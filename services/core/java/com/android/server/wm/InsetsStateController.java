@@ -34,7 +34,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
-import android.util.SparseLongArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -59,7 +58,6 @@ class InsetsStateController {
     private final DisplayContent mDisplayContent;
 
     private final SparseArray<InsetsSourceProvider> mProviders = new SparseArray<>();
-    private final SparseLongArray mSurfaceTransactionIds = new SparseLongArray();
     private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
             mControlTargetProvidersMap = new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mIdControlTargetMap = new SparseArray<>();
@@ -362,32 +360,14 @@ class InsetsStateController {
         notifyPendingInsetsControlChanged();
     }
 
-    void notifySurfaceTransactionReady(InsetsSourceProvider provider, long id, boolean ready) {
-        if (ready) {
-            mSurfaceTransactionIds.put(provider.getSource().getId(), id);
-        } else {
-            mSurfaceTransactionIds.delete(provider.getSource().getId());
-        }
-    }
-
     private void notifyPendingInsetsControlChanged() {
         if (mPendingControlChanged.isEmpty()) {
             return;
         }
-        final int size = mSurfaceTransactionIds.size();
-        final SparseLongArray surfaceTransactionIds = new SparseLongArray(size);
-        for (int i = 0; i < size; i++) {
-            surfaceTransactionIds.append(
-                    mSurfaceTransactionIds.keyAt(i), mSurfaceTransactionIds.valueAt(i));
-        }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
-            for (int i = 0; i < size; i++) {
-                final int sourceId = surfaceTransactionIds.keyAt(i);
-                final InsetsSourceProvider provider = mProviders.get(sourceId);
-                if (provider == null) {
-                    continue;
-                }
-                provider.onSurfaceTransactionCommitted(surfaceTransactionIds.valueAt(i));
+            for (int i = mProviders.size() - 1; i >= 0; i--) {
+                final InsetsSourceProvider provider = mProviders.valueAt(i);
+                provider.onSurfaceTransactionApplied();
             }
             final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();
             int displayId = mDisplayContent.getDisplayId();
