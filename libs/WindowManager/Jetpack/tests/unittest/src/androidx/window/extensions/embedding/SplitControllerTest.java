@@ -72,6 +72,8 @@ import static org.mockito.Mockito.times;
 import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.ActivityThread;
+import android.app.servertransaction.ClientTransactionListenerController;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -83,9 +85,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 import android.view.WindowInsets;
 import android.view.WindowMetrics;
+import android.window.ActivityWindowInfo;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentParentInfo;
@@ -99,7 +103,10 @@ import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
+import com.android.window.flags.Flags;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -110,6 +117,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -127,6 +136,9 @@ public class SplitControllerTest {
     private static final Intent PLACEHOLDER_INTENT = new Intent().setComponent(
             new ComponentName("test", "placeholder"));
 
+    @Rule
+    public final SetFlagsRule mSetFlagRule = new SetFlagsRule();
+
     private Activity mActivity;
     @Mock
     private Resources mActivityResources;
@@ -138,6 +150,13 @@ public class SplitControllerTest {
     private Handler mHandler;
     @Mock
     private WindowLayoutComponentImpl mWindowLayoutComponent;
+    @Mock
+    private ActivityWindowInfo mActivityWindowInfo;
+    @Mock
+    private BiConsumer<IBinder, ActivityWindowInfo> mActivityWindowInfoListener;
+    @Mock
+    private androidx.window.extensions.core.util.function.Consumer<EmbeddedActivityWindowInfo>
+            mEmbeddedActivityWindowInfoCallback;
 
     private SplitController mSplitController;
     private SplitPresenter mSplitPresenter;
@@ -1529,6 +1548,73 @@ public class SplitControllerTest {
                 .getTopNonFinishingActivity(), secondaryActivity);
     }
 
+    @Test
+    public void testIsActivityEmbedded() {
+        mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
+
+        assertFalse(mSplitController.isActivityEmbedded(mActivity));
+
+        doReturn(true).when(mActivityWindowInfo).isEmbedded();
+
+        assertTrue(mSplitController.isActivityEmbedded(mActivity));
+    }
+
+    @Test
+    public void testGetEmbeddedActivityWindowInfo() {
+        mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
+
+        final boolean isEmbedded = true;
+        final Rect activityBounds = mActivity.getResources().getConfiguration().windowConfiguration
+                .getBounds();
+        final Rect taskBounds = new Rect(0, 0, 1000, 2000);
+        final Rect activityStackBounds = new Rect(0, 0, 500, 2000);
+        doReturn(isEmbedded).when(mActivityWindowInfo).isEmbedded();
+        doReturn(taskBounds).when(mActivityWindowInfo).getTaskBounds();
+        doReturn(activityStackBounds).when(mActivityWindowInfo).getTaskFragmentBounds();
+
+        final EmbeddedActivityWindowInfo expected = new EmbeddedActivityWindowInfo(mActivity,
+                isEmbedded, activityBounds, taskBounds, activityStackBounds);
+        assertEquals(expected, mSplitController.getEmbeddedActivityWindowInfo(mActivity));
+    }
+
+    @Test
+    public void testSetEmbeddedActivityWindowInfoCallback() {
+        mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
+
+        final ClientTransactionListenerController controller = ClientTransactionListenerController
+                .getInstance();
+        spyOn(controller);
+        doNothing().when(controller).registerActivityWindowInfoChangedListener(any());
+        doReturn(mActivityWindowInfoListener).when(mSplitController)
+                .getActivityWindowInfoListener();
+        final Executor executor = Runnable::run;
+
+        // Register to ClientTransactionListenerController
+        mSplitController.setEmbeddedActivityWindowInfoCallback(executor,
+                mEmbeddedActivityWindowInfoCallback);
+
+        verify(controller).registerActivityWindowInfoChangedListener(mActivityWindowInfoListener);
+        verify(mEmbeddedActivityWindowInfoCallback, never()).accept(any());
+
+        // Test onActivityWindowInfoChanged triggered.
+        mSplitController.onActivityWindowInfoChanged(mActivity.getActivityToken(),
+                mActivityWindowInfo);
+
+        verify(mEmbeddedActivityWindowInfoCallback).accept(any());
+
+        // Unregister to ClientTransactionListenerController
+        mSplitController.clearEmbeddedActivityWindowInfoCallback();
+
+        verify(controller).unregisterActivityWindowInfoChangedListener(mActivityWindowInfoListener);
+
+        // Test onActivityWindowInfoChanged triggered as no-op after clear callback.
+        clearInvocations(mEmbeddedActivityWindowInfoCallback);
+        mSplitController.onActivityWindowInfoChanged(mActivity.getActivityToken(),
+                mActivityWindowInfo);
+
+        verify(mEmbeddedActivityWindowInfoCallback, never()).accept(any());
+    }
+
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity() {
         return createMockActivity(TASK_ID);
@@ -1537,13 +1623,17 @@ public class SplitControllerTest {
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity(int taskId) {
         final Activity activity = mock(Activity.class);
+        final ActivityThread.ActivityClientRecord activityClientRecord =
+                mock(ActivityThread.ActivityClientRecord.class);
         doReturn(mActivityResources).when(activity).getResources();
         final IBinder activityToken = new Binder();
         doReturn(activityToken).when(activity).getActivityToken();
         doReturn(activity).when(mSplitController).getActivity(activityToken);
+        doReturn(activityClientRecord).when(mSplitController).getActivityClientRecord(activity);
         doReturn(taskId).when(activity).getTaskId();
         doReturn(new ActivityInfo()).when(activity).getActivityInfo();
         doReturn(DEFAULT_DISPLAY).when(activity).getDisplayId();
+        doReturn(mActivityWindowInfo).when(activityClientRecord).getActivityWindowInfo();
         return activity;
     }
 
