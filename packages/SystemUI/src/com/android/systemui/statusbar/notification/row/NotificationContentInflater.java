@@ -833,143 +833,143 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             @Nullable InflationCallback endListener, NotificationEntry entry,
             ExpandableNotificationRow row, NotificationContentInflaterLogger logger) {
         Assert.isMainThread();
+        if (!runningInflations.isEmpty()) {
+            return false;
+        }
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
-        if (runningInflations.isEmpty()) {
-            logger.logAsyncTaskProgress(entry, "finishing");
-            boolean setRepliesAndActions = true;
-            if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
-                if (result.inflatedContentView != null) {
-                    // New view case
-                    privateLayout.setContractedChild(result.inflatedContentView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
-                            result.newContentView);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)) {
-                    // Reinflation case. Only update if it's still cached (i.e. view has not been
-                    // freed while inflating).
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
-                            result.newContentView);
-                }
-                setRepliesAndActions = true;
+        logger.logAsyncTaskProgress(entry, "finishing");
+        boolean setRepliesAndActions = true;
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
+            if (result.inflatedContentView != null) {
+                // New view case
+                privateLayout.setContractedChild(result.inflatedContentView);
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
+                        result.newContentView);
+            } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED)) {
+                // Reinflation case. Only update if it's still cached (i.e. view has not been
+                // freed while inflating).
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_CONTRACTED,
+                        result.newContentView);
             }
-
-            if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
-                if (result.inflatedExpandedView != null) {
-                    privateLayout.setExpandedChild(result.inflatedExpandedView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED,
-                            result.newExpandedView);
-                } else if (result.newExpandedView == null) {
-                    privateLayout.setExpandedChild(null);
-                    remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)) {
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED,
-                            result.newExpandedView);
-                }
-                if (result.newExpandedView != null) {
-                    privateLayout.setExpandedInflatedSmartReplies(
-                            result.expandedInflatedSmartReplies);
-                } else {
-                    privateLayout.setExpandedInflatedSmartReplies(null);
-                }
-                row.setExpandable(result.newExpandedView != null);
-                setRepliesAndActions = true;
-            }
-
-            if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
-                if (result.inflatedHeadsUpView != null) {
-                    privateLayout.setHeadsUpChild(result.inflatedHeadsUpView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP,
-                            result.newHeadsUpView);
-                } else if (result.newHeadsUpView == null) {
-                    privateLayout.setHeadsUpChild(null);
-                    remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)) {
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP,
-                            result.newHeadsUpView);
-                }
-                if (result.newHeadsUpView != null) {
-                    privateLayout.setHeadsUpInflatedSmartReplies(
-                            result.headsUpInflatedSmartReplies);
-                } else {
-                    privateLayout.setHeadsUpInflatedSmartReplies(null);
-                }
-                setRepliesAndActions = true;
-            }
-
-            if (AsyncHybridViewInflation.isEnabled()
-                    && (reInflateFlags & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
-                HybridNotificationView viewHolder = result.mInflatedSingleLineViewHolder;
-                SingleLineViewModel viewModel = result.mInflatedSingleLineViewModel;
-                if (viewHolder != null && viewModel != null) {
-                    if (viewModel.isConversation()) {
-                        SingleLineConversationViewBinder.bind(
-                                result.mInflatedSingleLineViewModel,
-                                result.mInflatedSingleLineViewHolder
-                        );
-                    } else {
-                        SingleLineViewBinder.bind(result.mInflatedSingleLineViewModel,
-                                result.mInflatedSingleLineViewHolder);
-                    }
-                    privateLayout.setSingleLineView(result.mInflatedSingleLineViewHolder);
-                }
-            }
-
-            if (setRepliesAndActions) {
-                privateLayout.setInflatedSmartReplyState(result.inflatedSmartReplyState);
-            }
-
-            if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
-                if (result.inflatedPublicView != null) {
-                    publicLayout.setContractedChild(result.inflatedPublicView);
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC,
-                            result.newPublicView);
-                } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC)) {
-                    remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC,
-                            result.newPublicView);
-                }
-            }
-
-            if (AsyncGroupHeaderViewInflation.isEnabled()) {
-                if ((reInflateFlags & FLAG_GROUP_SUMMARY_HEADER) != 0) {
-                    if (result.mInflatedGroupHeaderView != null) {
-                        row.setIsLowPriority(false);
-                        row.setGroupHeader(/* headerView= */ result.mInflatedGroupHeaderView);
-                        remoteViewCache.putCachedView(entry, FLAG_GROUP_SUMMARY_HEADER,
-                                result.mNewGroupHeaderView);
-                    } else if (remoteViewCache.hasCachedView(entry, FLAG_GROUP_SUMMARY_HEADER)) {
-                        // Re-inflation case. Only update if it's still cached (i.e. view has not
-                        // been freed while inflating).
-                        remoteViewCache.putCachedView(entry, FLAG_GROUP_SUMMARY_HEADER,
-                                result.mNewGroupHeaderView);
-                    }
-                }
-
-                if ((reInflateFlags & FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER) != 0) {
-                    if (result.mInflatedLowPriorityGroupHeaderView != null) {
-                        // New view case, set row to low priority
-                        row.setIsLowPriority(true);
-                        row.setLowPriorityGroupHeader(
-                                /* headerView= */ result.mInflatedLowPriorityGroupHeaderView);
-                        remoteViewCache.putCachedView(entry, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
-                                result.mNewLowPriorityGroupHeaderView);
-                    } else if (remoteViewCache.hasCachedView(entry,
-                            FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER)) {
-                        // Re-inflation case. Only update if it's still cached (i.e. view has not
-                        // been freed while inflating).
-                        remoteViewCache.putCachedView(entry, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
-                                result.mNewGroupHeaderView);
-                    }
-                }
-            }
-
-            entry.headsUpStatusBarText = result.headsUpStatusBarText;
-            entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
-            if (endListener != null) {
-                endListener.onAsyncInflationFinished(entry);
-            }
-            return true;
+            setRepliesAndActions = true;
         }
-        return false;
+
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
+            if (result.inflatedExpandedView != null) {
+                privateLayout.setExpandedChild(result.inflatedExpandedView);
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED,
+                        result.newExpandedView);
+            } else if (result.newExpandedView == null) {
+                privateLayout.setExpandedChild(null);
+                remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED);
+            } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED)) {
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_EXPANDED,
+                        result.newExpandedView);
+            }
+            if (result.newExpandedView != null) {
+                privateLayout.setExpandedInflatedSmartReplies(
+                        result.expandedInflatedSmartReplies);
+            } else {
+                privateLayout.setExpandedInflatedSmartReplies(null);
+            }
+            row.setExpandable(result.newExpandedView != null);
+            setRepliesAndActions = true;
+        }
+
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
+            if (result.inflatedHeadsUpView != null) {
+                privateLayout.setHeadsUpChild(result.inflatedHeadsUpView);
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP,
+                        result.newHeadsUpView);
+            } else if (result.newHeadsUpView == null) {
+                privateLayout.setHeadsUpChild(null);
+                remoteViewCache.removeCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP);
+            } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP)) {
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_HEADS_UP,
+                        result.newHeadsUpView);
+            }
+            if (result.newHeadsUpView != null) {
+                privateLayout.setHeadsUpInflatedSmartReplies(
+                        result.headsUpInflatedSmartReplies);
+            } else {
+                privateLayout.setHeadsUpInflatedSmartReplies(null);
+            }
+            setRepliesAndActions = true;
+        }
+
+        if (AsyncHybridViewInflation.isEnabled()
+                && (reInflateFlags & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
+            HybridNotificationView viewHolder = result.mInflatedSingleLineViewHolder;
+            SingleLineViewModel viewModel = result.mInflatedSingleLineViewModel;
+            if (viewHolder != null && viewModel != null) {
+                if (viewModel.isConversation()) {
+                    SingleLineConversationViewBinder.bind(
+                            result.mInflatedSingleLineViewModel,
+                            result.mInflatedSingleLineViewHolder
+                    );
+                } else {
+                    SingleLineViewBinder.bind(result.mInflatedSingleLineViewModel,
+                            result.mInflatedSingleLineViewHolder);
+                }
+                privateLayout.setSingleLineView(result.mInflatedSingleLineViewHolder);
+            }
+        }
+
+        if (setRepliesAndActions) {
+            privateLayout.setInflatedSmartReplyState(result.inflatedSmartReplyState);
+        }
+
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
+            if (result.inflatedPublicView != null) {
+                publicLayout.setContractedChild(result.inflatedPublicView);
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC,
+                        result.newPublicView);
+            } else if (remoteViewCache.hasCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC)) {
+                remoteViewCache.putCachedView(entry, FLAG_CONTENT_VIEW_PUBLIC,
+                        result.newPublicView);
+            }
+        }
+
+        if (AsyncGroupHeaderViewInflation.isEnabled()) {
+            if ((reInflateFlags & FLAG_GROUP_SUMMARY_HEADER) != 0) {
+                if (result.mInflatedGroupHeaderView != null) {
+                    row.setIsLowPriority(false);
+                    row.setGroupHeader(/* headerView= */ result.mInflatedGroupHeaderView);
+                    remoteViewCache.putCachedView(entry, FLAG_GROUP_SUMMARY_HEADER,
+                            result.mNewGroupHeaderView);
+                } else if (remoteViewCache.hasCachedView(entry, FLAG_GROUP_SUMMARY_HEADER)) {
+                    // Re-inflation case. Only update if it's still cached (i.e. view has not
+                    // been freed while inflating).
+                    remoteViewCache.putCachedView(entry, FLAG_GROUP_SUMMARY_HEADER,
+                            result.mNewGroupHeaderView);
+                }
+            }
+
+            if ((reInflateFlags & FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER) != 0) {
+                if (result.mInflatedLowPriorityGroupHeaderView != null) {
+                    // New view case, set row to low priority
+                    row.setIsLowPriority(true);
+                    row.setLowPriorityGroupHeader(
+                            /* headerView= */ result.mInflatedLowPriorityGroupHeaderView);
+                    remoteViewCache.putCachedView(entry, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
+                            result.mNewLowPriorityGroupHeaderView);
+                } else if (remoteViewCache.hasCachedView(entry,
+                        FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER)) {
+                    // Re-inflation case. Only update if it's still cached (i.e. view has not
+                    // been freed while inflating).
+                    remoteViewCache.putCachedView(entry, FLAG_LOW_PRIORITY_GROUP_SUMMARY_HEADER,
+                            result.mNewGroupHeaderView);
+                }
+            }
+        }
+
+        entry.headsUpStatusBarText = result.headsUpStatusBarText;
+        entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
+        if (endListener != null) {
+            endListener.onAsyncInflationFinished(entry);
+        }
+        return true;
     }
 
     private static RemoteViews createExpandedView(Notification.Builder builder,
