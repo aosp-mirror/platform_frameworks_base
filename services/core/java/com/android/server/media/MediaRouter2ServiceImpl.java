@@ -221,18 +221,27 @@ class MediaRouter2ServiceImpl {
     // Start of methods that implement MediaRouter2 operations.
 
     @NonNull
-    public List<MediaRoute2Info> getSystemRoutes() {
+    public List<MediaRoute2Info> getSystemRoutes(@NonNull String callerPackageName,
+            boolean isProxyRouter) {
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
-        final boolean hasSystemRoutingPermission = checkCallerHasSystemRoutingPermissions(pid, uid);
+
+        boolean hasSystemRoutingPermissions;
+        if (!isProxyRouter) {
+            hasSystemRoutingPermissions = checkCallerHasSystemRoutingPermissions(pid, uid);
+        } else {
+            // Request from ProxyRouter.
+            hasSystemRoutingPermissions =
+                    checkCallerHasPrivilegedRoutingPermissions(pid, uid, callerPackageName);
+        }
 
         final long token = Binder.clearCallingIdentity();
         try {
             Collection<MediaRoute2Info> systemRoutes;
             synchronized (mLock) {
                 UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-                if (hasSystemRoutingPermission) {
+                if (hasSystemRoutingPermissions) {
                     MediaRoute2ProviderInfo providerInfo =
                             userRecord.mHandler.mSystemProvider.getProviderInfo();
                     if (providerInfo != null) {
@@ -795,12 +804,21 @@ class MediaRouter2ServiceImpl {
 
     @Nullable
     public RoutingSessionInfo getSystemSessionInfo(
-            @Nullable String packageName, boolean setDeviceRouteSelected) {
+            @NonNull String callerPackageName,
+            @Nullable String targetPackageName,
+            boolean setDeviceRouteSelected) {
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
-        final boolean hasSystemRoutingPermissions =
-                checkCallerHasSystemRoutingPermissions(pid, uid);
+
+        boolean hasSystemRoutingPermissions;
+        if (targetPackageName == null) {
+            hasSystemRoutingPermissions = checkCallerHasSystemRoutingPermissions(pid, uid);
+        } else {
+            // Request from ProxyRouter.
+            hasSystemRoutingPermissions =
+                    checkCallerHasPrivilegedRoutingPermissions(pid, uid, callerPackageName);
+        }
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -812,14 +830,14 @@ class MediaRouter2ServiceImpl {
                         // Return a fake system session that shows the device route as selected and
                         // available bluetooth routes as transferable.
                         return userRecord.mHandler.mSystemProvider
-                                .generateDeviceRouteSelectedSessionInfo(packageName);
+                                .generateDeviceRouteSelectedSessionInfo(targetPackageName);
                     } else {
                         sessionInfos = userRecord.mHandler.mSystemProvider.getSessionInfos();
                         if (!sessionInfos.isEmpty()) {
                             // Return a copy of the current system session with no modification,
                             // except setting the client package name.
                             return new RoutingSessionInfo.Builder(sessionInfos.get(0))
-                                    .setClientPackageName(packageName)
+                                    .setClientPackageName(targetPackageName)
                                     .build();
                         } else {
                             Slog.w(TAG, "System provider does not have any session info.");
@@ -828,7 +846,7 @@ class MediaRouter2ServiceImpl {
                 } else {
                     return new RoutingSessionInfo.Builder(
                                     userRecord.mHandler.mSystemProvider.getDefaultSessionInfo())
-                            .setClientPackageName(packageName)
+                            .setClientPackageName(targetPackageName)
                             .build();
                 }
             }
@@ -841,6 +859,12 @@ class MediaRouter2ServiceImpl {
     private boolean checkCallerHasSystemRoutingPermissions(int pid, int uid) {
         return checkCallerHasModifyAudioRoutingPermission(pid, uid)
                 || checkCallerHasBluetoothPermissions(pid, uid);
+    }
+
+    private boolean checkCallerHasPrivilegedRoutingPermissions(
+            int pid, int uid, @NonNull String callerPackageName) {
+        return checkMediaContentControlPermission(uid, pid)
+                || checkMediaRoutingControlPermission(uid, pid, callerPackageName);
     }
 
     private boolean checkCallerHasModifyAudioRoutingPermission(int pid, int uid) {
@@ -864,13 +888,9 @@ class MediaRouter2ServiceImpl {
                 Manifest.permission.MEDIA_CONTENT_CONTROL
             })
     private void enforcePrivilegedRoutingPermissions(
-            int callerUid, int callerPid, @Nullable String callerPackageName) {
-        if (hasMediaContentControlPermission(callerUid, callerPid)) {
+            int callerUid, int callerPid, @NonNull String callerPackageName) {
+        if (checkMediaContentControlPermission(callerUid, callerPid)) {
             return;
-        }
-
-        if (!Flags.enablePrivilegedRoutingForMediaRoutingControl()) {
-            throw new SecurityException("Must hold MEDIA_CONTENT_CONTROL");
         }
 
         if (!checkMediaRoutingControlPermission(callerUid, callerPid, callerPackageName)) {
@@ -879,15 +899,18 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
-    private boolean hasMediaContentControlPermission(int callerUid, int callerPid) {
+    private boolean checkMediaContentControlPermission(int callerUid, int callerPid) {
         return mContext.checkPermission(
                         Manifest.permission.MEDIA_CONTENT_CONTROL, callerPid, callerUid)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
     private boolean checkMediaRoutingControlPermission(
-            int callerUid, int callerPid, @Nullable String callerPackageName) {
+            int callerUid, int callerPid, @NonNull String callerPackageName) {
+        if (!Flags.enablePrivilegedRoutingForMediaRoutingControl()) {
+            return false;
+        }
+
         return PermissionChecker.checkPermissionForDataDelivery(
                         mContext,
                         Manifest.permission.MEDIA_ROUTING_CONTROL,
@@ -1520,7 +1543,7 @@ class MediaRouter2ServiceImpl {
         boolean hasMediaRoutingControl =
                 checkMediaRoutingControlPermission(callerUid, callerPid, callerPackageName);
 
-        boolean hasMediaContentControl = hasMediaContentControlPermission(callerUid, callerPid);
+        boolean hasMediaContentControl = checkMediaContentControlPermission(callerUid, callerPid);
 
         Slog.i(
                 TAG,

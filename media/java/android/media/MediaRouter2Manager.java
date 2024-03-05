@@ -81,6 +81,7 @@ public final class MediaRouter2Manager {
     @GuardedBy("sLock")
     private static MediaRouter2Manager sInstance;
 
+    private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
     private final Client mClient;
     private final IMediaRouterService mMediaRouterService;
@@ -120,6 +121,7 @@ public final class MediaRouter2Manager {
     }
 
     private MediaRouter2Manager(Context context) {
+        mContext = context.getApplicationContext();
         mMediaRouterService = IMediaRouterService.Stub.asInterface(
                 ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
         mMediaSessionManager = (MediaSessionManager) context
@@ -374,16 +376,17 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Gets the system routing session for the given {@code packageName}.
-     * Apps can select a route that is not the global route. (e.g. an app can select the device
-     * route while BT route is available.)
+     * Gets the system routing session for the given {@code targetPackageName}. Apps can select a
+     * route that is not the global route. (e.g. an app can select the device route while BT route
+     * is available.)
      *
-     * @param packageName the package name of the application.
+     * @param targetPackageName the package name of the application.
      */
     @Nullable
-    public RoutingSessionInfo getSystemRoutingSession(@Nullable String packageName) {
+    public RoutingSessionInfo getSystemRoutingSession(@Nullable String targetPackageName) {
         try {
-            return mMediaRouterService.getSystemSessionInfoForPackage(packageName);
+            return mMediaRouterService.getSystemSessionInfoForPackage(
+                    mContext.getPackageName(), targetPackageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
