@@ -760,13 +760,18 @@ public class ComputerEngine implements Computer {
         if (pkgName == null) {
             if (!mCrossProfileIntentResolverEngine.shouldSkipCurrentProfile(this, intent,
                     resolvedType, userId)) {
-                /*
-                 Check for results in the current profile only if there is no
-                 {@link CrossProfileIntentFilter} for user with flag
-                 {@link PackageManager.SKIP_CURRENT_PROFILE} set.
-                 */
-                result.addAll(filterIfNotSystemUser(mComponentResolver.queryActivities(this,
-                        intent, resolvedType, flags, userId), userId));
+
+                final List<ResolveInfo> queryResult = mComponentResolver.queryActivities(this,
+                        intent, resolvedType, flags, userId);
+                // If the user doesn't exist, the queryResult is null
+                if (queryResult != null) {
+                    /*
+                     Check for results in the current profile only if there is no
+                     {@link CrossProfileIntentFilter} for user with flag
+                     {@link PackageManager.SKIP_CURRENT_PROFILE} set.
+                     */
+                    result.addAll(filterIfNotSystemUser(queryResult, userId));
+                }
             }
             addInstant = isInstantAppResolutionAllowed(intent, result, userId,
                     false /*skipPackageCheck*/, flags);
@@ -788,9 +793,13 @@ public class ComputerEngine implements Computer {
 
             if (setting != null && setting.getAndroidPackage() != null && (resolveForStart
                     || !shouldFilterApplication(setting, filterCallingUid, userId))) {
-                result.addAll(filterIfNotSystemUser(mComponentResolver.queryActivities(this,
+                final List<ResolveInfo> queryResult = mComponentResolver.queryActivities(this,
                         intent, resolvedType, flags, setting.getAndroidPackage().getActivities(),
-                        userId), userId));
+                        userId);
+                // If the user doesn't exist, the queryResult is null
+                if (queryResult != null) {
+                    result.addAll(filterIfNotSystemUser(queryResult, userId));
+                }
             }
             if (result == null || result.size() == 0) {
                 // the caller wants to resolve for a particular package; however, there
