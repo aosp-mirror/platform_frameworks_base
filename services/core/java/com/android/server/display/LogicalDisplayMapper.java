@@ -41,10 +41,12 @@ import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.foldables.FoldGracePeriodProvider;
+import com.android.server.LocalServices;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
 import com.android.server.display.utils.DebugUtils;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.FoldSettingProvider;
 
 import java.io.PrintWriter;
@@ -189,6 +191,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      * #updateLogicalDisplaysLocked} to establish which Virtual Devices own which Virtual Displays.
      */
     private final ArrayMap<String, Integer> mVirtualDeviceDisplayMapping = new ArrayMap<>();
+    private WindowManagerPolicy mWindowManagerPolicy;
 
     private int mNextNonDefaultGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
     private final DisplayIdProducer mIdProducer = (isDefault) ->
@@ -272,6 +275,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     @Override
     public void onTraversalRequested() {
         mListener.onTraversalRequested();
+    }
+
+    public void onWindowManagerReady() {
+        mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
     }
 
     public LogicalDisplay getDisplayLocked(int displayId) {
@@ -1114,14 +1121,22 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             final int logicalDisplayId = displayLayout.getLogicalDisplayId();
 
             LogicalDisplay newDisplay = getDisplayLocked(logicalDisplayId);
+            boolean newDisplayCreated = false;
             if (newDisplay == null) {
                 newDisplay = createNewLogicalDisplayLocked(
                         null /*displayDevice*/, logicalDisplayId);
+                newDisplayCreated = true;
             }
 
             // Now swap the underlying display devices between the old display and the new display
             final LogicalDisplay oldDisplay = getDisplayLocked(device);
             if (newDisplay != oldDisplay) {
+                // Display is swapping, notify WindowManager, so it can prepare for
+                // the display switch
+                if (!newDisplayCreated && mWindowManagerPolicy != null) {
+                    mWindowManagerPolicy.onDisplaySwitchStart(newDisplay.getDisplayIdLocked());
+                }
+
                 newDisplay.swapDisplaysLocked(oldDisplay);
             }
             DisplayDeviceConfig config = device.getDisplayDeviceConfig();

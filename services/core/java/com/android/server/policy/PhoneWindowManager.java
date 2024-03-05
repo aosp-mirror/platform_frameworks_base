@@ -5664,6 +5664,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    @Override
+    public void onDisplaySwitchStart(int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            mDefaultDisplayPolicy.onDisplaySwitchStart();
+        }
+    }
+
     private long getKeyguardDrawnTimeout() {
         final boolean bootCompleted =
                 LocalServices.getService(SystemServiceManager.class).isBootCompleted();

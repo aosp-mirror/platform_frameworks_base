@@ -895,6 +895,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         void onScreenOff();
     }
 
+    /** Called when the physical display starts to switch, e.g. fold/unfold. */
+    void onDisplaySwitchStart(int displayId);
+
     /**
      * Return whether the default display is on and not blocked by a black surface.
      */
