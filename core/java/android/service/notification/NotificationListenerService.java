@@ -1197,6 +1197,11 @@ public abstract class NotificationListenerService extends Service {
      * <p>
      * Listen for updates using {@link #onInterruptionFilterChanged(int)}.
      *
+     * <p>Apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above (with some
+     * exceptions, such as companion device managers) cannot modify the global interruption filter.
+     * Calling this method will instead activate or deactivate an
+     * {@link android.app.AutomaticZenRule} associated to the app.
+     *
      * <p>The service should wait for the {@link #onListenerConnected()} event
      * before performing this operation.
      *
