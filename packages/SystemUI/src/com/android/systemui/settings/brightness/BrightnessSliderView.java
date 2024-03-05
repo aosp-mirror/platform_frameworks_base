@@ -31,7 +31,6 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.res.R;
 
@@ -120,9 +119,8 @@ public class BrightnessSliderView extends FrameLayout {
      * @param admin
      * @see ToggleSeekBar#setEnforcedAdmin
      */
-    public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        mSlider.setEnabled(admin == null);
-        mSlider.setEnforcedAdmin(admin);
+    void setAdminBlocker(ToggleSeekBar.AdminBlocker blocker) {
+        mSlider.setAdminBlocker(blocker);
     }
 
     /**
