@@ -19,12 +19,12 @@ package android.app.admin;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_INTENT_FILTER;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_BUNDLE_KEY;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
-import static android.app.admin.flags.Flags.devicePolicySizeTrackingEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.flags.Flags;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -60,7 +60,7 @@ public final class IntentFilterPolicyKey extends PolicyKey {
     @TestApi
     public IntentFilterPolicyKey(@NonNull String identifier, @NonNull IntentFilter filter) {
         super(identifier);
-        if (devicePolicySizeTrackingEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
             PolicySizeVerifier.enforceMaxParcelableFieldsLength(filter);
         }
         mFilter = Objects.requireNonNull(filter);
