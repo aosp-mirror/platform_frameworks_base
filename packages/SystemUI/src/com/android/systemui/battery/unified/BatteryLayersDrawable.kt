@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.util.PathParser
 import android.view.Gravity
+import android.view.View
 import com.android.systemui.res.R
 import kotlin.math.roundToInt
 
@@ -69,8 +70,11 @@ class BatteryLayersDrawable(
 ) : LayerDrawable(arrayOf(frameBg, frame, fill, textOnly, spaceSharingText, attribution)) {
 
     private val scaleMatrix = Matrix().also { it.setScale(1f, 1f) }
-    private val scaledAttrFullCanvas = RectF(Metrics.AttrFullCanvas)
-    private val scaledAttrRightCanvas = RectF(Metrics.AttrRightCanvas)
+
+    private val attrFullCanvas = RectF()
+    private val attrRightCanvas = RectF()
+    private val scaledAttrFullCanvas = RectF()
+    private val scaledAttrRightCanvas = RectF()
 
     var batteryState = batteryState
         set(value) {
@@ -87,6 +91,11 @@ class BatteryLayersDrawable(
             field = value
             updateColors(batteryState.showErrorState, value)
         }
+
+    init {
+        // Initialize the canvas rects since they are not static
+        setAttrRects(layoutDirection == View.LAYOUT_DIRECTION_RTL)
+    }
 
     private fun handleUpdateState(old: BatteryDrawableState, new: BatteryDrawableState) {
         if (new.showErrorState != old.showErrorState) {
@@ -144,9 +153,35 @@ class BatteryLayersDrawable(
             bounds.height() / Metrics.ViewportHeight
         )
 
-        // Scale the attribution bounds
-        scaleMatrix.mapRect(scaledAttrFullCanvas, Metrics.AttrFullCanvas)
-        scaleMatrix.mapRect(scaledAttrRightCanvas, Metrics.AttrRightCanvas)
+        scaleAttributionBounds()
+    }
+
+    private fun setAttrRects(rtl: Boolean) {
+        // Local refs make the math easier to parse
+        val full = Metrics.AttrFullCanvasInsets
+        val side = Metrics.AttrRightCanvasInsets
+        val sideRtl = Metrics.AttrRightCanvasInsetsRtl
+        val vh = Metrics.ViewportHeight
+        val vw = Metrics.ViewportWidth
+
+        attrFullCanvas.set(
+            if (rtl) full.right else full.left,
+            full.top,
+            vw - if (rtl) full.left else full.right,
+            vh - full.bottom,
+        )
+        attrRightCanvas.set(
+            if (rtl) sideRtl.left else side.left,
+            side.top,
+            vw - (if (rtl) sideRtl.right else side.right),
+            vh - side.bottom,
+        )
+    }
+
+    /** If bounds (i.e., scale), or RTL properties change, we have to recalculate the attr bounds */
+    private fun scaleAttributionBounds() {
+        scaleMatrix.mapRect(scaledAttrFullCanvas, attrFullCanvas)
+        scaleMatrix.mapRect(scaledAttrRightCanvas, attrRightCanvas)
     }
 
     override fun draw(canvas: Canvas) {
@@ -196,16 +231,44 @@ class BatteryLayersDrawable(
      */
     override fun setAlpha(alpha: Int) {}
 
+    /**
+     * Interface that describes relevant top-level metrics for the proper rendering of this icon.
+     * The overall canvas is defined as ViewportWidth x ViewportHeight, which is hard coded to 24x14
+     * points.
+     *
+     * The attr canvas insets are rect inset definitions. That is, they are defined as l,t,r,b
+     * points from the nearest edge. Note that for RTL, we don't actually flip the text since
+     * numbers do not reverse for RTL locales.
+     */
     interface M {
         val ViewportWidth: Float
         val ViewportHeight: Float
 
-        // Bounds, oriented in the above viewport, where we will fit-center and center-align
-        // an attribution that is the sole foreground element
-        val AttrFullCanvas: RectF
-        // Bounds, oriented in the above viewport, where we will fit-center and left-align
-        // an attribution that is sharing space with the percent text of the drawable
-        val AttrRightCanvas: RectF
+        /**
+         * Insets, oriented in the above viewport in LTR, that define the full canvas for a single
+         * foreground element. The element will be fit-center and center-aligned on this canvas
+         *
+         * 18x8 point size
+         */
+        val AttrFullCanvasInsets: RectF
+
+        /**
+         * Insets, oriented in the above viewport in LTR, that define the partial canvas for a
+         * foreground element that shares space with the percent text. The element will be
+         * fit-center and left-aligned on this canvas.
+         *
+         * 6x6 point size
+         */
+        val AttrRightCanvasInsets: RectF
+
+        /**
+         * Insets, oriented in the above viewport in RTL, that define the partial canvas for a
+         * foreground element that shares space with the percent text. The element will be
+         * fit-center and left-aligned on this canvas.
+         *
+         * 6x6 point size
+         */
+        val AttrRightCanvasInsetsRtl: RectF
     }
 
     companion object {
@@ -220,20 +283,9 @@ class BatteryLayersDrawable(
                 override val ViewportWidth: Float = 24f
                 override val ViewportHeight: Float = 14f
 
-                /**
-                 * Bounds, oriented in the above viewport, where we will fit-center and center-align
-                 * an attribution that is the sole foreground element
-                 *
-                 * 18x8 point size
-                 */
-                override val AttrFullCanvas: RectF = RectF(4f, 3f, 22f, 11f)
-                /**
-                 * Bounds, oriented in the above viewport, where we will fit-center and left-align
-                 * an attribution that is sharing space with the percent text of the drawable
-                 *
-                 * 6x6 point size
-                 */
-                override val AttrRightCanvas: RectF = RectF(16f, 4f, 22f, 10f)
+                override val AttrFullCanvasInsets = RectF(4f, 3f, 2f, 3f)
+                override val AttrRightCanvasInsets = RectF(16f, 4f, 2f, 4f)
+                override val AttrRightCanvasInsetsRtl = RectF(14f, 4f, 4f, 4f)
             }
 
         /**
