@@ -2,6 +2,7 @@ package com.android.wm.shell.windowdecor
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
+import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
@@ -11,6 +12,7 @@ import android.view.Surface.ROTATION_270
 import android.view.Surface.ROTATION_90
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.window.TransitionInfo
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.Change.CHANGE_DRAG_RESIZING
@@ -41,6 +43,8 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.doReturn
 import java.util.function.Supplier
+import org.mockito.Mockito.eq
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when` as whenever
 
 /**
@@ -573,6 +577,32 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 )
             }
         })
+    }
+
+    @Test
+    fun testStartAnimation_useEndRelOffset() {
+        val mockTransitionInfo = mock(TransitionInfo::class.java)
+        val changeMock = mock(TransitionInfo.Change::class.java)
+        val startTransaction = mock(SurfaceControl.Transaction::class.java)
+        val finishTransaction = mock(SurfaceControl.Transaction::class.java)
+        val point = Point(10, 20)
+        val bounds = Rect(1, 2, 3, 4)
+        `when`(changeMock.endRelOffset).thenReturn(point)
+        `when`(changeMock.endAbsBounds).thenReturn(bounds)
+        `when`(mockTransitionInfo.changes).thenReturn(listOf(changeMock))
+        `when`(startTransaction.setWindowCrop(any(),
+            eq(bounds.width()),
+            eq(bounds.height()))).thenReturn(startTransaction)
+        `when`(finishTransaction.setWindowCrop(any(),
+            eq(bounds.width()),
+            eq(bounds.height()))).thenReturn(finishTransaction)
+
+        taskPositioner.startAnimation(mockTransitionBinder, mockTransitionInfo, startTransaction,
+            finishTransaction, { _ -> })
+
+        verify(startTransaction).setPosition(any(), eq(point.x.toFloat()), eq(point.y.toFloat()))
+        verify(finishTransaction).setPosition(any(), eq(point.x.toFloat()), eq(point.y.toFloat()))
+        verify(changeMock).endRelOffset
     }
 
     private fun WindowContainerTransaction.Change.ofBounds(bounds: Rect): Boolean {
