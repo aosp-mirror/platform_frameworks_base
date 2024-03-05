@@ -18,7 +18,6 @@ package android.hardware.face;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
-import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BACKGROUND_FACE_AUTHENTICATION;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_NONE;
@@ -30,7 +29,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -38,7 +36,6 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricStateListener;
-import android.hardware.biometrics.BiometricTestSession;
 import android.hardware.biometrics.CryptoObject;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
@@ -72,7 +69,6 @@ import java.util.concurrent.Executor;
  */
 @FlaggedApi(FLAG_FACE_BACKGROUND_AUTHENTICATION)
 @SystemApi
-@TestApi
 @SystemService(Context.FACE_SERVICE)
 public class FaceManager implements BiometricAuthenticator, BiometricFaceConstants {
 
@@ -784,8 +780,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @NonNull
-    @TestApi
-    @FlaggedApi(FLAG_FACE_BACKGROUND_AUTHENTICATION)
     public List<FaceSensorProperties> getSensorProperties() {
         final List<FaceSensorProperties> properties = new ArrayList<>();
         final List<FaceSensorPropertiesInternal> internalProperties
@@ -1633,24 +1627,5 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
         Slog.w(TAG, "Unknown enrollment acquired message: " + acquireInfo + ", " + vendorCode);
         return null;
-    }
-
-    /**
-     * Retrieves a test session for FaceManager.
-     *
-     * @hide
-     */
-    @TestApi
-    @NonNull
-    @RequiresPermission(TEST_BIOMETRIC)
-    @FlaggedApi(FLAG_FACE_BACKGROUND_AUTHENTICATION)
-    public BiometricTestSession createTestSession(int sensorId) {
-        try {
-            return new BiometricTestSession(mContext, sensorId,
-                    (context, sensorId1, callback) -> mService
-                            .createTestSession(sensorId1, callback, context.getOpPackageName()));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 }
