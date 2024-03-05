@@ -25,6 +25,7 @@ import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.internal.util.Preconditions
+import java.time.Instant
 
 data class GetCredentialUiState(
     val isRequestForAllOptions: Boolean,
@@ -156,11 +157,17 @@ fun toProviderDisplayInfo(
     userNameToCredentialEntryMap.values.forEach {
         it.sortWith(comparator)
     }
-    // Transform to list of PerUserNameCredentialEntryLists and then sort across usernames
+    // Transform to list of PerUserNameCredentialEntryLists and then sort the outer list (of
+    // entries grouped by username / entryGroupId) based on the latest timestamp within that
+    // PerUserNameCredentialEntryList
     val sortedUserNameToCredentialEntryList = userNameToCredentialEntryMap.map {
         PerUserNameCredentialEntryList(it.key, it.value)
     }.sortedWith(
-        compareByDescending { it.sortedCredentialEntryList.first().lastUsedTimeMillis }
+        compareByDescending {
+            it.sortedCredentialEntryList.maxByOrNull{ entry ->
+                entry.lastUsedTimeMillis ?: Instant.MIN
+            }?.lastUsedTimeMillis ?: Instant.MIN
+        }
     )
 
     return ProviderDisplayInfo(
@@ -211,7 +218,7 @@ internal class CredentialEntryInfoComparatorByTypeThenTimestamp(
         val typePriorityMap: Map<String, Int>,
 ) : Comparator<CredentialEntryInfo> {
     override fun compare(p0: CredentialEntryInfo, p1: CredentialEntryInfo): Int {
-        // First prefer passkey type for its security benefits
+        // First rank by priorities of each credential type.
         if (p0.rawCredentialType != p1.rawCredentialType) {
             val p0Priority = typePriorityMap.getOrDefault(
                     p0.rawCredentialType, PriorityHints.PRIORITY_DEFAULT
@@ -225,6 +232,7 @@ internal class CredentialEntryInfoComparatorByTypeThenTimestamp(
                 return 1
             }
         }
+        // Then rank by last used timestamps.
         val p0LastUsedTimeMillis = p0.lastUsedTimeMillis
         val p1LastUsedTimeMillis = p1.lastUsedTimeMillis
         // Then order by last used timestamp
