@@ -84,6 +84,9 @@ constructor(
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
         _isPopupOnDismissCtaShowing.asStateFlow()
 
+    private val _isEnableWidgetDialogShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isEnableWidgetDialogShowing: Flow<Boolean> = _isEnableWidgetDialogShowing.asStateFlow()
+
     /** Whether touches should be disabled in communal */
     val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
 
@@ -113,6 +116,23 @@ constructor(
     override fun onHidePopupAfterDismissCta() {
         cancelDelayedPopupHiding()
         setPopupOnDismissCtaVisibility(false)
+    }
+
+    override fun onOpenEnableWidgetDialog() {
+        setIsEnableWidgetDialogShowing(true)
+    }
+
+    fun onEnableWidgetDialogConfirm() {
+        communalInteractor.navigateToCommunalWidgetSettings()
+        setIsEnableWidgetDialogShowing(false)
+    }
+
+    fun onEnableWidgetDialogCancel() {
+        setIsEnableWidgetDialogShowing(false)
+    }
+
+    private fun setIsEnableWidgetDialogShowing(isVisible: Boolean) {
+        _isEnableWidgetDialogShowing.value = isVisible
     }
 
     private fun setPopupOnDismissCtaVisibility(isVisible: Boolean) {

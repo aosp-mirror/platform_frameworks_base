@@ -18,7 +18,9 @@ package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
+import android.content.Intent
 import android.os.UserHandle
+import android.provider.Settings
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
@@ -45,6 +47,7 @@ import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.log.dagger.CommunalTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
@@ -88,6 +91,7 @@ constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     private val userTracker: UserTracker,
+    private val activityStarter: ActivityStarter,
     sceneInteractor: SceneInteractor,
     sceneContainerFlags: SceneContainerFlags,
     @CommunalLog logBuffer: LogBuffer,
@@ -245,6 +249,18 @@ constructor(
     /** Show the widget editor Activity. */
     fun showWidgetEditor(preselectedKey: String? = null) {
         editWidgetsActivityStarter.startActivity(preselectedKey)
+    }
+
+    /**
+     * Navigates to communal widget setting after user has unlocked the device. Currently, this
+     * setting resides within the Hub Mode settings screen.
+     */
+    fun navigateToCommunalWidgetSettings() {
+        activityStarter.postStartActivityDismissingKeyguard(
+            Intent(Settings.ACTION_COMMUNAL_SETTING)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            /* delay= */ 0,
+        )
     }
 
     /** Dismiss the CTA tile from the hub in view mode. */

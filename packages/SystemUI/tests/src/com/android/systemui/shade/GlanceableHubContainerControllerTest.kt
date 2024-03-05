@@ -42,6 +42,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
@@ -76,6 +77,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var powerManager: PowerManager
+    @Mock private lateinit var dialogFactory: SystemUIDialogFactory
 
     private lateinit var parentView: FrameLayout
     private lateinit var containerView: View
@@ -99,6 +101,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             GlanceableHubContainerController(
                 communalInteractor,
                 communalViewModel,
+                dialogFactory,
                 keyguardTransitionInteractor,
                 shadeInteractor,
                 powerManager
@@ -138,6 +141,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             GlanceableHubContainerController(
                 communalInteractor,
                 communalViewModel,
+                dialogFactory,
                 keyguardTransitionInteractor,
                 shadeInteractor,
                 powerManager,
