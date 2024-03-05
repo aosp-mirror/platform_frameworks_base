@@ -24,7 +24,6 @@ import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.Flags.sceneContainer
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.Flags.SCENE_CONTAINER_ENABLED
@@ -47,9 +46,8 @@ object SceneContainerFlag {
                 keyguardBottomAreaRefactor() &&
                 migrateClocksToBlueprint() &&
                 ComposeLockscreen.isEnabled &&
-                MediaInSceneContainerFlag.isEnabled &&
-                // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
-                ComposeFacade.isComposeAvailable()
+                MediaInSceneContainerFlag.isEnabled
+    // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
     /**
      * The main static flag, SCENE_CONTAINER_ENABLED. This is an explicit static flag check that
@@ -74,11 +72,7 @@ object SceneContainerFlag {
 
     /** The full set of requirements for SceneContainer */
     inline fun getAllRequirements(): Sequence<FlagToken> {
-        val composeRequirement =
-            FlagToken("ComposeFacade.isComposeAvailable()", ComposeFacade.isComposeAvailable())
-        return sequenceOf(getMainStaticFlag(), getMainAconfigFlag()) +
-            getSecondaryFlags() +
-            composeRequirement
+        return sequenceOf(getMainStaticFlag(), getMainAconfigFlag()) + getSecondaryFlags()
     }
 
     /** Return all dependencies of this flag in pairs where [Pair.first] depends on [Pair.second] */

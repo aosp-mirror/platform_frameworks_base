@@ -1727,6 +1727,27 @@ public final class DisplayPowerControllerTest {
                 /* ignoreAnimationLimits= */ anyBoolean());
     }
 
+    @Test
+    public void testDefaultDozeBrightness() {
+        float brightness = 0.121f;
+        when(mPowerManagerMock.getBrightnessConstraint(
+                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE)).thenReturn(brightness);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.automaticBrightnessController.getAutomaticScreenBrightness(
+                any(BrightnessEvent.class))).thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
+        when(mHolder.hbmController.getCurrentBrightnessMax())
+                .thenReturn(PowerManager.BRIGHTNESS_MAX);
+
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_DOZE;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.animator).animateTo(eq(brightness), /* linearSecondTarget= */ anyFloat(),
+                eq(BRIGHTNESS_RAMP_RATE_FAST_INCREASE), eq(false));
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */

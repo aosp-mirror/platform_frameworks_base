@@ -17,7 +17,7 @@
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
 import android.app.ActivityManager.RunningTaskInfo
-import android.app.ActivityTaskManager
+import android.app.IActivityTaskManager
 import android.app.TaskStackListener
 import android.content.Intent
 import android.window.IWindowContainerToken
@@ -31,7 +31,7 @@ class FakeActivityTaskManager {
     private val runningTasks = mutableListOf<RunningTaskInfo>()
     private val taskTaskListeners = mutableListOf<TaskStackListener>()
 
-    val activityTaskManager = mock<ActivityTaskManager>()
+    val activityTaskManager = mock<IActivityTaskManager>()
 
     init {
         whenever(activityTaskManager.registerTaskStackListener(any())).thenAnswer {
@@ -42,9 +42,19 @@ class FakeActivityTaskManager {
             taskTaskListeners -= it.arguments[0] as TaskStackListener
             return@thenAnswer Unit
         }
-        whenever(activityTaskManager.getTasks(any())).thenAnswer {
+        whenever(activityTaskManager.getTasks(any(), any(), any(), any())).thenAnswer {
             val maxNumTasks = it.arguments[0] as Int
             return@thenAnswer runningTasks.take(maxNumTasks)
+        }
+        whenever(activityTaskManager.startActivityFromRecents(any(), any())).thenAnswer {
+            val taskId = it.arguments[0] as Int
+            val runningTask = runningTasks.find { runningTask -> runningTask.taskId == taskId }
+            if (runningTask != null) {
+                moveTaskToForeground(runningTask)
+                return@thenAnswer 0
+            } else {
+                return@thenAnswer -1
+            }
         }
     }
 

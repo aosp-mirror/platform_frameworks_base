@@ -43,6 +43,7 @@ import com.android.systemui.reardisplay.RearDisplayModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.rotationlock.RotationLockModule;
+import com.android.systemui.rotationlock.RotationLockNewModule;
 import com.android.systemui.scene.SceneContainerFrameworkModule;
 import com.android.systemui.screenshot.ReferenceScreenshotModule;
 import com.android.systemui.settings.MultiUserUtilsModule;
@@ -110,6 +111,7 @@ import javax.inject.Named;
         RearDisplayModule.class,
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
+        RotationLockNewModule.class,
         ScreenDecorationsModule.class,
         SystemActionsModule.class,
         ShadeModule.class,

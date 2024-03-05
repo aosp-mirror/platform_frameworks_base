@@ -851,7 +851,6 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    @RequiresPermission(value = Manifest.permission.MEDIA_ROUTING_CONTROL, conditional = true)
     private boolean checkMediaRoutingControlPermission(
             int callerUid, int callerPid, @Nullable String callerPackageName) {
         return PermissionChecker.checkPermissionForDataDelivery(

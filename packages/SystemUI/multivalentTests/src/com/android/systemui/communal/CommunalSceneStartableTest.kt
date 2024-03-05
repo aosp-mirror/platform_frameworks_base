@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dock.dockManager
@@ -79,8 +79,8 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
 
-                communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.PRIMARY_BOUNCER,
@@ -88,7 +88,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                     testScope = this
                 )
 
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
             }
         }
 
@@ -97,7 +97,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
 
                 updateDocked(true)
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
@@ -105,7 +105,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                     to = KeyguardState.LOCKSCREEN,
                     testScope = this
                 )
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
             }
         }
 
@@ -114,7 +114,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
 
                 updateDocked(true)
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
@@ -122,7 +122,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                     to = KeyguardState.LOCKSCREEN,
                     testScope = this
                 )
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
             }
         }
 
@@ -131,19 +131,19 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
-                communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.GLANCEABLE_HUB,
                     to = KeyguardState.OFF,
                     testScope = this
                 )
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 advanceTimeBy(CommunalSceneStartable.AWAKE_DEBOUNCE_DELAY)
 
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
             }
         }
 
@@ -152,17 +152,17 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 val scene by collectLastValue(communalInteractor.desiredScene)
-                communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.GLANCEABLE_HUB,
                     to = KeyguardState.OFF,
                     testScope = this
                 )
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
                 advanceTimeBy(CommunalSceneStartable.AWAKE_DEBOUNCE_DELAY / 2)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
 
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.OFF,
@@ -171,7 +171,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 )
 
                 advanceTimeBy(CommunalSceneStartable.AWAKE_DEBOUNCE_DELAY)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
             }
         }
 
@@ -179,7 +179,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     fun dockingOnLockscreen_forcesCommunal() =
         with(kosmos) {
             testScope.runTest {
-                communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+                communalInteractor.onSceneChanged(CommunalScenes.Blank)
                 val scene by collectLastValue(communalInteractor.desiredScene)
 
                 // device is docked while on the lockscreen
@@ -190,9 +190,9 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 )
                 updateDocked(true)
 
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
                 advanceTimeBy(CommunalSceneStartable.DOCK_DEBOUNCE_DELAY)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Communal)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
             }
         }
 
@@ -200,7 +200,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     fun dockingOnLockscreen_doesNotForceCommunalIfDreamStarts() =
         with(kosmos) {
             testScope.runTest {
-                communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+                communalInteractor.onSceneChanged(CommunalScenes.Blank)
                 val scene by collectLastValue(communalInteractor.desiredScene)
 
                 // device is docked while on the lockscreen
@@ -211,9 +211,9 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 )
                 updateDocked(true)
 
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
                 advanceTimeBy(CommunalSceneStartable.DOCK_DEBOUNCE_DELAY / 2)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
 
                 // dream starts shortly after docking
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
@@ -222,7 +222,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                     testScope = this
                 )
                 advanceTimeBy(CommunalSceneStartable.DOCK_DEBOUNCE_DELAY)
-                assertThat(scene).isEqualTo(CommunalSceneKey.Blank)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
             }
         }
 

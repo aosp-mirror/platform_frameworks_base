@@ -63,9 +63,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
-import com.android.systemui.scene.ui.composable.asComposeAware
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.Shade
@@ -89,7 +88,7 @@ constructor(
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
     private val statusBarIconController: StatusBarIconController,
 ) : ComposableScene {
-    override val key = SceneKey.QuickSettings
+    override val key = Scenes.QuickSettings
 
     override val destinationScenes =
         viewModel.destinationScenes.stateIn(
@@ -140,9 +139,7 @@ private fun SceneScope.QuickSettingsScene(
         val isScrollable =
             when (val state = layoutState.transitionState) {
                 is TransitionState.Idle -> true
-                is TransitionState.Transition -> {
-                    state.fromScene == SceneKey.QuickSettings.asComposeAware()
-                }
+                is TransitionState.Transition -> state.fromScene == Scenes.QuickSettings
             }
 
         LaunchedEffect(isCustomizing, scrollState) {

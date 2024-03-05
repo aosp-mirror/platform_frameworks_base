@@ -33,14 +33,15 @@
         android:orientation="horizontal"
         android:clickable="true"
         android:focusable="true"
-        android:paddingStart="6dp"
-        android:paddingEnd="8dp">
+        android:paddingStart="12dp">
         <ImageView
             android:id="@+id/application_icon"
             android:layout_width="@dimen/desktop_mode_caption_icon_radius"
             android:layout_height="@dimen/desktop_mode_caption_icon_radius"
             android:layout_gravity="center_vertical"
-            android:contentDescription="@string/app_icon_text" />
+            android:contentDescription="@string/app_icon_text"
+            android:layout_marginStart="6dp"
+            android:scaleType="centerCrop"/>
 
         <TextView
             android:id="@+id/application_name"
@@ -53,8 +54,7 @@
             android:lineHeight="20dp"
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:layout_marginStart="8dp"
             tools:text="Gmail"/>
 
         <ImageButton
@@ -67,6 +67,7 @@
             android:scaleType="fitCenter"
             android:clickable="false"
             android:focusable="false"
+            android:layout_marginHorizontal="8dp"
             android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
@@ -87,14 +88,15 @@
 
     <ImageButton
         android:id="@+id/close_window"
-        android:layout_width="40dp"
+        android:layout_width="44dp"
         android:layout_height="40dp"
-        android:padding="4dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="8dp"
         android:layout_marginEnd="8dp"
         android:tint="?androidprv:attr/materialColorOnSurface"
         android:background="?android:selectableItemBackgroundBorderless"
         android:contentDescription="@string/close_button_text"
-        android:src="@drawable/decor_close_button_dark"
-        android:scaleType="fitCenter"
+        android:src="@drawable/desktop_mode_header_ic_close"
+        android:scaleType="centerCrop"
         android:gravity="end"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

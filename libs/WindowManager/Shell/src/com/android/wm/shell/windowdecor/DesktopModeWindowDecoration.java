@@ -318,28 +318,25 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
 
-        // The "app controls" type caption bar should report the occluding elements as bounding
-        // rects to the insets system so that apps can draw in the empty space left in the center.
-        if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor) {
-            // The "app chip" section of the caption bar, it's aligned to the left and its width
-            // varies depending on the length of the app name, but we'll report its max width for
-            // now.
-            // TODO(b/316387515): consider reporting the true width after it's been laid out.
+        if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor
+                && TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
+            // App is requesting to customize the caption bar. Allow input to fall through to the
+            // windows below so that the app can respond to input events on their custom content.
+            relayoutParams.mAllowCaptionInputFallthrough = true;
+            // Report occluding elements as bounding rects to the insets system so that apps can
+            // draw in the empty space in the center:
+            //   First, the "app chip" section of the caption bar (+ some extra margins).
             final RelayoutParams.OccludingCaptionElement appChipElement =
                     new RelayoutParams.OccludingCaptionElement();
-            appChipElement.mWidthResId = R.dimen.desktop_mode_app_details_max_width;
+            appChipElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_start;
             appChipElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.START;
             relayoutParams.mOccludingCaptionElements.add(appChipElement);
-            // The "controls" section of the caption bar (maximize, close btns). These are aligned
-            // to the right of the caption bar and have a fixed width.
-            // TODO(b/316387515): add additional padding for an exclusive drag-move region.
+            //   Then, the right-aligned section (drag space, maximize and close buttons).
             final RelayoutParams.OccludingCaptionElement controlsElement =
                     new RelayoutParams.OccludingCaptionElement();
-            controlsElement.mWidthResId = R.dimen.desktop_mode_right_edge_buttons_width;
+            controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
-            relayoutParams.mAllowCaptionInputFallthrough =
-                    TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo);
         }
         if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
             relayoutParams.mShadowRadiusId = taskInfo.isFocused

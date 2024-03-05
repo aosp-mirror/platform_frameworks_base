@@ -346,6 +346,7 @@ cc_defaults {
         "jni/android_util_PathParser.cpp",
 
         "jni/Bitmap.cpp",
+        "jni/BitmapRegionDecoder.cpp",
         "jni/BufferUtils.cpp",
         "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
@@ -421,7 +422,6 @@ cc_defaults {
                 "jni/android_graphics_TextureLayer.cpp",
                 "jni/android_graphics_HardwareRenderer.cpp",
                 "jni/android_graphics_HardwareBufferRenderer.cpp",
-                "jni/BitmapRegionDecoder.cpp",
                 "jni/GIFMovie.cpp",
                 "jni/GraphicsStatsService.cpp",
                 "jni/Movie.cpp",
@@ -559,8 +559,13 @@ cc_defaults {
         "AnimatorManager.cpp",
         "CanvasTransform.cpp",
         "DamageAccumulator.cpp",
+        "DeviceInfo.cpp",
+        "FrameInfo.cpp",
+        "FrameInfoVisualizer.cpp",
+        "FrameMetricsReporter.cpp",
         "Gainmap.cpp",
         "Interpolator.cpp",
+        "JankTracker.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
         "Mesh.cpp",
@@ -623,13 +628,8 @@ cc_defaults {
                 "utils/NdkUtils.cpp",
                 "AutoBackendTextureRelease.cpp",
                 "DeferredLayerUpdater.cpp",
-                "DeviceInfo.cpp",
-                "FrameInfo.cpp",
-                "FrameInfoVisualizer.cpp",
                 "HardwareBitmapUploader.cpp",
                 "HWUIProperties.sysprop",
-                "JankTracker.cpp",
-                "FrameMetricsReporter.cpp",
                 "Layer.cpp",
                 "LayerUpdateQueue.cpp",
                 "ProfileDataContainer.cpp",
@@ -643,7 +643,10 @@ cc_defaults {
             cflags: ["-Wno-implicit-fallthrough"],
         },
         host: {
-            header_libs: ["libnativebase_headers"],
+            header_libs: [
+                "libnativebase_headers",
+                "libnativedisplay_headers",
+            ],
 
             local_include_dirs: ["platform/host"],
 
@@ -655,7 +658,11 @@ cc_defaults {
                 "platform/host/WebViewFunctorManager.cpp",
             ],
 
-            cflags: ["-Wno-unused-private-field"],
+            cflags: [
+                "-DHWUI_NULL_GPU",
+                "-DNULL_GPU_MAX_TEXTURE_SIZE=4096",
+                "-Wno-unused-private-field",
+            ],
         },
     },
 }

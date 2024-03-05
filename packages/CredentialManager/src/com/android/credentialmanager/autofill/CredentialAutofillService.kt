@@ -33,7 +33,6 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
-import android.provider.Settings
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -140,7 +139,7 @@ class CredentialAutofillService : AutofillService() {
             override fun onResult(result: GetCandidateCredentialsResponse) {
                 Log.i(TAG, "getCandidateCredentials onResult")
                 val fillResponse = convertToFillResponse(result, request,
-                    responseClientState)
+                    responseClientState, GetFlowUtils.extractTypePriorityMap(getCredRequest))
                 if (fillResponse != null) {
                     callback.onSuccess(fillResponse)
                 } else {
@@ -197,7 +196,8 @@ class CredentialAutofillService : AutofillService() {
     private fun convertToFillResponse(
             getCredResponse: GetCandidateCredentialsResponse,
             filLRequest: FillRequest,
-            responseClientState: Bundle
+            responseClientState: Bundle,
+            typePriorityMap: Map<String, Int>,
     ): FillResponse? {
         val candidateProviders = getCredResponse.candidateProviderDataList
         if (candidateProviders.isEmpty()) {
@@ -213,7 +213,7 @@ class CredentialAutofillService : AutofillService() {
         autofillIdToProvidersMap.forEach { (autofillId, providers) ->
             validFillResponse = processProvidersForAutofillId(
                     filLRequest, autofillId, providers, entryIconMap, fillResponseBuilder,
-                    getCredResponse.intent)
+                    getCredResponse.intent, typePriorityMap)
                     .or(validFillResponse)
         }
         if (!validFillResponse) {
@@ -229,7 +229,8 @@ class CredentialAutofillService : AutofillService() {
             providerDataList: ArrayList<GetCredentialProviderData>,
             entryIconMap: Map<String, Icon>,
             fillResponseBuilder: FillResponse.Builder,
-            bottomSheetIntent: Intent
+            bottomSheetIntent: Intent,
+            typePriorityMap: Map<String, Int>,
     ): Boolean {
         val providerList = GetFlowUtils.toProviderList(
             providerDataList,
@@ -237,7 +238,8 @@ class CredentialAutofillService : AutofillService() {
         if (providerList.isEmpty()) {
             return false
         }
-        val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerList)
+        val providerDisplayInfo: ProviderDisplayInfo =
+                toProviderDisplayInfo(providerList, typePriorityMap)
         var totalEntryCount = providerDisplayInfo.sortedUserNameToCredentialEntryList.size
         val inlineSuggestionsRequest = filLRequest.inlineSuggestionsRequest
         val inlinePresentationSpecs = inlineSuggestionsRequest?.inlinePresentationSpecs

@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"ৰিং"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"কম্পন"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"মিউট"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"কাষ্ট কৰক"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"ৰিং মিউট কৰি থোৱাৰ বাবে উপলব্ধ নহয়"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s। আনমিউট কৰিবৰ বাবে টিপক।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s। কম্পনৰ বাবে টিপক। দিব্য়াংগসকলৰ বাবে থকা সেৱা মিউট হৈ থাকিব পাৰে।"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। মিউট কৰিবলৈ টিপক। দিব্য়াংগসকলৰ বাবে থকা সেৱা মিউট হৈ থাকিব পাৰে।"</string>

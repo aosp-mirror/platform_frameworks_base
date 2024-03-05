@@ -16,6 +16,9 @@
 
 package android.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -352,12 +355,20 @@ public class VirtualDeviceInternal {
             @Nullable Executor executor,
             @Nullable VirtualAudioDevice.AudioConfigurationChangeCallback callback) {
         if (mVirtualAudioDevice == null) {
-            Context context = mContext;
-            if (Flags.deviceAwareRecordAudioPermission()) {
-                context = mContext.createDeviceContext(getDeviceId());
+            try {
+                Context context = mContext;
+                if (Flags.deviceAwareRecordAudioPermission()) {
+                    // When using a default policy for audio device-aware RECORD_AUDIO permission
+                    // should not take effect, thus register policies with the default context.
+                    if (mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM) {
+                        context = mContext.createDeviceContext(getDeviceId());
+                    }
+                }
+                mVirtualAudioDevice = new VirtualAudioDevice(context, mVirtualDevice, display,
+                        executor, callback, () -> mVirtualAudioDevice = null);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            mVirtualAudioDevice = new VirtualAudioDevice(context, mVirtualDevice, display,
-                    executor, callback, () -> mVirtualAudioDevice = null);
         }
         return mVirtualAudioDevice;
     }

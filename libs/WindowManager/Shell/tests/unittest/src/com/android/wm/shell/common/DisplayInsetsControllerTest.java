@@ -50,6 +50,12 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
+/**
+ * Tests for the display insets controller.
+ *
+ * <p> Build/Install/Run:
+ *  atest WMShellUnitTests:DisplayInsetsControllerTest
+ */
 @SmallTest
 public class DisplayInsetsControllerTest extends ShellTestCase {
 
@@ -114,9 +120,9 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).showInsets(0, false,
-                null /* statsToken */);
+                ImeTracker.Token.empty());
         mInsetsControllersByDisplayId.get(DEFAULT_DISPLAY).hideInsets(0, false,
-                null /* statsToken */);
+                ImeTracker.Token.empty());
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);
@@ -136,9 +142,9 @@ public class DisplayInsetsControllerTest extends ShellTestCase {
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsChanged(null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).insetsControlChanged(null, null);
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).showInsets(0, false,
-                null /* statsToken */);
+                ImeTracker.Token.empty());
         mInsetsControllersByDisplayId.get(SECOND_DISPLAY).hideInsets(0, false,
-                null /* statsToken */);
+                ImeTracker.Token.empty());
         mExecutor.flushAll();
 
         assertTrue(defaultListener.topFocusedWindowChangedCount == 1);

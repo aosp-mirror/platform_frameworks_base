@@ -96,6 +96,9 @@ public class TestSystemImpl implements SystemInterface {
             return;
         }
         PackageInfo packageInfo = userPackages.get(userId);
+        if (packageInfo == null) {
+            return;
+        }
         packageInfo.applicationInfo.enabled = enable;
         setPackageInfoForUser(userId, packageInfo);
     }
@@ -106,6 +109,9 @@ public class TestSystemImpl implements SystemInterface {
             return;
         }
         PackageInfo packageInfo = userPackages.get(userId);
+        if (packageInfo == null) {
+            return;
+        }
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
         packageInfo.applicationInfo.privateFlags &= (~ApplicationInfo.PRIVATE_FLAG_HIDDEN);
         setPackageInfoForUser(userId, packageInfo);

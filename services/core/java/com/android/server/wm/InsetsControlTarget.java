@@ -60,8 +60,8 @@ interface InsetsControlTarget {
      * Instructs the control target to show inset sources.
      *
      * @param types to specify which types of insets source window should be shown.
-     * @param fromIme {@code true} if IME show request originated from {@link InputMethodService}.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param fromIme {@code true} if the IME request originated from {@link InputMethodService}.
+     * @param statsToken the token tracking the current IME request or {@code null} otherwise.
      */
     default void showInsets(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {
@@ -71,8 +71,8 @@ interface InsetsControlTarget {
      * Instructs the control target to hide inset sources.
      *
      * @param types to specify which types of insets source window should be hidden.
-     * @param fromIme {@code true} if IME hide request originated from {@link InputMethodService}.
-     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
+     * @param fromIme {@code true} if the IME request originated from {@link InputMethodService}.
+     * @param statsToken the token tracking the current IME request or {@code null} otherwise.
      */
     default void hideInsets(@InsetsType int types, boolean fromIme,
             @Nullable ImeTracker.Token statsToken) {

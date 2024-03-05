@@ -16,6 +16,8 @@
 
 package com.android.server.ondeviceintelligence;
 
+import static android.service.ondeviceintelligence.OnDeviceIntelligenceService.OnDeviceUpdateProcessingException.PROCESSING_UPDATE_STATUS_CONNECTION_FAILED;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.app.AppGlobals;
@@ -36,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -43,8 +46,12 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.service.ondeviceintelligence.IOnDeviceIntelligenceService;
 import android.service.ondeviceintelligence.IOnDeviceTrustedInferenceService;
+import android.service.ondeviceintelligence.IRemoteProcessingService;
 import android.service.ondeviceintelligence.IRemoteStorageService;
+import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
+import android.service.ondeviceintelligence.OnDeviceIntelligenceService;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -59,10 +66,11 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * This is the system service for handling calls on the {@link OnDeviceIntelligenceManager}. This
+ * This is the system service for handling calls on the
+ * {@link android.app.ondeviceintelligence.OnDeviceIntelligenceManager}. This
  * service holds connection references to the underlying remote services i.e. the isolated service
- * {@link android.service.ondeviceintelligence.OnDeviceTrustedInferenceService} and a regular
- * service counter part {@link android.service.ondeviceintelligence.OnDeviceIntelligenceService}.
+ * {@link  OnDeviceTrustedInferenceService} and a regular
+ * service counter part {@link OnDeviceIntelligenceService}.
  *
  * Note: Both the remote services run under the SYSTEM user, as we cannot have separate instance of
  * the Inference service for each user, due to possible high memory footprint.
@@ -313,8 +321,46 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 mRemoteOnDeviceIntelligenceService = new RemoteOnDeviceIntelligenceService(mContext,
                         ComponentName.unflattenFromString(serviceName),
                         UserHandle.SYSTEM.getIdentifier());
+                mRemoteOnDeviceIntelligenceService.setServiceLifecycleCallbacks(
+                        new ServiceConnector.ServiceLifecycleCallbacks<>() {
+                            @Override
+                            public void onConnected(
+                                    @NonNull IOnDeviceIntelligenceService service) {
+                                try {
+                                    service.registerRemoteServices(
+                                            getRemoteProcessingService());
+                                } catch (RemoteException ex) {
+                                    Slog.w(TAG, "Failed to send connected event", ex);
+                                }
+                            }
+                        });
             }
         }
+    }
+
+    @NonNull
+    private IRemoteProcessingService.Stub getRemoteProcessingService() {
+        return new IRemoteProcessingService.Stub() {
+            @Override
+            public void updateProcessingState(
+                    Bundle processingState,
+                    IProcessingUpdateStatusCallback callback) {
+                try {
+                    ensureRemoteTrustedInferenceServiceInitialized();
+                    mRemoteInferenceService.post(
+                            service -> service.updateProcessingState(
+                                    processingState, callback));
+                } catch (RemoteException unused) {
+                    try {
+                        callback.onFailure(
+                                PROCESSING_UPDATE_STATUS_CONNECTION_FAILED,
+                                "Received failure invoking the remote processing service.");
+                    } catch (RemoteException ex) {
+                        Slog.w(TAG, "Failed to send failure status.", ex);
+                    }
+                }
+            }
+        };
     }
 
     private void ensureRemoteTrustedInferenceServiceInitialized() throws RemoteException {
@@ -332,6 +378,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                             public void onConnected(
                                     @NonNull IOnDeviceTrustedInferenceService service) {
                                 try {
+                                    ensureRemoteIntelligenceServiceInitialized();
                                     service.registerRemoteStorageService(
                                             getIRemoteStorageService());
                                 } catch (RemoteException ex) {
@@ -358,8 +405,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             @Override
             public void getReadOnlyFeatureFileDescriptorMap(
                     Feature feature,
-                    RemoteCallback remoteCallback)
-                    throws RemoteException {
+                    RemoteCallback remoteCallback) {
                 mRemoteOnDeviceIntelligenceService.post(
                         service -> service.getReadOnlyFeatureFileDescriptorMap(
                                 feature, remoteCallback));

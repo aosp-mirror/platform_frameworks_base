@@ -21,6 +21,8 @@ package com.android.systemui.scene.domain.interactor
 import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -28,8 +30,7 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.panelExpansionInteractor
@@ -56,7 +57,7 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
     private val sceneInteractor = kosmos.sceneInteractor
     private val transitionState =
         MutableStateFlow<ObservableTransitionState>(
-            ObservableTransitionState.Idle(SceneKey.Lockscreen)
+            ObservableTransitionState.Idle(Scenes.Lockscreen)
         )
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
     private val fakeShadeRepository = kosmos.fakeShadeRepository
@@ -76,19 +77,19 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
             setUnlocked(false)
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
-            changeScene(SceneKey.Lockscreen) { assertThat(panelExpansion).isEqualTo(1f) }
+            changeScene(Scenes.Lockscreen) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
 
-            changeScene(SceneKey.Bouncer) { assertThat(panelExpansion).isEqualTo(1f) }
+            changeScene(Scenes.Bouncer) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
 
-            changeScene(SceneKey.Shade) { assertThat(panelExpansion).isEqualTo(1f) }
+            changeScene(Scenes.Shade) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
 
-            changeScene(SceneKey.QuickSettings) { assertThat(panelExpansion).isEqualTo(1f) }
+            changeScene(Scenes.QuickSettings) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
 
-            changeScene(SceneKey.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
+            changeScene(Scenes.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
         }
 
@@ -100,21 +101,19 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
             setUnlocked(true)
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
-            changeScene(SceneKey.Gone) { assertThat(panelExpansion).isEqualTo(0f) }
+            changeScene(Scenes.Gone) { assertThat(panelExpansion).isEqualTo(0f) }
             assertThat(panelExpansion).isEqualTo(0f)
 
-            changeScene(SceneKey.Shade) { progress ->
-                assertThat(panelExpansion).isEqualTo(progress)
-            }
+            changeScene(Scenes.Shade) { progress -> assertThat(panelExpansion).isEqualTo(progress) }
             assertThat(panelExpansion).isEqualTo(1f)
 
-            changeScene(SceneKey.QuickSettings) {
+            changeScene(Scenes.QuickSettings) {
                 // Shade's already expanded, so moving to QS should also be 1f.
                 assertThat(panelExpansion).isEqualTo(1f)
             }
             assertThat(panelExpansion).isEqualTo(1f)
 
-            changeScene(SceneKey.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
+            changeScene(Scenes.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
         }
 
@@ -128,19 +127,19 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
             setUnlocked(false)
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
-            changeScene(SceneKey.Lockscreen)
+            changeScene(Scenes.Lockscreen)
             assertThat(panelExpansion).isEqualTo(leet)
 
-            changeScene(SceneKey.Bouncer)
+            changeScene(Scenes.Bouncer)
             assertThat(panelExpansion).isEqualTo(leet)
 
-            changeScene(SceneKey.Shade)
+            changeScene(Scenes.Shade)
             assertThat(panelExpansion).isEqualTo(leet)
 
-            changeScene(SceneKey.QuickSettings)
+            changeScene(Scenes.QuickSettings)
             assertThat(panelExpansion).isEqualTo(leet)
 
-            changeScene(SceneKey.Communal)
+            changeScene(Scenes.Communal)
             assertThat(panelExpansion).isEqualTo(leet)
         }
 

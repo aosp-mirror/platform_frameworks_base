@@ -22,12 +22,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalRepository
-import com.android.systemui.communal.shared.model.CommunalSceneKey
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.flags.Flags
@@ -262,7 +262,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
             // Hub transition state is idle with hub open.
             communalRepository.setTransitionState(
-                flowOf(ObservableCommunalTransitionState.Idle(CommunalSceneKey.Communal))
+                flowOf(ObservableTransitionState.Idle(CommunalScenes.Communal))
             )
             runCurrent()
 
@@ -325,6 +325,44 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             shadeRepository.setQsExpansion(0f)
             assertThat(alpha).isEqualTo(1f)
 
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun alpha_idleOnOccluded_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+            assertThat(alpha).isEqualTo(1f)
+
+            // Go to OCCLUDED state
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(0f)
+
+            // Try pulling down shade and ensure the value doesn't change
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun alpha_idleOnGone_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+            assertThat(alpha).isEqualTo(1f)
+
+            // Go to GONE state
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(0f)
+
+            // Try pulling down shade and ensure the value doesn't change
             shadeRepository.setQsExpansion(0.5f)
             assertThat(alpha).isEqualTo(0f)
         }

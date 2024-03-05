@@ -463,12 +463,6 @@ public class AutomaticBrightnessController {
             boolean userChangedAutoBrightnessAdjustment, int displayPolicy,
             boolean shouldResetShortTermModel) {
         mState = state;
-        // While dozing, the application processor may be suspended which will prevent us from
-        // receiving new information from the light sensor. On some devices, we may be able to
-        // switch to a wake-up light sensor instead but for now we will simply disable the sensor
-        // and hold onto the last computed screen auto brightness.  We save the dozing flag for
-        // debugging purposes.
-        boolean dozing = (displayPolicy == DisplayPowerRequest.POLICY_DOZE);
         boolean changed = setBrightnessConfiguration(configuration, shouldResetShortTermModel);
         changed |= setDisplayPolicy(displayPolicy);
         if (userChangedAutoBrightnessAdjustment) {
@@ -482,10 +476,10 @@ public class AutomaticBrightnessController {
         }
         final boolean userInitiatedChange =
                 userChangedBrightness || userChangedAutoBrightnessAdjustment;
-        if (userInitiatedChange && enable && !dozing) {
+        if (userInitiatedChange && enable) {
             prepareBrightnessAdjustmentSample();
         }
-        changed |= setLightSensorEnabled(enable && !dozing);
+        changed |= setLightSensorEnabled(enable);
 
         if (mIsBrightnessThrottled != mBrightnessThrottler.isThrottled()) {
             // Maximum brightness has changed, so recalculate display brightness.

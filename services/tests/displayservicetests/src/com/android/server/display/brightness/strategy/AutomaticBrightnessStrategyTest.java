@@ -215,7 +215,7 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setUseAutoBrightness(true);
         int targetDisplayState = Display.STATE_DOZE;
         boolean allowAutoBrightnessWhileDozing = true;
-        int brightnessReason = BrightnessReason.REASON_DOZE;
+        int brightnessReason = BrightnessReason.REASON_UNKNOWN;
         int policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
         float lastUserSetBrightness = 0.2f;
         boolean userSetBrightnessChanged = true;

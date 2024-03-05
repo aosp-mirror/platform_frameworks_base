@@ -1485,8 +1485,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         // Use default brightness when dozing unless overridden.
-        if ((Float.isNaN(brightnessState))
-                && Display.isDozeState(state)) {
+        if (Float.isNaN(brightnessState) && mPowerRequest.policy == POLICY_DOZE) {
             rawBrightnessState = mScreenBrightnessDozeConfig;
             brightnessState = clampScreenBrightness(rawBrightnessState);
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);

@@ -62,7 +62,7 @@ import java.util.UUID;
  * <li>To get access to standard directories (like the {@link Environment#DIRECTORY_PICTURES}), they
  * can use the {@link #createAccessIntent(String)}. This is the recommend way, since it provides a
  * simpler API and narrows the access to the given directory (and its descendants).
- * <li>To get access to any directory (and its descendants), they can use the Storage Acess
+ * <li>To get access to any directory (and its descendants), they can use the Storage Access
  * Framework APIs (such as {@link Intent#ACTION_OPEN_DOCUMENT} and
  * {@link Intent#ACTION_OPEN_DOCUMENT_TREE}, although these APIs do not guarantee the user will
  * select this specific volume.

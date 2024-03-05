@@ -42,7 +42,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
@@ -288,7 +288,7 @@ constructor(
             sceneInteractorProvider
                 .get()
                 .transitioningTo
-                .map { it == SceneKey.Lockscreen }
+                .map { it == Scenes.Lockscreen }
                 .distinctUntilChanged()
                 .flatMapLatest { isTransitioningToLockscreenScene ->
                     if (isTransitioningToLockscreenScene) {

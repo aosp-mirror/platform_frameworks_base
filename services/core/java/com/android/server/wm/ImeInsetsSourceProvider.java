@@ -215,11 +215,11 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
      * when {@link android.inputmethodservice.InputMethodService} requests to show IME
      * on {@param imeTarget}.
      *
-     * @param imeTarget imeTarget on which IME show request is coming from.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param imeTarget imeTarget on which IME request is coming from.
+     * @param statsToken the token tracking the current IME request.
      */
     void scheduleShowImePostLayout(InsetsControlTarget imeTarget,
-            @Nullable ImeTracker.Token statsToken) {
+            @NonNull ImeTracker.Token statsToken) {
         boolean targetChanged = isTargetChangedWithinActivity(imeTarget);
         mImeRequester = imeTarget;
         // Cancel the pre-existing stats token, if any.

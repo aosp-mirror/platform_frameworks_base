@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -31,7 +32,7 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -196,7 +197,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(message?.text).isEmpty()
             assertThat(pin).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -230,7 +231,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(pin).isEmpty()
             assertThat(message?.text).ignoringCase().isEqualTo(WRONG_PIN)
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -290,7 +291,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(pin).isEmpty()
             assertThat(message?.text).ignoringCase().isEqualTo(WRONG_PIN)
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -304,10 +305,10 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             assertThat(pin).isNotEmpty()
 
             // The user doesn't confirm the PIN, but navigates back to the lockscreen instead.
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
 
             // The user navigates to the bouncer again.
-            switchToScene(SceneKey.Bouncer)
+            switchToScene(Scenes.Bouncer)
 
             // Ensure the previously-entered PIN is not shown.
             assertThat(pin).isEmpty()
@@ -389,8 +390,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)
-        val bouncerShown = currentScene != SceneKey.Bouncer && toScene == SceneKey.Bouncer
-        val bouncerHidden = currentScene == SceneKey.Bouncer && toScene != SceneKey.Bouncer
+        val bouncerShown = currentScene != Scenes.Bouncer && toScene == Scenes.Bouncer
+        val bouncerHidden = currentScene == Scenes.Bouncer && toScene != Scenes.Bouncer
         sceneInteractor.changeScene(toScene, "reason")
         if (bouncerShown) underTest.onShown()
         if (bouncerHidden) underTest.onHidden()
@@ -402,7 +403,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     private fun TestScope.lockDeviceAndOpenPinBouncer() {
         kosmos.fakeAuthenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
         kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-        switchToScene(SceneKey.Bouncer)
+        switchToScene(Scenes.Bouncer)
     }
 
     companion object {

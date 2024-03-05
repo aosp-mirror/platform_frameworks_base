@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"घन्टी"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"कम्पन"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"म्युट गर्नुहोस्"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"कास्ट गर्नुहोस्"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"डिभाइस म्युट गरिएकाले यो सुविधा उपलब्ध छैन"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s। अनम्यूट गर्नाका लागि ट्याप गर्नुहोस्।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s। कम्पनमा सेट गर्नाका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s। म्यूट गर्नाका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>

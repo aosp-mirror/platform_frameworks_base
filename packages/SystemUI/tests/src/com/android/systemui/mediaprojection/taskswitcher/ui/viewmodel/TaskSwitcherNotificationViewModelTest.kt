@@ -63,11 +63,14 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
             handler = Handler.getMain(),
             applicationScope = testScope.backgroundScope,
             tasksRepository = tasksRepo,
+            backgroundDispatcher = dispatcher,
+            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper,
         )
 
     private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
 
-    private val viewModel = TaskSwitcherNotificationViewModel(interactor)
+    private val viewModel =
+        TaskSwitcherNotificationViewModel(interactor, backgroundDispatcher = dispatcher)
 
     @Test
     fun uiState_notProjecting_emitsNotShowing() =
@@ -132,6 +135,40 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
 
             assertThat(uiState)
                 .isEqualTo(TaskSwitcherNotificationUiState.Showing(projectedTask, foregroundTask))
+        }
+
+    @Test
+    fun uiState_projectingTask_foregroundTaskChanged_thenTaskSwitched_emitsNotShowing() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 1)
+            val foregroundTask = createTask(taskId = 2)
+            val uiState by collectLastValue(viewModel.uiState)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+            viewModel.onSwitchTaskClicked(foregroundTask)
+
+            assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
+        }
+
+    @Test
+    fun uiState_projectingTask_foregroundTaskChanged_thenGoBack_emitsNotShowing() =
+        testScope.runTest {
+            val projectedTask = createTask(taskId = 1)
+            val foregroundTask = createTask(taskId = 2)
+            val uiState by collectLastValue(viewModel.uiState)
+
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+            viewModel.onGoBackToTaskClicked(projectedTask)
+
+            assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
         }
 
     @Test

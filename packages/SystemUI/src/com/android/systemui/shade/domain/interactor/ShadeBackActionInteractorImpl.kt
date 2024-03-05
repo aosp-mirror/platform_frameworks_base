@@ -18,7 +18,7 @@ package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -36,12 +36,12 @@ constructor(
             val key =
                 if (fullyCollapse) {
                     if (deviceEntryInteractor.isDeviceEntered.value) {
-                        SceneKey.Gone
+                        Scenes.Gone
                     } else {
-                        SceneKey.Lockscreen
+                        Scenes.Lockscreen
                     }
                 } else {
-                    SceneKey.Shade
+                    Scenes.Shade
                 }
             sceneInteractor.changeScene(key, "animateCollapseQs")
         }

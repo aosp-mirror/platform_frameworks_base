@@ -23,11 +23,12 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
+import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
-import com.android.systemui.compose.ComposeFacade.createCommunalContainer
-import com.android.systemui.compose.ComposeFacade.isComposeAvailable
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
@@ -35,7 +36,6 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.kotlin.collectFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 /**
  * Controller that's responsible for the glanceable hub container view and its touch handling.
@@ -107,8 +107,7 @@ constructor(
     private var shadeShowing = false
 
     /** Returns a flow that tracks whether communal hub is available. */
-    fun communalAvailable(): Flow<Boolean> =
-        if (isComposeAvailable()) communalInteractor.isCommunalAvailable else flowOf(false)
+    fun communalAvailable(): Flow<Boolean> = communalInteractor.isCommunalAvailable
 
     /**
      * Creates the container view containing the glanceable hub UI.
@@ -118,7 +117,11 @@ constructor(
     fun initView(
         context: Context,
     ): View {
-        return initView(createCommunalContainer(context, communalViewModel))
+        return initView(
+            ComposeView(context).apply {
+                setContent { PlatformTheme { CommunalContainer(viewModel = communalViewModel) } }
+            }
+        )
     }
 
     /** Override for testing. */

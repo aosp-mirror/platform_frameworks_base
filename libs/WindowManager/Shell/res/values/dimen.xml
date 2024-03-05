@@ -434,15 +434,22 @@
     <!-- (32 dp buttons + 10dp margins) * 3 buttons-->
     <dimen name="caption_right_buttons_width">126dp</dimen>
 
-    <!-- 2 buttons * 48dp button size. -->
-    <dimen name="desktop_mode_right_edge_buttons_width">96dp</dimen>
+    <!-- 2 buttons * 44dp button size + 16dp total margins. -->
+    <dimen name="desktop_mode_right_edge_buttons_width">104dp</dimen>
 
     <!-- 22dp padding + 24dp app icon + 16dp expand button.
          Text varies in size, we will calculate that width separately. -->
     <dimen name="desktop_mode_app_details_width_minus_text">62dp</dimen>
 
-    <!-- 22dp padding + 24dp app icon + 16dp expand button + 86dp text (max) -->
-    <dimen name="desktop_mode_app_details_max_width">148dp</dimen>
+    <!-- When custom headers are requested, this is the width of the left-aligned region that is
+         taken up by caption elements and extra margins. The customizable region starts at the
+         end of this area. -->
+    <dimen name="desktop_mode_customizable_caption_margin_start">84dp</dimen>
+
+    <!-- When custom headers are requested, this is the width of the right-aligned region that is
+         taken up by caption elements and extra margins. The customizable region ends at the
+         start of this area. -->
+    <dimen name="desktop_mode_customizable_caption_margin_end">152dp</dimen>
 
     <!-- The width of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_width">287dp</dimen>
@@ -490,7 +497,7 @@
     <dimen name="desktop_mode_handle_menu_corner_radius">26dp</dimen>
 
     <!-- The radius of the caption menu icon. -->
-    <dimen name="desktop_mode_caption_icon_radius">28dp</dimen>
+    <dimen name="desktop_mode_caption_icon_radius">24dp</dimen>
 
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>

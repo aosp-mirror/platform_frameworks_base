@@ -16,6 +16,7 @@
 
 #include "VectorDrawable.h"
 
+#include <gui/TraceUtils.h>
 #include <math.h>
 #include <string.h>
 #include <utils/Log.h>
@@ -26,12 +27,7 @@
 #include "SkSamplingOptions.h"
 #include "SkScalar.h"
 #include "hwui/Paint.h"
-
-#ifdef __ANDROID__
 #include "renderthread/RenderThread.h"
-#endif
-
-#include <gui/TraceUtils.h>
 #include "utils/Macros.h"
 #include "utils/VectorDrawableUtils.h"
 

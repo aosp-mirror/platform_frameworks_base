@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.PixelFormat;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSource;
+import android.view.inputmethod.ImeTracker;
 
 import androidx.test.filters.SmallTest;
 
@@ -34,6 +35,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Tests for the {@link ImeInsetsSourceProvider} class.
+ *
+ * <p> Build/Install/Run:
+ * atest WmTests:ImeInsetsSourceProviderTest
+ */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -56,7 +63,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         mDisplayContent.setImeControlTarget(popup);
         mDisplayContent.setImeLayeringTarget(appWin);
         popup.mAttrs.format = PixelFormat.TRANSPARENT;
-        mImeProvider.scheduleShowImePostLayout(appWin, null /* statsToken */);
+        mImeProvider.scheduleShowImePostLayout(appWin, ImeTracker.Token.empty());
         assertTrue(mImeProvider.isReadyToShowIme());
     }
 
@@ -65,7 +72,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         WindowState target = createWindow(null, TYPE_APPLICATION, "app");
         mDisplayContent.setImeLayeringTarget(target);
         mDisplayContent.updateImeInputAndControlTarget(target);
-        mImeProvider.scheduleShowImePostLayout(target, null /* statsToken */);
+        mImeProvider.scheduleShowImePostLayout(target, ImeTracker.Token.empty());
         assertTrue(mImeProvider.isReadyToShowIme());
     }
 
@@ -79,7 +86,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(target);
         mDisplayContent.setImeControlTarget(target);
 
-        mImeProvider.scheduleShowImePostLayout(target, null /* statsToken */);
+        mImeProvider.scheduleShowImePostLayout(target, ImeTracker.Token.empty());
         assertFalse(mImeProvider.isImeShowing());
         mImeProvider.checkShowImePostLayout();
         assertTrue(mImeProvider.isImeShowing());

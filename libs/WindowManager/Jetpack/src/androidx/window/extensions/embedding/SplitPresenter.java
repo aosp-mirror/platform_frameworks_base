@@ -387,7 +387,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
         // Sets the dim area when the two TaskFragments are adjacent.
         final boolean dimOnTask = !isStacked
-                && splitAttributes.getWindowAttributes().getDimArea() == DIM_AREA_ON_TASK
+                && splitAttributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
                 && Flags.fullscreenDimFlag();
         setTaskFragmentDimOnTask(wct, primaryContainer.getTaskFragmentToken(), dimOnTask);
         setTaskFragmentDimOnTask(wct, secondaryContainer.getTaskFragmentToken(), dimOnTask);
@@ -590,7 +590,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final boolean isFillParent = relativeBounds.isEmpty();
         final boolean isIsolatedNavigated = !isFillParent && container.isOverlay();
         final boolean dimOnTask = !isFillParent
-                && attributes.getWindowAttributes().getDimArea() == DIM_AREA_ON_TASK
+                && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
                 && Flags.fullscreenDimFlag();
         final IBinder fragmentToken = container.getTaskFragmentToken();
 

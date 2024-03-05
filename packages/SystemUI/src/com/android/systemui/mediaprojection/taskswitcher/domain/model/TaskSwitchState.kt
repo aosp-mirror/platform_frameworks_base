@@ -16,7 +16,7 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.domain.model
 
-import android.app.TaskInfo
+import android.app.ActivityManager.RunningTaskInfo
 
 /** Represents tha state of task switching in the context of single task media projection. */
 sealed interface TaskSwitchState {
@@ -25,6 +25,8 @@ sealed interface TaskSwitchState {
     /** The foreground task is the same as the task that is currently being projected. */
     object TaskUnchanged : TaskSwitchState
     /** The foreground task is a different one to the task it currently being projected. */
-    data class TaskSwitched(val projectedTask: TaskInfo, val foregroundTask: TaskInfo) :
-        TaskSwitchState
+    data class TaskSwitched(
+        val projectedTask: RunningTaskInfo,
+        val foregroundTask: RunningTaskInfo
+    ) : TaskSwitchState
 }

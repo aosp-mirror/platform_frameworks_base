@@ -3504,7 +3504,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
                     if (statusbar != null) {
-                        statusbar.moveFocusedTaskToFullscreen(event.getDisplayId());
+                        statusbar.moveFocusedTaskToFullscreen(getTargetDisplayIdForKeyEvent(event));
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.MULTI_WINDOW_NAVIGATION);
                         return true;
                     }
@@ -3514,7 +3514,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
                     if (statusbar != null) {
-                        statusbar.enterDesktop(event.getDisplayId());
+                        statusbar.enterDesktop(getTargetDisplayIdForKeyEvent(event));
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.DESKTOP_MODE);
                         return true;
                     }
@@ -6949,6 +6949,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     null,
                     null)
                     == PERMISSION_GRANTED;
+        }
+    }
+
+    private int getTargetDisplayIdForKeyEvent(KeyEvent event) {
+        int displayId = event.getDisplayId();
+
+        if (displayId == INVALID_DISPLAY) {
+            displayId = mTopFocusedDisplayId;
+        }
+
+        if (displayId == INVALID_DISPLAY) {
+            return DEFAULT_DISPLAY;
+        } else {
+            return displayId;
         }
     }
 }
