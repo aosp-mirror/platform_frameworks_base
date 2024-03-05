@@ -42,7 +42,7 @@ import kotlin.math.max
 import kotlinx.coroutines.launch
 
 private const val TAG = "KeyguardBlueprintViewBinder"
-private const val DEBUG = true
+private const val DEBUG = false
 
 @SysUISingleton
 class KeyguardBlueprintViewBinder
