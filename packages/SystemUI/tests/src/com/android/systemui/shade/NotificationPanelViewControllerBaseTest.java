@@ -461,6 +461,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardLogger,
                 mInteractionJankMonitor,
                 mKeyguardInteractor,
+                mKeyguardTransitionInteractor,
                 mDumpManager,
                 mPowerInteractor));
 
