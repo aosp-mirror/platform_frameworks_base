@@ -66,6 +66,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -74,6 +75,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -151,6 +153,8 @@ fun CommunalHub(
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
+
+    ScrollOnNewSmartspaceEffect(viewModel, gridState)
 
     Box(
         modifier =
@@ -276,6 +280,34 @@ fun CommunalHub(
                 .width(Dimensions.Spacing)
                 .pointerInput(Unit) {}
         )
+    }
+}
+
+@Composable
+private fun ScrollOnNewSmartspaceEffect(
+    viewModel: BaseCommunalViewModel,
+    gridState: LazyGridState
+) {
+    val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
+    var smartspaceCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(communalContent) {
+        snapshotFlow { gridState.firstVisibleItemIndex }
+            .collect { index ->
+                val existingSmartspaceCount = smartspaceCount
+                smartspaceCount = communalContent.count { it.isSmartspace() }
+                val firstIndex = communalContent.indexOfFirst { it.isSmartspace() }
+
+                // Scroll to the beginning of the smartspace area whenever the number of
+                // smartspace elements grows
+                if (
+                    existingSmartspaceCount < smartspaceCount &&
+                        !viewModel.isEditMode &&
+                        index > firstIndex
+                ) {
+                    gridState.animateScrollToItem(firstIndex)
+                }
+            }
     }
 }
 
