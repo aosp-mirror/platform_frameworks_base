@@ -28,7 +28,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.content.Context;
-import android.os.HandlerExecutor;
 import android.os.Trace;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -70,8 +69,6 @@ public class WindowAnimator {
 
     private Choreographer mChoreographer;
 
-    private final HandlerExecutor mExecutor;
-
     /**
      * Indicates whether we have an animation frame callback scheduled, which will happen at
      * vsync-app and then schedule the animation tick at the right time (vsync-sf).
@@ -83,7 +80,8 @@ public class WindowAnimator {
      * A list of runnable that need to be run after {@link WindowContainer#prepareSurfaces} is
      * executed and the corresponding transaction is closed and applied.
      */
-    private ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
+    private final ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
+    private boolean mInExecuteAfterPrepareSurfacesRunnables;
 
     private final SurfaceControl.Transaction mTransaction;
 
@@ -94,7 +92,6 @@ public class WindowAnimator {
         mTransaction = service.mTransactionFactory.get();
         service.mAnimationHandler.runWithScissors(
                 () -> mChoreographer = Choreographer.getSfInstance(), 0 /* timeout */);
-        mExecutor = new HandlerExecutor(service.mAnimationHandler);
 
         mAnimationFrameCallback = frameTimeNs -> {
             synchronized (mService.mGlobalLock) {
@@ -200,19 +197,6 @@ public class WindowAnimator {
             updateRunningExpensiveAnimationsLegacy();
         }
 
-        final ArrayList<Runnable> afterPrepareSurfacesRunnables = mAfterPrepareSurfacesRunnables;
-        if (!afterPrepareSurfacesRunnables.isEmpty()) {
-            mAfterPrepareSurfacesRunnables = new ArrayList<>();
-            mTransaction.addTransactionCommittedListener(mExecutor, () -> {
-                synchronized (mService.mGlobalLock) {
-                    // Traverse in order they were added.
-                    for (int i = 0, size = afterPrepareSurfacesRunnables.size(); i < size; i++) {
-                        afterPrepareSurfacesRunnables.get(i).run();
-                    }
-                    afterPrepareSurfacesRunnables.clear();
-                }
-            });
-        }
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "applyTransaction");
         mTransaction.apply();
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -220,6 +204,7 @@ public class WindowAnimator {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
 
         mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        executeAfterPrepareSurfacesRunnables();
 
         if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: exit"
@@ -301,10 +286,34 @@ public class WindowAnimator {
 
     /**
      * Adds a runnable to be executed after {@link WindowContainer#prepareSurfaces} is called and
-     * the corresponding transaction is closed, applied, and committed.
+     * the corresponding transaction is closed and applied.
      */
     void addAfterPrepareSurfacesRunnable(Runnable r) {
+        // If runnables are already being handled in executeAfterPrepareSurfacesRunnable, then just
+        // immediately execute the runnable passed in.
+        if (mInExecuteAfterPrepareSurfacesRunnables) {
+            r.run();
+            return;
+        }
+
         mAfterPrepareSurfacesRunnables.add(r);
         scheduleAnimation();
+    }
+
+    void executeAfterPrepareSurfacesRunnables() {
+
+        // Don't even think about to start recursing!
+        if (mInExecuteAfterPrepareSurfacesRunnables) {
+            return;
+        }
+        mInExecuteAfterPrepareSurfacesRunnables = true;
+
+        // Traverse in order they were added.
+        final int size = mAfterPrepareSurfacesRunnables.size();
+        for (int i = 0; i < size; i++) {
+            mAfterPrepareSurfacesRunnables.get(i).run();
+        }
+        mAfterPrepareSurfacesRunnables.clear();
+        mInExecuteAfterPrepareSurfacesRunnables = false;
     }
 }
