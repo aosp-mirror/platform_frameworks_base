@@ -429,8 +429,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"વધુ વિજેટ ઉમેરો"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"વિજેટ કસ્ટમાઇઝ કરવા માટે થોડીવાર દબાવી રાખો"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"વિજેટ કસ્ટમાઇઝ કરો"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"બંધ કરેલા વિજેટ માટેની ઍપનું આઇકન"</string>
     <string name="edit_widget" msgid="9030848101135393954">"વિજેટમાં ફેરફાર કરો"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"કાઢી નાખો"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"વિજેટ ઉમેરો"</string>
@@ -837,10 +836,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"પાવર મેનૂ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> માંથી <xliff:g id="ID_1">%1$d</xliff:g> પૃષ્ઠ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"લૉક સ્ક્રીન"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"આ ફોનનો પાવર બંધ હોય ત્યારે પણ Find My Device વડે તમે તેનું લોકેશન જાણી શકો છો"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"શટ ડાઉન કરી રહ્યાં છીએ…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"તમારા ડિવાઇસને અનપ્લગ કરો"</string>
@@ -1226,6 +1223,12 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"વધુ રિઝોલ્યુશન માટે, ફોનને ફ્લિપ કરો"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ અનફોલ્ડ કરવામાં આવી રહ્યું છે"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ ફ્લિપ કરવામાં આવી રહ્યું છે"</string>
+    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
+    <skip />
+    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
+    <skip />
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> બૅટરી બાકી છે"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"તમારા સ્ટાઇલસને ચાર્જર સાથે કનેક્ટ કરો"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"સ્ટાઇલસની બૅટરીમાં ચાર્જ ઓછો છે"</string>
