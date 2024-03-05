@@ -341,6 +341,7 @@ android_library {
         "SystemUI_compose_defaults",
     ],
     manifest: "tests/AndroidManifest-base.xml",
+    resource_dirs: [],
     additional_manifests: ["tests/AndroidManifest.xml"],
     srcs: [
         "tests/src/**/*.kt",
