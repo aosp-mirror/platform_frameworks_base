@@ -34,6 +34,9 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
+import com.android.server.companion.association.AssociationDiskStore;
+import com.android.server.companion.association.AssociationRequestsProcessor;
+import com.android.server.companion.association.AssociationStore;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 
 import java.nio.ByteBuffer;
@@ -54,9 +57,9 @@ class BackupRestoreProcessor {
     @NonNull
     private final PackageManagerInternal mPackageManager;
     @NonNull
-    private final AssociationStoreImpl mAssociationStore;
+    private final AssociationStore mAssociationStore;
     @NonNull
-    private final PersistentDataStore mPersistentStore;
+    private final AssociationDiskStore mPersistentStore;
     @NonNull
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     @NonNull
@@ -71,8 +74,8 @@ class BackupRestoreProcessor {
             new PerUserAssociationSet();
 
     BackupRestoreProcessor(@NonNull CompanionDeviceManagerService service,
-                           @NonNull AssociationStoreImpl associationStore,
-                           @NonNull PersistentDataStore persistentStore,
+                           @NonNull AssociationStore associationStore,
+                           @NonNull AssociationDiskStore persistentStore,
                            @NonNull SystemDataTransferRequestStore systemDataTransferRequestStore,
                            @NonNull AssociationRequestsProcessor associationRequestsProcessor) {
         mService = service;

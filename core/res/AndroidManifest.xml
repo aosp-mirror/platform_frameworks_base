@@ -8679,7 +8679,7 @@
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <service android:name="com.android.server.companion.InactiveAssociationsRemovalService"
+        <service android:name="com.android.server.companion.association.InactiveAssociationsRemovalService"
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 

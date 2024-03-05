@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.association;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.net.MacAddress;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -30,6 +30,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,24 +42,69 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.StringJoiner;
 
 /**
- * Implementation of the {@link AssociationStore}, with addition of the methods for modification.
- * <ul>
- * <li> {@link #addAssociation(AssociationInfo)}
- * <li> {@link #removeAssociation(int)}
- * <li> {@link #updateAssociation(AssociationInfo)}
- * </ul>
- *
- * The class has package-private access level, and instances of the class should only be created by
- * the {@link CompanionDeviceManagerService}.
- * Other system component (both inside and outside if the com.android.server.companion package)
- * should use public {@link AssociationStore} interface.
+ * Association store for CRUD.
  */
 @SuppressLint("LongLogTag")
-class AssociationStoreImpl implements AssociationStore {
-    private static final boolean DEBUG = false;
+public class AssociationStore {
+
+    @IntDef(prefix = { "CHANGE_TYPE_" }, value = {
+            CHANGE_TYPE_ADDED,
+            CHANGE_TYPE_REMOVED,
+            CHANGE_TYPE_UPDATED_ADDRESS_CHANGED,
+            CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ChangeType {}
+
+    public static final int CHANGE_TYPE_ADDED = 0;
+    public static final int CHANGE_TYPE_REMOVED = 1;
+    public static final int CHANGE_TYPE_UPDATED_ADDRESS_CHANGED = 2;
+    public static final int CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED = 3;
+
+    /**  Listener for any changes to associations. */
+    public interface OnChangeListener {
+        /**
+         * Called when there are association changes.
+         */
+        default void onAssociationChanged(
+                @AssociationStore.ChangeType int changeType, AssociationInfo association) {
+            switch (changeType) {
+                case CHANGE_TYPE_ADDED:
+                    onAssociationAdded(association);
+                    break;
+
+                case CHANGE_TYPE_REMOVED:
+                    onAssociationRemoved(association);
+                    break;
+
+                case CHANGE_TYPE_UPDATED_ADDRESS_CHANGED:
+                    onAssociationUpdated(association, true);
+                    break;
+
+                case CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED:
+                    onAssociationUpdated(association, false);
+                    break;
+            }
+        }
+
+        /**
+         * Called when an association is added.
+         */
+        default void onAssociationAdded(AssociationInfo association) {}
+
+        /**
+         * Called when an association is removed.
+         */
+        default void onAssociationRemoved(AssociationInfo association) {}
+
+        /**
+         * Called when an association is updated.
+         */
+        default void onAssociationUpdated(AssociationInfo association, boolean addressChanged) {}
+    }
+
     private static final String TAG = "CDM_AssociationStore";
 
     private final Object mLock = new Object();
@@ -72,16 +119,16 @@ class AssociationStoreImpl implements AssociationStore {
     @GuardedBy("mListeners")
     private final Set<OnChangeListener> mListeners = new LinkedHashSet<>();
 
-    void addAssociation(@NonNull AssociationInfo association) {
+    /**
+     * Add an association.
+     */
+    public void addAssociation(@NonNull AssociationInfo association) {
+        Slog.i(TAG, "Adding new association=" + association);
+
         // Validity check first.
         checkNotRevoked(association);
 
         final int id = association.getId();
-
-        if (DEBUG) {
-            Log.i(TAG, "addAssociation() " + association.toShortString());
-            Log.d(TAG, "  association=" + association);
-        }
 
         synchronized (mLock) {
             if (mIdMap.containsKey(id)) {
@@ -96,34 +143,34 @@ class AssociationStoreImpl implements AssociationStore {
             }
 
             invalidateCacheForUserLocked(association.getUserId());
+
+            Slog.i(TAG, "Done adding new association.");
         }
 
         broadcastChange(CHANGE_TYPE_ADDED, association);
     }
 
-    void updateAssociation(@NonNull AssociationInfo updated) {
+    /**
+     * Update an association.
+     */
+    public void updateAssociation(@NonNull AssociationInfo updated) {
+        Slog.i(TAG, "Updating new association=" + updated);
         // Validity check first.
         checkNotRevoked(updated);
 
         final int id = updated.getId();
-
-        if (DEBUG) {
-            Log.i(TAG, "updateAssociation() " + updated.toShortString());
-            Log.d(TAG, "  updated=" + updated);
-        }
 
         final AssociationInfo current;
         final boolean macAddressChanged;
         synchronized (mLock) {
             current = mIdMap.get(id);
             if (current == null) {
-                if (DEBUG) Log.w(TAG, "Association with id " + id + " does not exist.");
+                Slog.w(TAG, "Can't update association. It does not exist.");
                 return;
             }
-            if (DEBUG) Log.d(TAG, "  current=" + current);
 
             if (current.equals(updated)) {
-                if (DEBUG) Log.w(TAG, "  No changes.");
+                Slog.w(TAG, "Association is the same.");
                 return;
             }
 
@@ -144,6 +191,7 @@ class AssociationStoreImpl implements AssociationStore {
                     mAddressMap.computeIfAbsent(updatedAddress, it -> new HashSet<>()).add(id);
                 }
             }
+            Slog.i(TAG, "Done updating association.");
         }
 
         final int changeType = macAddressChanged ? CHANGE_TYPE_UPDATED_ADDRESS_CHANGED
@@ -151,21 +199,19 @@ class AssociationStoreImpl implements AssociationStore {
         broadcastChange(changeType, updated);
     }
 
-    void removeAssociation(int id) {
-        if (DEBUG) Log.i(TAG, "removeAssociation() id=" + id);
+    /**
+     * Remove an association
+     */
+    public void removeAssociation(int id) {
+        Slog.i(TAG, "Removing association id=" + id);
 
         final AssociationInfo association;
         synchronized (mLock) {
             association = mIdMap.remove(id);
 
             if (association == null) {
-                if (DEBUG) Log.w(TAG, "Association with id " + id + " is not stored.");
+                Slog.w(TAG, "Can't remove association. It does not exist.");
                 return;
-            } else {
-                if (DEBUG) {
-                    Log.i(TAG, "removed " + association.toShortString());
-                    Log.d(TAG, "  association=" + association);
-                }
             }
 
             final MacAddress macAddress = association.getDeviceMacAddress();
@@ -174,6 +220,8 @@ class AssociationStoreImpl implements AssociationStore {
             }
 
             invalidateCacheForUserLocked(association.getUserId());
+
+            Slog.i(TAG, "Done removing association.");
         }
 
         broadcastChange(CHANGE_TYPE_REMOVED, association);
@@ -195,12 +243,18 @@ class AssociationStoreImpl implements AssociationStore {
         }
     }
 
+    /**
+     * Get associations for the user.
+     */
     public @NonNull List<AssociationInfo> getAssociationsForUser(@UserIdInt int userId) {
         synchronized (mLock) {
             return getAssociationsForUserLocked(userId);
         }
     }
 
+    /**
+     * Get associations for the package
+     */
     public @NonNull List<AssociationInfo> getAssociationsForPackage(
             @UserIdInt int userId, @NonNull String packageName) {
         final List<AssociationInfo> associationsForUser = getAssociationsForUser(userId);
@@ -210,6 +264,9 @@ class AssociationStoreImpl implements AssociationStore {
         return Collections.unmodifiableList(associationsForPackage);
     }
 
+    /**
+     * Get associations by mac address for the package.
+     */
     public @Nullable AssociationInfo getAssociationsForPackageWithAddress(
             @UserIdInt int userId, @NonNull String packageName, @NonNull String macAddress) {
         final List<AssociationInfo> associations = getAssociationsByAddress(macAddress);
@@ -217,13 +274,20 @@ class AssociationStoreImpl implements AssociationStore {
                 it -> it.belongsToPackage(userId, packageName));
     }
 
+    /**
+     * Get association by id.
+     */
     public @Nullable AssociationInfo getAssociationById(int id) {
         synchronized (mLock) {
             return mIdMap.get(id);
         }
     }
 
-    public @NonNull List<AssociationInfo> getAssociationsByAddress(@NonNull String macAddress) {
+    /**
+     * Get associations by mac address.
+     */
+    @NonNull
+    public List<AssociationInfo> getAssociationsByAddress(@NonNull String macAddress) {
         final MacAddress address = MacAddress.fromString(macAddress);
 
         synchronized (mLock) {
@@ -240,7 +304,8 @@ class AssociationStoreImpl implements AssociationStore {
     }
 
     @GuardedBy("mLock")
-    private @NonNull List<AssociationInfo> getAssociationsForUserLocked(@UserIdInt int userId) {
+    @NonNull
+    private List<AssociationInfo> getAssociationsForUserLocked(@UserIdInt int userId) {
         final List<AssociationInfo> cached = mCachedPerUser.get(userId);
         if (cached != null) {
             return cached;
@@ -262,12 +327,18 @@ class AssociationStoreImpl implements AssociationStore {
         mCachedPerUser.delete(userId);
     }
 
+    /**
+     * Register a listener for association changes.
+     */
     public void registerListener(@NonNull OnChangeListener listener) {
         synchronized (mListeners) {
             mListeners.add(listener);
         }
     }
 
+    /**
+     * Unregister a listener previously registered for association changes.
+     */
     public void unregisterListener(@NonNull OnChangeListener listener) {
         synchronized (mListeners) {
             mListeners.remove(listener);
@@ -297,41 +368,28 @@ class AssociationStoreImpl implements AssociationStore {
         }
     }
 
-    void setAssociations(Collection<AssociationInfo> allAssociations) {
+    /**
+     * Set associations to cache. It will clear the existing cache.
+     */
+    public void setAssociationsToCache(Collection<AssociationInfo> associations) {
         // Validity check first.
-        allAssociations.forEach(AssociationStoreImpl::checkNotRevoked);
+        associations.forEach(AssociationStore::checkNotRevoked);
 
-        if (DEBUG) {
-            Log.i(TAG, "setAssociations() n=" + allAssociations.size());
-            final StringJoiner stringJoiner = new StringJoiner(", ");
-            allAssociations.forEach(assoc -> stringJoiner.add(assoc.toShortString()));
-            Log.v(TAG, "  associations=" + stringJoiner);
-        }
         synchronized (mLock) {
-            setAssociationsLocked(allAssociations);
-        }
-    }
+            mIdMap.clear();
+            mAddressMap.clear();
+            mCachedPerUser.clear();
 
-    @GuardedBy("mLock")
-    private void setAssociationsLocked(Collection<AssociationInfo> associations) {
-        clearLocked();
+            for (AssociationInfo association : associations) {
+                final int id = association.getId();
+                mIdMap.put(id, association);
 
-        for (AssociationInfo association : associations) {
-            final int id = association.getId();
-            mIdMap.put(id, association);
-
-            final MacAddress address = association.getDeviceMacAddress();
-            if (address != null) {
-                mAddressMap.computeIfAbsent(address, it -> new HashSet<>()).add(id);
+                final MacAddress address = association.getDeviceMacAddress();
+                if (address != null) {
+                    mAddressMap.computeIfAbsent(address, it -> new HashSet<>()).add(id);
+                }
             }
         }
-    }
-
-    @GuardedBy("mLock")
-    private void clearLocked() {
-        mIdMap.clear();
-        mAddressMap.clear();
-        mCachedPerUser.clear();
     }
 
     private static void checkNotRevoked(@NonNull AssociationInfo association) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.association;
 
 import static com.android.internal.util.CollectionUtils.forEach;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -25,8 +25,8 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
-import static com.android.server.companion.CompanionDeviceManagerService.getFirstAssociationIdForUser;
-import static com.android.server.companion.CompanionDeviceManagerService.getLastAssociationIdForUser;
+import static com.android.server.companion.utils.AssociationUtils.getFirstAssociationIdForUser;
+import static com.android.server.companion.utils.AssociationUtils.getLastAssociationIdForUser;
 import static com.android.server.companion.utils.DataStoreUtils.createStorageFileForUser;
 import static com.android.server.companion.utils.DataStoreUtils.fileToByteArray;
 import static com.android.server.companion.utils.DataStoreUtils.isEndOfTag;
@@ -38,12 +38,10 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
-import android.content.pm.UserInfo;
 import android.net.MacAddress;
 import android.os.Environment;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -51,7 +49,6 @@ import android.util.Xml;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.companion.utils.DataStoreUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -71,6 +68,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * IMPORTANT: This class should NOT be directly used except {@link AssociationStore}
+ *
  * The class responsible for persisting Association records and other related information (such as
  * previously used IDs) to a disk, and reading the data back from the disk.
  *
@@ -106,8 +105,6 @@ import java.util.concurrent.ConcurrentMap;
  * <p>
  * Since Android T the data is stored to "companion_device_manager.xml" file in
  * {@link Environment#getDataSystemDeDirectory(int) /data/system_de/}.
- *
- * See {@link DataStoreUtils#getBaseStorageFileForUser(int, String)}
  *
  * <p>
  * Since Android T the data is stored using the v1 schema.
@@ -161,9 +158,8 @@ import java.util.concurrent.ConcurrentMap;
  * }</pre>
  */
 @SuppressLint("LongLogTag")
-final class PersistentDataStore {
-    private static final String TAG = "CompanionDevice_PersistentDataStore";
-    private static final boolean DEBUG = CompanionDeviceManagerService.DEBUG;
+public final class AssociationDiskStore {
+    private static final String TAG = "CompanionDevice_AssociationDiskStore";
 
     private static final int CURRENT_PERSISTENCE_VERSION = 1;
 
@@ -200,11 +196,13 @@ final class PersistentDataStore {
     private final @NonNull ConcurrentMap<Integer, AtomicFile> mUserIdToStorageFile =
             new ConcurrentHashMap<>();
 
-    void readStateForUsers(@NonNull List<UserInfo> users,
+    /**
+     * Read all associations for given users
+     */
+    public void readStateForUsers(@NonNull List<Integer> userIds,
             @NonNull Set<AssociationInfo> allAssociationsOut,
             @NonNull SparseArray<Map<String, Set<Integer>>> previouslyUsedIdsPerUserOut) {
-        for (UserInfo user : users) {
-            final int userId = user.id;
+        for (int userId : userIds) {
             // Previously used IDs are stored in the "out" collection per-user.
             final Map<String, Set<Integer>> previouslyUsedIds = new ArrayMap<>();
 
@@ -247,12 +245,11 @@ final class PersistentDataStore {
      * @param associationsOut a container to read the {@link AssociationInfo}s "into".
      * @param previouslyUsedIdsPerPackageOut a container to read the used IDs "into".
      */
-    void readStateForUser(@UserIdInt int userId,
+    private void readStateForUser(@UserIdInt int userId,
             @NonNull Collection<AssociationInfo> associationsOut,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
         Slog.i(TAG, "Reading associations for user " + userId + " from disk");
         final AtomicFile file = getStorageFileForUser(userId);
-        if (DEBUG) Log.d(TAG, "  > File=" + file.getBaseFile().getPath());
 
         // getStorageFileForUser() ALWAYS returns the SAME OBJECT, which allows us to synchronize
         // accesses to the file on the file system using this AtomicFile object.
@@ -261,12 +258,8 @@ final class PersistentDataStore {
             final AtomicFile readFrom;
             final String rootTag;
             if (!file.getBaseFile().exists()) {
-                if (DEBUG) Log.d(TAG, "  > File does not exist -> Try to read legacy file");
-
                 legacyBaseFile = getBaseLegacyStorageFileForUser(userId);
-                if (DEBUG) Log.d(TAG, "  > Legacy file=" + legacyBaseFile.getPath());
                 if (!legacyBaseFile.exists()) {
-                    if (DEBUG) Log.d(TAG, "  > Legacy file does not exist -> Abort");
                     return;
                 }
 
@@ -277,27 +270,16 @@ final class PersistentDataStore {
                 rootTag = XML_TAG_STATE;
             }
 
-            if (DEBUG) Log.d(TAG, "  > Reading associations...");
             final int version = readStateFromFileLocked(userId, readFrom, rootTag,
                     associationsOut, previouslyUsedIdsPerPackageOut);
-            if (DEBUG) {
-                Log.d(TAG, "  > Done reading: " + associationsOut);
-                if (version < CURRENT_PERSISTENCE_VERSION) {
-                    Log.d(TAG, "  > File used old format: v." + version + " -> Re-write");
-                }
-            }
 
             if (legacyBaseFile != null || version < CURRENT_PERSISTENCE_VERSION) {
                 // The data is either in the legacy file or in the legacy format, or both.
                 // Save the data to right file in using the current format.
-                if (DEBUG) {
-                    Log.d(TAG, "  > Writing the data to " + file.getBaseFile().getPath());
-                }
                 persistStateToFileLocked(file, associationsOut, previouslyUsedIdsPerPackageOut);
 
                 if (legacyBaseFile != null) {
                     // We saved the data to the right file, can delete the old file now.
-                    if (DEBUG) Log.d(TAG, "  > Deleting legacy file");
                     legacyBaseFile.delete();
                 }
             }
@@ -314,14 +296,12 @@ final class PersistentDataStore {
      * @param associations a set of user's associations.
      * @param previouslyUsedIdsPerPackage a set previously used Association IDs for the user.
      */
-    void persistStateForUser(@UserIdInt int userId,
+    public void persistStateForUser(@UserIdInt int userId,
             @NonNull Collection<AssociationInfo> associations,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
         Slog.i(TAG, "Writing associations for user " + userId + " to disk");
-        if (DEBUG) Slog.d(TAG, "  > " + associations);
 
         final AtomicFile file = getStorageFileForUser(userId);
-        if (DEBUG) Log.d(TAG, "  > File=" + file.getBaseFile().getPath());
         // getStorageFileForUser() ALWAYS returns the SAME OBJECT, which allows us to synchronize
         // accesses to the file on the file system using this AtomicFile object.
         synchronized (file) {
@@ -404,7 +384,10 @@ final class PersistentDataStore {
                 u -> createStorageFileForUser(userId, FILE_NAME));
     }
 
-    byte[] getBackupPayload(@UserIdInt int userId) {
+    /**
+     * Get associations backup payload from disk
+     */
+    public byte[] getBackupPayload(@UserIdInt int userId) {
         Slog.i(TAG, "Fetching stored state data for user " + userId + " from disk");
         final AtomicFile file = getStorageFileForUser(userId);
 
@@ -413,7 +396,10 @@ final class PersistentDataStore {
         }
     }
 
-    void readStateFromPayload(byte[] payload, @UserIdInt int userId,
+    /**
+     * Convert payload to a set of associations
+     */
+    public void readStateFromPayload(byte[] payload, @UserIdInt int userId,
                               @NonNull Set<AssociationInfo> associationsOut,
                               @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
         try (ByteArrayInputStream in = new ByteArrayInputStream(payload)) {
@@ -615,7 +601,7 @@ final class PersistentDataStore {
                     macAddress, displayName, profile, null, selfManaged, notify,
                     revoked, pending, timeApproved, lastTimeConnected, systemDataSyncFlags);
         } catch (Exception e) {
-            if (DEBUG) Log.w(TAG, "Could not create AssociationInfo", e);
+            Slog.e(TAG, "Could not create AssociationInfo", e);
         }
         return associationInfo;
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.association;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
@@ -38,6 +38,8 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.companion.CompanionApplicationController;
+import com.android.server.companion.CompanionDeviceManagerService;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 
@@ -55,7 +57,7 @@ public class AssociationRevokeProcessor {
     private static final boolean DEBUG = false;
     private final @NonNull Context mContext;
     private final @NonNull CompanionDeviceManagerService mService;
-    private final @NonNull AssociationStoreImpl mAssociationStore;
+    private final @NonNull AssociationStore mAssociationStore;
     private final @NonNull PackageManagerInternal mPackageManagerInternal;
     private final @NonNull CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final @NonNull SystemDataTransferRequestStore mSystemDataTransferRequestStore;
@@ -90,8 +92,8 @@ public class AssociationRevokeProcessor {
     @GuardedBy("mRevokedAssociationsPendingRoleHolderRemoval")
     private final Map<Integer, String> mUidsPendingRoleHolderRemoval = new HashMap<>();
 
-    AssociationRevokeProcessor(@NonNull CompanionDeviceManagerService service,
-            @NonNull AssociationStoreImpl associationStore,
+    public AssociationRevokeProcessor(@NonNull CompanionDeviceManagerService service,
+            @NonNull AssociationStore associationStore,
             @NonNull PackageManagerInternal packageManager,
             @NonNull CompanionDevicePresenceMonitor devicePresenceMonitor,
             @NonNull CompanionApplicationController applicationController,
@@ -108,8 +110,11 @@ public class AssociationRevokeProcessor {
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
     }
 
+    /**
+     * Disassociate an association
+     */
     // TODO: also revoke notification access
-    void disassociateInternal(int associationId) {
+    public void disassociateInternal(int associationId) {
         final AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
@@ -168,7 +173,7 @@ public class AssociationRevokeProcessor {
      *         {@code RoleManager.removeRoleHolderAsUser()} will kill the application's process,
      *         which would lead to the poor UX, hence need to try later.
      */
-    boolean maybeRemoveRoleHolderForAssociation(@NonNull AssociationInfo association) {
+    public boolean maybeRemoveRoleHolderForAssociation(@NonNull AssociationInfo association) {
         if (DEBUG) Log.d(TAG, "maybeRemoveRoleHolderForAssociation() association=" + association);
         final String deviceProfile = association.getDeviceProfile();
 
@@ -208,15 +213,6 @@ public class AssociationRevokeProcessor {
         return true;
     }
 
-    @SuppressLint("MissingPermission")
-    private int  getPackageProcessImportance(@UserIdInt int userId, @NonNull String packageName) {
-        return Binder.withCleanCallingIdentity(() -> {
-            final int uid =
-                    mPackageManagerInternal.getPackageUid(packageName, /* flags */0, userId);
-            return mActivityManager.getUidImportance(uid);
-        });
-    }
-
     /**
      * Set revoked flag for active association and add the revoked association and the uid into
      * the caches.
@@ -225,7 +221,7 @@ public class AssociationRevokeProcessor {
      * @see #mUidsPendingRoleHolderRemoval
      * @see OnPackageVisibilityChangeListener
      */
-    void addToPendingRoleHolderRemoval(@NonNull AssociationInfo association) {
+    public void addToPendingRoleHolderRemoval(@NonNull AssociationInfo association) {
         // First: set revoked flag
         association = (new AssociationInfo.Builder(association)).setRevoked(true).build();
         final String packageName = association.getPackageName();
@@ -244,6 +240,28 @@ public class AssociationRevokeProcessor {
                 }
             }
         }
+    }
+
+    /**
+     * @return a copy of the revoked associations set (safeguarding against
+     *         {@code ConcurrentModificationException}-s).
+     */
+    @NonNull
+    public Set<AssociationInfo> getPendingRoleHolderRemovalAssociationsForUser(
+            @UserIdInt int userId) {
+        synchronized (mRevokedAssociationsPendingRoleHolderRemoval) {
+            // Return a copy.
+            return new ArraySet<>(mRevokedAssociationsPendingRoleHolderRemoval.forUser(userId));
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private int  getPackageProcessImportance(@UserIdInt int userId, @NonNull String packageName) {
+        return Binder.withCleanCallingIdentity(() -> {
+            final int uid =
+                    mPackageManagerInternal.getPackageUid(packageName, /* flags */0, userId);
+            return mActivityManager.getUidImportance(uid);
+        });
     }
 
     /**
@@ -276,18 +294,6 @@ public class AssociationRevokeProcessor {
                 // The set is empty now - can "turn off" the listener.
                 mOnPackageVisibilityChangeListener.stopListening();
             }
-        }
-    }
-
-    /**
-     * @return a copy of the revoked associations set (safeguarding against
-     *         {@code ConcurrentModificationException}-s).
-     */
-    @NonNull Set<AssociationInfo> getPendingRoleHolderRemovalAssociationsForUser(
-            @UserIdInt int userId) {
-        synchronized (mRevokedAssociationsPendingRoleHolderRemoval) {
-            // Return a copy.
-            return new ArraySet<>(mRevokedAssociationsPendingRoleHolderRemoval.forUser(userId));
         }
     }
 

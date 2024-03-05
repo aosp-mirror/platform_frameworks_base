@@ -59,8 +59,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.server.companion.AssociationStore;
-import com.android.server.companion.AssociationStore.ChangeType;
+import com.android.server.companion.association.AssociationStore;
+import com.android.server.companion.association.AssociationStore.ChangeType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
