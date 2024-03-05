@@ -703,6 +703,32 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             coroutineContext.cancelChildren()
         }
 
+    /** This handles security method NONE and screen off with lock timeout */
+    @Test
+    fun dreamingToGoneWithKeyguardNotShowing() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING
+            keyguardRepository.setDreamingWithOverlay(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
+            runCurrent()
+
+            // WHEN the device wakes up without a keyguard
+            keyguardRepository.setKeyguardShowing(false)
+            keyguardRepository.setKeyguardDismissible(true)
+            keyguardRepository.setDreamingWithOverlay(false)
+            advanceTimeBy(60L)
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    to = KeyguardState.GONE,
+                    from = KeyguardState.DREAMING,
+                    ownerName = "FromDreamingTransitionInteractor",
+                    animatorAssertion = { it.isNotNull() }
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
     @Test
     fun dozingToGlanceableHub() =
         testScope.runTest {

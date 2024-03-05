@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -57,7 +58,8 @@ constructor(
 
     override fun start() {
         listenForDreamingToOccluded()
-        listenForDreamingToGone()
+        listenForDreamingToGoneWhenDismissable()
+        listenForDreamingToGoneFromBiometricUnlock()
         listenForDreamingToAodOrDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
         listenForDreamingToGlanceableHub()
@@ -101,7 +103,29 @@ constructor(
         }
     }
 
-    private fun listenForDreamingToGone() {
+    private fun listenForDreamingToGoneWhenDismissable() {
+        scope.launch {
+            keyguardInteractor.isAbleToDream
+                .sampleCombine(
+                    keyguardInteractor.isKeyguardShowing,
+                    keyguardInteractor.isKeyguardDismissible,
+                    startedKeyguardTransitionStep,
+                )
+                .collect {
+                    (isDreaming, isKeyguardShowing, isKeyguardDismissible, lastStartedTransition) ->
+                    if (
+                        !isDreaming &&
+                            lastStartedTransition.to == KeyguardState.DREAMING &&
+                            isKeyguardDismissible &&
+                            !isKeyguardShowing
+                    ) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
+                }
+        }
+    }
+
+    private fun listenForDreamingToGoneFromBiometricUnlock() {
         scope.launch {
             keyguardInteractor.biometricUnlockState
                 .sample(startedKeyguardTransitionStep, ::Pair)
