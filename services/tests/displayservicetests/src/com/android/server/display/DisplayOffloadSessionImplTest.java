@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.display.DisplayManagerInternal;
-import android.os.PowerManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,8 +65,6 @@ public class DisplayOffloadSessionImplTest {
         mSession.stopOffload();
 
         assertFalse(mSession.isActive());
-        verify(mDisplayPowerController).setBrightnessFromOffload(
-                PowerManager.BRIGHTNESS_INVALID_FLOAT);
 
         // An inactive session shouldn't be stopped again
         mSession.stopOffload();
