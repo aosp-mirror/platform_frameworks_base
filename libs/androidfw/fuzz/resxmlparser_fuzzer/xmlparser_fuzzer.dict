@@ -1,0 +1,11 @@
+root_tag=<root>
+child_tag=<child>
+end_child_tag=</child>
+id_attr=id="
+type_attr=type="
+cdata_start=<![CDATA[
+cdata_end=]]>
+ampersand_entity=&amp;
+xml_header=<?xml version="1.0" encoding="UTF-8"?>
+comment_start=<!--
+comment_end= -->
