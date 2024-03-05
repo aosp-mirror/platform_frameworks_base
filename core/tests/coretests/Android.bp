@@ -101,6 +101,7 @@ android_test {
         "flickerlib-trace_processor_shell",
         "mockito-target-extended-minus-junit4",
         "TestParameterInjector",
+        "android.content.res.flags-aconfig-java",
     ],
 
     libs: [
