@@ -12956,7 +12956,7 @@ package android.service.ondeviceintelligence {
     field public static final String SERVICE_INTERFACE = "android.service.ondeviceintelligence.OnDeviceIntelligenceService";
   }
 
-  public static class OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException extends java.lang.Exception {
+  public abstract static class OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException extends java.lang.Exception {
     ctor public OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException(int);
     ctor public OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException(int, @NonNull String);
     method public int getErrorCode();
