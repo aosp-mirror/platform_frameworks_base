@@ -119,7 +119,7 @@ public class FaceService extends SystemService {
      * Receives the incoming binder calls from FaceManager.
      */
     @VisibleForTesting final class FaceServiceWrapper extends IFaceService.Stub {
-        @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
                 @NonNull String opPackageName) {
