@@ -186,8 +186,8 @@
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Αδυναμία συγχρονισμού"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"Επιχειρήθηκε η διαγραφή πάρα πολλών <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"Ο αποθηκευτικός χώρος του tablet είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
-    <string name="low_memory" product="watch" msgid="3479447988234030194">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
-    <string name="low_memory" product="tv" msgid="6663680413790323318">"Ο αποθηκευτικός χώρος της συσκευής Android TV είναι πλήρης. Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
+    <string name="low_memory" product="watch" msgid="3479447988234030194">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να αποδεσμεύσετε χώρο."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Ο αποθηκευτικός χώρος της συσκευής Android TV είναι πλήρης. Διαγράψτε μερικά αρχεία για να αποδεσμεύσετε χώρο."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Ο αποθηκευτικός χώρος του τηλεφώνου είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
     <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Η αρχή έκδοσης πιστοποιητικών εγκαταστάθηκε}other{Οι αρχές έκδοσης πιστοποιητικών εγκαταστάθηκαν}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Από ένα άγνωστο τρίτο μέρος"</string>
