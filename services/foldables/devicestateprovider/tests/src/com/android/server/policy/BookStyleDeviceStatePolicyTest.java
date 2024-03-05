@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Surface;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -629,7 +630,11 @@ public final class BookStyleDeviceStatePolicyTest {
     }
 
     private void sendScreenRotation(int rotation) {
-        when(mDisplay.getRotation()).thenReturn(rotation);
+        doAnswer(invocation -> {
+            final DisplayInfo displayInfo = invocation.getArgument(0);
+            displayInfo.rotation = rotation;
+            return null;
+        }).when(mDisplay).getDisplayInfo(any());
         mDisplayListenerCaptor.getAllValues().forEach((l) -> l.onDisplayChanged(DEFAULT_DISPLAY));
     }
 
