@@ -115,6 +115,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
         Settings.Global.Wearable.CHARGING_SOUNDS_ENABLED,
         Settings.Global.Wearable.WRIST_DETECTION_AUTO_LOCKING_ENABLED,
+        Settings.Global.Wearable.AUTO_BEDTIME_MODE,
         Settings.Global.FORCE_ENABLE_PSS_PROFILING,
     };
 }
