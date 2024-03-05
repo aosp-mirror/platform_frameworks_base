@@ -156,6 +156,7 @@ constructor(
      * desired scene. Once enough of the transition has occurred, the [currentScene] will become
      * [toScene] (unless the transition is canceled by user action or another call to this method).
      */
+    @JvmOverloads
     fun changeScene(
         toScene: SceneKey,
         loggingReason: String,
