@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
+import android.app.AppGlobals;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -393,15 +394,34 @@ public class InputSettings {
      *
      * @hide
      */
-    public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
+    public static boolean isStylusPointerIconEnabled(@NonNull Context context,
+            boolean forceReloadSetting) {
         if (InputProperties.force_enable_stylus_pointer_icon().orElse(false)) {
+            // Sysprop override is set
             return true;
         }
-        return context.getResources()
-                        .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
-                && Settings.Secure.getIntForUser(context.getContentResolver(),
-                        Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
-                        DEFAULT_STYLUS_POINTER_ICON_ENABLED, UserHandle.USER_CURRENT_OR_SELF) != 0;
+        if (!context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableStylusPointerIcon)) {
+            // Stylus pointer icons are disabled for the build
+            return false;
+        }
+        if (forceReloadSetting) {
+            return Settings.Secure.getIntForUser(context.getContentResolver(),
+                    Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                    DEFAULT_STYLUS_POINTER_ICON_ENABLED, UserHandle.USER_CURRENT_OR_SELF) != 0;
+        }
+        return AppGlobals.getIntCoreSetting(Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
+                DEFAULT_STYLUS_POINTER_ICON_ENABLED) != 0;
+    }
+
+    /**
+     * Whether a pointer icon will be shown over the location of a stylus pointer.
+     *
+     * @hide
+     * @see #isStylusPointerIconEnabled(Context, boolean)
+     */
+    public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
+        return isStylusPointerIconEnabled(context, false /* forceReloadSetting */);
     }
 
     /**

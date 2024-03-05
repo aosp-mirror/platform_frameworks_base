@@ -258,6 +258,7 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateStylusPointerIconEnabled() {
-        mNative.setStylusPointerIconEnabled(InputSettings.isStylusPointerIconEnabled(mContext));
+        mNative.setStylusPointerIconEnabled(
+                InputSettings.isStylusPointerIconEnabled(mContext, true /* forceReloadSetting */));
     }
 }
