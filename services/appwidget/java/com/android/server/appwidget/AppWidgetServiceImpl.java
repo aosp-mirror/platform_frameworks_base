@@ -476,8 +476,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             } else {
                 // If the package is being updated, we'll receive a PACKAGE_ADDED
                 // shortly, otherwise it is removed permanently.
-                final boolean packageRemovedPermanently = (extras == null
-                        || !extras.getBoolean(Intent.EXTRA_REPLACING, false));
+                boolean isReplacing = extras != null && extras.getBoolean(Intent.EXTRA_REPLACING,
+                        false);
+                boolean isArchival = extras != null && extras.getBoolean(Intent.EXTRA_ARCHIVAL,
+                        false);
+                final boolean packageRemovedPermanently =
+                        (extras == null || !isReplacing || (isReplacing && isArchival));
 
                 if (packageRemovedPermanently) {
                     for (String pkgName : pkgList) {
