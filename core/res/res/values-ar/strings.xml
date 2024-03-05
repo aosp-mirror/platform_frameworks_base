@@ -1361,7 +1361,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"لا أذونات مطلوبة"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"قد يكلفك هذا مالاً."</string>
     <string name="dlg_ok" msgid="5103447663504839312">"حسنًا"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"‏جارٍ شحن هذا الجهاز عبر منفذ USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"‏جارٍ شحن هذا الجهاز عبر USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"‏جارٍ شحن الجهاز المتصل عبر USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"‏تمّ تفعيل نقل الملفات عبر USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"‏تمّ تفعيل PTP عبر USB"</string>
@@ -2300,7 +2300,7 @@
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"إزالة الحظر"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"الخصوصية في جهاز الاستشعار"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"رمز التطبيق"</string>
-    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"الصورة الذهنية للعلامة التجارية للتطبيق"</string>
+    <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"هوية العلامة التجارية للتطبيق"</string>
     <string name="view_and_control_notification_title" msgid="4300765399209912240">"التحقّق من إعدادات الوصول"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"يمكن لخدمة <xliff:g id="SERVICE_NAME">%s</xliff:g> الاطّلاع على شاشتك والتحكّم فيها. انقر لمراجعة الإعدادات."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (مُترجَم)."</string>

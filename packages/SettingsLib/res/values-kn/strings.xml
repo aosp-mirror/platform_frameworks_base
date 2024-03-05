@@ -60,7 +60,7 @@
     <string name="wifi_not_in_range" msgid="1541760821805777772">"ವ್ಯಾಪ್ತಿಯಲ್ಲಿಲ್ಲ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವಿಲ್ಲ"</string>
-    <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> ನಿಂದ ಉಳಿಸಲಾಗಿದೆ"</string>
+    <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> ನಿಂದ ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s ಮೂಲಕ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"ನೆಟ್‌ವರ್ಕ್ ರೇಟಿಂಗ್ ಒದಗಿಸುವವರ ಮೂಲಕ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> ಆ್ಯಪ್ ಮೂಲಕ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>

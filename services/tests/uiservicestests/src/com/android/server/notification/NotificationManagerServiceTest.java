@@ -99,6 +99,7 @@ import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyBoolean;
@@ -3584,6 +3585,69 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
 
         verify(mPreferencesHelper, never()).updateNotificationChannel(
+                anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
+
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    public void testUpdateNotificationChannelFromPrivilegedListener_noSoundUriPermission()
+            throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mCompanionMgr.getAssociations(PKG, mUserId))
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
+        when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+
+        final Uri soundUri = Uri.parse("content://media/test/sound/uri");
+        final NotificationChannel updatedNotificationChannel = new NotificationChannel(
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+        updatedNotificationChannel.setSound(soundUri,
+                updatedNotificationChannel.getAudioAttributes());
+
+        doThrow(new SecurityException("no access")).when(mUgmInternal)
+                .checkGrantUriPermission(eq(Process.myUid()), any(), eq(soundUri),
+                anyInt(), eq(Process.myUserHandle().getIdentifier()));
+
+        assertThrows(SecurityException.class,
+                () -> mBinderService.updateNotificationChannelFromPrivilegedListener(null, PKG,
+                Process.myUserHandle(), updatedNotificationChannel));
+
+        verify(mPreferencesHelper, never()).updateNotificationChannel(
+                anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
+
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    public void testUpdateNotificationChannelFromPrivilegedListener_noSoundUriPermission_sameSound()
+            throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mCompanionMgr.getAssociations(PKG, mUserId))
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
+        when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+
+        final Uri soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+        final NotificationChannel updatedNotificationChannel = new NotificationChannel(
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+        updatedNotificationChannel.setSound(soundUri,
+                updatedNotificationChannel.getAudioAttributes());
+
+        doThrow(new SecurityException("no access")).when(mUgmInternal)
+                .checkGrantUriPermission(eq(Process.myUid()), any(), eq(soundUri),
+                    anyInt(), eq(Process.myUserHandle().getIdentifier()));
+
+        mBinderService.updateNotificationChannelFromPrivilegedListener(
+                null, PKG, Process.myUserHandle(), updatedNotificationChannel);
+
+        verify(mPreferencesHelper, times(1)).updateNotificationChannel(
                 anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
 
         verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
@@ -7598,6 +7662,74 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(NotificationManagerService.MAX_PACKAGE_TOASTS, mService.mToastQueue.size());
     }
 
+    @Test
+    public void testPrioritizeSystemToasts() throws Exception {
+        // Insert non-system toasts
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        mService.isSystemAppId = false;
+        setToastRateIsWithinQuota(true);
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, mUserId))
+                .thenReturn(false);
+
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        // Enqueue maximum number of toasts for test package
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_TOASTS; i++) {
+            enqueueTextToast(testPackage, "Text");
+        }
+
+        // Enqueue system toast
+        final String testPackageSystem = "testPackageNameSystem";
+        mService.isSystemUid = true;
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackageSystem, false);
+        when(mPackageManager.isPackageSuspendedForUser(testPackageSystem, mUserId))
+                .thenReturn(false);
+
+        enqueueToast(testPackageSystem, new TestableToastCallback());
+
+        // System toast is inserted at the front of the queue, behind current showing toast
+        assertEquals(testPackageSystem, mService.mToastQueue.get(1).pkg);
+    }
+
+    @Test
+    public void testPrioritizeSystemToasts_enqueueAfterExistingSystemToast() throws Exception {
+        // Insert system toasts
+        final String testPackageSystem1 = "testPackageNameSystem1";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = true;
+        setToastRateIsWithinQuota(true);
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackageSystem1, false);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackageSystem1, mUserId))
+                .thenReturn(false);
+
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        // Enqueue maximum number of toasts for test package
+        for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_TOASTS; i++) {
+            enqueueTextToast(testPackageSystem1, "Text");
+        }
+
+        // Enqueue another system toast
+        final String testPackageSystem2 = "testPackageNameSystem2";
+        mService.isSystemUid = true;
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackageSystem2, false);
+        when(mPackageManager.isPackageSuspendedForUser(testPackageSystem2, mUserId))
+                .thenReturn(false);
+
+        enqueueToast(testPackageSystem2, new TestableToastCallback());
+
+        // System toast is inserted at the back of the queue, after the other system toasts
+        assertEquals(testPackageSystem2,
+                mService.mToastQueue.get(mService.mToastQueue.size() - 1).pkg);
+    }
+
     private void setAppInForegroundForToasts(int uid, boolean inForeground) {
         int importance = (inForeground) ? IMPORTANCE_FOREGROUND : IMPORTANCE_NONE;
         when(mActivityManager.getUidImportance(mUid)).thenReturn(importance);
@@ -10251,6 +10383,40 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // hypothetical other user untouched
         assertTrue(captor.getValue().isPackageAllowed(new VersionedPackage("apples", 10000)));
+    }
+
+    @Test
+    public void testMigrateNotificationFilter_invalidPackage() throws Exception {
+        int[] userIds = new int[] {mUserId, 1000};
+        when(mUm.getProfileIds(anyInt(), anyBoolean())).thenReturn(userIds);
+        List<String> disallowedApps = ImmutableList.of("apples", "bananas", "cherries");
+        for (int userId : userIds) {
+            when(mPackageManager.getPackageUid("apples", 0, userId)).thenThrow(
+                    new RemoteException(""));
+            when(mPackageManager.getPackageUid("bananas", 0, userId)).thenReturn(9000);
+            when(mPackageManager.getPackageUid("cherries", 0, userId)).thenReturn(9001);
+        }
+
+        when(mListeners.getNotificationListenerFilter(any())).thenReturn(
+                new NotificationListenerFilter());
+
+        mBinderService.migrateNotificationFilter(null,
+                FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                disallowedApps);
+
+        ArgumentCaptor<NotificationListenerFilter> captor =
+                ArgumentCaptor.forClass(NotificationListenerFilter.class);
+        verify(mListeners).setNotificationListenerFilter(any(), captor.capture());
+
+        assertEquals(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ONGOING,
+                captor.getValue().getTypes());
+        // valid values stay
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("bananas", 9000)));
+        assertFalse(captor.getValue().isPackageAllowed(new VersionedPackage("cherries", 9001)));
+        // don't store invalid values
+        for (VersionedPackage vp : captor.getValue().getDisallowedPackages()) {
+            assertNotEquals("apples", vp.getPackageName());
+        }
     }
 
     @Test
