@@ -40,7 +40,6 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.IME_WIND
 import static android.server.inputmethod.InputMethodManagerServiceProto.IN_FULLSCREEN_MODE;
 import static android.server.inputmethod.InputMethodManagerServiceProto.IS_INTERACTIVE;
 import static android.server.inputmethod.InputMethodManagerServiceProto.LAST_IME_TARGET_WINDOW_NAME;
-import static android.server.inputmethod.InputMethodManagerServiceProto.LAST_SWITCH_USER_ID;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_IME_WITH_HARD_KEYBOARD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.SYSTEM_READY;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -276,9 +275,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @NonNull
     private final String[] mNonPreemptibleInputMethods;
-
-    @UserIdInt
-    private int mLastSwitchUserId;
 
     final Context mContext;
     final Resources mRes;
@@ -1679,8 +1675,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         final int userId = mActivityManagerInternal.getCurrentUserId();
 
-        mLastSwitchUserId = userId;
-
         // mSettings should be created before buildInputMethodListLocked
         mSettings = InputMethodSettings.createEmptyMap(userId);
 
@@ -1866,7 +1860,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " selectedIme=" + mSettings.getSelectedInputMethod());
         }
 
-        mLastSwitchUserId = newUserId;
         if (mIsInteractive && clientToBeReset != null) {
             final ClientState cs = mClientController.getClient(clientToBeReset.asBinder());
             if (cs == null) {
@@ -4743,7 +4736,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             proto.write(CUR_TOKEN, Objects.toString(getCurTokenLocked()));
             proto.write(CUR_TOKEN_DISPLAY_ID, mCurTokenDisplayId);
             proto.write(SYSTEM_READY, mSystemReady);
-            proto.write(LAST_SWITCH_USER_ID, mLastSwitchUserId);
             proto.write(HAVE_CONNECTION, hasConnectionLocked());
             proto.write(BOUND_TO_METHOD, mBoundToMethod);
             proto.write(IS_INTERACTIVE, mIsInteractive);
@@ -6324,8 +6316,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @ShellCommandResult
         private int onCommandWithSystemIdentity(@Nullable String cmd) {
             switch (TextUtils.emptyIfNull(cmd)) {
-                case "get-last-switch-user-id":
-                    return mService.getLastSwitchUserId(this);
                 case "tracing":
                     return mService.handleShellCommandTraceInputMethod(this);
                 case "ime": {  // For "adb shell ime <command>".
@@ -6438,15 +6428,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
     // Shell command handlers:
-
-    @BinderThread
-    @ShellCommandResult
-    private int getLastSwitchUserId(@NonNull ShellCommand shellCommand) {
-        synchronized (ImfLock.class) {
-            shellCommand.getOutPrintWriter().println(mLastSwitchUserId);
-            return ShellCommandResult.SUCCESS;
-        }
-    }
 
     /**
      * Handles {@code adb shell ime list}.
