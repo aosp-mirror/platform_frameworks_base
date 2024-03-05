@@ -1532,12 +1532,12 @@
         </font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal">
-            NotoSerifHentaigana-EL.ttf
+        <font weight="400" style="normal" postScriptName="NotoSerifHentaigana-ExtraLight">
+            NotoSerifHentaigana.ttf
             <axis tag="wght" stylevalue="400"/>
         </font>
-        <font weight="700" style="normal">
-            NotoSerifHentaigana-EL.ttf
+        <font weight="700" style="normal" postScriptName="NotoSerifHentaigana-ExtraLight">
+            NotoSerifHentaigana.ttf
             <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
