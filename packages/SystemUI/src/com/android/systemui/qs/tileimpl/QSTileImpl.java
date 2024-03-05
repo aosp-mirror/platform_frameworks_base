@@ -587,7 +587,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                     name = "handleClick";
                     if (mState.disabledByPolicy) {
                         Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
-                                mContext, mEnforcedAdmin);
+                                mEnforcedAdmin);
                         mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
                     } else {
                         mQSLogger.logHandleClick(mTileSpec, msg.arg1);
