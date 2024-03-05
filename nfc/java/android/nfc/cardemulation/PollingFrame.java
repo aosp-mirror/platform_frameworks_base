@@ -157,11 +157,7 @@ public final class PollingFrame implements Parcelable{
         mType = frame.getInt(KEY_POLLING_LOOP_TYPE);
         byte[] data = frame.getByteArray(KEY_POLLING_LOOP_DATA);
         mData = (data == null) ? new byte[0] : data;
-        if (frame.containsKey(KEY_POLLING_LOOP_GAIN)) {
-            mGain = frame.getByte(KEY_POLLING_LOOP_GAIN);
-        } else {
-            mGain = -1;
-        }
+        mGain = frame.getInt(KEY_POLLING_LOOP_GAIN, -1);
         mTimestamp = frame.getInt(KEY_POLLING_LOOP_TIMESTAMP);
     }
 
@@ -233,7 +229,7 @@ public final class PollingFrame implements Parcelable{
         Bundle frame = new Bundle();
         frame.putInt(KEY_POLLING_LOOP_TYPE, getType());
         if (getVendorSpecificGain() != -1) {
-            frame.putByte(KEY_POLLING_LOOP_GAIN, (byte) getVendorSpecificGain());
+            frame.putInt(KEY_POLLING_LOOP_GAIN, (byte) getVendorSpecificGain());
         }
         frame.putByteArray(KEY_POLLING_LOOP_DATA, getData());
         frame.putInt(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
