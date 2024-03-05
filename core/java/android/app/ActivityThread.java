@@ -40,6 +40,7 @@ import static android.window.ConfigurationHelper.shouldUpdateResources;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
+import static com.android.window.flags.Flags.activityWindowInfoFlag;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,6 +64,7 @@ import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionListenerController;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.PendingTransactionActions;
@@ -606,6 +608,8 @@ public final class ActivityThread extends ClientTransactionHandler
         Configuration overrideConfig;
         @NonNull
         private ActivityWindowInfo mActivityWindowInfo;
+        @Nullable
+        private ActivityWindowInfo mLastReportedActivityWindowInfo;
 
         // Used for consolidating configs before sending on to Activity.
         private final Configuration tmpConfig = new Configuration();
@@ -4180,6 +4184,9 @@ public final class ActivityThread extends ClientTransactionHandler
                 pendingActions.setRestoreInstanceState(true);
                 pendingActions.setCallOnPostCreate(true);
             }
+
+            // Trigger ActivityWindowInfo callback if first launch or change from relaunch.
+            handleActivityWindowInfoChanged(r);
         } else {
             // If there was an error, for any reason, tell the activity manager to stop us.
             ActivityClient.getInstance().finishActivity(r.token, Activity.RESULT_CANCELED,
@@ -6740,7 +6747,7 @@ public final class ActivityThread extends ClientTransactionHandler
         // Perform updates.
         r.overrideConfig = overrideConfig;
         r.mActivityWindowInfo = activityWindowInfo;
-        // TODO(b/287582673): notify on ActivityWindowInfo change
+
         final ViewRootImpl viewRoot = r.activity.mDecor != null
             ? r.activity.mDecor.getViewRootImpl() : null;
 
@@ -6763,6 +6770,22 @@ public final class ActivityThread extends ClientTransactionHandler
             viewRoot.updateConfiguration(displayId);
         }
         mSomeActivitiesChanged = true;
+
+        // Trigger ActivityWindowInfo callback if changed.
+        handleActivityWindowInfoChanged(r);
+    }
+
+    private void handleActivityWindowInfoChanged(@NonNull ActivityClientRecord r) {
+        if (!activityWindowInfoFlag()) {
+            return;
+        }
+        if (r.mActivityWindowInfo == null
+                || r.mActivityWindowInfo.equals(r.mLastReportedActivityWindowInfo)) {
+            return;
+        }
+        r.mLastReportedActivityWindowInfo = r.mActivityWindowInfo;
+        ClientTransactionListenerController.getInstance().onActivityWindowInfoChanged(r.token,
+                r.mActivityWindowInfo);
     }
 
     final void handleProfilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
