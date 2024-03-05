@@ -2909,8 +2909,6 @@ public final class InputMethodManager {
      * @param flags {@link #HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED} or {@code 0}
      * @param executor The executor to run the callback on.
      * @param callback {@code true>} would be received if delegation was accepted.
-     * @return {@code true} if view belongs to allowed delegate package declared in {@link
-     *     #prepareStylusHandwritingDelegation(View, String)} and delegation is accepted
      * @see #prepareStylusHandwritingDelegation(View, String)
      * @see #acceptStylusHandwritingDelegation(View)
      */
