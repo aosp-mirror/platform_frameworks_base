@@ -18,14 +18,18 @@ package com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.domain.model.TaskSwitchState
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 
 class TaskSwitcherNotificationViewModel
@@ -36,21 +40,30 @@ constructor(
 ) {
 
     val uiState: Flow<TaskSwitcherNotificationUiState> =
-        interactor.taskSwitchChanges.map { taskSwitchChange ->
-            Log.d(TAG, "taskSwitchChange: $taskSwitchChange")
-            when (taskSwitchChange) {
-                is TaskSwitchState.TaskSwitched -> {
-                    TaskSwitcherNotificationUiState.Showing(
-                        projectedTask = taskSwitchChange.projectedTask,
-                        foregroundTask = taskSwitchChange.foregroundTask,
-                    )
-                }
-                is TaskSwitchState.NotProjectingTask,
-                is TaskSwitchState.TaskUnchanged -> {
-                    TaskSwitcherNotificationUiState.NotShowing
+        interactor.taskSwitchChanges
+            .map { taskSwitchChange ->
+                Log.d(TAG, "taskSwitchChange: $taskSwitchChange")
+                when (taskSwitchChange) {
+                    is TaskSwitchState.TaskSwitched -> {
+                        TaskSwitcherNotificationUiState.Showing(
+                            projectedTask = taskSwitchChange.projectedTask,
+                            foregroundTask = taskSwitchChange.foregroundTask,
+                        )
+                    }
+                    is TaskSwitchState.NotProjectingTask,
+                    is TaskSwitchState.TaskUnchanged -> {
+                        TaskSwitcherNotificationUiState.NotShowing
+                    }
                 }
             }
-        }
+            .transformLatest { uiState ->
+                emit(uiState)
+                if (uiState is TaskSwitcherNotificationUiState.Showing) {
+                    delay(NOTIFICATION_MAX_SHOW_DURATION)
+                    Log.d(TAG, "Auto hiding notification after $NOTIFICATION_MAX_SHOW_DURATION")
+                    emit(TaskSwitcherNotificationUiState.NotShowing)
+                }
+            }
 
     suspend fun onSwitchTaskClicked(task: RunningTaskInfo) {
         interactor.switchProjectedTask(task)
@@ -60,6 +73,7 @@ constructor(
         withContext(backgroundDispatcher) { interactor.goBackToTask(task) }
 
     companion object {
+        @VisibleForTesting val NOTIFICATION_MAX_SHOW_DURATION = 5.seconds
         private const val TAG = "TaskSwitchNotifVM"
     }
 }
