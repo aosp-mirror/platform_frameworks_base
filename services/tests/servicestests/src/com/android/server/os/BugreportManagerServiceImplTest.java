@@ -30,6 +30,7 @@ import android.app.admin.flags.Flags;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.BugreportParams;
@@ -37,6 +38,7 @@ import android.os.IBinder;
 import android.os.IDumpstateListener;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -67,6 +69,9 @@ import java.util.function.Consumer;
 @RunWith(AndroidJUnit4.class)
 public class BugreportManagerServiceImplTest {
 
+    private static final UserInfo ADMIN_USER_INFO =
+            new UserInfo(/* id= */ 5678, "adminUser", UserInfo.FLAG_ADMIN);
+
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -82,6 +87,8 @@ public class BugreportManagerServiceImplTest {
     @Mock
     private DevicePolicyManager mMockDevicePolicyManager;
 
+    private TestInjector mInjector;
+
     private int mCallingUid = 1234;
     private String mCallingPackage  = "test.package";
     private AtomicFile mMappingFile;
@@ -96,9 +103,9 @@ public class BugreportManagerServiceImplTest {
         mMappingFile = new AtomicFile(mContext.getFilesDir(), "bugreport-mapping.xml");
         ArraySet<String> mAllowlistedPackages = new ArraySet<>();
         mAllowlistedPackages.add(mContext.getPackageName());
-        mService = new BugreportManagerServiceImpl(
-                new TestInjector(mContext, mAllowlistedPackages, mMappingFile,
-                        mMockUserManager, mMockDevicePolicyManager));
+        mInjector = new TestInjector(mContext, mAllowlistedPackages, mMappingFile,
+                mMockUserManager, mMockDevicePolicyManager);
+        mService = new BugreportManagerServiceImpl(mInjector);
         mBugreportFileManager = new BugreportManagerServiceImpl.BugreportFileManager(mMappingFile);
         when(mPackageManager.getPackageUidAsUser(anyString(), anyInt())).thenReturn(mCallingUid);
         // The calling user is an admin user by default.
@@ -187,6 +194,33 @@ public class BugreportManagerServiceImplTest {
                         mContext, mPackageManager, callingInfo,
                         Process.myUserHandle().getIdentifier(), "test-file.zip",
                         /* forceUpdateMapping= */ true));
+    }
+
+    @Test
+    public void testStartBugreport() throws Exception {
+        mService.startBugreport(mCallingUid, mContext.getPackageName(),
+                new FileDescriptor(), /* screenshotFd= */ null,
+                BugreportParams.BUGREPORT_MODE_FULL,
+                /* flags= */ 0, new Listener(new CountDownLatch(1)),
+                /* isScreenshotRequested= */ false);
+
+        assertThat(mInjector.isBugreportStarted()).isTrue();
+    }
+
+    @Test
+    public void testStartBugreport_nonAdminProfileOfAdminCurrentUser() throws Exception {
+        int callingUid = Binder.getCallingUid();
+        int callingUserId = UserHandle.getUserId(callingUid);
+        when(mMockUserManager.isUserAdmin(callingUserId)).thenReturn(false);
+        when(mMockUserManager.getProfileParent(callingUserId)).thenReturn(ADMIN_USER_INFO);
+
+        mService.startBugreport(mCallingUid, mContext.getPackageName(),
+                new FileDescriptor(), /* screenshotFd= */ null,
+                BugreportParams.BUGREPORT_MODE_FULL,
+                /* flags= */ 0, new Listener(new CountDownLatch(1)),
+                /* isScreenshotRequested= */ false);
+
+        assertThat(mInjector.isBugreportStarted()).isTrue();
     }
 
     @Test
@@ -317,8 +351,12 @@ public class BugreportManagerServiceImplTest {
 
     private static class TestInjector extends BugreportManagerServiceImpl.Injector {
 
+        private static final String SYSTEM_PROPERTY_BUGREPORT_START = "ctl.start";
+        private static final String SYSTEM_PROPERTY_BUGREPORT_STOP = "ctl.stop";
+
         private final UserManager mUserManager;
         private final DevicePolicyManager mDevicePolicyManager;
+        private boolean mBugreportStarted = false;
 
         TestInjector(Context context, ArraySet<String> allowlistedPackages, AtomicFile mappingFile,
                 UserManager um, DevicePolicyManager dpm) {
@@ -335,6 +373,21 @@ public class BugreportManagerServiceImplTest {
         @Override
         public DevicePolicyManager getDevicePolicyManager() {
             return mDevicePolicyManager;
+        }
+
+        @Override
+        public void setSystemProperty(String key, String value) {
+            // Calling SystemProperties.set() will throw a RuntimeException due to permission error.
+            // Instead, we are just marking a flag to store the state for testing.
+            if (SYSTEM_PROPERTY_BUGREPORT_START.equals(key)) {
+                mBugreportStarted = true;
+            } else if (SYSTEM_PROPERTY_BUGREPORT_STOP.equals(key)) {
+                mBugreportStarted = false;
+            }
+        }
+
+        public boolean isBugreportStarted() {
+            return mBugreportStarted;
         }
     }
 }

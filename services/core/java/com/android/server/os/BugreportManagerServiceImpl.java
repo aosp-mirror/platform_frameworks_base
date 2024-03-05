@@ -354,6 +354,10 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         DevicePolicyManager getDevicePolicyManager() {
             return mContext.getSystemService(DevicePolicyManager.class);
         }
+
+        void setSystemProperty(String key, String value) {
+            SystemProperties.set(key, value);
+        }
     }
 
     BugreportManagerServiceImpl(Context context) {
@@ -737,7 +741,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @GuardedBy("mLock")
     private IDumpstate startAndGetDumpstateBinderServiceLocked() {
         // Start bugreport service.
-        SystemProperties.set("ctl.start", BUGREPORT_SERVICE);
+        mInjector.setSystemProperty("ctl.start", BUGREPORT_SERVICE);
 
         IDumpstate ds = null;
         boolean timedOut = false;
@@ -769,7 +773,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         // This tells init to cancel bugreportd service. Note that this is achieved through
         // setting a system property which is not thread-safe. So the lock here offers
         // thread-safety only among callers of the API.
-        SystemProperties.set("ctl.stop", BUGREPORT_SERVICE);
+        mInjector.setSystemProperty("ctl.stop", BUGREPORT_SERVICE);
     }
 
     @RequiresPermission(android.Manifest.permission.DUMP)
