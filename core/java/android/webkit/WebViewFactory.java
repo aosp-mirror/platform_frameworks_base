@@ -94,6 +94,9 @@ public final class WebViewFactory {
     // error for namespace lookup
     public static final int LIBLOAD_FAILED_TO_FIND_NAMESPACE = 10;
 
+    // generic error for future use
+    static final int LIBLOAD_FAILED_OTHER = 11;
+
     /**
      * Stores the timestamps at which various WebView startup events occurred in this process.
      */
