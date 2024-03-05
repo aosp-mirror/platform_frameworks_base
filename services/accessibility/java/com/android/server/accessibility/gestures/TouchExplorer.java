@@ -1601,6 +1601,9 @@ public class TouchExplorer extends BaseEventStreamTransformation
                                 + " pointers down.");
                 return;
             }
+            if (Flags.resetHoverEventTimerOnActionUp() && mEvents.size() == 0) {
+                return;
+            }
             // Send an accessibility event to announce the touch exploration start.
             mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_START);
             if (isSendMotionEventsEnabled()) {
