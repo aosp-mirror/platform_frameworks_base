@@ -39,6 +39,7 @@ import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -58,6 +59,7 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
 
+    //@Mock private lateinit var dialogFactory: SystemUIDialog.Factory
     @Mock private lateinit var starter: ActivityStarter
     @Mock private lateinit var controller: RecordingController
     @Mock private lateinit var userContextProvider: UserContextProvider
@@ -71,14 +73,17 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
+
         val systemUIDialogFactory =
-            SystemUIDialog.Factory(
-                context,
-                Dependency.get(SystemUIDialogManager::class.java),
-                Dependency.get(SysUiState::class.java),
-                Dependency.get(BroadcastDispatcher::class.java),
-                Dependency.get(DialogTransitionAnimator::class.java),
-            )
+                SystemUIDialog.Factory(
+                        context,
+                        Dependency.get(SystemUIDialogManager::class.java),
+                        Dependency.get(SysUiState::class.java),
+                        Dependency.get(BroadcastDispatcher::class.java),
+                        Dependency.get(DialogTransitionAnimator::class.java),
+                )
+
         val delegate =
             ScreenRecordPermissionDialogDelegate(
                 UserHandle.of(0),
@@ -88,11 +93,9 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
                 userContextProvider,
                 onStartRecordingClicked,
                 mediaProjectionMetricsLogger,
-                systemUIDialogFactory
+                systemUIDialogFactory,
             )
         dialog = delegate.createDialog()
-        delegate.onCreate(dialog, savedInstanceState = null)
-        whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
     }
 
     @After

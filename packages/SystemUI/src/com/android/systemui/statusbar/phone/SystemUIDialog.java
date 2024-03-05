@@ -93,7 +93,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
     /**
      * @deprecated Don't subclass SystemUIDialog. Please subclass {@link Delegate} and pass it to
-     *             {@link Factory#create(DialogDelegate)} to create a custom dialog.
+     *             {@link Factory#create(Delegate)} to create a custom dialog.
      */
     @Deprecated
     public SystemUIDialog(Context context) {

@@ -46,17 +46,20 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 /** Dialog to select screen recording options */
-class ScreenRecordPermissionDialogDelegate(
-    private val hostUserHandle: UserHandle,
-    private val hostUid: Int,
-    private val controller: RecordingController,
+class ScreenRecordPermissionDialogDelegate @AssistedInject constructor(
+    @Assisted private val hostUserHandle: UserHandle,
+    @Assisted private val hostUid: Int,
+    @Assisted private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val userContextProvider: UserContextProvider,
-    private val onStartRecordingClicked: Runnable?,
+    @Assisted private val onStartRecordingClicked: Runnable?,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
-    private val systemUIDialogFactory: SystemUIDialog.Factory
+    private val systemUIDialogFactory: SystemUIDialog.Factory,
 ) :
     BaseMediaProjectionPermissionDialogDelegate<SystemUIDialog>(
         createOptionList(),
@@ -65,8 +68,19 @@ class ScreenRecordPermissionDialogDelegate(
         mediaProjectionMetricsLogger,
         R.drawable.ic_screenrecord,
         R.color.screenrecord_icon_color
-    ),
-    SystemUIDialog.Delegate {
+    ), SystemUIDialog.Delegate {
+
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            recordingController: RecordingController,
+            hostUserHandle: UserHandle,
+            hostUid: Int,
+            onStartRecordingClicked: Runnable?
+        ): ScreenRecordPermissionDialogDelegate
+    }
+
     private lateinit var tapsSwitch: Switch
     private lateinit var tapsSwitchContainer: ViewGroup
     private lateinit var tapsView: View

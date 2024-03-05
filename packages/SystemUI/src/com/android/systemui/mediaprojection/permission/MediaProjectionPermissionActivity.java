@@ -59,7 +59,7 @@ import com.android.systemui.mediaprojection.MediaProjectionServiceHelper;
 import com.android.systemui.mediaprojection.SessionCreationSource;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
-import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.AlertDialogWithDelegate;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -79,6 +79,7 @@ public class MediaProjectionPermissionActivity extends Activity
     private final Lazy<ScreenCaptureDevicePolicyResolver> mScreenCaptureDevicePolicyResolver;
     private final StatusBarManager mStatusBarManager;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
+    private final ScreenCaptureDisabledDialogDelegate mScreenCaptureDisabledDialogDelegate;
 
     private String mPackageName;
     private int mUid;
@@ -93,14 +94,17 @@ public class MediaProjectionPermissionActivity extends Activity
     private boolean mUserSelectingTask = false;
 
     @Inject
-    public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
+    public MediaProjectionPermissionActivity(
+            FeatureFlags featureFlags,
             Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver,
             StatusBarManager statusBarManager,
-            MediaProjectionMetricsLogger mediaProjectionMetricsLogger) {
+            MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
+            ScreenCaptureDisabledDialogDelegate screenCaptureDisabledDialogDelegate) {
         mFeatureFlags = featureFlags;
         mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
         mStatusBarManager = statusBarManager;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
+        mScreenCaptureDisabledDialogDelegate = screenCaptureDisabledDialogDelegate;
     }
 
     @Override
@@ -315,10 +319,7 @@ public class MediaProjectionPermissionActivity extends Activity
         final UserHandle hostUserHandle = getHostUserHandle();
         if (mScreenCaptureDevicePolicyResolver.get()
                 .isScreenCaptureCompletelyDisabled(hostUserHandle)) {
-            // Using application context for the dialog, instead of the activity context, so we get
-            // the correct screen width when in split screen.
-            Context dialogContext = getApplicationContext();
-            AlertDialog dialog = new ScreenCaptureDisabledDialog(dialogContext);
+            AlertDialog dialog = mScreenCaptureDisabledDialogDelegate.createDialog();
             setUpDialog(dialog);
             dialog.show();
             return true;

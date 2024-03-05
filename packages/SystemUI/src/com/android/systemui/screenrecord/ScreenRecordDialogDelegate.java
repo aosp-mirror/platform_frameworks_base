@@ -49,52 +49,69 @@ import com.android.systemui.res.R;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
+
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Dialog to select screen recording options
  */
-public class ScreenRecordDialog extends SystemUIDialog {
+public class ScreenRecordDialogDelegate implements SystemUIDialog.Delegate {
     private static final List<ScreenRecordingAudioSource> MODES = Arrays.asList(INTERNAL, MIC,
             MIC_AND_INTERNAL);
     private static final long DELAY_MS = 3000;
     private static final long INTERVAL_MS = 1000;
 
-    private final RecordingController mController;
+    private final SystemUIDialog.Factory mSystemUIDialogFactory;
     private final UserContextProvider mUserContextProvider;
-    @Nullable
+    private final RecordingController mController;
     private final Runnable mOnStartRecordingClicked;
     private Switch mTapsSwitch;
     private Switch mAudioSwitch;
     private Spinner mOptions;
 
-    public ScreenRecordDialog(Context context,
-                              RecordingController controller,
-                              UserContextProvider userContextProvider,
-                              @Nullable Runnable onStartRecordingClicked) {
-        super(context);
-        mController = controller;
+    @AssistedFactory
+    public interface Factory {
+        ScreenRecordDialogDelegate create(
+                RecordingController recordingController,
+                @Nullable Runnable onStartRecordingClicked
+        );
+    }
+
+    @AssistedInject
+    public ScreenRecordDialogDelegate(
+            SystemUIDialog.Factory systemUIDialogFactory,
+            UserContextProvider userContextProvider,
+            @Assisted RecordingController controller,
+            @Assisted @Nullable Runnable onStartRecordingClicked) {
+        mSystemUIDialogFactory = systemUIDialogFactory;
         mUserContextProvider = userContextProvider;
+        mController = controller;
         mOnStartRecordingClicked = onStartRecordingClicked;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public SystemUIDialog createDialog() {
+        return mSystemUIDialogFactory.create(this);
+    }
 
-        Window window = getWindow();
+    @Override
+    public void onCreate(SystemUIDialog dialog, Bundle savedInstanceState) {
+        Window window = dialog.getWindow();
 
         window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
 
         window.setGravity(Gravity.CENTER);
-        setTitle(R.string.screenrecord_title);
+        dialog.setTitle(R.string.screenrecord_title);
 
-        setContentView(R.layout.screen_record_dialog);
+        dialog.setContentView(R.layout.screen_record_dialog);
 
-        TextView cancelBtn = findViewById(R.id.button_cancel);
-        cancelBtn.setOnClickListener(v -> dismiss());
-        TextView startBtn = findViewById(R.id.button_start);
+        TextView cancelBtn = dialog.findViewById(R.id.button_cancel);
+        cancelBtn.setOnClickListener(v -> dialog.dismiss());
+        TextView startBtn = dialog.findViewById(R.id.button_start);
         startBtn.setOnClickListener(v -> {
             if (mOnStartRecordingClicked != null) {
                 // Note that it is important to run this callback before dismissing, so that the
@@ -104,13 +121,13 @@ public class ScreenRecordDialog extends SystemUIDialog {
 
             // Start full-screen recording
             requestScreenCapture(/* captureTarget= */ null);
-            dismiss();
+            dialog.dismiss();
         });
 
-        mAudioSwitch = findViewById(R.id.screenrecord_audio_switch);
-        mTapsSwitch = findViewById(R.id.screenrecord_taps_switch);
-        mOptions = findViewById(R.id.screen_recording_options);
-        ArrayAdapter a = new ScreenRecordingAdapter(getContext().getApplicationContext(),
+        mAudioSwitch = dialog.findViewById(R.id.screenrecord_audio_switch);
+        mTapsSwitch = dialog.findViewById(R.id.screenrecord_taps_switch);
+        mOptions = dialog.findViewById(R.id.screen_recording_options);
+        ArrayAdapter a = new ScreenRecordingAdapter(dialog.getContext().getApplicationContext(),
                 android.R.layout.simple_spinner_dropdown_item,
                 MODES);
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
