@@ -16,11 +16,17 @@
 
 package android.widget;
 
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.util.AttributeSet;
 import android.util.PollingCheck;
 
 import androidx.test.filters.MediumTest;
@@ -43,14 +49,21 @@ import java.util.concurrent.TimeUnit;
 public class HorizontalScrollViewFunctionalTest {
     private HorizontalScrollViewActivity mActivity;
     private HorizontalScrollView mHorizontalScrollView;
+    private MyHorizontalScrollView mMyHorizontalScrollView;
     @Rule
     public ActivityTestRule<HorizontalScrollViewActivity> mActivityRule = new ActivityTestRule<>(
             HorizontalScrollViewActivity.class);
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() throws Exception {
         mActivity = mActivityRule.getActivity();
         mHorizontalScrollView = mActivity.findViewById(R.id.horizontal_scroll_view);
+        mMyHorizontalScrollView =
+                (MyHorizontalScrollView) mActivity.findViewById(R.id.my_horizontal_scroll_view);
     }
 
     @Test
@@ -79,6 +92,22 @@ public class HorizontalScrollViewFunctionalTest {
         assertEquals(maxScroll, mHorizontalScrollView.getScrollX());
     }
 
+    @Test
+    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
+    public void testSetVelocity() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            mMyHorizontalScrollView.setFrameContentVelocity(0);
+        });
+        // set setFrameContentVelocity shouldn't do anything.
+        assertEquals(mMyHorizontalScrollView.isSetVelocityCalled, false);
+
+        mActivityRule.runOnUiThread(() -> {
+            mMyHorizontalScrollView.fling(100);
+        });
+        // set setFrameContentVelocity should be called when fling.
+        assertEquals(mMyHorizontalScrollView.isSetVelocityCalled, true);
+    }
+
     static class WatchedEdgeEffect extends EdgeEffect {
         public CountDownLatch onAbsorbLatch = new CountDownLatch(1);
 
@@ -90,6 +119,30 @@ public class HorizontalScrollViewFunctionalTest {
         public void onAbsorb(int velocity) {
             super.onAbsorb(velocity);
             onAbsorbLatch.countDown();
+        }
+    }
+
+    public static class MyHorizontalScrollView extends ScrollView {
+
+        public boolean isSetVelocityCalled;
+
+        public MyHorizontalScrollView(Context context) {
+            super(context);
+        }
+
+        public MyHorizontalScrollView(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        public MyHorizontalScrollView(Context context, AttributeSet attrs, int defStyle) {
+            super(context, attrs, defStyle);
+        }
+
+        @Override
+        public void setFrameContentVelocity(float pixelsPerSecond) {
+            if (pixelsPerSecond != 0) {
+                isSetVelocityCalled = true;
+            }
         }
     }
 }
