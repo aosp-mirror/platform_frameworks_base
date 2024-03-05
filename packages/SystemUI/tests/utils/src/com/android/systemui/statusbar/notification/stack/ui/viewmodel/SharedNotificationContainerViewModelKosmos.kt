@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.alternateBouncerToGoneTransitionViewModel
@@ -48,6 +49,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.sharedNotificationContainerViewModel by Fixture {
     SharedNotificationContainerViewModel(
         interactor = sharedNotificationContainerInteractor,
+        dumpManager = dumpManager,
         applicationScope = applicationCoroutineScope,
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,

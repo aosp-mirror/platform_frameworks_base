@@ -701,7 +701,13 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     private IBinder mCurHideInputToken;
 
-    /** The token tracking the current IME request or {@code null} otherwise. */
+    /**
+     * The token tracking the current IME request.
+     *
+     * <p> This exists as a workaround to changing the signatures of public methods. It will get
+     * set to a {@code non-null} value before every call that uses it, stored locally inside the
+     * callee, and immediately after reset to {@code null} from the callee.
+     */
     @Nullable
     private ImeTracker.Token mCurStatsToken;
 
@@ -907,14 +913,13 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-                IBinder hideInputToken, @Nullable ImeTracker.Token statsToken) {
+                IBinder hideInputToken, @NonNull ImeTracker.Token statsToken) {
             mSystemCallingHideSoftInput = true;
             mCurHideInputToken = hideInputToken;
             mCurStatsToken = statsToken;
             try {
                 hideSoftInput(flags, resultReceiver);
             } finally {
-                mCurStatsToken = null;
                 mCurHideInputToken = null;
                 mSystemCallingHideSoftInput = false;
             }
@@ -926,23 +931,33 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void hideSoftInput(int flags, ResultReceiver resultReceiver) {
-            ImeTracker.forLogging().onProgress(
-                    mCurStatsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "hideSoftInput()");
+
+            final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                    : createStatsToken(false /* show */,
+                            SoftInputShowHideReason.HIDE_SOFT_INPUT_LEGACY_DIRECT,
+                            ImeTracker.isFromUser(mRootView));
+            mCurStatsToken = null;
+
+            // TODO(b/148086656): Disallow IME developers from calling InputMethodImpl methods.
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
                     && !mSystemCallingHideSoftInput) {
                 Log.e(TAG, "IME shouldn't call hideSoftInput on itself."
                         + " Use requestHideSelf(int) itself");
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
                 return;
             }
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_SOFT_INPUT);
+
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
             ImeTracing.getInstance().triggerServiceDump(
                     "InputMethodService.InputMethodImpl#hideSoftInput", mDumper,
                     null /* icProto */);
             final boolean wasVisible = isInputViewShown();
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
 
             mShowInputFlags = 0;
             mShowInputRequested = false;
+            mCurStatsToken = statsToken;
             hideWindow();
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
@@ -963,14 +978,13 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void showSoftInputWithToken(@InputMethod.ShowFlags int flags,
                 ResultReceiver resultReceiver, IBinder showInputToken,
-                @Nullable ImeTracker.Token statsToken) {
+                @NonNull ImeTracker.Token statsToken) {
             mSystemCallingShowSoftInput = true;
             mCurShowInputToken = showInputToken;
             mCurStatsToken = statsToken;
             try {
                 showSoftInput(flags, resultReceiver);
             } finally {
-                mCurStatsToken = null;
                 mCurShowInputToken = null;
                 mSystemCallingShowSoftInput = false;
             }
@@ -982,16 +996,23 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void showSoftInput(@InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
-            ImeTracker.forLogging().onProgress(
-                    mCurStatsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "showSoftInput()");
+
+            final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                    : createStatsToken(true /* show */,
+                            SoftInputShowHideReason.SHOW_SOFT_INPUT_LEGACY_DIRECT,
+                            ImeTracker.isFromUser(mRootView));
+            mCurStatsToken = null;
+
             // TODO(b/148086656): Disallow IME developers from calling InputMethodImpl methods.
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R
                     && !mSystemCallingShowSoftInput) {
-                Log.e(TAG," IME shouldn't call showSoftInput on itself."
+                Log.e(TAG, "IME shouldn't call showSoftInput on itself."
                         + " Use requestShowSelf(int) itself");
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
                 return;
             }
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
             ImeTracing.getInstance().triggerServiceDump(
@@ -999,11 +1020,12 @@ public class InputMethodService extends AbstractInputMethodService {
                     null /* icProto */);
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
-                ImeTracker.forLogging().onProgress(mCurStatsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
-                showWindow(true);
+                mCurStatsToken = statsToken;
+                showWindow(true /* showInput */);
             } else {
-                ImeTracker.forLogging().onFailed(mCurStatsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_IME_ON_SHOW_SOFT_INPUT_TRUE);
             }
             setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
@@ -1895,21 +1917,23 @@ public class InputMethodService extends AbstractInputMethodService {
             if (showingInput) {
                 // If we were last showing the soft keyboard, try to do so again.
                 if (dispatchOnShowInputRequested(showFlags, true)) {
-                    showWindow(true);
+                    showWindowWithToken(true /* showInput */,
+                            SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
                     if (completions != null) {
                         mCurCompletions = completions;
                         onDisplayCompletions(completions);
                     }
                 } else {
-                    hideWindow();
+                    hideWindowWithToken(SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
                 }
             } else if (mCandidatesVisibility == View.VISIBLE) {
                 // If the candidates are currently visible, make sure the
                 // window is shown for them.
-                showWindow(false);
+                showWindowWithToken(false /* showInput */,
+                        SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
             } else {
                 // Otherwise hide the window.
-                hideWindow();
+                hideWindowWithToken(SoftInputShowHideReason.RESET_NEW_CONFIGURATION);
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
@@ -2368,13 +2392,15 @@ public class InputMethodService extends AbstractInputMethodService {
             // has not asked for the input view to be shown, then we need
             // to update whether the window is shown.
             if (shown) {
-                showWindow(false);
+                showWindowWithToken(false /* showInput */,
+                        SoftInputShowHideReason.UPDATE_CANDIDATES_VIEW_VISIBILITY);
             } else {
-                hideWindow();
+                hideWindowWithToken(
+                        SoftInputShowHideReason.UPDATE_CANDIDATES_VIEW_VISIBILITY);
             }
         }
     }
-    
+
     void updateCandidatesVisibility(boolean shown) {
         int vis = shown ? View.VISIBLE : getCandidatesHiddenVisibility();
         if (mCandidatesVisibility != vis) {
@@ -3009,6 +3035,19 @@ public class InputMethodService extends AbstractInputMethodService {
         return result;
     }
 
+    /**
+     * Utility function that creates an IME request tracking token before
+     * calling {@link #showWindow}.
+     *
+     * @param showInput whether the input window should be shown.
+     * @param reason the reason why the IME request was created.
+     */
+    private void showWindowWithToken(boolean showInput, @SoftInputShowHideReason int reason) {
+        mCurStatsToken = createStatsToken(true /* show */, reason,
+                ImeTracker.isFromUser(mRootView));
+        showWindow(showInput);
+    }
+
     public void showWindow(boolean showInput) {
         if (DEBUG) Log.v(TAG, "Showing window: showInput=" + showInput
                 + " mShowInputRequested=" + mShowInputRequested
@@ -3018,10 +3057,19 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " mInputStarted=" + mInputStarted
                 + " mShowInputFlags=" + mShowInputFlags);
 
+        final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                : createStatsToken(true /* show */,
+                        SoftInputShowHideReason.SHOW_WINDOW_LEGACY_DIRECT,
+                        ImeTracker.isFromUser(mRootView));
+        mCurStatsToken = null;
+
         if (mInShowWindow) {
             Log.w(TAG, "Re-entrance in to showWindow");
+            ImeTracker.forLogging().onCancelled(statsToken, ImeTracker.PHASE_IME_SHOW_WINDOW);
             return;
         }
+
+        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_SHOW_WINDOW);
 
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#showWindow", mDumper,
                 null /* icProto */);
@@ -3046,7 +3094,7 @@ public class InputMethodService extends AbstractInputMethodService {
         if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
         mWindow.show();
         mDecorViewWasVisible = true;
-        applyVisibilityInInsetsConsumerIfNecessary(true);
+        applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */, statsToken);
         cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -3137,13 +3185,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * Applies the IME visibility in {@link android.view.ImeInsetsSourceConsumer}.
      *
      * @param setVisible {@code true} to make it visible, false to hide it.
+     * @param statsToken the token tracking the current IME request.
      */
-    private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible) {
+    private void applyVisibilityInInsetsConsumerIfNecessary(boolean setVisible,
+            @NonNull ImeTracker.Token statsToken) {
         ImeTracing.getInstance().triggerServiceDump(
                 "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", mDumper,
                 null /* icProto */);
         mPrivOps.applyImeVisibilityAsync(setVisible
-                ? mCurShowInputToken : mCurHideInputToken, setVisible, mCurStatsToken);
+                ? mCurShowInputToken : mCurHideInputToken, setVisible, statsToken);
     }
 
     private void finishViews(boolean finishingInput) {
@@ -3159,12 +3209,35 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesViewStarted = false;
     }
 
+    /**
+     * Utility function that creates an IME request tracking token before
+     * calling {@link #hideWindow}.
+     *
+     * @param reason the reason why the IME request was created.
+     */
+    private void hideWindowWithToken(@SoftInputShowHideReason int reason) {
+        // TODO(b/303041796): this should be handled by ImeTracker.isFromUser after fixing it
+        //  to work with onClickListeners
+        final boolean isFromUser = ImeTracker.isFromUser(mRootView)
+                || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY;
+        mCurStatsToken = createStatsToken(false /* show */, reason, isFromUser);
+        hideWindow();
+    }
+
     public void hideWindow() {
         if (DEBUG) Log.v(TAG, "CALL: hideWindow");
+
+        final var statsToken = mCurStatsToken != null ? mCurStatsToken
+                : createStatsToken(false /* show */,
+                        SoftInputShowHideReason.HIDE_WINDOW_LEGACY_DIRECT,
+                        ImeTracker.isFromUser(mRootView));
+        mCurStatsToken = null;
+
+        ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_IME_HIDE_WINDOW);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
         setImeWindowStatus(0, mBackDisposition);
-        applyVisibilityInInsetsConsumerIfNecessary(false);
+        applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */, statsToken);
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
@@ -3440,9 +3513,14 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private void requestHideSelf(@InputMethodManager.HideFlags int flags,
             @SoftInputShowHideReason int reason) {
+        // TODO(b/303041796): this should be handled by ImeTracker.isFromUser after fixing it
+        //  to work with onClickListeners
+        final boolean isFromUser = ImeTracker.isFromUser(mRootView)
+                || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY;
+        final var statsToken = createStatsToken(false /* show */, reason, isFromUser);
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestHideSelf", mDumper,
                 null /* icProto */);
-        mPrivOps.hideMySoftInput(flags, reason);
+        mPrivOps.hideMySoftInput(statsToken, flags, reason);
     }
 
     /**
@@ -3450,9 +3528,16 @@ public class InputMethodService extends AbstractInputMethodService {
      * interact with it.
      */
     public final void requestShowSelf(@InputMethodManager.ShowFlags int flags) {
+        requestShowSelf(flags, SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME);
+    }
+
+    private void requestShowSelf(@InputMethodManager.ShowFlags int flags,
+            @SoftInputShowHideReason int reason) {
+        final var statsToken = createStatsToken(true /* show */, reason,
+                ImeTracker.isFromUser(mRootView));
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestShowSelf", mDumper,
                 null /* icProto */);
-        mPrivOps.showMySoftInput(flags);
+        mPrivOps.showMySoftInput(statsToken, flags, reason);
     }
 
     private boolean handleBack(boolean doIt) {
@@ -3472,7 +3557,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 // If we have the window visible for some other reason --
                 // most likely to show candidates -- then just get rid
                 // of it.  This really shouldn't happen, but just in case...
-                if (doIt) hideWindow();
+                if (doIt) hideWindowWithToken(SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY);
             }
             return true;
         }
@@ -3627,10 +3712,11 @@ public class InputMethodService extends AbstractInputMethodService {
             @InputMethodManager.HideFlags int hideFlags) {
         if (DEBUG) Log.v(TAG, "toggleSoftInput()");
         if (isInputViewShown()) {
-            requestHideSelf(
-                    hideFlags, SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT);
+            requestHideSelf(hideFlags,
+                    SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT);
         } else {
-            requestShowSelf(showFlags);
+            requestShowSelf(showFlags,
+                    SoftInputShowHideReason.SHOW_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT);
         }
     }
     
@@ -4269,6 +4355,20 @@ public class InputMethodService extends AbstractInputMethodService {
     private int mapToImeWindowStatus() {
         return IME_ACTIVE
                 | (isInputViewShown() ? IME_VISIBLE : 0);
+    }
+
+    /**
+     * Creates an IME request tracking token.
+     *
+     * @param show whether this is a show or a hide request.
+     * @param reason the reason why the IME request was created.
+     * @param isFromUser whether this request was created directly from user interaction.
+     */
+    @NonNull
+    private ImeTracker.Token createStatsToken(boolean show, @SoftInputShowHideReason int reason,
+            boolean isFromUser) {
+        return ImeTracker.forLogging().onStart(show ? ImeTracker.TYPE_SHOW : ImeTracker.TYPE_HIDE,
+                ImeTracker.ORIGIN_IME, reason, isFromUser);
     }
 
     /**

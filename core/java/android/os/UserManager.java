@@ -4708,6 +4708,9 @@ public class UserManager {
      * Sets the user as enabled, if such an user exists.
      *
      * <p>Note that the default is true, it's only that managed profiles might not be enabled.
+     * (Managed profiles created by DevicePolicyManager will start out disabled, and DPM will later
+     * toggle them to enabled once they are provisioned. This is the primary purpose of the
+     * {@link UserInfo#FLAG_DISABLED} flag.)
      * Also ephemeral users can be disabled to indicate that their removal is in progress and they
      * shouldn't be re-entered. Therefore ephemeral users should not be re-enabled once disabled.
      *
@@ -5259,7 +5262,7 @@ public class UserManager {
 
     /**
      * Returns list of the profiles of userId including userId itself.
-     * Note that this returns only enabled.
+     * Note that this returns only {@link UserInfo#isEnabled() enabled} profiles.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or

@@ -21,6 +21,7 @@ java_library {
 
     libs: [
         "app-compat-annotations",
+        "error_prone_annotations",
         "framework",
         "services.core",
         "unsupportedappusage",

@@ -15,8 +15,6 @@
  */
 package com.android.keyguard
 
-import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
-import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -43,14 +41,16 @@ import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.core.Logger
+import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
 import com.android.systemui.plugins.clocks.ClockTickRate
-import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
@@ -61,16 +61,18 @@ import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChang
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import java.util.Locale
+import java.util.TimeZone
+import java.util.concurrent.Executor
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
-import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.Executor
-import javax.inject.Inject
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -93,11 +95,13 @@ constructor(
     private val featureFlags: FeatureFlagsClassic,
     private val zenModeController: ZenModeController,
 ) {
-    var loggers = listOf(
-        clockBuffers.infraMessageBuffer,
-        clockBuffers.smallClockMessageBuffer,
-        clockBuffers.largeClockMessageBuffer
-    ).map { Logger(it, TAG) }
+    var loggers =
+        listOf(
+                clockBuffers.infraMessageBuffer,
+                clockBuffers.smallClockMessageBuffer,
+                clockBuffers.largeClockMessageBuffer
+            )
+            .map { Logger(it, TAG) }
 
     var clock: ClockController? = null
         get() = field
@@ -108,11 +112,12 @@ constructor(
         }
 
     private fun disconnectClock(clock: ClockController?) {
-        if (clock == null) { return; }
+        if (clock == null) {
+            return
+        }
         smallClockOnAttachStateChangeListener?.let {
             clock.smallClock.view.removeOnAttachStateChangeListener(it)
-            smallClockFrame?.viewTreeObserver
-                    ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
+            smallClockFrame?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
         }
         largeClockOnAttachStateChangeListener?.let {
             clock.largeClock.view.removeOnAttachStateChangeListener(it)
@@ -120,7 +125,9 @@ constructor(
     }
 
     private fun connectClock(clock: ClockController?) {
-        if (clock == null) { return; }
+        if (clock == null) {
+            return
+        }
         val clockStr = clock.toString()
         loggers.forEach { it.d({ "New Clock: $str1" }) { str1 = clockStr } }
 
@@ -129,23 +136,27 @@ constructor(
         if (!regionSamplingEnabled) {
             updateColors()
         } else {
-            smallRegionSampler = createRegionSampler(
-                clock.smallClock.view,
-                mainExecutor,
-                bgExecutor,
-                regionSamplingEnabled,
-                isLockscreen = true,
-                ::updateColors
-            ).apply { startRegionSampler() }
+            smallRegionSampler =
+                createRegionSampler(
+                        clock.smallClock.view,
+                        mainExecutor,
+                        bgExecutor,
+                        regionSamplingEnabled,
+                        isLockscreen = true,
+                        ::updateColors
+                    )
+                    .apply { startRegionSampler() }
 
-            largeRegionSampler = createRegionSampler(
-                clock.largeClock.view,
-                mainExecutor,
-                bgExecutor,
-                regionSamplingEnabled,
-                isLockscreen = true,
-                ::updateColors
-            ).apply { startRegionSampler() }
+            largeRegionSampler =
+                createRegionSampler(
+                        clock.largeClock.view,
+                        mainExecutor,
+                        bgExecutor,
+                        regionSamplingEnabled,
+                        isLockscreen = true,
+                        ::updateColors
+                    )
+                    .apply { startRegionSampler() }
 
             updateColors()
         }
@@ -158,49 +169,49 @@ constructor(
             }
             clock.events.onWeatherDataChanged(it)
         }
-        zenData?.let {
-            clock.events.onZenDataChanged(it)
-        }
-        alarmData?.let {
-            clock.events.onAlarmDataChanged(it)
-        }
+        zenData?.let { clock.events.onZenDataChanged(it) }
+        alarmData?.let { clock.events.onAlarmDataChanged(it) }
 
-        smallClockOnAttachStateChangeListener = object : OnAttachStateChangeListener {
-            var pastVisibility: Int? = null
-            override fun onViewAttachedToWindow(view: View) {
-                clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
-                // Match the asing for view.parent's layout classes.
-                smallClockFrame = (view.parent as ViewGroup)?.also { frame ->
-                    pastVisibility = frame.visibility
-                    onGlobalLayoutListener = OnGlobalLayoutListener {
-                        val currentVisibility = frame.visibility
-                        if (pastVisibility != currentVisibility) {
-                            pastVisibility = currentVisibility
-                            // when small clock is visible,
-                            // recalculate bounds and sample
-                            if (currentVisibility == View.VISIBLE) {
-                                smallRegionSampler?.stopRegionSampler()
-                                smallRegionSampler?.startRegionSampler()
+        smallClockOnAttachStateChangeListener =
+            object : OnAttachStateChangeListener {
+                var pastVisibility: Int? = null
+                override fun onViewAttachedToWindow(view: View) {
+                    clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                    // Match the asing for view.parent's layout classes.
+                    smallClockFrame =
+                        (view.parent as ViewGroup)?.also { frame ->
+                            pastVisibility = frame.visibility
+                            onGlobalLayoutListener = OnGlobalLayoutListener {
+                                val currentVisibility = frame.visibility
+                                if (pastVisibility != currentVisibility) {
+                                    pastVisibility = currentVisibility
+                                    // when small clock is visible,
+                                    // recalculate bounds and sample
+                                    if (currentVisibility == View.VISIBLE) {
+                                        smallRegionSampler?.stopRegionSampler()
+                                        smallRegionSampler?.startRegionSampler()
+                                    }
+                                }
                             }
+                            frame.viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
                         }
-                    }
-                    frame.viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
+                }
+
+                override fun onViewDetachedFromWindow(p0: View) {
+                    smallClockFrame
+                        ?.viewTreeObserver
+                        ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
                 }
             }
-
-            override fun onViewDetachedFromWindow(p0: View) {
-                smallClockFrame?.viewTreeObserver
-                        ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
-            }
-        }
         clock.smallClock.view.addOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
 
-        largeClockOnAttachStateChangeListener = object : OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(p0: View) {
-                clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+        largeClockOnAttachStateChangeListener =
+            object : OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(p0: View) {
+                    clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                }
+                override fun onViewDetachedFromWindow(p0: View) {}
             }
-            override fun onViewDetachedFromWindow(p0: View) {}
-        }
         clock.largeClock.view.addOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
     }
 
@@ -263,7 +274,9 @@ constructor(
             bgExecutor,
             regionSamplingEnabled,
             isLockscreen,
-        ) { updateColors() }
+        ) {
+            updateColors()
+        }
     }
 
     var smallRegionSampler: RegionSampler? = null
@@ -364,35 +377,36 @@ constructor(
             }
         }
 
-    private val zenModeCallback = object : ZenModeController.Callback {
-        override fun onZenChanged(zen: Int) {
-            var mode = ZenMode.fromInt(zen)
-            if (mode == null) {
-                Log.e(TAG, "Failed to get zen mode from int: $zen")
-                return
-            }
-
-            zenData = ZenData(
-                mode,
-                if (mode == ZenMode.OFF) SysuiR.string::dnd_is_off.name
-                    else SysuiR.string::dnd_is_on.name
-            ).also { data ->
-                mainExecutor.execute {
-                    clock?.run { events.onZenDataChanged(data) }
+    private val zenModeCallback =
+        object : ZenModeController.Callback {
+            override fun onZenChanged(zen: Int) {
+                var mode = ZenMode.fromInt(zen)
+                if (mode == null) {
+                    Log.e(TAG, "Failed to get zen mode from int: $zen")
+                    return
                 }
-            }
-        }
 
-        override fun onNextAlarmChanged() {
-            val nextAlarmMillis = zenModeController.getNextAlarm()
-            alarmData = AlarmData(
-                if (nextAlarmMillis > 0) nextAlarmMillis else null,
-                SysuiR.string::status_bar_alarm.name
-            ).also { data ->
-                clock?.run { events.onAlarmDataChanged(data) }
+                zenData =
+                    ZenData(
+                            mode,
+                            if (mode == ZenMode.OFF) SysuiR.string::dnd_is_off.name
+                            else SysuiR.string::dnd_is_on.name
+                        )
+                        .also { data ->
+                            mainExecutor.execute { clock?.run { events.onZenDataChanged(data) } }
+                        }
+            }
+
+            override fun onNextAlarmChanged() {
+                val nextAlarmMillis = zenModeController.getNextAlarm()
+                alarmData =
+                    AlarmData(
+                            if (nextAlarmMillis > 0) nextAlarmMillis else null,
+                            SysuiR.string::status_bar_alarm.name
+                        )
+                        .also { data -> clock?.run { events.onAlarmDataChanged(data) } }
             }
         }
-    }
 
     fun registerListeners(parent: View) {
         if (isRegistered) {
@@ -413,6 +427,7 @@ constructor(
                     listenForDozing(this)
                     if (migrateClocksToBlueprint()) {
                         listenForDozeAmountTransition(this)
+                        listenForAnyStateToAodTransition(this)
                     } else {
                         listenForDozeAmount(this)
                     }
@@ -444,12 +459,15 @@ constructor(
         largeRegionSampler?.stopRegionSampler()
         smallTimeListener?.stop()
         largeTimeListener?.stop()
-        clock?.smallClock?.view
-                ?.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
-        smallClockFrame?.viewTreeObserver
-                ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
-        clock?.largeClock?.view
-                ?.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
+        clock
+            ?.smallClock
+            ?.view
+            ?.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
+        smallClockFrame?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
+        clock
+            ?.largeClock
+            ?.view
+            ?.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
     }
 
     /**
@@ -473,12 +491,10 @@ constructor(
         largeTimeListener = null
 
         clock?.let {
-            smallTimeListener = TimeListener(it.smallClock, mainExecutor).apply {
-                update(shouldTimeListenerRun)
-            }
-            largeTimeListener = TimeListener(it.largeClock, mainExecutor).apply {
-                update(shouldTimeListenerRun)
-            }
+            smallTimeListener =
+                TimeListener(it.smallClock, mainExecutor).apply { update(shouldTimeListenerRun) }
+            largeTimeListener =
+                TimeListener(it.largeClock, mainExecutor).apply { update(shouldTimeListenerRun) }
         }
     }
 
@@ -517,7 +533,27 @@ constructor(
     @VisibleForTesting
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.dozeAmountTransition.collect { handleDoze(it.value) }
+            merge(
+                    keyguardTransitionInteractor.aodToLockscreenTransition.map { step ->
+                        step.copy(value = 1f - step.value)
+                    },
+                    keyguardTransitionInteractor.lockscreenToAodTransition,
+                )
+                .collect { handleDoze(it.value) }
+        }
+    }
+
+    /**
+     * When keyguard is displayed again after being gone, the clock must be reset to full dozing.
+     */
+    @VisibleForTesting
+    internal fun listenForAnyStateToAodTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor
+                .transitionStepsToState(AOD)
+                .filter { it.transitionState == TransitionState.STARTED }
+                .filter { it.from != LOCKSCREEN }
+                .collect { handleDoze(1f) }
         }
     }
 

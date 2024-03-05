@@ -22,6 +22,7 @@ cc_library_host_static {
 
     srcs: [
         ":libui_host_common",
+        "ADisplay.cpp",
         "Fence.cpp",
         "HostBufferQueue.cpp",
         "PublicFormat.cpp",
@@ -32,16 +33,21 @@ cc_library_host_static {
         // When frameworks/native/include will be removed from the list of automatic includes.
         // We will have to copy necessary headers with a pre-build step (generated headers).
         ".",
-        "frameworks/native/libs/nativebase/include",
-        "frameworks/native/libs/nativewindow/include",
         "frameworks/native/libs/arect/include",
         "frameworks/native/libs/ui/include_private",
     ],
+
+    header_libs: [
+        "libnativebase_headers",
+        "libnativedisplay_headers",
+        "libnativewindow_headers",
+    ],
+
     export_include_dirs: ["."],
 
     target: {
         windows: {
             enabled: true,
-        }
+        },
     },
 }

@@ -41,7 +41,12 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
@@ -56,10 +61,7 @@ import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationScrollingStack
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionResult
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
@@ -109,7 +111,7 @@ constructor(
     private val mediaCarouselController: MediaCarouselController,
     @Named(QUICK_QS_PANEL) private val mediaHost: MediaHost,
 ) : ComposableScene {
-    override val key = SceneKey.Shade
+    override val key = Scenes.Shade
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         viewModel.upDestinationSceneKey
@@ -144,8 +146,8 @@ constructor(
         up: SceneKey,
     ): Map<UserAction, UserActionResult> {
         return mapOf(
-            UserAction.Swipe(Direction.UP) to UserActionResult(up),
-            UserAction.Swipe(Direction.DOWN) to UserActionResult(SceneKey.QuickSettings),
+            Swipe(SwipeDirection.Up) to UserActionResult(up),
+            Swipe(SwipeDirection.Down) to UserActionResult(Scenes.QuickSettings),
         )
     }
 }

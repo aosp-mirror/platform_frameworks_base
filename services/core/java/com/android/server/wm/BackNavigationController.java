@@ -61,6 +61,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.wm.utils.InsetUtils;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -644,6 +645,10 @@ class BackNavigationController {
         return false;
     }
 
+    void removePredictiveSurfaceIfNeeded(ActivityRecord openActivity) {
+        mAnimationHandler.markWindowHasDrawn(openActivity);
+    }
+
     private class NavigationMonitor {
         // The window which triggering the back navigation.
         private WindowState mNavigatingWindow;
@@ -897,7 +902,8 @@ class BackNavigationController {
             mWindowManagerService = wms;
             final Context context = wms.mContext;
             mShowWindowlessSurface = context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_predictShowStartingSurface);
+                    com.android.internal.R.bool.config_predictShowStartingSurface)
+                    && Flags.activitySnapshotByDefault();
         }
         private static final int UNKNOWN = 0;
         private static final int TASK_SWITCH = 1;
@@ -1032,6 +1038,23 @@ class BackNavigationController {
             return isAnimateTarget(wc, mCloseAdaptor.mTarget, mSwitchType);
         }
 
+        void markWindowHasDrawn(ActivityRecord activity) {
+            if (!mComposed || mWaitTransition) {
+                return;
+            }
+            boolean allWindowDrawn = true;
+            for (int i = mOpenAnimAdaptor.mAdaptors.length - 1; i >= 0; --i) {
+                final BackWindowAnimationAdaptor next = mOpenAnimAdaptor.mAdaptors[i];
+                if (isAnimateTarget(activity, next.mTarget, mSwitchType)) {
+                    next.mAppWindowDrawn = true;
+                }
+                allWindowDrawn &= next.mAppWindowDrawn;
+            }
+            if (allWindowDrawn) {
+                mOpenAnimAdaptor.cleanUpWindowlessSurface(true);
+            }
+        }
+
         private static boolean isAnimateTarget(@NonNull WindowContainer window,
                 @NonNull WindowContainer animationTarget, int switchType) {
             if (switchType == TASK_SWITCH) {
@@ -1134,15 +1157,17 @@ class BackNavigationController {
             final BackWindowAnimationAdaptor adaptor =
                     new BackWindowAnimationAdaptor(target, isOpen, switchType);
             final SurfaceControl.Transaction pt = target.getPendingTransaction();
-            target.startAnimation(pt, adaptor, false /* hidden */, ANIMATION_TYPE_PREDICT_BACK);
             // Workaround to show TaskFragment which can be hide in Transitions and won't show
             // during isAnimating.
             if (isOpen && target.asActivityRecord() != null) {
                 final TaskFragment fragment = target.asActivityRecord().getTaskFragment();
                 if (fragment != null) {
+                    // Ensure task fragment surface has updated, in case configuration has changed.
+                    fragment.updateOrganizedTaskFragmentSurface();
                     pt.show(fragment.mSurfaceControl);
                 }
             }
+            target.startAnimation(pt, adaptor, false /* hidden */, ANIMATION_TYPE_PREDICT_BACK);
             return adaptor;
         }
 
@@ -1181,8 +1206,6 @@ class BackNavigationController {
                 for (int i = mAdaptors.length - 1; i >= 0; --i) {
                     mAdaptors[i].mTarget.cancelAnimation();
                 }
-                mRequestedStartingSurfaceId = INVALID_TASK_ID;
-                mStartingSurface = null;
                 if (mCloseTransaction != null) {
                     mCloseTransaction.apply();
                     mCloseTransaction = null;
@@ -1235,7 +1258,7 @@ class BackNavigationController {
                         represent.allowEnterPip);
             }
 
-            void createStartingSurface(ActivityRecord[] visibleOpenActivities) {
+            void createStartingSurface(@Nullable TaskSnapshot snapshot) {
                 if (mAdaptors[0].mSwitchType == DIALOG_CLOSE) {
                     return;
                 }
@@ -1253,7 +1276,6 @@ class BackNavigationController {
                 if (mainActivity == null) {
                     return;
                 }
-                final TaskSnapshot snapshot = getSnapshot(mainOpen, visibleOpenActivities);
                 // If there is only one adaptor, attach the windowless window to top activity,
                 // because fixed rotation only applies on activity.
                 // Note that embedded activity won't use fixed rotation.
@@ -1321,11 +1343,13 @@ class BackNavigationController {
                         .removeWindowlessStartingSurface(mRequestedStartingSurfaceId,
                                 !openTransitionMatch);
                 mRequestedStartingSurfaceId = INVALID_TASK_ID;
+                mStartingSurface = null;
             }
         }
 
         private static class BackWindowAnimationAdaptor implements AnimationAdapter {
             SurfaceControl mCapturedLeash;
+            boolean mAppWindowDrawn;
             private final Rect mBounds = new Rect();
             private final WindowContainer mTarget;
             private final boolean mIsOpen;
@@ -1507,9 +1531,16 @@ class BackNavigationController {
             private void applyPreviewStrategy(
                     @NonNull BackWindowAnimationAdaptorWrapper openAnimationAdaptor,
                     @NonNull ActivityRecord[] visibleOpenActivities) {
+                boolean needsLaunchBehind = true;
                 if (isSupportWindowlessSurface() && mShowWindowlessSurface && !mIsLaunchBehind) {
-                    openAnimationAdaptor.createStartingSurface(visibleOpenActivities);
-                } else {
+                    final WindowContainer mainOpen = openAnimationAdaptor.mAdaptors[0].mTarget;
+                    final TaskSnapshot snapshot = getSnapshot(mainOpen, visibleOpenActivities);
+                    openAnimationAdaptor.createStartingSurface(snapshot);
+                    // set LaunchBehind if we are creating splash screen surface.
+                    needsLaunchBehind = snapshot == null
+                            && openAnimationAdaptor.mRequestedStartingSurfaceId != INVALID_TASK_ID;
+                }
+                if (needsLaunchBehind) {
                     for (int i = visibleOpenActivities.length - 1; i >= 0; --i) {
                         setLaunchBehind(visibleOpenActivities[i]);
                     }

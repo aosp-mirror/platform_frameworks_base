@@ -16,6 +16,9 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -52,40 +55,4 @@ interface Scene {
      * current scene is this one.
      */
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>>
-}
-
-/** Enumerates all scene framework supported user actions. */
-sealed interface UserAction {
-
-    /** The user is scrolling, dragging, swiping, or flinging. */
-    data class Swipe(
-        /** The direction of the swipe. */
-        val direction: Direction,
-        /**
-         * The edge from which the swipe originated or `null`, if the swipe didn't start close to an
-         * edge.
-         */
-        val fromEdge: Edge? = null,
-        /** The number of pointers that were used (for example, one or two fingers). */
-        val pointerCount: Int = 1,
-    ) : UserAction
-
-    /** The user has hit the back button or performed the back navigation gesture. */
-    data object Back : UserAction
-}
-
-/** Enumerates all known "cardinal" directions for user actions. */
-enum class Direction {
-    LEFT,
-    UP,
-    RIGHT,
-    DOWN,
-}
-
-/** Enumerates all known edges from which a swipe can start. */
-enum class Edge {
-    LEFT,
-    TOP,
-    RIGHT,
-    BOTTOM,
 }

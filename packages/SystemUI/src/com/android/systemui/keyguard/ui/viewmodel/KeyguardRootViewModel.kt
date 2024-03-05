@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
@@ -70,7 +71,9 @@ constructor(
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
+    private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    private val dozingToGoneTransitionViewModel: DozingToGoneTransitionViewModel,
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
@@ -120,6 +123,27 @@ constructor(
             }
             .distinctUntilChanged()
 
+    /**
+     * Keyguard should not show while the communal hub is fully visible. This check is added since
+     * at the moment, closing the notification shade will cause the keyguard alpha to be set back to
+     * 1. Also ensure keyguard is never visible when GONE.
+     */
+    private val hideKeyguard: Flow<Boolean> =
+        combine(
+                communalInteractor.isIdleOnCommunal,
+                keyguardTransitionInteractor
+                    .transitionValue(GONE)
+                    .map { it == 1f }
+                    .onStart { emit(false) },
+                keyguardTransitionInteractor
+                    .transitionValue(OCCLUDED)
+                    .map { it == 1f }
+                    .onStart { emit(false) },
+            ) { isIdleOnCommunal, isGone, isOccluded ->
+                isIdleOnCommunal || isGone || isOccluded
+            }
+            .distinctUntilChanged()
+
     /** Last point that the root view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition
 
@@ -136,19 +160,16 @@ constructor(
     /** An observable for the alpha level for the entire keyguard root view. */
     fun alpha(viewState: ViewStateAccessor): Flow<Float> {
         return combine(
-                communalInteractor.isIdleOnCommunal,
-                keyguardTransitionInteractor
-                    .transitionValue(GONE)
-                    .map { it == 1f }
-                    .onStart { emit(false) }
-                    .distinctUntilChanged(),
+                hideKeyguard,
                 // The transitions are mutually exclusive, so they are safe to merge to get the last
                 // value emitted by any of them. Do not add flows that cannot make this guarantee.
                 merge(
                         alphaOnShadeExpansion,
                         keyguardInteractor.dismissAlpha.filterNotNull(),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                        aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
+                        dozingToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
                         goneToAodTransitionViewModel.enterFromTopAnimationAlpha,
@@ -167,12 +188,8 @@ constructor(
                         primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha,
                     )
                     .onStart { emit(1f) }
-            ) { isIdleOnCommunal, gone, alpha ->
-                if (isIdleOnCommunal || gone) {
-                    // Keyguard should not show while the communal hub is fully visible. This check
-                    // is added since at the moment, closing the notification shade will cause the
-                    // keyguard alpha to be set back to 1. Also ensure keyguard is never visible
-                    // when GONE.
+            ) { hideKeyguard, alpha ->
+                if (hideKeyguard) {
                     0f
                 } else {
                     alpha

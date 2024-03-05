@@ -31,6 +31,11 @@ class CredentialEntryInfo(
     fillInIntent: Intent?,
     /** Type of this credential used for sorting. Not localized so must not be directly displayed. */
     val credentialType: CredentialType,
+    /**
+     * String type value of this credential used for sorting. Not localized so must not be directly
+     * displayed.
+     */
+    val rawCredentialType: String,
     /** Localized type value of this credential used for display purpose. */
     val credentialTypeDisplayName: String,
     val providerDisplayName: String,
@@ -42,6 +47,8 @@ class CredentialEntryInfo(
     val isAutoSelectable: Boolean,
     val entryGroupId: String, // Used for deduplication, and displayed as the grouping title
                               // "For <value-of-entryGroupId>" on the more-option screen.
+    val isDefaultIconPreferredAsSingleProvider: Boolean,
+    val affiliatedDomain: String?,
 ) : EntryInfo(
     providerId,
     entryKey,

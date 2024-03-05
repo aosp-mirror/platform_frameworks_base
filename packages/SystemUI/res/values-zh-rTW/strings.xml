@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"鈴聲"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"震動"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"靜音"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"投放"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"鈴聲已設為靜音，因此無法使用"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s。輕觸即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s。輕觸即可設為震動，但系統可能會將無障礙服務一併設為靜音。"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s。輕觸即可設為靜音，但系統可能會將無障礙服務一併設為靜音。"</string>

@@ -1064,7 +1064,11 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         if (sender != null) {
-            intent.putExtra(EXTRA_CHOOSER_RESULT_INTENT_SENDER, sender);
+            if (android.service.chooser.Flags.enableChooserResult()) {
+                intent.putExtra(EXTRA_CHOOSER_RESULT_INTENT_SENDER, sender);
+            } else {
+                intent.putExtra(EXTRA_CHOSEN_COMPONENT_INTENT_SENDER, sender);
+            }
         }
 
         // Migrate any clip data and flags from target.

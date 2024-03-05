@@ -17,10 +17,10 @@
 #include "JankTracker.h"
 
 #include <cutils/ashmem.h>
+#include <cutils/trace.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <log/log.h>
-#include <sys/mman.h>
 
 #include <algorithm>
 #include <cmath>
@@ -278,7 +278,7 @@ void JankTracker::recomputeThresholds(int64_t frameBudget) REQUIRES(mDataMutex) 
 
 void JankTracker::dumpData(int fd, const ProfileDataDescription* description,
                            const ProfileData* data) {
-
+#ifdef __ANDROID__
     if (description) {
         switch (description->type) {
             case JankTrackerType::Generic:
@@ -296,9 +296,11 @@ void JankTracker::dumpData(int fd, const ProfileDataDescription* description,
     }
     data->dump(fd);
     dprintf(fd, "\n");
+#endif
 }
 
 void JankTracker::dumpFrames(int fd) {
+#ifdef __ANDROID__
     dprintf(fd, "\n\n---PROFILEDATA---\n");
     for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
         dprintf(fd, "%s", FrameInfoNames[i]);
@@ -315,6 +317,7 @@ void JankTracker::dumpFrames(int fd) {
         }
     }
     dprintf(fd, "\n---PROFILEDATA---\n\n");
+#endif
 }
 
 void JankTracker::reset() REQUIRES(mDataMutex) {

@@ -4782,7 +4782,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         if (isCredmanIntegrationActive(response)) {
-            Slog.d(TAG, "Attempting to add Credential Manager callback to pinned entries");
             addCredentialManagerCallback(response);
         }
 
@@ -5713,7 +5712,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 /* isPrimary= */ true);
         updateFillDialogTriggerIdsLocked();
         updateTrackedIdsLocked();
-
         if (mCurrentViewId == null) {
             return;
         }

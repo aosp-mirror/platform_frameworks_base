@@ -16,12 +16,13 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +68,7 @@ constructor(
     /** Whether or not the shade container should be clickable. */
     val isClickable: StateFlow<Boolean> =
         upDestinationSceneKey
-            .map { it == SceneKey.Lockscreen }
+            .map { it == Scenes.Lockscreen }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -82,9 +83,9 @@ constructor(
         canSwipeToDismiss: Boolean?,
     ): SceneKey {
         return when {
-            canSwipeToDismiss == true -> SceneKey.Lockscreen
-            isUnlocked -> SceneKey.Gone
-            else -> SceneKey.Lockscreen
+            canSwipeToDismiss == true -> Scenes.Lockscreen
+            isUnlocked -> Scenes.Gone
+            else -> Scenes.Lockscreen
         }
     }
 

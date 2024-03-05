@@ -420,7 +420,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // been added, so they must be added here
                     mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
                     mDesktopTasksController.get().moveToDesktop(mTaskId, wct);
-                    closeOtherSplitTask(mTaskId);
                 }
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
@@ -559,8 +558,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (ev.getAction() == ACTION_HOVER_EXIT) {
                 if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
                     decoration.onMaximizeWindowHoverExit();
-                } else if (id == R.id.maximize_window
-                        || MaximizeMenu.Companion.isMaximizeMenuView(id)) {
+                } else if (id == R.id.maximize_window || id == R.id.maximize_menu) {
                     // Close menu if not hovering over maximize menu or maximize button after a
                     // delay to give user a chance to re-enter view or to move from one maximize
                     // menu view to another.
@@ -1117,12 +1115,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 .getSplitPosition(taskId) == SPLIT_POSITION_BOTTOM_OR_RIGHT
                 ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
         return mSplitScreenController.getTaskInfo(remainingTaskPosition);
-    }
-
-    private void closeOtherSplitTask(int taskId) {
-        if (isTaskInSplitScreen(taskId)) {
-            mTaskOperations.closeTask(getOtherSplitTask(taskId).token);
-        }
     }
 
     private boolean isTaskInSplitScreen(int taskId) {

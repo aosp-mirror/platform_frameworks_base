@@ -200,12 +200,9 @@ public class DisplayBrightnessStrategySelector {
         // We are not checking the targetDisplayState, but rather relying on the policy because
         // a user can define a different display state(displayPowerRequest.dozeScreenState) too
         // in the request with the Doze policy
-        if (displayPowerRequest.policy == DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE) {
-            if (!mAllowAutoBrightnessWhileDozingConfig) {
-                return true;
-            }
-        }
-        return false;
+        return displayPowerRequest.policy == DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE
+                && !mAllowAutoBrightnessWhileDozingConfig
+                && BrightnessUtils.isValidBrightnessValue(displayPowerRequest.dozeScreenBrightness);
     }
 
     @VisibleForTesting

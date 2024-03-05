@@ -18,7 +18,7 @@ package com.android.systemui.scene
 
 import com.android.systemui.scene.shared.flag.SceneContainerFlagsModule
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import dagger.Module
 import dagger.Provides
 
@@ -44,11 +44,11 @@ object ShadelessSceneContainerFrameworkModule {
             // last one is top-most.
             sceneKeys =
                 listOf(
-                    SceneKey.Gone,
-                    SceneKey.Lockscreen,
-                    SceneKey.Bouncer,
+                    Scenes.Gone,
+                    Scenes.Lockscreen,
+                    Scenes.Bouncer,
                 ),
-            initialSceneKey = SceneKey.Lockscreen,
+            initialSceneKey = Scenes.Lockscreen,
         )
     }
 }

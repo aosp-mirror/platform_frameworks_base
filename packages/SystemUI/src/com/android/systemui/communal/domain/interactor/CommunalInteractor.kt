@@ -19,6 +19,8 @@ package com.android.systemui.communal.domain.interactor
 import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.os.UserHandle
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
@@ -29,9 +31,8 @@ import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalContentSize.FULL
 import com.android.systemui.communal.shared.model.CommunalContentSize.HALF
 import com.android.systemui.communal.shared.model.CommunalContentSize.THIRD
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.widgets.CommunalAppWidgetHost
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -46,7 +47,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
@@ -131,34 +132,33 @@ constructor(
      * Target scene as requested by the underlying [SceneTransitionLayout] or through
      * [onSceneChanged].
      *
-     * If [isCommunalAvailable] is false, will return [CommunalSceneKey.Blank]
+     * If [isCommunalAvailable] is false, will return [CommunalScenes.Blank]
      */
-    val desiredScene: Flow<CommunalSceneKey> =
+    val desiredScene: Flow<SceneKey> =
         communalRepository.desiredScene.combine(isCommunalAvailable) { scene, available ->
-            if (available) scene else CommunalSceneKey.Blank
+            if (available) scene else CommunalScenes.Blank
         }
 
     /** Transition state of the hub mode. */
-    val transitionState: StateFlow<ObservableCommunalTransitionState> =
-        communalRepository.transitionState
+    val transitionState: StateFlow<ObservableTransitionState> = communalRepository.transitionState
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].
      *
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
-    fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         communalRepository.setTransitionState(transitionState)
     }
 
     /** Returns a flow that tracks the progress of transitions to the given scene from 0-1. */
-    fun transitionProgressToScene(targetScene: CommunalSceneKey) =
+    fun transitionProgressToScene(targetScene: SceneKey) =
         transitionState
             .flatMapLatest { state ->
                 when (state) {
-                    is ObservableCommunalTransitionState.Idle ->
+                    is ObservableTransitionState.Idle ->
                         flowOf(CommunalTransitionProgress.Idle(state.scene))
-                    is ObservableCommunalTransitionState.Transition ->
+                    is ObservableTransitionState.Transition ->
                         if (state.toScene == targetScene) {
                             state.progress.map {
                                 CommunalTransitionProgress.Transition(
@@ -176,7 +176,7 @@ constructor(
 
     /**
      * Flow that emits a boolean if the communal UI is the target scene, ie. the [desiredScene] is
-     * the [CommunalSceneKey.Communal].
+     * the [CommunalScenes.Communal].
      *
      * This will be true as soon as the desired scene is set programmatically or at whatever point
      * during a fling that SceneTransitionLayout determines that the end state will be the communal
@@ -191,9 +191,9 @@ constructor(
         flow { emit(sceneContainerFlags.isEnabled()) }
             .flatMapLatest { sceneContainerEnabled ->
                 if (sceneContainerEnabled) {
-                    sceneInteractor.currentScene.map { it == SceneKey.Communal }
+                    sceneInteractor.currentScene.map { it == Scenes.Communal }
                 } else {
-                    desiredScene.map { it == CommunalSceneKey.Communal }
+                    desiredScene.map { it == CommunalScenes.Communal }
                 }
             }
             .distinctUntilChanged()
@@ -220,7 +220,7 @@ constructor(
      */
     val isIdleOnCommunal: Flow<Boolean> =
         communalRepository.transitionState.map {
-            it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Communal
+            it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Communal
         }
 
     /**
@@ -230,11 +230,11 @@ constructor(
      */
     val isCommunalVisible: Flow<Boolean> =
         communalRepository.transitionState.map {
-            !(it is ObservableCommunalTransitionState.Idle && it.scene == CommunalSceneKey.Blank)
+            !(it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Blank)
         }
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
-    fun onSceneChanged(newScene: CommunalSceneKey) {
+    fun onSceneChanged(newScene: SceneKey) {
         communalRepository.setDesiredScene(newScene)
     }
 
@@ -422,7 +422,7 @@ constructor(
 /** Simplified transition progress data class for tracking a single transition between scenes. */
 sealed class CommunalTransitionProgress {
     /** No transition/animation is currently running. */
-    data class Idle(val scene: CommunalSceneKey) : CommunalTransitionProgress()
+    data class Idle(val scene: SceneKey) : CommunalTransitionProgress()
 
     /** There is a transition animating to the expected scene. */
     data class Transition(

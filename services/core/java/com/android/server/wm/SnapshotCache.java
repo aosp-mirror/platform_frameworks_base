@@ -16,6 +16,7 @@
 package com.android.server.wm;
 
 import android.annotation.Nullable;
+import android.hardware.HardwareBuffer;
 import android.util.ArrayMap;
 import android.window.TaskSnapshot;
 
@@ -92,6 +93,10 @@ abstract class SnapshotCache<TYPE extends WindowContainer> {
             if (entry != null) {
                 mAppIdMap.remove(entry.topApp);
                 mRunningCache.remove(id);
+                final HardwareBuffer buffer = entry.snapshot.getHardwareBuffer();
+                if (buffer != null) {
+                    buffer.close();
+                }
             }
         }
     }

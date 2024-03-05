@@ -104,6 +104,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.inputmethod.ImeTracker;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizer;
@@ -126,7 +127,7 @@ import java.util.List;
 /**
  * Tests for the {@link WindowState} class.
  *
- * Build/Install/Run:
+ * <p> Build/Install/Run:
  * atest WmTests:WindowStateTests
  */
 @SmallTest
@@ -1099,7 +1100,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, ImeTracker.Token.empty());
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 
@@ -1137,7 +1138,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         app.setRequestedVisibleTypes(ime(), ime());
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
-        controller.getImeSourceProvider().scheduleShowImePostLayout(app, null /* statsToken */);
+        controller.getImeSourceProvider().scheduleShowImePostLayout(app, ImeTracker.Token.empty());
         controller.getImeSourceProvider().getSource().setVisible(true);
         controller.updateAboveInsetsState(false);
 

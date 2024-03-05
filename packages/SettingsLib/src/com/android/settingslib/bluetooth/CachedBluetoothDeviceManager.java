@@ -363,7 +363,6 @@ public class CachedBluetoothDeviceManager {
         if (profileId == BluetoothProfile.HEADSET
                 || profileId == BluetoothProfile.A2DP
                 || profileId == BluetoothProfile.LE_AUDIO
-                || profileId == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
                 || profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
             return mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
                 state);

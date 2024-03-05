@@ -2894,6 +2894,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Makes starting window always fill the associated task. */
     private void attachStartingSurfaceToAssociatedTask() {
+        if (mSyncState == SYNC_STATE_NONE && isEmbedded()) {
+            // Collect this activity since it's starting window will reparent to task. To ensure
+            // any starting window's transaction will occur in order.
+            mTransitionController.collect(this);
+        }
         // Associate the configuration of starting window with the task.
         overrideConfigurationPropagation(mStartingWindow, mStartingData.mAssociatedTask);
         getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
@@ -6867,6 +6872,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // stop tracking
         mSplashScreenStyleSolidColor = true;
 
+        mAtmService.mBackNavigationController.removePredictiveSurfaceIfNeeded(this);
         if (mStartingWindow != null) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Finish starting %s"
                     + ": first real window is shown, no animation", win.mToken);

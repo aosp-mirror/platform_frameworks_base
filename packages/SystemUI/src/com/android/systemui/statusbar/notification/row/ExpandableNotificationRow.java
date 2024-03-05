@@ -1761,7 +1761,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * Constructs an ExpandableNotificationRow. Used by layout inflation.
      *
      * @param context passed to image resolver
-     * @param attrs attributes used to initialize parent view
+     * @param attrs   attributes used to initialize parent view
      */
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         this(context, attrs, context);
@@ -1775,9 +1775,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * AsyncLayoutFactory} in {@link RowInflaterTask}.
      *
      * @param context context context of the view
-     * @param attrs attributes used to initialize parent view
-     * @param entry notification that the row will be associated to (determines the user for the
-     *              ImageResolver)
+     * @param attrs   attributes used to initialize parent view
+     * @param entry   notification that the row will be associated to (determines the user for the
+     *                ImageResolver)
      */
     public ExpandableNotificationRow(Context context, AttributeSet attrs, NotificationEntry entry) {
         this(context, attrs, userContextForEntry(context, entry));
@@ -2028,7 +2028,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return traceTag;
         }
 
-        return  traceTag + "(" + getEntry().getNotificationStyle() + ")";
+        return traceTag + "(" + getEntry().getNotificationStyle() + ")";
     }
 
     @Override
@@ -3083,6 +3083,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                             onStartedRunnable.run();
                         }
                     }
+
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         ExpandableNotificationRow.super.performRemoveAnimation(
@@ -3777,6 +3778,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
             pw.print(", mShowNoBackground: " + mShowNoBackground);
             pw.println();
+            if (NotificationContentView.INCLUDE_HEIGHTS_TO_DUMP) {
+                dumpHeights(pw);
+            }
             showingLayout.dump(pw, args);
 
             if (getViewState() != null) {
@@ -3818,6 +3822,34 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mPrivateLayout.dumpSmartReplies(pw);
             }
         });
+    }
+
+    private void dumpHeights(IndentingPrintWriter pw) {
+        pw.print("Heights: ");
+        pw.print("intrinsic", getIntrinsicHeight());
+        pw.print("actual", getActualHeight());
+        pw.print("maxContent", getMaxContentHeight());
+        pw.print("maxExpanded", getMaxExpandHeight());
+        pw.print("collapsed", getCollapsedHeight());
+        pw.print("headsup", getHeadsUpHeight());
+        pw.print("headsup  without header", getHeadsUpHeightWithoutHeader());
+        pw.print("minHeight", getMinHeight());
+        pw.print("pinned headsup", getPinnedHeadsUpHeight(
+                true /* atLeastMinHeight */));
+        pw.println();
+        pw.print("Intrinsic Height Factors: ");
+        pw.print("isUserLocked()", isUserLocked());
+        pw.print("isChildInGroup()", isChildInGroup());
+        pw.print("isGroupExpanded()", isGroupExpanded());
+        pw.print("sensitive", mSensitive);
+        pw.print("hideSensitiveForIntrinsicHeight", mHideSensitiveForIntrinsicHeight);
+        pw.print("isSummaryWithChildren", mIsSummaryWithChildren);
+        pw.print("canShowHeadsUp()", canShowHeadsUp());
+        pw.print("isHeadsUpState()", isHeadsUpState());
+        pw.print("isPinned()", isPinned());
+        pw.print("headsupDisappearRunning", mHeadsupDisappearRunning);
+        pw.print("isExpanded()", isExpanded());
+        pw.println();
     }
 
     private void logKeepInParentChildDetached(ExpandableNotificationRow child) {

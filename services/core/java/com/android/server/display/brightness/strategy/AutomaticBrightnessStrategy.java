@@ -15,6 +15,8 @@
  */
 package com.android.server.display.brightness.strategy;
 
+import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
@@ -102,8 +104,7 @@ public class AutomaticBrightnessStrategy {
             boolean allowAutoBrightnessWhileDozingConfig, int brightnessReason, int policy,
             float lastUserSetScreenBrightness, boolean userSetBrightnessChanged) {
         final boolean autoBrightnessEnabledInDoze =
-                allowAutoBrightnessWhileDozingConfig
-                        && Display.isDozeState(targetDisplayState);
+                allowAutoBrightnessWhileDozingConfig && policy == POLICY_DOZE;
         mIsAutoBrightnessEnabled = shouldUseAutoBrightness()
                 && (targetDisplayState == Display.STATE_ON || autoBrightnessEnabledInDoze)
                 && brightnessReason != BrightnessReason.REASON_OVERRIDE

@@ -31,12 +31,6 @@ import java.util.function.Consumer
  * @see NotificationPanelViewController
  */
 interface ShadeViewController {
-    /** Expand the shade either animated or instantly. */
-    fun expand(animate: Boolean)
-
-    /** Animates to an expanded shade with QS expanded. If the shade starts expanded, expands QS. */
-    fun expandToQs()
-
     /** Returns whether the shade is expanding or collapsing itself or quick settings. */
     val isExpandingOrCollapsing: Boolean
 
@@ -57,9 +51,6 @@ interface ShadeViewController {
 
     /** Collapses the shade. */
     fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float)
-
-    /** Collapses the shade with an animation duration in milliseconds. */
-    fun collapseWithDuration(animationDuration: Int)
 
     /** Collapses the shade instantly without animation. */
     fun instantCollapse()
@@ -101,9 +92,6 @@ interface ShadeViewController {
 
     /** Returns the StatusBarState. */
     val barState: Int
-
-    /** Sets the amount of progress in the status bar launch animation. */
-    fun applyLaunchAnimationProgress(linearProgress: Float)
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
     fun setAlpha(alpha: Int, animate: Boolean)

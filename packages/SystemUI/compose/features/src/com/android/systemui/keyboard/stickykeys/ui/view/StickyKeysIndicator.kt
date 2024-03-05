@@ -18,8 +18,11 @@ package com.android.systemui.keyboard.stickykeys.ui.view
 
 import android.content.Context
 import android.view.View
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -61,22 +64,32 @@ fun StickyKeysIndicator(viewModel: StickyKeysIndicatorViewModel) {
 @Composable
 fun StickyKeysIndicator(stickyKeys: Map<ModifierKey, Locked>, modifier: Modifier = Modifier) {
     Surface(
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.inverseSurface,
         shape = MaterialTheme.shapes.medium,
-        modifier = modifier
+        modifier = modifier.heightIn(min = 84.dp).width(96.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(16.dp)
         ) {
-            stickyKeys.forEach { (key, isLocked) ->
-                key(key) {
-                    Text(
-                        text = key.displayedText,
-                        fontWeight = if (isLocked.locked) FontWeight.Bold else FontWeight.Normal
-                    )
-                }
-            }
+            stickyKeys.forEach { (key, isLocked) -> key(key) { StickyKeyText(key, isLocked) } }
         }
     }
+}
+
+@Composable
+private fun StickyKeyText(key: ModifierKey, isLocked: Locked, modifier: Modifier = Modifier) {
+    Text(
+        text = key.displayedText,
+        fontWeight = if (isLocked.locked) FontWeight.Bold else FontWeight.Normal,
+        style = MaterialTheme.typography.bodyMedium,
+        color =
+            if (isLocked.locked) {
+                MaterialTheme.colorScheme.inverseOnSurface
+            } else {
+                MaterialTheme.colorScheme.outlineVariant
+            },
+        modifier = modifier
+    )
 }

@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"రింగ్"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"వైబ్రేట్"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"మ్యూట్"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"ప్రసారం చేయండి"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"వాల్యూమ్ మ్యూట్ అయినందున అందుబాటులో లేదు"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. అన్‌మ్యూట్ చేయడానికి నొక్కండి."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. వైబ్రేషన్‌కు సెట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. మ్యూట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>

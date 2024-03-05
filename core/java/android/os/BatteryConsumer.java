@@ -240,7 +240,7 @@ public abstract class BatteryConsumer {
             new Dimensions(POWER_COMPONENT_ANY, PROCESS_STATE_ANY);
 
     /**
-     * Identifies power attribution dimensions that are captured by an data element of
+     * Identifies power attribution dimensions that are captured by a data element of
      * a BatteryConsumer. These Keys are used to access those values and to set them using
      * Builders.  See for example {@link #getConsumedPower(Key)}.
      *

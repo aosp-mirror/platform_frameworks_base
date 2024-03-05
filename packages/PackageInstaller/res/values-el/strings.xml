@@ -117,7 +117,7 @@
     <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Κάτι πήγε στραβά"</string>
     <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Παρουσιάστηκε κάποιο πρόβλημα κατά την επαναφορά αυτής της εφαρμογής"</string>
     <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Δεν επαρκεί ο αποθηκευτικός χώρος"</string>
-    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Για να επαναφέρετε αυτή την εφαρμογή, μπορείτε να ελευθερώσετε χώρο στη συσκευή. Απαιτούμενος αποθηκευτικός χώρος: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Για να επαναφέρετε αυτή την εφαρμογή, μπορείτε να αποδεσμεύσετε χώρο στη συσκευή. Απαιτούμενος αποθηκευτικός χώρος: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Απαιτούμενη ενέργεια"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Ακολουθήστε τα επόμενα βήματα για να επαναφέρετε αυτή την εφαρμογή"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Το <xliff:g id="INSTALLERNAME">%1$s</xliff:g> είναι απενεργοποιημένο"</string>

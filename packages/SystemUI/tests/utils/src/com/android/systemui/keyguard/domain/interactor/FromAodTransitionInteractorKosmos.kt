@@ -20,6 +20,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.domain.interactor.powerInteractor
 
 val Kosmos.fromAodTransitionInteractor by
     Kosmos.Fixture {
@@ -30,5 +31,6 @@ val Kosmos.fromAodTransitionInteractor by
             bgDispatcher = testDispatcher,
             mainDispatcher = testDispatcher,
             keyguardInteractor = keyguardInteractor,
+            powerInteractor = powerInteractor,
         )
     }
