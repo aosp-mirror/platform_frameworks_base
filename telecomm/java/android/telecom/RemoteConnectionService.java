@@ -28,6 +28,8 @@ import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IConnectionServiceAdapter;
 import com.android.internal.telecom.IVideoProvider;
 import com.android.internal.telecom.RemoteServiceCallback;
+import com.android.server.telecom.flags.FeatureFlags;
+import com.android.server.telecom.flags.FeatureFlagsImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -550,6 +552,9 @@ final class RemoteConnectionService {
     private final Map<String, RemoteConference> mConferenceById = new HashMap<>();
     private final Set<RemoteConnection> mPendingConnections = new HashSet<>();
 
+    /** Telecom feature flags **/
+    private final FeatureFlags mTelecomFeatureFlags = new FeatureFlagsImpl();
+
     RemoteConnectionService(
             IConnectionService outgoingConnectionServiceRpc,
             ConnectionService ourConnectionServiceImpl) throws RemoteException {
@@ -578,6 +583,14 @@ final class RemoteConnectionService {
         extras.putString(Connection.EXTRA_REMOTE_CONNECTION_ORIGINATING_PACKAGE_NAME,
                 mOurConnectionServiceImpl.getApplicationContext().getOpPackageName());
 
+        // Defaulted ConnectionRequest params
+        String telecomCallId = "";
+        boolean shouldShowIncomingUI = false;
+        if (mTelecomFeatureFlags.setRemoteConnectionCallId()) {
+            telecomCallId = id;
+            shouldShowIncomingUI = request.shouldShowIncomingCallUi();
+        }
+
         final ConnectionRequest newRequest = new ConnectionRequest.Builder()
                 .setAccountHandle(request.getAccountHandle())
                 .setAddress(request.getAddress())
@@ -585,6 +598,9 @@ final class RemoteConnectionService {
                 .setVideoState(request.getVideoState())
                 .setRttPipeFromInCall(request.getRttPipeFromInCall())
                 .setRttPipeToInCall(request.getRttPipeToInCall())
+                // Flagged changes
+                .setTelecomCallId(telecomCallId)
+                .setShouldShowIncomingCallUi(shouldShowIncomingUI)
                 .build();
         try {
             if (mConnectionById.isEmpty()) {
@@ -626,10 +642,28 @@ final class RemoteConnectionService {
                 mOutgoingConnectionServiceRpc.addConnectionServiceAdapter(mServant.getStub(),
                         null /*Session.Info*/);
             }
+
+            // Set telecom call id to what's being tracked by base ConnectionService.
+            String telecomCallId = mTelecomFeatureFlags.setRemoteConnectionCallId()
+                    ? id : request.getTelecomCallId();
+
+            final ConnectionRequest newRequest = new ConnectionRequest.Builder()
+                    .setAccountHandle(request.getAccountHandle())
+                    .setAddress(request.getAddress())
+                    .setExtras(request.getExtras())
+                    .setVideoState(request.getVideoState())
+                    .setShouldShowIncomingCallUi(request.shouldShowIncomingCallUi())
+                    .setRttPipeFromInCall(request.getRttPipeFromInCall())
+                    .setRttPipeToInCall(request.getRttPipeToInCall())
+                    .setParticipants(request.getParticipants())
+                    .setIsAdhocConferenceCall(request.isAdhocConferenceCall())
+                    .setTelecomCallId(telecomCallId)
+                    .build();
+
             RemoteConference conference = new RemoteConference(id, mOutgoingConnectionServiceRpc);
             mOutgoingConnectionServiceRpc.createConference(connectionManagerPhoneAccount,
                     id,
-                    request,
+                    newRequest,
                     isIncoming,
                     false /* isUnknownCall */,
                     null /*Session.info*/);
@@ -640,7 +674,7 @@ final class RemoteConnectionService {
                     maybeDisconnectAdapter();
                 }
             });
-            conference.putExtras(request.getExtras());
+            conference.putExtras(newRequest.getExtras());
             return conference;
         } catch (RemoteException e) {
             return RemoteConference.failure(
