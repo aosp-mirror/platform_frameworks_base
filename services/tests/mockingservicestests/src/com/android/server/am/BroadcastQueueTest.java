@@ -2001,6 +2001,59 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
     }
 
     @Test
+    public void testReplacePendingToCachedProcess_withDeferrableBroadcast() throws Exception {
+        // Legacy stack doesn't support deferral
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverYellowApp = makeActiveProcessRecord(PACKAGE_YELLOW);
+
+        setProcessFreezable(receiverGreenApp, true, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        waitForIdle();
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK)
+                .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        final BroadcastOptions opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
+
+        final BroadcastFilter receiverGreen = makeRegisteredReceiver(receiverGreenApp, 10);
+        final BroadcastFilter receiverBlue = makeRegisteredReceiver(receiverBlueApp, 5);
+        final BroadcastFilter receiverYellow = makeRegisteredReceiver(receiverYellowApp, 0);
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp, opts, List.of(
+                receiverGreen, receiverBlue, receiverYellow)));
+
+        // Enqueue the broadcast again to replace the earlier one
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp, opts, List.of(
+                receiverGreen, receiverBlue, receiverYellow)));
+
+        waitForIdle();
+        // Green should still be in the cached state and shouldn't receive the broadcast
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp, timeTick);
+
+        final IApplicationThread blueThread = receiverBlueApp.getThread();
+        final IApplicationThread yellowThread = receiverYellowApp.getThread();
+        final InOrder inOrder = inOrder(blueThread, yellowThread);
+        inOrder.verify(blueThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+        inOrder.verify(yellowThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(timeTick)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+
+        setProcessFreezable(receiverGreenApp, false, false);
+        mQueue.onProcessFreezableChangedLocked(receiverGreenApp);
+        waitForIdle();
+
+        // Confirm that green receives the broadcast once it comes out of the cached state
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
+    }
+
+    @Test
     public void testIdleAndBarrier() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
