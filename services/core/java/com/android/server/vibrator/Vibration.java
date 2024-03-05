@@ -208,6 +208,7 @@ abstract class Vibration {
      * potentially expensive or resource-linked objects, such as {@link IBinder}.
      */
     static final class DebugInfo {
+        final Status mStatus;
         final long mCreateTime;
         final CallerInfo mCallerInfo;
         @Nullable
@@ -220,7 +221,6 @@ abstract class Vibration {
         private final CombinedVibration mOriginalEffect;
         private final int mScaleLevel;
         private final float mAdaptiveScale;
-        private final Status mStatus;
 
         DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration playedEffect,
                 @Nullable CombinedVibration originalEffect, int scaleLevel,
@@ -251,6 +251,10 @@ abstract class Vibration {
                     + ", scaleLevel: " + VibrationScaler.scaleLevelToString(mScaleLevel)
                     + ", adaptiveScale: " + String.format(Locale.ROOT, "%.2f", mAdaptiveScale)
                     + ", callerInfo: " + mCallerInfo;
+        }
+
+        void logMetrics(VibratorFrameworkStatsLogger statsLogger) {
+            statsLogger.logVibrationAdaptiveHapticScale(mCallerInfo.uid, mAdaptiveScale);
         }
 
         /**

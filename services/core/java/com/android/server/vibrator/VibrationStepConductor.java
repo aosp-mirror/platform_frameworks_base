@@ -40,8 +40,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Creates and manages a queue of steps for performing a VibrationEffect, as well as coordinating
@@ -70,6 +72,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
 
     private final DeviceAdapter mDeviceAdapter;
     private final VibrationScaler mVibrationScaler;
+    private final VibratorFrameworkStatsLogger mStatsLogger;
 
     // Not guarded by lock because it's mostly used to read immutable fields by this conductor.
     // This is only modified here at the prepareToStart method which always runs at the vibration
@@ -103,14 +106,15 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     private int mSuccessfulVibratorOnSteps;
 
     VibrationStepConductor(HalVibration vib, VibrationSettings vibrationSettings,
-            DeviceAdapter deviceAdapter,
-            VibrationScaler vibrationScaler,
+            DeviceAdapter deviceAdapter, VibrationScaler vibrationScaler,
+            VibratorFrameworkStatsLogger statsLogger,
             CompletableFuture<Void> requestVibrationParamsFuture,
             VibrationThread.VibratorManagerHooks vibratorManagerHooks) {
         this.mVibration = vib;
         this.vibrationSettings = vibrationSettings;
         this.mDeviceAdapter = deviceAdapter;
         mVibrationScaler = vibrationScaler;
+        mStatsLogger = statsLogger;
         mRequestVibrationParamsFuture = requestVibrationParamsFuture;
         this.vibratorManagerHooks = vibratorManagerHooks;
         this.mSignalVibratorsComplete =
@@ -461,9 +465,19 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         }
 
         try {
-            mRequestVibrationParamsFuture.orTimeout(
+            mRequestVibrationParamsFuture.get(
                     vibrationSettings.getRequestVibrationParamsTimeoutMs(),
-                    TimeUnit.MILLISECONDS).get();
+                    TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            if (DEBUG) {
+                Slog.d(TAG, "Request for vibration params timed out", e);
+            }
+            mStatsLogger.logVibrationParamRequestTimeout(mVibration.callerInfo.uid);
+        } catch (CancellationException e) {
+            if (DEBUG) {
+                Slog.d(TAG, "Request for vibration params cancelled, maybe superseded or"
+                        + " vibrator controller unregistered. Skipping params...", e);
+            }
         } catch (Throwable e) {
             Slog.w(TAG, "Failed to retrieve vibration params.", e);
         }
