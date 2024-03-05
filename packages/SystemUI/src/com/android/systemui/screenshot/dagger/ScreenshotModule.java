@@ -20,6 +20,7 @@ import android.app.Service;
 
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
+import com.android.systemui.screenshot.LegacyScreenshotViewProxy;
 import com.android.systemui.screenshot.RequestProcessor;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
@@ -29,12 +30,14 @@ import com.android.systemui.screenshot.ScreenshotSoundController;
 import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
 import com.android.systemui.screenshot.ScreenshotSoundProvider;
 import com.android.systemui.screenshot.ScreenshotSoundProviderImpl;
+import com.android.systemui.screenshot.ScreenshotViewProxy;
 import com.android.systemui.screenshot.TakeScreenshotService;
 import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
 import com.android.systemui.screenshot.appclips.AppClipsService;
 
 import dagger.Binds;
 import dagger.Module;
+import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
@@ -81,4 +84,9 @@ public abstract class ScreenshotModule {
     @Binds
     abstract ScreenshotSoundController bindScreenshotSoundController(
             ScreenshotSoundControllerImpl screenshotSoundProviderImpl);
+
+    @Provides
+    static ScreenshotViewProxy.Factory providesScreenshotViewProxyFactory() {
+        return new LegacyScreenshotViewProxy.Factory();
+    }
 }
