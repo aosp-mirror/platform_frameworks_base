@@ -2999,18 +2999,15 @@ static void android_media_MediaCodec_native_queueLinearBlock(
                     "MediaCodec.LinearBlock#obtain method to obtain a compatible buffer.");
             return;
         }
-        sp<CryptoInfosWrapper> cryptoInfos = new CryptoInfosWrapper{decltype(cryptoInfos->value)()};
-        jint sampleSize = 0;
+        sp<CryptoInfosWrapper> cryptoInfos = nullptr;
+        jint sampleSize = totalSize;
         if (cryptoInfoArray != nullptr) {
+            cryptoInfos = new CryptoInfosWrapper{decltype(cryptoInfos->value)()};
             extractCryptoInfosFromObjectArray(env,
                     &sampleSize,
                     &cryptoInfos->value,
                     cryptoInfoArray,
                     &errorDetailMsg);
-        } else {
-            sampleSize = totalSize;
-            std::unique_ptr<CodecCryptoInfo> cryptoInfo{new MediaCodecCryptoInfo(totalSize)};
-            cryptoInfos->value.push_back(std::move(cryptoInfo));
         }
         if (env->ExceptionCheck()) {
             // Creation of cryptoInfo failed. Let the exception bubble up.
