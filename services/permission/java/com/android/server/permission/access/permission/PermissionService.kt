@@ -88,7 +88,6 @@ import com.android.server.pm.PackageInstallerService
 import com.android.server.pm.PackageManagerLocal
 import com.android.server.pm.UserManagerInternal
 import com.android.server.pm.UserManagerService
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils
 import com.android.server.pm.permission.LegacyPermission
 import com.android.server.pm.permission.LegacyPermissionSettings
 import com.android.server.pm.permission.LegacyPermissionState
@@ -97,7 +96,6 @@ import com.android.server.pm.permission.PermissionManagerServiceInterface
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
-import com.android.server.policy.SoftRestrictedPermissionPolicy
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.CompletableFuture
@@ -1006,25 +1004,14 @@ class PermissionService(private val service: AccessCheckingService) :
         }
 
         if (isGranted && oldFlags.hasBits(PermissionFlags.SOFT_RESTRICTED)) {
-            // TODO: Refactor SoftRestrictedPermissionPolicy.
-            val softRestrictedPermissionPolicy =
-                SoftRestrictedPermissionPolicy.forPermission(
-                    context,
-                    AndroidPackageUtils.generateAppInfoWithoutState(androidPackage),
-                    androidPackage,
-                    UserHandle.of(userId),
-                    permissionName
+            if (reportError) {
+                Slog.e(
+                    LOG_TAG,
+                    "$methodName: Cannot grant soft-restricted non-exempt permission" +
+                        " $permissionName to package $packageName"
                 )
-            if (!softRestrictedPermissionPolicy.mayGrantPermission()) {
-                if (reportError) {
-                    Slog.e(
-                        LOG_TAG,
-                        "$methodName: Cannot grant soft-restricted non-exempt permission" +
-                            " $permissionName to package $packageName"
-                    )
-                }
-                return
             }
+            return
         }
 
         val newFlags = PermissionFlags.updateRuntimePermissionGranted(oldFlags, isGranted)
@@ -1850,10 +1837,19 @@ class PermissionService(private val service: AccessCheckingService) :
         allowlistedFlags: Int,
         userId: Int
     ) {
+        var exemptMask = 0
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM)) {
+            exemptMask = exemptMask or PermissionFlags.SYSTEM_EXEMPT
+        }
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE)) {
+            exemptMask = exemptMask or PermissionFlags.UPGRADE_EXEMPT
+        }
+        if (allowlistedFlags.hasBits(PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER)) {
+            exemptMask = exemptMask or PermissionFlags.INSTALLER_EXEMPT
+        }
+
         service.mutateState {
             with(policy) {
-                val permissionsFlags = getUidPermissionFlags(appId, userId) ?: return@mutateState
-
                 val permissions = getPermissions()
                 androidPackage.requestedPermissions.forEachIndexed { _, requestedPermission ->
                     val permission = permissions[requestedPermission]
@@ -1861,81 +1857,8 @@ class PermissionService(private val service: AccessCheckingService) :
                         return@forEachIndexed
                     }
 
-                    val oldFlags = permissionsFlags[requestedPermission] ?: 0
-                    val wasGranted = PermissionFlags.isPermissionGranted(oldFlags)
-
-                    var newFlags = oldFlags
-                    var mask = 0
-                    var allowlistFlagsCopy = allowlistedFlags
-                    while (allowlistFlagsCopy != 0) {
-                        val flag = 1 shl allowlistFlagsCopy.countTrailingZeroBits()
-                        allowlistFlagsCopy = allowlistFlagsCopy and flag.inv()
-                        when (flag) {
-                            PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM -> {
-                                mask = mask or PermissionFlags.SYSTEM_EXEMPT
-                                newFlags =
-                                    if (permissionNames.contains(requestedPermission)) {
-                                        newFlags or PermissionFlags.SYSTEM_EXEMPT
-                                    } else {
-                                        newFlags andInv PermissionFlags.SYSTEM_EXEMPT
-                                    }
-                            }
-                            PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE -> {
-                                mask = mask or PermissionFlags.UPGRADE_EXEMPT
-                                newFlags =
-                                    if (permissionNames.contains(requestedPermission)) {
-                                        newFlags or PermissionFlags.UPGRADE_EXEMPT
-                                    } else {
-                                        newFlags andInv PermissionFlags.UPGRADE_EXEMPT
-                                    }
-                            }
-                            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER -> {
-                                mask = mask or PermissionFlags.INSTALLER_EXEMPT
-                                newFlags =
-                                    if (permissionNames.contains(requestedPermission)) {
-                                        newFlags or PermissionFlags.INSTALLER_EXEMPT
-                                    } else {
-                                        newFlags andInv PermissionFlags.INSTALLER_EXEMPT
-                                    }
-                            }
-                        }
-                    }
-
-                    if (oldFlags == newFlags) {
-                        return@forEachIndexed
-                    }
-
-                    val isExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
-
-                    // If the permission is policy fixed as granted but it is no longer
-                    // on any of the allowlists we need to clear the policy fixed flag
-                    // as allowlisting trumps policy i.e. policy cannot grant a non
-                    // grantable permission.
-                    if (oldFlags.hasBits(PermissionFlags.POLICY_FIXED)) {
-                        if (!isExempt && wasGranted) {
-                            mask = mask or PermissionFlags.POLICY_FIXED
-                            newFlags = newFlags andInv PermissionFlags.POLICY_FIXED
-                        }
-                    }
-
-                    newFlags =
-                        if (permission.isHardRestricted && !isExempt) {
-                            newFlags or PermissionFlags.RESTRICTION_REVOKED
-                        } else {
-                            newFlags andInv PermissionFlags.RESTRICTION_REVOKED
-                        }
-                    newFlags =
-                        if (permission.isSoftRestricted && !isExempt) {
-                            newFlags or PermissionFlags.SOFT_RESTRICTED
-                        } else {
-                            newFlags andInv PermissionFlags.SOFT_RESTRICTED
-                        }
-                    mask =
-                        mask or
-                            PermissionFlags.RESTRICTION_REVOKED or
-                            PermissionFlags.SOFT_RESTRICTED
-
-                    updatePermissionFlags(appId, userId, requestedPermission, mask, newFlags)
+                    var exemptFlags = if (requestedPermission in permissionNames) exemptMask else 0
+                    updatePermissionExemptFlags(appId, userId, permission, exemptMask, exemptFlags)
                 }
             }
         }

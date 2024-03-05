@@ -233,24 +233,6 @@ class AppIdPermissionPolicyTest : BasePermissionPolicyTest() {
             .isEqualTo(expectedNewFlags)
     }
 
-    @Test
-    fun testOnPackageInstalled_restrictedPermissionsIsExempted_clearsRestrictionFlags() {
-        val oldFlags = PermissionFlags.SOFT_RESTRICTED or PermissionFlags.INSTALLER_EXEMPT
-        testOnPackageInstalled(
-            oldFlags,
-            permissionInfoFlags = PermissionInfo.FLAG_SOFT_RESTRICTED
-        ) {}
-        val actualFlags = getPermissionFlags(APP_ID_1, USER_ID_0, PERMISSION_NAME_0)
-        val expectedNewFlags = PermissionFlags.INSTALLER_EXEMPT
-        assertWithMessage(
-            "After onPackageInstalled() is called for a non-system app that requests a runtime" +
-                " soft restricted permission that is exempted. The actual permission flags" +
-                " $actualFlags should match the expected flags $expectedNewFlags"
-        )
-            .that(actualFlags)
-            .isEqualTo(expectedNewFlags)
-    }
-
     private fun testOnPackageInstalled(
         oldFlags: Int,
         permissionInfoFlags: Int = 0,
