@@ -32,8 +32,8 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.volume.localMediaRepository
 import com.android.systemui.volume.mediaController
 import com.android.systemui.volume.mediaControllerRepository
+import com.android.systemui.volume.mediaOutputActionsInteractor
 import com.android.systemui.volume.mediaOutputInteractor
-import com.android.systemui.volume.panel.mediaOutputActionsInteractor
 import com.android.systemui.volume.panel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -16,14 +16,11 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 
-import android.content.Intent
-import android.provider.Settings
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
@@ -34,16 +31,7 @@ class MediaOutputActionsInteractor
 @Inject
 constructor(
     private val mediaOutputDialogFactory: MediaOutputDialogFactory,
-    private val activityStarter: ActivityStarter,
 ) {
-
-    fun onDeviceClick(expandable: Expandable) {
-        activityStarter.startActivity(
-            Intent(Settings.ACTION_BLUETOOTH_SETTINGS),
-            true,
-            expandable.activityTransitionController(),
-        )
-    }
 
     fun onBarClick(session: MediaDeviceSession, expandable: Expandable) {
         when (session) {

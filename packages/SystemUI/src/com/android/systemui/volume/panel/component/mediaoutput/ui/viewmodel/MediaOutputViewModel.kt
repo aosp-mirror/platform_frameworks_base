@@ -113,11 +113,6 @@ constructor(
     private fun MediaDeviceSession.isPlaying(): Boolean =
         this is MediaDeviceSession.Active && playbackState?.isActive == true
 
-    fun onDeviceClick(expandable: Expandable) {
-        actionsInteractor.onDeviceClick(expandable)
-        volumePanelViewModel.dismissPanel()
-    }
-
     fun onBarClick(expandable: Expandable) {
         actionsInteractor.onBarClick(mediaDeviceSession.value, expandable)
         volumePanelViewModel.dismissPanel()
