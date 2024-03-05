@@ -477,7 +477,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayRotation mDisplayRotation;
     @Nullable final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     DisplayFrames mDisplayFrames;
-    private final DisplayUpdater mDisplayUpdater;
+    final DisplayUpdater mDisplayUpdater;
 
     private boolean mInTouchMode;
 
