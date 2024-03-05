@@ -22,6 +22,8 @@ import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -435,7 +437,14 @@ class MenuView extends FrameLayout implements
         }
         mMenuAnimationController.flingMenuThenSpringToEdge(
                 getMenuPosition().x, 100f, 0f);
-        mContext.startActivity(getIntentForEditScreen());
+
+        Intent intent = getIntentForEditScreen();
+        PackageManager packageManager = getContext().getPackageManager();
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
+        if (!activities.isEmpty()) {
+            mContext.startActivity(intent);
+        }
     }
 
     void incrementTexMetricForAllTargets(String metric) {

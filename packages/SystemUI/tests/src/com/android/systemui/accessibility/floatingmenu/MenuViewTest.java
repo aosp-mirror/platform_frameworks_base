@@ -22,11 +22,15 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.UiModeManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.platform.test.annotations.EnableFlags;
@@ -54,6 +58,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.ArrayList;
+
 /** Tests for {@link MenuView}. */
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -73,6 +79,8 @@ public class MenuViewTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
 
     private SysuiTestableContext mSpyContext;
+    @Mock
+    private PackageManager mMockPackageManager;
 
     @Before
     public void setUp() throws Exception {
@@ -82,6 +90,8 @@ public class MenuViewTest extends SysuiTestCase {
 
         mSpyContext = spy(mContext);
         doNothing().when(mSpyContext).startActivity(any());
+
+        when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
         final SecureSettings secureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 secureSettings);
@@ -181,8 +191,17 @@ public class MenuViewTest extends SysuiTestCase {
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
     public void gotoEditScreen_sendsIntent() {
+        mockActivityQuery(true);
         mMenuView.gotoEditScreen();
         verify(mSpyContext).startActivity(any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void gotoEditScreen_noResolve_doesNotStart() {
+        mockActivityQuery(false);
+        mMenuView.gotoEditScreen();
+        verify(mSpyContext, never()).startActivity(any());
     }
 
     private InstantInsetLayerDrawable getMenuViewInsetLayer() {
@@ -206,5 +225,15 @@ public class MenuViewTest extends SysuiTestCase {
     public void tearDown() throws Exception {
         mUiModeManager.setNightMode(mNightMode);
         Prefs.putString(mContext, Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, mLastPosition);
+    }
+
+    private void mockActivityQuery(boolean successfulQuery) {
+        // Query just needs to return a non-empty set to be successful.
+        ArrayList<ResolveInfo> resolveInfos = new ArrayList<>();
+        if (successfulQuery) {
+            resolveInfos.add(new ResolveInfo());
+        }
+        when(mMockPackageManager.queryIntentActivities(
+                any(), any(PackageManager.ResolveInfoFlags.class))).thenReturn(resolveInfos);
     }
 }
