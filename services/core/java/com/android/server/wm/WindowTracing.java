@@ -109,6 +109,9 @@ class WindowTracing {
             return;
         }
         synchronized (mEnabledLock) {
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
+                ((LegacyProtoLogImpl) ProtoLog.getSingleInstance()).startProtoLog(pw);
+            }
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
@@ -135,6 +138,9 @@ class WindowTracing {
             }
             writeTraceToFileLocked();
             logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
+        }
+        if (!android.tracing.Flags.perfettoProtologTracing()) {
+            ((LegacyProtoLogImpl) ProtoLog.getSingleInstance()).stopProtoLog(pw, true);
         }
     }
 
