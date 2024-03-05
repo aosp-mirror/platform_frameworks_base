@@ -1038,6 +1038,11 @@ public abstract class Window {
     }
 
     /** @hide */
+    public final void setSystemBarAppearance(@WindowInsetsController.Appearance int appearance) {
+        mSystemBarAppearance = appearance;
+    }
+
+    /** @hide */
     @WindowInsetsController.Appearance
     public final int getSystemBarAppearance() {
         return mSystemBarAppearance;
@@ -1046,7 +1051,7 @@ public abstract class Window {
     /** @hide */
     public final void dispatchOnSystemBarAppearanceChanged(
             @WindowInsetsController.Appearance int appearance) {
-        mSystemBarAppearance = appearance;
+        setSystemBarAppearance(appearance);
         if (mDecorCallback != null) {
             mDecorCallback.onSystemBarAppearanceChanged(appearance);
         }
