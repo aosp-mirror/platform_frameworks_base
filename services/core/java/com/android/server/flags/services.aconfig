@@ -1,0 +1,8 @@
+package: "com.android.server.flags"
+
+flag {
+     namespace: "wear_frameworks"
+     name: "enable_odp_feature_guard"
+     description: "Enable guard based on system feature to prevent OnDevicePersonalization service from starting on form factors."
+     bug: "322249125"
+}
