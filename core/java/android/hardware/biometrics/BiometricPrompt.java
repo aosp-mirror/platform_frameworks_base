@@ -23,7 +23,6 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
 import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
-import static android.hardware.biometrics.Flags.FLAG_FACE_BACKGROUND_AUTHENTICATION;
 import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
 import static android.multiuser.Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE;
 
@@ -1128,8 +1127,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         @Override
-        @TestApi
-        @FlaggedApi(FLAG_FACE_BACKGROUND_AUTHENTICATION)
         public void onAuthenticationAcquired(int acquireInfo) {}
 
         /**
