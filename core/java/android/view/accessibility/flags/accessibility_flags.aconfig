@@ -94,6 +94,13 @@ flag {
 }
 
 flag {
+    namespace: "accessibility"
+    name: "remove_child_hover_check_for_touch_exploration"
+    description: "Remove a check for a hovered child that prevents touch events from being delegated to non-direct descendants"
+    bug: "304770837"
+}
+
+flag {
     name: "skip_accessibility_warning_dialog_for_trusted_services"
     namespace: "accessibility"
     description: "Skips showing the accessibility warning dialog for trusted services."

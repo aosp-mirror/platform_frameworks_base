@@ -24,6 +24,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+import static android.view.accessibility.Flags.removeChildHoverCheckForTouchExploration;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
@@ -16905,9 +16906,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Dispatching hover events to {@link TouchDelegate} to improve accessibility.
      * <p>
      * This method is dispatching hover events to the delegate target to support explore by touch.
-     * Similar to {@link ViewGroup#dispatchTouchEvent}, this method send proper hover events to
+     * Similar to {@link ViewGroup#dispatchTouchEvent}, this method sends proper hover events to
      * the delegate target according to the pointer and the touch area of the delegate while touch
-     * exploration enabled.
+     * exploration is enabled.
      * </p>
      *
      * @param event The motion event dispatch to the delegate target.
@@ -16939,17 +16940,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // hover events but receive accessibility focus, it should also not delegate to these
         // views when hovered.
         if (!oldHoveringTouchDelegate) {
-            if ((action == MotionEvent.ACTION_HOVER_ENTER
-                    || action == MotionEvent.ACTION_HOVER_MOVE)
-                    && !pointInHoveredChild(event)
-                    && pointInDelegateRegion) {
-                mHoveringTouchDelegate = true;
+            if (removeChildHoverCheckForTouchExploration()) {
+                if ((action == MotionEvent.ACTION_HOVER_ENTER
+                        || action == MotionEvent.ACTION_HOVER_MOVE) && pointInDelegateRegion) {
+                    mHoveringTouchDelegate = true;
+                }
+            } else {
+                if ((action == MotionEvent.ACTION_HOVER_ENTER
+                        || action == MotionEvent.ACTION_HOVER_MOVE)
+                        && !pointInHoveredChild(event)
+                        && pointInDelegateRegion) {
+                    mHoveringTouchDelegate = true;
+                }
             }
         } else {
-            if (action == MotionEvent.ACTION_HOVER_EXIT
-                    || (action == MotionEvent.ACTION_HOVER_MOVE
+            if (removeChildHoverCheckForTouchExploration()) {
+                if (action == MotionEvent.ACTION_HOVER_EXIT
+                        || (action == MotionEvent.ACTION_HOVER_MOVE)) {
+                    if (!pointInDelegateRegion) {
+                        mHoveringTouchDelegate = false;
+                    }
+                }
+            } else {
+                if (action == MotionEvent.ACTION_HOVER_EXIT
+                        || (action == MotionEvent.ACTION_HOVER_MOVE
                         && (pointInHoveredChild(event) || !pointInDelegateRegion))) {
-                mHoveringTouchDelegate = false;
+                    mHoveringTouchDelegate = false;
+                }
             }
         }
         switch (action) {
