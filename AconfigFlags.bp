@@ -335,6 +335,17 @@ java_aconfig_library {
     mode: "exported",
 }
 
+cc_aconfig_library {
+    name: "android.os.flags-aconfig-cc",
+    aconfig_declarations: "android.os.flags-aconfig",
+}
+
+cc_aconfig_library {
+    name: "android.os.flags-aconfig-cc-test",
+    aconfig_declarations: "android.os.flags-aconfig",
+    mode: "test",
+}
+
 // VirtualDeviceManager
 cc_aconfig_library {
     name: "android.companion.virtualdevice.flags-aconfig-cc",
