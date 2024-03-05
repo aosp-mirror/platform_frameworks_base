@@ -47,6 +47,7 @@ import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
+import com.android.systemui.Flags
 import com.android.systemui.FontSizeUtils
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
@@ -134,7 +135,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
      */
     protected var showRippleEffect = true
 
-    private lateinit var ripple: RippleDrawable
+    private lateinit var qsTileBackground: LayerDrawable
     private lateinit var backgroundDrawable: LayerDrawable
     private lateinit var backgroundBaseDrawable: Drawable
     private lateinit var backgroundOverlayDrawable: Drawable
@@ -283,15 +284,20 @@ open class QSTileViewImpl @JvmOverloads constructor(
         addView(sideView)
     }
 
-    fun createTileBackground(): Drawable {
-        ripple = mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
-        backgroundDrawable = ripple.findDrawableByLayerId(R.id.background) as LayerDrawable
+    private fun createTileBackground(): Drawable {
+        qsTileBackground = if (Flags.qsTileFocusState()) {
+            mContext.getDrawable(R.drawable.qs_tile_background_flagged) as LayerDrawable
+        } else {
+            mContext.getDrawable(R.drawable.qs_tile_background) as RippleDrawable
+        }
+        backgroundDrawable =
+            qsTileBackground.findDrawableByLayerId(R.id.background) as LayerDrawable
         backgroundBaseDrawable =
             backgroundDrawable.findDrawableByLayerId(R.id.qs_tile_background_base)
         backgroundOverlayDrawable =
             backgroundDrawable.findDrawableByLayerId(R.id.qs_tile_background_overlay)
         backgroundOverlayDrawable.mutate().setTintMode(PorterDuff.Mode.SRC)
-        return ripple
+        return qsTileBackground
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -366,14 +372,16 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun setClickable(clickable: Boolean) {
         super.setClickable(clickable)
-        background = if (clickable && showRippleEffect) {
-            ripple.also {
-                // In case that the colorBackgroundDrawable was used as the background, make sure
-                // it has the correct callback instead of null
-                backgroundDrawable.callback = it
+        if (!Flags.qsTileFocusState()){
+            background = if (clickable && showRippleEffect) {
+                qsTileBackground.also {
+                    // In case that the colorBackgroundDrawable was used as the background, make sure
+                    // it has the correct callback instead of null
+                    backgroundDrawable.callback = it
+                }
+            } else {
+                backgroundDrawable
             }
-        } else {
-            backgroundDrawable
         }
     }
 
