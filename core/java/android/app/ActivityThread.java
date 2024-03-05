@@ -4565,7 +4565,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private void schedulePauseWithUserLeavingHint(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(mAppThread);
         final PauseActivityItem pauseActivityItem = PauseActivityItem.obtain(r.token,
-                r.activity.isFinishing(), /* userLeaving */ true, r.activity.mConfigChangeFlags,
+                r.activity.isFinishing(), /* userLeaving */ true,
                 /* dontReport */ false, /* autoEnteringPip */ false);
         transaction.addTransactionItem(pauseActivityItem);
         executeTransaction(transaction);
@@ -5439,13 +5439,12 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @Override
     public void handlePauseActivity(ActivityClientRecord r, boolean finished, boolean userLeaving,
-            int configChanges, boolean autoEnteringPip, PendingTransactionActions pendingActions,
+            boolean autoEnteringPip, PendingTransactionActions pendingActions,
             String reason) {
         if (userLeaving) {
             performUserLeavingActivity(r);
         }
 
-        r.activity.mConfigChangeFlags |= configChanges;
         if (autoEnteringPip) {
             // Set mIsInPictureInPictureMode earlier in case of auto-enter-pip, see also
             // {@link Activity#enterPictureInPictureMode(PictureInPictureParams)}.
@@ -5694,9 +5693,8 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public void handleStopActivity(ActivityClientRecord r, int configChanges,
+    public void handleStopActivity(ActivityClientRecord r,
             PendingTransactionActions pendingActions, boolean finalStateRequest, String reason) {
-        r.activity.mConfigChangeFlags |= configChanges;
 
         final StopInfo stopInfo = new StopInfo();
         performStopActivityInner(r, stopInfo, true /* saveState */, finalStateRequest,
@@ -5866,11 +5864,10 @@ public final class ActivityThread extends ClientTransactionHandler
 
     /** Core implementation of activity destroy call. */
     void performDestroyActivity(ActivityClientRecord r, boolean finishing,
-            int configChanges, boolean getNonConfigInstance, String reason) {
+            boolean getNonConfigInstance, String reason) {
         Class<? extends Activity> activityClass;
         if (localLOGV) Slog.v(TAG, "Performing finish of " + r);
         activityClass = r.activity.getClass();
-        r.activity.mConfigChangeFlags |= configChanges;
         if (finishing) {
             r.activity.mFinished = true;
         }
@@ -5935,9 +5932,9 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public void handleDestroyActivity(ActivityClientRecord r, boolean finishing, int configChanges,
+    public void handleDestroyActivity(ActivityClientRecord r, boolean finishing,
             boolean getNonConfigInstance, String reason) {
-        performDestroyActivity(r, finishing, configChanges, getNonConfigInstance, reason);
+        performDestroyActivity(r, finishing, getNonConfigInstance, reason);
         cleanUpPendingRemoveWindows(r, finishing);
         WindowManager wm = r.activity.getWindowManager();
         View v = r.activity.mDecor;
@@ -6137,7 +6134,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         r.activity.mChangingConfigurations = true;
 
-        handleRelaunchActivityInner(r, configChanges, tmp.pendingResults, tmp.pendingIntents,
+        handleRelaunchActivityInner(r, tmp.pendingResults, tmp.pendingIntents,
                 pendingActions, tmp.startsNotResumed, tmp.overrideConfig, tmp.mActivityWindowInfo,
                 "handleRelaunchActivity");
     }
@@ -6206,7 +6203,7 @@ public final class ActivityThread extends ClientTransactionHandler
         executeTransaction(transaction);
     }
 
-    private void handleRelaunchActivityInner(@NonNull ActivityClientRecord r, int configChanges,
+    private void handleRelaunchActivityInner(@NonNull ActivityClientRecord r,
             @Nullable List<ResultInfo> pendingResults,
             @Nullable List<ReferrerIntent> pendingIntents,
             @NonNull PendingTransactionActions pendingActions, boolean startsNotResumed,
@@ -6222,7 +6219,7 @@ public final class ActivityThread extends ClientTransactionHandler
             callActivityOnStop(r, true /* saveState */, reason);
         }
 
-        handleDestroyActivity(r, false, configChanges, true, reason);
+        handleDestroyActivity(r, false /* finishing */, true /* getNonConfigInstance */, reason);
 
         r.activity = null;
         r.window = null;

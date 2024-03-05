@@ -988,7 +988,7 @@ public class ActivityThreadTest {
     @NonNull
     private static ClientTransaction newStopTransaction(@NonNull Activity activity) {
         final StopActivityItem stopStateRequest = StopActivityItem.obtain(
-                activity.getActivityToken(), 0 /* configChanges */);
+                activity.getActivityToken());
 
         final ClientTransaction transaction = newTransaction(activity);
         transaction.addTransactionItem(stopStateRequest);
