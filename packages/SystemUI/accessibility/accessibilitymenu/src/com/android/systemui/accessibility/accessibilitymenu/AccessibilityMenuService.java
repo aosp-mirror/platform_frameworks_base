@@ -56,10 +56,12 @@ public class AccessibilityMenuService extends AccessibilityService
         implements View.OnTouchListener {
 
     public static final String PACKAGE_NAME = AccessibilityMenuService.class.getPackageName();
+    public static final String PACKAGE_TESTS = ".tests";
     public static final String INTENT_TOGGLE_MENU = ".toggle_menu";
     public static final String INTENT_HIDE_MENU = ".hide_menu";
     public static final String INTENT_GLOBAL_ACTION = ".global_action";
     public static final String INTENT_GLOBAL_ACTION_EXTRA = "GLOBAL_ACTION";
+    public static final String INTENT_OPEN_BLOCKED = "OPEN_BLOCKED";
 
     private static final String TAG = "A11yMenuService";
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
@@ -192,7 +194,7 @@ public class AccessibilityMenuService extends AccessibilityService
 
         IntentFilter hideMenuFilter = new IntentFilter();
         hideMenuFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        hideMenuFilter.addAction(PACKAGE_NAME + INTENT_HIDE_MENU);
+        hideMenuFilter.addAction(INTENT_HIDE_MENU);
 
         // Including WRITE_SECURE_SETTINGS enforces that we only listen to apps
         // with the restricted WRITE_SECURE_SETTINGS permission who broadcast this intent.
@@ -200,7 +202,7 @@ public class AccessibilityMenuService extends AccessibilityService
                 Manifest.permission.WRITE_SECURE_SETTINGS, null,
                 Context.RECEIVER_EXPORTED);
         registerReceiver(mToggleMenuReceiver,
-                new IntentFilter(PACKAGE_NAME + INTENT_TOGGLE_MENU),
+                new IntentFilter(INTENT_TOGGLE_MENU),
                 Manifest.permission.WRITE_SECURE_SETTINGS, null,
                 Context.RECEIVER_EXPORTED);
 
@@ -245,8 +247,9 @@ public class AccessibilityMenuService extends AccessibilityService
      * @return {@code true} if successful, {@code false} otherwise.
      */
     private boolean performGlobalActionInternal(int globalAction) {
-        Intent intent = new Intent(PACKAGE_NAME + INTENT_GLOBAL_ACTION);
+        Intent intent = new Intent(INTENT_GLOBAL_ACTION);
         intent.putExtra(INTENT_GLOBAL_ACTION_EXTRA, globalAction);
+        intent.setPackage(PACKAGE_NAME + PACKAGE_TESTS);
         sendBroadcast(intent);
         Log.i("A11yMenuService", "Broadcasting global action " + globalAction);
         return performGlobalAction(globalAction);
@@ -410,9 +413,16 @@ public class AccessibilityMenuService extends AccessibilityService
 
     private void toggleVisibility() {
         boolean locked = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
-        if (!locked && SystemClock.uptimeMillis() - mLastTimeTouchedOutside
-                        > BUTTON_CLICK_TIMEOUT) {
-            mA11yMenuLayout.toggleVisibility();
+        if (!locked) {
+            if (SystemClock.uptimeMillis() - mLastTimeTouchedOutside
+                    > BUTTON_CLICK_TIMEOUT) {
+                mA11yMenuLayout.toggleVisibility();
+            }
+        } else {
+            // Broadcast for testing.
+            Intent intent = new Intent(INTENT_OPEN_BLOCKED);
+            intent.setPackage(PACKAGE_NAME + PACKAGE_TESTS);
+            sendBroadcast(intent);
         }
     }
 }
