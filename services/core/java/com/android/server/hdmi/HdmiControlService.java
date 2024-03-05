@@ -4665,15 +4665,27 @@ public class HdmiControlService extends SystemService {
         public void onAudioDeviceVolumeChanged(
                 @NonNull AudioDeviceAttributes audioDevice,
                 @NonNull VolumeInfo volumeInfo) {
+            int localDeviceAddress = mLocalDevice.getDeviceInfo().getLogicalAddress();
 
-            // Do nothing if the System Audio device does not support <Set Audio Volume Level>
+            // We can't send <Set Audio Volume Level> if the System Audio device doesn't support it.
+            // But AudioService has already updated its volume and expects us to set it.
+            // So the best we can do is to send <Give Audio Status>, which triggers
+            // <Report Audio Status>, which should update AudioService with its correct volume.
             if (mSystemAudioDevice.getDeviceFeatures().getSetAudioVolumeLevelSupport()
                     != DeviceFeatures.FEATURE_SUPPORTED) {
+                // Update the volume tracked in AbsoluteVolumeAudioStatusAction
+                // so it correctly processes the next <Report Audio Status>
+                HdmiCecLocalDevice avbDevice = isTvDevice() ? tv() : playback();
+                avbDevice.updateAvbVolume(volumeInfo.getVolumeIndex());
+                // Send <Give Audio Status>
+                sendCecCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
+                        localDeviceAddress,
+                        mSystemAudioDevice.getLogicalAddress()
+                ));
                 return;
             }
 
             // Send <Set Audio Volume Level> to notify the System Audio device of the volume change
-            int localDeviceAddress = mLocalDevice.getDeviceInfo().getLogicalAddress();
             sendCecCommand(SetAudioVolumeLevelMessage.build(
                             localDeviceAddress,
                             mSystemAudioDevice.getLogicalAddress(),
