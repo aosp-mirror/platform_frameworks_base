@@ -336,7 +336,7 @@ fun CreationSelectionCard(
             if (!footerDescription.isNullOrBlank()) {
                 item {
                     Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                        BodySmallText(text = footerDescription)
+                        BodyMediumText(text = footerDescription)
                     }
                 }
                 item { Divider(thickness = 24.dp, color = Color.Transparent) }
