@@ -186,7 +186,7 @@ public final class ServiceBindingOomAdjPolicyTest {
                 any());
         doReturn(true).when(mAms.mOomAdjuster.mCachedAppOptimizer).useFreezer();
         doNothing().when(mAms.mOomAdjuster.mCachedAppOptimizer).freezeAppAsyncInternalLSP(
-                any(), anyLong(), anyBoolean());
+                any(), anyLong(), anyBoolean(), anyBoolean());
         doReturn(false).when(mAms.mAppProfiler).updateLowMemStateLSP(anyInt(), anyInt(),
                 anyInt(), anyLong());
 
@@ -503,7 +503,7 @@ public final class ServiceBindingOomAdjPolicyTest {
         if (clientApp.isFreezable()) {
             verify(mAms.mOomAdjuster.mCachedAppOptimizer,
                     times(Flags.serviceBindingOomAdjPolicy() ? 1 : 0))
-                    .freezeAppAsyncInternalLSP(eq(clientApp), eq(0L), anyBoolean());
+                    .freezeAppAsyncInternalLSP(eq(clientApp), eq(0L), anyBoolean(), anyBoolean());
             clearInvocations(mAms.mOomAdjuster.mCachedAppOptimizer);
         }
 

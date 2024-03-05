@@ -283,4 +283,9 @@ public abstract class BaseBroadcastQueueTest {
         receiverList.add(res);
         return res;
     }
+
+    void setProcessFreezable(ProcessRecord app, boolean pendingFreeze, boolean frozen) {
+        app.mOptRecord.setPendingFreeze(pendingFreeze);
+        app.mOptRecord.setFrozen(frozen);
+    }
 }

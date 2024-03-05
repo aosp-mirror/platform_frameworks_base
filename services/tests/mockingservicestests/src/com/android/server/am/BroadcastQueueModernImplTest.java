@@ -99,7 +99,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
     private static final int TEST_UID2 = android.os.Process.FIRST_APPLICATION_UID + 1;
 
-    @Mock ProcessRecord mProcess;
+    ProcessRecord mProcess;
 
     @Mock BroadcastProcessQueue mQueue1;
     @Mock BroadcastProcessQueue mQueue2;
@@ -126,6 +126,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
         doReturn(2L).when(mQueue2).getRunnableAt();
         doReturn(3L).when(mQueue3).getRunnableAt();
         doReturn(4L).when(mQueue4).getRunnableAt();
+
+        final ApplicationInfo ai = makeApplicationInfo(PACKAGE_ORANGE);
+        mProcess = spy(new ProcessRecord(mAms, ai, ai.processName, ai.uid));
     }
 
     @After
@@ -1744,6 +1747,31 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
             assertEquals("Unexpected state for " + r,
                     BroadcastRecord.DELIVERY_PENDING, r.getDeliveryState(i));
         }, false /* andRemove */);
+    }
+
+    @Test
+    public void testIsProcessFreezable() throws Exception {
+        final ProcessRecord greenProcess = makeProcessRecord(makeApplicationInfo(PACKAGE_GREEN));
+
+        setProcessFreezable(greenProcess, true /* pendingFreeze */, true /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertTrue(mImpl.isProcessFreezable(greenProcess));
+
+        setProcessFreezable(greenProcess, true /* pendingFreeze */, false /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertTrue(mImpl.isProcessFreezable(greenProcess));
+
+        setProcessFreezable(greenProcess, false /* pendingFreeze */, true /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertTrue(mImpl.isProcessFreezable(greenProcess));
+
+        setProcessFreezable(greenProcess, false /* pendingFreeze */, false /* frozen */);
+        mImpl.onProcessFreezableChangedLocked(greenProcess);
+        waitForIdle();
+        assertFalse(mImpl.isProcessFreezable(greenProcess));
     }
 
     // TODO: Reuse BroadcastQueueTest.makeActiveProcessRecord()
