@@ -346,11 +346,15 @@ public class HearingAidDeviceManager {
         } else {
             long hiSyncId = asha.getHiSyncId(cachedDevice.getDevice());
             if (isValidHiSyncId(hiSyncId)) {
-                final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                final HearingAidInfo info = new HearingAidInfo.Builder()
                         .setAshaDeviceSide(asha.getDeviceSide(cachedDevice.getDevice()))
                         .setAshaDeviceMode(asha.getDeviceMode(cachedDevice.getDevice()))
-                        .setHiSyncId(hiSyncId);
-                return infoBuilder.build();
+                        .setHiSyncId(hiSyncId)
+                        .build();
+                if (DEBUG) {
+                    Log.d(TAG, "generateHearingAidInfo, " + cachedDevice + ", info=" + info);
+                }
+                return info;
             }
         }
 
@@ -358,15 +362,20 @@ public class HearingAidDeviceManager {
         final LeAudioProfile leAudioProfile = profileManager.getLeAudioProfile();
         if (hapClientProfile == null || leAudioProfile == null) {
             Log.w(TAG, "HapClientProfile or LeAudioProfile is not supported on this device");
-        } else {
+        } else if (cachedDevice.getProfiles().stream().anyMatch(
+                p -> p instanceof HapClientProfile)) {
             int audioLocation = leAudioProfile.getAudioLocation(cachedDevice.getDevice());
             int hearingAidType = hapClientProfile.getHearingAidType(cachedDevice.getDevice());
             if (audioLocation != BluetoothLeAudio.AUDIO_LOCATION_INVALID
                     && hearingAidType != HapClientProfile.HearingAidType.TYPE_INVALID) {
-                final HearingAidInfo.Builder infoBuilder = new HearingAidInfo.Builder()
+                final HearingAidInfo info = new HearingAidInfo.Builder()
                         .setLeAudioLocation(audioLocation)
-                        .setHapDeviceType(hearingAidType);
-                return infoBuilder.build();
+                        .setHapDeviceType(hearingAidType)
+                        .build();
+                if (DEBUG) {
+                    Log.d(TAG, "generateHearingAidInfo, " + cachedDevice + ", info=" + info);
+                }
+                return info;
             }
         }
 

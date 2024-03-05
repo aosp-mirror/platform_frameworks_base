@@ -16,8 +16,6 @@
 
 package com.android.server.os;
 
-import android.app.admin.flags.Flags;
-
 import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -27,15 +25,19 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.flags.Flags;
 import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.BugreportManager.BugreportCallback;
+import android.os.BugreportParams;
 import android.os.IBinder;
 import android.os.IDumpstateListener;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -75,6 +77,10 @@ public class BugreportManagerServiceImplTest {
 
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private UserManager mMockUserManager;
+    @Mock
+    private DevicePolicyManager mMockDevicePolicyManager;
 
     private int mCallingUid = 1234;
     private String mCallingPackage  = "test.package";
@@ -91,10 +97,12 @@ public class BugreportManagerServiceImplTest {
         ArraySet<String> mAllowlistedPackages = new ArraySet<>();
         mAllowlistedPackages.add(mContext.getPackageName());
         mService = new BugreportManagerServiceImpl(
-                new BugreportManagerServiceImpl.Injector(mContext, mAllowlistedPackages,
-                        mMappingFile));
+                new TestInjector(mContext, mAllowlistedPackages, mMappingFile,
+                        mMockUserManager, mMockDevicePolicyManager));
         mBugreportFileManager = new BugreportManagerServiceImpl.BugreportFileManager(mMappingFile);
         when(mPackageManager.getPackageUidAsUser(anyString(), anyInt())).thenReturn(mCallingUid);
+        // The calling user is an admin user by default.
+        when(mMockUserManager.isUserAdmin(anyInt())).thenReturn(true);
     }
 
     @After
@@ -182,6 +190,36 @@ public class BugreportManagerServiceImplTest {
     }
 
     @Test
+    public void testStartBugreport_throwsForNonAdminUser() throws Exception {
+        when(mMockUserManager.isUserAdmin(anyInt())).thenReturn(false);
+
+        Exception thrown = assertThrows(IllegalArgumentException.class,
+                () -> mService.startBugreport(mCallingUid, mContext.getPackageName(),
+                        new FileDescriptor(), /* screenshotFd= */ null,
+                        BugreportParams.BUGREPORT_MODE_FULL,
+                        /* flags= */ 0, new Listener(new CountDownLatch(1)),
+                        /* isScreenshotRequested= */ false));
+
+        assertThat(thrown.getMessage()).contains("not an admin user");
+    }
+
+    @Test
+    public void testStartBugreport_throwsForNotAffiliatedUser() throws Exception {
+        when(mMockUserManager.isUserAdmin(anyInt())).thenReturn(false);
+        when(mMockDevicePolicyManager.getDeviceOwnerUserId()).thenReturn(-1);
+        when(mMockDevicePolicyManager.isAffiliatedUser(anyInt())).thenReturn(false);
+
+        Exception thrown = assertThrows(IllegalArgumentException.class,
+                () -> mService.startBugreport(mCallingUid, mContext.getPackageName(),
+                        new FileDescriptor(), /* screenshotFd= */ null,
+                        BugreportParams.BUGREPORT_MODE_REMOTE,
+                        /* flags= */ 0, new Listener(new CountDownLatch(1)),
+                        /* isScreenshotRequested= */ false));
+
+        assertThat(thrown.getMessage()).contains("not affiliated to the device owner");
+    }
+
+    @Test
     public void testRetrieveBugreportWithoutFilesForCaller() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         Listener listener = new Listener(latch);
@@ -224,7 +262,8 @@ public class BugreportManagerServiceImplTest {
 
     private void clearAllowlist() {
         mService = new BugreportManagerServiceImpl(
-                new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>(), mMappingFile));
+                new TestInjector(mContext, new ArraySet<>(), mMappingFile,
+                        mMockUserManager, mMockDevicePolicyManager));
     }
 
     private static class Listener implements IDumpstateListener {
@@ -273,6 +312,29 @@ public class BugreportManagerServiceImplTest {
         @Override
         public void accept(Boolean successful) {
             complete(successful);
+        }
+    }
+
+    private static class TestInjector extends BugreportManagerServiceImpl.Injector {
+
+        private final UserManager mUserManager;
+        private final DevicePolicyManager mDevicePolicyManager;
+
+        TestInjector(Context context, ArraySet<String> allowlistedPackages, AtomicFile mappingFile,
+                UserManager um, DevicePolicyManager dpm) {
+            super(context, allowlistedPackages, mappingFile);
+            mUserManager = um;
+            mDevicePolicyManager = dpm;
+        }
+
+        @Override
+        public UserManager getUserManager() {
+            return mUserManager;
+        }
+
+        @Override
+        public DevicePolicyManager getDevicePolicyManager() {
+            return mDevicePolicyManager;
         }
     }
 }

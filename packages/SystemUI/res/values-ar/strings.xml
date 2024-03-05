@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"استصدار رنين"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"اهتزاز"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"كتم الصوت"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"البثّ"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"يتعذّر التغيير بسبب كتم صوت الرنين."</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. انقر لإلغاء التجاهل."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>

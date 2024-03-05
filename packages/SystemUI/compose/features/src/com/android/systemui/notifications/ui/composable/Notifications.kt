@@ -71,8 +71,7 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadi
 import com.android.systemui.notifications.ui.composable.Notifications.Form
 import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
 import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
-import com.android.systemui.scene.ui.composable.Gone
-import com.android.systemui.scene.ui.composable.Shade
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackAppearanceViewBinder.SCRIM_CORNER_RADIUS
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
@@ -214,7 +213,7 @@ fun SceneScope.NotificationScrollingStack(
                     // in step with the transition so that it is 0 when it completes.
                     if (
                         scrimOffset.value < 0 &&
-                            layoutState.isTransitioning(from = Shade, to = Gone)
+                            layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Gone)
                     ) {
                         IntOffset(x = 0, y = (scrimOffset.value * expansionFraction).roundToInt())
                     } else {
@@ -226,7 +225,7 @@ fun SceneScope.NotificationScrollingStack(
                         calculateCornerRadius(
                                 screenCornerRadius,
                                 { expansionFraction },
-                                layoutState.isTransitioningBetween(Gone, Shade)
+                                layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)
                             )
                             .let {
                                 RoundedCornerShape(
@@ -250,7 +249,7 @@ fun SceneScope.NotificationScrollingStack(
                 Modifier.fillMaxSize()
                     .graphicsLayer {
                         alpha =
-                            if (layoutState.isTransitioningBetween(Gone, Shade)) {
+                            if (layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)) {
                                 (expansionFraction / EXPANSION_FOR_MAX_SCRIM_ALPHA).coerceAtMost(1f)
                             } else 1f
                     }

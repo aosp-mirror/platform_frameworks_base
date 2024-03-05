@@ -319,6 +319,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
+            if (SceneContainerFlag.isEnabled() && !mChildrenUpdateRequested) {
+                getViewTreeObserver().removeOnPreDrawListener(this);
+                return true;
+            }
             updateForcedScroll();
             updateChildren();
             mChildrenUpdateRequested = false;
@@ -680,7 +684,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 res.getBoolean(R.bool.config_drawNotificationBackground);
         setOutlineProvider(mOutlineProvider);
 
-        boolean willDraw = mShouldDrawNotificationBackground || mDebugLines;
+        // We could set this whenever we 'requestChildUpdate' much like the viewTreeObserver, but
+        // that adds a bunch of complexity, and drawing nothing isn't *that* expensive.
+        boolean willDraw = SceneContainerFlag.isEnabled()
+                || mShouldDrawNotificationBackground || mDebugLines;
         setWillNotDraw(!willDraw);
         mBackgroundPaint.setAntiAlias(true);
         if (mDebugLines) {
@@ -816,7 +823,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
+    private void onJustBeforeDraw() {
+        if (SceneContainerFlag.isEnabled()) {
+            if (mChildrenUpdateRequested) {
+                updateForcedScroll();
+                updateChildren();
+                mChildrenUpdateRequested = false;
+            }
+        }
+    }
+
     protected void onDraw(Canvas canvas) {
+        onJustBeforeDraw();
         if (mShouldDrawNotificationBackground
                 && (mSections[0].getCurrentBounds().top
                 < mSections[mSections.length - 1].getCurrentBounds().bottom

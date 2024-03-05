@@ -30,7 +30,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
@@ -125,7 +125,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             )
             kosmos.fakeDeviceEntryRepository.setUnlocked(false)
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -137,7 +137,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             )
             kosmos.fakeDeviceEntryRepository.setUnlocked(true)
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -148,9 +148,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
-            sceneInteractor.changeScene(SceneKey.Lockscreen, "reason")
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -163,9 +163,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.None
             )
             runCurrent()
-            sceneInteractor.changeScene(SceneKey.Gone, "reason")
+            sceneInteractor.changeScene(Scenes.Gone, "reason")
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -206,7 +206,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -221,7 +221,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             underTest.onContentClicked()
 
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test

@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.authenticationRepository
@@ -31,7 +32,7 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -86,7 +87,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PATTERN)
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
             assertThat(underTest.authenticationMethod).isEqualTo(AuthenticationMethodModel.Pattern)
         }
 
@@ -104,7 +105,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(message?.text).isEmpty()
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -159,7 +160,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(message?.text).isEqualTo(WRONG_PATTERN)
-            assertThat(currentScene).isEqualTo(SceneKey.Bouncer)
+            assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
     @Test
@@ -369,8 +370,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)
-        val bouncerShown = currentScene != SceneKey.Bouncer && toScene == SceneKey.Bouncer
-        val bouncerHidden = currentScene == SceneKey.Bouncer && toScene != SceneKey.Bouncer
+        val bouncerShown = currentScene != Scenes.Bouncer && toScene == Scenes.Bouncer
+        val bouncerHidden = currentScene == Scenes.Bouncer && toScene != Scenes.Bouncer
         sceneInteractor.changeScene(toScene, "reason")
         if (bouncerShown) underTest.onShown()
         if (bouncerHidden) underTest.onHidden()
@@ -384,7 +385,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             AuthenticationMethodModel.Pattern
         )
         kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-        switchToScene(SceneKey.Bouncer)
+        switchToScene(Scenes.Bouncer)
     }
 
     companion object {

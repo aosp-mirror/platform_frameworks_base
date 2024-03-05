@@ -36,13 +36,16 @@ import android.app.ondeviceintelligence.ProcessingSignal;
 import android.app.ondeviceintelligence.StreamingResponseReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.service.ondeviceintelligence.OnDeviceIntelligenceService.OnDeviceUpdateProcessingException;
 import android.util.Log;
 import android.util.Slog;
 
@@ -64,6 +67,11 @@ import java.util.function.Consumer;
  * <p> A service that provides methods to perform on-device inference both in streaming and
  * non-streaming fashion. Also, provides a way to register a storage service that will be used to
  * read-only access files from the {@link OnDeviceIntelligenceService} counterpart. </p>
+ *
+ * <p> Similar to {@link OnDeviceIntelligenceManager} class, the contracts in this service are
+ * defined to be open-ended in general, to allow interoperability. Therefore, it is recommended
+ * that implementations of this system-service expose this API to the clients via a library which
+ * has more defined contract.</p>
  *
  * <pre>
  * {@literal
@@ -152,6 +160,17 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
                             wrapResponseCallback(callback)
                     );
                 }
+
+                @Override
+                public void updateProcessingState(Bundle processingState,
+                        IProcessingUpdateStatusCallback callback) {
+                    Objects.requireNonNull(processingState);
+                    Objects.requireNonNull(callback);
+
+                    OnDeviceTrustedInferenceService.this.onUpdateProcessingState(processingState,
+                            wrapOutcomeReceiver(callback)
+                    );
+                }
             };
         }
         Slog.w(TAG, "Incorrect service interface, returning null.");
@@ -232,6 +251,21 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
             @Nullable ProcessingSignal processingSignal,
             @NonNull OutcomeReceiver<Content,
                     OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> callback);
+
+
+    /**
+     * Invoked when processing environment needs to be updated or refreshed with fresh
+     * configuration, files or state.
+     *
+     * @param processingState contains updated state and params that are to be applied to the
+     *                        processing environmment,
+     * @param callback        callback to populate the update status and if there are params
+     *                        associated with the status.
+     */
+    public abstract void onUpdateProcessingState(@NonNull Bundle processingState,
+            @NonNull OutcomeReceiver<PersistableBundle,
+                    OnDeviceUpdateProcessingException> callback);
+
 
     /**
      * Overrides {@link Context#openFileInput} to read files with the given file names under the
@@ -407,4 +441,31 @@ public abstract class OnDeviceTrustedInferenceService extends Service {
             }
         };
     }
+
+    @NonNull
+    private static OutcomeReceiver<PersistableBundle, OnDeviceUpdateProcessingException> wrapOutcomeReceiver(
+            IProcessingUpdateStatusCallback callback) {
+        return new OutcomeReceiver<>() {
+            @Override
+            public void onResult(@NonNull PersistableBundle result) {
+                try {
+                    callback.onSuccess(result);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error sending result: " + e);
+
+                }
+            }
+
+            @Override
+            public void onError(
+                    @androidx.annotation.NonNull OnDeviceUpdateProcessingException error) {
+                try {
+                    callback.onFailure(error.getErrorCode(), error.getMessage());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error sending exception details: " + e);
+                }
+            }
+        };
+    }
+
 }

@@ -817,13 +817,8 @@ final class AccessibilityController {
             switch (transition) {
                 case WindowManagerPolicy.TRANSIT_ENTER:
                 case WindowManagerPolicy.TRANSIT_SHOW: {
-                    if (!isMagnifierActivated) {
+                    if (!isMagnifierActivated || !windowState.shouldMagnify()) {
                         break;
-                    }
-                    if (Flags.doNotCheckIntersectionWhenNonMagnifiableWindowTransitions()) {
-                        if (!windowState.shouldMagnify()) {
-                            break;
-                        }
                     }
                     switch (type) {
                         case WindowManager.LayoutParams.TYPE_APPLICATION:

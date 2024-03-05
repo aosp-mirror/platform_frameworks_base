@@ -309,7 +309,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 if (mVibrateOnOpening) {
                     vibrateOnNavigationKeyDown();
                 }
-                mShadeViewController.expand(true /* animate */);
+                mShadeController.animateExpandShade();
                 mNotificationStackScrollLayoutController.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count("panel_open", 1);

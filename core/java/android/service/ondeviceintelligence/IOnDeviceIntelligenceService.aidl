@@ -26,6 +26,7 @@ import android.app.ondeviceintelligence.IFeatureCallback;
 import android.app.ondeviceintelligence.IListFeaturesCallback;
 import android.app.ondeviceintelligence.IFeatureDetailsCallback;
 import com.android.internal.infra.AndroidFuture;
+import android.service.ondeviceintelligence.IRemoteProcessingService;
 
 
 /**
@@ -41,4 +42,5 @@ oneway interface IOnDeviceIntelligenceService {
     void getReadOnlyFileDescriptor(in String fileName, in AndroidFuture<ParcelFileDescriptor> future);
     void getReadOnlyFeatureFileDescriptorMap(in Feature feature, in RemoteCallback remoteCallback);
     void requestFeatureDownload(in Feature feature, in ICancellationSignal cancellationSignal, in IDownloadCallback downloadCallback);
+    void registerRemoteServices(in IRemoteProcessingService remoteProcessingService);
 }

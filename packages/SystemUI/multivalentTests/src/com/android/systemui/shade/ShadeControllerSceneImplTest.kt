@@ -18,6 +18,8 @@ package com.android.systemui.shade
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
@@ -28,8 +30,7 @@ import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.CommandQueue
@@ -87,7 +88,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade remains collapsed and the post-collapse action ran
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Gone)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
             verify(testRunnable, times(1)).run()
         }
 
@@ -105,7 +106,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade remains expanded and the post-collapse action did not run
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Shade)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Shade)
             assertThat(shadeInteractor.isAnyFullyExpanded.value).isTrue()
             verify(testRunnable, never()).run()
         }
@@ -122,7 +123,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade collapses back to lockscreen and the post-collapse action ran
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Lockscreen)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Lockscreen)
         }
 
     @Test
@@ -137,7 +138,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the shade collapses back to lockscreen and the post-collapse action ran
-            assertThat(sceneInteractor.currentScene.value).isEqualTo(SceneKey.Gone)
+            assertThat(sceneInteractor.currentScene.value).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -181,21 +182,21 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
     private fun setDeviceEntered(isEntered: Boolean) {
         setScene(
             if (isEntered) {
-                SceneKey.Gone
+                Scenes.Gone
             } else {
-                SceneKey.Lockscreen
+                Scenes.Lockscreen
             }
         )
         assertThat(deviceEntryInteractor.isDeviceEntered.value).isEqualTo(isEntered)
     }
 
     private fun setCollapsed() {
-        setScene(SceneKey.Gone)
+        setScene(Scenes.Gone)
         assertThat(shadeInteractor.isAnyExpanded.value).isFalse()
     }
 
     private fun setShadeFullyExpanded() {
-        setScene(SceneKey.Shade)
+        setScene(Scenes.Shade)
         assertThat(shadeInteractor.isAnyFullyExpanded.value).isTrue()
     }
 }

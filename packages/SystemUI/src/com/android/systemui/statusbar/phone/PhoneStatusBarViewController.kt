@@ -91,7 +91,7 @@ private constructor(
                 if (event.source == InputDevice.SOURCE_MOUSE) {
                     if (event.action == MotionEvent.ACTION_UP) {
                         v.performClick()
-                        shadeViewController.expand(/* animate= */ true)
+                        shadeController.animateExpandShade()
                     }
                     return true
                 }

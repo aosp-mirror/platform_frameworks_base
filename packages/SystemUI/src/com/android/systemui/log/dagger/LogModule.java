@@ -546,7 +546,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardLog
     public static LogBuffer provideKeyguardLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardLog", 250);
+        return factory.create("KeyguardLog", 500);
     }
 
     /**

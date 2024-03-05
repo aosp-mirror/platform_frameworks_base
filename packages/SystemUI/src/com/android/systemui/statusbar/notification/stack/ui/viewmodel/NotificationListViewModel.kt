@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.shared.model.StatusBarState
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -26,6 +23,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.SeenNotific
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.UserSetupInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.util.kotlin.combine
@@ -51,8 +49,7 @@ constructor(
     val footer: Optional<FooterViewModel>,
     val logger: Optional<NotificationLoggerViewModel>,
     activeNotificationsInteractor: ActiveNotificationsInteractor,
-    keyguardInteractor: KeyguardInteractor,
-    powerInteractor: PowerInteractor,
+    notificationStackInteractor: NotificationStackInteractor,
     remoteInputInteractor: RemoteInputInteractor,
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
@@ -71,7 +68,7 @@ constructor(
         } else {
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
-                    isShowingOnLockscreen,
+                    notificationStackInteractor.isShowingOnLockscreen,
                 ) { hasNotifications, isShowingOnLockscreen ->
                     hasNotifications || !isShowingOnLockscreen
                 }
@@ -86,7 +83,7 @@ constructor(
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
                     shadeInteractor.isQsFullscreen,
-                    isShowingOnLockscreen,
+                    notificationStackInteractor.isShowingOnLockscreen,
                 ) { hasNotifications, isQsFullScreen, isShowingOnLockscreen ->
                     when {
                         hasNotifications -> false
@@ -109,7 +106,7 @@ constructor(
             combine(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
                     userSetupInteractor.isUserSetUp,
-                    isShowingOnLockscreen,
+                    notificationStackInteractor.isShowingOnLockscreen,
                     shadeInteractor.qsExpansion,
                     shadeInteractor.isQsFullscreen,
                     remoteInputInteractor.isRemoteInputActive,
@@ -175,29 +172,6 @@ constructor(
         HIDE_WITHOUT_ANIMATION(visible = false, canAnimate = false),
         HIDE_WITH_ANIMATION(visible = false, canAnimate = true),
         SHOW_WITH_ANIMATION(visible = true, canAnimate = true)
-    }
-
-    private val isShowingOnLockscreen: Flow<Boolean> by lazy {
-        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
-            flowOf(false)
-        } else {
-            combine(
-                    // Non-notification UI elements of the notification list should not be visible
-                    // on the lockscreen (incl. AOD and bouncer), except if the shade is opened on
-                    // top. See b/219680200 for the footer and b/228790482, b/267060171 for the
-                    // empty shade.
-                    // TODO(b/323187006): There's a plan to eventually get rid of StatusBarState
-                    //  entirely, so this will have to be replaced at some point.
-                    keyguardInteractor.statusBarState.map { it == StatusBarState.KEYGUARD },
-                    // The StatusBarState is unfortunately not updated quickly enough when the power
-                    // button is pressed, so this is necessary in addition to the KEYGUARD check to
-                    // cover the transition to AOD while going to sleep (b/190227875).
-                    powerInteractor.isAsleep,
-                ) { (isOnKeyguard, isAsleep) ->
-                    isOnKeyguard || isAsleep
-                }
-                .distinctUntilChanged()
-        }
     }
 
     // TODO(b/308591475): This should be tracked separately by the empty shade.

@@ -17,10 +17,14 @@
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.ActivityOptions
+import android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.ActivityTaskManager
+import android.app.IActivityTaskManager
 import android.app.TaskStackListener
 import android.os.IBinder
 import android.util.Log
+import android.view.Display
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -40,10 +44,23 @@ import kotlinx.coroutines.withContext
 class ActivityTaskManagerTasksRepository
 @Inject
 constructor(
-    private val activityTaskManager: ActivityTaskManager,
+    private val activityTaskManager: IActivityTaskManager,
     @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : TasksRepository {
+
+    override suspend fun launchRecentTask(taskInfo: RunningTaskInfo) {
+        withContext(backgroundDispatcher) {
+            val activityOptions = ActivityOptions.makeBasic()
+            activityOptions.pendingIntentBackgroundActivityStartMode =
+                MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+            activityOptions.launchDisplayId = taskInfo.displayId
+            activityTaskManager.startActivityFromRecents(
+                taskInfo.taskId,
+                activityOptions.toBundle()
+            )
+        }
+    }
 
     override suspend fun findRunningTaskFromWindowContainerToken(
         windowContainerToken: IBinder
@@ -53,7 +70,14 @@ constructor(
         }
 
     private suspend fun getRunningTasks(): List<RunningTaskInfo> =
-        withContext(backgroundDispatcher) { activityTaskManager.getTasks(Integer.MAX_VALUE) }
+        withContext(backgroundDispatcher) {
+            activityTaskManager.getTasks(
+                /* maxNum = */ Integer.MAX_VALUE,
+                /* filterForVisibleRecents = */ false,
+                /* keepIntentExtra = */ false,
+                /* displayId = */ Display.INVALID_DISPLAY
+            )
+        }
 
     override val foregroundTask: Flow<RunningTaskInfo> =
         conflatedCallbackFlow {

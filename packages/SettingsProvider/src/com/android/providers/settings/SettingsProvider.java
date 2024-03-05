@@ -3812,7 +3812,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 225;
+            private static final int SETTINGS_VERSION = 226;
 
             private final int mUserId;
 
@@ -6009,6 +6009,28 @@ public class SettingsProvider extends ContentProvider {
                 if (currentVersion == 224) {
                     handleDefaultFontScale(getSystemSettingsLocked(userId));
                     currentVersion = 225;
+                }
+
+                // Version 225: Set the System#KEYBOARD_VIBRATION_ENABLED based on touch
+                // feedback enabled state.
+                if (currentVersion == 225) {
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    final Setting touchFeedbackSettings = systemSettings
+                            .getSettingLocked(Settings.System.HAPTIC_FEEDBACK_ENABLED);
+                    final Setting keyboardVibrationSettings = systemSettings
+                            .getSettingLocked(Settings.System.KEYBOARD_VIBRATION_ENABLED);
+                    if (keyboardVibrationSettings.isNull()) {
+                        if (!touchFeedbackSettings.isNull()) {
+                            // Use touch feedback settings.
+                            systemSettings.insertSettingOverrideableByRestoreLocked(
+                                    Settings.System.KEYBOARD_VIBRATION_ENABLED,
+                                    touchFeedbackSettings.getValue(),
+                                    touchFeedbackSettings.getTag(),
+                                    touchFeedbackSettings.isDefaultFromSystem(),
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 226;
                 }
 
                 // vXXX: Add new settings above this point.

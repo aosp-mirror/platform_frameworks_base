@@ -234,21 +234,16 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun shadeIsExpandedOnStatusIconClick() {
+    fun shadeIsExpandedOnStatusIconMouseClick() {
         val view = createViewMock()
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             controller = createAndInitController(view)
         }
         val statusContainer = view.requireViewById<View>(R.id.system_icons)
         statusContainer.dispatchTouchEvent(
-            getMotionEventFromSource(
-                MotionEvent.ACTION_UP,
-                0,
-                0,
-                InputDevice.SOURCE_MOUSE
-            )
+            getActionUpEventFromSource(InputDevice.SOURCE_MOUSE)
         )
-        verify(shadeViewController).expand(any())
+        verify(shadeControllerImpl).animateExpandShade()
     }
 
     @Test
@@ -259,18 +254,13 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         }
         val statusContainer = view.requireViewById<View>(R.id.system_icons)
         val handled = statusContainer.dispatchTouchEvent(
-            getMotionEventFromSource(
-                MotionEvent.ACTION_UP,
-                0,
-                0,
-                InputDevice.SOURCE_TOUCHSCREEN
-            )
+            getActionUpEventFromSource(InputDevice.SOURCE_TOUCHSCREEN)
         )
         assertThat(handled).isFalse()
     }
 
-    private fun getMotionEventFromSource(action: Int, x: Int, y: Int, source: Int): MotionEvent {
-        val ev = MotionEvent.obtain(0, 0, action, x.toFloat(), y.toFloat(), 0)
+    private fun getActionUpEventFromSource(source: Int): MotionEvent {
+        val ev = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0f, 0f, 0)
         ev.source = source
         return ev
     }
@@ -282,7 +272,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             controller = createAndInitController(view)
         }
         view.performClick()
-        verify(shadeViewController, never()).expand(any())
+        verify(shadeControllerImpl, never()).animateExpandShade()
     }
 
     private fun getCommandQueueCallback(): CommandQueue.Callbacks {

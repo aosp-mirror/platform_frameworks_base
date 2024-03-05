@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable
 import android.text.TextUtils
 import android.util.Log
 import androidx.activity.result.IntentSenderRequest
+import androidx.credentials.PasswordCredential
 import androidx.credentials.PublicKeyCredential
 import androidx.credentials.provider.Action
 import androidx.credentials.provider.AuthenticationAction
@@ -125,6 +126,7 @@ private fun getCredentialOptionInfoList(
                     pendingIntent = credentialEntry.pendingIntent,
                     fillInIntent = it.frameworkExtrasIntent,
                     credentialType = CredentialType.PASSWORD,
+                    rawCredentialType = PasswordCredential.TYPE_PASSWORD_CREDENTIAL,
                     credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
@@ -134,6 +136,9 @@ private fun getCredentialOptionInfoList(
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
                     entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }
@@ -147,6 +152,7 @@ private fun getCredentialOptionInfoList(
                     pendingIntent = credentialEntry.pendingIntent,
                     fillInIntent = it.frameworkExtrasIntent,
                     credentialType = CredentialType.PASSKEY,
+                    rawCredentialType = PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL,
                     credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                     userName = credentialEntry.username.toString(),
                     displayName = credentialEntry.displayName?.toString(),
@@ -158,6 +164,9 @@ private fun getCredentialOptionInfoList(
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
                     entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }
@@ -171,6 +180,7 @@ private fun getCredentialOptionInfoList(
                     pendingIntent = credentialEntry.pendingIntent,
                     fillInIntent = it.frameworkExtrasIntent,
                     credentialType = CredentialType.UNKNOWN,
+                    rawCredentialType = credentialEntry.type,
                     credentialTypeDisplayName =
                     credentialEntry.typeDisplayName?.toString().orEmpty(),
                     userName = credentialEntry.title.toString(),
@@ -181,6 +191,9 @@ private fun getCredentialOptionInfoList(
                     isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
                             credentialEntry.isAutoSelectAllowedFromOption,
                     entryGroupId = credentialEntry.entryGroupId.toString(),
+                    isDefaultIconPreferredAsSingleProvider =
+                            credentialEntry.isDefaultIconPreferredAsSingleProvider,
+                    affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
                 )
                 )
             }

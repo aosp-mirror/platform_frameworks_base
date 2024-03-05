@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Jo tonua"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Dardara"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Ez jo tonua"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"Igorri"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Ez dago erabilgarri, tonua desaktibatuta dagoelako"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Sakatu audioa aktibatzeko."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Sakatu dardara ezartzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Sakatu audioa desaktibatzeko. Baliteke erabilerraztasun-eginbideen audioa desaktibatzea."</string>
@@ -732,7 +730,7 @@
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Atera pantaila-argazki bat"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Erakutsi lasterbideak"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Egin atzera"</string>
-    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Joan hasierako pantailara"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Joan orri nagusira"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ikusi azkenaldiko aplikazioak"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Ikusi azken aplikazioak banan-banan (aurrerantz)"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Ikusi azken aplikazioak banan-banan (atzerantz)"</string>
@@ -1096,7 +1094,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Kopiatu da konpilazio-zenbakia arbelean."</string>
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Elkarrizketa-widgetak"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat hasierako pantailan gehitzeko"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat orri nagusian gehitzeko"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Azken elkarrizketak agertuko dira hemen"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Lehentasunezko elkarrizketak"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Azken elkarrizketak"</string>

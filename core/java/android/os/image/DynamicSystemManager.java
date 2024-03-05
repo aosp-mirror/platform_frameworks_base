@@ -172,7 +172,7 @@ public class DynamicSystemManager {
         }
     }
     /**
-     * Finish a previously started installation. Installations without a cooresponding
+     * Finish a previously started installation. Installations without a corresponding
      * finishInstallation() will be cleaned up during device boot.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)

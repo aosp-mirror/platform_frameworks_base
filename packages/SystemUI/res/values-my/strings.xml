@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"အသံမြည်သည်"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"တုန်ခါသည်"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံတိတ်သည်"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"ကာစ်လုပ်ရန်"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"ဖုန်းမြည်သံပိတ်ထားသဖြင့် မရနိုင်ပါ"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>

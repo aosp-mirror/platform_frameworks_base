@@ -17,15 +17,13 @@
 package com.android.systemui.keyboard.stickykeys.ui
 
 import android.app.Dialog
-import android.util.Log
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyboard.stickykeys.StickyKeysLogger
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @SysUISingleton
 class StickyKeysIndicatorCoordinator
@@ -40,11 +38,6 @@ constructor(
     private var dialog: Dialog? = null
 
     fun startListening() {
-        // this check needs to be moved to PhysicalKeyboardCoreStartable
-        if (!ComposeFacade.isComposeAvailable()) {
-            Log.e("StickyKeysIndicatorCoordinator", "Compose is required for this UI")
-            return
-        }
         applicationScope.launch {
             viewModel.indicatorContent.collect { stickyKeys ->
                 stickyKeysLogger.logNewUiState(stickyKeys)

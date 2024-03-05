@@ -575,10 +575,8 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"ஒலி"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"அதிர்வு"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"அமைதி"</string>
-    <!-- no translation found for media_device_cast (4786241789687569892) -->
-    <skip />
-    <!-- no translation found for stream_notification_unavailable (4313854556205836435) -->
-    <skip />
+    <string name="media_device_cast" msgid="4786241789687569892">"அலைபரப்பு"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"\'ரிங்\' மியூட்டில் உள்ளதால் கிடைக்கவில்லை"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. ஒலி இயக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>

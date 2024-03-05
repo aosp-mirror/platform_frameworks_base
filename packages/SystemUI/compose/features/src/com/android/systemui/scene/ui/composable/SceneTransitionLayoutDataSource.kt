@@ -20,10 +20,10 @@ package com.android.systemui.scene.ui.composable
 
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.systemui.scene.shared.model.SceneDataSource
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.TransitionKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,11 +61,10 @@ class SceneTransitionLayoutDataSource(
                         }
                 }
             }
-            .map { it.asComposeUnaware() }
             .stateIn(
                 scope = coroutineScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = state.transitionState.currentScene.asComposeUnaware(),
+                initialValue = state.transitionState.currentScene,
             )
 
     override fun changeScene(
@@ -73,8 +72,8 @@ class SceneTransitionLayoutDataSource(
         transitionKey: TransitionKey?,
     ) {
         state.setTargetScene(
-            targetScene = toScene.asComposeAware(),
-            transitionKey = transitionKey?.asComposeAware(),
+            targetScene = toScene,
+            transitionKey = transitionKey,
             coroutineScope = coroutineScope,
         )
     }

@@ -63,8 +63,7 @@ import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
-import com.android.systemui.scene.ui.composable.QuickSettings
-import com.android.systemui.scene.ui.composable.Shade as ShadeKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader.Dimensions.CollapsedHeight
 import com.android.systemui.shade.ui.composable.ShadeHeader.Values.ClockScale
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
@@ -443,7 +442,7 @@ private fun SceneScope.StatusIcons(
         },
         update = { iconContainer ->
             iconContainer.setQsExpansionTransitioning(
-                layoutState.isTransitioningBetween(ShadeKey, QuickSettings)
+                layoutState.isTransitioningBetween(Scenes.Shade, Scenes.QuickSettings)
             )
             if (isSingleCarrier || !useExpandedFormat) {
                 iconContainer.removeIgnoredSlots(carrierIconSlots)

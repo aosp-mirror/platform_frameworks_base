@@ -22,6 +22,7 @@ import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -40,7 +41,8 @@ public class WorkDurationUnitTest {
 
     // Required for RequiresFlagsEnabled and RequiresFlagsDisabled annotations to take effect.
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isUnderRavenwood() ? null
+    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isOnRavenwood()
+            ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
             : DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before

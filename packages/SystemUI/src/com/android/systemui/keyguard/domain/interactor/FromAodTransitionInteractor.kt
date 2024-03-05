@@ -27,12 +27,14 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -45,6 +47,7 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
@@ -68,15 +71,16 @@ constructor(
      */
     private fun listenForAodToOccluded() {
         scope.launch {
-            keyguardInteractor.isKeyguardOccluded.sample(startedKeyguardState, ::Pair).collect {
-                (isOccluded, startedKeyguardState) ->
-                if (isOccluded && startedKeyguardState == KeyguardState.AOD) {
-                    startTransitionTo(
-                        toState = KeyguardState.OCCLUDED,
-                        modeOnCanceled = TransitionModeOnCanceled.RESET
-                    )
+            keyguardInteractor.isKeyguardOccluded
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { (isOccluded, lastStartedStep) ->
+                    if (isOccluded && lastStartedStep.to == KeyguardState.AOD) {
+                        startTransitionTo(
+                            toState = KeyguardState.OCCLUDED,
+                            modeOnCanceled = TransitionModeOnCanceled.RESET
+                        )
+                    }
                 }
-            }
         }
     }
 
@@ -85,15 +89,26 @@ constructor(
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.FINISH)
                 .sample(
+                    keyguardInteractor.isKeyguardShowing,
                     startedKeyguardTransitionStep,
                     keyguardInteractor.isKeyguardOccluded,
                     keyguardInteractor.biometricUnlockState,
+                    keyguardInteractor.primaryBouncerShowing,
                 )
-                .collect { (_, lastStartedStep, occluded, biometricUnlockState) ->
+                .collect {
+                    (
+                        _,
+                        isKeyguardShowing,
+                        lastStartedStep,
+                        occluded,
+                        biometricUnlockState,
+                        primaryBouncerShowing) ->
                     if (
                         lastStartedStep.to == KeyguardState.AOD &&
                             !occluded &&
-                            !isWakeAndUnlock(biometricUnlockState)
+                            !isWakeAndUnlock(biometricUnlockState) &&
+                            isKeyguardShowing &&
+                            !primaryBouncerShowing
                     ) {
                         val modeOnCanceled =
                             if (lastStartedStep.from == KeyguardState.LOCKSCREEN) {
@@ -134,13 +149,31 @@ constructor(
         }
 
         scope.launch {
-            keyguardInteractor.biometricUnlockState.sample(finishedKeyguardState, ::Pair).collect {
-                (biometricUnlockState, keyguardState) ->
-                KeyguardWmStateRefactor.assertInLegacyMode()
-                if (keyguardState == KeyguardState.AOD && isWakeAndUnlock(biometricUnlockState)) {
-                    startTransitionTo(KeyguardState.GONE)
+            powerInteractor.isAwake
+                .debounce(50L)
+                .sample(
+                    keyguardInteractor.biometricUnlockState,
+                    startedKeyguardTransitionStep,
+                    keyguardInteractor.isKeyguardShowing,
+                    keyguardInteractor.isKeyguardDismissible,
+                )
+                .collect {
+                    (
+                        isAwake,
+                        biometricUnlockState,
+                        lastStartedTransitionStep,
+                        isKeyguardShowing,
+                        isKeyguardDismissible) ->
+                    KeyguardWmStateRefactor.assertInLegacyMode()
+                    if (
+                        isAwake &&
+                            lastStartedTransitionStep.to == KeyguardState.AOD &&
+                            (isWakeAndUnlock(biometricUnlockState) ||
+                                (!isKeyguardShowing && isKeyguardDismissible))
+                    ) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
                 }
-            }
         }
     }
 

@@ -45,8 +45,8 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
-import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -71,7 +71,7 @@ constructor(
     private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val shadeControllerLazy: Lazy<ShadeController>,
-    private val shadeViewControllerLazy: Lazy<ShadeViewController>,
+    private val commandQueue: CommandQueue,
     private val shadeAnimationInteractor: ShadeAnimationInteractor,
     private val statusBarKeyguardViewManagerLazy: Lazy<StatusBarKeyguardViewManager>,
     private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
@@ -853,10 +853,11 @@ constructor(
                 if (dismissShade) {
                     return StatusBarTransitionAnimatorController(
                         animationController,
-                        shadeViewControllerLazy.get(),
                         shadeAnimationInteractor,
                         shadeControllerLazy.get(),
                         notifShadeWindowControllerLazy.get(),
+                        commandQueue,
+                        displayId,
                         isLaunchForActivity
                     )
                 }
