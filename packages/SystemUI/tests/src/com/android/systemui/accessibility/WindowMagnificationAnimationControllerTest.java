@@ -476,12 +476,18 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mValueAnimator.end();
         });
 
-        verify(mSpyController).enableWindowMagnificationInternal(
+        // Verify the method is called in
+        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
+        // {@link Animator.AnimatorListener#onAnimationEnd} once in {@link ValueAnimator#end()}
+        verify(mSpyController, times(2)).enableWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
-        //Animating in reverse, so we only check if the start values are greater than current.
+
+        // The animation is playing forwards, so we only check the animated values are greater than
+        // the current one. (Asserting the first captured scale)
         assertTrue(mScaleCaptor.getAllValues().get(0) > mCurrentScale.get());
+        // The last captured scale equalsto the targetScale when we enable window magnification.
         assertEquals(targetScale, mScaleCaptor.getValue(), 0f);
         assertTrue(mCenterXCaptor.getAllValues().get(0) > mCurrentCenterX.get());
         assertEquals(targetCenterX, mCenterXCaptor.getValue(), 0f);
@@ -588,10 +594,10 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         final float expectedY = (int) (windowBounds.exactCenterY() + expectedOffset
                 - defaultMagnificationWindowSize / 2);
 
-        // This is called 4 times when (1) first creating WindowlessMirrorWindow (2) SurfaceView is
+        // This is called 5 times when (1) first creating WindowlessMirrorWindow (2) SurfaceView is
         // created and we place the mirrored content as a child of the SurfaceView
-        // (3) the animation starts (4) the animation updates
-        verify(mTransaction, times(4))
+        // (3) the animation starts (4) the animation updates (5) the animation ends
+        verify(mTransaction, times(5))
                 .setPosition(any(SurfaceControl.class), eq(expectedX), eq(expectedY));
     }
 
@@ -781,16 +787,18 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         // wait for animation returns
         waitForIdleSync();
 
-        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate(ValueAnimator)} will only
-        // be triggered once in {@link ValueAnimator#end()}
-        verify(mSpyController).enableWindowMagnificationInternal(
+        // Verify the method is called in
+        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
+        // {@link Animator.AnimatorListener#onAnimationEnd} once in {@link ValueAnimator#end()}
+        verify(mSpyController, times(2)).enableWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
 
-        //The animation is in verse, so we only check the start values should no be greater than
-        // the current one.
+        // The animation is playing backwards, so we only check the animated values should not be
+        // greater than the current one. (Asserting the first captured scale)
         assertTrue(mScaleCaptor.getAllValues().get(0) <= mCurrentScale.get());
+        // The last captured scale is 1.0 when we delete window magnification.
         assertEquals(1.0f, mScaleCaptor.getValue(), 0f);
         verifyStartValue(mCenterXCaptor, Float.NaN);
         verifyStartValue(mCenterYCaptor, Float.NaN);
@@ -823,10 +831,15 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         resetMockObjects();
         deleteWindowMagnificationAndWaitAnimating(mWaitAnimationDuration, mAnimationCallback2);
 
-        verify(mSpyController).enableWindowMagnificationInternal(
+        // Verify the method is called in
+        // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
+        // {@link Animator.AnimatorListener#onAnimationEnd} once when running the animation at
+        // the final duration time.
+        verify(mSpyController, times(2)).enableWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
+        // The last captured scale is 1.0 when we delete window magnification.
         assertEquals(1.0f, mScaleCaptor.getValue(), 0f);
         verifyStartValue(mOffsetXCaptor, 0f);
         verifyStartValue(mOffsetYCaptor, 0f);
