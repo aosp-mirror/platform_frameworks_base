@@ -64,6 +64,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
+import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
@@ -115,6 +116,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private boolean mShouldStartOnNextMoveEvent = false;
     private boolean mOnBackStartDispatched = false;
     private boolean mPointerPilfered = false;
+    private final boolean mRequirePointerPilfer;
 
     private final FlingAnimationUtils mFlingAnimationUtils;
 
@@ -220,6 +222,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mActivityTaskManager = activityTaskManager;
         mContext = context;
         mContentResolver = contentResolver;
+        mRequirePointerPilfer =
+                context.getResources().getBoolean(R.bool.config_backAnimationRequiresPointerPilfer);
         mBgHandler = bgHandler;
         shellInit.addInitCallback(this::onInit, this);
         mAnimationBackground = backAnimationBackground;
@@ -560,7 +564,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private void tryDispatchOnBackStarted(
             IOnBackInvokedCallback callback,
             BackMotionEvent backEvent) {
-        if (mOnBackStartDispatched || callback == null || !mPointerPilfered) {
+        if (mOnBackStartDispatched
+                || callback == null
+                || (!mPointerPilfered && mRequirePointerPilfer)) {
             return;
         }
         dispatchOnBackStarted(callback, backEvent);
@@ -1006,6 +1012,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         pw.println(prefix + "  mBackGestureStarted=" + mBackGestureStarted);
         pw.println(prefix + "  mPostCommitAnimationInProgress=" + mPostCommitAnimationInProgress);
         pw.println(prefix + "  mShouldStartOnNextMoveEvent=" + mShouldStartOnNextMoveEvent);
+        pw.println(prefix + "  mPointerPilfered=" + mPointerPilfered);
+        pw.println(prefix + "  mRequirePointerPilfer=" + mRequirePointerPilfer);
         pw.println(prefix + "  mCurrentTracker state:");
         mCurrentTracker.dump(pw, prefix + "    ");
         pw.println(prefix + "  mQueuedTracker state:");
