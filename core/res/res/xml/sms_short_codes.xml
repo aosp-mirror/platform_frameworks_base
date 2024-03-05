@@ -88,6 +88,9 @@
     <!-- Colombia: 1-6 digits (not confirmed) -->
     <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960|899948|87739|85517|491289" />
 
+    <!-- Costa Rica  -->
+    <shortcode country="cr" pattern="\\d{1,6}" free="466453" />
+
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
 
@@ -142,6 +145,9 @@
 
     <!-- Greece: 5 digits (54xxx, 19yxx, x=0-9, y=0-5): http://www.cmtelecom.com/premium-sms/greece -->
     <shortcode country="gr" pattern="\\d{5}" premium="54\\d{3}|19[0-5]\\d{2}" free="116\\d{3}|12115" />
+
+    <!--  Guatemala  -->
+    <shortcode country="gt" pattern="\\d{1,6}" free="466453" />
 
     <!-- Croatia -->
     <shortcode country="hr" pattern="\\d{1,5}" free="13062" />
@@ -241,10 +247,10 @@
     <shortcode country="ph" pattern="\\d{1,5}" free="2147|5495|5496" />
 
     <!-- Pakistan -->
-    <shortcode country="pk" pattern="\\d{1,5}" free="2057" />
+    <shortcode country="pk" pattern="\\d{1,5}" free="2057|9092" />
 
     <!-- Palestine: 5 digits, known premium codes listed -->
-    <shortcode country="ps" pattern="\\d{1,5}" free="37477" />
+    <shortcode country="ps" pattern="\\d{1,5}" free="37477|6681" />
 
     <!-- Poland: 4-5 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="pl" pattern="\\d{4,5}" premium="74240|79(?:10|866)|92525" free="116\\d{3}|8012|80921" />
@@ -323,5 +329,8 @@
 
     <!-- South Africa -->
     <shortcode country="za" pattern="\\d{1,5}" free="44136|30791|36056" />
+
+    <!-- Zimbabwe -->
+    <shortcode country="zw" pattern="\\d{1,5}" free="33679" />
 
 </shortcodes>
