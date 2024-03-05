@@ -1307,20 +1307,35 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onPackageDataCleared(String packageName, int uid) {
+            final int userId = getChangingUserId();
             synchronized (ImfLock.class) {
+                final boolean isCurrentUser = (userId == mSettings.getUserId());
+                final AdditionalSubtypeMap additionalSubtypeMap;
+                final InputMethodSettings settings;
+                if (isCurrentUser) {
+                    additionalSubtypeMap = mAdditionalSubtypeMap;
+                    settings = mSettings;
+                } else {
+                    additionalSubtypeMap = AdditionalSubtypeUtils.load(userId);
+                    settings = queryInputMethodServicesInternal(mContext, userId,
+                            additionalSubtypeMap, DirectBootAwareness.AUTO);
+                }
+
                 // Note that one package may implement multiple IMEs.
                 final ArrayList<String> changedImes = new ArrayList<>();
-                for (InputMethodInfo imi : mSettings.getMethodList()) {
+                for (InputMethodInfo imi : settings.getMethodList()) {
                     if (imi.getPackageName().equals(packageName)) {
                         changedImes.add(imi.getId());
                     }
                 }
                 final AdditionalSubtypeMap newMap =
-                        mAdditionalSubtypeMap.cloneWithRemoveOrSelf(changedImes);
-                if (newMap != mAdditionalSubtypeMap) {
-                    mAdditionalSubtypeMap = newMap;
+                        additionalSubtypeMap.cloneWithRemoveOrSelf(changedImes);
+                if (newMap != additionalSubtypeMap) {
+                    if (isCurrentUser) {
+                        mAdditionalSubtypeMap = newMap;
+                    }
                     AdditionalSubtypeUtils.save(
-                            mAdditionalSubtypeMap, mSettings.getMethodMap(), mSettings.getUserId());
+                            newMap, settings.getMethodMap(), settings.getUserId());
                 }
                 if (!changedImes.isEmpty()) {
                     mChangedPackages.add(packageName);
