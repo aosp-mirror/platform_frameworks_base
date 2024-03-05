@@ -29,6 +29,7 @@ import android.hardware.display.VirtualDisplay
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.util.SparseArray
 import android.view.Choreographer
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.IWindowManager
@@ -72,6 +73,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import java.util.Optional
 import java.util.function.Supplier
+import org.mockito.Mockito
+import org.mockito.kotlin.spy
 
 
 /** Tests of [DesktopModeWindowDecorViewModel]  */
@@ -102,6 +105,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
     }
+    private val windowDecorByTaskIdSpy = spy(SparseArray<DesktopModeWindowDecoration>())
 
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeOnInsetsChangedListener: DesktopModeOnInsetsChangedListener
@@ -110,6 +114,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Before
     fun setUp() {
         shellInit = ShellInit(mockShellExecutor)
+        windowDecorByTaskIdSpy.clear()
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
                 mContext,
                 mockShellExecutor,
@@ -128,7 +133,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockDesktopModeWindowDecorFactory,
                 mockInputMonitorFactory,
                 transactionFactory,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+            windowDecorByTaskIdSpy
         )
 
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -330,6 +336,19 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         // Verify relayout runs only once when status bar inset visibility changes.
         verify(decoration, times(1)).relayout(task)
+    }
+
+    @Test
+    fun testDestroyWindowDecoration_closesBeforeCleanup() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration = setUpMockDecorationForTask(task)
+        val inOrder = Mockito.inOrder(decoration, windowDecorByTaskIdSpy)
+
+        onTaskOpening(task)
+        desktopModeWindowDecorViewModel.destroyWindowDecoration(task)
+
+        inOrder.verify(decoration).close()
+        inOrder.verify(windowDecorByTaskIdSpy).remove(task.taskId)
     }
 
     private fun onTaskOpening(task: RunningTaskInfo, leash: SurfaceControl = SurfaceControl()) {
