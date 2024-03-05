@@ -39,7 +39,7 @@ message InputMethodManagerServiceProto {
     optional string cur_token = 14;
     optional int32 cur_token_display_id = 15;
     optional bool system_ready = 16;
-    optional int32 last_switch_user_id = 17;
+    reserved 17; // deprecated last_switch_user_id
     optional bool have_connection = 18;
     optional bool bound_to_method = 19;
     optional bool is_interactive = 20;
