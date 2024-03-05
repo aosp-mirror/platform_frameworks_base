@@ -28,7 +28,6 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DIS
 import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_ATTRIBUTE;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_CLIENT;
-import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCUSED_WINDOW_NAME;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_ID;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_METHOD_ID;
@@ -423,6 +422,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final ClientController mClientController;
 
     /**
+     * Holds the current IME binding state info.
+     */
+    ImeBindingState mImeBindingState;
+
+    /**
      * Set once the system is ready to run third party code.
      */
     boolean mSystemReady;
@@ -482,46 +486,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private ClientState mCurClient;
 
     /**
-     * The last window token that we confirmed to be focused.  This is always updated upon reports
-     * from the input method client.  If the window state is already changed before the report is
-     * handled, this field just keeps the last value.
-     */
-    IBinder mCurFocusedWindow;
-
-    /**
      * The last window token that we confirmed that IME started talking to.  This is always updated
      * upon reports from the input method.  If the window state is already changed before the report
      * is handled, this field just keeps the last value.
      */
     IBinder mLastImeTargetWindow;
-
-    /**
-     * {@link LayoutParams#softInputMode} of {@link #mCurFocusedWindow}.
-     *
-     * @see #mCurFocusedWindow
-     */
-    @SoftInputModeFlags
-    int mCurFocusedWindowSoftInputMode;
-
-    /**
-     * The client by which {@link #mCurFocusedWindow} was reported. This gets updated whenever an
-     * IME-focusable window gained focus (without necessarily starting an input connection),
-     * while {@link #mCurClient} only gets updated when we actually start an input connection.
-     *
-     * @see #mCurFocusedWindow
-     */
-    @Nullable
-    ClientState mCurFocusedWindowClient;
-
-    /**
-     * The editor info by which {@link #mCurFocusedWindow} was reported. This differs from
-     * {@link #mCurEditorInfo} the same way {@link #mCurFocusedWindowClient} differs
-     * from {@link #mCurClient}.
-     *
-     * @see #mCurFocusedWindow
-     */
-    @Nullable
-    EditorInfo mCurFocusedWindowEditorInfo;
 
     /**
      * The {@link IRemoteInputConnection} last provided by the current client.
@@ -1131,10 +1100,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     mVisibilityStateComputer.getImePolicy().setA11yRequestNoSoftKeyboard(
                             accessibilitySoftKeyboardSetting);
                     if (mVisibilityStateComputer.getImePolicy().isA11yRequestNoSoftKeyboard()) {
-                        hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */,
+                        hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                                 SoftInputShowHideReason.HIDE_SETTINGS_ON_CHANGE);
                     } else if (isShowRequestedForCurrentWindow()) {
-                        showCurrentInputLocked(mCurFocusedWindow, InputMethodManager.SHOW_IMPLICIT,
+                        showCurrentInputLocked(mImeBindingState.mFocusedWindow,
+                                InputMethodManager.SHOW_IMPLICIT,
                                 SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE);
                     }
                 } else if (stylusHandwritingEnabledUri.equals(uri)) {
@@ -1629,7 +1599,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         // Hide soft input before user switch task since switch task may block main handler a while
         // and delayed the hideCurrentInputLocked().
-        hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */,
+        hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                 SoftInputShowHideReason.HIDE_SWITCH_USER);
         final UserSwitchHandlerTask task = new UserSwitchHandlerTask(this, userId,
                 clientToBeReset);
@@ -1704,6 +1674,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mClientController = new ClientController(mPackageManagerInternal);
         synchronized (ImfLock.class) {
             mClientController.addClientControllerCallback(c -> onClientRemoved(c));
+            mImeBindingState = ImeBindingState.newEmptyState();
         }
 
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
@@ -2218,7 +2189,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         clearClientSessionLocked(client);
         clearClientSessionForAccessibilityLocked(client);
         if (mCurClient == client) {
-            hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */,
+            hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                     SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
             if (mBoundToMethod) {
                 mBoundToMethod = false;
@@ -2232,9 +2203,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             mBoundToAccessibility = false;
             mCurClient = null;
-            if (mCurFocusedWindowClient == client) {
-                mCurFocusedWindowClient = null;
-                mCurFocusedWindowEditorInfo = null;
+            if (mImeBindingState.mFocusedWindowClient == client) {
+                mImeBindingState = ImeBindingState.newEmptyState();
             }
         }
     }
@@ -2283,7 +2253,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     void onUnbindCurrentMethodByReset() {
         final ImeTargetWindowState winState = mVisibilityStateComputer.getWindowStateOrNull(
-                mCurFocusedWindow);
+                mImeBindingState.mFocusedWindow);
         if (winState != null && !winState.isRequestedImeVisible()
                 && !mVisibilityStateComputer.isInputShown()) {
             // Normally, the focus window will apply the IME visibility state to
@@ -2295,7 +2265,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // binding states in the first place.
             final var statsToken = createStatsTokenForFocusedClient(false /* show */,
                     SoftInputShowHideReason.UNBIND_CURRENT_METHOD);
-            mVisibilityApplier.applyImeVisibility(mCurFocusedWindow, statsToken, STATE_HIDE_IME);
+            mVisibilityApplier.applyImeVisibility(mImeBindingState.mFocusedWindow, statsToken,
+                    STATE_HIDE_IME);
         }
     }
 
@@ -2328,7 +2299,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private boolean isShowRequestedForCurrentWindow() {
         final ImeTargetWindowState state = mVisibilityStateComputer.getWindowStateOrNull(
-                mCurFocusedWindow);
+                mImeBindingState.mFocusedWindow);
         return state != null && state.isRequestedImeVisible();
     }
 
@@ -2346,10 +2317,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 getCurTokenLocked(),
                 mCurTokenDisplayId, getCurIdLocked(), startInputReason, restarting,
                 UserHandle.getUserId(mCurClient.mUid),
-                mCurClient.mSelfReportedDisplayId,
-                mCurFocusedWindow, mCurEditorInfo, mCurFocusedWindowSoftInputMode,
-                getSequenceNumberLocked());
-        mImeTargetWindowMap.put(startInputToken, mCurFocusedWindow);
+                mCurClient.mSelfReportedDisplayId, mImeBindingState.mFocusedWindow, mCurEditorInfo,
+                mImeBindingState.mFocusedWindowSoftInputMode, getSequenceNumberLocked());
+        mImeTargetWindowMap.put(startInputToken, mImeBindingState.mFocusedWindow);
         mStartInputHistory.addEntry(info);
 
         // Seems that PackageManagerInternal#grantImplicitAccess() doesn't handle cross-user
@@ -2376,7 +2346,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     : createStatsTokenForFocusedClient(true /* show */,
                             SoftInputShowHideReason.ATTACH_NEW_INPUT);
             mCurStatsToken = null;
-            showCurrentInputLocked(mCurFocusedWindow, statsToken,
+            showCurrentInputLocked(mImeBindingState.mFocusedWindow, statsToken,
                     mVisibilityStateComputer.getShowFlags(), MotionEvent.TOOL_TYPE_UNKNOWN,
                     null /* resultReceiver */, SoftInputShowHideReason.ATTACH_NEW_INPUT);
         }
@@ -2450,7 +2420,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
         ImeTargetWindowState winState = mVisibilityStateComputer.getWindowStateOrNull(
-                mCurFocusedWindow);
+                mImeBindingState.mFocusedWindow);
         if (winState == null) {
             return InputBindResult.NOT_IME_TARGET_WINDOW;
         }
@@ -2469,7 +2439,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (mVisibilityStateComputer.getImePolicy().isImeHiddenByDisplayPolicy()) {
-            hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */,
+            hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                     SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE);
             return InputBindResult.NO_IME;
         }
@@ -3638,7 +3608,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         Binder.withCleanCallingIdentity(() -> {
             Objects.requireNonNull(windowToken, "windowToken must not be null");
             synchronized (ImfLock.class) {
-                if (mCurFocusedWindow != windowToken || mCurPerceptible == perceptible) {
+                if (mImeBindingState.mFocusedWindow != windowToken
+                        || mCurPerceptible == perceptible) {
                     return;
                 }
                 mCurPerceptible = perceptible;
@@ -3732,7 +3703,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         super.hideSoftInputFromServerForTest_enforcePermission();
 
         synchronized (ImfLock.class) {
-            hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */,
+            hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                     SoftInputShowHideReason.HIDE_SOFT_INPUT);
         }
     }
@@ -3907,7 +3878,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     final boolean shouldClearFlag =
                             mImePlatformCompatUtils.shouldClearShowForcedFlag(cs.mUid);
                     final boolean showForced = mVisibilityStateComputer.mShowForced;
-                    if (mCurFocusedWindow != windowToken && showForced && shouldClearFlag) {
+                    if (mImeBindingState.mFocusedWindow != windowToken
+                            && showForced && shouldClearFlag) {
                         mVisibilityStateComputer.mShowForced = false;
                     }
 
@@ -3925,7 +3897,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
                                 + " a background user, use EditorInfo.targetInputMethodUser with"
                                 + " INTERACT_ACROSS_USERS_FULL permission.");
-                        hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */,
+                        hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                                 SoftInputShowHideReason.HIDE_INVALID_USER);
                         return InputBindResult.INVALID_USER;
                     }
@@ -3986,7 +3958,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " cs=" + cs);
         }
 
-        final boolean sameWindowFocused = mCurFocusedWindow == windowToken;
+        final boolean sameWindowFocused = mImeBindingState.mFocusedWindow == windowToken;
         final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
         final boolean startInputByWinGainedFocus =
                 (startInputFlags & StartInputFlags.WINDOW_GAINED_FOCUS) != 0;
@@ -4017,10 +3989,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     null, null, null, null, -1, false);
         }
 
-        mCurFocusedWindow = windowToken;
-        mCurFocusedWindowSoftInputMode = softInputMode;
-        mCurFocusedWindowClient = cs;
-        mCurFocusedWindowEditorInfo = editorInfo;
+        mImeBindingState = new ImeBindingState(windowToken, softInputMode, cs, editorInfo);
         mCurPerceptible = true;
 
         // We want to start input before showing the IME, but after closing
@@ -4051,9 +4020,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     break;
             }
             final var statsToken = createStatsTokenForFocusedClient(isShow, imeVisRes.getReason());
-            mVisibilityApplier.applyImeVisibility(mCurFocusedWindow, statsToken,
+            mVisibilityApplier.applyImeVisibility(mImeBindingState.mFocusedWindow, statsToken,
                     imeVisRes.getState(), imeVisRes.getReason());
-
             if (imeVisRes.getReason() == SoftInputShowHideReason.HIDE_UNSPECIFIED_WINDOW) {
                 // If focused display changed, we should unbind current method
                 // to make app window in previous display relayout after Ime
@@ -4092,7 +4060,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 throw new IllegalArgumentException("unknown client " + client.asBinder());
             }
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_CLIENT_KNOWN);
-            if (!isImeClientFocused(mCurFocusedWindow, cs)) {
+            if (!isImeClientFocused(mImeBindingState.mFocusedWindow, cs)) {
                 Slog.w(TAG, String.format("Ignoring %s of uid %d : %s", methodName, uid, client));
                 return false;
             }
@@ -4104,8 +4072,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
         final int uid = Binder.getCallingUid();
-        if (mCurFocusedWindowClient != null && client != null
-                && mCurFocusedWindowClient.mClient.asBinder() == client.asBinder()) {
+        if (mImeBindingState.mFocusedWindowClient != null && client != null
+                && mImeBindingState.mFocusedWindowClient.mClient.asBinder() == client.asBinder()) {
             return true;
         }
         if (mSettings.getUserId() != UserHandle.getUserId(uid)) {
@@ -4728,12 +4696,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             proto.write(CUR_METHOD_ID, getSelectedMethodIdLocked());
             proto.write(CUR_SEQ, getSequenceNumberLocked());
             proto.write(CUR_CLIENT, Objects.toString(mCurClient));
-            proto.write(CUR_FOCUSED_WINDOW_NAME,
-                    mWindowManagerInternal.getWindowName(mCurFocusedWindow));
+            mImeBindingState.dumpDebug(proto, mWindowManagerInternal);
             proto.write(LAST_IME_TARGET_WINDOW_NAME,
                     mWindowManagerInternal.getWindowName(mLastImeTargetWindow));
-            proto.write(CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE,
-                    InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode));
+            proto.write(CUR_FOCUSED_WINDOW_SOFT_INPUT_MODE, InputMethodDebug.softInputModeToString(
+                    mImeBindingState.mFocusedWindowSoftInputMode));
             if (mCurEditorInfo != null) {
                 mCurEditorInfo.dumpDebug(proto, CUR_ATTRIBUTE);
             }
@@ -4855,12 +4822,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(requestImeToken);
         final WindowManagerInternal.ImeTargetInfo info =
                 mWindowManagerInternal.onToggleImeRequested(
-                        show, mCurFocusedWindow, requestToken, mCurTokenDisplayId);
+                        show, mImeBindingState.mFocusedWindow, requestToken, mCurTokenDisplayId);
         mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                mCurFocusedWindowClient, mCurFocusedWindowEditorInfo, info.focusedWindowName,
-                mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
-                info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName,
-                info.imeSurfaceParentName));
+                mImeBindingState.mFocusedWindowClient, mImeBindingState.mFocusedWindowEditorInfo,
+                info.focusedWindowName, mImeBindingState.mFocusedWindowSoftInputMode, reason,
+                mInFullscreenMode, info.requestWindowName, info.imeControlTargetName,
+                info.imeLayerTargetName, info.imeSurfaceParentName));
 
         if (statsToken != null) {
             mImeTrackerService.onImmsUpdate(statsToken, info.requestWindowName);
@@ -5031,8 +4998,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_HIDE_ALL_INPUT_METHODS:
                 synchronized (ImfLock.class) {
                     @SoftInputShowHideReason final int reason = (int) msg.obj;
-                    hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */, reason);
-
+                    hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */, reason);
                 }
                 return true;
             case MSG_REMOVE_IME_SURFACE: {
@@ -5051,7 +5017,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 IBinder windowToken = (IBinder) msg.obj;
                 synchronized (ImfLock.class) {
                     try {
-                        if (windowToken == mCurFocusedWindow
+                        if (windowToken == mImeBindingState.mFocusedWindow
                                 && mEnabledSession != null && mEnabledSession.mSession != null) {
                             mEnabledSession.mSession.removeImeSurface();
                         }
@@ -5126,7 +5092,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_START_HANDWRITING:
                 synchronized (ImfLock.class) {
                     IInputMethodInvoker curMethod = getCurMethodLocked();
-                    if (curMethod == null || mCurFocusedWindow == null) {
+                    if (curMethod == null || mImeBindingState.mFocusedWindow == null) {
                         return true;
                     }
                     final HandwritingModeController.HandwritingSession session =
@@ -5134,7 +5100,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                     msg.arg1 /*requestId*/,
                                     msg.arg2 /*pid*/,
                                     mBindingController.getCurMethodUid(),
-                                    mCurFocusedWindow);
+                                    mImeBindingState.mFocusedWindow);
                     if (session == null) {
                         Slog.e(TAG,
                                 "Failed to start handwriting session for requestId: " + msg.arg1);
@@ -5187,11 +5153,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // Handle IME visibility when interactive changed before finishing the input to
                 // ensure we preserve the last state as possible.
                 final ImeVisibilityResult imeVisRes = mVisibilityStateComputer.onInteractiveChanged(
-                        mCurFocusedWindow, interactive);
+                        mImeBindingState.mFocusedWindow, interactive);
                 if (imeVisRes != null) {
                     // Pass in a null statsToken as the IME snapshot is not tracked by ImeTracker.
-                    mVisibilityApplier.applyImeVisibility(mCurFocusedWindow, null /* statsToken */,
-                            imeVisRes.getState(), imeVisRes.getReason());
+                    mVisibilityApplier.applyImeVisibility(mImeBindingState.mFocusedWindow,
+                            null /* statsToken */, imeVisRes.getState(), imeVisRes.getReason());
                 }
                 // Eligible IME processes use new "setInteractive" protocol.
                 mCurClient.mClient.setInteractive(mIsInteractive, mInFullscreenMode);
@@ -5881,7 +5847,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void reportImeControl(@Nullable IBinder windowToken) {
             synchronized (ImfLock.class) {
-                if (mCurFocusedWindow != windowToken) {
+                if (mImeBindingState.mFocusedWindow != windowToken) {
                     // mCurPerceptible was set by the focused window, but it is no longer in
                     // control, so we reset mCurPerceptible.
                     mCurPerceptible = true;
@@ -5895,7 +5861,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // Hide the IME method menu only when the IME surface parent is changed by the
                 // input target changed, in case seeing the dialog dismiss flickering during
                 // the next focused window starting the input connection.
-                if (mLastImeTargetWindow != mCurFocusedWindow) {
+                if (mLastImeTargetWindow != mImeBindingState.mFocusedWindow) {
                     mMenuController.hideInputMethodMenuLocked();
                 }
             }
@@ -6189,11 +6155,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());
             p.println("  mCurPerceptible=" + mCurPerceptible);
-            p.println("  mCurFocusedWindow=" + mCurFocusedWindow
-                    + " softInputMode="
-                    + InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode)
-                    + " client=" + mCurFocusedWindowClient);
-            focusedWindowClient = mCurFocusedWindowClient;
+            mImeBindingState.dump("  ", p);
             p.println("  mCurId=" + getCurIdLocked() + " mHaveConnection=" + hasConnectionLocked()
                     + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound="
                     + mBindingController.isVisibleBound());
@@ -6244,7 +6206,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("No input method client.");
         }
 
-        if (focusedWindowClient != null && client != focusedWindowClient) {
+        if (mImeBindingState.mFocusedWindowClient != null
+                && client != mImeBindingState.mFocusedWindowClient) {
             p.println(" ");
             p.println("Warning: Current input method client doesn't match the last focused. "
                     + "window.");
@@ -6252,7 +6215,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             p.println(" ");
             pw.flush();
             try {
-                TransferPipe.dumpAsync(focusedWindowClient.mClient.asBinder(), fd, args);
+                TransferPipe.dumpAsync(
+                        mImeBindingState.mFocusedWindowClient.mClient.asBinder(), fd, args);
             } catch (IOException | RemoteException e) {
                 p.println("Failed to dump input method client in focused window: " + e);
             }
@@ -6698,7 +6662,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     final String nextIme;
                     final List<InputMethodInfo> nextEnabledImes;
                     if (userId == mSettings.getUserId()) {
-                        hideCurrentInputLocked(mCurFocusedWindow, 0 /* flags */,
+                        hideCurrentInputLocked(mImeBindingState.mFocusedWindow, 0 /* flags */,
                                 SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
                         mBindingController.unbindCurrentMethod();
 
@@ -6832,11 +6796,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private ImeTracker.Token createStatsTokenForFocusedClient(boolean show,
             @SoftInputShowHideReason int reason) {
-        final int uid = mCurFocusedWindowClient != null
-                ? mCurFocusedWindowClient.mUid
+        final int uid = mImeBindingState.mFocusedWindowClient != null
+                ? mImeBindingState.mFocusedWindowClient.mUid
                 : -1;
-        final var packageName = mCurFocusedWindowEditorInfo != null
-                ? mCurFocusedWindowEditorInfo.packageName
+        final var packageName = mImeBindingState.mFocusedWindowEditorInfo != null
+                ? mImeBindingState.mFocusedWindowEditorInfo.packageName
                 : "uid(" + uid + ")";
 
         return ImeTracker.forLogging().onStart(packageName, uid,

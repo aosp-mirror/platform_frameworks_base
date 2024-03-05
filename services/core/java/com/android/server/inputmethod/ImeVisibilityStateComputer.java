@@ -548,7 +548,7 @@ public final class ImeVisibilityStateComputer {
             }
         }
         // Fallback to the focused window for some edge cases (e.g. relaunching the activity)
-        return mService.mCurFocusedWindow;
+        return mService.mImeBindingState.mFocusedWindow;
     }
 
     IBinder getWindowTokenFrom(ImeTargetWindowState windowState) {
