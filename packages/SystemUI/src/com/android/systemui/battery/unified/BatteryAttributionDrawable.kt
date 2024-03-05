@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.DrawableWrapper
 import android.view.Gravity
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -36,7 +37,7 @@ import kotlin.math.roundToInt
  */
 @Suppress("RtlHardcoded")
 class BatteryAttributionDrawable(dr: Drawable?) : DrawableWrapper(dr) {
-    /** One of [CENTER, LEFT]. Note that RTL is handled in the parent */
+    /** One of [CENTER, LEFT]. Note that number text does not RTL. */
     var gravity = Gravity.CENTER
         set(value) {
             field = value
@@ -67,8 +68,8 @@ class BatteryAttributionDrawable(dr: Drawable?) : DrawableWrapper(dr) {
             dr.setBounds(
                 bounds.left,
                 bounds.top,
-                (bounds.left + dw).roundToInt(),
-                (bounds.top + dh).roundToInt()
+                ceil(bounds.left + dw).toInt(),
+                ceil(bounds.top + dh).toInt()
             )
         }
     }

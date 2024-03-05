@@ -26,6 +26,7 @@ import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.drawable.Drawable
+import android.view.View
 import com.android.systemui.battery.unified.BatteryLayersDrawable.Companion.Metrics
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -102,6 +103,11 @@ class BatteryFillDrawable(private val framePath: Path) : Drawable() {
 
         // saveLayer is needed here so we don't clip the other layers of our drawable
         canvas.saveLayer(null, null)
+
+        // Fill from the opposite direction in rtl mode
+        if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+            canvas.scale(-1f, 1f, bounds.width() / 2f, bounds.height() / 2f)
+        }
 
         // We need to use 3 draw commands:
         // 1. Clip to the current level

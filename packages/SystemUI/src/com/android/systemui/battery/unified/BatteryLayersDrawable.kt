@@ -28,6 +28,8 @@ import android.util.PathParser
 import android.view.Gravity
 import android.view.View
 import com.android.systemui.res.R
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /**
@@ -93,6 +95,7 @@ class BatteryLayersDrawable(
         }
 
     init {
+        isAutoMirrored = true
         // Initialize the canvas rects since they are not static
         setAttrRects(layoutDirection == View.LAYOUT_DIRECTION_RTL)
     }
@@ -156,6 +159,13 @@ class BatteryLayersDrawable(
         scaleAttributionBounds()
     }
 
+    override fun onLayoutDirectionChanged(layoutDirection: Int): Boolean {
+        setAttrRects(layoutDirection == View.LAYOUT_DIRECTION_RTL)
+        scaleAttributionBounds()
+
+        return super.onLayoutDirectionChanged(layoutDirection)
+    }
+
     private fun setAttrRects(rtl: Boolean) {
         // Local refs make the math easier to parse
         val full = Metrics.AttrFullCanvasInsets
@@ -198,13 +208,14 @@ class BatteryLayersDrawable(
         if (batteryState.showPercent && batteryState.attribution != null) {
             // 4a. percent & attribution. Implies space-sharing
 
-            // Configure the attribute to draw in a smaller bounding box and align left
+            // Configure the attribute to draw in a smaller bounding box and align left and use
+            // floor/ceil math to make sure we get every available pixel
             attribution.gravity = Gravity.LEFT
             attribution.setBounds(
-                scaledAttrRightCanvas.left.roundToInt(),
-                scaledAttrRightCanvas.top.roundToInt(),
-                scaledAttrRightCanvas.right.roundToInt(),
-                scaledAttrRightCanvas.bottom.roundToInt(),
+                floor(scaledAttrRightCanvas.left).toInt(),
+                floor(scaledAttrRightCanvas.top).toInt(),
+                ceil(scaledAttrRightCanvas.right).toInt(),
+                ceil(scaledAttrRightCanvas.bottom).toInt(),
             )
             attribution.draw(canvas)
 
