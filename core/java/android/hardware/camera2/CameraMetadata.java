@@ -911,10 +911,10 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>Combinations of logical and physical streams, or physical streams from different
      * physical cameras are not guaranteed. However, if the camera device supports
-     * {@link CameraManager#isSessionConfigurationWithParametersSupported },
+     * {@link CameraDevice#isSessionConfigurationSupported },
      * application must be able to query whether a stream combination involving physical
      * streams is supported by calling
-     * {@link CameraManager#isSessionConfigurationWithParametersSupported }.</p>
+     * {@link CameraDevice#isSessionConfigurationSupported }.</p>
      * <p>Camera application shouldn't assume that there are at most 1 rear camera and 1 front
      * camera in the system. For an application that switches between front and back cameras,
      * the recommendation is to switch between the first rear camera and the first front
