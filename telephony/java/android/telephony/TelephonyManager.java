@@ -18852,7 +18852,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
-    @RequiresPermission(android.Manifest.permission.DUMP)
+    @RequiresPermission(android.Manifest.permission.READ_DROPBOX_DATA)
     public void persistEmergencyCallDiagnosticData(@NonNull String dropboxTag,
             @NonNull EmergencyCallDiagnosticData data) {
         try {
