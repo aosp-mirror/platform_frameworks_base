@@ -1775,9 +1775,9 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @CriticalNative
     private static native void nativeOffsetLocation(long nativePtr, float deltaX, float deltaY);
     @CriticalNative
-    private static native float nativeGetXOffset(long nativePtr);
+    private static native float nativeGetRawXOffset(long nativePtr);
     @CriticalNative
-    private static native float nativeGetYOffset(long nativePtr);
+    private static native float nativeGetRawYOffset(long nativePtr);
     @CriticalNative
     private static native float nativeGetXPrecision(long nativePtr);
     @CriticalNative
@@ -3745,7 +3745,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     nativeGetAction(mNativePtr), nativeGetFlags(mNativePtr),
                     nativeGetEdgeFlags(mNativePtr), nativeGetMetaState(mNativePtr),
                     nativeGetButtonState(mNativePtr), nativeGetClassification(mNativePtr),
-                    nativeGetXOffset(mNativePtr), nativeGetYOffset(mNativePtr),
+                    nativeGetRawXOffset(mNativePtr), nativeGetRawYOffset(mNativePtr),
                     nativeGetXPrecision(mNativePtr), nativeGetYPrecision(mNativePtr),
                     nativeGetDownTimeNanos(mNativePtr),
                     nativeGetEventTimeNanos(mNativePtr, HISTORY_CURRENT),

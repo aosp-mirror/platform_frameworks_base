@@ -124,11 +124,11 @@ int64_t AMotionEvent_getEventTime(const AInputEvent* motion_event) {
 }
 
 float AMotionEvent_getXOffset(const AInputEvent* motion_event) {
-    return static_cast<const MotionEvent*>(motion_event)->getXOffset();
+    return static_cast<const MotionEvent*>(motion_event)->getRawXOffset();
 }
 
 float AMotionEvent_getYOffset(const AInputEvent* motion_event) {
-    return static_cast<const MotionEvent*>(motion_event)->getYOffset();
+    return static_cast<const MotionEvent*>(motion_event)->getRawYOffset();
 }
 
 float AMotionEvent_getXPrecision(const AInputEvent* motion_event) {
