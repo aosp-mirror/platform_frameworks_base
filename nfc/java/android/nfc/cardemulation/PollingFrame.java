@@ -157,7 +157,11 @@ public final class PollingFrame implements Parcelable{
         mType = frame.getInt(KEY_POLLING_LOOP_TYPE);
         byte[] data = frame.getByteArray(KEY_POLLING_LOOP_DATA);
         mData = (data == null) ? new byte[0] : data;
-        mGain = frame.getByte(KEY_POLLING_LOOP_GAIN);
+        if (frame.containsKey(KEY_POLLING_LOOP_GAIN)) {
+            mGain = frame.getByte(KEY_POLLING_LOOP_GAIN);
+        } else {
+            mGain = -1;
+        }
         mTimestamp = frame.getInt(KEY_POLLING_LOOP_TIMESTAMP);
     }
 
@@ -194,8 +198,9 @@ public final class PollingFrame implements Parcelable{
     /**
      * Returns the gain representing the field strength of the NFC field when this polling loop
      * frame was observed.
+     * @return the gain or -1 if there is no gain measurement associated with this frame.
      */
-    public int getGain() {
+    public int getVendorSpecificGain() {
         return mGain;
     }
 
@@ -227,7 +232,9 @@ public final class PollingFrame implements Parcelable{
     public Bundle toBundle() {
         Bundle frame = new Bundle();
         frame.putInt(KEY_POLLING_LOOP_TYPE, getType());
-        frame.putByte(KEY_POLLING_LOOP_GAIN, (byte) getGain());
+        if (getVendorSpecificGain() != -1) {
+            frame.putByte(KEY_POLLING_LOOP_GAIN, (byte) getVendorSpecificGain());
+        }
         frame.putByteArray(KEY_POLLING_LOOP_DATA, getData());
         frame.putInt(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
         return frame;
@@ -236,7 +243,7 @@ public final class PollingFrame implements Parcelable{
     @Override
     public String toString() {
         return "PollingFrame { Type: " + (char) getType()
-                + ", gain: " + getGain()
+                + ", gain: " + getVendorSpecificGain()
                 + ", timestamp: " + Integer.toUnsignedString(getTimestamp())
                 + ", data: [" + HexFormat.ofDelimiter(" ").formatHex(getData()) + "] }";
     }
