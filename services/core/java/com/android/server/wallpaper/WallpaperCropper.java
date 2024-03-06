@@ -131,19 +131,23 @@ public class WallpaperCropper {
                     (bitmapSize.y - crop.height()) / 2);
             return crop;
         }
+
+        // If any suggested crop is invalid, fallback to case 1
+        for (int i = 0; i < suggestedCrops.size(); i++) {
+            Rect testCrop = suggestedCrops.valueAt(i);
+            if (testCrop == null || testCrop.left < 0 || testCrop.top < 0
+                    || testCrop.right > bitmapSize.x || testCrop.bottom > bitmapSize.y) {
+                Slog.w(TAG, "invalid crop: " + testCrop + " for bitmap size: " + bitmapSize);
+                return getCrop(displaySize, bitmapSize, new SparseArray<>(), rtl);
+            }
+        }
+
         int orientation = getOrientation(displaySize);
 
         // Case 2: if the orientation exists in the suggested crops, adjust the suggested crop
         Rect suggestedCrop = suggestedCrops.get(orientation);
         if (suggestedCrop != null) {
-            if (suggestedCrop.left < 0 || suggestedCrop.top < 0
-                    || suggestedCrop.right > bitmapSize.x || suggestedCrop.bottom > bitmapSize.y) {
-                Slog.w(TAG, "invalid suggested crop: " + suggestedCrop);
-                Rect fullImage = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
-                return getAdjustedCrop(fullImage, bitmapSize, displaySize, true, rtl, ADD);
-            } else {
                 return getAdjustedCrop(suggestedCrop, bitmapSize, displaySize, true, rtl, ADD);
-            }
         }
 
         // Case 3: if we have the 90° rotated orientation in the suggested crops, reuse it and
@@ -247,6 +251,7 @@ public class WallpaperCropper {
         Rect adjustedCrop = new Rect(crop);
         float cropRatio = ((float) crop.width()) / crop.height();
         float screenRatio = ((float) screenSize.x) / screenSize.y;
+        if (cropRatio == screenRatio) return crop;
         if (cropRatio > screenRatio) {
             if (!parallax) {
                 // rotate everything 90 degrees clockwise, compute the result, and rotate back
@@ -276,6 +281,7 @@ public class WallpaperCropper {
                 }
             }
         } else {
+            // TODO (b/281648899) the third case is not always correct, fix that.
             int widthToAdd = mode == REMOVE ? 0
                     : mode == ADD ? (int) (0.5 + crop.height() * screenRatio - crop.width())
                     : (int) (0.5 + crop.height() - crop.width());
@@ -646,6 +652,9 @@ public class WallpaperCropper {
         if (!success) {
             Slog.e(TAG, "Unable to apply new wallpaper");
             wallpaper.getCropFile().delete();
+            wallpaper.mCropHints.clear();
+            wallpaper.cropHint.set(0, 0, 0, 0);
+            wallpaper.mSampleSize = 1f;
         }
 
         if (wallpaper.getCropFile().exists()) {
