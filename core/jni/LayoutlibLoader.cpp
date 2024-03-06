@@ -428,7 +428,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         return JNI_ERR;
     }
 
-    if (!systemProperties["register_properties_during_load"].empty()) {
+    if (!systemProperties["icu.data.path"].empty()) {
         // Set the location of ICU data
         bool icuInitialized = init_icu(systemProperties["icu.data.path"].c_str());
         if (!icuInitialized) {
