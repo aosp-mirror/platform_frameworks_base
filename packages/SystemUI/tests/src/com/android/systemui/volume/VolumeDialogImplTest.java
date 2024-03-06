@@ -69,7 +69,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.res.R;
@@ -130,7 +130,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Mock
     DeviceProvisionedController mDeviceProvisionedController;
     @Mock
-    MediaOutputDialogFactory mMediaOutputDialogFactory;
+    MediaOutputDialogManager mMediaOutputDialogManager;
     @Mock
     InteractionJankMonitor mInteractionJankMonitor;
     @Mock
@@ -196,7 +196,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mAccessibilityMgr,
                 mDeviceProvisionedController,
                 mConfigurationController,
-                mMediaOutputDialogFactory,
+                mMediaOutputDialogManager,
                 mInteractionJankMonitor,
                 mVolumePanelNavigationInteractor,
                 mVolumeNavigator,

@@ -120,7 +120,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
 import com.android.systemui.haptics.slider.SeekableSliderHapticPlugin;
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
@@ -265,7 +265,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
     private final ConfigurationController mConfigurationController;
-    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final MediaOutputDialogManager mMediaOutputDialogManager;
     private final CsdWarningDialog.Factory mCsdWarningDialogFactory;
     private final VolumePanelNavigationInteractor mVolumePanelNavigationInteractor;
     private final VolumeNavigator mVolumeNavigator;
@@ -316,7 +316,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             DeviceProvisionedController deviceProvisionedController,
             ConfigurationController configurationController,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
+            MediaOutputDialogManager mediaOutputDialogManager,
             InteractionJankMonitor interactionJankMonitor,
             VolumePanelNavigationInteractor volumePanelNavigationInteractor,
             VolumeNavigator volumeNavigator,
@@ -340,7 +340,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mAccessibilityMgr = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mConfigurationController = configurationController;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mMediaOutputDialogManager = mediaOutputDialogManager;
         mCsdWarningDialogFactory = csdWarningDialogFactory;
         mShowActiveStreamOnly = showActiveStreamOnly();
         mHasSeenODICaptionsTooltip =
@@ -1199,7 +1199,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             mSettingsIcon.setOnClickListener(v -> {
                 Events.writeEvent(Events.EVENT_SETTINGS_CLICK);
                 dismissH(DISMISS_REASON_SETTINGS_CLICKED);
-                mMediaOutputDialogFactory.dismiss();
+                mMediaOutputDialogManager.dismiss();
                 mVolumeNavigator.openVolumePanel(
                         mVolumePanelNavigationInteractor.getVolumePanelRoute());
             });

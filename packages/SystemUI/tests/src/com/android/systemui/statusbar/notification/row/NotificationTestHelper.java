@@ -58,7 +58,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -159,7 +159,7 @@ public class NotificationTestHelper {
         dependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
-        dependency.injectMockDependency(MediaOutputDialogFactory.class);
+        dependency.injectMockDependency(MediaOutputDialogManager.class);
         mMockLogger = mock(ExpandableNotificationRowLogger.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mKeyguardBypassController = mock(KeyguardBypassController.class);
