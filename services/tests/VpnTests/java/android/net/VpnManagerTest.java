@@ -50,7 +50,6 @@ public class VpnManagerTest {
 
     private static final String PKG_NAME = "fooPackage";
 
-    private static final String SESSION_NAME_STRING = "testSession";
     private static final String SERVER_ADDR_STRING = "1.2.3.4";
     private static final String IDENTITY_STRING = "Identity";
     private static final byte[] PSK_BYTES = "preSharedKey".getBytes();
