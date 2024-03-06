@@ -19,8 +19,6 @@ package com.android.internal.net;
 import static android.net.cts.util.IkeSessionTestUtils.CHILD_PARAMS;
 import static android.net.cts.util.IkeSessionTestUtils.IKE_PARAMS_V4;
 
-import static com.android.modules.utils.build.SdkLevel.isAtLeastT;
-import static com.android.modules.utils.build.SdkLevel.isAtLeastU;
 import static com.android.testutils.ParcelUtils.assertParcelSane;
 
 import static org.junit.Assert.assertEquals;
@@ -32,12 +30,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.IpSecAlgorithm;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
-import android.os.Build;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +43,7 @@ import java.util.List;
 
 /** Unit tests for {@link VpnProfile}. */
 @SmallTest
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.R)
+@RunWith(AndroidJUnit4.class)
 public class VpnProfileTest {
     private static final String DUMMY_PROFILE_KEY = "Test";
 
@@ -176,17 +170,8 @@ public class VpnProfileTest {
 
     @Test
     public void testParcelUnparcel() {
-        if (isAtLeastU()) {
-            // automaticNattKeepaliveTimerEnabled, automaticIpVersionSelectionEnabled added in U.
-            assertParcelSane(getSampleIkev2Profile(DUMMY_PROFILE_KEY), 28);
-            assertParcelSane(getSampleIkev2ProfileWithIkeTunConnParams(DUMMY_PROFILE_KEY), 28);
-        } else if (isAtLeastT()) {
-            // excludeLocalRoutes, requiresPlatformValidation were added in T.
-            assertParcelSane(getSampleIkev2Profile(DUMMY_PROFILE_KEY), 26);
-            assertParcelSane(getSampleIkev2ProfileWithIkeTunConnParams(DUMMY_PROFILE_KEY), 26);
-        } else {
-            assertParcelSane(getSampleIkev2Profile(DUMMY_PROFILE_KEY), 23);
-        }
+        assertParcelSane(getSampleIkev2Profile(DUMMY_PROFILE_KEY), 28);
+        assertParcelSane(getSampleIkev2ProfileWithIkeTunConnParams(DUMMY_PROFILE_KEY), 28);
     }
 
     @Test
