@@ -30,7 +30,7 @@ struct MyWrapper {
 
     void setBuffer(AHardwareBuffer* buffer) {
         ASurfaceTransaction* transaction = ASurfaceTransaction_create();
-        ASurfaceTransaction_setBuffer(transaction, surfaceControl, buffer);
+        ASurfaceTransaction_setBuffer(transaction, surfaceControl, buffer, -1);
         ASurfaceTransaction_setVisibility(transaction, surfaceControl,
                                           ASURFACE_TRANSACTION_VISIBILITY_SHOW);
         ASurfaceTransaction_apply(transaction);
