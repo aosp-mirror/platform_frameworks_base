@@ -29,6 +29,7 @@ import android.credentials.CredentialOption
 import android.credentials.selection.Entry
 import android.credentials.selection.GetCredentialProviderData
 import android.credentials.selection.ProviderData
+import android.graphics.BlendMode
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CancellationSignal
@@ -353,6 +354,7 @@ class CredentialAutofillService : AutofillService() {
         val sliceBuilder = InlineSuggestionUi
                 .newContentBuilder(pendingIntent)
                 .setTitle(displayName)
+        icon.setTintBlendMode(BlendMode.DST)
         sliceBuilder.setStartIcon(icon)
         if (primaryEntry.credentialType ==
                 CredentialType.PASSKEY && duplicateDisplayNameForPasskeys[displayName] == true) {
