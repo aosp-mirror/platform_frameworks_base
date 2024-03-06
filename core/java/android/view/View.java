@@ -25,7 +25,6 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
@@ -5630,7 +5629,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
     private ViewTranslationCallback mViewTranslationCallback;
 
-    private float mFrameContentVelocity = -1;
+    private float mFrameContentVelocity = 0;
 
     @Nullable
 
@@ -5660,9 +5659,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected long mMinusTwoFrameIntervalMillis = 0;
     private int mLastFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-
-    private float mLastFrameX = Float.NaN;
-    private float mLastFrameY = Float.NaN;
 
     @FlaggedApi(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public static final float REQUESTED_FRAME_RATE_CATEGORY_DEFAULT = Float.NaN;
@@ -24601,10 +24597,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void draw(@NonNull Canvas canvas) {
         final int privateFlags = mPrivateFlags;
         mPrivateFlags = (privateFlags & ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
-
-        mFrameContentVelocity = -1;
-        mLastFrameX = mLeft + mRenderNode.getTranslationX();
-        mLastFrameY = mTop + mRenderNode.getTranslationY();
+        mFrameContentVelocity = 0;
 
         /*
          * Draw traversal performs several drawing steps which must be executed
@@ -33680,17 +33673,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
                 viewRootImpl.recordViewPercentage(sizePercentage);
             }
-            if (viewVelocityApi()) {
-                float velocity = mFrameContentVelocity;
-                if (velocity < 0f) {
-                    velocity = calculateVelocity();
-                }
-                if (velocity > 0f) {
-                    float frameRate = convertVelocityToFrameRate(velocity);
-                    viewRootImpl.votePreferredFrameRate(frameRate, FRAME_RATE_COMPATIBILITY_GTE);
-                    return;
-                }
-            }
             if (!Float.isNaN(mPreferredFrameRate)) {
                 if (mPreferredFrameRate < 0) {
                     if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
@@ -33711,23 +33693,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
             mLastFrameRateCategory = frameRateCateogry;
         }
-    }
-
-    private float convertVelocityToFrameRate(float velocityPps) {
-        float density = getResources().getDisplayMetrics().density;
-        float velocityDps = velocityPps / density;
-        // Choose a frame rate in increments of 10fps
-        return Math.min(140f, 60f + (10f * (float) Math.floor(velocityDps / 300f)));
-    }
-
-    private float calculateVelocity() {
-        // This current calculation is very simple. If something on the screen moved, then
-        // it votes for the highest velocity. If it doesn't move, then return 0.
-        float x = mLeft + mRenderNode.getTranslationX();
-        float y = mTop + mRenderNode.getTranslationY();
-
-        return (!Float.isNaN(mLastFrameX) && (x != mLastFrameX || y != mLastFrameY))
-                ? 100_000f : 0f;
     }
 
     /**
