@@ -57,39 +57,6 @@ class AmbientStateTest : SysuiTestCase() {
             )
     }
 
-    // region isDimmed
-    @Test
-    fun isDimmed_whenTrue_shouldReturnTrue() {
-        sut.arrangeDimmed(true)
-
-        assertThat(sut.isDimmed).isTrue()
-    }
-
-    @Test
-    fun isDimmed_whenFalse_shouldReturnFalse() {
-        sut.arrangeDimmed(false)
-
-        assertThat(sut.isDimmed).isFalse()
-    }
-
-    @Test
-    fun isDimmed_whenDozeAmountIsEmpty_shouldReturnTrue() {
-        sut.arrangeDimmed(true)
-        sut.dozeAmount = 0f
-
-        assertThat(sut.isDimmed).isTrue()
-    }
-
-    @Test
-    fun isDimmed_whenPulseExpandingIsFalse_shouldReturnTrue() {
-        sut.arrangeDimmed(true)
-        sut.arrangePulseExpanding(false)
-        sut.dozeAmount = 1f // arrangePulseExpanding changes dozeAmount
-
-        assertThat(sut.isDimmed).isTrue()
-    }
-    // endregion
-
     // region pulseHeight
     @Test
     fun pulseHeight_whenValueChanged_shouldCallListener() {
@@ -383,12 +350,6 @@ class AmbientStateTest : SysuiTestCase() {
 }
 
 // region Arrange helper methods.
-private fun AmbientState.arrangeDimmed(value: Boolean) {
-    isDimmed = value
-    dozeAmount = if (value) 0f else 1f
-    arrangePulseExpanding(!value)
-}
-
 private fun AmbientState.arrangePulseExpanding(value: Boolean) {
     if (value) {
         dozeAmount = 1f

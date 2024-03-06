@@ -61,7 +61,6 @@ public class AmbientState implements Dumpable {
      */
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
-    private boolean mDimmed;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private boolean mDozing;
@@ -344,14 +343,6 @@ public class AmbientState implements Dumpable {
         this.mScrollY = Math.max(scrollY, 0);
     }
 
-    /**
-     * @param dimmed Whether we are in a dimmed state (on the lockscreen), where the backgrounds are
-     *               translucent and everything is scaled back a bit.
-     */
-    public void setDimmed(boolean dimmed) {
-        mDimmed = dimmed;
-    }
-
     /** While dozing, we draw as little as possible, assuming a black background */
     public void setDozing(boolean dozing) {
         mDozing = dozing;
@@ -373,12 +364,6 @@ public class AmbientState implements Dumpable {
 
     public void setHideSensitive(boolean hideSensitive) {
         mHideSensitive = hideSensitive;
-    }
-
-    public boolean isDimmed() {
-        // While we are expanding from pulse, we want the notifications not to be dimmed, otherwise
-        // you'd see the difference to the pulsing notification
-        return mDimmed && !(isPulseExpanding() && mDozeAmount == 1.0f);
     }
 
     public boolean isDozing() {
@@ -768,7 +753,6 @@ public class AmbientState implements Dumpable {
         pw.println("mHideSensitive=" + mHideSensitive);
         pw.println("mShadeExpanded=" + mShadeExpanded);
         pw.println("mClearAllInProgress=" + mClearAllInProgress);
-        pw.println("mDimmed=" + mDimmed);
         pw.println("mStatusBarState=" + mStatusBarState);
         pw.println("mExpansionChanging=" + mExpansionChanging);
         pw.println("mPanelFullWidth=" + mIsSmallScreen);
