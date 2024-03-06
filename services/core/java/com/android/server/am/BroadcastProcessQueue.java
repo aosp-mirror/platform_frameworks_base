@@ -264,6 +264,11 @@ class BroadcastProcessQueue {
                 && record.getDeliveryGroupPolicy() == BroadcastOptions.DELIVERY_GROUP_POLICY_ALL) {
             final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex);
             if (replacedBroadcastRecord != null) {
+                if (mLastDeferredStates && shouldBeDeferred()
+                        && (record.getDeliveryState(recordIndex)
+                                == BroadcastRecord.DELIVERY_PENDING)) {
+                    deferredStatesApplyConsumer.accept(record, recordIndex);
+                }
                 return replacedBroadcastRecord;
             }
         }
