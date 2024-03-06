@@ -50,6 +50,9 @@ abstract class BackupRestoreStorage : BackupHelper {
     /** Entities to back up and restore. */
     abstract fun createBackupRestoreEntities(): List<BackupRestoreEntity>
 
+    /** Default codec used to encode/decode the entity data. */
+    open fun defaultCodec(): BackupCodec = BackupZipCodec.BEST_COMPRESSION
+
     override fun performBackup(
         oldState: ParcelFileDescriptor?,
         data: BackupDataOutput,
@@ -64,9 +67,10 @@ abstract class BackupRestoreStorage : BackupHelper {
         for (entity in entities) {
             val key = entity.key
             val outputStream = ByteArrayOutputStream()
+            val codec = entity.codec() ?: defaultCodec()
             val result =
                 try {
-                    entity.backup(backupContext, wrapBackupOutputStream(outputStream))
+                    entity.backup(backupContext, wrapBackupOutputStream(codec, outputStream))
                 } catch (exception: Exception) {
                     Log.e(LOG_TAG, "[$name] Fail to backup entity $key", exception)
                     continue
@@ -94,8 +98,10 @@ abstract class BackupRestoreStorage : BackupHelper {
     /** Returns if backup is enabled. */
     open fun enableBackup(backupContext: BackupContext): Boolean = true
 
-    fun wrapBackupOutputStream(outputStream: OutputStream): OutputStream {
-        return outputStream
+    open fun wrapBackupOutputStream(codec: BackupCodec, outputStream: OutputStream): OutputStream {
+        // write a codec id header for safe restore
+        outputStream.write(codec.id.toInt())
+        return codec.encode(outputStream)
     }
 
     override fun restoreEntity(data: BackupDataInputStream) {
@@ -111,8 +117,12 @@ abstract class BackupRestoreStorage : BackupHelper {
         }
         Log.i(LOG_TAG, "[$name] Restore $key: ${data.size()} bytes")
         val restoreContext = RestoreContext(key)
+        val codec = entity.codec() ?: defaultCodec()
         try {
-            entity.restore(restoreContext, wrapRestoreInputStream(data))
+            entity.restore(
+                restoreContext,
+                wrapRestoreInputStream(codec, LimitedNoCloseInputStream(data))
+            )
         } catch (exception: Exception) {
             Log.e(LOG_TAG, "[$name] Fail to restore entity $key", exception)
         }
@@ -121,8 +131,16 @@ abstract class BackupRestoreStorage : BackupHelper {
     /** Returns if restore is enabled. */
     open fun enableRestore(): Boolean = true
 
-    fun wrapRestoreInputStream(inputStream: BackupDataInputStream): InputStream {
-        return LimitedNoCloseInputStream(inputStream)
+    open fun wrapRestoreInputStream(
+        codec: BackupCodec,
+        inputStream: InputStream,
+    ): InputStream {
+        // read the codec id first to check if it is expected codec
+        val id = inputStream.read()
+        val expectedId = codec.id.toInt()
+        if (id == expectedId) return codec.decode(inputStream)
+        Log.i(LOG_TAG, "Expect codec id $expectedId but got $id")
+        return BackupCodec.fromId(id.toByte()).decode(inputStream)
     }
 
     override fun writeNewStateDescription(newState: ParcelFileDescriptor) {}
