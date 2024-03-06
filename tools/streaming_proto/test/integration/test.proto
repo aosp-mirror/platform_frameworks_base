@@ -16,7 +16,7 @@
 
 syntax = "proto2";
 
-import "frameworks/base/tools/streaming_proto/test/imported.proto";
+import "frameworks/base/tools/streaming_proto/test/integration/imported.proto";
 
 package com.android.streaming_proto_test;
 
