@@ -19,6 +19,7 @@ package android.view;
 import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_BY_SIZE_READ_ONLY;
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
@@ -793,6 +794,38 @@ public class ViewRootImplTest {
             view.invalidate();
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
         });
+    }
+
+    /**
+     * When velocity of a View is not equal to 0, we call setFrameRateCategory with HIGH.
+     * Also, we shouldn't call setFrameRate.
+     */
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY, FLAG_VIEW_VELOCITY_API})
+    public void votePreferredFrameRate_voteFrameRateCategory_velocityToHigh() {
+        View view = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+        wmlp.width = 1;
+        wmlp.height = 1;
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
+            view.setFrameContentVelocity(100);
+            view.invalidate();
+            assertTrue(viewRootImpl.getPreferredFrameRate() > 0);
+        });
+        sInstrumentation.waitForIdleSync();
+        assertEquals(viewRootImpl.getLastPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+        assertEquals(viewRootImpl.getLastPreferredFrameRate(), 0 , 0.1);
     }
 
     /**
