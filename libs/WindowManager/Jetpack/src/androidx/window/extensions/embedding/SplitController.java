@@ -110,7 +110,7 @@ import java.util.function.BiConsumer;
  * Main controller class that manages split states and presentation.
  */
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
-        ActivityEmbeddingComponent {
+        ActivityEmbeddingComponent, DividerPresenter.DragEventCallback {
     static final String TAG = "SplitController";
     static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
@@ -163,6 +163,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     final SparseArray<TaskContainer> mTaskContainers = new SparseArray<>();
 
+    /** Map from Task id to {@link DividerPresenter} which manages the divider in the Task. */
+    @GuardedBy("mLock")
+    private final SparseArray<DividerPresenter> mDividerPresenters = new SparseArray<>();
+
     /** Callback to Jetpack to notify about changes to split states. */
     @GuardedBy("mLock")
     @Nullable
@@ -195,15 +199,16 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                     : null;
 
     private final Handler mHandler;
+    private final MainThreadExecutor mExecutor;
     final Object mLock = new Object();
     private final ActivityStartMonitor mActivityStartMonitor;
 
     public SplitController(@NonNull WindowLayoutComponentImpl windowLayoutComponent,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
         Log.i(TAG, "Initializing Activity Embedding Controller.");
-        final MainThreadExecutor executor = new MainThreadExecutor();
-        mHandler = executor.mHandler;
-        mPresenter = new SplitPresenter(executor, windowLayoutComponent, this);
+        mExecutor = new MainThreadExecutor();
+        mHandler = mExecutor.mHandler;
+        mPresenter = new SplitPresenter(mExecutor, windowLayoutComponent, this);
         mTransactionManager = new TransactionManager(mPresenter);
         final ActivityThread activityThread = ActivityThread.currentActivityThread();
         final Application application = activityThread.getApplication();
@@ -844,7 +849,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Checks if container should be updated before apply new parentInfo.
         final boolean shouldUpdateContainer = taskContainer.shouldUpdateContainer(parentInfo);
         taskContainer.updateTaskFragmentParentInfo(parentInfo);
-        taskContainer.updateDivider(wct);
+
+        // The divider need to be updated even if shouldUpdateContainer is false, because the decor
+        // surface may change in TaskFragmentParentInfo, which requires divider update but not
+        // container update.
+        updateDivider(wct, taskContainer);
 
         // If the last direct activity of the host task is dismissed and the overlay container is
         // the only taskFragment, the overlay container should also be dismissed.
@@ -1007,6 +1016,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (taskContainer.isEmpty()) {
                 // Cleanup the TaskContainer if it becomes empty.
                 mTaskContainers.remove(taskContainer.getTaskId());
+                mDividerPresenters.remove(taskContainer.getTaskId());
             }
             return;
         }
@@ -1759,6 +1769,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         if (!mTaskContainers.contains(taskId)) {
             mTaskContainers.put(taskId, new TaskContainer(taskId, activityInTask));
+            mDividerPresenters.put(taskId, new DividerPresenter(taskId, this, mExecutor));
         }
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
         final TaskFragmentContainer container = new TaskFragmentContainer(pendingAppearedActivity,
@@ -3064,5 +3075,47 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private static boolean isInPictureInPicture(@Nullable Configuration configuration) {
         return configuration != null
                 && configuration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED;
+    }
+
+    @GuardedBy("mLock")
+    void updateDivider(
+            @NonNull WindowContainerTransaction wct, @NonNull TaskContainer taskContainer) {
+        final DividerPresenter dividerPresenter = mDividerPresenters.get(taskContainer.getTaskId());
+        final TaskFragmentParentInfo parentInfo = taskContainer.getTaskFragmentParentInfo();
+        if (parentInfo != null) {
+            dividerPresenter.updateDivider(
+                    wct, parentInfo, taskContainer.getTopNonFinishingSplitContainer());
+        }
+    }
+
+    @Override
+    public void onStartDragging(@NonNull Consumer<WindowContainerTransaction> action) {
+        synchronized (mLock) {
+            final TransactionRecord transactionRecord =
+                    mTransactionManager.startNewTransaction();
+            final WindowContainerTransaction wct = transactionRecord.getTransaction();
+            action.accept(wct);
+            transactionRecord.apply(false /* shouldApplyIndependently */);
+        }
+    }
+
+    @Override
+    public void onFinishDragging(
+            int taskId,
+            @NonNull Consumer<WindowContainerTransaction> action) {
+        synchronized (mLock) {
+            final TransactionRecord transactionRecord =
+                    mTransactionManager.startNewTransaction();
+            final WindowContainerTransaction wct = transactionRecord.getTransaction();
+            final TaskContainer taskContainer = mTaskContainers.get(taskId);
+            if (taskContainer != null) {
+                final DividerPresenter dividerPresenter =
+                        mDividerPresenters.get(taskContainer.getTaskId());
+                taskContainer.updateTopSplitContainerForDivider(dividerPresenter);
+                updateContainersInTask(wct, taskContainer);
+            }
+            action.accept(wct);
+            transactionRecord.apply(false /* shouldApplyIndependently */);
+        }
     }
 }

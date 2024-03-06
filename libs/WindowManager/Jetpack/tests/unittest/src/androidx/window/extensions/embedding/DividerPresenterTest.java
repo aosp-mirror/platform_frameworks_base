@@ -42,6 +42,7 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.window.TaskFragmentOperation;
 import android.window.TaskFragmentParentInfo;
@@ -60,6 +61,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.Executor;
+
 /**
  * Test class for {@link DividerPresenter}.
  *
@@ -73,6 +76,8 @@ public class DividerPresenterTest {
     @Rule
     public final SetFlagsRule mSetFlagRule = new SetFlagsRule();
 
+    private static final int MOCK_TASK_ID = 1234;
+
     @Mock
     private DividerPresenter.Renderer mRenderer;
 
@@ -81,6 +86,12 @@ public class DividerPresenterTest {
 
     @Mock
     private TaskFragmentParentInfo mParentInfo;
+
+    @Mock
+    private TaskContainer mTaskContainer;
+
+    @Mock
+    private DividerPresenter.DragEventCallback mDragEventCallback;
 
     @Mock
     private SplitContainer mSplitContainer;
@@ -110,6 +121,8 @@ public class DividerPresenterTest {
         MockitoAnnotations.initMocks(this);
         mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_INTERACTIVE_DIVIDER_FLAG);
 
+        when(mTaskContainer.getTaskId()).thenReturn(MOCK_TASK_ID);
+
         when(mParentInfo.getDisplayId()).thenReturn(Display.DEFAULT_DISPLAY);
         when(mParentInfo.getConfiguration()).thenReturn(new Configuration());
         when(mParentInfo.getDecorSurface()).thenReturn(mSurfaceControl);
@@ -133,9 +146,11 @@ public class DividerPresenterTest {
                 mSurfaceControl,
                 getInitialDividerPosition(mSplitContainer),
                 true /* isVerticalSplit */,
+                false /* isReversedLayout */,
                 Display.DEFAULT_DISPLAY);
 
-        mDividerPresenter = new DividerPresenter();
+        mDividerPresenter = new DividerPresenter(
+                MOCK_TASK_ID, mDragEventCallback, mock(Executor.class));
         mDividerPresenter.mProperties = mProperties;
         mDividerPresenter.mRenderer = mRenderer;
         mDividerPresenter.mDecorSurfaceOwner = mPrimaryContainerToken;
@@ -309,6 +324,184 @@ public class DividerPresenterTest {
 
         assertDividerOffsetEquals(
                 dividerWidthPx, splitType, expectedTopLeftOffset, expectedBottomRightOffset);
+    }
+
+    @Test
+    public void testCalculateDividerPosition() {
+        final MotionEvent event = mock(MotionEvent.class);
+        final Rect taskBounds = new Rect(100, 200, 1000, 2000);
+        final int dividerWidthPx = 50;
+        final DividerAttributes dividerAttributes =
+                new DividerAttributes.Builder(DividerAttributes.DIVIDER_TYPE_DRAGGABLE)
+                        .setPrimaryMinRatio(0.3f)
+                        .setPrimaryMaxRatio(0.8f)
+                        .build();
+
+        // Left-to-right split
+        when(event.getRawX()).thenReturn(500f); // Touch event is in display space
+        assertEquals(
+                // Touch position is in task space is 400, then minus half of divider width.
+                375,
+                DividerPresenter.calculateDividerPosition(
+                        event,
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        true /* isVerticalSplit */,
+                        false /* isReversedLayout */));
+
+        // Top-to-bottom split
+        when(event.getRawY()).thenReturn(1000f); // Touch event is in display space
+        assertEquals(
+                // Touch position is in task space is 800, then minus half of divider width.
+                775,
+                DividerPresenter.calculateDividerPosition(
+                        event,
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        false /* isVerticalSplit */,
+                        false /* isReversedLayout */));
+    }
+
+    @Test
+    public void testCalculateMinPosition() {
+        final Rect taskBounds = new Rect(100, 200, 1000, 2000);
+        final int dividerWidthPx = 50;
+        final DividerAttributes dividerAttributes =
+                new DividerAttributes.Builder(DividerAttributes.DIVIDER_TYPE_DRAGGABLE)
+                        .setPrimaryMinRatio(0.3f)
+                        .setPrimaryMaxRatio(0.8f)
+                        .build();
+
+        // Left-to-right split
+        assertEquals(
+                255, /* (1000 - 100 - 50) * 0.3 */
+                DividerPresenter.calculateMinPosition(
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        true /* isVerticalSplit */,
+                        false /* isReversedLayout */));
+
+        // Top-to-bottom split
+        assertEquals(
+                525, /* (2000 - 200 - 50) * 0.3 */
+                DividerPresenter.calculateMinPosition(
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        false /* isVerticalSplit */,
+                        false /* isReversedLayout */));
+
+        // Right-to-left split
+        assertEquals(
+                170, /* (1000 - 100 - 50) * (1 - 0.8) */
+                DividerPresenter.calculateMinPosition(
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        true /* isVerticalSplit */,
+                        true /* isReversedLayout */));
+    }
+
+    @Test
+    public void testCalculateMaxPosition() {
+        final Rect taskBounds = new Rect(100, 200, 1000, 2000);
+        final int dividerWidthPx = 50;
+        final DividerAttributes dividerAttributes =
+                new DividerAttributes.Builder(DividerAttributes.DIVIDER_TYPE_DRAGGABLE)
+                        .setPrimaryMinRatio(0.3f)
+                        .setPrimaryMaxRatio(0.8f)
+                        .build();
+
+        // Left-to-right split
+        assertEquals(
+                680, /* (1000 - 100 - 50) * 0.8 */
+                DividerPresenter.calculateMaxPosition(
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        true /* isVerticalSplit */,
+                        false /* isReversedLayout */));
+
+        // Top-to-bottom split
+        assertEquals(
+                1400, /* (2000 - 200 - 50) * 0.8 */
+                DividerPresenter.calculateMaxPosition(
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        false /* isVerticalSplit */,
+                        false /* isReversedLayout */));
+
+        // Right-to-left split
+        assertEquals(
+                595, /* (1000 - 100 - 50) * (1 - 0.3) */
+                DividerPresenter.calculateMaxPosition(
+                        taskBounds,
+                        dividerWidthPx,
+                        dividerAttributes,
+                        true /* isVerticalSplit */,
+                        true /* isReversedLayout */));
+    }
+
+    @Test
+    public void testCalculateNewSplitRatio_leftToRight() {
+        // primary=500px; secondary=500px; divider=100px; total=1100px.
+        final Rect taskBounds = new Rect(0, 0, 1100, 2000);
+        final Rect primaryBounds = new Rect(0, 0, 500, 2000);
+        final Rect secondaryBounds = new Rect(600, 0, 1100, 2000);
+        final int dividerWidthPx = 100;
+        final int dividerPosition = 300;
+
+        final TaskFragmentContainer mockPrimaryContainer =
+                createMockTaskFragmentContainer(mPrimaryContainerToken, primaryBounds);
+        final TaskFragmentContainer mockSecondaryContainer =
+                createMockTaskFragmentContainer(mSecondaryContainerToken, secondaryBounds);
+        when(mSplitContainer.getPrimaryContainer()).thenReturn(mockPrimaryContainer);
+        when(mSplitContainer.getSecondaryContainer()).thenReturn(mockSecondaryContainer);
+
+        assertEquals(
+                0.3f, // Primary is 300px after dragging.
+                DividerPresenter.calculateNewSplitRatio(
+                        mSplitContainer,
+                        dividerPosition,
+                        taskBounds,
+                        dividerWidthPx,
+                        true /* isVerticalSplit */,
+                        false /* isReversedLayout */),
+                0.0001 /* delta */);
+    }
+
+    @Test
+    public void testCalculateNewSplitRatio_bottomToTop() {
+        // Primary is at bottom. Secondary is at top.
+        // primary=500px; secondary=500px; divider=100px; total=1100px.
+        final Rect taskBounds = new Rect(0, 0, 2000, 1100);
+        final Rect primaryBounds = new Rect(0, 0, 2000, 1100);
+        final Rect secondaryBounds = new Rect(0, 0, 2000, 500);
+        final int dividerWidthPx = 100;
+        final int dividerPosition = 300;
+
+        final TaskFragmentContainer mockPrimaryContainer =
+                createMockTaskFragmentContainer(mPrimaryContainerToken, primaryBounds);
+        final TaskFragmentContainer mockSecondaryContainer =
+                createMockTaskFragmentContainer(mSecondaryContainerToken, secondaryBounds);
+        when(mSplitContainer.getPrimaryContainer()).thenReturn(mockPrimaryContainer);
+        when(mSplitContainer.getSecondaryContainer()).thenReturn(mockSecondaryContainer);
+
+        assertEquals(
+                // After dragging, secondary is [0, 0, 2000, 300]. Primary is [0, 400, 2000, 1100].
+                0.7f,
+                DividerPresenter.calculateNewSplitRatio(
+                        mSplitContainer,
+                        dividerPosition,
+                        taskBounds,
+                        dividerWidthPx,
+                        false /* isVerticalSplit */,
+                        true /* isReversedLayout */),
+                0.0001 /* delta */);
     }
 
     private TaskFragmentContainer createMockTaskFragmentContainer(
