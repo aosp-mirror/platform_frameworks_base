@@ -39,8 +39,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
-import kotlin.math.abs
-import kotlin.random.Random
+import kotlin.math.absoluteValue
 import kotlin.system.exitProcess
 
 object ProtoLogTool {
@@ -72,7 +71,11 @@ object ProtoLogTool {
     }
 
     private fun processClasses(command: CommandOptions) {
-        val generationHash = abs(Random.nextInt())
+        // A deterministic hash based on the group jar path and the source files we are processing.
+        // The hash is required to make sure different ProtoLogImpls don't conflict.
+        val generationHash = (command.javaSourceArgs.toTypedArray() + command.protoLogGroupsJarArg)
+                .contentHashCode().absoluteValue
+
         // Need to generate a new impl class to inject static constants into the class.
         val generatedProtoLogImplClass =
             "com.android.internal.protolog.ProtoLogImpl_$generationHash"
