@@ -1379,7 +1379,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Switch to doze auto-brightness mode if needed
         if (mFlags.areAutoBrightnessModesEnabled() && mAutomaticBrightnessController != null
                 && !mAutomaticBrightnessController.isInIdleMode()) {
-            mAutomaticBrightnessController.switchMode(mPowerRequest.policy == POLICY_DOZE
+            mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
                     ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT);
         }
 
