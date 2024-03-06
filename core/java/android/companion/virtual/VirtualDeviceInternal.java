@@ -162,6 +162,20 @@ public class VirtualDeviceInternal {
                 mSoundEffectListener);
     }
 
+    VirtualDeviceInternal(
+            IVirtualDeviceManager service,
+            Context context,
+            IVirtualDevice virtualDevice) {
+        mService = service;
+        mContext = context.getApplicationContext();
+        mVirtualDevice = virtualDevice;
+        try {
+            mVirtualDevice.setListeners(mActivityListenerBinder, mSoundEffectListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     int getDeviceId() {
         try {
             return mVirtualDevice.getDeviceId();

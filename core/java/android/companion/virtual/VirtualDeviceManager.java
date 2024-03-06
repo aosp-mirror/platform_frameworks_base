@@ -573,6 +573,12 @@ public final class VirtualDeviceManager {
                     new VirtualDeviceInternal(service, context, associationId, params);
         }
 
+        /** @hide */
+        public VirtualDevice(IVirtualDeviceManager service, Context context,
+                IVirtualDevice virtualDevice) {
+            mVirtualDeviceInternal = new VirtualDeviceInternal(service, context, virtualDevice);
+        }
+
         /**
          * Returns the unique ID of this virtual device.
          */
