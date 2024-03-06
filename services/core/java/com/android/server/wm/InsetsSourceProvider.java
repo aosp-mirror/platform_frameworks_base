@@ -311,7 +311,7 @@ class InsetsSourceProvider {
             return mInsetsHint;
         }
         final WindowState win = mWindowContainer.asWindowState();
-        if (win != null && win.mGivenInsetsPending && win.mAttrs.providedInsets == null) {
+        if (win != null && win.mGivenInsetsPending) {
             return mInsetsHint;
         }
         if (mInsetsHintStale) {
