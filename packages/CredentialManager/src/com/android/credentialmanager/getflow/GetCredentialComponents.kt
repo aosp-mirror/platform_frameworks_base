@@ -16,8 +16,11 @@
 
 package com.android.credentialmanager.getflow
 
+import android.content.Context
+import android.credentials.flags.Flags.credmanBiometricApiEnabled
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
+import android.hardware.biometrics.BiometricPrompt
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -41,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -49,30 +53,31 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
-import com.android.credentialmanager.model.EntryInfo
-import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
+import com.android.credentialmanager.common.runBiometricFlow
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ActionEntry
 import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.CredentialContainerCard
+import com.android.credentialmanager.common.ui.CredentialListSectionHeader
 import com.android.credentialmanager.common.ui.CtaButtonRow
 import com.android.credentialmanager.common.ui.Entry
+import com.android.credentialmanager.common.ui.HeadlineIcon
+import com.android.credentialmanager.common.ui.HeadlineText
+import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ModalBottomSheet
 import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
 import com.android.credentialmanager.common.ui.SheetContainerCard
-import com.android.credentialmanager.common.ui.SnackbarActionText
-import com.android.credentialmanager.common.ui.HeadlineText
-import com.android.credentialmanager.common.ui.CredentialListSectionHeader
-import com.android.credentialmanager.common.ui.HeadlineIcon
-import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
+import com.android.credentialmanager.common.ui.SnackbarActionText
 import com.android.credentialmanager.logging.GetCredentialEvent
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.get.ActionEntryInfo
 import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.userAndDisplayNameForPasskey
 import com.android.internal.logging.UiEventLogger.UiEventEnum
@@ -82,7 +87,7 @@ import kotlin.math.max
 fun GetCredentialScreen(
     viewModel: CredentialSelectorViewModel,
     getCredentialUiState: GetCredentialUiState,
-    providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+    providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>,
 ) {
     if (getCredentialUiState.currentScreenState == GetScreenState.REMOTE_ONLY) {
         RemoteCredentialSnackBarScreen(
@@ -137,6 +142,22 @@ fun GetCredentialScreen(
                             }
                             viewModel.uiMetrics.log(GetCredentialEvent
                                     .CREDMAN_GET_CRED_SCREEN_PRIMARY_SELECTION)
+                        } else if (credmanBiometricApiEnabled() && getCredentialUiState
+                                .currentScreenState == GetScreenState.BIOMETRIC_SELECTION) {
+                            BiometricSelectionPage(
+                                // TODO(b/326243754) : Utilize expected entry for this flow, confirm
+                                // activeEntry will always be what represents the single tap flow
+                                selectedEntry = getCredentialUiState.activeEntry,
+                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
+                                onCancelFlowAndFinish = viewModel::onIllegalUiState,
+                                requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
+                                providerInfoList = getCredentialUiState.providerInfoList,
+                                providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                onBiometricEntrySelected =
+                                viewModel::getFlowOnEntrySelected,
+                                fallbackToOriginalFlow =
+                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                            )
                         } else {
                             AllSignInOptionCard(
                                 providerInfoList = getCredentialUiState.providerInfoList,
@@ -187,6 +208,30 @@ fun GetCredentialScreen(
             onInitialRenderComplete = viewModel::onInitialRenderComplete,
         )
     }
+}
+
+@Composable
+internal fun BiometricSelectionPage(
+    selectedEntry: EntryInfo?,
+    onCancelFlowAndFinish: (String) -> Unit,
+    onMoreOptionSelected: () -> Unit,
+    requestDisplayInfo: RequestDisplayInfo,
+    providerInfoList: List<ProviderInfo>,
+    providerDisplayInfo: ProviderDisplayInfo,
+    onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult?) -> Unit,
+    fallbackToOriginalFlow: () -> Unit,
+) {
+    runBiometricFlow(
+        selectedEntry = selectedEntry,
+        context = LocalContext.current,
+        openMoreOptionsPage = onMoreOptionSelected,
+        sendDataToProvider = onBiometricEntrySelected,
+        onCancelFlowAndFinish = onCancelFlowAndFinish,
+        getRequestDisplayInfo = requestDisplayInfo,
+        getProviderInfoList = providerInfoList,
+        getProviderDisplayInfo = providerDisplayInfo,
+        onBiometricFailureFallback = fallbackToOriginalFlow
+    )
 }
 
 /** Draws the primary credential selection page, used in Android U. */
@@ -256,13 +301,8 @@ fun PrimarySelectionCard(
                         if (hasSingleEntry) {
                             val singleEntryType = sortedUserNameToCredentialEntryList.firstOrNull()
                                 ?.sortedCredentialEntryList?.firstOrNull()?.credentialType
-                            if (singleEntryType == CredentialType.PASSKEY)
-                                R.string.get_dialog_title_use_passkey_for
-                            else if (singleEntryType == CredentialType.PASSWORD)
-                                R.string.get_dialog_title_use_password_for
-                            else if (authenticationEntryList.isNotEmpty())
-                                R.string.get_dialog_title_unlock_options_for
-                            else R.string.get_dialog_title_use_sign_in_for
+                            generateDisplayTitleTextResCode(singleEntryType!!,
+                                authenticationEntryList)
                         } else {
                             if (authenticationEntryList.isNotEmpty() ||
                                 sortedUserNameToCredentialEntryList.any { perNameEntryList ->

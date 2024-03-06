@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.app.Activity
+import android.hardware.biometrics.BiometricPrompt
 import android.os.IBinder
 import android.text.TextUtils
 import android.util.Log
@@ -28,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.common.BiometricState
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
@@ -54,6 +56,7 @@ data class UiState(
     val isAutoSelectFlow: Boolean = false,
     val cancelRequestState: CancelUiRequestState?,
     val isInitialRender: Boolean,
+    val biometricState: BiometricState? = null
 )
 
 data class CancelUiRequestState(
@@ -200,13 +203,19 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     /*****                      Get Flow Callbacks                        *****/
     /**************************************************************************/
-    fun getFlowOnEntrySelected(entry: EntryInfo) {
+    fun getFlowOnEntrySelected(
+        entry: EntryInfo,
+        authResult: BiometricPrompt.AuthenticationResult? = null
+    ) {
         Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
             ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
         uiState = if (entry.pendingIntent != null) {
             uiState.copy(
                 selectedEntry = entry,
                 providerActivityState = ProviderActivityState.READY_TO_LAUNCH,
+                biometricState = uiState.biometricState?.copy(
+                    biometricAuthenticationResult = authResult
+                )
             )
         } else {
             credManRepo.onOptionSelected(entry.providerId, entry.entryKey, entry.entrySubkey)

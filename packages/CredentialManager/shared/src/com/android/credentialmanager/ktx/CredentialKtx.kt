@@ -139,6 +139,7 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
+                    isSupportingSingleTap = false, // TODO(b/326243754) : Fill in as product built
                 )
                 )
             }
@@ -167,6 +168,7 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
+                    isSupportingSingleTap = false, // TODO(b/326243754) : Fill in as product built
                 )
                 )
             }
@@ -194,6 +196,9 @@ private fun getCredentialOptionInfoList(
                     isDefaultIconPreferredAsSingleProvider =
                             credentialEntry.isDefaultIconPreferredAsSingleProvider,
                     affiliatedDomain = credentialEntry.affiliatedDomain?.toString(),
+                    isSupportingSingleTap = false, // TODO(b/326243754) : Fill in as product built
+                    // TODO(b/326243754) : If required info above is missing, force condition to
+                    // false.
                 )
                 )
             }

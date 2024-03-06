@@ -17,8 +17,11 @@
 package com.android.credentialmanager.getflow
 
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
+import android.credentials.flags.Flags.credmanBiometricApiEnabled
 import android.graphics.drawable.Drawable
 import androidx.credentials.PriorityHints
+import com.android.credentialmanager.R
+import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.get.AuthenticationEntryInfo
@@ -39,6 +42,56 @@ data class GetCredentialUiState(
     val isNoAccount: Boolean = false,
 )
 
+/**
+ * Checks if this get flow is a biometric selection flow by ensuring that the first account has a
+ * single credential entry to display. The presently agreed upon condition matches the auto
+ * select criteria, but with one additional requirement that the entry contains an extra parameter
+ * that indicates the biometric flow. The auto select flow is supported over the biometric flow
+ * at the moment in cases where they collide.
+ */
+internal fun isBiometricFlow(
+    providerDisplayInfo: ProviderDisplayInfo,
+    isAutoSelectFlow: Boolean
+): Boolean {
+    if (!credmanBiometricApiEnabled()) {
+        return false
+    }
+    if (isAutoSelectFlow) {
+        // For this to be true, it must be the case that there is a single entry and a single
+        // account. If that is the case, and auto-select is enabled along side the one-tap flow, we
+        // always favor that over the one tap flow.
+        return false
+    }
+    // The flow through an authentication entry, even if only a singular entry exists, is deemed
+    // as not being eligible for the single tap flow given that it adds any number of credentials
+    // once unlocked; essentially, this entry contains additional complexities behind it, making it
+    // invalid.
+    if (providerDisplayInfo.authenticationEntryList.isNotEmpty()) {
+        return false
+    }
+    val singleAccountEntryList = getCredentialEntryListIffSingleAccount(
+        providerDisplayInfo.sortedUserNameToCredentialEntryList) ?: return false
+
+    // TODO(b/326243754) : Set this value from dynamic slice until structured jetpack object is used
+    return singleAccountEntryList.firstOrNull()?.isSupportingSingleTap ?: false
+}
+
+/**
+ * A utility method that will procure the credential entry list if and only if the credential entry
+ * list is for a singular account use case. This can be used for various flows that condition on
+ * a singular account.
+ */
+internal fun getCredentialEntryListIffSingleAccount(
+    sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>
+): List<CredentialEntryInfo>? {
+    if (sortedUserNameToCredentialEntryList.size != 1) {
+        return null
+    }
+    val entryList = sortedUserNameToCredentialEntryList.firstOrNull() ?: return null
+    val sortedEntryList = entryList.sortedCredentialEntryList
+    return sortedEntryList
+}
+
 internal fun hasContentToDisplay(state: GetCredentialUiState): Boolean {
     return state.providerDisplayInfo.sortedUserNameToCredentialEntryList.isNotEmpty() ||
         state.providerDisplayInfo.authenticationEntryList.isNotEmpty() ||
@@ -50,15 +103,14 @@ internal fun findAutoSelectEntry(providerDisplayInfo: ProviderDisplayInfo): Cred
     if (providerDisplayInfo.authenticationEntryList.isNotEmpty()) {
         return null
     }
-    if (providerDisplayInfo.sortedUserNameToCredentialEntryList.size == 1) {
-        val entryList = providerDisplayInfo.sortedUserNameToCredentialEntryList.firstOrNull()
-            ?: return null
-        if (entryList.sortedCredentialEntryList.size == 1) {
-            val entry = entryList.sortedCredentialEntryList.firstOrNull() ?: return null
-            if (entry.isAutoSelectable) {
-                return entry
-            }
-        }
+    val entryList = getCredentialEntryListIffSingleAccount(
+        providerDisplayInfo.sortedUserNameToCredentialEntryList) ?: return null
+    if (entryList.size != 1) {
+        return null
+    }
+    val entry = entryList.firstOrNull() ?: return null
+    if (entry.isAutoSelectable) {
+        return entry
     }
     return null
 }
@@ -104,6 +156,9 @@ data class PerUserNameCredentialEntryList(
 enum class GetScreenState {
     /** The primary credential selection page. */
     PRIMARY_SELECTION,
+
+    /** The single tap biometric selection page. */
+    BIOMETRIC_SELECTION,
 
     /** The secondary credential selection page, where all sign-in options are listed. */
     ALL_SIGN_IN_OPTIONS,
@@ -177,6 +232,22 @@ fun toProviderDisplayInfo(
     )
 }
 
+/**
+ * This generates the res code for the large display title text for the selector. For example, it
+ * retrieves the resource for strings like: "Use your saved passkey for *rpName*".
+ */
+internal fun generateDisplayTitleTextResCode(
+    singleEntryType: CredentialType,
+    authenticationEntryList: List<AuthenticationEntryInfo> = emptyList()
+): Int =
+    if (singleEntryType == CredentialType.PASSKEY)
+        R.string.get_dialog_title_use_passkey_for
+    else if (singleEntryType == CredentialType.PASSWORD)
+        R.string.get_dialog_title_use_password_for
+    else if (authenticationEntryList.isNotEmpty())
+        R.string.get_dialog_title_unlock_options_for
+    else R.string.get_dialog_title_use_sign_in_for
+
 fun toActiveEntry(
     providerDisplayInfo: ProviderDisplayInfo,
 ): EntryInfo? {
@@ -211,6 +282,9 @@ private fun toGetScreenState(
         GetScreenState.REMOTE_ONLY
     else if (isRequestForAllOptions)
         GetScreenState.ALL_SIGN_IN_OPTIONS
+    else if (isBiometricFlow(providerDisplayInfo,
+            findAutoSelectEntry(providerDisplayInfo) != null))
+        GetScreenState.BIOMETRIC_SELECTION
     else GetScreenState.PRIMARY_SELECTION
 }
 

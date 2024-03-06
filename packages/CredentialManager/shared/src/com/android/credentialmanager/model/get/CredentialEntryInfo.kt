@@ -49,6 +49,7 @@ class CredentialEntryInfo(
                               // "For <value-of-entryGroupId>" on the more-option screen.
     val isDefaultIconPreferredAsSingleProvider: Boolean,
     val affiliatedDomain: String?,
+    val isSupportingSingleTap: Boolean,
 ) : EntryInfo(
     providerId,
     entryKey,
