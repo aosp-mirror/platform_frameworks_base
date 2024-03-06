@@ -727,7 +727,7 @@ public final class SensorPrivacyManager {
      * Returns if camera privacy is enabled for a specific package.
      *
      * @param packageName The package to check
-     * @return boolean sensor privacy state.
+     * @return boolean camera privacy state.
      *
      * @hide
      */
