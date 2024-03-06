@@ -262,9 +262,6 @@ public class AmbientState implements Dumpable {
         return mStackHeight;
     }
 
-    /** Tracks the state from HeadsUpManager#hasNotifications() */
-    private boolean mHasHeadsUpEntries;
-
     @Inject
     public AmbientState(
             @NonNull Context context,
@@ -547,10 +544,6 @@ public class AmbientState implements Dumpable {
         mPanelTracking = panelTracking;
     }
 
-    public boolean hasPulsingNotifications() {
-        return mPulsing && mHasHeadsUpEntries;
-    }
-
     public void setPulsing(boolean hasPulsing) {
         mPulsing = hasPulsing;
     }
@@ -699,10 +692,6 @@ public class AmbientState implements Dumpable {
 
     public float getAppearFraction() {
         return mAppearFraction;
-    }
-
-    public void setHasHeadsUpEntries(boolean hasHeadsUpEntries) {
-        mHasHeadsUpEntries = hasHeadsUpEntries;
     }
 
     public void setStackTopMargin(int stackTopMargin) {
