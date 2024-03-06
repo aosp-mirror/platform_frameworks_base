@@ -213,6 +213,7 @@ android_library {
     lint: {
         extra_check_modules: ["SystemUILintChecker"],
     },
+    skip_jarjar_repackage: true,
 }
 
 filegroup {
