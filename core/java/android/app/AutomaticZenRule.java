@@ -173,8 +173,8 @@ public final class AutomaticZenRule implements Parcelable {
      *                           interrupt the user (e.g. via sound &amp; vibration) while this rule
      *                           is active.
      * @param enabled Whether the rule is enabled.
-     * @deprecated use {@link #AutomaticZenRule(String, ComponentName, ComponentName, Uri,
-     * ZenPolicy, int, boolean)}.
+     *
+     * @deprecated Use {@link AutomaticZenRule.Builder} to construct an {@link AutomaticZenRule}.
      */
     @Deprecated
     public AutomaticZenRule(String name, ComponentName owner, Uri conditionId,
@@ -206,8 +206,10 @@ public final class AutomaticZenRule implements Parcelable {
      *               while this rule is active. This overrides the global policy while this rule is
      *               action ({@link Condition#STATE_TRUE}).
      * @param enabled Whether the rule is enabled.
+     *
+     * @deprecated Use {@link AutomaticZenRule.Builder} to construct an {@link AutomaticZenRule}.
      */
-    // TODO (b/309088420): deprecate this constructor in favor of the builder
+    @Deprecated
     public AutomaticZenRule(@NonNull String name, @Nullable ComponentName owner,
             @Nullable ComponentName configurationActivity, @NonNull Uri conditionId,
             @Nullable ZenPolicy policy, int interruptionFilter, boolean enabled) {
@@ -368,6 +370,9 @@ public final class AutomaticZenRule implements Parcelable {
 
     /**
      * Sets the zen policy.
+     *
+     * <p>When updating an existing rule via {@link NotificationManager#updateAutomaticZenRule},
+     * a {@code null} value here means the previous policy is retained.
      */
     public void setZenPolicy(@Nullable ZenPolicy zenPolicy) {
         this.mZenPolicy = (zenPolicy == null ? null : zenPolicy.copy());
@@ -390,7 +395,12 @@ public final class AutomaticZenRule implements Parcelable {
      * Sets the configuration activity - an activity that handles
      * {@link NotificationManager#ACTION_AUTOMATIC_ZEN_RULE} that shows the user more information
      * about this rule and/or allows them to configure it. This is required to be non-null for rules
-     * that are not backed by {@link android.service.notification.ConditionProviderService}.
+     * that are not backed by a {@link android.service.notification.ConditionProviderService}.
+     *
+     * <p>This is exclusive with the {@code owner} supplied in the constructor; rules where a
+     * configuration activity is set will not use the
+     * {@link android.service.notification.ConditionProviderService} supplied there to determine
+     * whether the rule should be active.
      */
     public void setConfigurationActivity(@Nullable ComponentName componentName) {
         this.configurationActivity = getTrimmedComponentName(componentName);
