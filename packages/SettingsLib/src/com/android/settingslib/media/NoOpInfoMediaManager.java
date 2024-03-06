@@ -37,6 +37,23 @@ import java.util.List;
  */
 // TODO - b/293578081: Remove once PackageNotAvailableException is propagated to library clients.
 /* package */ final class NoOpInfoMediaManager extends InfoMediaManager {
+    /**
+     * Placeholder routing session to return as active session of {@link NoOpInfoMediaManager}.
+     *
+     * <p>Returning this routing session avoids crashes in {@link InfoMediaManager} and maintains
+     * the same client-facing behaviour as if no routing session was found for the target package
+     * name.
+     *
+     * <p>Volume and max volume are set to {@code -1} to emulate a non-existing routing session in
+     * {@link #getSessionVolume()} and {@link #getSessionVolumeMax()}.
+     */
+    private static final RoutingSessionInfo PLACEHOLDER_SESSION =
+            new RoutingSessionInfo.Builder(
+                            /* id */ "FAKE_ROUTING_SESSION", /* clientPackageName */ "")
+                    .addSelectedRoute(/* routeId */ "FAKE_SELECTED_ROUTE_ID")
+                    .setVolumeMax(-1)
+                    .setVolume(-1)
+                    .build();
 
     NoOpInfoMediaManager(
             Context context,
@@ -118,7 +135,7 @@ import java.util.List;
     @NonNull
     @Override
     protected List<RoutingSessionInfo> getRoutingSessionsForPackage() {
-        return Collections.emptyList();
+        return List.of(PLACEHOLDER_SESSION);
     }
 
     @Nullable
