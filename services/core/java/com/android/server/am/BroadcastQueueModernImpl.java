@@ -286,9 +286,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     // when the flag is fused on.
     private static final int MSG_DELIVERY_TIMEOUT_SOFT = 8;
 
-    // TODO: Use the trunk stable flag.
-    private static final boolean DEFER_FROZEN_OUTGOING_BCASTS = false;
-
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
         mLocalHandler.sendEmptyMessage(MSG_UPDATE_RUNNING_LIST);
@@ -766,7 +763,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // TODO: Apply delivery group policies and FLAG_REPLACE_PENDING to collapse the
         // outgoing broadcasts.
         // TODO: Add traces/logs for the enqueueing outgoing broadcasts logic.
-        if (DEFER_FROZEN_OUTGOING_BCASTS && isProcessFreezable(r.callerApp)) {
+        if (Flags.deferOutgoingBcasts() && isProcessFreezable(r.callerApp)) {
             final BroadcastProcessQueue queue = getOrCreateProcessQueue(
                     r.callerApp.processName, r.callerApp.uid);
             if (queue.getOutgoingBroadcastCount() >= mConstants.MAX_FROZEN_OUTGOING_BROADCASTS) {
