@@ -90,7 +90,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final long TEST_HD_FREQUENCY_VALUE = 95_300;
     private static final long TEST_HD_STATION_ID_EXT_VALUE = 0x100000001L
             | (TEST_HD_FREQUENCY_VALUE << 36);
-    private static final long TEST_HD_LOCATION_VALUE = 0x89CC8E06CCB9ECL;
+    private static final long TEST_HD_LOCATION_VALUE =  0x4E647007665CF6L;
     private static final long TEST_VENDOR_ID_VALUE = 9_901;
 
     private static final ProgramSelector.Identifier TEST_DAB_SID_EXT_ID =
