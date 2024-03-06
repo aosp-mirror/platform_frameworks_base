@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2023 The Android Open Source Project
+  ~ Copyright (C) 2024 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,16 +15,10 @@
   ~ limitations under the License.
   -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi"
-        android:color="@android:color/transparent">
-    <item
-        android:bottom="1dp"
-        android:shape="rectangle"
-        android:top="1dp">
-        <shape>
-            <corners android:radius="28dp" />
-            <solid android:color="@android:color/system_surface_container_high_dark" />
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+        xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi">
+        <shape android:shape="rectangle">
+            <solid android:color="?androidprv:attr/materialColorSurfaceContainer" />
         </shape>
-    </item>
-</ripple>
+</inset>

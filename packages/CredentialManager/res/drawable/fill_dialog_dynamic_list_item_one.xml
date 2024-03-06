@@ -15,16 +15,12 @@
   ~ limitations under the License.
   -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi"
-        android:color="@android:color/transparent">
-    <item
-        android:bottom="1dp"
-        android:shape="rectangle"
-        android:top="1dp">
-        <shape>
-            <corners android:radius="4dp" />
-            <solid android:color="@color/dropdown_container" />
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+        xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi">
+        <shape android:shape="rectangle">
+            <corners android:topLeftRadius="4dp" android:topRightRadius="4dp"
+            android:bottomLeftRadius="0dp" android:bottomRightRadius="0dp"/>
+            <solid android:color="?androidprv:attr/materialColorSurfaceContainer" />
         </shape>
-    </item>
-</ripple>
+</inset>
