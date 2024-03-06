@@ -6434,4 +6434,6 @@ ul.</string>
     <string name="satellite_notification_open_message">Open Messages</string>
     <!-- Invoke Satellite setting activity of Settings -->
     <string name="satellite_notification_how_it_works">How it works</string>
+    <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
+    <string name="unarchival_session_app_label">Pending...</string>
 </resources>
