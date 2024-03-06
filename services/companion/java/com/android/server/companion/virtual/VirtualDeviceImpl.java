@@ -210,7 +210,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     mActivityListener.onTopActivityChanged(displayId, topActivity,
                             UserHandle.USER_NULL);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
             }
 
@@ -220,7 +220,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 try {
                     mActivityListener.onTopActivityChanged(displayId, topActivity, userId);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
             }
 
@@ -229,7 +229,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 try {
                     mActivityListener.onDisplayEmpty(displayId);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
             }
         };
