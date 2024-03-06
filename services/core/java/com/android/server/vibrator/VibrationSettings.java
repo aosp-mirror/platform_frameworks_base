@@ -532,7 +532,7 @@ final class VibrationSettings {
             return false;
         }
 
-        if (Flags.keyboardCategoryEnabled()) {
+        if (Flags.keyboardCategoryEnabled() && mVibrationConfig.hasFixedKeyboardAmplitude()) {
             int category = callerInfo.attrs.getCategory();
             if (usage == USAGE_TOUCH && category == CATEGORY_KEYBOARD) {
                 // Keyboard touch has a different user setting.
