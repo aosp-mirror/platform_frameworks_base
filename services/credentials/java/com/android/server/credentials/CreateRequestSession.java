@@ -50,7 +50,7 @@ import java.util.Set;
 public final class CreateRequestSession extends RequestSession<CreateCredentialRequest,
         ICreateCredentialCallback, CreateCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
-    private static final String TAG = "CreateRequestSession";
+    private static final String TAG = CredentialManager.TAG;
     private final Set<ComponentName> mPrimaryProviders;
 
     CreateRequestSession(@NonNull Context context, RequestSession.SessionLifetime sessionCallback,

@@ -65,7 +65,7 @@ import java.util.Set;
  * @hide
  */
 public final class CredentialProviderInfoFactory {
-    private static final String TAG = "CredentialProviderInfoFactory";
+    private static final String TAG = CredentialManager.TAG;
 
     private static final String TAG_CREDENTIAL_PROVIDER = "credential-provider";
     private static final String TAG_CAPABILITIES = "capabilities";
