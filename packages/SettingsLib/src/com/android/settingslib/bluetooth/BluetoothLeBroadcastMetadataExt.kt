@@ -311,7 +311,7 @@ object BluetoothLeBroadcastMetadataExt {
         }
 
         builder.apply {
-            setSourceDevice(device, sourceAddrType)
+            setSourceDevice(device, addrType)
             setSourceAdvertisingSid(sourceAdvertiserSid)
             setBroadcastId(broadcastId)
             setBroadcastName(broadcastName)
