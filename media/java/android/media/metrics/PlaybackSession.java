@@ -24,7 +24,10 @@ import com.android.internal.util.AnnotationValidations;
 import java.util.Objects;
 
 /**
- * An instances of this class represents a session of media playback.
+ * An instance of this class represents a session of media playback used to report playback
+ * metrics and events.
+ *
+ * Create a new instance using {@link MediaMetricsManager#createPlaybackSession}.
  */
 public final class PlaybackSession implements AutoCloseable {
     private final @NonNull String mId;
@@ -80,6 +83,21 @@ public final class PlaybackSession implements AutoCloseable {
         mManager.reportTrackChangeEvent(mId, event);
     }
 
+    /**
+     * A session ID is used to identify a unique playback and to tie together lower-level
+     * playback components.
+     *
+     * Associate this session with a {@link MediaCodec} by passing the ID into
+     * {@link MediaFormat} through {@link MediaFormat#LOG_SESSION_ID} when
+     * creating the {@link MediaCodec}.
+     *
+     * Associate this session with an {@link AudioTrack} by calling
+     * {@link AudioTrack#setLogSessionId}.
+     *
+     * Associate this session with {@link MediaDrm} and {@link MediaCrypto} by calling
+     * {@link MediaDrm#getPlaybackComponent} and then calling
+     * {@link PlaybackComponent#setLogSessionId}.
+     */
     public @NonNull LogSessionId getSessionId() {
         return mLogSessionId;
     }
