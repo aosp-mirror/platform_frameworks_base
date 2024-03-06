@@ -63,12 +63,6 @@ object PromptIconViewBinder {
 
                     iconOverlayView.layoutParams.width = iconViewLayoutParamSizeOverride.first
                     iconOverlayView.layoutParams.height = iconViewLayoutParamSizeOverride.second
-                } else {
-                    iconView.layoutParams.width = viewModel.fingerprintIconWidth.first()
-                    iconView.layoutParams.height = viewModel.fingerprintIconWidth.first()
-
-                    iconOverlayView.layoutParams.width = viewModel.fingerprintIconWidth.first()
-                    iconOverlayView.layoutParams.height = viewModel.fingerprintIconWidth.first()
                 }
 
                 var faceIcon: AnimatedVectorDrawable? = null
@@ -84,10 +78,8 @@ object PromptIconViewBinder {
                     }
 
                 launch {
-                    var width = 0
-                    var height = 0
-                    combine(promptViewModel.size, viewModel.activeAuthType, ::Pair).collect {
-                        (_, activeAuthType) ->
+                    combine(viewModel.activeAuthType, viewModel.iconSize, ::Pair).collect {
+                        (activeAuthType, iconSize) ->
                         // Every time after bp shows, [isIconViewLoaded] is set to false in
                         // [BiometricViewSizeBinder]. Then when biometric prompt view is redrew
                         // (when size or activeAuthType changes), we need to update
@@ -109,8 +101,6 @@ object PromptIconViewBinder {
                                 }
                             }
                             AuthType.Face -> {
-                                width = viewModel.faceIconWidth
-                                height = viewModel.faceIconHeight
                                 /**
                                  * Set to true by default since face icon is a drawable, which
                                  * doesn't have a LottieOnCompositionLoadedListener equivalent.
@@ -122,11 +112,12 @@ object PromptIconViewBinder {
                             }
                         }
 
-                        if (width != 0 && height != 0) {
-                            iconView.layoutParams.width = width
-                            iconView.layoutParams.height = height
-                            iconOverlayView.layoutParams.width = width
-                            iconOverlayView.layoutParams.height = height
+                        if (iconViewLayoutParamSizeOverride == null) {
+                            iconView.layoutParams.width = iconSize.first
+                            iconView.layoutParams.height = iconSize.second
+
+                            iconOverlayView.layoutParams.width = iconSize.first
+                            iconOverlayView.layoutParams.height = iconSize.second
                         }
                     }
                 }

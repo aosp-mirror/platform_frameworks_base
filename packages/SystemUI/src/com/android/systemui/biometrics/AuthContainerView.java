@@ -340,13 +340,19 @@ public class AuthContainerView extends LinearLayout
         mPanelInteractionDetector = panelInteractionDetector;
         mApplicationCoroutineScope = applicationCoroutineScope;
 
+        mPromptViewModel = promptViewModel;
         mTranslationY = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
         mBiometricCallback = new BiometricCallback();
 
+        mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
+        mPromptSelectorInteractorProvider.get().setShouldShowBpWithoutIconForCredential(
+                config.mPromptInfo);
+
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-        if (constraintBp()) {
+        if (constraintBp() && (Utils.isBiometricAllowed(config.mPromptInfo)
+                || mPromptViewModel.getShowBpWithoutIconForCredential().getValue())) {
             mLayout = (ConstraintLayout) layoutInflater.inflate(
                     R.layout.biometric_prompt_constraint_layout, this, false /* attachToRoot */);
         } else {
@@ -375,9 +381,7 @@ public class AuthContainerView extends LinearLayout
         mBackgroundExecutor = bgExecutor;
         mInteractionJankMonitor = jankMonitor;
         mPromptCredentialInteractor = credentialInteractor;
-        mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
-        mPromptViewModel = promptViewModel;
         mFpProps = fpProps;
         mFaceProps = faceProps;
 
@@ -408,10 +412,6 @@ public class AuthContainerView extends LinearLayout
             @Nullable FaceSensorPropertiesInternal faceProps,
             @NonNull VibratorHelper vibratorHelper
     ) {
-        // Set this value before showing either of the prompt.
-        mPromptSelectorInteractorProvider.get().setShouldShowBpWithoutIconForCredential(
-                config.mPromptInfo);
-
         if (Utils.isBiometricAllowed(config.mPromptInfo)
                 || mPromptViewModel.getShowBpWithoutIconForCredential().getValue()) {
             addBiometricView(config, layoutInflater, viewModel, fpProps, faceProps, vibratorHelper);

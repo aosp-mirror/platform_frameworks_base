@@ -1087,7 +1087,7 @@
     <dimen name="biometric_dialog_fingerprint_icon_height">80dp</dimen>
     <dimen name="biometric_dialog_button_negative_max_width">160dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">136dp</dimen>
-    <dimen name="biometric_dialog_corner_size">4dp</dimen>
+    <dimen name="biometric_dialog_corner_size">28dp</dimen>
     <!-- Y translation when showing/dismissing the dialog-->
     <dimen name="biometric_dialog_animation_translation_offset">350dp</dimen>
     <dimen name="biometric_dialog_border_padding">4dp</dimen>
