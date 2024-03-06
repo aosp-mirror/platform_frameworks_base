@@ -2371,6 +2371,39 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
+    /**
+     * This indicates that the frame rate category was chosen because it was a small area update.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_SMALL = 0x0100_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it was an intermittent update.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_INTERMITTENT = 0x0200_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it was a large View.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_LARGE = 0x03000000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it was requested.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_REQUESTED = 0x0400_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because an invalid frame rate was
+     * requested.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_INVALID = 0x0500_0000;
+
+    private static final int FRAME_RATE_CATEGORY_REASON_MASK = 0xFFFF_0000;
+
     private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
     // Used to set frame rate compatibility.
@@ -5637,10 +5670,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private ViewTranslationResponse mViewTranslationResponse;
 
     /**
-     * A threshold value to determine the frame rate category of the View based on the size.
+     * Threshold size for something to be considered a small area update (in DP).
+     * This is the dimension for both width and height.
      */
-    private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
+    private static final float FRAME_RATE_SMALL_SIZE_THRESHOLD = 40f;
 
+    /**
+     * Threshold size for something to be considered a small area update (in DP) if
+     * it is narrow. This is for either width OR height. For example, a narrow progress
+     * bar could be considered a small area.
+     */
+    private static final float FRAME_RATE_NARROW_THRESHOLD = 10f;
 
     private static final long INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
     private static final int INFREQUENT_UPDATE_COUNTS = 2;
@@ -33655,18 +33695,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    protected int calculateFrameRateCategory(float sizePercentage) {
+    protected int calculateFrameRateCategory(int width, int height) {
         if (mMinusTwoFrameIntervalMillis + mMinusOneFrameIntervalMillis
                 < INFREQUENT_UPDATE_INTERVAL_MILLIS) {
-            if (sizePercentage <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD) {
-                return FRAME_RATE_CATEGORY_NORMAL;
+            DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
+            float density = displayMetrics.density;
+            if (density == 0f) {
+                density = 1f;
+            }
+            float widthDp = width / density;
+            float heightDp = height / density;
+            if (widthDp <= FRAME_RATE_NARROW_THRESHOLD
+                    || heightDp <= FRAME_RATE_NARROW_THRESHOLD
+                    || (widthDp <= FRAME_RATE_SMALL_SIZE_THRESHOLD
+                    && heightDp <= FRAME_RATE_SMALL_SIZE_THRESHOLD)) {
+                return FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_SMALL;
             } else {
-                return FRAME_RATE_CATEGORY_HIGH;
+                return FRAME_RATE_CATEGORY_HIGH | FRAME_RATE_CATEGORY_REASON_LARGE;
             }
         }
 
         if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
-            return FRAME_RATE_CATEGORY_NORMAL;
+            return FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
         }
         return mLastFrameRateCategory;
     }
@@ -33674,12 +33724,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void votePreferredFrameRate() {
         // use toolkitSetFrameRate flag to gate the change
         ViewRootImpl viewRootImpl = getViewRootImpl();
-        float sizePercentage = getSizePercentage();
-        int frameRateCateogry = calculateFrameRateCategory(sizePercentage);
-        if (viewRootImpl != null && sizePercentage > 0) {
-            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
-                viewRootImpl.recordViewPercentage(sizePercentage);
-            }
+        int width = mRight - mLeft;
+        int height = mBottom - mTop;
+        if (viewRootImpl != null && (width != 0 && height != 0)) {
             if (viewVelocityApi()) {
                 float velocity = mFrameContentVelocity;
                 if (velocity < 0f) {
@@ -33691,25 +33738,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return;
                 }
             }
-            if (!Float.isNaN(mPreferredFrameRate)) {
-                if (mPreferredFrameRate < 0) {
-                    if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_LOW;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_NORMAL;
-                    } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
-                        frameRateCateogry = FRAME_RATE_CATEGORY_HIGH;
-                    }
+            int frameRateCategory;
+            if (Float.isNaN(mPreferredFrameRate)) {
+                frameRateCategory = calculateFrameRateCategory(width, height);
+            } else if (mPreferredFrameRate < 0) {
+                if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE) {
+                    frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
+                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_LOW) {
+                    frameRateCategory = FRAME_RATE_CATEGORY_LOW
+                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_NORMAL) {
+                    frameRateCategory = FRAME_RATE_CATEGORY_NORMAL
+                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
+                } else if (mPreferredFrameRate == REQUESTED_FRAME_RATE_CATEGORY_HIGH) {
+                    frameRateCategory = FRAME_RATE_CATEGORY_HIGH
+                            | FRAME_RATE_CATEGORY_REASON_REQUESTED;
                 } else {
-                    viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
-                            mFrameRateCompatibility);
-                    return;
+                    // invalid frame rate, default to HIGH
+                    frameRateCategory = FRAME_RATE_CATEGORY_HIGH
+                            | FRAME_RATE_CATEGORY_REASON_INVALID;
                 }
+            } else {
+                viewRootImpl.votePreferredFrameRate(mPreferredFrameRate,
+                        mFrameRateCompatibility);
+                return;
             }
-            viewRootImpl.votePreferredFrameRateCategory(frameRateCateogry);
-            mLastFrameRateCategory = frameRateCateogry;
+
+            int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
+            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+                int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
+                viewRootImpl.recordCategory(category, reason, this);
+            }
+            viewRootImpl.votePreferredFrameRateCategory(category);
+            mLastFrameRateCategory = frameRateCategory;
         }
     }
 
