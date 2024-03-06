@@ -146,7 +146,7 @@ a similar way.
         <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
         <item name="imeFullscreenBackground">?colorBackground</item>
         <item name="imeExtractEnterAnimation">@anim/input_method_extract_enter</item>
-        <item name="windowSwipeToDismiss">false</item>
+        <item name="windowSwipeToDismiss">true</item>
     </style>
 
     <!-- DeviceDefault theme for dialog windows and activities. In contrast to Material, the
