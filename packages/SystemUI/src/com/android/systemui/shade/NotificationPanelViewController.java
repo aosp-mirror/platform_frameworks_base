@@ -1288,10 +1288,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                             mView.getContext().getDisplay());
             mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
             mKeyguardStatusViewController.init();
-        }
 
-        mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
-        mKeyguardStatusViewController.getView().addOnLayoutChangeListener(
+            mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
+            mKeyguardStatusViewController.getView().addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     int oldHeight = oldBottom - oldTop;
                     if (v.getHeight() != oldHeight) {
@@ -1299,7 +1298,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     }
                 });
 
-        updateClockAppearance();
+            updateClockAppearance();
+        }
     }
 
     @Override
@@ -1326,7 +1326,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void onSplitShadeEnabledChanged() {
         mShadeLog.logSplitShadeChanged(mSplitShadeEnabled);
-        mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
+        if (!migrateClocksToBlueprint()) {
+            mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
+        }
         // Reset any left over overscroll state. It is a rare corner case but can happen.
         mQsController.setOverScrollAmount(0);
         mScrimController.setNotificationsOverScrollAmount(0);
@@ -1441,11 +1443,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mStatusBarStateListener.onDozeAmountChanged(mStatusBarStateController.getDozeAmount(),
                 mStatusBarStateController.getInterpolatedDozeAmount());
 
-        mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
-                mBarState,
-                false,
-                false,
-                mBarState);
+        if (!migrateClocksToBlueprint()) {
+            mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
+                    mBarState,
+                    false,
+                    false,
+                    mBarState);
+        }
         if (mKeyguardQsUserSwitchController != null) {
             mKeyguardQsUserSwitchController.setKeyguardQsUserSwitchVisibility(
                     mBarState,
@@ -1665,13 +1669,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mKeyguardStatusViewController.setLockscreenClockY(
                     mClockPositionAlgorithm.getExpandedPreferredClockY());
         }
-        if (keyguardBottomAreaRefactor()) {
-            mKeyguardInteractor.setClockPosition(
-                mClockPositionResult.clockX, mClockPositionResult.clockY);
-        } else {
+        if (!(migrateClocksToBlueprint() || keyguardBottomAreaRefactor())) {
             mKeyguardBottomAreaInteractor.setClockPosition(
                 mClockPositionResult.clockX, mClockPositionResult.clockY);
         }
+
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = (animate || mAnimateNextPositionUpdate) && shouldAnimateClockChange;
 
@@ -1749,13 +1751,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
-        boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
-        ConstraintLayout layout;
         if (migrateClocksToBlueprint()) {
-            layout = mKeyguardViewConfigurator.getKeyguardRootView();
-        } else {
-            layout = mNotificationContainerParent;
+            return;
         }
+        boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
+        ConstraintLayout layout = mNotificationContainerParent;
         mKeyguardStatusViewController.updateAlignment(
                 layout, mSplitShadeEnabled, shouldBeCentered, animate);
         mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
@@ -3316,6 +3316,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         /** Updates the views to the initial state for the fold to AOD animation. */
         @Override
         public void prepareFoldToAodAnimation() {
+            if (migrateClocksToBlueprint()) {
+                return;
+            }
             // Force show AOD UI even if we are not locked
             showAodUi();
 
@@ -3337,6 +3340,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         @Override
         public void startFoldToAodAnimation(Runnable startAction, Runnable endAction,
                 Runnable cancelAction) {
+            if (migrateClocksToBlueprint()) {
+                return;
+            }
             final ViewPropertyAnimator viewAnimator = mView.animate();
             viewAnimator.cancel();
             viewAnimator
@@ -3372,6 +3378,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         /** Cancels fold to AOD transition and resets view state. */
         @Override
         public void cancelFoldToAodAnimation() {
+            if (migrateClocksToBlueprint()) {
+                return;
+            }
             cancelAnimation();
             resetAlpha();
             resetTranslation();
@@ -4446,11 +4455,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 }
             }
 
-            mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
-                    statusBarState,
-                    keyguardFadingAway,
-                    goingToFullShade,
-                    mBarState);
+            if (!migrateClocksToBlueprint()) {
+                mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
+                        statusBarState,
+                        keyguardFadingAway,
+                        goingToFullShade,
+                        mBarState);
+            }
 
             if (!keyguardBottomAreaRefactor()) {
                 setKeyguardBottomAreaVisibility(statusBarState, goingToFullShade);

@@ -474,7 +474,10 @@ constructor(
      */
     fun translationY(params: BurnInParameters): Flow<Float> {
         return combine(
-                aodBurnInViewModel.translationY(params).onStart { emit(0f) },
+                aodBurnInViewModel
+                    .movement(params)
+                    .map { it.translationY.toFloat() }
+                    .onStart { emit(0f) },
                 isOnLockscreenWithoutShade,
                 merge(
                     keyguardInteractor.keyguardTranslationY,

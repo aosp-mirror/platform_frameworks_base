@@ -71,7 +71,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 
         MockitoAnnotations.initMocks(this)
-        whenever(burnInInteractor.keyguardBurnIn).thenReturn(burnInFlow)
+        whenever(burnInInteractor.burnIn(anyInt(), anyInt())).thenReturn(burnInFlow)
         kosmos.burnInInteractor = burnInInteractor
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow())
@@ -81,18 +81,18 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun translationY_initializedToZero() =
+    fun movement_initializedToZero() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY(burnInParameters))
-            assertThat(translationY).isEqualTo(0)
+            val movement by collectLastValue(underTest.movement(burnInParameters))
+            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.translationX).isEqualTo(0)
+            assertThat(movement?.scale).isEqualTo(0f)
         }
 
     @Test
     fun translationAndScale_whenNotDozing() =
         testScope.runTest {
-            val translationX by collectLastValue(underTest.translationX(burnInParameters))
-            val translationY by collectLastValue(underTest.translationY(burnInParameters))
-            val scale by collectLastValue(underTest.scale(burnInParameters))
+            val movement by collectLastValue(underTest.movement(burnInParameters))
 
             // Set to not dozing (on lockscreen)
             keyguardTransitionRepository.sendTransitionStep(
@@ -113,24 +113,17 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     scale = 0.5f,
                 )
 
-            assertThat(translationX).isEqualTo(0)
-            assertThat(translationY).isEqualTo(0)
-            assertThat(scale)
-                .isEqualTo(
-                    BurnInScaleViewModel(
-                        scale = 1f,
-                        scaleClockOnly = true,
-                    )
-                )
+            assertThat(movement?.translationX).isEqualTo(0)
+            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.scale).isEqualTo(1f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
         }
 
     @Test
     fun translationAndScale_whenFullyDozing() =
         testScope.runTest {
             burnInParameters = burnInParameters.copy(minViewY = 100)
-            val translationX by collectLastValue(underTest.translationX(burnInParameters))
-            val translationY by collectLastValue(underTest.translationY(burnInParameters))
-            val scale by collectLastValue(underTest.scale(burnInParameters))
+            val movement by collectLastValue(underTest.movement(burnInParameters))
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -150,15 +143,10 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     scale = 0.5f,
                 )
 
-            assertThat(translationX).isEqualTo(20)
-            assertThat(translationY).isEqualTo(30)
-            assertThat(scale)
-                .isEqualTo(
-                    BurnInScaleViewModel(
-                        scale = 0.5f,
-                        scaleClockOnly = true,
-                    )
-                )
+            assertThat(movement?.translationX).isEqualTo(20)
+            assertThat(movement?.translationY).isEqualTo(30)
+            assertThat(movement?.scale).isEqualTo(0.5f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
 
             // Set to the beginning of GONE->AOD transition
             keyguardTransitionRepository.sendTransitionStep(
@@ -170,15 +158,10 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                 ),
                 validateStep = false,
             )
-            assertThat(translationX).isEqualTo(0)
-            assertThat(translationY).isEqualTo(0)
-            assertThat(scale)
-                .isEqualTo(
-                    BurnInScaleViewModel(
-                        scale = 1f,
-                        scaleClockOnly = true,
-                    )
-                )
+            assertThat(movement?.translationX).isEqualTo(0)
+            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.scale).isEqualTo(1f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
         }
 
     @Test
@@ -191,9 +174,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     minViewY = 100,
                     topInset = 80,
                 )
-            val translationX by collectLastValue(underTest.translationX(burnInParameters))
-            val translationY by collectLastValue(underTest.translationY(burnInParameters))
-            val scale by collectLastValue(underTest.scale(burnInParameters))
+            val movement by collectLastValue(underTest.movement(burnInParameters))
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -213,16 +194,11 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     translationY = -30,
                     scale = 0.5f,
                 )
-            assertThat(translationX).isEqualTo(20)
+            assertThat(movement?.translationX).isEqualTo(20)
             // -20 instead of -30, due to inset of 80
-            assertThat(translationY).isEqualTo(-20)
-            assertThat(scale)
-                .isEqualTo(
-                    BurnInScaleViewModel(
-                        scale = 0.5f,
-                        scaleClockOnly = true,
-                    )
-                )
+            assertThat(movement?.translationY).isEqualTo(-20)
+            assertThat(movement?.scale).isEqualTo(0.5f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
 
             // Set to the beginning of GONE->AOD transition
             keyguardTransitionRepository.sendTransitionStep(
@@ -234,15 +210,10 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                 ),
                 validateStep = false,
             )
-            assertThat(translationX).isEqualTo(0)
-            assertThat(translationY).isEqualTo(0)
-            assertThat(scale)
-                .isEqualTo(
-                    BurnInScaleViewModel(
-                        scale = 1f,
-                        scaleClockOnly = true,
-                    )
-                )
+            assertThat(movement?.translationX).isEqualTo(0)
+            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.scale).isEqualTo(1f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
         }
 
     @Test
@@ -255,9 +226,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     minViewY = 100,
                     topInset = 80,
                 )
-            val translationX by collectLastValue(underTest.translationX(burnInParameters))
-            val translationY by collectLastValue(underTest.translationY(burnInParameters))
-            val scale by collectLastValue(underTest.scale(burnInParameters))
+            val movement by collectLastValue(underTest.movement(burnInParameters))
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -277,16 +246,11 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     translationY = -30,
                     scale = 0.5f,
                 )
-            assertThat(translationX).isEqualTo(20)
+            assertThat(movement?.translationX).isEqualTo(20)
             // -20 instead of -30, due to inset of 80
-            assertThat(translationY).isEqualTo(-20)
-            assertThat(scale)
-                .isEqualTo(
-                    BurnInScaleViewModel(
-                        scale = 0.5f,
-                        scaleClockOnly = true,
-                    )
-                )
+            assertThat(movement?.translationY).isEqualTo(-20)
+            assertThat(movement?.scale).isEqualTo(0.5f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
 
             // Set to the beginning of GONE->AOD transition
             keyguardTransitionRepository.sendTransitionStep(
@@ -298,15 +262,10 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                 ),
                 validateStep = false,
             )
-            assertThat(translationX).isEqualTo(0)
-            assertThat(translationY).isEqualTo(0)
-            assertThat(scale)
-                .isEqualTo(
-                    BurnInScaleViewModel(
-                        scale = 1f,
-                        scaleClockOnly = true,
-                    )
-                )
+            assertThat(movement?.translationX).isEqualTo(0)
+            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.scale).isEqualTo(1f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
         }
 
     @Test
@@ -314,9 +273,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         testScope.runTest {
             whenever(clockController.config.useAlternateSmartspaceAODTransition).thenReturn(true)
 
-            val translationX by collectLastValue(underTest.translationX(burnInParameters))
-            val translationY by collectLastValue(underTest.translationY(burnInParameters))
-            val scale by collectLastValue(underTest.scale(burnInParameters))
+            val movement by collectLastValue(underTest.movement(burnInParameters))
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -337,8 +294,9 @@ class AodBurnInViewModelTest : SysuiTestCase() {
                     scale = 0.5f,
                 )
 
-            assertThat(translationX).isEqualTo(0)
-            assertThat(translationY).isEqualTo(0)
-            assertThat(scale).isEqualTo(BurnInScaleViewModel(scale = 0.5f, scaleClockOnly = false))
+            assertThat(movement?.translationX).isEqualTo(0)
+            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.scale).isEqualTo(0.5f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(false)
         }
 }

@@ -22,23 +22,25 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -53,18 +55,19 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class UdfpsKeyguardInteractorTest : SysuiTestCase() {
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
+    val configRepository = kosmos.fakeConfigurationRepository
+    val keyguardRepository = kosmos.fakeKeyguardRepository
+
     private val burnInProgress = 1f
     private val burnInYOffset = 20
     private val burnInXOffset = 10
 
-    private lateinit var testScope: TestScope
-    private lateinit var configRepository: FakeConfigurationRepository
     private lateinit var bouncerRepository: KeyguardBouncerRepository
-    private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var fakeCommandQueue: FakeCommandQueue
     private lateinit var burnInInteractor: BurnInInteractor
     private lateinit var shadeRepository: FakeShadeRepository
-    private lateinit var keyguardInteractor: KeyguardInteractor
     private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
@@ -75,12 +78,6 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        testScope = TestScope()
-        configRepository = FakeConfigurationRepository()
-        KeyguardInteractorFactory.create().let {
-            keyguardInteractor = it.keyguardInteractor
-            keyguardRepository = it.repository
-        }
         bouncerRepository = FakeKeyguardBouncerRepository()
         shadeRepository = FakeShadeRepository()
         fakeCommandQueue = FakeCommandQueue()
@@ -89,8 +86,8 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
                 context,
                 burnInHelper,
                 testScope.backgroundScope,
-                configRepository,
-                keyguardInteractor
+                kosmos.configurationInteractor,
+                kosmos.keyguardInteractor
             )
         powerInteractor = PowerInteractorFactory.create().powerInteractor
 
@@ -98,7 +95,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
             UdfpsKeyguardInteractor(
                 configRepository,
                 burnInInteractor,
-                keyguardInteractor,
+                kosmos.keyguardInteractor,
                 shadeRepository,
                 dialogManager,
             )
