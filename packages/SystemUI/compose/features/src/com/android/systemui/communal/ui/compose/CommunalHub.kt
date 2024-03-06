@@ -31,8 +31,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -93,7 +93,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -119,7 +118,6 @@ import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.observeTapsWithoutConsuming
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
@@ -199,37 +197,26 @@ fun CommunalHub(
                     }
                 },
     ) {
-        Column(Modifier.align(Alignment.TopStart)) {
-            CommunalHubLazyGrid(
-                communalContent = communalContent,
-                viewModel = viewModel,
-                contentPadding = contentPadding,
-                contentOffset = contentOffset,
-                setGridCoordinates = { gridCoordinates = it },
-                updateDragPositionForRemove = { offset ->
-                    isDraggingToRemove =
-                        isPointerWithinCoordinates(
-                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                            containerToCheck = removeButtonCoordinates
-                        )
-                    isDraggingToRemove
-                },
-                onOpenWidgetPicker = onOpenWidgetPicker,
-                gridState = gridState,
-                contentListState = contentListState,
-                selectedKey = selectedKey,
-                widgetConfigurator = widgetConfigurator,
-            )
-            // TODO(b/326060686): Remove this once keyguard indication area can persist over hub
-            if (viewModel is CommunalViewModel) {
-                val isUnlocked by viewModel.deviceUnlocked.collectAsState(initial = false)
-                Spacer(Modifier.height(24.dp))
-                LockStateIcon(
-                    isUnlocked = isUnlocked,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                )
-            }
-        }
+        CommunalHubLazyGrid(
+            communalContent = communalContent,
+            viewModel = viewModel,
+            contentPadding = contentPadding,
+            contentOffset = contentOffset,
+            setGridCoordinates = { gridCoordinates = it },
+            updateDragPositionForRemove = { offset ->
+                isDraggingToRemove =
+                    isPointerWithinCoordinates(
+                        offset = gridCoordinates?.let { it.positionInWindow() + offset },
+                        containerToCheck = removeButtonCoordinates
+                    )
+                isDraggingToRemove
+            },
+            onOpenWidgetPicker = onOpenWidgetPicker,
+            gridState = gridState,
+            contentListState = contentListState,
+            selectedKey = selectedKey,
+            widgetConfigurator = widgetConfigurator,
+        )
 
         if (viewModel.isEditMode && onOpenWidgetPicker != null && onEditDone != null) {
             Toolbar(
@@ -281,7 +268,7 @@ fun CommunalHub(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ColumnScope.CommunalHubLazyGrid(
+private fun BoxScope.CommunalHubLazyGrid(
     communalContent: List<CommunalContentModel>,
     viewModel: BaseCommunalViewModel,
     contentPadding: PaddingValues,
@@ -295,7 +282,7 @@ private fun ColumnScope.CommunalHubLazyGrid(
     widgetConfigurator: WidgetConfigurator?,
 ) {
     var gridModifier =
-        Modifier.align(Alignment.Start).onGloballyPositioned { setGridCoordinates(it) }
+        Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
     var list = communalContent
     var dragDropState: GridDragDropState? = null
     if (viewModel.isEditMode && viewModel is CommunalEditModeViewModel) {
@@ -375,26 +362,6 @@ private fun ColumnScope.CommunalHubLazyGrid(
             }
         }
     }
-}
-
-@Composable
-private fun LockStateIcon(
-    isUnlocked: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val colors = LocalAndroidColorScheme.current
-    val resource =
-        if (isUnlocked) {
-            R.drawable.ic_unlocked
-        } else {
-            R.drawable.ic_lock
-        }
-    Icon(
-        painter = painterResource(id = resource),
-        contentDescription = null,
-        tint = colors.onPrimaryContainer,
-        modifier = modifier.size(52.dp)
-    )
 }
 
 /**
