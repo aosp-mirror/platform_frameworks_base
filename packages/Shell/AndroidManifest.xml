@@ -566,9 +566,6 @@
     <!-- Permission required for CTS test - android.server.biometrics -->
     <uses-permission android:name="android.permission.SET_BIOMETRIC_DIALOG_LOGO" />
 
-    <!-- Permission required for CTS test - android.server.biometrics -->
-    <uses-permission android:name="android.permission.USE_BACKGROUND_FACE_AUTHENTICATION" />
-
     <!-- Permissions required for CTS test - NotificationManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
 
