@@ -29,17 +29,15 @@ import static org.mockito.Mockito.when;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.test.mock.MockContext;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.MessageUtils;
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,13 +45,11 @@ import org.junit.runner.RunWith;
 
 /** Unit tests for {@link VpnManager}. */
 @SmallTest
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.R)
+@RunWith(AndroidJUnit4.class)
 public class VpnManagerTest {
 
     private static final String PKG_NAME = "fooPackage";
 
-    private static final String SESSION_NAME_STRING = "testSession";
     private static final String SERVER_ADDR_STRING = "1.2.3.4";
     private static final String IDENTITY_STRING = "Identity";
     private static final byte[] PSK_BYTES = "preSharedKey".getBytes();
