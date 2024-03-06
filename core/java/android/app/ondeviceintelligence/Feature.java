@@ -199,24 +199,13 @@ public final class Feature implements Parcelable {
 
         private long mBuilderFieldsSet = 0L;
 
-        public Builder(
-                int id,
-                int type,
-                int variant,
-                @NonNull PersistableBundle featureParams) {
+        /**
+         * Provides a builder instance to create a feature for given id.
+         * @param id the unique identifier for the feature.
+         */
+        public Builder(int id) {
             mId = id;
-            mType = type;
-            mVariant = variant;
-            mFeatureParams = featureParams;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mFeatureParams);
-        }
-
-        public @NonNull Builder setId(int value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x1;
-            mId = value;
-            return this;
+            mFeatureParams = new PersistableBundle();
         }
 
         public @NonNull Builder setName(@NonNull String value) {
