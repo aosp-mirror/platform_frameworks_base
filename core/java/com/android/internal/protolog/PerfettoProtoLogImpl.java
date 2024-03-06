@@ -70,6 +70,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData;
@@ -89,6 +91,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups;
+
+    private final ExecutorService mBackgroundLoggingService = Executors.newCachedThreadPool();
 
     public PerfettoProtoLogImpl(String viewerConfigFilePath,
             TreeMap<String, IProtoLogGroup> logGroups) {
@@ -134,7 +138,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
         long tsNanos = SystemClock.elapsedRealtimeNanos();
         try {
-            logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos);
+            mBackgroundLoggingService.submit(() ->
+                    logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos));
             if (group.isLogToLogcat()) {
                 logToLogcat(group.getTag(), level, messageHash, messageString, args);
             }
