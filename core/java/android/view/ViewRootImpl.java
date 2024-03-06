@@ -31,7 +31,6 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -7572,8 +7571,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             // For the variable refresh rate project
-            if (handled && shouldTouchBoost(action & MotionEvent.ACTION_MASK,
-                    mWindowAttributes.type)) {
+            if (handled && shouldTouchBoost(action, mWindowAttributes.type)) {
                 // set the frame rate to the maximum value.
                 mIsTouchBoosting = true;
                 setPreferredFrameRateCategory(mPreferredFrameRateCategory);
@@ -12400,17 +12398,6 @@ public final class ViewRootImpl implements ViewParent,
                     mFrameRateCompatibility).applyAsyncUnsafe();
                 mLastPreferredFrameRate = preferredFrameRate;
             }
-            if (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE && mIsTouchBoosting) {
-                // We've received a velocity, so we'll let the velocity control the
-                // frame rate unless we receive additional motion events.
-                mIsTouchBoosting = false;
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    Trace.instant(
-                            Trace.TRACE_TAG_VIEW,
-                            "ViewRootImpl#setFrameRate velocity used, no touch boost on next frame"
-                    );
-                }
-            }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate", e);
         } finally {
@@ -12436,8 +12423,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean shouldTouchBoost(int motionEventAction, int windowType) {
-        // boost for almost all input
-        boolean desiredAction = motionEventAction != MotionEvent.ACTION_OUTSIDE;
+        boolean desiredAction = motionEventAction == MotionEvent.ACTION_DOWN
+                || motionEventAction == MotionEvent.ACTION_MOVE
+                || motionEventAction == MotionEvent.ACTION_UP;
         boolean undesiredType = windowType == TYPE_INPUT_METHOD
                 && sToolkitFrameRateTypingReadOnlyFlagValue;
         // use toolkitSetFrameRate flag to gate the change
@@ -12540,14 +12528,6 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public float getPreferredFrameRate() {
         return mPreferredFrameRate >= 0 ? mPreferredFrameRate : mLastPreferredFrameRate;
-    }
-
-    /**
-     * Returns whether touch boost is currently enabled.
-     */
-    @VisibleForTesting
-    public boolean getIsTouchBoosting() {
-        return mIsTouchBoosting;
     }
 
     /**
