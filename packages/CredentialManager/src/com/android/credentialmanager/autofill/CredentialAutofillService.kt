@@ -611,6 +611,12 @@ class CredentialAutofillService : AutofillService() {
             sessionId: Int
     ) {
         viewNode.autofillId?.let {
+            val domain = viewNode.webDomain
+            val request = viewNode.credentialManagerRequest
+            if (domain != null && request != null) {
+                responseClientState.putBoolean(
+                    WEBVIEW_REQUESTED_CREDENTIAL_KEY, true)
+            }
             cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, it, responseClientState,
                 traversedViewNodes, credentialOptionsFromHints, sessionId))
             traversedViewNodes.add(it)
