@@ -260,7 +260,11 @@ public final class ForwardGeocodeRequest implements Parcelable {
             mCallingAttributionTag = null;
         }
 
-        /** Sets the attribution tag. */
+        /**
+         * Sets the attribution tag.
+         *
+         * @param attributionTag The attribution tag to associate with the request.
+         */
         @NonNull
         public Builder setCallingAttributionTag(@NonNull String attributionTag) {
             mCallingAttributionTag = attributionTag;
