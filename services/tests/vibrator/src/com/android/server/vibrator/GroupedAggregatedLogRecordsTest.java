@@ -135,7 +135,7 @@ public class GroupedAggregatedLogRecordsTest {
         AggregatedLogRecord<TestSingleLogRecord> droppedRecord =
                 records.add(createRecord(GROUP_1, KEY_2, createTime++));
         assertThat(droppedRecord).isNotNull();
-        assertThat(droppedRecord.getLatest()).isEqualTo(mTestRecords.getFirst());
+        assertThat(droppedRecord.getLatest()).isEqualTo(mTestRecords.get(0));
 
         dumpRecords(records);
         assertGroupHeadersWrittenOnce(records, GROUP_1);
@@ -155,7 +155,7 @@ public class GroupedAggregatedLogRecordsTest {
         AggregatedLogRecord<TestSingleLogRecord> droppedRecord =
                 records.add(createRecord(GROUP_1, KEY_1, createTime + AGGREGATION_TIME_LIMIT));
         assertThat(droppedRecord).isNotNull();
-        assertThat(droppedRecord.getLatest()).isEqualTo(mTestRecords.getFirst());
+        assertThat(droppedRecord.getLatest()).isEqualTo(mTestRecords.get(0));
 
         dumpRecords(records);
         assertGroupHeadersWrittenOnce(records, GROUP_1);
