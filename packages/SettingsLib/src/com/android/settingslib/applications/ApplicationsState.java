@@ -1918,6 +1918,16 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_PERSONAL_OR_PRIVATE = new AppFilter() {
+        @Override
+        public void init() {}
+
+        @Override
+        public boolean filterApp(AppEntry entry) {
+            return entry.showInPersonalTab || entry.isPrivateProfile();
+        }
+    };
+
     /**
      * Displays a combined list with "downloaded" and "visible in launcher" apps only.
      */
