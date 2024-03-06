@@ -19,7 +19,9 @@ package com.android.systemui.statusbar.notification.row
 import android.widget.flags.Flags.notifLinearlayoutOptimized
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.notification.shared.NotificationViewFlipperPausing
 import javax.inject.Inject
+import javax.inject.Provider
 
 interface NotifRemoteViewsFactoryContainer {
     val factories: Set<NotifRemoteViewsFactory>
@@ -31,7 +33,8 @@ constructor(
     featureFlags: FeatureFlags,
     precomputedTextViewFactory: PrecomputedTextViewFactory,
     bigPictureLayoutInflaterFactory: BigPictureLayoutInflaterFactory,
-    optimizedLinearLayoutFactory: NotificationOptimizedLinearLayoutFactory
+    optimizedLinearLayoutFactory: NotificationOptimizedLinearLayoutFactory,
+    notificationViewFlipperFactory: Provider<NotificationViewFlipperFactory>,
 ) : NotifRemoteViewsFactoryContainer {
     override val factories: Set<NotifRemoteViewsFactory> = buildSet {
         add(precomputedTextViewFactory)
@@ -40,6 +43,9 @@ constructor(
         }
         if (notifLinearlayoutOptimized()) {
             add(optimizedLinearLayoutFactory)
+        }
+        if (NotificationViewFlipperPausing.isEnabled) {
+            add(notificationViewFlipperFactory.get())
         }
     }
 }
