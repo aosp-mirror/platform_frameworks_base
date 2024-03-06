@@ -35,6 +35,10 @@ import com.android.systemui.qs.tiles.impl.airplane.domain.AirplaneModeMapper
 import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileDataInteractor
 import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
+import com.android.systemui.qs.tiles.impl.internet.domain.InternetTileMapper
+import com.android.systemui.qs.tiles.impl.internet.domain.interactor.InternetTileDataInteractor
+import com.android.systemui.qs.tiles.impl.internet.domain.interactor.InternetTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
 import com.android.systemui.qs.tiles.impl.saver.domain.DataSaverTileMapper
 import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileDataInteractor
 import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileUserActionInteractor
@@ -90,6 +94,7 @@ interface ConnectivityModule {
 
         const val AIRPLANE_MODE_TILE_SPEC = "airplane"
         const val DATA_SAVER_TILE_SPEC = "saver"
+        const val INTERNET_TILE_SPEC = "internet"
 
         /** Inject InternetTile or InternetTileNewImpl into tileMap in QSModule */
         @Provides
@@ -164,6 +169,37 @@ interface ConnectivityModule {
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(DATA_SAVER_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(INTERNET_TILE_SPEC)
+        fun provideInternetTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(INTERNET_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_qs_no_internet_available,
+                        labelRes = R.string.quick_settings_internet_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject InternetTile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(INTERNET_TILE_SPEC)
+        fun provideInternetTileViewModel(
+            factory: QSTileViewModelFactory.Static<InternetTileModel>,
+            mapper: InternetTileMapper,
+            stateInteractor: InternetTileDataInteractor,
+            userActionInteractor: InternetTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(INTERNET_TILE_SPEC),
                 userActionInteractor,
                 stateInteractor,
                 mapper,
