@@ -19992,6 +19992,13 @@ public final class Settings {
             @Readable
             public static final String CONSISTENT_NOTIFICATION_BLOCKING_ENABLED =
                     "consistent_notification_blocking_enabled";
+
+            /**
+             * Whether the Auto Bedtime Mode experience is enabled.
+             *
+             * @hide
+             */
+            public static final String AUTO_BEDTIME_MODE = "auto_bedtime_mode";
         }
     }
 
