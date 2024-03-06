@@ -27,14 +27,17 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -47,21 +50,105 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
-    private val powerInteractor: PowerInteractor,
+    powerInteractor: PowerInteractor,
+    keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
         transitionInteractor = transitionInteractor,
         mainDispatcher = mainDispatcher,
         bgDispatcher = bgDispatcher,
+        powerInteractor = powerInteractor,
+        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
     ) {
 
     override fun start() {
-        listenForAodToLockscreen()
+        listenForAodToAwake()
+        listenForAodToOccluded()
         listenForAodToPrimaryBouncer()
         listenForAodToGone()
-        listenForAodToOccluded()
         listenForTransitionToCamera(scope, keyguardInteractor)
+    }
+
+    /**
+     * Listen for the signal that we're waking up and figure what state we need to transition to.
+     */
+    private fun listenForAodToAwake() {
+        val transitionToLockscreen: suspend (TransitionStep) -> UUID? =
+            { startedStep: TransitionStep ->
+                val modeOnCanceled =
+                    if (startedStep.from == KeyguardState.LOCKSCREEN) {
+                        TransitionModeOnCanceled.REVERSE
+                    } else if (startedStep.from == KeyguardState.GONE) {
+                        TransitionModeOnCanceled.RESET
+                    } else {
+                        TransitionModeOnCanceled.LAST_VALUE
+                    }
+                startTransitionTo(
+                    toState = KeyguardState.LOCKSCREEN,
+                    modeOnCanceled = modeOnCanceled,
+                )
+            }
+
+        if (KeyguardWmStateRefactor.isEnabled) {
+            // The refactor uses PowerInteractor's wakefulness, which is the earliest wake signal
+            // available. We have all of the information we need at this time to make a decision
+            // about where to transition.
+            scope.launch {
+                powerInteractor.detailedWakefulness
+                    // React only to wake events.
+                    .filter { it.isAwake() }
+                    .sample(
+                        startedKeyguardTransitionStep,
+                        keyguardInteractor.biometricUnlockState,
+                        keyguardInteractor.primaryBouncerShowing,
+                    )
+                    // Make sure we've at least STARTED a transition to AOD.
+                    .filter { (_, startedStep, _, _) -> startedStep.to == KeyguardState.AOD }
+                    .collect { (_, startedStep, biometricUnlockState, primaryBouncerShowing) ->
+                        // Check with the superclass to see if an occlusion transition is needed.
+                        // Also, don't react to wake and unlock events, as we'll be receiving a call
+                        // to #dismissAod() shortly when the authentication completes.
+                        if (
+                            !maybeStartTransitionToOccludedOrInsecureCamera() &&
+                                !isWakeAndUnlock(biometricUnlockState) &&
+                                !primaryBouncerShowing
+                        ) {
+                            transitionToLockscreen(startedStep)
+                        }
+                    }
+            }
+        } else {
+            scope.launch {
+                keyguardInteractor
+                    .dozeTransitionTo(DozeStateModel.FINISH)
+                    .sample(
+                        keyguardInteractor.isKeyguardShowing,
+                        startedKeyguardTransitionStep,
+                        keyguardInteractor.isKeyguardOccluded,
+                        keyguardInteractor.biometricUnlockState,
+                        keyguardInteractor.primaryBouncerShowing,
+                    )
+                    .collect {
+                        (
+                            _,
+                            isKeyguardShowing,
+                            lastStartedStep,
+                            occluded,
+                            biometricUnlockState,
+                            primaryBouncerShowing) ->
+                        if (
+                            lastStartedStep.to == KeyguardState.AOD &&
+                                !occluded &&
+                                !isWakeAndUnlock(biometricUnlockState) &&
+                                isKeyguardShowing &&
+                                !primaryBouncerShowing
+                        ) {
+                            transitionToLockscreen(lastStartedStep)
+                        }
+                    }
+            }
+        }
     }
 
     /**
@@ -70,6 +157,11 @@ constructor(
      * run AOD->OCCLUDED.
      */
     private fun listenForAodToOccluded() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            // Handled by calls to maybeStartTransitionToOccludedOrInsecureCamera on waking.
+            return
+        }
+
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
                 .sample(startedKeyguardTransitionStep, ::Pair)
@@ -78,49 +170,6 @@ constructor(
                         startTransitionTo(
                             toState = KeyguardState.OCCLUDED,
                             modeOnCanceled = TransitionModeOnCanceled.RESET
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun listenForAodToLockscreen() {
-        scope.launch {
-            keyguardInteractor
-                .dozeTransitionTo(DozeStateModel.FINISH)
-                .sample(
-                    keyguardInteractor.isKeyguardShowing,
-                    startedKeyguardTransitionStep,
-                    keyguardInteractor.isKeyguardOccluded,
-                    keyguardInteractor.biometricUnlockState,
-                    keyguardInteractor.primaryBouncerShowing,
-                )
-                .collect {
-                    (
-                        _,
-                        isKeyguardShowing,
-                        lastStartedStep,
-                        occluded,
-                        biometricUnlockState,
-                        primaryBouncerShowing) ->
-                    if (
-                        lastStartedStep.to == KeyguardState.AOD &&
-                            !occluded &&
-                            !isWakeAndUnlock(biometricUnlockState) &&
-                            isKeyguardShowing &&
-                            !primaryBouncerShowing
-                    ) {
-                        val modeOnCanceled =
-                            if (lastStartedStep.from == KeyguardState.LOCKSCREEN) {
-                                TransitionModeOnCanceled.REVERSE
-                            } else if (lastStartedStep.from == KeyguardState.GONE) {
-                                TransitionModeOnCanceled.RESET
-                            } else {
-                                TransitionModeOnCanceled.LAST_VALUE
-                            }
-                        startTransitionTo(
-                            toState = KeyguardState.LOCKSCREEN,
-                            modeOnCanceled = modeOnCanceled,
                         )
                     }
                 }
@@ -145,6 +194,7 @@ constructor(
 
     private fun listenForAodToGone() {
         if (KeyguardWmStateRefactor.isEnabled) {
+            // Handled via #dismissAod.
             return
         }
 

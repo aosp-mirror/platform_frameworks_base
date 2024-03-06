@@ -140,8 +140,14 @@ constructor(
         nonApps: Array<RemoteAnimationTarget>,
         finishedCallback: IRemoteAnimationFinishedCallback
     ) {
-        goingAwayRemoteAnimationFinishedCallback = finishedCallback
-        keyguardSurfaceBehindAnimator.applyParamsToSurface(apps[0])
+        if (apps.isNotEmpty()) {
+            goingAwayRemoteAnimationFinishedCallback = finishedCallback
+            keyguardSurfaceBehindAnimator.applyParamsToSurface(apps[0])
+        } else {
+            // Nothing to do here if we have no apps, end the animation, which will cancel it and WM
+            // will make *something* visible.
+            finishedCallback.onAnimationFinished()
+        }
     }
 
     fun onKeyguardGoingAwayRemoteAnimationCancelled() {
@@ -174,13 +180,19 @@ constructor(
      * if so, true should be the right choice.
      */
     private fun setWmLockscreenState(
-            lockscreenShowing: Boolean = this.isLockscreenShowing ?: true.also {
-                Log.d(TAG, "Using isLockscreenShowing=true default in setWmLockscreenState, " +
-                        "because setAodVisible was called before the first setLockscreenShown " +
-                        "call during boot. This is not typical, but is theoretically possible. " +
-                        "If you're investigating the lockscreen showing unexpectedly, start here.")
-            },
-            aodVisible: Boolean = this.isAodVisible
+        lockscreenShowing: Boolean =
+            this.isLockscreenShowing
+                ?: true.also {
+                    Log.d(
+                        TAG,
+                        "Using isLockscreenShowing=true default in setWmLockscreenState, " +
+                            "because setAodVisible was called before the first " +
+                            "setLockscreenShown call during boot. This is not typical, but is " +
+                            "theoretically possible. If you're investigating the lockscreen " +
+                            "showing unexpectedly, start here."
+                    )
+                },
+        aodVisible: Boolean = this.isAodVisible
     ) {
         Log.d(
             TAG,

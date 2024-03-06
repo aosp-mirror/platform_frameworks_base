@@ -1365,7 +1365,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private final Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
 
+    private WindowManagerOcclusionManager mWmOcclusionManager;
     /**
+
      * Injected constructor. See {@link KeyguardModule}.
      */
     public KeyguardViewMediator(
@@ -1411,7 +1413,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
-            KeyguardInteractor keyguardInteractor) {
+            KeyguardInteractor keyguardInteractor,
+            WindowManagerOcclusionManager wmOcclusionManager) {
         mContext = context;
         mUserTracker = userTracker;
         mFalsingCollector = falsingCollector;
@@ -1486,6 +1489,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
+
+        mWmOcclusionManager = wmOcclusionManager;
     }
 
     public void userActivity() {
@@ -2103,15 +2108,27 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     public IRemoteAnimationRunner getOccludeAnimationRunner() {
-        return validatingRemoteAnimationRunner(mOccludeAnimationRunner);
+        if (KeyguardWmStateRefactor.isEnabled()) {
+            return validatingRemoteAnimationRunner(mWmOcclusionManager.getOccludeAnimationRunner());
+        } else {
+            return validatingRemoteAnimationRunner(mOccludeAnimationRunner);
+        }
     }
 
+    /**
+     * TODO(b/326464548): Move this to WindowManagerOcclusionManager
+     */
     public IRemoteAnimationRunner getOccludeByDreamAnimationRunner() {
         return validatingRemoteAnimationRunner(mOccludeByDreamAnimationRunner);
     }
 
     public IRemoteAnimationRunner getUnoccludeAnimationRunner() {
-        return validatingRemoteAnimationRunner(mUnoccludeAnimationRunner);
+        if (KeyguardWmStateRefactor.isEnabled()) {
+            return validatingRemoteAnimationRunner(
+                    mWmOcclusionManager.getUnoccludeAnimationRunner());
+        } else {
+            return validatingRemoteAnimationRunner(mUnoccludeAnimationRunner);
+        }
     }
 
     public boolean isHiding() {
@@ -2145,8 +2162,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
-                mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
-                        && mDeviceInteractive);
+                if (!KeyguardWmStateRefactor.isEnabled()) {
+                    mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
+                            && mDeviceInteractive);
+                }
                 adjustStatusBarLocked();
             }
 

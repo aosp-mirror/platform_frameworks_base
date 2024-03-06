@@ -18,9 +18,11 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
+import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
@@ -120,6 +122,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testKeyguardGuardVisibilityStopsSecureCamera() =
         testScope.runTest {
             val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
@@ -144,6 +147,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testBouncerShowingResetsSecureCameraState() =
         testScope.runTest {
             val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
@@ -166,6 +170,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun keyguardVisibilityIsDefinedAsKeyguardShowingButNotOccluded() = runTest {
         val isVisible = collectLastValue(underTest.isKeyguardVisible)
         repository.setKeyguardShowing(true)

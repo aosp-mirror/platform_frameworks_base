@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
 
-/** Breaks down AOD->OCCLUDED transition into discrete steps for corresponding views to consume. */
+/**
+ * Breaks down DOZING->OCCLUDED transition into discrete steps for corresponding views to consume.
+ */
 @SysUISingleton
-class AodToOccludedTransitionViewModel
+class DozingToOccludedTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
@@ -36,7 +38,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromAodTransitionInteractor.TO_OCCLUDED_DURATION,
-            from = KeyguardState.AOD,
+            from = KeyguardState.DOZING,
             to = KeyguardState.OCCLUDED,
         )
 
@@ -45,7 +47,8 @@ constructor(
      *
      * This happens when pressing the power button while a SHOW_WHEN_LOCKED activity is on the top
      * of the task stack, as well as when the power button is double tapped on the LOCKSCREEN (the
-     * first tap transitions to AOD, the second cancels that transition and starts AOD -> OCCLUDED.
+     * first tap transitions to DOZING, the second cancels that transition and starts DOZING ->
+     * OCCLUDED.
      */
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
         var currentAlpha = 0f

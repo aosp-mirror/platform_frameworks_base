@@ -50,6 +50,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager;
+import com.android.systemui.keyguard.WindowManagerOcclusionManager;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
@@ -163,7 +164,8 @@ public interface KeyguardModule {
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
-            KeyguardInteractor keyguardInteractor) {
+            KeyguardInteractor keyguardInteractor,
+            WindowManagerOcclusionManager windowManagerOcclusionManager) {
         return new KeyguardViewMediator(
                 context,
                 uiEventLogger,
@@ -209,7 +211,8 @@ public interface KeyguardModule {
                 systemPropertiesHelper,
                 wmLockscreenVisibilityManager,
                 selectedUserInteractor,
-                keyguardInteractor);
+                keyguardInteractor,
+                windowManagerOcclusionManager);
     }
 
     /** */

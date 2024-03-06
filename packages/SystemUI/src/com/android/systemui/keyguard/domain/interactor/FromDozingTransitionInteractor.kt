@@ -22,6 +22,7 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -34,6 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -46,18 +48,22 @@ constructor(
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
-    private val powerInteractor: PowerInteractor,
+    powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
+    keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DOZING,
         transitionInteractor = transitionInteractor,
         mainDispatcher = mainDispatcher,
         bgDispatcher = bgDispatcher,
+        powerInteractor = powerInteractor,
+        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
     ) {
 
     override fun start() {
         listenForDozingToAny()
+        listenForWakeFromDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
@@ -70,6 +76,10 @@ constructor(
         }
 
     private fun listenForDozingToAny() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
         scope.launch {
             powerInteractor.isAwake
                 .debounce(50L)
@@ -110,6 +120,58 @@ constructor(
                     )
                 }
         }
+    }
+
+    /** Figure out what state to transition to when we awake from DOZING. */
+    private fun listenForWakeFromDozing() {
+        if (!KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
+        scope.launch {
+            powerInteractor.detailedWakefulness
+                .filter { it.isAwake() }
+                .sample(
+                    startedKeyguardTransitionStep,
+                    communalInteractor.isIdleOnCommunal,
+                    keyguardInteractor.biometricUnlockState,
+                    canDismissLockScreen,
+                    keyguardInteractor.primaryBouncerShowing,
+                )
+                // If we haven't at least STARTED a transition to DOZING, ignore.
+                .filter { (_, startedStep, _, _) -> startedStep.to == KeyguardState.DOZING }
+                .collect {
+                    (
+                        _,
+                        _,
+                        isIdleOnCommunal,
+                        biometricUnlockState,
+                        canDismissLockscreen,
+                        primaryBouncerShowing) ->
+                    if (
+                        !maybeStartTransitionToOccludedOrInsecureCamera() &&
+                            // Handled by dismissFromDozing().
+                            !isWakeAndUnlock(biometricUnlockState)
+                    ) {
+                        startTransitionTo(
+                            if (canDismissLockscreen) {
+                                KeyguardState.GONE
+                            } else if (primaryBouncerShowing) {
+                                KeyguardState.PRIMARY_BOUNCER
+                            } else if (isIdleOnCommunal) {
+                                KeyguardState.GLANCEABLE_HUB
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+                        )
+                    }
+                }
+        }
+    }
+
+    /** Dismisses keyguard from the DOZING state. */
+    fun dismissFromDozing() {
+        scope.launch { startTransitionTo(KeyguardState.GONE) }
     }
 
     override fun getDefaultAnimatorForTransitionsToState(toState: KeyguardState): ValueAnimator {

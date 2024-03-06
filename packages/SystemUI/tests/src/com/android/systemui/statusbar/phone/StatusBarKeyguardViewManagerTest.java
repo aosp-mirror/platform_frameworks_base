@@ -95,6 +95,7 @@ import com.android.systemui.shade.ShadeLockscreenInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.domain.interactor.StatusBarKeyguardViewManagerInteractor;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
@@ -226,7 +227,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mSelectedUserInteractor,
                         () -> mock(KeyguardSurfaceBehindInteractor.class),
                         mock(JavaAdapter.class),
-                        () -> mock(SceneInteractor.class)) {
+                        () -> mock(SceneInteractor.class),
+                        mock(StatusBarKeyguardViewManagerInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -736,7 +738,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mSelectedUserInteractor,
                         () -> mock(KeyguardSurfaceBehindInteractor.class),
                         mock(JavaAdapter.class),
-                        () -> mock(SceneInteractor.class)) {
+                        () -> mock(SceneInteractor.class),
+                        mock(StatusBarKeyguardViewManagerInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

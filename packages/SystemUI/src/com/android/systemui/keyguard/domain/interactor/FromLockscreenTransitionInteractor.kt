@@ -33,7 +33,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
@@ -44,6 +43,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -62,21 +62,24 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val flags: FeatureFlags,
     private val shadeRepository: ShadeRepository,
-    private val powerInteractor: PowerInteractor,
+    powerInteractor: PowerInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
     private val swipeToDismissInteractor: SwipeToDismissInteractor,
+    keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.LOCKSCREEN,
         transitionInteractor = transitionInteractor,
         mainDispatcher = mainDispatcher,
         bgDispatcher = bgDispatcher,
+        powerInteractor = powerInteractor,
+        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
     ) {
 
     override fun start() {
         listenForLockscreenToGone()
         listenForLockscreenToGoneDragging()
-        listenForLockscreenToOccluded()
+        listenForLockscreenToOccludedOrDreaming()
         listenForLockscreenToAodOrDozing()
         listenForLockscreenToPrimaryBouncer()
         listenForLockscreenToDreaming()
@@ -115,6 +118,10 @@ constructor(
     }
 
     private fun listenForLockscreenToDreaming() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
         val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
         scope.launch {
             keyguardInteractor.isAbleToDream
@@ -157,7 +164,10 @@ constructor(
                     if (
                         isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.LOCKSCREEN
                     ) {
-                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                        startTransitionTo(
+                            KeyguardState.PRIMARY_BOUNCER,
+                            ownerReason = "#listenForLockscreenToPrimaryBouncer"
+                        )
                     }
                 }
         }
@@ -254,7 +264,8 @@ constructor(
                                 transitionId =
                                     startTransitionTo(
                                         toState = KeyguardState.PRIMARY_BOUNCER,
-                                        animator = null, // transition will be manually controlled
+                                        animator = null, // transition will be manually controlled,
+                                        ownerReason = "#listenForLockscreenToPrimaryBouncerDragging"
                                     )
                             }
                         }
@@ -309,47 +320,51 @@ constructor(
         }
     }
 
-    private fun listenForLockscreenToOccluded() {
-        scope.launch {
-            keyguardInteractor.isKeyguardOccluded.sample(startedKeyguardState, ::Pair).collect {
-                (isOccluded, keyguardState) ->
-                if (isOccluded && keyguardState == KeyguardState.LOCKSCREEN) {
-                    startTransitionTo(KeyguardState.OCCLUDED)
-                }
+    private fun listenForLockscreenToOccludedOrDreaming() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            scope.launch {
+                keyguardOcclusionInteractor.showWhenLockedActivityInfo
+                    .filter { it.isOnTop }
+                    .sample(startedKeyguardState, ::Pair)
+                    .collect { (taskInfo, startedState) ->
+                        if (startedState == KeyguardState.LOCKSCREEN) {
+                            startTransitionTo(
+                                if (taskInfo.isDream()) {
+                                    KeyguardState.DREAMING
+                                } else {
+                                    KeyguardState.OCCLUDED
+                                }
+                            )
+                        }
+                    }
+            }
+        } else {
+            scope.launch {
+                keyguardInteractor.isKeyguardOccluded
+                    .sample(startedKeyguardState, ::Pair)
+                    .collect { (isOccluded, keyguardState) ->
+                        if (isOccluded && keyguardState == KeyguardState.LOCKSCREEN) {
+                            startTransitionTo(KeyguardState.OCCLUDED)
+                        }
+                    }
             }
         }
     }
 
     private fun listenForLockscreenToAodOrDozing() {
         scope.launch {
-            powerInteractor.isAsleep
-                .sample(
-                    combine(
-                        startedKeyguardTransitionStep,
-                        keyguardInteractor.isAodAvailable,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
-                    if (lastStartedStep.to == KeyguardState.LOCKSCREEN && isAsleep) {
-                        val toState =
-                            if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
-                        val modeOnCanceled =
-                            if (
-                                toState == KeyguardState.AOD &&
-                                    lastStartedStep.from == KeyguardState.AOD
-                            ) {
-                                TransitionModeOnCanceled.REVERSE
-                            } else {
-                                TransitionModeOnCanceled.LAST_VALUE
-                            }
-                        startTransitionTo(
-                            toState = toState,
-                            modeOnCanceled = modeOnCanceled,
-                        )
+            listenForSleepTransition(
+                from = KeyguardState.LOCKSCREEN,
+                modeOnCanceledFromStartedStep = { startedStep ->
+                    if (
+                        startedStep.to == KeyguardState.AOD && startedStep.from == KeyguardState.AOD
+                    ) {
+                        TransitionModeOnCanceled.REVERSE
+                    } else {
+                        TransitionModeOnCanceled.LAST_VALUE
                     }
                 }
+            )
         }
     }
 

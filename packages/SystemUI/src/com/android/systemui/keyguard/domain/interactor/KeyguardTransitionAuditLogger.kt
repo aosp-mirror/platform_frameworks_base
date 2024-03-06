@@ -41,6 +41,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     private val shadeInteractor: ShadeInteractor,
+    private val keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) {
 
     fun start() {
@@ -91,6 +92,12 @@ constructor(
         }
 
         scope.launch {
+            keyguardInteractor.isKeyguardDismissible.collect {
+                logger.log(TAG, VERBOSE, "isKeyguardDismissable", it)
+            }
+        }
+
+        scope.launch {
             keyguardInteractor.isAbleToDream.collect {
                 logger.log(TAG, VERBOSE, "isAbleToDream", it)
             }
@@ -123,6 +130,12 @@ constructor(
         scope.launch {
             keyguardInteractor.onCameraLaunchDetected.collect {
                 logger.log(TAG, VERBOSE, "onCameraLaunchDetected", it)
+            }
+        }
+
+        scope.launch {
+            keyguardOcclusionInteractor.showWhenLockedActivityInfo.collect {
+                logger.log(TAG, VERBOSE, "showWhenLockedActivityInfo", it)
             }
         }
     }
