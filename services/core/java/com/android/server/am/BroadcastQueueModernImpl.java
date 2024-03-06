@@ -20,6 +20,9 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__BOOT_COMPLETED;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__LOCKED_BOOT_COMPLETED;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_UNKNOWN;
@@ -59,6 +62,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.Handler;
@@ -85,9 +89,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalServices;
 import com.android.server.am.BroadcastProcessQueue.BroadcastConsumer;
 import com.android.server.am.BroadcastProcessQueue.BroadcastPredicate;
 import com.android.server.am.BroadcastRecord.DeliveryState;
+import com.android.server.pm.UserJourneyLogger;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.AnrTimer;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -2120,7 +2127,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.nextReceiver = r.receivers.size();
         mHistory.onBroadcastFinishedLocked(r);
 
-        BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
+        logBootCompletedBroadcastCompletionLatencyIfPossible(r);
 
         if (r.intent.getComponent() == null && r.intent.getPackage() == null
                 && (r.intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
@@ -2214,6 +2221,59 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             leaf = leaf.processNameNext;
         }
         return null;
+    }
+
+    private void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
+        // Only log after last receiver.
+        // In case of split BOOT_COMPLETED broadcast, make sure only call this method on the
+        // last BroadcastRecord of the split broadcast which has non-null resultTo.
+        final int numReceivers = (r.receivers != null) ? r.receivers.size() : 0;
+        if (r.nextReceiver < numReceivers) {
+            return;
+        }
+        final String action = r.intent.getAction();
+        int event = 0;
+        if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)) {
+            event = BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__LOCKED_BOOT_COMPLETED;
+        } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+            event = BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__BOOT_COMPLETED;
+        }
+        if (event != 0) {
+            final int dispatchLatency = (int) (r.dispatchTime - r.enqueueTime);
+            final int completeLatency = (int) (SystemClock.uptimeMillis() - r.enqueueTime);
+            final int dispatchRealLatency = (int) (r.dispatchRealTime - r.enqueueRealTime);
+            final int completeRealLatency = (int)
+                    (SystemClock.elapsedRealtime() - r.enqueueRealTime);
+            int userType =
+                    FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN;
+            // This method is called very infrequently, no performance issue we call
+            // LocalServices.getService() here.
+            final UserManagerInternal umInternal = LocalServices.getService(
+                    UserManagerInternal.class);
+            final UserInfo userInfo =
+                    (umInternal != null) ? umInternal.getUserInfo(r.userId) : null;
+            if (userInfo != null) {
+                userType = UserJourneyLogger.getUserTypeForStatsd(userInfo.userType);
+            }
+            Slog.i(TAG, "BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED action:"
+                    + action
+                    + " dispatchLatency:" + dispatchLatency
+                    + " completeLatency:" + completeLatency
+                    + " dispatchRealLatency:" + dispatchRealLatency
+                    + " completeRealLatency:" + completeRealLatency
+                    + " receiversSize:" + numReceivers
+                    + " userId:" + r.userId
+                    + " userType:" + (userInfo != null ? userInfo.userType : null));
+            FrameworkStatsLog.write(
+                    BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED,
+                    event,
+                    dispatchLatency,
+                    completeLatency,
+                    dispatchRealLatency,
+                    completeRealLatency,
+                    r.userId,
+                    userType);
+        }
     }
 
     @Override

@@ -141,7 +141,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_BACKGROUND;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
@@ -726,21 +725,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     final boolean mUseFifoUiScheduling;
 
-    // Use an offload queue for long broadcasts, e.g. BOOT_COMPLETED.
-    // For simplicity, since we statically declare the size of the array of BroadcastQueues,
-    // we still create this new offload queue, but never ever put anything on it.
-    final boolean mEnableOffloadQueue;
-
     /**
      * Flag indicating if we should use {@link BroadcastQueueModernImpl} instead
      * of the default {@link BroadcastQueueImpl}.
      */
     final boolean mEnableModernQueue;
-
-    static final int BROADCAST_QUEUE_FG = 0;
-    static final int BROADCAST_QUEUE_BG = 1;
-    static final int BROADCAST_QUEUE_BG_OFFLOAD = 2;
-    static final int BROADCAST_QUEUE_FG_OFFLOAD = 3;
 
     @GuardedBy("this")
     private final SparseArray<IUnsafeIntentStrictModeCallback>
@@ -748,7 +737,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
-    final BroadcastQueue[] mBroadcastQueues;
+    private BroadcastQueue mBroadcastQueue;
 
     @GuardedBy("this")
     BroadcastStats mLastBroadcastStats;
@@ -757,43 +746,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     BroadcastStats mCurBroadcastStats;
 
     TraceErrorLogger mTraceErrorLogger;
-
-    BroadcastQueue broadcastQueueForIntent(Intent intent) {
-        return broadcastQueueForFlags(intent.getFlags(), intent);
-    }
-
-    BroadcastQueue broadcastQueueForFlags(int flags) {
-        return broadcastQueueForFlags(flags, null);
-    }
-
-    BroadcastQueue broadcastQueueForFlags(int flags, Object cookie) {
-        if (mEnableModernQueue) {
-            return mBroadcastQueues[0];
-        }
-
-        if (isOnFgOffloadQueue(flags)) {
-            if (DEBUG_BROADCAST_BACKGROUND) {
-                Slog.i(TAG_BROADCAST,
-                        "Broadcast intent " + cookie + " on foreground offload queue");
-            }
-            return mBroadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD];
-        }
-
-        if (isOnBgOffloadQueue(flags)) {
-            if (DEBUG_BROADCAST_BACKGROUND) {
-                Slog.i(TAG_BROADCAST,
-                        "Broadcast intent " + cookie + " on background offload queue");
-            }
-            return mBroadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD];
-        }
-
-        final boolean isFg = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
-        if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
-                "Broadcast intent " + cookie + " on "
-                + (isFg ? "foreground" : "background") + " queue");
-        return (isFg) ? mBroadcastQueues[BROADCAST_QUEUE_FG]
-                : mBroadcastQueues[BROADCAST_QUEUE_BG];
-    }
 
     private volatile int mDeviceOwnerUid = INVALID_UID;
 
@@ -2556,9 +2508,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mInternal = new LocalService();
         mPendingStartActivityUids = new PendingStartActivityUids();
         mUseFifoUiScheduling = false;
-        mEnableOffloadQueue = false;
         mEnableModernQueue = false;
-        mBroadcastQueues = injector.getBroadcastQueues(this);
+        mBroadcastQueue = injector.getBroadcastQueue(this);
         mComponentAliasResolver = new ComponentAliasResolver(this);
     }
 
@@ -2599,12 +2550,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new OomAdjusterModernImpl(this, mProcessList, activeUids)
                 : new OomAdjuster(this, mProcessList, activeUids);
 
-        mEnableOffloadQueue = SystemProperties.getBoolean(
-                "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
         mEnableModernQueue = new BroadcastConstants(
                 Settings.Global.BROADCAST_FG_CONSTANTS).MODERN_QUEUE_ENABLED;
 
-        mBroadcastQueues = mInjector.getBroadcastQueues(this);
+        mBroadcastQueue = mInjector.getBroadcastQueue(this);
 
         mServices = new ActiveServices(this);
         mCpHelper = new ContentProviderHelper(this, true);
@@ -2669,6 +2618,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mTraceErrorLogger = new TraceErrorLogger();
         mComponentAliasResolver = new ComponentAliasResolver(this);
+    }
+
+    void setBroadcastQueueForTest(BroadcastQueue broadcastQueue) {
+        mBroadcastQueue = broadcastQueue;
+    }
+
+    BroadcastQueue getBroadcastQueue() {
+        return mBroadcastQueue;
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -4280,19 +4237,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Clean-up disabled broadcast receivers.
-        for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
-            mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                    packageName, disabledClasses, userId);
-        }
+        mBroadcastQueue.cleanupDisabledPackageReceiversLocked(
+                packageName, disabledClasses, userId);
 
     }
 
     final boolean clearBroadcastQueueForUserLocked(int userId) {
-        boolean didSomething = false;
-        for (int i = mBroadcastQueues.length - 1; i >= 0; i--) {
-            didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
-                    null, null, userId);
-        }
+        boolean didSomething = mBroadcastQueue.cleanupDisabledPackageReceiversLocked(
+                null, null, userId);
         return didSomething;
     }
 
@@ -4445,10 +4397,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUgmInternal.removeUriPermissionsForPackage(packageName, userId, false, false);
 
         if (doit) {
-            for (i = mBroadcastQueues.length - 1; i >= 0; i--) {
-                didSomething |= mBroadcastQueues[i].cleanupDisabledPackageReceiversLocked(
+            didSomething |= mBroadcastQueue.cleanupDisabledPackageReceiversLocked(
                         packageName, null, userId);
-            }
         }
 
         if (packageName == null || uninstalling || packageStateStopped) {
@@ -4515,9 +4465,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Take care of any services that are waiting for the process.
                 mServices.processStartTimedOutLocked(app);
                 // Take care of any broadcasts waiting for the process.
-                for (BroadcastQueue queue : mBroadcastQueues) {
-                    queue.onApplicationTimeoutLocked(app);
-                }
+                mBroadcastQueue.onApplicationTimeoutLocked(app);
                 if (!isKillTimeout) {
                     mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                     app.killLocked("start timeout",
@@ -4959,9 +4907,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Check if a next-broadcast receiver is in this process...
             if (!badApp) {
                 try {
-                    for (BroadcastQueue queue : mBroadcastQueues) {
-                        didSomething |= queue.onApplicationAttachedLocked(app);
-                    }
+                    didSomething |= mBroadcastQueue.onApplicationAttachedLocked(app);
                     checkTime(startTime, "finishAttachApplicationInner: "
                             + "after dispatching broadcasts");
                 } catch (BroadcastDeliveryFailedException e) {
@@ -9101,9 +9047,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void startBroadcastObservers() {
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.start(mContext.getContentResolver());
-        }
+        mBroadcastQueue.start(mContext.getContentResolver());
     }
 
     private void updateForceBackgroundCheck(boolean enabled) {
@@ -11509,9 +11453,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         mReceiverResolver.dumpDebug(proto, ActivityManagerServiceDumpBroadcastsProto.RECEIVER_RESOLVER);
-        for (BroadcastQueue q : mBroadcastQueues) {
-            q.dumpDebug(proto, ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
-        }
+        mBroadcastQueue.dumpDebug(proto, ActivityManagerServiceDumpBroadcastsProto.BROADCAST_QUEUE);
         synchronized (mStickyBroadcasts) {
             for (int user = 0; user < mStickyBroadcasts.size(); user++) {
                 long token = proto.start(
@@ -11661,11 +11603,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (!onlyReceivers) {
-            for (BroadcastQueue q : mBroadcastQueues) {
-                needSep = q.dumpLocked(fd, pw, args, opti,
-                        dumpConstants, dumpHistory, dumpAll, dumpPackage, needSep);
-                printedAnything |= needSep;
-            }
+            needSep = mBroadcastQueue.dumpLocked(fd, pw, args, opti,
+                    dumpConstants, dumpHistory, dumpAll, dumpPackage, needSep);
+            printedAnything |= needSep;
         }
 
         needSep = true;
@@ -11721,9 +11661,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (!onlyHistory && !onlyReceivers && dumpAll) {
             pw.println();
-            for (BroadcastQueue queue : mBroadcastQueues) {
-                pw.println("  Queue " + queue.toString() + ": " + queue.describeStateLocked());
-            }
+            pw.println("  Queue " + mBroadcastQueue.toString() + ": "
+                    + mBroadcastQueue.describeStateLocked());
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
             needSep = true;
@@ -13571,9 +13510,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mOomAdjuster.mCachedAppOptimizer.onCleanupApplicationRecordLocked(app);
         }
         mAppProfiler.onCleanupApplicationRecordLocked(app);
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.onApplicationCleanupLocked(app);
-        }
+        mBroadcastQueue.onApplicationCleanupLocked(app);
         clearProcessForegroundLocked(app);
         mServices.killServicesLocked(app, allowRestart);
         mPhantomProcessList.onAppDied(pid);
@@ -14687,7 +14624,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             originalStickyCallingUid))) {
                         sticky = broadcast.intent;
                     }
-                    BroadcastQueue queue = broadcastQueueForIntent(broadcast.intent);
+                    BroadcastQueue queue = mBroadcastQueue;
                     BroadcastRecord r = new BroadcastRecord(queue, broadcast.intent, null,
                             null, null, -1, -1, false, null, null, null, null, OP_NONE,
                             BroadcastOptions.makeWithDeferUntilActive(broadcast.deferUntilActive),
@@ -15686,7 +15623,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 checkBroadcastFromSystem(intent, callerApp, callerPackage, callingUid,
                         isProtectedBroadcast, registeredReceivers);
             }
-            final BroadcastQueue queue = broadcastQueueForIntent(intent);
+            final BroadcastQueue queue = mBroadcastQueue;
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
@@ -15779,7 +15716,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if ((receivers != null && receivers.size() > 0)
                 || resultTo != null) {
-            BroadcastQueue queue = broadcastQueueForIntent(intent);
+            BroadcastQueue queue = mBroadcastQueue;
             filterNonExportedComponents(intent, callingUid, callingPid, receivers,
                     mPlatformCompat, callerPackage, resolvedType);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
@@ -16067,9 +16004,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void backgroundServicesFinishedLocked(int userId) {
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.backgroundServicesFinishedLocked(userId);
-        }
+        mBroadcastQueue.backgroundServicesFinishedLocked(userId);
     }
 
     public void finishReceiver(IBinder caller, int resultCode, String resultData,
@@ -16090,8 +16025,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
 
-                final BroadcastQueue queue = broadcastQueueForFlags(flags);
-                queue.finishReceiverLocked(callerApp, resultCode,
+                mBroadcastQueue.finishReceiverLocked(callerApp, resultCode,
                         resultData, resultExtras, resultAbort, true);
                 // updateOomAdjLocked() will be done here
                 trimApplicationsLocked(false, OOM_ADJ_REASON_FINISH_RECEIVER);
@@ -16682,10 +16616,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // =========================================================
 
     boolean isReceivingBroadcastLocked(ProcessRecord app, int[] outSchedGroup) {
-        int res = ProcessList.SCHED_GROUP_UNDEFINED;
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            res = Math.max(res, queue.getPreferredSchedulingGroupLocked(app));
-        }
+        final int res = mBroadcastQueue.getPreferredSchedulingGroupLocked(app);
         outSchedGroup[0] = res;
         return res != ProcessList.SCHED_GROUP_UNDEFINED;
     }
@@ -16809,10 +16740,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     final boolean canGcNowLocked() {
-        for (BroadcastQueue q : mBroadcastQueues) {
-            if (!q.isIdleLocked()) {
-                return false;
-            }
+        if (!mBroadcastQueue.isIdleLocked()) {
+            return false;
         }
         return mAtmInternal.canGcNow();
     }
@@ -18022,9 +17951,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void onProcessFreezableChangedLocked(ProcessRecord app) {
-        if (mEnableModernQueue) {
-            mBroadcastQueues[0].onProcessFreezableChangedLocked(app);
-        }
+        mBroadcastQueue.onProcessFreezableChangedLocked(app);
     }
 
     @VisibleForTesting
@@ -19715,9 +19642,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (flushBroadcastLoopers) {
             BroadcastLoopers.waitForIdle(pw);
         }
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.waitForIdle(pw);
-        }
+        mBroadcastQueue.waitForIdle(pw);
         pw.println("All broadcast queues are idle!");
         pw.flush();
     }
@@ -19733,9 +19658,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (flushBroadcastLoopers) {
             BroadcastLoopers.waitForBarrier(pw);
         }
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.waitForBarrier(pw);
-        }
+        mBroadcastQueue.waitForBarrier(pw);
         if (flushApplicationThreads) {
             waitForApplicationBarrier(pw);
         }
@@ -19811,9 +19734,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void waitForBroadcastDispatch(@NonNull PrintWriter pw, @NonNull Intent intent) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastDispatch");
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.waitForDispatched(intent, pw);
-        }
+        mBroadcastQueue.waitForDispatched(intent, pw);
     }
 
     void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {
@@ -19858,9 +19779,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
-        for (BroadcastQueue queue : mBroadcastQueues) {
-            queue.forceDelayBroadcastDelivery(targetPackage, delayedDurationMs);
-        }
+        mBroadcastQueue.forceDelayBroadcastDelivery(targetPackage, delayedDurationMs);
     }
 
     @Override
@@ -20414,7 +20333,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mNmi != null;
         }
 
-        public BroadcastQueue[] getBroadcastQueues(ActivityManagerService service) {
+        public BroadcastQueue getBroadcastQueue(ActivityManagerService service) {
             // Broadcast policy parameters
             final BroadcastConstants foreConstants = new BroadcastConstants(
                     Settings.Global.BROADCAST_FG_CONSTANTS);
@@ -20430,26 +20349,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // by default, no "slow" policy in this queue
             offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
 
-            final BroadcastQueue[] broadcastQueues;
-            final Handler handler = service.mHandler;
-            if (service.mEnableModernQueue) {
-                broadcastQueues = new BroadcastQueue[1];
-                broadcastQueues[0] = new BroadcastQueueModernImpl(service, handler,
+            return new BroadcastQueueModernImpl(service, service.mHandler,
                         foreConstants, backConstants);
-            } else {
-                broadcastQueues = new BroadcastQueue[4];
-                broadcastQueues[BROADCAST_QUEUE_FG] = new BroadcastQueueImpl(service, handler,
-                        "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
-                broadcastQueues[BROADCAST_QUEUE_BG] = new BroadcastQueueImpl(service, handler,
-                        "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-                broadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD] = new BroadcastQueueImpl(service,
-                        handler, "offload_bg", offloadConstants, true,
-                        ProcessList.SCHED_GROUP_BACKGROUND);
-                broadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD] = new BroadcastQueueImpl(service,
-                        handler, "offload_fg", foreConstants, true,
-                        ProcessList.SCHED_GROUP_BACKGROUND);
-            }
-            return broadcastQueues;
         }
 
         /** @see Binder#getCallingUid */
@@ -20769,14 +20670,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
-    }
-
-    private boolean isOnFgOffloadQueue(int flags) {
-        return ((flags & Intent.FLAG_RECEIVER_OFFLOAD_FOREGROUND) != 0);
-    }
-
-    private boolean isOnBgOffloadQueue(int flags) {
-        return (mEnableOffloadQueue && ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0));
     }
 
     @Override
