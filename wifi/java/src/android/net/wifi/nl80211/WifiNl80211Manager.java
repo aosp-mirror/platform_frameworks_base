@@ -718,6 +718,9 @@ public class WifiNl80211Manager {
         } catch (RemoteException e1) {
             Log.e(TAG, "Failed to get IClientInterface due to remote exception");
             return false;
+        } catch (NullPointerException e2) {
+            Log.e(TAG, "setupInterfaceForClientMode NullPointerException");
+            return false;
         }
 
         if (clientInterface == null) {
@@ -785,6 +788,9 @@ public class WifiNl80211Manager {
         } catch (RemoteException e1) {
             Log.e(TAG, "Failed to teardown client interface due to remote exception");
             return false;
+        } catch (NullPointerException e2) {
+            Log.e(TAG, "tearDownClientInterface NullPointerException");
+            return false;
         }
         if (!success) {
             Log.e(TAG, "Failed to teardown client interface");
@@ -815,6 +821,9 @@ public class WifiNl80211Manager {
             apInterface = mWificond.createApInterface(ifaceName);
         } catch (RemoteException e1) {
             Log.e(TAG, "Failed to get IApInterface due to remote exception");
+            return false;
+        } catch (NullPointerException e2) {
+            Log.e(TAG, "setupInterfaceForSoftApMode NullPointerException");
             return false;
         }
 
@@ -853,6 +862,9 @@ public class WifiNl80211Manager {
             success = mWificond.tearDownApInterface(ifaceName);
         } catch (RemoteException e1) {
             Log.e(TAG, "Failed to teardown AP interface due to remote exception");
+            return false;
+        } catch (NullPointerException e2) {
+            Log.e(TAG, "tearDownSoftApInterface NullPointerException");
             return false;
         }
         if (!success) {
@@ -1328,6 +1340,8 @@ public class WifiNl80211Manager {
             }
         } catch (RemoteException e1) {
             Log.e(TAG, "Failed to request getChannelsForBand due to remote exception");
+        } catch (NullPointerException e2) {
+            Log.e(TAG, "getChannelsMhzForBand NullPointerException");
         }
         if (result == null) {
             result = new int[0];
@@ -1352,13 +1366,17 @@ public class WifiNl80211Manager {
      */
     @Nullable public DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String ifaceName) {
         if (mWificond == null) {
-            Log.e(TAG, "getDeviceWiphyCapabilities: mWificond binder is null! Did wificond die?");
+            Log.e(TAG, "getDeviceWiphyCapabilities: mWificond binder is null! "
+                    + "Did wificond die?");
             return null;
         }
 
         try {
             return mWificond.getDeviceWiphyCapabilities(ifaceName);
         } catch (RemoteException e) {
+            return null;
+        } catch (NullPointerException e2) {
+            Log.e(TAG, "getDeviceWiphyCapabilities NullPointerException");
             return null;
         }
     }
@@ -1409,6 +1427,8 @@ public class WifiNl80211Manager {
             Log.i(TAG, "Receive country code change to " + newCountryCode);
         } catch (RemoteException re) {
             re.rethrowFromSystemServer();
+        } catch (NullPointerException e) {
+            new RemoteException("Wificond service doesn't exist!").rethrowFromSystemServer();
         }
     }
 
