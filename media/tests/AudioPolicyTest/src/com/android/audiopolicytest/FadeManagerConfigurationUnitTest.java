@@ -45,10 +45,8 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @RequiresFlagsEnabled(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
 public final class FadeManagerConfigurationUnitTest {
-    private static final long DEFAULT_FADE_OUT_DURATION_MS =
-            FadeManagerConfiguration.getDefaultFadeOutDurationMillis();
-    private static final long DEFAULT_FADE_IN_DURATION_MS =
-            FadeManagerConfiguration.getDefaultFadeInDurationMillis();
+    private static final long DEFAULT_FADE_OUT_DURATION_MS = 2_000;
+    private static final long DEFAULT_FADE_IN_DURATION_MS = 1_000;
     private static final long TEST_FADE_OUT_DURATION_MS = 1_500;
     private static final long TEST_FADE_IN_DURATION_MS = 750;
     private static final int TEST_INVALID_USAGE = -10;
@@ -248,6 +246,20 @@ public final class FadeManagerConfigurationUnitTest {
         expect.withMessage("Fade in duration for game audio attributes")
                 .that(fmc.getFadeInDurationForAudioAttributes(TEST_GAME_AUDIO_ATTRIBUTE))
                 .isEqualTo(fmcObj.getFadeInDurationForAudioAttributes(TEST_GAME_AUDIO_ATTRIBUTE));
+    }
+
+    @Test
+    public void testGetDefaultFadeOutDuration() {
+        expect.withMessage("Default fade out duration")
+                .that(FadeManagerConfiguration.getDefaultFadeOutDurationMillis())
+                .isEqualTo(DEFAULT_FADE_OUT_DURATION_MS);
+    }
+
+    @Test
+    public void testGetDefaultFadeInDuration() {
+        expect.withMessage("Default fade in duration")
+                .that(FadeManagerConfiguration.getDefaultFadeInDurationMillis())
+                .isEqualTo(DEFAULT_FADE_IN_DURATION_MS);
     }
 
     @Test
