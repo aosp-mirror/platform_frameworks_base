@@ -2895,6 +2895,10 @@ static void extractBufferFromContext(
         jint offset,
         jint size,
         std::shared_ptr<C2Buffer> *buffer) {
+    if ((offset + size) > context->capacity()) {
+        ALOGW("extractBufferFromContext: offset + size provided exceed capacity");
+        return;
+    }
     *buffer = context->toC2Buffer(offset, size);
     if (*buffer == nullptr) {
         if (!context->mMemory) {
