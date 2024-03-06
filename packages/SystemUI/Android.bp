@@ -302,6 +302,7 @@ android_library {
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
     ],
+    skip_jarjar_repackage: true,
 }
 
 android_library {
@@ -351,6 +352,7 @@ android_library {
         test: true,
         extra_check_modules: ["SystemUILintChecker"],
     },
+    skip_jarjar_repackage: true,
 }
 
 android_app {
