@@ -109,7 +109,7 @@ import org.mockito.MockitoAnnotations;
 
 import kotlinx.coroutines.test.TestScope;
 
-public class QuickSettingsControllerBaseTest extends SysuiTestCase {
+public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     protected static final float QS_FRAME_START_X = 0f;
     protected static final int QS_FRAME_WIDTH = 1000;
     protected static final int QS_FRAME_TOP = 0;
@@ -119,7 +119,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     protected static final int DEFAULT_MIN_HEIGHT_SPLIT_SHADE = DEFAULT_HEIGHT;
     protected static final int DEFAULT_MIN_HEIGHT = 300;
 
-    protected QuickSettingsController mQsController;
+    protected QuickSettingsControllerImpl mQsController;
 
     protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     protected TestScope mTestScope = mKosmos.getTestScope();
@@ -304,7 +304,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
 
         mMainHandler = new Handler(Looper.getMainLooper());
 
-        mQsController = new QuickSettingsController(
+        mQsController = new QuickSettingsControllerImpl(
                 mPanelViewControllerLazy,
                 mPanelView,
                 mQsFrameTranslateController,

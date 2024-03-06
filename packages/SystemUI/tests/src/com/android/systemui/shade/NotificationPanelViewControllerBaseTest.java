@@ -287,7 +287,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardMediaController mKeyguardMediaController;
     @Mock protected NavigationModeController mNavigationModeController;
     @Mock protected NavigationBarController mNavigationBarController;
-    @Mock protected QuickSettingsController mQsController;
+    @Mock protected QuickSettingsControllerImpl mQsController;
     @Mock protected ShadeHeaderController mShadeHeaderController;
     @Mock protected ContentResolver mContentResolver;
     @Mock protected TapAgainViewController mTapAgainViewController;
@@ -380,7 +380,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected final ShadeExpansionStateManager mShadeExpansionStateManager =
             new ShadeExpansionStateManager();
 
-    protected QuickSettingsController mQuickSettingsController;
+    protected QuickSettingsControllerImpl mQuickSettingsController;
     @Mock protected Lazy<NotificationPanelViewController> mNotificationPanelViewControllerLazy;
 
     protected FragmentHostManager.FragmentListener mFragmentListener;
@@ -794,7 +794,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         when(mNotificationPanelViewControllerLazy.get())
                 .thenReturn(mNotificationPanelViewController);
-        mQuickSettingsController = new QuickSettingsController(
+        mQuickSettingsController = new QuickSettingsControllerImpl(
                 mNotificationPanelViewControllerLazy,
                 mView,
                 mQsFrameTranslateController,

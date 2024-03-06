@@ -118,7 +118,7 @@ import javax.inject.Inject;
  * TODO (b/264460656) make this dumpable
  */
 @SysUISingleton
-public class QuickSettingsController implements Dumpable {
+public class QuickSettingsControllerImpl implements QuickSettingsController, Dumpable {
     public static final String TAG = "QuickSettingsController";
 
     public static final int SHADE_BACK_ANIM_SCALE_MULTIPLIER = 100;
@@ -252,7 +252,7 @@ public class QuickSettingsController implements Dumpable {
 
     /**
      * The window width currently in effect -- used together with
-     * {@link QuickSettingsController#mCachedGestureInsets} to decide whether a back gesture should
+     * {@link QuickSettingsControllerImpl#mCachedGestureInsets} to decide whether a back gesture should
      * receive a horizontal swipe inwards from the left/right vertical edge of the screen.
      * We cache this on ACTION_DOWN, and query it during both ACTION_DOWN and ACTION_MOVE events.
      */
@@ -304,7 +304,7 @@ public class QuickSettingsController implements Dumpable {
     private final QS.ScrollListener mQsScrollListener = this::onScroll;
 
     @Inject
-    public QuickSettingsController(
+    public QuickSettingsControllerImpl(
             Lazy<NotificationPanelViewController> panelViewControllerLazy,
             NotificationPanelView panelView,
             QsFrameTranslateController qsFrameTranslateController,
@@ -399,23 +399,23 @@ public class QuickSettingsController implements Dumpable {
         mQs = qs;
     }
 
-    public void setExpansionHeightListener(ExpansionHeightListener listener) {
+    void setExpansionHeightListener(ExpansionHeightListener listener) {
         mExpansionHeightListener = listener;
     }
 
-    public void setQsStateUpdateListener(QsStateUpdateListener listener) {
+    void setQsStateUpdateListener(QsStateUpdateListener listener) {
         mQsStateUpdateListener = listener;
     }
 
-    public void setApplyClippingImmediatelyListener(ApplyClippingImmediatelyListener listener) {
+    void setApplyClippingImmediatelyListener(ApplyClippingImmediatelyListener listener) {
         mApplyClippingImmediatelyListener = listener;
     }
 
-    public void setFlingQsWithoutClickListener(FlingQsWithoutClickListener listener) {
+    void setFlingQsWithoutClickListener(FlingQsWithoutClickListener listener) {
         mFlingQsWithoutClickListener = listener;
     }
 
-    public void setExpansionHeightSetToMaxListener(ExpansionHeightSetToMaxListener callback) {
+    void setExpansionHeightSetToMaxListener(ExpansionHeightSetToMaxListener callback) {
         mExpansionHeightSetToMaxListener = callback;
     }
 
@@ -507,13 +507,9 @@ public class QuickSettingsController implements Dumpable {
                 && mPanelView.getRootWindowInsets().isVisible(ime());
     }
 
-    public boolean isExpansionEnabled() {
+    boolean isExpansionEnabled() {
         return mExpansionEnabledPolicy && mExpansionEnabledAmbient
             && !isRemoteInputActiveWithKeyboardUp();
-    }
-
-    public float getTransitioningToFullShadeProgress() {
-        return mTransitioningToFullShadeProgress;
     }
 
     /** */
@@ -536,7 +532,7 @@ public class QuickSettingsController implements Dumpable {
      *  Computes (and caches) the gesture insets for the current window. Intended to be called
      *  on ACTION_DOWN, and safely queried repeatedly thereafter during ACTION_MOVE events.
      */
-    public void updateGestureInsetsCache() {
+    void updateGestureInsetsCache() {
         WindowManager wm = this.mPanelView.getContext().getSystemService(WindowManager.class);
         WindowMetrics windowMetrics = wm.getCurrentWindowMetrics();
         mCachedGestureInsets = windowMetrics.getWindowInsets().getInsets(
@@ -548,7 +544,7 @@ public class QuickSettingsController implements Dumpable {
      *  Returns whether x coordinate lies in the vertical edges of the screen
      *  (the only place where a back gesture can be initiated).
      */
-    public boolean shouldBackBypassQuickSettings(float touchX) {
+    boolean shouldBackBypassQuickSettings(float touchX) {
         return (touchX < mCachedGestureInsets.left)
                 || (touchX > mCachedWindowWidth - mCachedGestureInsets.right);
     }
@@ -592,6 +588,7 @@ public class QuickSettingsController implements Dumpable {
         return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
     }
 
+    @Override
     public boolean getExpanded() {
         return mShadeRepository.getLegacyIsQsExpanded().getValue();
     }
@@ -601,7 +598,7 @@ public class QuickSettingsController implements Dumpable {
         return mShadeRepository.getLegacyQsTracking().getValue();
     }
 
-    public boolean getFullyExpanded() {
+    boolean getFullyExpanded() {
         return mFullyExpanded;
     }
 
@@ -623,27 +620,28 @@ public class QuickSettingsController implements Dumpable {
         return mQs != null;
     }
 
+    @Override
     public boolean isCustomizing() {
         return isQsFragmentCreated() && mQs.isCustomizing();
     }
 
-    public float getExpansionHeight() {
+    float getExpansionHeight() {
         return mExpansionHeight;
     }
 
-    public boolean getExpandedWhenExpandingStarted() {
+    boolean getExpandedWhenExpandingStarted() {
         return mExpandedWhenExpandingStarted;
     }
 
-    public int getMinExpansionHeight() {
+    int getMinExpansionHeight() {
         return mMinExpansionHeight;
     }
 
-    public boolean isFullyExpandedAndTouchesDisallowed() {
+    boolean isFullyExpandedAndTouchesDisallowed() {
         return isQsFragmentCreated() && getFullyExpanded() && disallowTouches();
     }
 
-    public int getMaxExpansionHeight() {
+    int getMaxExpansionHeight() {
         return mMaxExpansionHeight;
     }
 
@@ -654,13 +652,14 @@ public class QuickSettingsController implements Dumpable {
         return !mTouchAboveFalsingThreshold;
     }
 
-    public int getFalsingThreshold() {
+    int getFalsingThreshold() {
         return mFalsingThreshold;
     }
 
     /**
      * Returns Whether we should intercept a gesture to open Quick Settings.
      */
+    @Override
     public boolean shouldQuickSettingsIntercept(float x, float y, float yDiff) {
         boolean keyguardShowing = mBarState == KEYGUARD;
         if (!isExpansionEnabled() || mCollapsedOnDown || (keyguardShowing
@@ -717,7 +716,7 @@ public class QuickSettingsController implements Dumpable {
      * @param downY the y location where the touch started
      * Returns true if the panel could be collapsed because it stared on QQS
      */
-    public boolean canPanelCollapseOnQQS(float downX, float downY) {
+    boolean canPanelCollapseOnQQS(float downX, float downY) {
         if (mCollapsedOnDown || mBarState == KEYGUARD || getExpanded()) {
             return false;
         }
@@ -727,6 +726,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** Closes the Qs customizer. */
+    @Override
     public void closeQsCustomizer() {
         if (mQs != null) {
             mQs.closeCustomizer();
@@ -734,7 +734,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** Returns whether touches from the notification panel should be disallowed */
-    public boolean disallowTouches() {
+    boolean disallowTouches() {
         if (mQs != null) {
             return mQs.disallowPanelTouches();
         } else {
@@ -754,15 +754,11 @@ public class QuickSettingsController implements Dumpable {
         }
     }
 
-    public void setDozing(boolean dozing) {
+    void setDozing(boolean dozing) {
         mDozing = dozing;
     }
 
-    /**
-     * This method closes QS but in split shade it should be used only in special cases: to make
-     * sure QS closes when shade is closed as well. Otherwise it will result in QS disappearing
-     * from split shade
-     */
+    @Override
     public void closeQs() {
         if (mSplitShadeEnabled) {
             mShadeLog.d("Closing QS while in split shade");
@@ -794,7 +790,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** update Qs height state */
-    public void setExpansionHeight(float height) {
+    void setExpansionHeight(float height) {
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
                 height, getMinExpansionHeight()), maxHeight);
@@ -817,7 +813,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** */
-    public void setHeightOverrideToDesiredHeight() {
+    void setHeightOverrideToDesiredHeight() {
         if (isSizeChangeAnimationRunning() && isQsFragmentCreated()) {
             mQs.setHeightOverride(mQs.getDesiredHeight());
         }
@@ -919,7 +915,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** Sets Qs ScrimEnabled and updates QS state. */
-    public void setScrimEnabled(boolean scrimEnabled) {
+    void setScrimEnabled(boolean scrimEnabled) {
         boolean changed = mScrimEnabled != scrimEnabled;
         mScrimEnabled = scrimEnabled;
         if (changed) {
@@ -995,7 +991,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** update expanded state of QS */
-    public void updateExpansion() {
+    void updateExpansion() {
         if (mQs == null) return;
         final float squishiness;
         if ((isExpandImmediate() || getExpanded()) && !mSplitShadeEnabled) {
@@ -1053,13 +1049,13 @@ public class QuickSettingsController implements Dumpable {
         // mTransitioningToFullShadeProgress > 0 means we're doing regular lockscreen to shade
         // transition. If that's not the case we should follow QS expansion fraction for when
         // user is pulling from the same top to go directly to expanded QS
-        return getTransitioningToFullShadeProgress() > 0
+        return mTransitioningToFullShadeProgress > 0
                 ? mLockscreenShadeTransitionController.getQSDragProgress()
                 : computeExpansionFraction();
     }
 
     /** */
-    public void updateExpansionEnabledAmbient() {
+    void updateExpansionEnabledAmbient() {
         final float scrollRangeToTop = mAmbientState.getTopPadding() - mQuickQsHeaderHeight;
         mExpansionEnabledAmbient = mSplitShadeEnabled
                 || (mAmbientState.getScrollY() <= scrollRangeToTop);
@@ -1081,7 +1077,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** Calculate fraction of current QS expansion state */
-    public float computeExpansionFraction() {
+    float computeExpansionFraction() {
         if (mAnimatingHiddenFromCollapsed) {
             // When hiding QS from collapsed state, the expansion can sometimes temporarily
             // be larger than 0 because of the timing, leading to flickers.
@@ -1112,7 +1108,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** Called when shade starts expanding. */
-    public void onExpandingStarted(boolean qsFullyExpanded) {
+    void onExpandingStarted(boolean qsFullyExpanded) {
         mNotificationStackScrollLayoutController.onExpansionStarted();
         mExpandedWhenExpandingStarted = qsFullyExpanded;
         mMediaHierarchyManager.setCollapsingShadeFromQS(mExpandedWhenExpandingStarted
@@ -1363,7 +1359,7 @@ public class QuickSettingsController implements Dumpable {
         }
     }
 
-    /** Calculate top padding for notifications */
+    @Override
     public float calculateNotificationsTopPadding(boolean isShadeExpanding,
             int keyguardNotificationStaticPadding, float expandedFraction) {
         float topPadding;
@@ -1404,7 +1400,7 @@ public class QuickSettingsController implements Dumpable {
         }
     }
 
-    /** Calculate height of QS panel */
+    @Override
     public int calculatePanelHeightExpanded(int stackScrollerPadding) {
         float
                 notificationHeight =
@@ -1576,7 +1572,6 @@ public class QuickSettingsController implements Dumpable {
         }
     }
 
-    @VisibleForTesting
     boolean isTrackingBlocked() {
         return mConflictingExpansionGesture && getExpanded();
     }
@@ -1591,7 +1586,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** handles touches in Qs panel area */
-    public boolean handleTouch(MotionEvent event, boolean isFullyCollapsed,
+    boolean handleTouch(MotionEvent event, boolean isFullyCollapsed,
             boolean isShadeOrQsHeightAnimationRunning) {
         if (isSplitShadeAndTouchXOutsideQs(event.getX())) {
             return false;
@@ -1747,7 +1742,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** intercepts touches on Qs panel area. */
-    public boolean onIntercept(MotionEvent event) {
+    boolean onIntercept(MotionEvent event) {
         int pointerIndex = event.findPointerIndex(mTrackingPointer);
         if (pointerIndex < 0) {
             pointerIndex = 0;
@@ -1858,7 +1853,7 @@ public class QuickSettingsController implements Dumpable {
      *
      * @param animateAway Do not stop when QS becomes QQS. Fling until QS isn't visible anymore.
      */
-    public void animateCloseQs(boolean animateAway) {
+    void animateCloseQs(boolean animateAway) {
         if (mExpansionAnimator != null) {
             if (!mAnimatorExpand) {
                 return;
@@ -1877,7 +1872,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** @see #flingQs(float, int, Runnable, boolean) */
-    public void flingQs(float vel, int type) {
+    void flingQs(float vel, int type) {
         flingQs(vel, type, null /* onFinishRunnable */, false /* isClick */);
     }
 
@@ -2144,7 +2139,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** */
-    public FragmentHostManager.FragmentListener getQsFragmentListener() {
+    FragmentHostManager.FragmentListener getQsFragmentListener() {
         return new QsFragmentListener();
     }
 

@@ -27,7 +27,7 @@ import org.junit.Test
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-class QuickSettingsControllerWithCoroutinesTest : QuickSettingsControllerBaseTest() {
+class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImplBaseTest() {
 
     @Test
     fun isExpansionEnabled_dozing_false() =
