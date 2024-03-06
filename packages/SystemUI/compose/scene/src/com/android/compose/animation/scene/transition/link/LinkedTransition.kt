@@ -18,6 +18,7 @@ package com.android.compose.animation.scene.transition.link
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionState
+import kotlinx.coroutines.Job
 
 /** A linked transition which is driven by a [originalTransition]. */
 internal class LinkedTransition(
@@ -43,4 +44,6 @@ internal class LinkedTransition(
 
     override val progress: Float
         get() = originalTransition.progress
+
+    override fun finish(): Job = originalTransition.finish()
 }
