@@ -20,8 +20,6 @@ import static android.net.cts.util.IkeSessionTestUtils.CHILD_PARAMS;
 import static android.net.cts.util.IkeSessionTestUtils.IKE_PARAMS_V6;
 import static android.net.cts.util.IkeSessionTestUtils.getTestIkeSessionParams;
 
-import static com.android.testutils.DevSdkIgnoreRuleKt.SC_V2;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,19 +29,15 @@ import static org.junit.Assert.fail;
 
 import android.net.ipsec.ike.IkeKeyIdIdentification;
 import android.net.ipsec.ike.IkeTunnelConnectionParams;
-import android.os.Build;
-import android.test.mock.MockContext;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.net.VpnProfile;
 import com.android.internal.org.bouncycastle.x509.X509V1CertificateGenerator;
 import com.android.net.module.util.ProxyUtils;
-import com.android.testutils.DevSdkIgnoreRule;
-import com.android.testutils.DevSdkIgnoreRunner;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,8 +56,7 @@ import javax.security.auth.x500.X500Principal;
 
 /** Unit tests for {@link Ikev2VpnProfile.Builder}. */
 @SmallTest
-@RunWith(DevSdkIgnoreRunner.class)
-@DevSdkIgnoreRule.IgnoreUpTo(Build.VERSION_CODES.R)
+@RunWith(AndroidJUnit4.class)
 public class Ikev2VpnProfileTest {
     private static final String SERVER_ADDR_STRING = "1.2.3.4";
     private static final String IDENTITY_STRING = "Identity";
@@ -73,16 +66,6 @@ public class Ikev2VpnProfileTest {
     private static final byte[] PSK_BYTES = "preSharedKey".getBytes();
     private static final int TEST_MTU = 1300;
 
-    @Rule
-    public final DevSdkIgnoreRule ignoreRule = new DevSdkIgnoreRule();
-
-    private final MockContext mMockContext =
-            new MockContext() {
-                @Override
-                public String getOpPackageName() {
-                    return "fooPackage";
-                }
-            };
     private final ProxyInfo mProxy = ProxyInfo.buildDirectProxy(
             SERVER_ADDR_STRING, -1, ProxyUtils.exclusionStringAsList(EXCL_LIST));
 
@@ -227,7 +210,6 @@ public class Ikev2VpnProfileTest {
     @Test
     public void testSetAllowedAlgorithmsInvalidList() throws Exception {
         final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
-        List<String> allowedAlgorithms = new ArrayList<>();
 
         try {
             builder.setAllowedAlgorithms(Arrays.asList(IpSecAlgorithm.AUTH_HMAC_SHA256));
@@ -245,7 +227,6 @@ public class Ikev2VpnProfileTest {
     @Test
     public void testSetAllowedAlgorithmsInsecureAlgorithm() throws Exception {
         final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
-        List<String> allowedAlgorithms = new ArrayList<>();
 
         try {
             builder.setAllowedAlgorithms(Arrays.asList(IpSecAlgorithm.AUTH_HMAC_MD5));
@@ -271,9 +252,6 @@ public class Ikev2VpnProfileTest {
         }
     }
 
-
-    // TODO: Refer to Build.VERSION_CODES.SC_V2 when it's available in AOSP and mainline branch
-    @DevSdkIgnoreRule.IgnoreUpTo(SC_V2)
     @Test
     public void testBuildExcludeLocalRoutesSet() throws Exception {
         final Ikev2VpnProfile.Builder builder = getBuilderWithDefaultOptions();
