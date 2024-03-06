@@ -194,13 +194,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION =
             "settings_remote_device_credential_validation";
 
-    /**
-     * Flag to enable/disable to start treating any calls to "suspend" an app as "quarantine".
-     * @hide
-     */
-    public static final String SETTINGS_TREAT_PAUSE_AS_QUARANTINE =
-            "settings_treat_pause_as_quarantine";
-
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -246,7 +239,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS, "false");
         // TODO: b/298454866 Replace with Trunk Stable Feature Flag
         DEFAULT_FLAGS.put(SETTINGS_REMOTEAUTH_ENROLLMENT_SETTINGS, "false");
-        DEFAULT_FLAGS.put(SETTINGS_TREAT_PAUSE_AS_QUARANTINE, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -264,7 +256,6 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA_PHASE2);
         PERSISTENT_FLAGS.add(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM);
-        PERSISTENT_FLAGS.add(SETTINGS_TREAT_PAUSE_AS_QUARANTINE);
     }
 
     /**

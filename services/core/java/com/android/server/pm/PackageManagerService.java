@@ -38,7 +38,6 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
-import static android.util.FeatureFlagUtils.SETTINGS_TREAT_PAUSE_AS_QUARANTINE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
@@ -168,7 +167,6 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -3208,15 +3206,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         if (quarantined) {
-            final boolean hasQuarantineAppsPerm = mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.QUARANTINE_APPS) == PERMISSION_GRANTED;
-            // TODO: b/305256093 - In order to facilitate testing, temporarily allowing apps
-            // with SUSPEND_APPS permission to quarantine apps. Remove this once the testing
-            // is done and this is no longer needed.
-            if (!hasQuarantineAppsPerm) {
-                mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
-                        callingMethod);
-            }
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.QUARANTINE_APPS,
+                    callingMethod);
         } else {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
                     callingMethod);
@@ -6287,16 +6278,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 SuspendDialogInfo dialogInfo, int flags, String suspendingPackage,
                 int suspendingUserId, int targetUserId) {
             final int callingUid = Binder.getCallingUid();
-            boolean quarantined = false;
-            if (Flags.quarantinedEnabled()) {
-                if ((flags & PackageManager.FLAG_SUSPEND_QUARANTINED) != 0) {
-                    quarantined = true;
-                } else if (FeatureFlagUtils.isEnabled(mContext,
-                        SETTINGS_TREAT_PAUSE_AS_QUARANTINE)) {
-                    final String wellbeingPkg = mContext.getString(R.string.config_systemWellbeing);
-                    quarantined = suspendingPackage.equals(wellbeingPkg);
-                }
-            }
+            final boolean quarantined = ((flags & PackageManager.FLAG_SUSPEND_QUARANTINED) != 0)
+                    && Flags.quarantinedEnabled();
             final Computer snapshot = snapshotComputer();
             final UserPackage suspender = UserPackage.of(targetUserId, suspendingPackage);
             enforceCanSetPackagesSuspendedAsUser(snapshot, quarantined, suspender, callingUid,
