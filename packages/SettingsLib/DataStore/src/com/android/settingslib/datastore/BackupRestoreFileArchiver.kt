@@ -41,6 +41,11 @@ internal class BackupRestoreFileArchiver(
     override fun createBackupRestoreEntities(): List<BackupRestoreEntity> =
         fileStorages.map { it.toBackupRestoreEntity() }
 
+    override fun wrapBackupOutputStream(codec: BackupCodec, outputStream: OutputStream) =
+        outputStream
+
+    override fun wrapRestoreInputStream(codec: BackupCodec, inputStream: InputStream) = inputStream
+
     override fun restoreEntity(data: BackupDataInputStream) {
         val key = data.key
         val fileStorage = fileStorages.firstOrNull { it.storageFilePath == key }
@@ -56,11 +61,19 @@ internal class BackupRestoreFileArchiver(
                 File(context.dataDirCompat, key)
             }
         Log.i(LOG_TAG, "[$name] Restore ${data.size()} bytes for $key to $file")
+        val inputStream = LimitedNoCloseInputStream(data)
         try {
+            val codec = BackupCodec.fromId(inputStream.read().toByte())
+            if (fileStorage != null && fileStorage.defaultCodec().id != codec.id) {
+                Log.i(
+                    LOG_TAG,
+                    "[$name] $key different codec: ${codec.id}, ${fileStorage.defaultCodec().id}"
+                )
+            }
             file.parentFile?.mkdirs() // ensure parent folders are created
-            val wrappedInputStream = wrapRestoreInputStream(data)
-            file.outputStream().use { wrappedInputStream.copyTo(it) }
-            Log.i(LOG_TAG, "[$name] $key restored")
+            val wrappedInputStream = codec.decode(inputStream)
+            val bytesCopied = file.outputStream().use { wrappedInputStream.copyTo(it) }
+            Log.i(LOG_TAG, "[$name] $key restore $bytesCopied bytes with ${codec.name}")
             fileStorage?.onRestoreFinished(file)
         } catch (e: Exception) {
             Log.e(LOG_TAG, "[$name] Fail to restore $key", e)
@@ -90,8 +103,12 @@ private fun BackupRestoreFileStorage.toBackupRestoreEntity() =
                 Log.i(LOG_TAG, "[$name] $key not exist")
                 return EntityBackupResult.DELETE
             }
-            val wrappedOutputStream = wrapBackupOutputStream(outputStream)
-            file.inputStream().use { it.copyTo(wrappedOutputStream) }
+            val codec = codec() ?: defaultCodec()
+            // MUST close to flush the data
+            wrapBackupOutputStream(codec, outputStream).use { stream ->
+                val bytesCopied = file.inputStream().use { it.copyTo(stream) }
+                Log.i(LOG_TAG, "[$name] $key backup $bytesCopied bytes with ${codec.name}")
+            }
             onBackupFinished(file)
             return EntityBackupResult.UPDATE
         }
