@@ -17,50 +17,35 @@
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
 import android.os.Binder
-import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.view.ContentRecordingSession
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
 import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createToken
+import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.mediaProjectionManagerRepository
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
-    private val dispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(dispatcher)
+    private val kosmos = taskSwitcherKosmos()
+    private val testScope = kosmos.testScope
 
-    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
-    private val fakeActivityTaskManager = FakeActivityTaskManager()
+    private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
+    private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
 
-    private val tasksRepo =
-        ActivityTaskManagerTasksRepository(
-            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
-            applicationScope = testScope.backgroundScope,
-            backgroundDispatcher = dispatcher
-        )
-
-    private val repo =
-        MediaProjectionManagerRepository(
-            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
-            handler = Handler.getMain(),
-            applicationScope = testScope.backgroundScope,
-            tasksRepository = tasksRepo,
-            backgroundDispatcher = dispatcher,
-            mediaProjectionServiceHelper = fakeMediaProjectionManager.helper
-        )
+    private val repo = kosmos.mediaProjectionManagerRepository
 
     @Test
     fun switchProjectedTask_stateIsUpdatedWithNewTask() =
