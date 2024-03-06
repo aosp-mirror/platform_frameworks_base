@@ -133,7 +133,8 @@ public class DisplayBrightnessStrategySelector {
         } else if (BrightnessUtils.isValidBrightnessValue(
                 mTemporaryBrightnessStrategy.getTemporaryScreenBrightness())) {
             displayBrightnessStrategy = mTemporaryBrightnessStrategy;
-        } else if (mOffloadBrightnessStrategy != null && BrightnessUtils.isValidBrightnessValue(
+        } else if (mAutomaticBrightnessStrategy.shouldUseAutoBrightness()
+                && mOffloadBrightnessStrategy != null && BrightnessUtils.isValidBrightnessValue(
                 mOffloadBrightnessStrategy.getOffloadScreenBrightness())) {
             displayBrightnessStrategy = mOffloadBrightnessStrategy;
         }

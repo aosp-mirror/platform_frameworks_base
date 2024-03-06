@@ -46,7 +46,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.SurfaceControl;
@@ -1229,8 +1228,6 @@ public class LocalDisplayAdapterTest {
 
         verify(mDisplayOffloader).stopOffload();
         assertFalse(mDisplayOffloadSession.isActive());
-        verify(mMockedDisplayPowerController).setBrightnessFromOffload(
-                PowerManager.BRIGHTNESS_INVALID_FLOAT);
     }
 
     private void initDisplayOffloadSession() {

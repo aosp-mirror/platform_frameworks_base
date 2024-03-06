@@ -393,7 +393,31 @@ public final class DisplayBrightnessControllerTest {
         OffloadBrightnessStrategy offloadBrightnessStrategy = mock(OffloadBrightnessStrategy.class);
         when(mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy()).thenReturn(
                 offloadBrightnessStrategy);
-        mDisplayBrightnessController.setBrightnessFromOffload(brightness);
+        boolean brightnessUpdated =
+                mDisplayBrightnessController.setBrightnessFromOffload(brightness);
         verify(offloadBrightnessStrategy).setOffloadScreenBrightness(brightness);
+        assertTrue(brightnessUpdated);
+    }
+
+    @Test
+    public void setBrightnessFromOffload_OffloadStrategyNull() {
+        float brightness = 0.4f;
+        when(mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy()).thenReturn(null);
+        boolean brightnessUpdated =
+                mDisplayBrightnessController.setBrightnessFromOffload(brightness);
+        assertFalse(brightnessUpdated);
+    }
+
+    @Test
+    public void setBrightnessFromOffload_BrightnessUnchanged() {
+        float brightness = 0.4f;
+        OffloadBrightnessStrategy offloadBrightnessStrategy = mock(OffloadBrightnessStrategy.class);
+        when(offloadBrightnessStrategy.getOffloadScreenBrightness()).thenReturn(brightness);
+        when(mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy()).thenReturn(
+                offloadBrightnessStrategy);
+        boolean brightnessUpdated =
+                mDisplayBrightnessController.setBrightnessFromOffload(brightness);
+        verify(offloadBrightnessStrategy, never()).setOffloadScreenBrightness(brightness);
+        assertFalse(brightnessUpdated);
     }
 }

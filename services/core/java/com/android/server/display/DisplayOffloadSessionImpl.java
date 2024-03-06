@@ -20,7 +20,6 @@ import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIG
 
 import android.annotation.Nullable;
 import android.hardware.display.DisplayManagerInternal;
-import android.os.PowerManager;
 import android.os.Trace;
 
 /**
@@ -110,7 +109,6 @@ public class DisplayOffloadSessionImpl implements DisplayManagerInternal.Display
         try {
             mDisplayOffloader.stopOffload();
             mIsActive = false;
-            mDisplayPowerController.setBrightnessFromOffload(PowerManager.BRIGHTNESS_INVALID_FLOAT);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
