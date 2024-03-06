@@ -411,8 +411,8 @@ static void android_view_MotionEvent_nativeAddBatch(JNIEnv* env, jclass clazz,
             jniThrowNullPointerException(env, "pointerCoords");
             return;
         }
-        pointerCoordsToNative(env, pointerCoordsObj,
-                event->getXOffset(), event->getYOffset(), &rawPointerCoords[i]);
+        pointerCoordsToNative(env, pointerCoordsObj, event->getRawXOffset(), event->getRawYOffset(),
+                              &rawPointerCoords[i]);
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
@@ -735,14 +735,14 @@ static void android_view_MotionEvent_nativeOffsetLocation(jlong nativePtr, jfloa
     return event->offsetLocation(deltaX, deltaY);
 }
 
-static jfloat android_view_MotionEvent_nativeGetXOffset(jlong nativePtr) {
+static jfloat android_view_MotionEvent_nativeGetRawXOffset(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getXOffset();
+    return event->getRawXOffset();
 }
 
-static jfloat android_view_MotionEvent_nativeGetYOffset(jlong nativePtr) {
+static jfloat android_view_MotionEvent_nativeGetRawYOffset(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return event->getYOffset();
+    return event->getRawYOffset();
 }
 
 static jfloat android_view_MotionEvent_nativeGetXPrecision(jlong nativePtr) {
@@ -871,8 +871,8 @@ static const JNINativeMethod gMotionEventMethods[] = {
         {"nativeGetClassification", "(J)I",
          (void*)android_view_MotionEvent_nativeGetClassification},
         {"nativeOffsetLocation", "(JFF)V", (void*)android_view_MotionEvent_nativeOffsetLocation},
-        {"nativeGetXOffset", "(J)F", (void*)android_view_MotionEvent_nativeGetXOffset},
-        {"nativeGetYOffset", "(J)F", (void*)android_view_MotionEvent_nativeGetYOffset},
+        {"nativeGetRawXOffset", "(J)F", (void*)android_view_MotionEvent_nativeGetRawXOffset},
+        {"nativeGetRawYOffset", "(J)F", (void*)android_view_MotionEvent_nativeGetRawYOffset},
         {"nativeGetXPrecision", "(J)F", (void*)android_view_MotionEvent_nativeGetXPrecision},
         {"nativeGetYPrecision", "(J)F", (void*)android_view_MotionEvent_nativeGetYPrecision},
         {"nativeGetXCursorPosition", "(J)F",
