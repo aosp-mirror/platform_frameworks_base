@@ -152,14 +152,14 @@ fun Entry(
                                 },
                             )
                         }
-                    } else if (entrySecondLineText != null) {
+                    } else if (!entrySecondLineText.isNullOrBlank()) {
                         BodySmallText(
                             text = entrySecondLineText,
                             enforceOneLine = enforceOneLine,
                             onTextLayout = onTextLayout,
                         )
                     }
-                    if (entryThirdLineText != null) {
+                    if (!entryThirdLineText.isNullOrBlank()) {
                         BodySmallText(
                             text = entryThirdLineText,
                             enforceOneLine = enforceOneLine,

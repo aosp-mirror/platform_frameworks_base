@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
@@ -56,6 +57,9 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _bottomAreaAlpha = MutableStateFlow(1f)
     override val bottomAreaAlpha: StateFlow<Float> = _bottomAreaAlpha
+
+    private val _clockPosition = MutableStateFlow(Position(0, 0))
+    override val clockPosition: StateFlow<Position> = _clockPosition
 
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
@@ -143,6 +147,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     @Deprecated("Deprecated as part of b/278057014")
     override fun setBottomAreaAlpha(alpha: Float) {
         _bottomAreaAlpha.value = alpha
+    }
+
+    override fun setClockPosition(x: Int, y: Int) {
+        _clockPosition.value = Position(x, y)
     }
 
     fun setKeyguardShowing(isShowing: Boolean) {

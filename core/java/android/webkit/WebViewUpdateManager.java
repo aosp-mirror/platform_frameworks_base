@@ -127,7 +127,7 @@ public final class WebViewUpdateManager {
      *
      * This choice will be stored persistently.
      *
-     * @param newProvider the package name to use, or null to reset to default.
+     * @param newProvider the package name to use.
      * @return the package name which is now in use, which may not be the
      *         requested one if it was not usable.
      */
@@ -155,7 +155,7 @@ public final class WebViewUpdateManager {
     /**
      * Get the WebView provider which will be used if no explicit choice has been made.
      *
-     * The default provider is not guaranteed to be currently valid/usable.
+     * The default provider is not guaranteed to be a valid/usable WebView implementation.
      *
      * @return the default WebView provider.
      */

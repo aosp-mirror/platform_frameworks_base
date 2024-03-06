@@ -39,6 +39,7 @@ import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import libcore.io.IoUtils;
@@ -65,7 +66,7 @@ public class WallpaperCropper {
      * Maximum acceptable parallax.
      * A value of 1 means "the additional width for parallax is at most 100% of the screen width"
      */
-    private static final float MAX_PARALLAX = 1f;
+    @VisibleForTesting static final float MAX_PARALLAX = 1f;
 
     /**
      * We define three ways to adjust a crop. These modes are used depending on the situation:
@@ -73,10 +74,9 @@ public class WallpaperCropper {
      *   - When going from folded to unfolded, we want to add content
      *   - For a screen rotation, we want to keep the same amount of content
      */
-    private static final int ADD = 1;
-    private static final int REMOVE = 2;
-    private static final int BALANCE = 3;
-
+    @VisibleForTesting static final int ADD = 1;
+    @VisibleForTesting static final int REMOVE = 2;
+    @VisibleForTesting static final int BALANCE = 3;
 
     private final WallpaperDisplayHelper mWallpaperDisplayHelper;
 
@@ -209,7 +209,8 @@ public class WallpaperCropper {
      * Given a crop, a displaySize for the orientation of that crop, compute the visible part of the
      * crop. This removes any additional width used for parallax. No-op if displaySize == null.
      */
-    private static Rect noParallax(Rect crop, Point displaySize, Point bitmapSize, boolean rtl) {
+    @VisibleForTesting
+    static Rect noParallax(Rect crop, Point displaySize, Point bitmapSize, boolean rtl) {
         if (displaySize == null) return crop;
         Rect adjustedCrop = getAdjustedCrop(crop, bitmapSize, displaySize, true, rtl, ADD);
         // only keep the visible part (without parallax)
@@ -240,12 +241,13 @@ public class WallpaperCropper {
      *     </li>
      * </ul>
      */
-    private static Rect getAdjustedCrop(Rect crop, Point bitmapSize, Point screenSize,
+    @VisibleForTesting
+    static Rect getAdjustedCrop(Rect crop, Point bitmapSize, Point screenSize,
             boolean parallax, boolean rtl, int mode) {
         Rect adjustedCrop = new Rect(crop);
         float cropRatio = ((float) crop.width()) / crop.height();
         float screenRatio = ((float) screenSize.x) / screenSize.y;
-        if (cropRatio >= screenRatio) {
+        if (cropRatio > screenRatio) {
             if (!parallax) {
                 // rotate everything 90 degrees clockwise, compute the result, and rotate back
                 int newLeft = bitmapSize.y - crop.bottom;

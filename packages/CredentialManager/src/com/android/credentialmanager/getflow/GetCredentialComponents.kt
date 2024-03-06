@@ -786,16 +786,16 @@ fun CredentialEntryRow(
         else if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
         entryHeadlineText = username,
-        entrySecondLineText =
+        entrySecondLineText = displayName,
+        entryThirdLineText =
         (if (hasSingleEntry != null && hasSingleEntry)
             if (credentialEntryInfo.credentialType == CredentialType.PASSKEY ||
                     credentialEntryInfo.credentialType == CredentialType.PASSWORD)
-                listOf(displayName)
+                emptyList()
             // Still show the type display name for all non-password/passkey types since it won't be
             // mentioned in the bottom sheet heading.
-            else listOf(displayName, credentialEntryInfo.credentialTypeDisplayName)
+            else listOf(credentialEntryInfo.credentialTypeDisplayName)
         else listOf(
-                displayName,
                 credentialEntryInfo.credentialTypeDisplayName,
                 credentialEntryInfo.providerDisplayName
         )).filterNot(TextUtils::isEmpty).let { itemsToDisplay ->

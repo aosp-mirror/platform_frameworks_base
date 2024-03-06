@@ -408,6 +408,9 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
 
     /**
      * Gets the permission states for requested package, persistent device and user.
+     * <p>
+     * <strong>Note: </strong>Default device permissions are not inherited in this API. Returns the
+     * exact permission states for the requested device.
      *
      * @param packageName name of the package you are checking against
      * @param deviceId id of the persistent device you are checking against

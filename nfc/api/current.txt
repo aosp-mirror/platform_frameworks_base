@@ -268,9 +268,9 @@ package android.nfc.cardemulation {
     ctor public PollingFrame(int, @Nullable byte[], int, int);
     method public int describeContents();
     method @NonNull public byte[] getData();
-    method public int getGain();
     method public int getTimestamp();
     method public int getType();
+    method public int getVendorSpecificGain();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.nfc.cardemulation.PollingFrame> CREATOR;
     field @FlaggedApi("android.nfc.nfc_read_polling_loop") public static final int POLLING_LOOP_TYPE_A = 65; // 0x41

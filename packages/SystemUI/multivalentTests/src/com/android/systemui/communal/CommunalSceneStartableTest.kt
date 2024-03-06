@@ -23,7 +23,6 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.dock.DockManager
 import com.android.systemui.dock.dockManager
 import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -40,6 +39,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -92,6 +92,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             }
         }
 
+    @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
     fun deviceDocked_forceCommunalScene() =
         with(kosmos) {
@@ -102,6 +103,23 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 updateDocked(true)
                 fakeKeyguardTransitionRepository.sendTransitionSteps(
                     from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    testScope = this
+                )
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    fun exitingDream_forceCommunalScene() =
+        with(kosmos) {
+            testScope.runTest {
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+
+                updateDocked(true)
+                fakeKeyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.DREAMING,
                     to = KeyguardState.LOCKSCREEN,
                     testScope = this
                 )
@@ -175,6 +193,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             }
         }
 
+    @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
     fun dockingOnLockscreen_forcesCommunal() =
         with(kosmos) {
@@ -196,6 +215,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             }
         }
 
+    @Ignore("Ignored until custom animations are implemented in b/322787129")
     @Test
     fun dockingOnLockscreen_doesNotForceCommunalIfDreamStarts() =
         with(kosmos) {
@@ -230,7 +250,8 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         with(kosmos) {
             runCurrent()
             fakeDockManager.setIsDocked(docked)
-            fakeDockManager.setDockEvent(DockManager.STATE_DOCKED)
+            // TODO(b/322787129): uncomment once custom animations are in place
+            // fakeDockManager.setDockEvent(DockManager.STATE_DOCKED)
             runCurrent()
         }
 

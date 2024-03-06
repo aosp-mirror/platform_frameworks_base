@@ -199,7 +199,7 @@ class ClockSizeTransition(
             private val TRANSITION_PROPERTIES =
                 arrayOf(PROP_VISIBILITY, PROP_ALPHA, PROP_BOUNDS, SMARTSPACE_BOUNDS)
 
-            private val DEBUG = true
+            private val DEBUG = false
             private val TAG = VisibilityBoundsTransition::class.simpleName!!
         }
     }

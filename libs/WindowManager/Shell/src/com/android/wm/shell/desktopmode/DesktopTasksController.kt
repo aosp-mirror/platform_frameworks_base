@@ -140,7 +140,7 @@ class DesktopTasksController(
 
     private val transitionAreaHeight
         get() = context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height
+                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height
         )
 
     private val transitionAreaWidth
@@ -565,30 +565,7 @@ class DesktopTasksController(
      * @param position the portion of the screen (RIGHT or LEFT) we want to snap the task to.
      */
     fun snapToHalfScreen(taskInfo: RunningTaskInfo, position: SnapPosition) {
-        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
-
-        val stableBounds = Rect()
-        displayLayout.getStableBounds(stableBounds)
-
-        val destinationWidth = stableBounds.width() / 2
-        val destinationBounds = when (position) {
-            SnapPosition.LEFT -> {
-                Rect(
-                        stableBounds.left,
-                        stableBounds.top,
-                        stableBounds.left + destinationWidth,
-                        stableBounds.bottom
-                )
-            }
-            SnapPosition.RIGHT -> {
-                Rect(
-                        stableBounds.right - destinationWidth,
-                        stableBounds.top,
-                        stableBounds.right,
-                        stableBounds.bottom
-                )
-            }
-        }
+        val destinationBounds = getSnapBounds(taskInfo, position)
 
         if (destinationBounds == taskInfo.configuration.windowConfiguration.bounds) return
 
@@ -609,8 +586,35 @@ class DesktopTasksController(
         outBounds.set(0, 0, desiredWidth, desiredHeight)
         // Center the task in screen bounds
         outBounds.offset(
-                screenBounds.centerX() - outBounds.centerX(),
-                screenBounds.centerY() - outBounds.centerY())
+            screenBounds.centerX() - outBounds.centerX(),
+            screenBounds.centerY() - outBounds.centerY())
+    }
+
+    private fun getSnapBounds(taskInfo: RunningTaskInfo, position: SnapPosition): Rect {
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return Rect()
+
+        val stableBounds = Rect()
+        displayLayout.getStableBounds(stableBounds)
+
+        val destinationWidth = stableBounds.width() / 2
+        return when (position) {
+            SnapPosition.LEFT -> {
+                Rect(
+                    stableBounds.left,
+                    stableBounds.top,
+                    stableBounds.left + destinationWidth,
+                    stableBounds.bottom
+                )
+            }
+            SnapPosition.RIGHT -> {
+                Rect(
+                    stableBounds.right - destinationWidth,
+                    stableBounds.top,
+                    stableBounds.right,
+                    stableBounds.bottom
+                )
+            }
+        }
     }
 
     /**
@@ -646,7 +650,7 @@ class DesktopTasksController(
             ?.let { homeTask -> wct.reorder(homeTask.getToken(), true /* onTop */) }
     }
 
-    private fun releaseVisualIndicator() {
+    fun releaseVisualIndicator() {
         val t = SurfaceControl.Transaction()
         visualIndicator?.releaseVisualIndicator(t)
         visualIndicator = null
@@ -927,16 +931,13 @@ class DesktopTasksController(
         taskSurface: SurfaceControl,
         inputX: Float,
         taskTop: Float
-    ) {
+    ): DesktopModeVisualIndicator.IndicatorType {
         // If the visual indicator does not exist, create it.
-        if (visualIndicator == null) {
-            visualIndicator = DesktopModeVisualIndicator(
-                syncQueue, taskInfo, displayController, context, taskSurface,
-                rootTaskDisplayAreaOrganizer)
-        }
-        // Then, update the indicator type.
-        val indicator = visualIndicator ?: return
-        indicator.updateIndicatorType(PointF(inputX, taskTop), taskInfo.windowingMode)
+        val indicator = visualIndicator ?: DesktopModeVisualIndicator(
+            syncQueue, taskInfo, displayController, context, taskSurface,
+            rootTaskDisplayAreaOrganizer)
+        if (visualIndicator == null) visualIndicator = indicator
+        return indicator.updateIndicatorType(PointF(inputX, taskTop), taskInfo.windowingMode)
     }
 
     /**
@@ -956,20 +957,28 @@ class DesktopTasksController(
         if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
             return
         }
-        if (taskBounds.top <= transitionAreaHeight) {
-            moveToFullscreenWithAnimation(taskInfo, position)
-            return
-        }
-        if (inputCoordinate.x <= transitionAreaWidth) {
-            releaseVisualIndicator()
-            snapToHalfScreen(taskInfo, SnapPosition.LEFT)
-            return
-        }
-        if (inputCoordinate.x >= (displayController.getDisplayLayout(taskInfo.displayId)?.width()
-            ?.minus(transitionAreaWidth) ?: return)) {
-            releaseVisualIndicator()
-            snapToHalfScreen(taskInfo, SnapPosition.RIGHT)
-            return
+
+        val indicator = visualIndicator ?: return
+        val indicatorType = indicator.updateIndicatorType(
+            PointF(inputCoordinate.x, taskBounds.top.toFloat()),
+            taskInfo.windowingMode
+        )
+        when (indicatorType) {
+            DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+                moveToFullscreenWithAnimation(taskInfo, position)
+            }
+            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+                releaseVisualIndicator()
+                snapToHalfScreen(taskInfo, SnapPosition.LEFT)
+            }
+            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+                releaseVisualIndicator()
+                snapToHalfScreen(taskInfo, SnapPosition.RIGHT)
+            }
+            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR,
+            DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR -> {
+                releaseVisualIndicator()
+            }
         }
         // A freeform drag-move ended, remove the indicator immediately.
         releaseVisualIndicator()
@@ -982,14 +991,28 @@ class DesktopTasksController(
      * @param y height of drag, to be checked against status bar height.
      */
     fun onDragPositioningEndThroughStatusBar(
+            inputCoordinates: PointF,
             taskInfo: RunningTaskInfo,
             freeformBounds: Rect
     ) {
-        finalizeDragToDesktop(taskInfo, freeformBounds)
-    }
-
-    private fun getStatusBarHeight(taskInfo: RunningTaskInfo): Int {
-        return displayController.getDisplayLayout(taskInfo.displayId)?.stableInsets()?.top ?: 0
+        val indicator = visualIndicator ?: return
+        val indicatorType = indicator
+            .updateIndicatorType(inputCoordinates, taskInfo.windowingMode)
+        when (indicatorType) {
+            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
+                finalizeDragToDesktop(taskInfo, freeformBounds)
+            }
+            DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR,
+                    DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR -> {
+                cancelDragToDesktop(taskInfo)
+            }
+            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR -> {
+                finalizeDragToDesktop(taskInfo, getSnapBounds(taskInfo, SnapPosition.LEFT))
+            }
+            DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR -> {
+                finalizeDragToDesktop(taskInfo, getSnapBounds(taskInfo, SnapPosition.RIGHT))
+            }
+        }
     }
 
     /**

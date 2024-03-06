@@ -554,7 +554,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mRootWindowContainer.applySleepTokens(true);
 
         // The display orientation should be changed by the activity so there is no relaunch.
-        verify(activity, never()).relaunchActivityLocked(anyBoolean());
+        verify(activity, never()).relaunchActivityLocked(anyBoolean(), anyInt());
         assertEquals(rotatedConfig.orientation, display.getConfiguration().orientation);
     }
 

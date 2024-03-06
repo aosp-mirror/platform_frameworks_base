@@ -622,6 +622,18 @@ static jlong android_view_MotionEvent_nativeCopy(jlong destNativePtr, jlong sour
     return reinterpret_cast<jlong>(destEvent);
 }
 
+static jlong android_view_MotionEvent_nativeSplit(jlong destNativePtr, jlong sourceNativePtr,
+                                                  jint idBits) {
+    MotionEvent* destEvent = reinterpret_cast<MotionEvent*>(destNativePtr);
+    if (!destEvent) {
+        destEvent = new MotionEvent();
+    }
+    MotionEvent* sourceEvent = reinterpret_cast<MotionEvent*>(sourceNativePtr);
+    destEvent->splitFrom(*sourceEvent, static_cast<std::bitset<MAX_POINTER_ID + 1>>(idBits),
+                         InputEvent::nextId());
+    return reinterpret_cast<jlong>(destEvent);
+}
+
 static jint android_view_MotionEvent_nativeGetId(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     return event->getId();
@@ -837,6 +849,7 @@ static const JNINativeMethod gMotionEventMethods[] = {
         // --------------- @CriticalNative ------------------
 
         {"nativeCopy", "(JJZ)J", (void*)android_view_MotionEvent_nativeCopy},
+        {"nativeSplit", "(JJI)J", (void*)android_view_MotionEvent_nativeSplit},
         {"nativeGetId", "(J)I", (void*)android_view_MotionEvent_nativeGetId},
         {"nativeGetDeviceId", "(J)I", (void*)android_view_MotionEvent_nativeGetDeviceId},
         {"nativeGetSource", "(J)I", (void*)android_view_MotionEvent_nativeGetSource},

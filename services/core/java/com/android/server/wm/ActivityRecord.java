@@ -553,7 +553,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
-    int configChangeFlags;  // which config values have changed
     private boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
     int lockTaskLaunchMode; // the lockTaskMode manifest attribute, subject to override
@@ -1294,10 +1293,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         if (mDeferHidingClient) {
             pw.println(prefix + "mDeferHidingClient=" + mDeferHidingClient);
-        }
-        if (configChangeFlags != 0) {
-            pw.print(prefix); pw.print(" configChangeFlags=");
-                    pw.println(Integer.toHexString(configChangeFlags));
         }
         if (mServiceConnectionsHolder != null) {
             pw.print(prefix); pw.print("connections="); pw.println(mServiceConnectionsHolder);
@@ -4064,7 +4059,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + this);
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        DestroyActivityItem.obtain(token, finishing, configChangeFlags));
+                        DestroyActivityItem.obtain(token, finishing));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process has crashed, our death
                 // notification will clean things up.
@@ -4105,8 +4100,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 setState(DESTROYED, "destroyActivityLocked. not finishing and had no app");
             }
         }
-
-        configChangeFlags = 0;
 
         return removedFromHistory;
     }
@@ -5026,7 +5019,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return PauseActivityItem.obtain(token);
             case STOPPING:
             case STOPPED:
-                return StopActivityItem.obtain(token, configChangeFlags);
+                return StopActivityItem.obtain(token);
             default:
                 // Do not send a result immediately if the activity is in state INITIALIZING,
                 // RESTARTING_PROCESS, FINISHING, DESTROYING, or DESTROYED.
@@ -6300,7 +6293,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             try {
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
                         PauseActivityItem.obtain(token, finishing, false /* userLeaving */,
-                                configChangeFlags, false /* dontReport */, mAutoEnteringPip));
+                                false /* dontReport */, mAutoEnteringPip));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
             }
@@ -6614,7 +6607,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    StopActivityItem.obtain(token, configChangeFlags));
+                    StopActivityItem.obtain(token));
 
             mAtmService.mH.postDelayed(mStopTimeoutRunnable, STOP_TIMEOUT);
         } catch (Exception e) {
@@ -9858,7 +9851,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (shouldRelaunchLocked(changes, mTmpConfig)) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
-            configChangeFlags |= changes;
             if (mVisible && mAtmService.mTmpUpdateConfigurationResult.mIsUpdating
                     && !mTransitionController.isShellTransitionsEnabled()) {
                 startFreezingScreenLocked(app, mAtmService.mTmpUpdateConfigurationResult.changes);
@@ -9887,7 +9879,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ProtoLog.v(WM_DEBUG_STATES, "Config is relaunching invisible "
                         + "activity %s called by %s", this, Debug.getCallers(4));
             }
-            relaunchActivityLocked(preserveWindow);
+            relaunchActivityLocked(preserveWindow, changes);
 
             // All done...  tell the caller we weren't able to keep this activity around.
             return false;
@@ -10029,9 +10021,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 | CONFIG_SCREEN_LAYOUT)) != 0;
     }
 
-    void relaunchActivityLocked(boolean preserveWindow) {
+    void relaunchActivityLocked(boolean preserveWindow, int configChangeFlags) {
         if (mAtmService.mSuppressResizeConfigChanges && preserveWindow) {
-            configChangeFlags = 0;
             return;
         }
         if (!preserveWindow) {
@@ -10104,8 +10095,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The activity may be waiting for stop, but that is no longer appropriate for it.
         mTaskSupervisor.mStoppingActivities.remove(this);
-
-        configChangeFlags = 0;
     }
 
     /**
@@ -10174,7 +10163,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // {@link ActivityTaskManagerService.activityStopped}).
         try {
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    StopActivityItem.obtain(token, 0 /* configChanges */));
+                    StopActivityItem.obtain(token));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception thrown during restart " + this, e);
         }

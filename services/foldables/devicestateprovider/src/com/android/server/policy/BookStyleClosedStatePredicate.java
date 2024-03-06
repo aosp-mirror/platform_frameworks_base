@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.util.ArraySet;
 import android.util.Dumpable;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.Surface;
 
 import com.android.server.policy.BookStylePreferredScreenCalculator.PreferredScreen;
@@ -65,6 +66,7 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     private final Handler mHandler = new Handler();
     private final PostureEstimator mPostureEstimator;
     private final DisplayManager mDisplayManager;
+    private final DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
 
     /**
      * Creates {@link BookStyleClosedStatePredicate}. It is expected that the device has a pair
@@ -140,10 +142,11 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     public void onDisplayChanged(int displayId) {
         if (displayId == DEFAULT_DISPLAY) {
             final Display display = mDisplayManager.getDisplay(displayId);
+            display.getDisplayInfo(mDefaultDisplayInfo);
             int displayState = display.getState();
             boolean isDisplayOn = displayState == Display.STATE_ON;
             mPostureEstimator.onDisplayPowerStatusChanged(isDisplayOn);
-            mPostureEstimator.onDisplayRotationChanged(display.getRotation());
+            mPostureEstimator.onDisplayRotationChanged(mDefaultDisplayInfo.rotation);
         }
     }
 

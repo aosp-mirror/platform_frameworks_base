@@ -81,6 +81,9 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionListener;
@@ -157,6 +160,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final BouncerView mPrimaryBouncerView;
     private final Lazy<ShadeController> mShadeController;
+    private final Lazy<SceneInteractor> mSceneInteractorLazy;
 
     // Local cache of expansion events, to avoid duplicates
     private float mFraction = -1f;
@@ -381,7 +385,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             Lazy<KeyguardDismissActionInteractor> keyguardDismissActionInteractorLazy,
             SelectedUserInteractor selectedUserInteractor,
             Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor,
-            JavaAdapter javaAdapter
+            JavaAdapter javaAdapter,
+            Lazy<SceneInteractor> sceneInteractorLazy
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -415,6 +420,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mSelectedUserInteractor = selectedUserInteractor;
         mSurfaceBehindInteractor = surfaceBehindInteractor;
         mJavaAdapter = javaAdapter;
+        mSceneInteractorLazy = sceneInteractorLazy;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -633,8 +639,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void show(Bundle options) {
         Trace.beginSection("StatusBarKeyguardViewManager#show");
         mNotificationShadeWindowController.setKeyguardShowing(true);
-        mKeyguardStateController.notifyKeyguardState(true,
-                mKeyguardStateController.isOccluded());
+        if (SceneContainerFlag.isEnabled()) {
+            mSceneInteractorLazy.get().changeScene(
+                    Scenes.Lockscreen, "StatusBarKeyguardViewManager.show");
+        }
+        mKeyguardStateController.notifyKeyguardState(true, mKeyguardStateController.isOccluded());
         reset(true /* hideBouncerWhenShowing */);
         SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_STATE_CHANGED,
                 SysUiStatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);

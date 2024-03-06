@@ -19,7 +19,6 @@ package android.app.servertransaction;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
@@ -34,13 +33,11 @@ public class StopActivityItem extends ActivityLifecycleItem {
 
     private static final String TAG = "StopActivityItem";
 
-    private int mConfigChanges;
-
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-        client.handleStopActivity(r, mConfigChanges, pendingActions,
+        client.handleStopActivity(r, pendingActions,
                 true /* finalStateRequest */, "STOP_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -63,16 +60,14 @@ public class StopActivityItem extends ActivityLifecycleItem {
     /**
      * Obtain an instance initialized with provided params.
      * @param activityToken the activity that stops.
-     * @param configChanges Configuration pieces that changed.
      */
     @NonNull
-    public static StopActivityItem obtain(@NonNull IBinder activityToken, int configChanges) {
+    public static StopActivityItem obtain(@NonNull IBinder activityToken) {
         StopActivityItem instance = ObjectPool.obtain(StopActivityItem.class);
         if (instance == null) {
             instance = new StopActivityItem();
         }
         instance.setActivityToken(activityToken);
-        instance.mConfigChanges = configChanges;
 
         return instance;
     }
@@ -80,23 +75,14 @@ public class StopActivityItem extends ActivityLifecycleItem {
     @Override
     public void recycle() {
         super.recycle();
-        mConfigChanges = 0;
         ObjectPool.recycle(this);
     }
 
     // Parcelable implementation
 
-    /** Write to Parcel. */
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(mConfigChanges);
-    }
-
     /** Read from Parcel. */
     private StopActivityItem(@NonNull Parcel in) {
         super(in);
-        mConfigChanges = in.readInt();
     }
 
     public static final @NonNull Creator<StopActivityItem> CREATOR = new Creator<>() {
@@ -110,28 +96,7 @@ public class StopActivityItem extends ActivityLifecycleItem {
     };
 
     @Override
-    public boolean equals(@Nullable Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        final StopActivityItem other = (StopActivityItem) o;
-        return mConfigChanges == other.mConfigChanges;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + super.hashCode();
-        result = 31 * result + mConfigChanges;
-        return result;
-    }
-
-    @Override
     public String toString() {
-        return "StopActivityItem{" + super.toString()
-                + ",configChanges=" + mConfigChanges + "}";
+        return "StopActivityItem{" + super.toString() + "}";
     }
 }

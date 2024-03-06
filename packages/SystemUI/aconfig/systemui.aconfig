@@ -194,14 +194,6 @@ flag {
 }
 
 flag {
-    name: "keyguard_shade_migration_nssl"
-    namespace: "systemui"
-    description: "Moves NSSL into a shared element between the notification_panel and "
-        "keyguard_root_view."
-    bug: "278054201"
-}
-
-flag {
     name: "unfold_animation_background_progress"
     namespace: "systemui"
     description: "Moves unfold animation progress calculation to a background thread"

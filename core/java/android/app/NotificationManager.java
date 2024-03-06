@@ -2052,10 +2052,12 @@ public class NotificationManager {
 
         /** Notification senders to prioritize for calls. One of:
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
+        @PrioritySenders
         public final int priorityCallSenders;
 
         /** Notification senders to prioritize for messages. One of:
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
+        @PrioritySenders
         public final int priorityMessageSenders;
 
         /**
@@ -2063,6 +2065,7 @@ public class NotificationManager {
          * {@link #CONVERSATION_SENDERS_NONE}, {@link #CONVERSATION_SENDERS_IMPORTANT},
          * {@link #CONVERSATION_SENDERS_ANYONE}.
          */
+        @ConversationSenders
         public final int priorityConversationSenders;
 
         /**
@@ -2630,16 +2633,19 @@ public class NotificationManager {
         }
 
         /** @hide **/
+        @PrioritySenders
         public int allowCallsFrom() {
             return priorityCallSenders;
         }
 
         /** @hide **/
+        @PrioritySenders
         public int allowMessagesFrom() {
             return priorityMessageSenders;
         }
 
         /** @hide **/
+        @ConversationSenders
         public int allowConversationsFrom() {
             return priorityConversationSenders;
         }

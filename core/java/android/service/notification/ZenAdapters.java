@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.server.notification;
+package android.service.notification;
 
+import android.annotation.NonNull;
 import android.app.Flags;
 import android.app.NotificationManager.Policy;
-import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenPolicy;
 
 /**
  * Converters between different Zen representations.
+ * @hide
  */
-class ZenAdapters {
+public class ZenAdapters {
 
-    static ZenPolicy notificationPolicyToZenPolicy(Policy policy) {
+    /** Maps {@link Policy} to {@link ZenPolicy}. */
+    @NonNull
+    public static ZenPolicy notificationPolicyToZenPolicy(@NonNull Policy policy) {
         ZenPolicy.Builder zenPolicyBuilder = new ZenPolicy.Builder()
                 .allowAlarms(policy.allowAlarms())
                 .allowCalls(
                         policy.allowCalls()
-                                ? ZenModeConfig.getZenPolicySenders(policy.allowCallsFrom())
-                                : ZenPolicy.PEOPLE_TYPE_NONE)
+                                ? notificationPolicySendersToZenPolicyPeopleType(
+                                        policy.allowCallsFrom())
+                        : ZenPolicy.PEOPLE_TYPE_NONE)
                 .allowConversations(
                         policy.allowConversations()
                                 ? notificationPolicyConversationSendersToZenPolicy(
@@ -42,7 +45,8 @@ class ZenAdapters {
                 .allowMedia(policy.allowMedia())
                 .allowMessages(
                         policy.allowMessages()
-                                ? ZenModeConfig.getZenPolicySenders(policy.allowMessagesFrom())
+                                ? notificationPolicySendersToZenPolicyPeopleType(
+                                        policy.allowMessagesFrom())
                                 : ZenPolicy.PEOPLE_TYPE_NONE)
                 .allowReminders(policy.allowReminders())
                 .allowRepeatCallers(policy.allowRepeatCallers())
@@ -65,9 +69,58 @@ class ZenAdapters {
         return zenPolicyBuilder.build();
     }
 
+    /** Maps {@link ZenPolicy.PeopleType} enum to {@link Policy.PrioritySenders}. */
+    @Policy.PrioritySenders
+    public static int zenPolicyPeopleTypeToNotificationPolicySenders(
+            @ZenPolicy.PeopleType int zpPeopleType, @Policy.PrioritySenders int defaultResult) {
+        switch (zpPeopleType) {
+            case ZenPolicy.PEOPLE_TYPE_ANYONE:
+                return Policy.PRIORITY_SENDERS_ANY;
+            case ZenPolicy.PEOPLE_TYPE_CONTACTS:
+                return Policy.PRIORITY_SENDERS_CONTACTS;
+            case ZenPolicy.PEOPLE_TYPE_STARRED:
+                return Policy.PRIORITY_SENDERS_STARRED;
+            default:
+                return defaultResult;
+        }
+    }
+
+    /** Maps {@link Policy.PrioritySenders} enum to {@link ZenPolicy.PeopleType}. */
+    @ZenPolicy.PeopleType
+    public static int notificationPolicySendersToZenPolicyPeopleType(
+            @Policy.PrioritySenders int npPrioritySenders) {
+        switch (npPrioritySenders) {
+            case Policy.PRIORITY_SENDERS_ANY:
+                return ZenPolicy.PEOPLE_TYPE_ANYONE;
+            case Policy.PRIORITY_SENDERS_CONTACTS:
+                return ZenPolicy.PEOPLE_TYPE_CONTACTS;
+            case Policy.PRIORITY_SENDERS_STARRED:
+            default:
+                return ZenPolicy.PEOPLE_TYPE_STARRED;
+        }
+    }
+
+    /** Maps {@link ZenPolicy.ConversationSenders} enum to {@link Policy.ConversationSenders}. */
+    @Policy.ConversationSenders
+    public static int zenPolicyConversationSendersToNotificationPolicy(
+            @ZenPolicy.ConversationSenders int zpConversationSenders,
+            @Policy.ConversationSenders int defaultResult) {
+        switch (zpConversationSenders) {
+            case ZenPolicy.CONVERSATION_SENDERS_ANYONE:
+                return Policy.CONVERSATION_SENDERS_ANYONE;
+            case ZenPolicy.CONVERSATION_SENDERS_IMPORTANT:
+                return Policy.CONVERSATION_SENDERS_IMPORTANT;
+            case ZenPolicy.CONVERSATION_SENDERS_NONE:
+                return Policy.CONVERSATION_SENDERS_NONE;
+            default:
+                return defaultResult;
+        }
+    }
+
+    /** Maps {@link Policy.ConversationSenders} enum to {@link ZenPolicy.ConversationSenders}. */
     @ZenPolicy.ConversationSenders
     private static int notificationPolicyConversationSendersToZenPolicy(
-            int npPriorityConversationSenders) {
+            @Policy.ConversationSenders int npPriorityConversationSenders) {
         switch (npPriorityConversationSenders) {
             case Policy.CONVERSATION_SENDERS_ANYONE:
                 return ZenPolicy.CONVERSATION_SENDERS_ANYONE;
@@ -75,8 +128,7 @@ class ZenAdapters {
                 return ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
             case Policy.CONVERSATION_SENDERS_NONE:
                 return ZenPolicy.CONVERSATION_SENDERS_NONE;
-            case Policy.CONVERSATION_SENDERS_UNSET:
-            default:
+            default: // including Policy.CONVERSATION_SENDERS_UNSET
                 return ZenPolicy.CONVERSATION_SENDERS_UNSET;
         }
     }

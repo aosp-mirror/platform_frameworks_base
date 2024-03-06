@@ -27,6 +27,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECU
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AIRPLANE_MODE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APPS_CONTROL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_RESTRICTIONS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_AUTOFILL;
@@ -83,7 +84,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THREAD_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_FILE_TRANSFER;
-import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ASSIST_CONTENT;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_VPN;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WALLPAPER;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
@@ -196,11 +196,11 @@ import static android.app.admin.DevicePolicyManager.STATUS_CANNOT_ADD_MANAGED_PR
 import static android.app.admin.DevicePolicyManager.STATUS_DEVICE_ADMIN_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.STATUS_HAS_DEVICE_OWNER;
 import static android.app.admin.DevicePolicyManager.STATUS_HAS_PAIRED;
+import static android.app.admin.DevicePolicyManager.STATUS_HEADLESS_ONLY_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.STATUS_MANAGED_USERS_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.STATUS_NONSYSTEM_USER_EXISTS;
 import static android.app.admin.DevicePolicyManager.STATUS_NOT_SYSTEM_USER;
-import static android.app.admin.DevicePolicyManager.STATUS_HEADLESS_ONLY_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.STATUS_OK;
 import static android.app.admin.DevicePolicyManager.STATUS_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
 import static android.app.admin.DevicePolicyManager.STATUS_SYSTEM_USER;
@@ -12062,7 +12062,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (packageList != null) {
-            if (!Flags.devicePolicySizeTrackingEnabled()) {
+            if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
                 for (String pkg : packageList) {
                     PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
                 }
@@ -13771,7 +13771,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if (!Flags.devicePolicySizeTrackingEnabled()) {
+        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
             PolicySizeVerifier.enforceMaxStringLength(accountType, "account type");
         }
 
@@ -14385,7 +14385,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setLockTaskPackages(ComponentName who, String callerPackageName, String[] packages)
             throws SecurityException {
         Objects.requireNonNull(packages, "packages is null");
-        if (!Flags.devicePolicySizeTrackingEnabled()) {
+        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
             for (String pkg : packages) {
                 PolicySizeVerifier.enforceMaxPackageNameLength(pkg);
             }
@@ -24235,7 +24235,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setMaxPolicyStorageLimit(String callerPackageName, int storageLimit) {
-        if (!Flags.devicePolicySizeTrackingEnabled() || true) {
+        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
             return;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);
@@ -24247,7 +24247,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getMaxPolicyStorageLimit(String callerPackageName) {
-        if (!Flags.devicePolicySizeTrackingEnabled() || true) {
+        if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
             return -1;
         }
         CallerIdentity caller = getCallerIdentity(callerPackageName);

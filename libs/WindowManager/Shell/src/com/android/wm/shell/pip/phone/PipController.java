@@ -122,6 +122,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private static final long PIP_KEEP_CLEAR_AREAS_DELAY =
             SystemProperties.getLong("persist.wm.debug.pip_keep_clear_areas_delay", 200);
 
+    private static final long ENABLE_TOUCH_DELAY_MS = 200L;
+
     private Context mContext;
     protected ShellExecutor mMainExecutor;
     private DisplayController mDisplayController;
@@ -151,6 +153,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private final Runnable mMovePipInResponseToKeepClearAreasChangeCallback =
             this::onKeepClearAreasChangedCallback;
+
+    private final Runnable mEnableTouchCallback = () -> mTouchHandler.setTouchEnabled(true);
 
     private void onKeepClearAreasChangedCallback() {
         if (mIsKeyguardShowingOrAnimating) {
@@ -1037,6 +1041,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             saveReentryState(pipBounds);
         }
         // Disable touches while the animation is running
+        mMainExecutor.removeCallbacks(mEnableTouchCallback);
         mTouchHandler.setTouchEnabled(false);
         if (mPinnedStackAnimationRecentsCallback != null) {
             mPinnedStackAnimationRecentsCallback.onPipAnimationStarted();
@@ -1067,7 +1072,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         InteractionJankMonitor.getInstance().end(CUJ_PIP_TRANSITION);
 
         // Re-enable touches after the animation completes
-        mTouchHandler.setTouchEnabled(true);
+        mMainExecutor.executeDelayed(mEnableTouchCallback, ENABLE_TOUCH_DELAY_MS);
         mTouchHandler.onPinnedStackAnimationEnded(direction);
     }
 

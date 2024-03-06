@@ -3795,6 +3795,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
 
                 final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                final boolean archival = intent.getBooleanExtra(Intent.EXTRA_ARCHIVAL, false);
 
                 switch (action) {
                     case Intent.ACTION_PACKAGE_ADDED:
@@ -3805,7 +3806,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         }
                         break;
                     case Intent.ACTION_PACKAGE_REMOVED:
-                        if (!replacing) {
+                        if (!replacing || (replacing && archival)) {
                             handlePackageRemoved(packageName, userId);
                         }
                         break;

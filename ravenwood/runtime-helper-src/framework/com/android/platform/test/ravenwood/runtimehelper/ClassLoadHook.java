@@ -42,7 +42,6 @@ public class ClassLoadHook {
     public static final String KEYBOARD_PATHS = "keyboard_paths";
     public static final String GRAPHICS_NATIVE_CLASSES = "graphics_native_classes";
 
-    public static final String VALUE_N_A = "**n/a**";
     public static final String LIBANDROID_RUNTIME_NAME = "android_runtime";
 
     private static String sInitialDir = new File("").getAbsolutePath();
@@ -130,8 +129,6 @@ public class ClassLoadHook {
         }
         setProperty(CORE_NATIVE_CLASSES, jniClasses);
         setProperty(GRAPHICS_NATIVE_CLASSES, "");
-        setProperty(ICU_DATA_PATH, VALUE_N_A);
-        setProperty(KEYBOARD_PATHS, VALUE_N_A);
 
         RavenwoodUtils.loadJniLibrary(LIBANDROID_RUNTIME_NAME);
     }

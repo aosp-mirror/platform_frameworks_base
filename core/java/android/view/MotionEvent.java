@@ -1733,6 +1733,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private static native long nativeCopy(long destNativePtr, long sourceNativePtr,
             boolean keepHistory);
     @CriticalNative
+    private static native long nativeSplit(long destNativePtr, long sourceNativePtr, int idBits);
+    @CriticalNative
     private static native int nativeGetId(long nativePtr);
     @CriticalNative
     private static native int nativeGetDeviceId(long nativePtr);
@@ -3767,86 +3769,23 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Splits a motion event such that it includes only a subset of pointer ids.
+     * Splits a motion event such that it includes only a subset of pointer IDs.
+     * @param idBits the bitset indicating all of the pointer IDs from this motion event that should
+     *               be in the new split event. idBits must be a non-empty subset of the pointer IDs
+     *               contained in this event.
      * @hide
      */
+    // TODO(b/327503168): Pass downTime as a parameter to split.
     @UnsupportedAppUsage
+    @NonNull
     public final MotionEvent split(int idBits) {
-        MotionEvent ev = obtain();
-        synchronized (gSharedTempLock) {
-            final int oldPointerCount = nativeGetPointerCount(mNativePtr);
-            ensureSharedTempPointerCapacity(oldPointerCount);
-            final PointerProperties[] pp = gSharedTempPointerProperties;
-            final PointerCoords[] pc = gSharedTempPointerCoords;
-            final int[] map = gSharedTempPointerIndexMap;
-
-            final int oldAction = nativeGetAction(mNativePtr);
-            final int oldActionMasked = oldAction & ACTION_MASK;
-            final int oldActionPointerIndex = (oldAction & ACTION_POINTER_INDEX_MASK)
-                    >> ACTION_POINTER_INDEX_SHIFT;
-            int newActionPointerIndex = -1;
-            int newPointerCount = 0;
-            for (int i = 0; i < oldPointerCount; i++) {
-                nativeGetPointerProperties(mNativePtr, i, pp[newPointerCount]);
-                final int idBit = 1 << pp[newPointerCount].id;
-                if ((idBit & idBits) != 0) {
-                    if (i == oldActionPointerIndex) {
-                        newActionPointerIndex = newPointerCount;
-                    }
-                    map[newPointerCount] = i;
-                    newPointerCount += 1;
-                }
-            }
-
-            if (newPointerCount == 0) {
-                throw new IllegalArgumentException("idBits did not match any ids in the event");
-            }
-
-            final int newAction;
-            if (oldActionMasked == ACTION_POINTER_DOWN || oldActionMasked == ACTION_POINTER_UP) {
-                if (newActionPointerIndex < 0) {
-                    // An unrelated pointer changed.
-                    newAction = ACTION_MOVE;
-                } else if (newPointerCount == 1) {
-                    // The first/last pointer went down/up.
-                    newAction = oldActionMasked == ACTION_POINTER_DOWN
-                            ? ACTION_DOWN
-                            : (getFlags() & FLAG_CANCELED) == 0 ? ACTION_UP : ACTION_CANCEL;
-                } else {
-                    // A secondary pointer went down/up.
-                    newAction = oldActionMasked
-                            | (newActionPointerIndex << ACTION_POINTER_INDEX_SHIFT);
-                }
-            } else {
-                // Simple up/down/cancel/move or other motion action.
-                newAction = oldAction;
-            }
-
-            final int historySize = nativeGetHistorySize(mNativePtr);
-            for (int h = 0; h <= historySize; h++) {
-                final int historyPos = h == historySize ? HISTORY_CURRENT : h;
-
-                for (int i = 0; i < newPointerCount; i++) {
-                    nativeGetPointerCoords(mNativePtr, map[i], historyPos, pc[i]);
-                }
-
-                final long eventTimeNanos = nativeGetEventTimeNanos(mNativePtr, historyPos);
-                if (h == 0) {
-                    ev.initialize(nativeGetDeviceId(mNativePtr), nativeGetSource(mNativePtr),
-                            nativeGetDisplayId(mNativePtr),
-                            newAction, nativeGetFlags(mNativePtr),
-                            nativeGetEdgeFlags(mNativePtr), nativeGetMetaState(mNativePtr),
-                            nativeGetButtonState(mNativePtr), nativeGetClassification(mNativePtr),
-                            nativeGetXOffset(mNativePtr), nativeGetYOffset(mNativePtr),
-                            nativeGetXPrecision(mNativePtr), nativeGetYPrecision(mNativePtr),
-                            nativeGetDownTimeNanos(mNativePtr), eventTimeNanos,
-                            newPointerCount, pp, pc);
-                } else {
-                    nativeAddBatch(ev.mNativePtr, eventTimeNanos, pc, 0);
-                }
-            }
-            return ev;
+        if (idBits == 0) {
+            throw new IllegalArgumentException(
+                    "idBits must contain at least one pointer from this motion event");
         }
+        MotionEvent event = obtain();
+        event.mNativePtr = nativeSplit(event.mNativePtr, this.mNativePtr, idBits);
+        return event;
     }
 
     /**

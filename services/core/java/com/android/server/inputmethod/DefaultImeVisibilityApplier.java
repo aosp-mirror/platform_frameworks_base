@@ -91,10 +91,10 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                 if (DEBUG_IME_VISIBILITY) {
                     EventLog.writeEvent(IMF_SHOW_IME,
                             statsToken != null ? statsToken.getTag() : ImeTracker.TOKEN_NONE,
-                            Objects.toString(mService.mCurFocusedWindow),
+                            Objects.toString(mService.mImeBindingState.mFocusedWindow),
                             InputMethodDebug.softInputDisplayReasonToString(reason),
                             InputMethodDebug.softInputModeToString(
-                                    mService.mCurFocusedWindowSoftInputMode));
+                                    mService.mImeBindingState.mFocusedWindowSoftInputMode));
                 }
                 mService.onShowHideSoftInputRequested(true /* show */, showInputToken, reason,
                         statsToken);
@@ -122,10 +122,10 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
                 if (DEBUG_IME_VISIBILITY) {
                     EventLog.writeEvent(IMF_HIDE_IME,
                             statsToken != null ? statsToken.getTag() : ImeTracker.TOKEN_NONE,
-                            Objects.toString(mService.mCurFocusedWindow),
+                            Objects.toString(mService.mImeBindingState.mFocusedWindow),
                             InputMethodDebug.softInputDisplayReasonToString(reason),
                             InputMethodDebug.softInputModeToString(
-                                    mService.mCurFocusedWindowSoftInputMode));
+                                    mService.mImeBindingState.mFocusedWindowSoftInputMode));
                 }
                 mService.onShowHideSoftInputRequested(false /* show */, hideInputToken, reason,
                         statsToken);
@@ -207,7 +207,8 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
     @Override
     public boolean removeImeScreenshot(int displayId) {
         if (mImeTargetVisibilityPolicy.removeImeScreenshot(displayId)) {
-            mService.onShowHideSoftInputRequested(false /* show */, mService.mCurFocusedWindow,
+            mService.onShowHideSoftInputRequested(false /* show */,
+                    mService.mImeBindingState.mFocusedWindow,
                     REMOVE_IME_SCREENSHOT_FROM_IMMS, null /* statsToken */);
             return true;
         }

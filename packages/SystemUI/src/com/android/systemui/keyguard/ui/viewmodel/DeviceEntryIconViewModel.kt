@@ -180,7 +180,7 @@ constructor(
         }
 
     private val isUnlocked: Flow<Boolean> =
-        deviceEntryInteractor.isUnlocked.flatMapLatest { isUnlocked ->
+        keyguardInteractor.isKeyguardDismissible.flatMapLatest { isUnlocked ->
             if (!isUnlocked) {
                 flowOf(false)
             } else {
@@ -197,7 +197,7 @@ constructor(
     val iconType: Flow<DeviceEntryIconView.IconType> =
         combine(
             deviceEntryUdfpsInteractor.isListeningForUdfps,
-            keyguardInteractor.isKeyguardDismissible,
+            isUnlocked,
         ) { isListeningForUdfps, isUnlocked ->
             if (isListeningForUdfps) {
                 DeviceEntryIconView.IconType.FINGERPRINT

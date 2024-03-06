@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel
+package android.hardware.input;
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.media.mediaOutputDialogFactory
-import com.android.systemui.plugins.activityStarter
-import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputActionsInteractor
-
-val Kosmos.mediaOutputActionsInteractor by
-    Kosmos.Fixture { MediaOutputActionsInteractor(mediaOutputDialogFactory, activityStarter) }
+parcelable KeyboardLayoutSelectionResult;

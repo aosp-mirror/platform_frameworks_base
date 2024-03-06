@@ -25,7 +25,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.mediaOutputDialogFactory
-import com.android.systemui.plugins.activityStarter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -43,7 +42,7 @@ val Kosmos.localMediaRepositoryFactory: LocalMediaRepositoryFactory by
     Kosmos.Fixture { FakeLocalMediaRepositoryFactory { localMediaRepository } }
 
 val Kosmos.mediaOutputActionsInteractor by
-    Kosmos.Fixture { MediaOutputActionsInteractor(mediaOutputDialogFactory, activityStarter) }
+    Kosmos.Fixture { MediaOutputActionsInteractor(mediaOutputDialogFactory) }
 val Kosmos.mediaControllerRepository by Kosmos.Fixture { FakeMediaControllerRepository() }
 val Kosmos.mediaOutputInteractor by
     Kosmos.Fixture {

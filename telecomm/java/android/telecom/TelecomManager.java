@@ -1434,11 +1434,14 @@ public class TelecomManager {
     }
 
     /**
-     * This API will return all {@link PhoneAccount}s registered via
-     * {@link TelecomManager#registerPhoneAccount(PhoneAccount)}. If a {@link PhoneAccount} appears
-     * to be missing from the list, Telecom has either unregistered the {@link PhoneAccount}
-     * or the caller registered the {@link PhoneAccount} under a different user and does not
-     * have the {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     * This API will return all {@link PhoneAccount}s the caller registered via
+     * {@link TelecomManager#registerPhoneAccount(PhoneAccount)}.  If a {@link PhoneAccount} appears
+     * to be missing from the list, Telecom has either unregistered the {@link PhoneAccount} (for
+     * cleanup purposes) or the caller registered the {@link PhoneAccount} under a different user
+     * and does not have the  {@link android.Manifest.permission#INTERACT_ACROSS_USERS} permission.
+     * <b>Note:</b> This API will only return {@link PhoneAccount}s registered by the same app.  For
+     * system Dialers that need all the {@link PhoneAccount}s registered by every application, see
+     * {@link TelecomManager#getAllPhoneAccounts()}.
      *
      * @return all the {@link PhoneAccount}s registered by the caller.
      */

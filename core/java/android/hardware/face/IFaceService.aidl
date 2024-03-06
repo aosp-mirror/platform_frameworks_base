@@ -39,7 +39,7 @@ import android.view.Surface;
 interface IFaceService {
 
     // Creates a test session with the specified sensorId
-    @EnforcePermission("TEST_BIOMETRIC")
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
 
     // Requests a proto dump of the specified sensor

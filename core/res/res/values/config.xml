@@ -3348,26 +3348,23 @@
     <string name="config_carrierAppInstallDialogComponent" translatable="false"
             >com.android.simappdialog/com.android.simappdialog.InstallCarrierAppActivity</string>
 
-    <!-- Name of the default framework dialog that is used to get or save an app credential.
+    <!-- Name of the fallback CredentialManager dialog that is used to get or save an app
+     credential.
 
-    This UI should be always launch-able and is used as a fallback when an oem replacement activity
-    (defined at config_oemCredentialManagerDialogComponent) is undefined / not found. -->
-    <string name="config_credentialManagerDialogComponent" translatable="false"
+     If empty, no fallback will be used. IMPORTANT: In that case the OEM dialog value specified in
+     config_oemCredentialManagerDialogComponent must always launch-able. Otherwise, the
+     CredentialManager API contract is broken.
+
+     If specified, this UI should be always launch-able. It will be used as a fallback when the OEM
+     dialog value specified in config_oemCredentialManagerDialogComponent) is undefined / not
+     found. -->
+    <string name="config_fallbackCredentialManagerDialogComponent" translatable="false"
             >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
-    <!-- Whether to allow the credential selector activity to be replaced by an activity at
-     run-time (restricted to the privileged activity specified by
-     config_credentialSelectorActivityName).
-
-     When disabled, the fallback activity defined at
-     config_credentialManagerDialogComponent will be used instead. -->
-    <bool name="config_enableOemCredentialManagerDialogComponent" translatable="false">true</bool>
     <!-- Fully qualified activity name providing the credential selector UI, that serves the
-     CredentialManager APIs.
+     CredentialManager APIs. Must be a system app component.
 
-     Used only when config_enableOemCredentialManagerDialogComponent is true.
-
-     If the activity specified cannot be found or launched, then the fallback activity defined at
-     config_credentialManagerDialogComponent will be used instead. -->
+     If empty, or if this activity specified cannot be found or launched, then the fallback activity
+     defined at config_fallbackCredentialManagerDialogComponent will be used instead. -->
     <string name="config_oemCredentialManagerDialogComponent" translatable="false"></string>
 
     <!-- Name of the broadcast receiver that is used to receive provider change events -->

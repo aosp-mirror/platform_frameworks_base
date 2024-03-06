@@ -223,7 +223,6 @@
     <item type="id" name="lock_icon" />
     <item type="id" name="lock_icon_bg" />
     <item type="id" name="burn_in_layer" />
-    <item type="id" name="burn_in_layer_empty_view" />
     <item type="id" name="communal_tutorial_indicator" />
     <item type="id" name="nssl_placeholder_barrier_bottom" />
     <item type="id" name="ambient_indication_container" />

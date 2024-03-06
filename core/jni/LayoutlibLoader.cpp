@@ -196,14 +196,6 @@ static vector<string> parseCsv(const string& csvString) {
     return result;
 }
 
-static vector<string> parseCsv(JNIEnv* env, jstring csvJString) {
-    const char* charArray = env->GetStringUTFChars(csvJString, 0);
-    string csvString(charArray);
-    vector<string> result = parseCsv(csvString);
-    env->ReleaseStringUTFChars(csvJString, charArray);
-    return result;
-}
-
 void LayoutlibLogger(base::LogId, base::LogSeverity severity, const char* tag, const char* file,
                      unsigned int line, const char* message) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -395,20 +387,28 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     jmethodID getPropertyMethod = GetStaticMethodIDOrDie(env, system, "getProperty",
                                                          "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
-    // Get the names of classes that need to register their native methods
-    auto nativesClassesJString =
-            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF("core_native_classes"),
-                                                 env->NewStringUTF(""));
-    vector<string> classesToRegister = parseCsv(env, nativesClassesJString);
+    // Java system properties that contain LayoutLib config. The initial values in the map
+    // are the default values if the property is not specified.
+    std::unordered_map<std::string, std::string> systemProperties =
+            {{"core_native_classes", ""},
+             {"register_properties_during_load", ""},
+             {"icu.data.path", ""},
+             {"use_bridge_for_logging", ""},
+             {"keyboard_paths", ""}};
 
-    jstring registerProperty =
-            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF(
-                                                         "register_properties_during_load"),
-                                                 env->NewStringUTF(""));
-    const char* registerPropertyString = env->GetStringUTFChars(registerProperty, 0);
-    if (strcmp(registerPropertyString, "true") == 0) {
+    for (auto& [name, defaultValue] : systemProperties) {
+        jstring propertyString =
+                (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
+                                                     env->NewStringUTF(name.c_str()),
+                                                     env->NewStringUTF(defaultValue.c_str()));
+        const char* propertyChars = env->GetStringUTFChars(propertyString, 0);
+        systemProperties[name] = string(propertyChars);
+        env->ReleaseStringUTFChars(propertyString, propertyChars);
+    }
+    // Get the names of classes that need to register their native methods
+    vector<string> classesToRegister = parseCsv(systemProperties["core_native_classes"]);
+
+    if (systemProperties["register_properties_during_load"] == "true") {
         // Set the system properties first as they could be used in the static initialization of
         // other classes
         if (register_android_os_SystemProperties(env) < 0) {
@@ -423,35 +423,20 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         env->CallStaticVoidMethod(bridge, setSystemPropertiesMethod);
         property_initialize_ro_cpu_abilist();
     }
-    env->ReleaseStringUTFChars(registerProperty, registerPropertyString);
 
     if (register_jni_procs(gRegJNIMap, classesToRegister, env) < 0) {
         return JNI_ERR;
     }
 
-    // Set the location of ICU data
-    auto stringPath = (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                           env->NewStringUTF("icu.data.path"),
-                                                           env->NewStringUTF(""));
-    const char* path = env->GetStringUTFChars(stringPath, 0);
-
-    if (strcmp(path, "**n/a**") != 0) {
-        bool icuInitialized = init_icu(path);
+    if (!systemProperties["register_properties_during_load"].empty()) {
+        // Set the location of ICU data
+        bool icuInitialized = init_icu(systemProperties["icu.data.path"].c_str());
         if (!icuInitialized) {
-            fprintf(stderr, "Failed to initialize ICU\n");
             return JNI_ERR;
         }
-    } else {
-        fprintf(stderr, "Skip initializing ICU\n");
     }
-    env->ReleaseStringUTFChars(stringPath, path);
 
-    jstring useJniProperty =
-            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF("use_bridge_for_logging"),
-                                                 env->NewStringUTF(""));
-    const char* useJniString = env->GetStringUTFChars(useJniProperty, 0);
-    if (strcmp(useJniString, "true") == 0) {
+    if (systemProperties["use_bridge_for_logging"] == "true") {
         layoutLog = FindClassOrDie(env, "com/android/ide/common/rendering/api/ILayoutLog");
         layoutLog = MakeGlobalRefOrDie(env, layoutLog);
         logMethodId = GetMethodIDOrDie(env, layoutLog, "logAndroidFramework",
@@ -468,23 +453,16 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         // initialize logging, so ANDROD_LOG_TAGS env variable is respected
         android::base::InitLogging(nullptr, android::base::StderrLogger);
     }
-    env->ReleaseStringUTFChars(useJniProperty, useJniString);
 
     // Use English locale for number format to ensure correct parsing of floats when using strtof
     setlocale(LC_NUMERIC, "en_US.UTF-8");
 
-    auto keyboardPathsJString =
-            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                 env->NewStringUTF("keyboard_paths"),
-                                                 env->NewStringUTF(""));
-    const char* keyboardPathsString = env->GetStringUTFChars(keyboardPathsJString, 0);
-    if (strcmp(keyboardPathsString, "**n/a**") != 0) {
-        vector<string> keyboardPaths = parseCsv(env, keyboardPathsJString);
+    if (!systemProperties["keyboard_paths"].empty()) {
+        vector<string> keyboardPaths = parseCsv(systemProperties["keyboard_paths"]);
         init_keyboard(env, keyboardPaths);
     } else {
         fprintf(stderr, "Skip initializing keyboard\n");
     }
-    env->ReleaseStringUTFChars(keyboardPathsJString, keyboardPathsString);
 
     return JNI_VERSION_1_6;
 }

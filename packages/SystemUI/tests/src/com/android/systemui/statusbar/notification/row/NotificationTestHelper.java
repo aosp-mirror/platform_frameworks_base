@@ -89,6 +89,8 @@ import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
+import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.systemui.wmshell.BubblesTestActivity;
 
@@ -136,6 +138,8 @@ public class NotificationTestHelper {
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
     private final FakeFeatureFlags mFeatureFlags;
+    private final SystemClock mSystemClock;
+    private final RowInflaterTaskLogger mRowInflaterTaskLogger;
 
     public NotificationTestHelper(
             Context context,
@@ -199,6 +203,9 @@ public class NotificationTestHelper {
         mFutureDismissalRunnable = mock(Runnable.class);
         when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
                 .thenReturn(mFutureDismissalRunnable);
+
+        mSystemClock = new SystemClockImpl();
+        mRowInflaterTaskLogger = mock(RowInflaterTaskLogger.class);
     }
 
     public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
@@ -572,7 +579,8 @@ public class NotificationTestHelper {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         if (com.android.systemui.Flags.notificationRowUserContext()) {
-            inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry));
+            inflater.setFactory2(new RowInflaterTask.RowAsyncLayoutInflater(entry, mSystemClock,
+                    mRowInflaterTaskLogger));
         }
         mRow = (ExpandableNotificationRow) inflater.inflate(
                 R.layout.status_bar_notification_row,

@@ -11576,6 +11576,15 @@ public final class Settings {
                 "extra_low_power_warning_acknowledged";
 
         /**
+         * Whether the emergency thermal alert would be disabled
+         * (0: default) or not (1).
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_THERMAL_ALERT_DISABLED =
+                "emergency_thermal_alert_disabled";
+
+        /**
          * 0 (default) Auto battery saver suggestion has not been suppressed. 1) it has been
          * suppressed.
          * @hide

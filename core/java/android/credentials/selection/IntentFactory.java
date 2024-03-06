@@ -80,17 +80,7 @@ public class IntentFactory {
             ArrayList<DisabledProviderData> disabledProviderDataList,
             @NonNull ResultReceiver resultReceiver) {
         Intent intent = new Intent();
-        ComponentName componentName =
-                ComponentName.unflattenFromString(
-                        Resources.getSystem()
-                                .getString(
-                                        com.android.internal.R.string
-                                                .config_credentialManagerDialogComponent));
-        ComponentName oemOverrideComponentName = getOemOverrideComponentName(context);
-        if (oemOverrideComponentName != null) {
-            componentName = oemOverrideComponentName;
-        }
-        intent.setComponent(componentName);
+        setCredentialSelectorUiComponentName(context, intent);
         intent.putParcelableArrayListExtra(
                 ProviderData.EXTRA_DISABLED_PROVIDER_DATA_LIST, disabledProviderDataList);
         intent.putExtra(RequestInfo.EXTRA_REQUEST_INFO, requestInfo);
@@ -100,6 +90,24 @@ public class IntentFactory {
         return intent;
     }
 
+    private static void setCredentialSelectorUiComponentName(@NonNull Context context,
+            @NonNull Intent intent) {
+        if (configurableSelectorUiEnabled()) {
+            ComponentName componentName = getOemOverrideComponentName(context);
+            if (componentName == null) {
+                componentName = ComponentName.unflattenFromString(Resources.getSystem().getString(
+                        com.android.internal.R.string
+                                .config_fallbackCredentialManagerDialogComponent));
+            }
+            intent.setComponent(componentName);
+        } else {
+            ComponentName componentName = ComponentName.unflattenFromString(Resources.getSystem()
+                    .getString(com.android.internal.R.string
+                            .config_fallbackCredentialManagerDialogComponent));
+            intent.setComponent(componentName);
+        }
+    }
+
     /**
      * Returns null if there is not an enabled and valid oem override component. It means the
      * default platform UI component name should be used instead.
@@ -107,44 +115,39 @@ public class IntentFactory {
     @Nullable
     private static ComponentName getOemOverrideComponentName(@NonNull Context context) {
         ComponentName result = null;
-        if (configurableSelectorUiEnabled()) {
-            if (Resources.getSystem().getBoolean(
-                    com.android.internal.R.bool.config_enableOemCredentialManagerDialogComponent)) {
-                String oemComponentString =
-                        Resources.getSystem()
-                                .getString(
-                                        com.android.internal.R.string
-                                                .config_oemCredentialManagerDialogComponent);
-                if (!TextUtils.isEmpty(oemComponentString)) {
-                    ComponentName oemComponentName = ComponentName.unflattenFromString(
-                            oemComponentString);
-                    if (oemComponentName != null) {
-                        try {
-                            ActivityInfo info = context.getPackageManager().getActivityInfo(
-                                    oemComponentName,
-                                    PackageManager.ComponentInfoFlags.of(
-                                            PackageManager.MATCH_SYSTEM_ONLY));
-                            if (info.enabled && info.exported) {
-                                Slog.i(TAG,
-                                        "Found enabled oem CredMan UI component."
-                                                + oemComponentString);
-                                result = oemComponentName;
-                            } else {
-                                Slog.i(TAG,
-                                        "Found enabled oem CredMan UI component but it was not "
-                                                + "enabled.");
-                            }
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Slog.i(TAG, "Unable to find oem CredMan UI component: "
-                                    + oemComponentString + ".");
-                        }
+        String oemComponentString =
+                Resources.getSystem()
+                        .getString(
+                                com.android.internal.R.string
+                                        .config_oemCredentialManagerDialogComponent);
+        if (!TextUtils.isEmpty(oemComponentString)) {
+            ComponentName oemComponentName = ComponentName.unflattenFromString(
+                    oemComponentString);
+            if (oemComponentName != null) {
+                try {
+                    ActivityInfo info = context.getPackageManager().getActivityInfo(
+                            oemComponentName,
+                            PackageManager.ComponentInfoFlags.of(
+                                    PackageManager.MATCH_SYSTEM_ONLY));
+                    if (info.enabled && info.exported) {
+                        Slog.i(TAG,
+                                "Found enabled oem CredMan UI component."
+                                        + oemComponentString);
+                        result = oemComponentName;
                     } else {
-                        Slog.i(TAG, "Invalid OEM ComponentName format.");
+                        Slog.i(TAG,
+                                "Found enabled oem CredMan UI component but it was not "
+                                        + "enabled.");
                     }
-                } else {
-                    Slog.i(TAG, "Invalid empty OEM component name.");
+                } catch (PackageManager.NameNotFoundException e) {
+                    Slog.i(TAG, "Unable to find oem CredMan UI component: "
+                            + oemComponentString + ".");
                 }
+            } else {
+                Slog.i(TAG, "Invalid OEM ComponentName format.");
             }
+        } else {
+            Slog.i(TAG, "Invalid empty OEM component name.");
         }
         return result;
     }
@@ -186,16 +189,11 @@ public class IntentFactory {
      * Creates an Intent that cancels any UI matching the given request token id.
      */
     @NonNull
-    public static Intent createCancelUiIntent(@NonNull IBinder requestToken,
-            boolean shouldShowCancellationUi, @NonNull String appPackageName) {
+    public static Intent createCancelUiIntent(@NonNull Context context,
+            @NonNull IBinder requestToken, boolean shouldShowCancellationUi,
+            @NonNull String appPackageName) {
         Intent intent = new Intent();
-        ComponentName componentName =
-                ComponentName.unflattenFromString(
-                        Resources.getSystem()
-                                .getString(
-                                        com.android.internal.R.string
-                                                .config_credentialManagerDialogComponent));
-        intent.setComponent(componentName);
+        setCredentialSelectorUiComponentName(context, intent);
         intent.putExtra(CancelSelectionRequest.EXTRA_CANCEL_UI_REQUEST,
                 new CancelSelectionRequest(new RequestToken(requestToken), shouldShowCancellationUi,
                         appPackageName));

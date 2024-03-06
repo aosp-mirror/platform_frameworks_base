@@ -1881,7 +1881,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(),
                     PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
-                            prev.configChangeFlags, pauseImmediately, autoEnteringPip));
+                            pauseImmediately, autoEnteringPip));
         } catch (Exception e) {
             // Ignore exception, if process died other code will cleanup.
             Slog.w(TAG, "Exception thrown during pause", e);

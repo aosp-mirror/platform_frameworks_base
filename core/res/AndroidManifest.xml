@@ -8621,6 +8621,10 @@
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
+        <service android:name="com.android.system.virtualmachine.SecretkeeperJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
         <service android:name="com.android.server.PruneInstantAppsJobService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>

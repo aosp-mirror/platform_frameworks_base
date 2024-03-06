@@ -25,6 +25,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
+import com.android.systemui.common.shared.model.Position
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
@@ -148,6 +149,24 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             underTest.topClippingBounds.value = 500
             assertThat(underTest.topClippingBounds.value).isEqualTo(500)
+        }
+
+    @Test
+    fun clockPosition() =
+        testScope.runTest {
+            assertThat(underTest.clockPosition.value).isEqualTo(Position(0, 0))
+
+            underTest.setClockPosition(0, 1)
+            assertThat(underTest.clockPosition.value).isEqualTo(Position(0, 1))
+
+            underTest.setClockPosition(1, 9)
+            assertThat(underTest.clockPosition.value).isEqualTo(Position(1, 9))
+
+            underTest.setClockPosition(1, 0)
+            assertThat(underTest.clockPosition.value).isEqualTo(Position(1, 0))
+
+            underTest.setClockPosition(3, 1)
+            assertThat(underTest.clockPosition.value).isEqualTo(Position(3, 1))
         }
 
     @Test

@@ -310,6 +310,8 @@ java_aconfig_library {
 aconfig_declarations {
     name: "android.os.flags-aconfig",
     package: "android.os",
+    exportable: true,
+    container: "system",
     srcs: ["core/java/android/os/*.aconfig"],
 }
 
@@ -324,6 +326,24 @@ java_aconfig_library {
     aconfig_declarations: "android.os.flags-aconfig",
     host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.os.flags-aconfig-java-export",
+    aconfig_declarations: "android.os.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
+}
+
+cc_aconfig_library {
+    name: "android.os.flags-aconfig-cc",
+    aconfig_declarations: "android.os.flags-aconfig",
+}
+
+cc_aconfig_library {
+    name: "android.os.flags-aconfig-cc-test",
+    aconfig_declarations: "android.os.flags-aconfig",
+    mode: "test",
 }
 
 // VirtualDeviceManager
@@ -480,6 +500,13 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.content.res.flags-aconfig-java",
     aconfig_declarations: "android.content.res.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.content.res.flags-aconfig-java-host",
+    aconfig_declarations: "android.content.res.flags-aconfig",
+    host_supported: true,
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
