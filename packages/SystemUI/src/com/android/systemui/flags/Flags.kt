@@ -76,10 +76,6 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
             releasedFlag("notification_memory_logging_enabled")
 
-    // TODO(b/260335638): Tracking Bug
-    @JvmField
-    val NOTIFICATION_INLINE_REPLY_ANIMATION = releasedFlag("notification_inline_reply_animation")
-
     // TODO(b/288326013): Tracking Bug
     @JvmField
     val NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION =
