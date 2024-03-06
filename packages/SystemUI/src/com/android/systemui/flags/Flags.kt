@@ -76,10 +76,6 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
             releasedFlag("notification_memory_logging_enabled")
 
-    // TODO(b/268005230): Tracking Bug
-    @JvmField
-    val SENSITIVE_REVEAL_ANIM = releasedFlag("sensitive_reveal_anim")
-
     // TODO(b/280783617): Tracking Bug
     @Keep
     @JvmField

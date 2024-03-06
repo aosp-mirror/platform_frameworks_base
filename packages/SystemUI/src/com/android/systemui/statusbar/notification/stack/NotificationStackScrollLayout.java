@@ -194,7 +194,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private Set<Integer> mDebugTextUsedYPositions;
     private final boolean mDebugRemoveAnimation;
-    private final boolean mSensitiveRevealAnimEndabled;
     private int mContentHeight;
     private float mIntrinsicContentHeight;
     private int mPaddingBetweenElements;
@@ -615,7 +614,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 Flags.LOCKSCREEN_ENABLE_LANDSCAPE);
         mDebugLines = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
-        mSensitiveRevealAnimEndabled = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
         mScreenOffAnimationController =
                 Dependency.get(ScreenOffAnimationController.class);
@@ -2549,7 +2547,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         child.setOnHeightChangedListener(null);
-        if (child instanceof ExpandableNotificationRow && mSensitiveRevealAnimEndabled) {
+        if (child instanceof ExpandableNotificationRow) {
             NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
             entry.removeOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
         }
@@ -2845,7 +2843,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void onViewAddedInternal(ExpandableView child) {
         updateHideSensitiveForChild(child);
         child.setOnHeightChangedListener(mOnChildHeightChangedListener);
-        if (child instanceof ExpandableNotificationRow && mSensitiveRevealAnimEndabled) {
+        if (child instanceof ExpandableNotificationRow) {
             NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
             entry.addOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
         }
