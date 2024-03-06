@@ -978,7 +978,6 @@ class Task extends TaskFragment {
         }
         effectiveUid = info.applicationInfo.uid;
         mIsEffectivelySystemApp = info.applicationInfo.isSystemApp();
-        stringName = null;
 
         if (info.targetActivity == null) {
             if (_intent != null) {
@@ -1045,6 +1044,7 @@ class Task extends TaskFragment {
             updateTaskDescription();
         }
         mSupportsPictureInPicture = info.supportsPictureInPicture();
+        stringName = null;
 
         // Re-adding the task to Recents once updated
         if (inRecents) {
