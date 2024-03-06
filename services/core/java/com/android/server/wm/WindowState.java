@@ -364,6 +364,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
     private boolean mRedrawForSyncReported = true;
+    private long mCreateTime = System.currentTimeMillis();
 
     /**
      * Used to assosciate a given set of state changes sent from MSG_RESIZED
@@ -1712,6 +1713,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null
                 ? mActivityRecord.mInputDispatchingTimeoutMillis
                 : DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+    }
+
+    long getCreateTime() {
+        return mCreateTime;
     }
 
     /**
