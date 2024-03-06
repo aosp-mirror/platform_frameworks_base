@@ -91,7 +91,7 @@ public class InfoMediaManagerTest {
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
     @Mock
-    private MediaManager.MediaDeviceCallback mCallback;
+    private InfoMediaManager.MediaDeviceCallback mCallback;
     @Mock
     private MediaSessionManager mMediaSessionManager;
     @Mock
@@ -109,8 +109,7 @@ public class InfoMediaManagerTest {
         doReturn(mMediaSessionManager).when(mContext).getSystemService(
                 Context.MEDIA_SESSION_SERVICE);
         mInfoMediaManager =
-                new ManagerInfoMediaManager(
-                        mContext, TEST_PACKAGE_NAME, null, mLocalBluetoothManager);
+                new ManagerInfoMediaManager(mContext, TEST_PACKAGE_NAME, mLocalBluetoothManager);
         mShadowRouter2Manager = ShadowRouter2Manager.getShadow();
         mInfoMediaManager.mRouterManager = MediaRouter2Manager.getInstance(mContext);
     }

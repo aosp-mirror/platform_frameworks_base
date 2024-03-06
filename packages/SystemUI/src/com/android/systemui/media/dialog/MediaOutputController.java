@@ -193,7 +193,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mKeyGuardManager = keyGuardManager;
         mFeatureFlags = featureFlags;
         mUserTracker = userTracker;
-        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, null, lbm);
+        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogTransitionAnimator = dialogTransitionAnimator;
