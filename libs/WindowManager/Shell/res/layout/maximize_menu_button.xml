@@ -20,16 +20,16 @@
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:progressDrawable="@drawable/circular_progress"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
         android:indeterminate="false"
         android:visibility="invisible"/>
 
     <ImageButton
         android:id="@+id/maximize_window"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="9dp"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:padding="5dp"
         android:contentDescription="@string/maximize_button_text"
         android:tint="?androidprv:attr/materialColorOnSurface"
         android:background="?android:selectableItemBackgroundBorderless"
