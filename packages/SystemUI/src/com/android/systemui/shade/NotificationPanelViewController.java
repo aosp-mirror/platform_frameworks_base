@@ -1197,7 +1197,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                             /* excludeNotifications=*/ true), mMainDispatcher);
             collectFlow(mView, mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha(),
                     (Float alpha) -> {
-                        mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(alpha);
+                        mNotificationStackScrollLayoutController.setMaxAlphaForKeyguard(alpha,
+                                "mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha()");
                     }, mMainDispatcher);
         }
     }
@@ -2719,7 +2720,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 && !mQsController.getFullyExpanded()) {
                 alpha *= mClockPositionResult.clockAlpha;
             }
-            mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(alpha);
+            mNotificationStackScrollLayoutController.setMaxAlphaForKeyguard(alpha,
+                    "NPVC.updateNotificationTranslucency()");
         }
     }
 
@@ -2770,7 +2772,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void onExpandingFinished() {
-        mNotificationStackScrollLayoutController.onExpansionStopped();
+        if (!SceneContainerFlag.isEnabled()) {
+            mNotificationStackScrollLayoutController.onExpansionStopped();
+        }
         mHeadsUpManager.onExpandingFinished();
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
         mIsExpandingOrCollapsing = false;
@@ -3085,7 +3089,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             // The expandedHeight is always the full panel Height when bypassing
             expandedHeight = getMaxPanelHeight();
         }
-        mNotificationStackScrollLayoutController.setExpandedHeight(expandedHeight);
+        if (!SceneContainerFlag.isEnabled()) {
+            mNotificationStackScrollLayoutController.setExpandedHeight(expandedHeight);
+        }
         updateKeyguardBottomAreaAlpha();
         updateStatusBarIcons();
     }
@@ -4718,7 +4724,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return (Float alpha) -> {
             mKeyguardStatusViewController.setAlpha(alpha);
             if (!excludeNotifications) {
-                stackScroller.setMaxAlphaForExpansion(alpha);
+                stackScroller.setMaxAlphaForKeyguard(alpha, "NPVC.setTransitionAlpha()");
             }
 
             if (keyguardBottomAreaRefactor()) {

@@ -363,7 +363,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     };
 
     private NotifStats mNotifStats = NotifStats.getEmpty();
-    private float mMaxAlphaForExpansion = 1.0f;
+    private float mMaxAlphaForKeyguard = 1.0f;
+    private String mMaxAlphaForKeyguardSource = "constructor";
     private float mMaxAlphaForUnhide = 1.0f;
 
     /**
@@ -1324,9 +1325,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         return mView.getEmptyShadeViewHeight();
     }
 
-    public void setMaxAlphaForExpansion(float alpha) {
-        mMaxAlphaForExpansion = alpha;
+    /** Set the max alpha for keyguard */
+    public void setMaxAlphaForKeyguard(float alpha, String source) {
+        mMaxAlphaForKeyguard = alpha;
+        mMaxAlphaForKeyguardSource = source;
         updateAlpha();
+        if (DEBUG) {
+            Log.d(TAG, "setMaxAlphaForKeyguard=" + alpha + " --- from: " + source);
+        }
     }
 
     private void setMaxAlphaForUnhide(float alpha) {
@@ -1345,7 +1351,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     private void updateAlpha() {
         if (mView != null) {
-            mView.setAlpha(Math.min(mMaxAlphaForExpansion,
+            mView.setAlpha(Math.min(mMaxAlphaForKeyguard,
                     Math.min(mMaxAlphaForUnhide, mMaxAlphaForGlanceableHub)));
         }
     }
@@ -1842,9 +1848,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        pw.println("mMaxAlphaForExpansion=" + mMaxAlphaForExpansion);
         pw.println("mMaxAlphaForUnhide=" + mMaxAlphaForUnhide);
         pw.println("mMaxAlphaForGlanceableHub=" + mMaxAlphaForGlanceableHub);
+        pw.println("mMaxAlphaForKeyguard=" + mMaxAlphaForKeyguard);
+        pw.println("mMaxAlphaForKeyguardSource=" + mMaxAlphaForKeyguardSource);
     }
 
     /**
