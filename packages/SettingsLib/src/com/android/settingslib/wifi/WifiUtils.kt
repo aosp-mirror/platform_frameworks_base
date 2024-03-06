@@ -53,7 +53,7 @@ open class WifiUtils {
          * @param noInternet True if a connected Wi-Fi network cannot access the Internet
          * @param level The number of bars to show (0-4)
          */
-        fun getIcon(noInternet: Boolean, level: Int): Drawable? {
+        open fun getIcon(noInternet: Boolean, level: Int): Drawable? {
             return context.getDrawable(getInternetIconResource(level, noInternet))
         }
     }
