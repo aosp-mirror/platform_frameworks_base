@@ -896,6 +896,11 @@ public class TaskFragmentTest extends WindowTestsBase {
             assertFalse(mWm.moveFocusToTopEmbeddedWindow(winRightTop));
             // The focus should NOT change.
             assertEquals(winRightTop, mDisplayContent.mCurrentFocus);
+
+            // Do not move focus if the dim is boosted.
+            taskFragmentLeft.mDimmerSurfaceBoosted = true;
+            assertFalse(mWm.moveFocusToTopEmbeddedWindow(winLeftTop));
+            assertEquals(winRightTop, mDisplayContent.mCurrentFocus);
         }
     }
 

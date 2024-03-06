@@ -9214,6 +9214,11 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
 
+        if (taskFragment.mDimmerSurfaceBoosted) {
+            // Skip if the TaskFragment currently has dimmer surface boosted.
+            return false;
+        }
+
         final ActivityRecord topActivity =
                 taskFragment.getTask().topRunningActivity(true /* focusableOnly */);
         if (topActivity == null || topActivity == focusedWindow.mActivityRecord) {
