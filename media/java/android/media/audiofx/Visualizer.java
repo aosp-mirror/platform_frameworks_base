@@ -336,8 +336,9 @@ public class Visualizer {
      * This method must not be called when the Visualizer is enabled.
      * @param size requested capture size
      * @return {@link #SUCCESS} in case of success,
-     * {@link #ERROR_BAD_VALUE} in case of failure.
-     * @throws IllegalStateException
+     * {@link #ERROR_INVALID_OPERATION} if Visualizer effect enginer not enabled.
+     * @throws IllegalStateException if the effect is not in proper state.
+     * @throws IllegalArgumentException if the size parameter is invalid (out of supported range).
      */
     public int setCaptureSize(int size)
     throws IllegalStateException {
@@ -345,7 +346,13 @@ public class Visualizer {
             if (mState != STATE_INITIALIZED) {
                 throw(new IllegalStateException("setCaptureSize() called in wrong state: "+mState));
             }
-            return native_setCaptureSize(size);
+
+            int ret = native_setCaptureSize(size);
+            if (ret == ERROR_BAD_VALUE) {
+                throw(new IllegalArgumentException("setCaptureSize to " + size + " failed"));
+            }
+
+            return ret;
         }
     }
 
