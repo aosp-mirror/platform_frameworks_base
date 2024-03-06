@@ -20,7 +20,6 @@ import static android.content.res.AssetFileDescriptor.UNKNOWN_LENGTH;
 
 import static com.android.packageinstaller.PackageInstallerActivity.EXTRA_STAGED_SESSION_ID;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -28,10 +27,10 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.Flags;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.Manifest;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -201,7 +200,7 @@ public class InstallStaging extends Activity {
         params.setPermissionState(Manifest.permission.USE_FULL_SCREEN_INTENT,
                 PackageInstaller.SessionParams.PERMISSION_STATE_DENIED);
 
-        if (pfd != null && Flags.readInstallInfo()) {
+        if (pfd != null) {
             try {
                 final PackageInstaller.InstallInfo result = installer.readInstallInfo(pfd,
                         debugPathName, 0);
