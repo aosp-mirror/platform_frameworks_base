@@ -695,7 +695,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private boolean mDrawnStateEvaluated;
 
-    private final Point mSurfacePosition = new Point();
+    /** The surface position relative to the parent container. */
+    final Point mSurfacePosition = new Point();
 
     /**
      * A region inside of this window to be excluded from touch.
