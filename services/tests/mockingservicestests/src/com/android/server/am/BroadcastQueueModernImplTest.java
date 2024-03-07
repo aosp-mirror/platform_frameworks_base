@@ -118,15 +118,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
         mConstants.DELAY_NORMAL_MILLIS = 10_000;
         mConstants.DELAY_CACHED_MILLIS = 120_000;
 
-        final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
-            public void addBroadcastToHistoryLocked(BroadcastRecord original) {
-                // Ignored
-            }
-        };
-
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
-            mConstants, mConstants, mSkipPolicy, emptyHistory);
-        mBroadcastQueues[0] = mImpl;
+                mConstants, mConstants, mSkipPolicy, mEmptyHistory);
+        mAms.setBroadcastQueueForTest(mImpl);
 
         doReturn(1L).when(mQueue1).getRunnableAt();
         doReturn(2L).when(mQueue2).getRunnableAt();
