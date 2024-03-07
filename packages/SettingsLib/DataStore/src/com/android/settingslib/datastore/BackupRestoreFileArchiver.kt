@@ -18,11 +18,11 @@ package com.android.settingslib.datastore
 
 import android.app.backup.BackupDataInputStream
 import android.content.Context
-import android.os.ParcelFileDescriptor
 import android.util.Log
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.zip.CheckedInputStream
 
 /**
  * File archiver to handle backup and restore for all the [BackupRestoreFileStorage] subclasses.
@@ -62,8 +62,10 @@ internal class BackupRestoreFileArchiver(
             }
         Log.i(LOG_TAG, "[$name] Restore ${data.size()} bytes for $key to $file")
         val inputStream = LimitedNoCloseInputStream(data)
+        checksum.reset()
+        val checkedInputStream = CheckedInputStream(inputStream, checksum)
         try {
-            val codec = BackupCodec.fromId(inputStream.read().toByte())
+            val codec = BackupCodec.fromId(checkedInputStream.read().toByte())
             if (fileStorage != null && fileStorage.defaultCodec().id != codec.id) {
                 Log.i(
                     LOG_TAG,
@@ -71,17 +73,19 @@ internal class BackupRestoreFileArchiver(
                 )
             }
             file.parentFile?.mkdirs() // ensure parent folders are created
-            val wrappedInputStream = codec.decode(inputStream)
+            val wrappedInputStream = codec.decode(checkedInputStream)
             val bytesCopied = file.outputStream().use { wrappedInputStream.copyTo(it) }
             Log.i(LOG_TAG, "[$name] $key restore $bytesCopied bytes with ${codec.name}")
             fileStorage?.onRestoreFinished(file)
+            entityStates[key] = checksum.value
         } catch (e: Exception) {
             Log.e(LOG_TAG, "[$name] Fail to restore $key", e)
         }
     }
 
-    override fun writeNewStateDescription(newState: ParcelFileDescriptor) =
-        fileStorages.forEach { it.writeNewStateDescription(newState) }
+    override fun onRestoreFinished() {
+        fileStorages.forEach { it.onRestoreFinished() }
+    }
 }
 
 private fun BackupRestoreFileStorage.toBackupRestoreEntity() =
