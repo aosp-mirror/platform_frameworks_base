@@ -648,6 +648,10 @@ constructor(
                 }
                 if (intent.isActivity) {
                     assistManagerLazy.get().hideAssist()
+                    // This activity could have started while the device is dreaming, in which case
+                    // the dream would occlude the activity. In order to show the newly started
+                    // activity, we wake from the dream.
+                    keyguardUpdateMonitor.awakenFromDream()
                 }
                 intentSentUiThreadCallback?.let { postOnUiThread(runnable = it) }
             }
