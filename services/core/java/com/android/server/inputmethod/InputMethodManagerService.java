@@ -192,7 +192,9 @@ import com.android.server.wm.WindowManagerInternal;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.security.InvalidParameterException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -228,6 +230,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private @interface ShellCommandResult {
         int SUCCESS = 0;
         int FAILURE = -1;
+    }
+
+    /**
+     * Indicates that the annotated field is not yet ready for concurrent multi-user support.
+     *
+     * <p>See b/305849394 for details.</p>
+     */
+    @Retention(SOURCE)
+    @Target({ElementType.FIELD})
+    private @interface MultiUserUnawareField {
     }
 
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
@@ -279,7 +291,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final Resources mRes;
     private final Handler mHandler;
     @NonNull
+    @MultiUserUnawareField
     private InputMethodSettings mSettings;
+    @MultiUserUnawareField
     final SettingsObserver mSettingsObserver;
     final WindowManagerInternal mWindowManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
@@ -289,11 +303,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final InputMethodDeviceConfigs mInputMethodDeviceConfigs;
 
     private final UserManagerInternal mUserManagerInternal;
+    @MultiUserUnawareField
     private final InputMethodMenuController mMenuController;
+    @MultiUserUnawareField
     @NonNull private final InputMethodBindingController mBindingController;
+    @MultiUserUnawareField
     @NonNull private final AutofillSuggestionsController mAutofillController;
 
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     @NonNull private final ImeVisibilityStateComputer mVisibilityStateComputer;
 
     @GuardedBy("ImfLock.class")
@@ -312,13 +330,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Mapping from deviceId to the device-specific imeId for that device.
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     private final SparseArray<String> mVirtualDeviceMethodMap = new SparseArray<>();
 
     // TODO: Instantiate mSwitchingController for each user.
     @NonNull
+    @MultiUserUnawareField
     private InputMethodSubtypeSwitchingController mSwitchingController;
     // TODO: Instantiate mHardwareKeyboardShortcutController for each user.
     @NonNull
+    @MultiUserUnawareField
     private HardwareKeyboardShortcutController mHardwareKeyboardShortcutController;
 
     /**
@@ -336,23 +357,29 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     private int mDisplayIdToShowIme = INVALID_DISPLAY;
 
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
 
     @Nullable private StatusBarManagerInternal mStatusBarManagerInternal;
     private boolean mShowOngoingImeSwitcherForPhones;
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     private final HandwritingModeController mHwController;
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     private IntArray mStylusIds;
 
     @GuardedBy("ImfLock.class")
     @Nullable
+    @MultiUserUnawareField
     private OverlayableSystemBooleanResourceWrapper mImeDrawsImeNavBarRes;
     @GuardedBy("ImfLock.class")
     @Nullable
+    @MultiUserUnawareField
     Future<?> mImeDrawsImeNavBarResLazyInitFuture;
 
     static class SessionState {
@@ -417,6 +444,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * Holds the current IME binding state info.
      */
+    @MultiUserUnawareField
     ImeBindingState mImeBindingState;
 
     /**
@@ -483,27 +511,32 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * upon reports from the input method.  If the window state is already changed before the report
      * is handled, this field just keeps the last value.
      */
+    @MultiUserUnawareField
     IBinder mLastImeTargetWindow;
 
     /**
      * The {@link IRemoteInputConnection} last provided by the current client.
      */
+    @MultiUserUnawareField
     IRemoteInputConnection mCurInputConnection;
 
     /**
      * The {@link ImeOnBackInvokedDispatcher} last provided by the current client to
      * receive {@link android.window.OnBackInvokedCallback}s forwarded from IME.
      */
+    @MultiUserUnawareField
     ImeOnBackInvokedDispatcher mCurImeDispatcher;
 
     /**
      * The {@link IRemoteAccessibilityInputConnection} last provided by the current client.
      */
+    @MultiUserUnawareField
     @Nullable IRemoteAccessibilityInputConnection mCurRemoteAccessibilityInputConnection;
 
     /**
      * The {@link EditorInfo} last provided by the current client.
      */
+    @MultiUserUnawareField
     @Nullable
     EditorInfo mCurEditorInfo;
 
@@ -524,11 +557,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * The current subtype of the current input method.
      */
+    @MultiUserUnawareField
     private InputMethodSubtype mCurrentSubtype;
 
     /**
      * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}
      */
+    @MultiUserUnawareField
     private boolean mCurPerceptible;
 
     /**
@@ -545,11 +580,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * otherwise {@code null}.
      */
     @Nullable
+    @MultiUserUnawareField
     private ImeTracker.Token mCurStatsToken;
 
     /**
      * {@code true} if the current input method is in fullscreen mode.
      */
+    @MultiUserUnawareField
     boolean mInFullscreenMode;
 
     /**
@@ -585,6 +622,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     private int mCurTokenDisplayId = INVALID_DISPLAY;
 
     /**
@@ -592,6 +630,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     @Nullable
+    @MultiUserUnawareField
     private IBinder mCurHostInputToken;
 
     /**
@@ -630,25 +669,31 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * Have we called mCurMethod.bindInput()?
      */
+    @MultiUserUnawareField
     boolean mBoundToMethod;
 
     /**
      * Have we called bindInput() for accessibility services?
      */
+    @MultiUserUnawareField
     boolean mBoundToAccessibility;
 
     /**
      * Currently enabled session.
      */
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     SessionState mEnabledSession;
+    @MultiUserUnawareField
     SparseArray<AccessibilitySessionState> mEnabledAccessibilitySessions = new SparseArray<>();
 
     /**
      * True if the device is currently interactive with user.  The value is true initially.
      */
+    @MultiUserUnawareField
     boolean mIsInteractive = true;
 
+    @MultiUserUnawareField
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
     /**
@@ -672,6 +717,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
      * {@link InputMethodBindingController#unbindCurrentMethod()}.</em>
      */
+    @MultiUserUnawareField
     int mImeWindowVis;
 
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
@@ -1504,6 +1550,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Nullable
     @GuardedBy("ImfLock.class")
+    @MultiUserUnawareField
     private UserSwitchHandlerTask mUserSwitchHandlerTask;
 
     /**
