@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -94,7 +95,7 @@ fun Entry(
         label = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(
                     // Total end padding should be 16dp, but the suggestion chip itself
                     // has 8dp horizontal elements padding
                     horizontal = 8.dp, vertical = 16.dp,
