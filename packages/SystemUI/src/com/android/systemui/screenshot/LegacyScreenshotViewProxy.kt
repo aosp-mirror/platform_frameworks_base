@@ -21,7 +21,6 @@ import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.Display
 import android.view.KeyEvent
@@ -32,6 +31,7 @@ import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.appcompat.content.res.AppCompatResources
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.res.R
@@ -42,19 +42,14 @@ import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHE
  * Legacy implementation of screenshot view methods. Just proxies the calls down into the original
  * ScreenshotView.
  */
-class LegacyScreenshotViewProxy(context: Context, private val logger: UiEventLogger) :
+class LegacyScreenshotViewProxy(private val context: Context, private val logger: UiEventLogger) :
     ScreenshotViewProxy {
     override val view: ScreenshotView =
         LayoutInflater.from(context).inflate(R.layout.screenshot, null) as ScreenshotView
     override val screenshotPreview: View
-
     override var defaultDisplay: Int = Display.DEFAULT_DISPLAY
         set(value) {
             view.setDefaultDisplay(value)
-        }
-    override var defaultTimeoutMillis: Long = 6000
-        set(value) {
-            view.setDefaultTimeoutMillis(value)
         }
     override var flags: FeatureFlags? = null
         set(value) {
@@ -70,7 +65,16 @@ class LegacyScreenshotViewProxy(context: Context, private val logger: UiEventLog
         }
     override var screenshot: ScreenshotData? = null
         set(value) {
-            view.setScreenshot(value)
+            field = value
+            value?.let {
+                val badgeBg =
+                    AppCompatResources.getDrawable(context, R.drawable.overlay_badge_background)
+                val user = it.userHandle
+                if (badgeBg != null && user != null) {
+                    view.badgeScreenshot(context.packageManager.getUserBadgedIcon(badgeBg, user))
+                }
+                view.setScreenshot(it)
+            }
         }
 
     override val isAttachedToWindow
@@ -94,8 +98,6 @@ class LegacyScreenshotViewProxy(context: Context, private val logger: UiEventLog
     override fun reset() = view.reset()
     override fun updateInsets(insets: WindowInsets) = view.updateInsets(insets)
     override fun updateOrientation(insets: WindowInsets) = view.updateOrientation(insets)
-
-    override fun badgeScreenshot(userBadgedIcon: Drawable) = view.badgeScreenshot(userBadgedIcon)
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator =
         view.createScreenshotDropInAnimation(screenRect, showFlash)
@@ -130,14 +132,17 @@ class LegacyScreenshotViewProxy(context: Context, private val logger: UiEventLog
         response: ScrollCaptureResponse,
         screenBitmap: Bitmap,
         newScreenshot: Bitmap,
-        screenshotTakenInPortrait: Boolean
-    ) =
+        screenshotTakenInPortrait: Boolean,
+        onTransitionPrepared: Runnable,
+    ) {
         view.prepareScrollingTransition(
             response,
             screenBitmap,
             newScreenshot,
             screenshotTakenInPortrait
         )
+        view.post { onTransitionPrepared.run() }
+    }
 
     override fun startLongScreenshotTransition(
         transitionDestination: Rect,
@@ -155,10 +160,19 @@ class LegacyScreenshotViewProxy(context: Context, private val logger: UiEventLog
 
     override fun announceForAccessibility(string: String) = view.announceForAccessibility(string)
 
-    override fun getViewTreeObserver(): ViewTreeObserver = view.viewTreeObserver
-
-    override fun post(runnable: Runnable) {
-        view.post(runnable)
+    override fun prepareEntranceAnimation(runnable: Runnable) {
+        view.viewTreeObserver.addOnPreDrawListener(
+            object : ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    if (LogConfig.DEBUG_WINDOW) {
+                        Log.d(TAG, "onPreDraw: startAnimation")
+                    }
+                    view.viewTreeObserver.removeOnPreDrawListener(this)
+                    runnable.run()
+                    return true
+                }
+            }
+        )
     }
 
     private fun addPredictiveBackListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
