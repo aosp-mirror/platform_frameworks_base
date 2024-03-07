@@ -4948,13 +4948,6 @@ class Task extends TaskFragment {
         }
     }
 
-    void minimalResumeActivityLocked(ActivityRecord r) {
-        ProtoLog.v(WM_DEBUG_STATES, "Moving to RESUMED: %s (starting new instance) "
-                + "callers=%s", r, Debug.getCallers(5));
-        r.setState(RESUMED, "minimalResumeActivityLocked");
-        r.completeResumeLocked();
-    }
-
     void checkReadyForSleep() {
         if (shouldSleepActivities() && goToSleepIfPossible(false /* shuttingDown */)) {
             mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
@@ -5863,7 +5856,7 @@ class Task extends TaskFragment {
             }
 
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                    mDisplayContent.mDisplayId, false /* deferResume */);
+                    mDisplayContent, false /* deferResume */);
         } finally {
             if (mTransitionController.isShellTransitionsEnabled()) {
                 mAtmService.continueWindowLayout();

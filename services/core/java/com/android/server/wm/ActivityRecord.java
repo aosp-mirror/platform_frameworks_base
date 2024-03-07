@@ -658,7 +658,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean mVoiceInteraction;
 
-    private int mPendingRelaunchCount;
+    int mPendingRelaunchCount;
     long mRelaunchStartTime;
 
     // True if we are current in the process of removing this app token from the display
@@ -3988,7 +3988,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the display does not have running activity, the configuration may need to be
         // updated for restoring original orientation of the display.
         if (next == null) {
-            mRootWindowContainer.ensureVisibilityAndConfig(next, getDisplayId(),
+            mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */, mDisplayContent,
                     true /* deferResume */);
         }
         if (activityRemoved) {
@@ -6463,12 +6463,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * state to match that fact.
      */
     void completeResumeLocked() {
-        final boolean wasVisible = mVisibleRequested;
-        setVisibility(true);
-        if (!wasVisible) {
-            // Visibility has changed, so take a note of it so we call the TaskStackChangedListener
-            mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
-        }
         idle = false;
         results = null;
         if (newIntents != null && newIntents.size() > 0) {
