@@ -485,6 +485,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
     }
 
+    public void setSplitscreenFocus(boolean leftOrTop) {
+        if (mStageCoordinator.isSplitActive()) {
+            mStageCoordinator.grantFocusToPosition(leftOrTop);
+        }
+    }
+
     /** Move the specified task to fullscreen, regardless of focus state. */
     public void moveTaskToFullscreen(int taskId, int exitReason) {
         mStageCoordinator.moveTaskToFullscreen(taskId, exitReason);
@@ -1145,6 +1151,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void goToFullscreenFromSplit() {
             mMainExecutor.execute(SplitScreenController.this::goToFullscreenFromSplit);
+        }
+
+        @Override
+        public void setSplitscreenFocus(boolean leftOrTop) {
+            mMainExecutor.execute(
+                    () -> SplitScreenController.this.setSplitscreenFocus(leftOrTop));
         }
     }
 

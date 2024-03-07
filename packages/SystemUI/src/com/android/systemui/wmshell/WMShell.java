@@ -259,6 +259,11 @@ public final class WMShell implements
             public void moveFocusedTaskToFullscreen(int displayId) {
                 splitScreen.goToFullscreenFromSplit();
             }
+
+            @Override
+            public void setSplitscreenFocus(boolean leftOrTop) {
+                splitScreen.setSplitscreenFocus(leftOrTop);
+            }
         });
     }
 

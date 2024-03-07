@@ -85,6 +85,9 @@ public interface SplitScreen {
     /** Called when requested to go to fullscreen from the current active split app. */
     void goToFullscreenFromSplit();
 
+    /** Called when splitscreen focused app is changed. */
+    void setSplitscreenFocus(boolean leftOrTop);
+
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {
         switch (stage) {
