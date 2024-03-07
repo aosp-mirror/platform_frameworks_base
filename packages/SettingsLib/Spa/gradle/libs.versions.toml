@@ -15,7 +15,7 @@
 #
 
 [versions]
-agp = "8.2.2"
+agp = "8.3.0"
 compose-compiler = "1.5.10"
 dexmaker-mockito = "2.28.3"
 jvm = "17"
