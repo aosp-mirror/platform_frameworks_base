@@ -18,7 +18,6 @@ package com.android.credentialmanager.getflow
 
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
-import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -431,6 +430,14 @@ fun PrimarySelectionCardVImpl(
 
         val hasSingleEntry = primaryPageCredentialEntryList.size +
                 primaryPageLockedEntryList.size == 1
+        val areAllPasswordsOnPrimaryScreen = primaryPageLockedEntryList.isEmpty() &&
+                primaryPageCredentialEntryList.all {
+                    it.sortedCredentialEntryList.first().credentialType == CredentialType.PASSWORD
+                }
+        val areAllPasskeysOnPrimaryScreen = primaryPageLockedEntryList.isEmpty() &&
+                primaryPageCredentialEntryList.all {
+                    it.sortedCredentialEntryList.first().credentialType == CredentialType.PASSKEY
+                }
         item {
             if (requestDisplayInfo.preferIdentityDocUi) {
                 HeadlineText(
@@ -447,28 +454,30 @@ fun PrimarySelectionCardVImpl(
                 HeadlineText(
                     text = stringResource(
                         if (hasSingleEntry) {
-                            val singleEntryType = primaryPageCredentialEntryList.firstOrNull()
-                                ?.sortedCredentialEntryList?.firstOrNull()?.credentialType
-                            if (singleEntryType == CredentialType.PASSKEY)
+                            if (areAllPasskeysOnPrimaryScreen)
                                 R.string.get_dialog_title_use_passkey_for
-                            else if (singleEntryType == CredentialType.PASSWORD)
+                            else if (areAllPasswordsOnPrimaryScreen)
                                 R.string.get_dialog_title_use_password_for
                             else if (authenticationEntryList.isNotEmpty())
                                 R.string.get_dialog_title_unlock_options_for
                             else R.string.get_dialog_title_use_sign_in_for
                         } else {
-                            if (authenticationEntryList.isNotEmpty() ||
-                                sortedUserNameToCredentialEntryList.any { perNameEntryList ->
-                                    perNameEntryList.sortedCredentialEntryList.any { entry ->
-                                        entry.credentialType != CredentialType.PASSWORD &&
-                                            entry.credentialType != CredentialType.PASSKEY
-                                    }
+                            if (areAllPasswordsOnPrimaryScreen)
+                                R.string.get_dialog_title_choose_password_for
+                            else if (areAllPasskeysOnPrimaryScreen)
+                                R.string.get_dialog_title_choose_passkey_for
+                            else if (primaryPageLockedEntryList.isNotEmpty() ||
+                                primaryPageCredentialEntryList.any {
+                                    it.sortedCredentialEntryList.first().credentialType !=
+                                            CredentialType.PASSWORD &&
+                                    it.sortedCredentialEntryList.first().credentialType !=
+                                            CredentialType.PASSKEY
                                 }
-                            ) // For an unknown / locked entry, it's not true that it is
+                            ) // An unknown typed / locked entry exists, and we can't say it is
                             // already saved, strictly speaking. Hence use a different title
-                            // without the mention of "saved"
+                            // without the mention of "saved".
                                 R.string.get_dialog_title_choose_sign_in_for
-                            else
+                            else // All entries on the primary screen are passkeys or passwords
                                 R.string.get_dialog_title_choose_saved_sign_in_for
                         },
                         requestDisplayInfo.appName
@@ -490,8 +499,11 @@ fun PrimarySelectionCardVImpl(
                                     showMoreForTruncatedEntry.value = it.hasVisualOverflow
                                 },
                                 hasSingleEntry = hasSingleEntry,
+                                hasSingleProvider = singleProviderId != null,
                                 shouldOverrideIcon = entry.isDefaultIconPreferredAsSingleProvider &&
                                         (singleProviderId != null),
+                                shouldRemoveTypeDisplayName = areAllPasswordsOnPrimaryScreen ||
+                                        areAllPasskeysOnPrimaryScreen
                         )
                     }
                     primaryPageLockedEntryList.forEach {
@@ -754,11 +766,19 @@ fun CredentialEntryRow(
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     // Make optional since the secondary page doesn't care about this value.
-    hasSingleEntry: Boolean? = null,
+    hasSingleEntry: Boolean = false,
     // For primary page only, if all display entries come from the same provider AND if that
     // provider has opted in via isDefaultIconPreferredAsSingleProvider, then we override the
     // display icon to the default icon for the given credential type.
     shouldOverrideIcon: Boolean = false,
+    // For primary page only, if all entries come from the same provider, then remove that provider
+    // name from each entry, since that provider icon + name will be shown front and central at
+    // the top of the bottom sheet.
+    hasSingleProvider: Boolean = false,
+    // For primary page only, if all visible entrise are of the same type and that type is passkey
+    // or password, then set this bit to true to remove the type display name from each entry for
+    // simplification, since that info is mentioned in the title.
+    shouldRemoveTypeDisplayName: Boolean = false,
 ) {
     val (username, displayName) = if (credentialEntryInfo.credentialType == CredentialType.PASSKEY)
         userAndDisplayNameForPasskey(
@@ -788,17 +808,16 @@ fun CredentialEntryRow(
         entryHeadlineText = username,
         entrySecondLineText = displayName,
         entryThirdLineText =
-        (if (hasSingleEntry != null && hasSingleEntry)
-            if (credentialEntryInfo.credentialType == CredentialType.PASSKEY ||
-                    credentialEntryInfo.credentialType == CredentialType.PASSWORD)
-                emptyList()
+        (if (hasSingleEntry)
+            if (shouldRemoveTypeDisplayName) emptyList()
             // Still show the type display name for all non-password/passkey types since it won't be
             // mentioned in the bottom sheet heading.
             else listOf(credentialEntryInfo.credentialTypeDisplayName)
         else listOf(
-                credentialEntryInfo.credentialTypeDisplayName,
-                credentialEntryInfo.providerDisplayName
-        )).filterNot(TextUtils::isEmpty).let { itemsToDisplay ->
+                if (shouldRemoveTypeDisplayName) null
+                else credentialEntryInfo.credentialTypeDisplayName,
+                if (hasSingleProvider) null else credentialEntryInfo.providerDisplayName
+        )).filterNot{ it.isNullOrBlank() }.let { itemsToDisplay ->
             if (itemsToDisplay.isEmpty()) null
             else itemsToDisplay.joinToString(
                 separator = stringResource(R.string.get_dialog_sign_in_type_username_separator)
