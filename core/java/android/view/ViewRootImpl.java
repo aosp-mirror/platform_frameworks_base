@@ -32,6 +32,11 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_INVALID;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_LARGE;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_REQUESTED;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_SMALL;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -841,8 +846,9 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mInsetsAnimationRunning;
 
     private long mPreviousFrameDrawnTime = -1;
-    // The largest view size percentage to the display size. Used on trace to collect metric.
-    private float mLargestChildPercentage = 0.0f;
+    // The reason the category was changed.
+    private int mFrameRateCategoryChangeReason = 0;
+    private String mFrameRateCategoryView;
 
     /**
      * The resolved pointer icon type requested by this window.
@@ -4847,10 +4853,6 @@ public final class ViewRootImpl implements ViewParent,
         long fps = NANOS_PER_SEC / timeDiff;
         Trace.setCounter(mFpsTraceName, fps);
         mPreviousFrameDrawnTime = expectedDrawnTime;
-
-        long percentage = (long) (mLargestChildPercentage * 100);
-        Trace.setCounter(mLargestViewTraceName, percentage);
-        mLargestChildPercentage = 0.0f;
     }
 
     private void reportDrawFinished(@Nullable Transaction t, int seqId) {
@@ -12369,9 +12371,20 @@ public final class ViewRootImpl implements ViewParent,
         try {
             if (mLastPreferredFrameRateCategory != frameRateCategory) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    String reason = "none";
+                    switch (mFrameRateCategoryChangeReason) {
+                        case FRAME_RATE_CATEGORY_REASON_INTERMITTENT -> reason = "intermittent";
+                        case FRAME_RATE_CATEGORY_REASON_SMALL -> reason = "small";
+                        case FRAME_RATE_CATEGORY_REASON_LARGE -> reason = "large";
+                        case FRAME_RATE_CATEGORY_REASON_REQUESTED -> reason = "requested";
+                        case FRAME_RATE_CATEGORY_REASON_INVALID -> reason = "invalid frame rate";
+                    }
+                    String sourceView = mFrameRateCategoryView == null ? "No View Given"
+                            : mFrameRateCategoryView;
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRateCategory "
-                                + frameRateCategory);
+                                    + frameRateCategory + ", reason " + reason + ", "
+                                    + sourceView);
                 }
                 mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
                         frameRateCategory, false).applyAsyncUnsafe();
@@ -12603,10 +12616,12 @@ public final class ViewRootImpl implements ViewParent,
         mWindowlessBackKeyCallback = callback;
     }
 
-    void recordViewPercentage(float percentage) {
+    void recordCategory(int category, int reason, View view) {
         if (!Trace.isEnabled()) return;
-        // Record the largest view of percentage to the display size.
-        mLargestChildPercentage = Math.max(percentage, mLargestChildPercentage);
+        if (category > mPreferredFrameRateCategory) {
+            mFrameRateCategoryChangeReason = reason;
+            mFrameRateCategoryView = view.getClass().getSimpleName();
+        }
     }
 
     /**
