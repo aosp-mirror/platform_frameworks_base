@@ -292,6 +292,7 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_PRIVATE)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
+                .setEnabled(UserManager.isPrivateProfileEnabled() ? 1 : 0)
                 .setLabels(R.string.profile_label_private)
                 .setIconBadge(com.android.internal.R.drawable.ic_private_profile_icon_badge)
                 .setBadgePlain(com.android.internal.R.drawable.ic_private_profile_badge)
