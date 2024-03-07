@@ -7,3 +7,13 @@ flag {
     description: "Use proto tombstones as source of truth for adding to dropbox"
     bug: "323857385"
 }
+
+flag {
+    name: "async_start_bugreport"
+    namespace: "crumpet"
+    description: "Don't block callers on the start of dumpsys service"
+    bug: "180123623"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
