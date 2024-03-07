@@ -1897,7 +1897,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
-                mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
+                mMyPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
 
                 final IntentFilter broadcastFilterForAllUsers = new IntentFilter();
