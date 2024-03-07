@@ -76,6 +76,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.keyguard.shared.model.DismissAction;
 import com.android.systemui.keyguard.shared.model.KeyguardDone;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
@@ -105,6 +107,8 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -116,6 +120,7 @@ import javax.inject.Inject;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.Job;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
@@ -162,6 +167,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final BouncerView mPrimaryBouncerView;
     private final Lazy<ShadeController> mShadeController;
     private final Lazy<SceneInteractor> mSceneInteractorLazy;
+
+    private Job mListenForAlternateBouncerTransitionSteps = null;
+    private Job mListenForKeyguardAuthenticatedBiometricsHandled = null;
 
     // Local cache of expansion events, to avoid duplicates
     private float mFraction = -1f;
@@ -491,6 +499,26 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
         }
+        if (mListenForAlternateBouncerTransitionSteps != null) {
+            mListenForAlternateBouncerTransitionSteps.cancel(null);
+        }
+        mListenForAlternateBouncerTransitionSteps = null;
+        if (mListenForKeyguardAuthenticatedBiometricsHandled != null) {
+            mListenForKeyguardAuthenticatedBiometricsHandled.cancel(null);
+        }
+        mListenForKeyguardAuthenticatedBiometricsHandled = null;
+        if (!DeviceEntryUdfpsRefactor.isEnabled()) {
+            mListenForAlternateBouncerTransitionSteps = mJavaAdapter.alwaysCollectFlow(
+                    mKeyguardTransitionInteractor.transitionStepsFromState(
+                            KeyguardState.ALTERNATE_BOUNCER),
+                    this::consumeFromAlternateBouncerTransitionSteps
+            );
+
+            mListenForKeyguardAuthenticatedBiometricsHandled = mJavaAdapter.alwaysCollectFlow(
+                    mPrimaryBouncerInteractor.getKeyguardAuthenticatedBiometricsHandled(),
+                    this::consumeKeyguardAuthenticatedBiometricsHandled
+            );
+        }
 
         if (KeyguardWmStateRefactor.isEnabled()) {
             // Show the keyguard views whenever we've told WM that the lockscreen is visible.
@@ -511,6 +539,22 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     mStatusBarKeyguardViewManagerInteractor.getKeyguardViewOcclusionState(),
                     (occlusionState) -> setOccluded(
                             occlusionState.getOccluded(), occlusionState.getAnimate()));
+        }
+    }
+
+    @VisibleForTesting
+    void consumeFromAlternateBouncerTransitionSteps(TransitionStep step) {
+        hideAlternateBouncer(false);
+    }
+
+    /**
+     * Required without fix for b/328643370: missing AlternateBouncer (when occluded) => Gone
+     * transition.
+     */
+    @VisibleForTesting
+    void consumeKeyguardAuthenticatedBiometricsHandled(Unit handled) {
+        if (mAlternateBouncerInteractor.isVisibleState()) {
+            hideAlternateBouncer(false);
         }
     }
 
@@ -1458,7 +1502,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mPrimaryBouncerInteractor.notifyKeyguardAuthenticatedBiometrics(strongAuth);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            hideAlternateBouncer(false);
             executeAfterKeyguardGoneAction();
         }
 

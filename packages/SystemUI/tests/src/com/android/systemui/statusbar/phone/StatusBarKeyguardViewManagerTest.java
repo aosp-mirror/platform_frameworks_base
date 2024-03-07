@@ -82,6 +82,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInte
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
+import com.android.systemui.keyguard.shared.model.TransitionState;
+import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
@@ -102,6 +105,8 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
 import com.google.common.truth.Truth;
+
+import kotlin.Unit;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -1044,5 +1049,36 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.showBouncerOrKeyguard(false);
         verify(mCentralSurfaces, never()).hideKeyguard();
         verify(mPrimaryBouncerInteractor, never()).show(true);
+    }
+
+    @Test
+    public void altBouncerNotVisible_keyguardAuthenticatedBiometricsHandled() {
+        clearInvocations(mAlternateBouncerInteractor);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
+        mStatusBarKeyguardViewManager.consumeKeyguardAuthenticatedBiometricsHandled(Unit.INSTANCE);
+        verify(mAlternateBouncerInteractor, never()).hide();
+    }
+
+    @Test
+    public void altBouncerVisible_keyguardAuthenticatedBiometricsHandled() {
+        clearInvocations(mAlternateBouncerInteractor);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        mStatusBarKeyguardViewManager.consumeKeyguardAuthenticatedBiometricsHandled(Unit.INSTANCE);
+        verify(mAlternateBouncerInteractor).hide();
+    }
+
+    @Test
+    public void fromAlternateBouncerTransitionStep() {
+        clearInvocations(mAlternateBouncerInteractor);
+        mStatusBarKeyguardViewManager.consumeFromAlternateBouncerTransitionSteps(
+                new TransitionStep(
+                        /* from */ KeyguardState.ALTERNATE_BOUNCER,
+                        /* to */ KeyguardState.GONE,
+                        /* value */ 1f,
+                        TransitionState.FINISHED,
+                        "StatusBarKeyguardViewManagerTest"
+                )
+        );
+        verify(mAlternateBouncerInteractor).hide();
     }
 }
