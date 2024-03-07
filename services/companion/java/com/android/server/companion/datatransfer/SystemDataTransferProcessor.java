@@ -186,18 +186,14 @@ public class SystemDataTransferProcessor {
         intent.putExtras(extras);
 
         // Create a PendingIntent
-        final long token = Binder.clearCallingIdentity();
-        try {
-            return PendingIntent.getActivityAsUser(mContext, /*requestCode */ associationId, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
-                    ActivityOptions.makeBasic()
-                            .setPendingIntentCreatorBackgroundActivityStartMode(
-                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
-                            .toBundle(),
-                    UserHandle.CURRENT);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        return Binder.withCleanCallingIdentity(() ->
+                PendingIntent.getActivityAsUser(mContext, /*requestCode */ associationId,
+                        intent, FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                        ActivityOptions.makeBasic()
+                                .setPendingIntentCreatorBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle(),
+                        UserHandle.CURRENT));
     }
 
     /**
@@ -228,8 +224,7 @@ public class SystemDataTransferProcessor {
         }
 
         // Start permission sync
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-        try {
+        Binder.withCleanCallingIdentity(() -> {
             // TODO: refactor to work with streams of data
             mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
                     mExecutor, backup -> {
@@ -237,39 +232,31 @@ public class SystemDataTransferProcessor {
                                 .requestPermissionRestore(associationId, backup);
                         translateFutureToCallback(future, callback);
                     });
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentityToken);
-        }
+        });
     }
 
     /**
      * Enable perm sync for the association
      */
     public void enablePermissionsSync(int associationId) {
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-        try {
+        Binder.withCleanCallingIdentity(() -> {
             int userId = mAssociationStore.getAssociationById(associationId).getUserId();
             PermissionSyncRequest request = new PermissionSyncRequest(associationId);
             request.setUserConsented(true);
             mSystemDataTransferRequestStore.writeRequest(userId, request);
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentityToken);
-        }
+        });
     }
 
     /**
      * Disable perm sync for the association
      */
     public void disablePermissionsSync(int associationId) {
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-        try {
+        Binder.withCleanCallingIdentity(() -> {
             int userId = mAssociationStore.getAssociationById(associationId).getUserId();
             PermissionSyncRequest request = new PermissionSyncRequest(associationId);
             request.setUserConsented(false);
             mSystemDataTransferRequestStore.writeRequest(userId, request);
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentityToken);
-        }
+        });
     }
 
     /**
@@ -277,8 +264,7 @@ public class SystemDataTransferProcessor {
      */
     @Nullable
     public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-        try {
+        return Binder.withCleanCallingIdentity(() -> {
             int userId = mAssociationStore.getAssociationById(associationId).getUserId();
             List<SystemDataTransferRequest> requests =
                     mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
@@ -289,22 +275,17 @@ public class SystemDataTransferProcessor {
                 }
             }
             return null;
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentityToken);
-        }
+        });
     }
 
     /**
      * Remove perm sync request for the association.
      */
     public void removePermissionSyncRequest(int associationId) {
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-        try {
+        Binder.withCleanCallingIdentity(() -> {
             int userId = mAssociationStore.getAssociationById(associationId).getUserId();
             mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, associationId);
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentityToken);
-        }
+        });
     }
 
     private void onReceivePermissionRestore(byte[] message) {
@@ -318,14 +299,12 @@ public class SystemDataTransferProcessor {
         Slog.i(LOG_TAG, "Applying permissions.");
         // Start applying permissions
         UserHandle user = mContext.getUser();
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-        try {
+
+        Binder.withCleanCallingIdentity(() -> {
             // TODO: refactor to work with streams of data
             mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(
                     message, user);
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentityToken);
-        }
+        });
     }
 
     private static void translateFutureToCallback(@NonNull Future<?> future,
