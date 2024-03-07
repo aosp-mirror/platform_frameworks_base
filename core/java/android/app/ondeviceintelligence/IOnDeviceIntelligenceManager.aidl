@@ -67,4 +67,6 @@
       void processRequestStreaming(in Feature feature,
                     in Bundle requestBundle, int requestType, in  ICancellationSignal cancellationSignal, in  IProcessingSignal signal,
                     in IStreamingResponseCallback streamingCallback) = 8;
+
+      String getRemoteServicePackageName() = 9;
  }

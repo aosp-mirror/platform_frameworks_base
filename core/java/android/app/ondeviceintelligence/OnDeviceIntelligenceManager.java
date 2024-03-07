@@ -120,14 +120,13 @@ public final class OnDeviceIntelligenceManager {
     @Nullable
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public String getRemoteServicePackageName() {
-        String serviceConfigValue = mContext.getResources().getString(
-                R.string.config_defaultOnDeviceSandboxedInferenceService);
-        ComponentName componentName = ComponentName.unflattenFromString(serviceConfigValue);
-        if (componentName != null) {
-            return componentName.getPackageName();
+        String result;
+        try{
+           result = mService.getRemoteServicePackageName();
+        } catch (RemoteException e){
+            throw e.rethrowFromSystemServer();
         }
-
-        return null;
+        return result;
     }
 
     /**
