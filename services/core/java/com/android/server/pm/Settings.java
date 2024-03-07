@@ -4558,6 +4558,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             for (int i = 0; i < size; i++) {
                 final PackageSetting ps = mPackages.valueAt(i);
                 if (ps.getPkg() == null) {
+                    // This would force-create correct per-user state.
+                    ps.setInstalled(false, userHandle);
+                    // Make sure the app is excluded from storage mapping for this user.
+                    writeKernelMappingLPr(ps);
                     continue;
                 }
                 final boolean shouldMaybeInstall = ps.isSystem() &&
