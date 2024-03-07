@@ -35,6 +35,8 @@ import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.user.domain.UserDomainLayerModule
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import dagger.BindsInstance
 import dagger.Component
@@ -55,6 +57,7 @@ import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.eq
+import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.clearInvocations
@@ -307,6 +310,17 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.goToLockedShade(null, needsQSAnimation = true)
         verify(shadeLockscreenInteractor).transitionToExpandedShade(anyLong())
         assertNotNull(transitionController.dragDownAnimator)
+    }
+
+    @Test
+    fun testGoToLockedShadeCancelDoesntLeaveShadeOpenOnKeyguardHide() {
+        whenever(lockScreenUserManager.shouldShowLockscreenNotifications()).thenReturn(false)
+        whenever(lockScreenUserManager.isLockscreenPublicMode(any())).thenReturn(true)
+        transitionController.goToLockedShade(null)
+        val captor = argumentCaptor<Runnable>()
+        verify(centralSurfaces).showBouncerWithDimissAndCancelIfKeyguard(isNull(), captor.capture())
+        captor.value.run()
+        verify(statusbarStateController).setLeaveOpenOnKeyguardHide(false)
     }
 
     @Test
