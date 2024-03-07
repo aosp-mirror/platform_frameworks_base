@@ -8183,7 +8183,7 @@ public class Intent implements Parcelable, Cloneable {
 
                 // launch flags
                 else if (uri.startsWith("launchFlags=", i)) {
-                    intent.mFlags = Integer.decode(value);
+                    intent.mFlags = decodeInteger(value);
                     if ((flags& URI_ALLOW_UNSAFE) == 0) {
                         intent.mFlags &= ~IMMUTABLE_FLAGS;
                     }
@@ -8191,7 +8191,7 @@ public class Intent implements Parcelable, Cloneable {
 
                 // extended flags
                 else if (uri.startsWith("extendedLaunchFlags=", i)) {
-                    intent.mExtendedFlags = Integer.decode(value);
+                    intent.mExtendedFlags = decodeInteger(value);
                 }
 
                 // package
@@ -8401,7 +8401,7 @@ public class Intent implements Parcelable, Cloneable {
                 isIntentFragment = true;
                 i += 12;
                 int j = uri.indexOf(')', i);
-                intent.mFlags = Integer.decode(uri.substring(i, j));
+                intent.mFlags = decodeInteger(uri.substring(i, j));
                 if ((flags& URI_ALLOW_UNSAFE) == 0) {
                     intent.mFlags &= ~IMMUTABLE_FLAGS;
                 }
@@ -8512,6 +8512,23 @@ public class Intent implements Parcelable, Cloneable {
         return intent;
     }
 
+    private static Integer decodeInteger(String value) {
+        try {
+            return Integer.decode(value);
+        } catch (NumberFormatException e) {
+            try {
+                if (value != null && value.startsWith("0x")) {
+                    // In toUriInner, we do "0x".append(Integer.toHexString).
+                    // Sometimes "decode" fails to parse, e.g. 0x90000000.
+                    return Integer.parseUnsignedInt(value.substring(2), 16);
+                }
+            } catch (NumberFormatException ignored) {
+                // ignored, throw the original exception
+            }
+            throw e;
+        }
+    }
+
     /** @hide */
     public interface CommandOptionHandler {
         boolean handleOption(String opt, ShellCommand cmd);
@@ -8577,7 +8594,7 @@ public class Intent implements Parcelable, Cloneable {
                 case "--ei": {
                     String key = cmd.getNextArgRequired();
                     String value = cmd.getNextArgRequired();
-                    intent.putExtra(key, Integer.decode(value));
+                    intent.putExtra(key, decodeInteger(value));
                 }
                 break;
                 case "--eu": {
@@ -8601,7 +8618,7 @@ public class Intent implements Parcelable, Cloneable {
                     String[] strings = value.split(",");
                     int[] list = new int[strings.length];
                     for (int i = 0; i < strings.length; i++) {
-                        list[i] = Integer.decode(strings[i]);
+                        list[i] = decodeInteger(strings[i]);
                     }
                     intent.putExtra(key, list);
                 }
@@ -8612,7 +8629,7 @@ public class Intent implements Parcelable, Cloneable {
                     String[] strings = value.split(",");
                     ArrayList<Integer> list = new ArrayList<>(strings.length);
                     for (int i = 0; i < strings.length; i++) {
-                        list.add(Integer.decode(strings[i]));
+                        list.add(decodeInteger(strings[i]));
                     }
                     intent.putExtra(key, list);
                 }
@@ -8747,7 +8764,7 @@ public class Intent implements Parcelable, Cloneable {
                         arg = false;
                     } else {
                         try {
-                            arg = Integer.decode(value) != 0;
+                            arg = decodeInteger(value) != 0;
                         } catch (NumberFormatException ex) {
                             throw new IllegalArgumentException("Invalid boolean value: " + value);
                         }
@@ -8777,7 +8794,7 @@ public class Intent implements Parcelable, Cloneable {
                 break;
                 case "-f":
                     String str = cmd.getNextArgRequired();
-                    intent.setFlags(Integer.decode(str).intValue());
+                    intent.setFlags(decodeInteger(str).intValue());
                     break;
                 case "--grant-read-uri-permission":
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
