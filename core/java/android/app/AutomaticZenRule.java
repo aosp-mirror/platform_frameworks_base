@@ -185,6 +185,8 @@ public final class AutomaticZenRule implements Parcelable {
     /**
      * Creates an automatic zen rule.
      *
+     * <p>Note: Prefer {@link AutomaticZenRule.Builder} to construct an {@link AutomaticZenRule}.
+     *
      * @param name The name of the rule.
      * @param owner The Condition Provider service that owns this rule. This can be null if you're
      *              using {@link NotificationManager#setAutomaticZenRuleState(String, Condition)}
@@ -206,10 +208,7 @@ public final class AutomaticZenRule implements Parcelable {
      *               while this rule is active. This overrides the global policy while this rule is
      *               action ({@link Condition#STATE_TRUE}).
      * @param enabled Whether the rule is enabled.
-     *
-     * @deprecated Use {@link AutomaticZenRule.Builder} to construct an {@link AutomaticZenRule}.
      */
-    @Deprecated
     public AutomaticZenRule(@NonNull String name, @Nullable ComponentName owner,
             @Nullable ComponentName configurationActivity, @NonNull Uri conditionId,
             @Nullable ZenPolicy policy, int interruptionFilter, boolean enabled) {
