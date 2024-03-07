@@ -158,6 +158,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Coordinates the staging (visibility, sizing, ...) of the split-screen {@link MainStage} and
@@ -238,6 +239,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private DefaultMixedHandler mMixedHandler;
     private final Toast mSplitUnsupportedToast;
     private SplitRequest mSplitRequest;
+    /** Used to notify others of when shell is animating into split screen */
+    private SplitScreen.SplitInvocationListener mSplitInvocationListener;
+    private Executor mSplitInvocationListenerExecutor;
 
     /**
      * Since StageCoordinator only coordinates MainStage and SideStage, it shouldn't support
@@ -246,6 +250,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     @Override
     public boolean supportCompatUI() {
         return false;
+    }
+
+    /** NOTE: Will overwrite any previously set {@link #mSplitInvocationListener} */
+    public void registerSplitAnimationListener(
+            @NonNull SplitScreen.SplitInvocationListener listener, @NonNull Executor executor) {
+        mSplitInvocationListener = listener;
+        mSplitInvocationListenerExecutor = executor;
+        mSplitTransitions.registerSplitAnimListener(listener, executor);
     }
 
     class SplitRequest {
@@ -536,7 +548,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             null /* childrenToTop */, EXIT_REASON_UNKNOWN));
                     Log.w(TAG, splitFailureMessage("startShortcut",
                             "side stage was not populated"));
-                    mSplitUnsupportedToast.show();
+                    handleUnsupportedSplitStart();
                 }
 
                 if (finishedCallback != null) {
@@ -667,7 +679,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             null /* childrenToTop */, EXIT_REASON_UNKNOWN));
                     Log.w(TAG, splitFailureMessage("startIntentLegacy",
                             "side stage was not populated"));
-                    mSplitUnsupportedToast.show();
+                    handleUnsupportedSplitStart();
                 }
 
                 if (apps != null) {
@@ -1288,7 +1300,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
             Log.w(TAG, splitFailureMessage("onRemoteAnimationFinishedOrCancelled",
                     "main or side stage was not populated."));
-            mSplitUnsupportedToast.show();
+            handleUnsupportedSplitStart();
         } else {
             mSyncQueue.queue(evictWct);
             mSyncQueue.runInSync(t -> {
@@ -1309,7 +1321,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
             Log.w(TAG, splitFailureMessage("onRemoteAnimationFinished",
                     "main or side stage was not populated"));
-            mSplitUnsupportedToast.show();
+            handleUnsupportedSplitStart();
             return;
         }
 
@@ -2880,6 +2892,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mMixedHandler.animatePendingEnterPipFromSplit(transition, info,
                         startTransaction, finishTransaction, finishCallback,
                         pipReplacingChange != null);
+                notifySplitAnimationFinished();
                 return true;
             }
 
@@ -2914,6 +2927,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 //                    the transition, or synchronize task-org callbacks.
             }
             // Use normal animations.
+            notifySplitAnimationFinished();
             return false;
         } else if (mMixedHandler != null && TransitionUtil.hasDisplayChange(info)) {
             // A display-change has been un-expectedly inserted into the transition. Redirect
@@ -2927,6 +2941,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mSplitLayout.update(startTransaction, true /* resetImePosition */);
                     startTransaction.apply();
                 }
+                notifySplitAnimationFinished();
                 return true;
             }
         }
@@ -3100,7 +3115,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     pendingEnter.mRemoteHandler.onTransitionConsumed(transition,
                             false /*aborted*/, finishT);
                 }
-                mSplitUnsupportedToast.show();
+                handleUnsupportedSplitStart();
                 return true;
             }
         }
@@ -3129,6 +3144,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final TransitionInfo.Change finalMainChild = mainChild;
         final TransitionInfo.Change finalSideChild = sideChild;
         enterTransition.setFinishedCallback((callbackWct, callbackT) -> {
+            notifySplitAnimationFinished();
             if (finalMainChild != null) {
                 if (!mainNotContainOpenTask) {
                     mMainStage.evictOtherChildren(callbackWct, finalMainChild.getTaskInfo().taskId);
@@ -3545,6 +3561,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitLayout.isLeftRightSplit());
     }
 
+    private void handleUnsupportedSplitStart() {
+        mSplitUnsupportedToast.show();
+        notifySplitAnimationFinished();
+    }
+
+    void notifySplitAnimationFinished() {
+        if (mSplitInvocationListener == null || mSplitInvocationListenerExecutor == null) {
+            return;
+        }
+        mSplitInvocationListenerExecutor.execute(() ->
+                mSplitInvocationListener.onSplitAnimationInvoked(false /*animationRunning*/));
+    }
+
     /**
      * Logs the exit of splitscreen to a specific stage. This must be called before the exit is
      * executed.
@@ -3607,7 +3636,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 if (!ENABLE_SHELL_TRANSITIONS) {
                     StageCoordinator.this.exitSplitScreen(isMainStage ? mMainStage : mSideStage,
                             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW);
-                    mSplitUnsupportedToast.show();
+                    handleUnsupportedSplitStart();
                     return;
                 }
 
@@ -3627,7 +3656,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         "app package " + taskInfo.baseActivity.getPackageName()
                         + " does not support splitscreen, or is a controlled activity type"));
                 if (splitScreenVisible) {
-                    mSplitUnsupportedToast.show();
+                    handleUnsupportedSplitStart();
                 }
             }
         }
