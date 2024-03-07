@@ -36,6 +36,13 @@ interface BackupRestoreEntity {
     val key: String
 
     /**
+     * Codec used to encode/decode the backup data.
+     *
+     * When it is null, the [BackupRestoreStorage.defaultCodec] will be used.
+     */
+    fun codec(): BackupCodec? = null
+
+    /**
      * Backs up the entity.
      *
      * @param backupContext context for backup
