@@ -48,6 +48,9 @@ class NotificationsSoundPolicyInteractor(
     /** Checks if [notificationPolicy] allows media. */
     val isMediaAllowed: Flow<Boolean?> = notificationPolicy.map { it?.allowMedia() }
 
+    /** Checks if [notificationPolicy] allows system sounds. */
+    val isSystemAllowed: Flow<Boolean?> = notificationPolicy.map { it?.allowSystem() }
+
     /** Checks if [notificationPolicy] allows ringer. */
     val isRingerAllowed: Flow<Boolean?> =
         notificationPolicy.map { policy ->
@@ -62,31 +65,29 @@ class NotificationsSoundPolicyInteractor(
             areAlarmsAllowed.filterNotNull(),
             isMediaAllowed.filterNotNull(),
             isRingerAllowed.filterNotNull(),
-        ) { zenMode, areAlarmsAllowed, isMediaAllowed, isRingerAllowed ->
-            if (zenMode.zenMode == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS) {
-                return@combine true
+            isSystemAllowed.filterNotNull(),
+        ) { zenMode, areAlarmsAllowed, isMediaAllowed, isRingerAllowed, isSystemAllowed ->
+            when (zenMode.zenMode) {
+                // Everything is muted
+                Settings.Global.ZEN_MODE_NO_INTERRUPTIONS -> return@combine true
+                Settings.Global.ZEN_MODE_ALARMS ->
+                    return@combine stream.value == AudioManager.STREAM_RING ||
+                        stream.value == AudioManager.STREAM_NOTIFICATION ||
+                        stream.value == AudioManager.STREAM_SYSTEM
+                Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS -> {
+                    when {
+                        stream.value == AudioManager.STREAM_ALARM && !areAlarmsAllowed ->
+                            return@combine true
+                        stream.value == AudioManager.STREAM_MUSIC && !isMediaAllowed ->
+                            return@combine true
+                        stream.value == AudioManager.STREAM_SYSTEM && !isSystemAllowed ->
+                            return@combine true
+                        (stream.value == AudioManager.STREAM_RING ||
+                            stream.value == AudioManager.STREAM_NOTIFICATION) && !isRingerAllowed ->
+                            return@combine true
+                    }
+                }
             }
-
-            val isNotificationOrRing =
-                stream.value == AudioManager.STREAM_RING ||
-                    stream.value == AudioManager.STREAM_NOTIFICATION
-            if (isNotificationOrRing && zenMode.zenMode == Settings.Global.ZEN_MODE_ALARMS) {
-                return@combine true
-            }
-            if (zenMode.zenMode != Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
-                return@combine false
-            }
-
-            if (stream.value == AudioManager.STREAM_ALARM && !areAlarmsAllowed) {
-                return@combine true
-            }
-            if (stream.value == AudioManager.STREAM_MUSIC && !isMediaAllowed) {
-                return@combine true
-            }
-            if (isNotificationOrRing && !isRingerAllowed) {
-                return@combine true
-            }
-
             return@combine false
         }
     }

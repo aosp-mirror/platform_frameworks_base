@@ -196,10 +196,14 @@ class NotificationsSoundPolicyInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun zenModeAlarms_ringAndNotifications_muted() {
+    fun zenModeAlarms_ringedStreams_muted() {
         with(kosmos) {
             val expectedToBeMuted =
-                setOf(AudioManager.STREAM_RING, AudioManager.STREAM_NOTIFICATION)
+                setOf(
+                    AudioManager.STREAM_RING,
+                    AudioManager.STREAM_NOTIFICATION,
+                    AudioManager.STREAM_SYSTEM,
+                )
             testScope.runTest {
                 notificationsSoundPolicyRepository.updateNotificationPolicy()
                 notificationsSoundPolicyRepository.updateZenMode(ZenMode(Global.ZEN_MODE_ALARMS))
