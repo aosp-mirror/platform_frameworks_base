@@ -7208,6 +7208,13 @@
     <permission android:name="android.permission.ACCESS_SMARTSPACE"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- @SystemApi Allows an application to start a contextual search.
+         @FlaggedApi("android.app.contextualsearch.flags.enable_service")
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.ACCESS_CONTEXTUAL_SEARCH"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.app.contextualsearch.flags.enable_service"/>
+
     <!-- @SystemApi Allows an application to manage the wallpaper effects
      generation service.
      @hide  <p>Not for use by third-party applications.</p> -->
