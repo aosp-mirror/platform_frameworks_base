@@ -1319,7 +1319,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         for (int i = 0; i < mChildren.size(); i++)  {
             SurfaceControl sc = mChildren.get(i).getSurfaceControl();
             if (sc != null) {
-                t.reparent(sc, mSurfaceControl);
+                t.reparent(sc, getParentingSurfaceControl());
             }
         }
 
@@ -5806,6 +5806,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean isHomeSupported() {
         return (mWmService.mDisplayWindowSettings.isHomeSupportedLocked(this) && isTrusted())
                 || supportsSystemDecorations();
+    }
+
+    /**
+     * Returns the {@link SurfaceControl} where all the children should be parented on.
+     *
+     * <p> {@link DisplayContent} inserts a RootWrapper leash in the hierarchy above its original
+     * {@link #mSurfaceControl} and then overrides the {@link #mSurfaceControl} to point to the
+     * RootWrapper.
+     * <p> To prevent inconsistent state later where the DAs might get re-parented to the
+     * RootWrapper, this method should be used which returns the correct surface where the
+     * re-parenting should happen.
+     */
+    @Override
+    SurfaceControl getParentingSurfaceControl() {
+        return mWindowingLayer;
     }
 
     SurfaceControl getWindowingLayer() {
