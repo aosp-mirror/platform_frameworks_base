@@ -707,7 +707,7 @@ public class RescueParty {
                 if (pm.getModuleInfo(packageName, 0) != null) {
                     return true;
                 }
-            } catch (PackageManager.NameNotFoundException ignore) {
+            } catch (PackageManager.NameNotFoundException | IllegalStateException ignore) {
             }
 
             return isPersistentSystemApp(packageName);
