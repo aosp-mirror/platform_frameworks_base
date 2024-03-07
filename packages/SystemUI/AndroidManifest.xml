@@ -528,15 +528,6 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Springboard for launching the share and edit activity. This needs to be in the main
-             system ui process since we need to notify the status bar to dismiss the keyguard -->
-        <receiver android:name=".screenshot.ActionProxyReceiver"
-            android:exported="false" />
-
-        <!-- Callback for deleting screenshot notification -->
-        <receiver android:name=".screenshot.DeleteScreenshotReceiver"
-            android:exported="false" />
-
         <!-- Callback for invoking a smart action from the screenshot notification. -->
         <receiver android:name=".screenshot.SmartActionsReceiver"
                   android:exported="false"/>
