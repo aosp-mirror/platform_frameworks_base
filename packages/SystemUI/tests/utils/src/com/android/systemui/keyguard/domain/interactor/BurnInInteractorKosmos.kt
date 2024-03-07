@@ -19,7 +19,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.applicationContext
-import com.android.systemui.common.ui.data.repository.configurationRepository
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.doze.util.burnInHelperWrapper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -31,7 +31,7 @@ var Kosmos.burnInInteractor by Fixture {
         context = applicationContext,
         burnInHelperWrapper = burnInHelperWrapper,
         scope = applicationCoroutineScope,
-        configurationRepository = configurationRepository,
+        configurationInteractor = configurationInteractor,
         keyguardInteractor = keyguardInteractor,
     )
 }

@@ -21,6 +21,8 @@ import android.content.Context
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
+import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
@@ -37,24 +39,24 @@ constructor(
     private val clockViewModel: KeyguardClockViewModel,
 ) : KeyguardSection() {
     private lateinit var burnInLayer: AodBurnInLayer
+    // The burn-in layer requires at least 1 view at all times
+    private val emptyView: View by lazy {
+        View(context, null).apply {
+            id = R.id.burn_in_layer_empty_view
+            visibility = View.GONE
+        }
+    }
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!migrateClocksToBlueprint()) {
             return
         }
 
-        // The burn-in layer requires at least 1 view at all times
-        val emptyView = View(context, null).apply { id = View.generateViewId() }
         constraintLayout.addView(emptyView)
         burnInLayer =
             AodBurnInLayer(context).apply {
                 id = R.id.burn_in_layer
                 registerListener(rootView)
                 addView(emptyView)
-                if (!migrateClocksToBlueprint()) {
-                    val statusView =
-                        constraintLayout.requireViewById<View>(R.id.keyguard_status_view)
-                    addView(statusView)
-                }
             }
         constraintLayout.addView(burnInLayer)
     }
@@ -69,6 +71,13 @@ constructor(
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!migrateClocksToBlueprint()) {
             return
+        }
+
+        constraintSet.apply {
+            // The empty view should not occupy any space
+            constrainHeight(R.id.burn_in_layer_empty_view, 1)
+            constrainWidth(R.id.burn_in_layer_empty_view, 0)
+            connect(R.id.burn_in_layer_empty_view, BOTTOM, PARENT_ID, BOTTOM)
         }
     }
 
