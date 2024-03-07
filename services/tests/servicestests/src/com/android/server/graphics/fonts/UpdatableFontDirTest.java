@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.graphics.FontListParser;
+import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontUpdateRequest;
@@ -66,6 +67,8 @@ import java.util.stream.Collectors;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class UpdatableFontDirTest {
+
+    private static final String LEGACY_FONTS_XML = "/system/etc/fonts.xml";
 
     /**
      * A {@link UpdatableFontDir.FontFileParser} for testing. Instead of using real font files,
@@ -140,9 +143,7 @@ public final class UpdatableFontDirTest {
     private List<File> mPreinstalledFontDirs;
     private final Supplier<Long> mCurrentTimeSupplier = () -> CURRENT_TIME;
     private final Function<Map<String, File>, FontConfig> mConfigSupplier =
-            // /system/etc/font_fallback.xml is not accessible from application process, so
-            // use legacy fonts.xml for testing.
-            (map) -> SystemFonts.getSystemFontConfigForTesting("/system/etc/fonts.xml", map, 0, 0);
+            (map) -> SystemFonts.getSystemFontConfigForTesting(LEGACY_FONTS_XML, map, 0, 0);
     private FakeFontFileParser mParser;
     private FakeFsverityUtil mFakeFsverityUtil;
 
@@ -330,11 +331,13 @@ public final class UpdatableFontDirTest {
 
             FontConfig.FontFamily family = new FontConfig.FontFamily(
                     Arrays.asList(fooFont, barFont), null,
-                    FontConfig.FontFamily.VARIANT_DEFAULT);
+                    FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
             return new FontConfig(Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
-                            Collections.singletonList(family), "sans-serif")), 0, 1);
+                            Collections.singletonList(family), "sans-serif")),
+                    Collections.emptyList(), 0, 1);
         };
 
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
@@ -491,12 +494,14 @@ public final class UpdatableFontDirTest {
                     file, null, "bar", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT),
                     0, null, null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT);
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
             return new FontConfig(
                     Collections.emptyList(),
                     Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
-                            Collections.singletonList(family), "sans-serif")), 0, 1);
+                            Collections.singletonList(family), "sans-serif")),
+                    Collections.emptyList(), 0, 1);
         });
         dir.loadFontFileMap();
 
@@ -644,10 +649,12 @@ public final class UpdatableFontDirTest {
                     file, null, "test", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT), 0, null,
                     null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT);
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
             return new FontConfig(Collections.emptyList(), Collections.emptyList(),
                     Collections.singletonList(new FontConfig.NamedFamilyList(
-                            Collections.singletonList(family), "sans-serif")), 0, 1);
+                            Collections.singletonList(family), "sans-serif")),
+                    Collections.emptyList(), 0, 1);
         });
         dir.loadFontFileMap();
 

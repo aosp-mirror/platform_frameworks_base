@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessCorrection;
 import android.os.PowerManager;
+import android.util.LongArray;
 import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -32,12 +33,17 @@ import android.util.Spline;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.display.BrightnessUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.display.utils.Plog;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -115,6 +121,7 @@ public abstract class BrightnessMappingStrategy {
 
         // Display independent, mode dependent values
         float[] brightnessLevelsNits;
+        float[] brightnessLevels = null;
         float[] luxLevels;
         if (isForIdleMode) {
             brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
@@ -124,11 +131,21 @@ public abstract class BrightnessMappingStrategy {
         } else {
             brightnessLevelsNits = displayDeviceConfig.getAutoBrightnessBrighteningLevelsNits();
             luxLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevelsLux();
+
+            brightnessLevels = displayDeviceConfig.getAutoBrightnessBrighteningLevels();
+            if (brightnessLevels == null || brightnessLevels.length == 0) {
+                // Load the old configuration in the range [0, 255]. The values need to be
+                // normalized to the range [0, 1].
+                int[] brightnessLevelsInt = resources.getIntArray(
+                        com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
+                brightnessLevels = new float[brightnessLevelsInt.length];
+                for (int i = 0; i < brightnessLevels.length; i++) {
+                    brightnessLevels[i] = normalizeAbsoluteBrightness(brightnessLevelsInt[i]);
+                }
+            }
         }
 
         // Display independent, mode independent values
-        int[] brightnessLevelsBacklight = resources.getIntArray(
-                com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
         float autoBrightnessAdjustmentMaxGamma = resources.getFraction(
                 com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma,
                 1, 1);
@@ -149,8 +166,8 @@ public abstract class BrightnessMappingStrategy {
             builder.setShortTermModelUpperLuxMultiplier(SHORT_TERM_MODEL_THRESHOLD_RATIO);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, brightnessRange,
                     autoBrightnessAdjustmentMaxGamma, isForIdleMode, displayWhiteBalanceController);
-        } else if (isValidMapping(luxLevels, brightnessLevelsBacklight) && !isForIdleMode) {
-            return new SimpleMappingStrategy(luxLevels, brightnessLevelsBacklight,
+        } else if (isValidMapping(luxLevels, brightnessLevels)) {
+            return new SimpleMappingStrategy(luxLevels, brightnessLevels,
                     autoBrightnessAdjustmentMaxGamma, shortTermModelTimeout);
         } else {
             return null;
@@ -614,7 +631,7 @@ public abstract class BrightnessMappingStrategy {
         private float mUserBrightness;
         private long mShortTermModelTimeout;
 
-        private SimpleMappingStrategy(float[] lux, int[] brightness, float maxGamma,
+        private SimpleMappingStrategy(float[] lux, float[] brightness, float maxGamma,
                 long timeout) {
             Preconditions.checkArgument(lux.length != 0 && brightness.length != 0,
                     "Lux and brightness arrays must not be empty!");
@@ -629,7 +646,7 @@ public abstract class BrightnessMappingStrategy {
             mBrightness = new float[N];
             for (int i = 0; i < N; i++) {
                 mLux[i] = lux[i];
-                mBrightness[i] = normalizeAbsoluteBrightness(brightness[i]);
+                mBrightness[i] = brightness[i];
             }
 
             mMaxGamma = maxGamma;
@@ -840,6 +857,13 @@ public abstract class BrightnessMappingStrategy {
         private final boolean mIsForIdleMode;
         private final DisplayWhiteBalanceController mDisplayWhiteBalanceController;
 
+        // Previous short-term models and the times that they were computed stored for debugging
+        // purposes
+        private List<Spline> mPreviousBrightnessSplines = new ArrayList<>();
+        private LongArray mBrightnessSplineChangeTimes = new LongArray();
+        private static final int NO_OF_PREVIOUS_CONFIGS_TO_LOG = 5;
+        private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+
         public PhysicalMappingStrategy(BrightnessConfiguration config, float[] nits,
                 float[] brightness, float maxGamma, boolean isForIdleMode,
                 DisplayWhiteBalanceController displayWhiteBalanceController) {
@@ -982,6 +1006,13 @@ public abstract class BrightnessMappingStrategy {
             mUserLux = lux;
             mUserBrightness = brightness;
             computeSpline();
+
+            if (mPreviousBrightnessSplines.size() == NO_OF_PREVIOUS_CONFIGS_TO_LOG) {
+                mPreviousBrightnessSplines.remove(0);
+                mBrightnessSplineChangeTimes.remove(0);
+            }
+            mPreviousBrightnessSplines.add(mBrightnessSpline);
+            mBrightnessSplineChangeTimes.add(System.currentTimeMillis());
         }
 
         @Override
@@ -1042,7 +1073,16 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mDefaultConfig=" + mDefaultConfig);
             pw.println("  mBrightnessRangeAdjustmentApplied=" + mBrightnessRangeAdjustmentApplied);
 
-            dumpConfigDiff(pw, hbmTransition);
+            pw.println("  Previous short-term models (oldest to newest): ");
+            for (int i = 0; i < mPreviousBrightnessSplines.size(); i++) {
+                pw.println("  Computed at "
+                        + FORMAT.format(new Date(mBrightnessSplineChangeTimes.get(i))) + ": ");
+                dumpConfigDiff(pw, hbmTransition, mPreviousBrightnessSplines.get(i),
+                        /* shortTermModelOnly= */ true);
+            }
+
+            pw.println("  Difference between current config and default: ");
+            dumpConfigDiff(pw, hbmTransition, mBrightnessSpline, /* shortTermModelOnly= */ false);
         }
 
         @Override
@@ -1066,9 +1106,8 @@ public abstract class BrightnessMappingStrategy {
          *
          * @param pw The print-writer to write to.
          */
-        private void dumpConfigDiff(PrintWriter pw, float hbmTransition) {
-            pw.println("  Difference between current config and default: ");
-
+        private void dumpConfigDiff(PrintWriter pw, float hbmTransition, Spline brightnessSpline,
+                boolean shortTermModelOnly) {
             Pair<float[], float[]> currentCurve = mConfig.getCurve();
             Spline currSpline = Spline.createSpline(currentCurve.first, currentCurve.second);
 
@@ -1107,7 +1146,7 @@ public abstract class BrightnessMappingStrategy {
 
                 float defaultNits = defaultSpline.interpolate(lux);
                 float longTermNits = currSpline.interpolate(lux);
-                float shortTermNits = mBrightnessSpline.interpolate(lux);
+                float shortTermNits = brightnessSpline.interpolate(lux);
                 float brightness = mAdjustedNitsToBrightnessSpline.interpolate(shortTermNits);
 
                 String luxPrefix = (lux == mUserLux ? "^" : "");
@@ -1142,8 +1181,10 @@ public abstract class BrightnessMappingStrategy {
                 // At 80 chars, start another row
                 if (sbLux.length() > 80 || (i == luxes.length - 1)) {
                     pw.println(sbLux);
-                    pw.println(sbNits);
-                    pw.println(sbLong);
+                    if (!shortTermModelOnly) {
+                        pw.println(sbNits);
+                        pw.println(sbLong);
+                    }
                     pw.println(sbShort);
                     pw.println(sbBrightness);
                     pw.println(sbPercent);

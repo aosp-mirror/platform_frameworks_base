@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,41 +24,45 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.SettingsOpacity.alphaForEnabled
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.toMediumWeight
-
-@Composable
-fun SettingsTitle(title: State<String>, useMediumWeight: Boolean = false) {
-    SettingsTitle(title.value, useMediumWeight)
-}
 
 @Composable
 fun SettingsTitle(title: String, useMediumWeight: Boolean = false) {
     Text(
         text = title,
+        modifier = Modifier.padding(vertical = SettingsDimension.paddingTiny),
         color = MaterialTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.titleMedium.let {
-            when (useMediumWeight) {
-                true -> it.toMediumWeight()
-                else -> it
-            }
-        },
+        style = MaterialTheme.typography.titleMedium.withWeight(useMediumWeight),
     )
 }
 
 @Composable
-fun SettingsBody(
-    body: State<String>,
-    maxLines: Int = Int.MAX_VALUE,
-) {
-    SettingsBody(body = body.value, maxLines = maxLines)
+fun SettingsTitleSmall(title: String, useMediumWeight: Boolean = false) {
+    Text(
+        text = title,
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.titleSmall.withWeight(useMediumWeight),
+    )
+}
+
+@Composable
+fun SettingsDialogItem(text: String, enabled: Boolean = true) {
+    Text(
+        text = text,
+        modifier = Modifier.alphaForEnabled(enabled),
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.bodyLarge,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable
@@ -80,7 +84,9 @@ fun SettingsBody(
 @Composable
 fun PlaceholderTitle(title: String) {
     Box(
-        modifier = Modifier.fillMaxSize().padding(SettingsDimension.itemPadding),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(SettingsDimension.itemPadding),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -91,11 +97,19 @@ fun PlaceholderTitle(title: String) {
     }
 }
 
+private fun TextStyle.withWeight(useMediumWeight: Boolean = false) = when (useMediumWeight) {
+    true -> toMediumWeight()
+    else -> this
+}
+
 @Preview
 @Composable
 private fun BasePreferencePreview() {
     SettingsTheme {
         Column(Modifier.width(100.dp)) {
+            SettingsTitle(
+                title = "Title",
+            )
             SettingsBody(
                 body = "Long long long long long long text",
             )

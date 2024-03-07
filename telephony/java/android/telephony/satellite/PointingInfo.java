@@ -16,13 +16,24 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.telephony.flags.Flags;
+
+import java.util.Objects;
+
 /**
+ * PointingInfo is used to store the position of satellite received from satellite modem.
+ * The position of satellite is represented by azimuth and elevation angles
+ * with degrees as unit of measurement. Satellite position is based on magnetic north direction.
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public final class PointingInfo implements Parcelable {
     /** Satellite azimuth in degrees */
     private float mSatelliteAzimuthDegrees;
@@ -33,7 +44,6 @@ public final class PointingInfo implements Parcelable {
     /**
      * @hide
      */
-
     public PointingInfo(float satelliteAzimuthDegrees, float satelliteElevationDegrees) {
         mSatelliteAzimuthDegrees = satelliteAzimuthDegrees;
         mSatelliteElevationDegrees = satelliteElevationDegrees;
@@ -44,16 +54,19 @@ public final class PointingInfo implements Parcelable {
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public int describeContents() {
         return 0;
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeFloat(mSatelliteAzimuthDegrees);
         out.writeFloat(mSatelliteElevationDegrees);
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public static final @android.annotation.NonNull Creator<PointingInfo> CREATOR =
             new Creator<PointingInfo>() {
                 @Override
@@ -66,6 +79,20 @@ public final class PointingInfo implements Parcelable {
                     return new PointingInfo[size];
                 }
             };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PointingInfo that = (PointingInfo) o;
+        return mSatelliteAzimuthDegrees == that.mSatelliteAzimuthDegrees
+                && mSatelliteElevationDegrees == that.mSatelliteElevationDegrees;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSatelliteAzimuthDegrees, mSatelliteElevationDegrees);
+    }
 
     @NonNull
     @Override
@@ -81,10 +108,12 @@ public final class PointingInfo implements Parcelable {
         return sb.toString();
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public float getSatelliteAzimuthDegrees() {
         return mSatelliteAzimuthDegrees;
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public float getSatelliteElevationDegrees() {
         return mSatelliteElevationDegrees;
     }

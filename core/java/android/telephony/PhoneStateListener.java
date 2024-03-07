@@ -401,7 +401,7 @@ public class PhoneStateListener {
 
     /**
      * Listen for call disconnect causes which contains {@link DisconnectCause} and
-     * {@link PreciseDisconnectCause}.
+     * the precise disconnect cause.
      *
      * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE}
      * or the calling app has carrier privileges
@@ -851,8 +851,8 @@ public class PhoneStateListener {
      * subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * @param disconnectCause {@link DisconnectCause}.
-     * @param preciseDisconnectCause {@link PreciseDisconnectCause}.
+     * @param disconnectCause the disconnect cause
+     * @param preciseDisconnectCause the precise disconnect cause
      * @deprecated Use {@link TelephonyCallback.CallDisconnectCauseListener} instead.
      */
     @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)

@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
+
+import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
@@ -29,32 +33,65 @@ public class CrossFadeHelper {
     public static final long ANIMATION_DURATION_LENGTH = 210;
 
     public static void fadeOut(final View view) {
-        fadeOut(view, null);
+        fadeOut(view, (Runnable) null);
     }
 
     public static void fadeOut(final View view, final Runnable endRunnable) {
         fadeOut(view, ANIMATION_DURATION_LENGTH, 0, endRunnable);
     }
 
+    public static void fadeOut(final View view, final Animator.AnimatorListener listener) {
+        fadeOut(view, ANIMATION_DURATION_LENGTH, 0, listener);
+    }
+
+    public static void fadeOut(final View view, long duration, int delay) {
+        fadeOut(view, duration, delay, (Runnable) null);
+    }
+
+    /**
+     * Perform a fade-out animation, invoking {@code endRunnable} when the animation ends. It will
+     * not be invoked if the animation is cancelled.
+     *
+     * @deprecated Use {@link #fadeOut(View, long, int, Animator.AnimatorListener)} instead.
+     */
+    @Deprecated
     public static void fadeOut(final View view, long duration, int delay,
-            final Runnable endRunnable) {
+            @Nullable final Runnable endRunnable) {
         view.animate().cancel();
         view.animate()
                 .alpha(0f)
                 .setDuration(duration)
                 .setInterpolator(Interpolators.ALPHA_OUT)
                 .setStartDelay(delay)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (endRunnable != null) {
-                            endRunnable.run();
-                        }
-                        if (view.getVisibility() != View.GONE) {
-                            view.setVisibility(View.INVISIBLE);
-                        }
+                .withEndAction(() -> {
+                    if (endRunnable != null) {
+                        endRunnable.run();
+                    }
+                    if (view.getVisibility() != View.GONE) {
+                        view.setVisibility(View.INVISIBLE);
                     }
                 });
+        if (view.hasOverlappingRendering()) {
+            view.animate().withLayer();
+        }
+    }
+
+    public static void fadeOut(final View view, long duration, int delay,
+            @Nullable final Animator.AnimatorListener listener) {
+        view.animate().cancel();
+        ViewPropertyAnimator animator = view.animate()
+                .alpha(0f)
+                .setDuration(duration)
+                .setInterpolator(Interpolators.ALPHA_OUT)
+                .setStartDelay(delay)
+                .withEndAction(() -> {
+                    if (view.getVisibility() != View.GONE) {
+                        view.setVisibility(View.INVISIBLE);
+                    }
+                });
+        if (listener != null) {
+            animator.setListener(listener);
+        }
         if (view.hasOverlappingRendering()) {
             view.animate().withLayer();
         }
@@ -113,7 +150,27 @@ public class CrossFadeHelper {
         fadeIn(view, ANIMATION_DURATION_LENGTH, 0);
     }
 
+    public static void fadeIn(final View view, Runnable endRunnable) {
+        fadeIn(view, ANIMATION_DURATION_LENGTH, /* delay= */ 0, endRunnable);
+    }
+
+    public static void fadeIn(final View view, Animator.AnimatorListener listener) {
+        fadeIn(view, ANIMATION_DURATION_LENGTH, /* delay= */ 0, listener);
+    }
+
     public static void fadeIn(final View view, long duration, int delay) {
+        fadeIn(view, duration, delay, /* endRunnable= */ (Runnable) null);
+    }
+
+    /**
+     * Perform a fade-in animation, invoking {@code endRunnable} when the animation ends. It will
+     * not be invoked if the animation is cancelled.
+     *
+     * @deprecated Use {@link #fadeIn(View, long, int, Animator.AnimatorListener)} instead.
+     */
+    @Deprecated
+    public static void fadeIn(final View view, long duration, int delay,
+            @Nullable Runnable endRunnable) {
         view.animate().cancel();
         if (view.getVisibility() == View.INVISIBLE) {
             view.setAlpha(0.0f);
@@ -124,7 +181,27 @@ public class CrossFadeHelper {
                 .setDuration(duration)
                 .setStartDelay(delay)
                 .setInterpolator(Interpolators.ALPHA_IN)
-                .withEndAction(null);
+                .withEndAction(endRunnable);
+        if (view.hasOverlappingRendering() && view.getLayerType() != View.LAYER_TYPE_HARDWARE) {
+            view.animate().withLayer();
+        }
+    }
+
+    public static void fadeIn(final View view, long duration, int delay,
+            @Nullable Animator.AnimatorListener listener) {
+        view.animate().cancel();
+        if (view.getVisibility() == View.INVISIBLE) {
+            view.setAlpha(0.0f);
+            view.setVisibility(View.VISIBLE);
+        }
+        ViewPropertyAnimator animator = view.animate()
+                .alpha(1f)
+                .setDuration(duration)
+                .setStartDelay(delay)
+                .setInterpolator(Interpolators.ALPHA_IN);
+        if (listener != null) {
+            animator.setListener(listener);
+        }
         if (view.hasOverlappingRendering() && view.getLayerType() != View.LAYER_TYPE_HARDWARE) {
             view.animate().withLayer();
         }

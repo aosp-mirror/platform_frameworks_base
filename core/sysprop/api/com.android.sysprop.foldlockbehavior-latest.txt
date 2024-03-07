@@ -1,0 +1,9 @@
+props {
+  module: "android.sysprop.FoldLockBehaviorProperties"
+  prop {
+    api_name: "fold_lock_setting_enabled"
+    type: Boolean
+    prop_name: "persist.fold_lock_setting_enabled"
+    scope: Internal
+  }
+}

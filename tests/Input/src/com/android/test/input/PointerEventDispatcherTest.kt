@@ -25,7 +25,6 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener
 import com.android.server.UiThread
 import com.android.server.wm.PointerEventDispatcher
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -86,8 +85,7 @@ class PointerEventDispatcherTest {
         // Since the listener raises an exception during the event handling, the event should be
         // marked as 'not handled'.
         assertEquals(SpyInputEventSender.FinishedSignal(seq, handled = false), finishedSignal)
-        // Ensure that there aren't double finish calls. This would crash if there's a call
-        // to finish twice.
-        assertNull(mSender.getFinishedSignal())
+        // Ensure that there aren't double finish calls.
+        mSender.assertNoEvents()
     }
 }

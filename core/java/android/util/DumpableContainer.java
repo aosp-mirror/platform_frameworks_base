@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 /**
  * Represents a container that manages {@link Dumpable dumpables}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public interface DumpableContainer {
 
     /**

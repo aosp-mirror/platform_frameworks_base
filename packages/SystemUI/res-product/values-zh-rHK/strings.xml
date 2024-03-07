@@ -26,20 +26,38 @@
     <string name="keyguard_missing_sim_message" product="tablet" msgid="408124574073032188">"平板電腦中沒有 SIM 卡。"</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="2605468359948247208">"手機中沒有 SIM 卡。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"PIN 碼不符"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將重設此平板電腦，而所有平板電腦資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將重設此手機，而所有手機資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將重設此平板電腦，而所有平板電腦資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將重設此手機，而所有手機資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解鎖平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解鎖手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="302165994845009232">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將重設此平板電腦，而所有平板電腦資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="2594813176164266847">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將重設此手機，而所有手機資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="8710104080409538587">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將重設此平板電腦，而所有平板電腦資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="6381835450014881813">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將重設此手機，而所有手機資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="7325071812832605911">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="8110939900089863103">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="8509811676952707883">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="3051962486994265014">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此使用者，而所有使用者資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="1049523640263353830">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"你嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。系統將移除此工作設定檔，而所有設定檔資料亦會一併刪除。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"你已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求你透過電郵帳戶解鎖平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"你已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果之後再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求你透過電郵帳戶解鎖手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="thermal_shutdown_title" product="default" msgid="8039593017174903505">"手機因過熱而關機"</string>
+    <string name="thermal_shutdown_title" product="device" msgid="2954206342842856379">"裝置因過熱而關機"</string>
+    <string name="thermal_shutdown_title" product="tablet" msgid="8941033526856177533">"平板電腦因過熱而關機"</string>
+    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"你的手機現已正常運作。\n輕按即可瞭解詳情"</string>
+    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"你的裝置現已正常運作。\n輕按即可瞭解詳情"</string>
+    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"你的平板電腦現已正常運作。\n輕按即可瞭解詳情"</string>
+    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"你的手機之前因過熱而關機降溫。手機現已正常運作。\n\n以下情況可能會導致手機過熱：\n	• 使用耗用大量資源的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上載大型檔案\n	• 在高溫環境下使用手機"</string>
+    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"你的裝置之前因過熱而關機降溫。裝置現已正常運作。\n\n以下情況可能會導致裝置過熱：\n	• 使用耗用大量資源的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上載大型檔案\n	• 在高溫環境下使用裝置"</string>
+    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"你的平板電腦之前因過熱而關機降溫。平板電腦現已正常運作。\n\n以下情況可能會導致平板電腦過熱：\n	• 使用耗用大量資源的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上載大型檔案\n	• 在高溫環境下使用平板電腦"</string>
+    <string name="high_temp_title" product="default" msgid="5365000411304924115">"手機溫度正在上升"</string>
+    <string name="high_temp_title" product="device" msgid="6622009907401563664">"裝置溫度正在上升"</string>
+    <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"平板電腦溫度正在上升"</string>
+    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"手機降溫時，部分功能會受限制。\n輕按即可瞭解詳情"</string>
+    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"裝置降溫時，部分功能會受限制。\n輕按即可瞭解詳情"</string>
+    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"平板電腦降溫時，部分功能會受限制。\n輕按即可瞭解詳情"</string>
+    <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"手機會自動嘗試降溫。你仍可以使用手機，但手機的運作速度可能較慢。\n\n手機降溫後便會正常運作。"</string>
+    <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"裝置會自動嘗試降溫。你仍可以使用裝置，但裝置的運作速度可能較慢。\n\n裝置降溫後便會正常運作。"</string>
+    <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"平板電腦會自動嘗試降溫。你仍可以使用平板電腦，但平板電腦的運作速度可能較慢。\n\n平板電腦降溫後便會正常運作。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"指紋感應器位於開關按鈕上，開關按鈕形狀扁平，位於平板電腦邊緣凸起的音量按鈕旁。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"指紋感應器位於開關按鈕上，開關按鈕形狀扁平，位於裝置邊緣凸起的音量按鈕旁。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指紋感應器位於開關按鈕上，開關按鈕形狀扁平，位於手機邊緣凸起的音量按鈕旁。"</string>

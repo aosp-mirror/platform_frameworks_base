@@ -16,7 +16,7 @@
 
 package android.widget.listview;
 
-import android.util.ListScenario;
+import android.widget.ListScenario;
 
 /**
  * Pressing down from position 0 requires looking past positions 1, 2 and 3 to

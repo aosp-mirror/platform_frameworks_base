@@ -18,6 +18,11 @@
 
 package com.android.systemui.bouncer.ui.composable
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.view.Gravity
+import android.view.WindowManager
+import android.widget.TextView
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
@@ -26,11 +31,16 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,20 +51,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.android.compose.PlatformOutlinedButton
 import com.android.compose.animation.Easings
 import com.android.keyguard.PinShapeAdapter
-import com.android.systemui.R
 import com.android.systemui.bouncer.ui.viewmodel.EntryToken.Digit
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinInputViewModel
+import com.android.systemui.res.R
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -65,7 +82,10 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 
 @Composable
-fun PinInputDisplay(viewModel: PinBouncerViewModel) {
+fun PinInputDisplay(
+    viewModel: PinBouncerViewModel,
+    modifier: Modifier = Modifier,
+) {
     val hintedPinLength: Int? by viewModel.hintedPinLength.collectAsState()
     val shapeAnimations = rememberShapeAnimations(viewModel.pinShapes)
 
@@ -81,8 +101,8 @@ fun PinInputDisplay(viewModel: PinBouncerViewModel) {
     // unifying into a single, more complex implementation.
 
     when (val length = hintedPinLength) {
-        null -> RegularPinInputDisplay(viewModel, shapeAnimations)
-        else -> HintingPinInputDisplay(viewModel, shapeAnimations, length)
+        null -> RegularPinInputDisplay(viewModel, shapeAnimations, modifier)
+        else -> HintingPinInputDisplay(viewModel, shapeAnimations, length, modifier)
     }
 }
 
@@ -97,6 +117,7 @@ private fun HintingPinInputDisplay(
     viewModel: PinBouncerViewModel,
     shapeAnimations: ShapeAnimations,
     hintedPinLength: Int,
+    modifier: Modifier = Modifier,
 ) {
     val pinInput: PinInputViewModel by viewModel.pinInput.collectAsState()
     // [ClearAll] marker pointing at the beginning of the current pin input.
@@ -151,7 +172,7 @@ private fun HintingPinInputDisplay(
     LaunchedEffect(Unit) { playAnimation = true }
 
     val dotColor = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(modifier = Modifier.heightIn(min = shapeAnimations.shapeSize)) {
+    Row(modifier = modifier.heightIn(min = shapeAnimations.shapeSize)) {
         pinEntryDrawable.forEachIndexed { index, drawable ->
             // Key the loop by [index] and [drawable], so that updating a shape drawable at the same
             // index will play the new animation (by remembering a new [atEnd]).
@@ -183,7 +204,12 @@ private fun HintingPinInputDisplay(
 private fun RegularPinInputDisplay(
     viewModel: PinBouncerViewModel,
     shapeAnimations: ShapeAnimations,
+    modifier: Modifier = Modifier,
 ) {
+    if (viewModel.isSimAreaVisible) {
+        SimArea(viewModel = viewModel)
+    }
+
     // Holds all currently [VisiblePinEntry] composables. This cannot be simply derived from
     // `viewModel.pinInput` at composition, since deleting a pin entry needs to play a remove
     // animation, thus the composable to be removed has to remain in the composition until fully
@@ -226,7 +252,95 @@ private fun RegularPinInputDisplay(
             }
     }
 
-    pinInputRow.Content()
+    pinInputRow.Content(modifier)
+}
+
+@Composable
+private fun SimArea(viewModel: PinBouncerViewModel) {
+    val isLockedEsim by viewModel.isLockedEsim.collectAsState()
+    val isSimUnlockingDialogVisible by viewModel.isSimUnlockingDialogVisible.collectAsState()
+    val errorDialogMessage by viewModel.errorDialogMessage.collectAsState()
+    var unlockDialog: Dialog? by remember { mutableStateOf(null) }
+    var errorDialog: Dialog? by remember { mutableStateOf(null) }
+    val context = LocalView.current.context
+
+    DisposableEffect(isSimUnlockingDialogVisible) {
+        if (isSimUnlockingDialogVisible) {
+            val builder =
+                AlertDialog.Builder(context).apply {
+                    setMessage(context.getString(R.string.kg_sim_unlock_progress_dialog_message))
+                    setCancelable(false)
+                }
+            unlockDialog =
+                builder.create().apply {
+                    window?.setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG)
+                    show()
+                    findViewById<TextView>(android.R.id.message)?.gravity = Gravity.CENTER
+                }
+        } else {
+            unlockDialog?.hide()
+            unlockDialog = null
+        }
+
+        onDispose {
+            unlockDialog?.hide()
+            unlockDialog = null
+        }
+    }
+
+    DisposableEffect(errorDialogMessage) {
+        if (errorDialogMessage != null) {
+            val builder = AlertDialog.Builder(context)
+            builder.setMessage(errorDialogMessage)
+            builder.setCancelable(false)
+            builder.setNeutralButton(R.string.ok, null)
+            errorDialog =
+                builder.create().apply {
+                    window?.setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG)
+                    setOnDismissListener { viewModel.onErrorDialogDismissed() }
+                    show()
+                }
+        } else {
+            errorDialog?.hide()
+            errorDialog = null
+        }
+
+        onDispose {
+            errorDialog?.hide()
+            errorDialog = null
+        }
+    }
+
+    Box(modifier = Modifier.padding(bottom = 20.dp)) {
+        // If isLockedEsim is null, then we do not show anything.
+        if (isLockedEsim == true) {
+            PlatformOutlinedButton(
+                onClick = { viewModel.onDisableEsimButtonClicked() },
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_no_sim),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                    )
+                    Text(
+                        text = stringResource(R.string.disable_carrier_button_text),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        } else if (isLockedEsim == false) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_lockscreen_sim),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(colorResource(id = R.color.background_protected))
+            )
+        }
+    }
 }
 
 private class PinInputRow(
@@ -235,10 +349,11 @@ private class PinInputRow(
     private val entries = mutableStateListOf<PinInputEntry>()
 
     @Composable
-    fun Content() {
+    fun Content(modifier: Modifier) {
         Row(
             modifier =
-                Modifier.heightIn(min = shapeAnimations.shapeSize)
+                modifier
+                    .heightIn(min = shapeAnimations.shapeSize)
                     // Pins overflowing horizontally should still be shown as scrolling.
                     .wrapContentSize(unbounded = true),
         ) {

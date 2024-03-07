@@ -315,6 +315,13 @@ public abstract class PowerManagerInternal {
     public static final int MODE_DISPLAY_INACTIVE = 9;
 
     /**
+     * Mode: It indicates that display is changing layout due to rotation or fold
+     * unfold behavior.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_DISPLAY_CHANGE = 17;
+
+    /**
      * SetPowerMode() is called to enable/disable specific hint mode, which
      * may result in adjustment of power/performance parameters of the
      * cpufreq governor and other controls on device side.

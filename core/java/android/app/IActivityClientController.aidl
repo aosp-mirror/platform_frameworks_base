@@ -191,4 +191,14 @@ interface IActivityClientController {
      */
     boolean isRequestedToLaunchInTaskFragment(in IBinder activityToken,
             in IBinder taskFragmentToken);
+
+    /**
+     * Enable or disable ActivityRecordInputSink to block input events.
+     *
+     * @param token The token for the activity that requests to toggle.
+     * @param enabled Whether the input evens are blocked by ActivityRecordInputSink.
+     */
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.INTERNAL_SYSTEM_WINDOW)")
+    oneway void setActivityRecordInputSinkEnabled(in IBinder activityToken, boolean enabled);
 }

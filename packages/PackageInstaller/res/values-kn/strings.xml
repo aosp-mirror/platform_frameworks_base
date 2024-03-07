@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ನಿಂದ ಈ ಆ್ಯಪ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬೇಕೇ?\n\nಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> ನಿಂದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಬೇರೆ ಮೂಲವೊಂದರಿಂದ ಅಪ್‌ಡೇಟ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿರುವ ಯಾವುದೇ ಮೂಲದಿಂದ ಭವಿಷ್ಯದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ನೀವು ಸ್ವೀಕರಿಸಬಹುದು. ಆ್ಯಪ್‌ನ ಕಾರ್ಯಚಟುವಟಿಕೆಯು ಬದಲಾಗಬಹುದು."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;ಈ ಆ್ಯಪ್ ಅನ್ನು &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೇ?&lt;/p&gt;&lt;p&gt;ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಬೇರೆ ಮೂಲವೊಂದರಿಂದ ಅಪ್‌ಡೇಟ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿರುವ ಯಾವುದೇ ಮೂಲದಿಂದ ನೀವು ಭವಿಷ್ಯದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು. ಆ್ಯಪ್‌ನ ಕಾರ್ಯಚಟುವಟಿಕೆಯು ಬದಲಾಗಬಹುದು.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;ಈ ಆ್ಯಪ್ ಅನ್ನು &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೇ?&lt;/p&gt;&lt;p&gt;ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಬೇರೆ ಮೂಲವೊಂದರಿಂದ ಅಪ್‌ಡೇಟ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ TV ಯಲ್ಲಿರುವ ಯಾವುದೇ ಮೂಲದಿಂದ ನೀವು ಭವಿಷ್ಯದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು. ಆ್ಯಪ್‌ನ ಕಾರ್ಯಚಟುವಟಿಕೆಯು ಬದಲಾಗಬಹುದು.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;ಈ ಆ್ಯಪ್ ಅನ್ನು &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೇ?&lt;/p&gt;&lt;p&gt;ಈ ಆ್ಯಪ್ ಸಾಮಾನ್ಯವಾಗಿ &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt; ನಿಂದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಬೇರೆ ಮೂಲವೊಂದರಿಂದ ಅಪ್‌ಡೇಟ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿರುವ ಯಾವುದೇ ಮೂಲದಿಂದ ನೀವು ಭವಿಷ್ಯದ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು. ಆ್ಯಪ್‌ನ ಕಾರ್ಯಚಟುವಟಿಕೆಯು ಬದಲಾಗಬಹುದು.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿಲ್ಲ."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಪ್ಯಾಕೇಜ್‌ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿರುವ ಆ್ಯಪ್‌ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ಯಾಕೇಜ್ ಜೊತೆಗೆ ಸಂಘರ್ಷವಾಗುತ್ತದೆ."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ಆ್ಯಪ್ ಡೇಟಾದಲ್ಲಿ <xliff:g id="SIZE">%1$s</xliff:g> ಇರಿಸಿಕೊಳ್ಳಿ."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ನೀವು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅಳಿಸಲು ಬಯಸುತ್ತೀರಾ?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ನೀವು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಬಯಸುತ್ತೀರಾ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಕ್ಲೋನ್ ಅನ್ನು ಸಹ ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"ನಿಮ್ಮ ಖಾಸಗಿ ಸ್ಪೇಸ್‌ನಿಂದ ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ನೀವು ಬಯಸುತ್ತೀರಾ?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ಚಾಲನೆಯಲ್ಲಿರುವ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ವಿಫಲಗೊಂಡ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
@@ -98,7 +101,27 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ಮುಂದುವರಿಸಿ"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌/ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
-    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿರುವ ಕುರಿತು ಅಧಿಸೂಚನೆ"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿರುವ ಕುರಿತು ನೋಟಿಫಿಕೇಶನ್"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆ"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" ಆ್ಯಪ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ನಿಂದ <xliff:g id="APPNAME">%1$s</xliff:g> ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಬೇಕೆ?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೌನ್‌ಲೋಡ್ ಆಗಲು ಈ ಆ್ಯಪ್ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ"</string>
+    <string name="restore" msgid="8460854736328970444">"ಮರುಸ್ಥಾಪಿಸಿ"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ನೀವು ಆಫ್‌ಲೈನ್‌ನಲ್ಲಿರುವಿರಿ"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"ನೀವು ಇಂಟರ್ನೆಟ್‌ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಿದಾಗ, ಈ ಆ್ಯಪ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮರುಸ್ಥಾಪನೆಯಾಗುತ್ತದೆ"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ಏನೋ ತಪ್ಪಾಗಿದೆ"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ಪ್ರಯತ್ನಿಸುವಾಗ ಸಮಸ್ಯೆ ಕಂಡುಬಂದಿದೆ"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆ ಇಲ್ಲ"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಲು, ನೀವು ಈ ಸಾಧನದಲ್ಲಿ ಸ್ಥಳಾವಕಾಶವನ್ನು ತೆರವುಗೊಳಿಸಬಹುದು. ಅಗತ್ಯವಿರುವ ಸಂಗ್ರಹಣೆ: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"ಕ್ರಮದ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ಮುಂದಿನ ಹಂತಗಳನ್ನು ಅನುಸರಿಸಿ"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಸ್ಥಾಪಿಸಲು, ನೀವು <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡುವ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"ಮುಂದುವರಿಸಿ"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"ಸಂಗ್ರಹಣೆಯನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="close" msgid="5214897374055647996">"ಮುಚ್ಚಿರಿ"</string>
 </resources>

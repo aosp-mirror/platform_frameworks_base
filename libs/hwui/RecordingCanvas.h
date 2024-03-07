@@ -110,7 +110,7 @@ class RecordingCanvas;
 
 class DisplayListData final {
 public:
-    DisplayListData() : mHasText(false) {}
+    DisplayListData() : mHasText(false), mHasFill(false) {}
     ~DisplayListData();
 
     void draw(SkCanvas* canvas) const;
@@ -121,13 +121,12 @@ public:
     void applyColorTransform(ColorTransform transform);
 
     bool hasText() const { return mHasText; }
+    bool hasFill() const { return mHasFill; }
     size_t usedSize() const { return fUsed; }
     size_t allocatedSize() const { return fReserved; }
 
 private:
     friend class RecordingCanvas;
-
-    void flush();
 
     void save();
     void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, SkCanvas::SaveLayerFlags);
@@ -194,6 +193,7 @@ private:
     size_t fReserved = 0;
 
     bool mHasText : 1;
+    bool mHasFill : 1;
 };
 
 class RecordingCanvas final : public SkCanvasVirtualEnforcer<SkNoDrawCanvas> {
@@ -207,8 +207,6 @@ public:
     SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec&) override;
     void willRestore() override;
     bool onDoSaveBehind(const SkRect*) override;
-
-    void onFlush() override;
 
     void didConcat44(const SkM44&) override;
     void didSetM44(const SkM44&) override;

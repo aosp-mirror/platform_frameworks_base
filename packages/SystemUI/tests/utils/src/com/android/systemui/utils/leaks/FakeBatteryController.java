@@ -22,10 +22,16 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCallback>
         implements BatteryController {
+    private boolean mIsAodPowerSave = false;
     private boolean mWirelessCharging;
+    private boolean mPowerSaveMode = false;
+
+    private final List<BatteryStateChangeCallback> mCallbacks = new ArrayList<>();
 
     public FakeBatteryController(LeakCheck test) {
         super(test, "battery");
@@ -43,12 +49,18 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
 
     @Override
     public void setPowerSaveMode(boolean powerSave) {
-
+        mPowerSaveMode = powerSave;
+        for (BatteryStateChangeCallback callback: mCallbacks) {
+            callback.onPowerSaveChanged(powerSave);
+        }
     }
 
+    /**
+     * Note: this method ignores the View argument
+     */
     @Override
     public void setPowerSaveMode(boolean powerSave, View view) {
-
+        setPowerSaveMode(powerSave);
     }
 
     @Override
@@ -58,12 +70,12 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
 
     @Override
     public boolean isPowerSave() {
-        return false;
+        return mPowerSaveMode;
     }
 
     @Override
     public boolean isAodPowerSave() {
-        return false;
+        return mIsAodPowerSave;
     }
 
     @Override
@@ -71,7 +83,21 @@ public class FakeBatteryController extends BaseLeakChecker<BatteryStateChangeCal
         return mWirelessCharging;
     }
 
+    public void setIsAodPowerSave(boolean isAodPowerSave) {
+        mIsAodPowerSave = isAodPowerSave;
+    }
+
     public void setWirelessCharging(boolean wirelessCharging) {
         mWirelessCharging = wirelessCharging;
+    }
+
+    @Override
+    public void addCallback(BatteryStateChangeCallback listener) {
+        mCallbacks.add(listener);
+    }
+
+    @Override
+    public void removeCallback(BatteryStateChangeCallback listener) {
+        mCallbacks.remove(listener);
     }
 }

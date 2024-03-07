@@ -1,0 +1,155 @@
+package: "com.android.server.display.feature.flags"
+
+# Important: Flags must be accessed through DisplayManagerFlags.
+
+flag {
+    name: "enable_connected_display_management"
+    namespace: "display_manager"
+    description: "Feature flag for Connected Display management"
+    bug: "280739508"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_nbm_controller"
+    namespace: "display_manager"
+    description: "Feature flag for Normal Brightness Mode Controller"
+    bug: "299527549"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_hdr_clamper"
+    namespace: "display_manager"
+    description: "Feature flag for HDR Clamper"
+    bug: "295100043"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_power_throttling_clamper"
+    namespace: "display_manager"
+    description: "Feature flag for Power Throttling Clamper"
+    bug: "294777007"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_adaptive_tone_improvements_1"
+    namespace: "display_manager"
+    description: "Feature flag for Adaptive Tone Improvements"
+    bug: "299550755"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_adaptive_tone_improvements_2"
+    namespace: "display_manager"
+    description: "Feature flag for Further Adaptive Tone Improvements"
+    bug: "294762632"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_display_resolution_range_voting"
+    namespace: "display_manager"
+    description: "Feature flag to enable voting for ranges of resolutions"
+    bug: "299297058"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_user_preferred_mode_vote"
+    namespace: "display_manager"
+    description: "Feature flag to use voting for UserPreferredMode for display"
+    bug: "297018612"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_mode_limit_for_external_display"
+    namespace: "display_manager"
+    description: "Feature limiting external display resolution and refresh rate"
+    bug: "242093547"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_displays_refresh_rates_synchronization"
+    namespace: "display_manager"
+    description: "Enables synchronization of refresh rates across displays"
+    bug: "294015845"
+}
+
+flag {
+    name: "enable_display_offload"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayOffload"
+    bug: "299521647"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_connected_display_error_handling"
+    namespace: "display_manager"
+    description: "Feature flag for connected display error handling"
+    bug: "283461472"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "back_up_smooth_display_and_force_peak_refresh_rate"
+    namespace: "display_manager"
+    description: "Feature flag for backing up Smooth Display and Force Peak Refresh Rate"
+    bug: "211737588"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "even_dimmer"
+    namespace: "display_manager"
+    description: "Feature flag for extending the brightness below traditional range"
+    bug: "179428400"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "brightness_int_range_user_perception"
+    namespace: "display_manager"
+    description: "Feature flag for converting the brightness integer range to the user perception scale"
+    bug: "183655602"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_external_vsync_proximity_vote"
+    namespace: "display_manager"
+    description: "Feature flag for external vsync proximity vote"
+    bug: "284866750"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "brightness_wear_bedtime_mode_clamper"
+    namespace: "display_manager"
+    description: "Feature flag for the Wear Bedtime mode brightness clamper"
+    bug: "293613040"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "auto_brightness_modes"
+    namespace: "display_manager"
+    description: "Feature flag for generic auto-brightness modes"
+    bug: "293613040"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fast_hdr_transitions"
+    namespace: "display_manager"
+    description: "Feature flag for fast transitions into/out of HDR"
+    bug: "292124102"
+    is_fixed_read_only: true
+}
+

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lassú töltés"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimalizált töltés az akkumulátor védelme érdekében"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Probléma van a töltőtartozékkal"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"A feloldáshoz nyomja meg a Menü gombot."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Hálózat zárolva"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nincs SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Adjon hozzá egy SIM-et."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"A SIM hiányzik vagy nem olvasható. Adjon hozzá egy SIM-et."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Nem használható SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM véglegesen deaktiválva.\n Forduljon a vezeték nélküli szolgáltatójához másik SIM beszerzése érdekében."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Zárolt SIM."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"A SIM le van zárva PUK-kóddal."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM zárolásának feloldása…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN-kód megadása szükséges a zárolás után"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Jelszó megadása szükséges a zárolás után"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Minta megadása szükséges a zárolás után"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"A frissítést inaktív időben telepíti a rendszer"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"A frissítést telepíti a rendszer, amikor nincs használatban az eszköz"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Fokozott biztonság szükséges. Régóta nem használta a PIN-t."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Fokozott biztonság szükséges. Régóta nem használta jelszavát."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Fokozott biztonság szükséges. Régóta nem használta a mintát."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Buborék"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analóg"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"A folytatáshoz oldja fel az eszközét"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"A frissítés később történő telepítéséhez adja meg a PIN-kódot"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"A frissítés később történő telepítéséhez adja meg a jelszót"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"A frissítés később történő telepítéséhez rajzolja le a mintát"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Eszköz frissítve. A folytatáshoz adja meg a PIN-kódot."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Eszköz frissítve. A folytatáshoz adja meg a jelszót."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Eszköz frissítve. A folytatáshoz rajzolja le a mintát."</string>
 </resources>

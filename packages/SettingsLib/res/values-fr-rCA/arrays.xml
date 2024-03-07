@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (sécurisé)"</item>
     <item msgid="7322156123728520872">"4K (adapté à la haute résolution)"</item>
     <item msgid="7735692090314849188">"4K (adapté haute rés., sécurisé)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (double écran)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (Dual Screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Aucun"</item>
@@ -282,6 +282,10 @@
     <item msgid="8828567335701536560">"Source audio"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
-  <string-array name="avatar_image_descriptions">
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

@@ -19,10 +19,17 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.util.mockito.mock
 
 /**
  * Simply put, I got tired of adding a constructor argument and then having to tweak dozens of
@@ -33,39 +40,47 @@ object KeyguardInteractorFactory {
     @JvmOverloads
     @JvmStatic
     fun create(
-        featureFlags: FakeFeatureFlags = createFakeFeatureFlags(),
+        featureFlags: FakeFeatureFlags = FakeFeatureFlags(),
+        sceneContainerFlags: SceneContainerFlags = FakeSceneContainerFlags(),
         repository: FakeKeyguardRepository = FakeKeyguardRepository(),
         commandQueue: FakeCommandQueue = FakeCommandQueue(),
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
+        shadeRepository: FakeShadeRepository = FakeShadeRepository(),
+        sceneInteractor: SceneInteractor = mock(),
+        powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
     ): WithDependencies {
         return WithDependencies(
             repository = repository,
             commandQueue = commandQueue,
             featureFlags = featureFlags,
+            sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
+            shadeRepository = shadeRepository,
+            powerInteractor = powerInteractor,
             KeyguardInteractor(
                 repository = repository,
                 commandQueue = commandQueue,
-                featureFlags = featureFlags,
+                sceneContainerFlags = sceneContainerFlags,
                 bouncerRepository = bouncerRepository,
-                configurationRepository = configurationRepository,
-            )
+                configurationInteractor = ConfigurationInteractor(configurationRepository),
+                shadeRepository = shadeRepository,
+                sceneInteractorProvider = { sceneInteractor },
+                powerInteractor = powerInteractor,
+            ),
         )
-    }
-
-    /** Provide defaults, otherwise tests will throw an error */
-    fun createFakeFeatureFlags(): FakeFeatureFlags {
-        return FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
     }
 
     data class WithDependencies(
         val repository: FakeKeyguardRepository,
         val commandQueue: FakeCommandQueue,
         val featureFlags: FakeFeatureFlags,
+        val sceneContainerFlags: SceneContainerFlags,
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,
+        val shadeRepository: FakeShadeRepository,
+        val powerInteractor: PowerInteractor,
         val keyguardInteractor: KeyguardInteractor,
     )
 }

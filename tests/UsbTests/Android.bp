@@ -29,7 +29,7 @@ android_test {
     static_libs: [
         "frameworks-base-testutils",
         "androidx.test.rules",
-        "mockito-target-inline-minus-junit4",
+        "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "services.core",
         "services.net",
@@ -37,7 +37,12 @@ android_test {
         "truth",
         "UsbManagerTestLib",
     ],
-    jni_libs: ["libdexmakerjvmtiagent"],
+    jni_libs: [
+        // Required for ExtendedMockito
+        "libdexmakerjvmtiagent",
+        "libmultiplejvmtiagentsinterferenceagent",
+        "libstaticjvmtiagent",
+    ],
     certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests"],

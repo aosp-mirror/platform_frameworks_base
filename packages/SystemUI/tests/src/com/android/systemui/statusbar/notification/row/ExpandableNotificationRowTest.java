@@ -481,33 +481,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetNumUniqueChildren_defaultChannel() throws Exception {
-        ExpandableNotificationRow groupRow = mNotificationTestHelper.createGroup();
-
-        assertEquals(1, groupRow.getNumUniqueChannels());
-    }
-
-    @Test
-    public void testGetNumUniqueChildren_multiChannel() throws Exception {
-        ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
-
-        List<ExpandableNotificationRow> childRows =
-                group.getChildrenContainer().getAttachedChildren();
-        // Give each child a unique channel id/name.
-        int i = 0;
-        for (ExpandableNotificationRow childRow : childRows) {
-            modifyRanking(childRow.getEntry())
-                    .setChannel(
-                            new NotificationChannel(
-                                    "id" + i, "dinnertime" + i, IMPORTANCE_DEFAULT))
-                    .build();
-            i++;
-        }
-
-        assertEquals(3, group.getNumUniqueChannels());
-    }
-
-    @Test
     public void testIconScrollXAfterTranslationAndReset() throws Exception {
         ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
 

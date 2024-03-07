@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.statusbar.notification.interruption;
 
+package com.android.systemui.statusbar.notification.interruption;
 
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
@@ -27,6 +27,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.VISIBILITY_NO_OVERRIDE;
+import static android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED;
+import static android.provider.Settings.Global.HEADS_UP_ON;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -61,9 +63,9 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -71,8 +73,12 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.FakeEventLog;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -117,6 +123,11 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     PendingIntent mPendingIntent;
     @Mock
     UserTracker mUserTracker;
+    @Mock
+    DeviceProvisionedController mDeviceProvisionedController;
+    FakeSystemClock mSystemClock;
+    FakeGlobalSettings mGlobalSettings;
+    FakeEventLog mEventLog;
 
     private NotificationInterruptStateProviderImpl mNotifInterruptionStateProvider;
 
@@ -126,10 +137,13 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mUiEventLoggerFake = new UiEventLoggerFake();
+        mSystemClock = new FakeSystemClock();
+        mGlobalSettings = new FakeGlobalSettings();
+        mGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
+        mEventLog = new FakeEventLog();
 
         mNotifInterruptionStateProvider =
                 new NotificationInterruptStateProviderImpl(
-                        mContext.getContentResolver(),
                         mPowerManager,
                         mAmbientDisplayConfiguration,
                         mBatteryController,
@@ -141,7 +155,11 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mFlags,
                         mKeyguardNotificationVisibilityProvider,
                         mUiEventLoggerFake,
-                        mUserTracker);
+                        mUserTracker,
+                        mDeviceProvisionedController,
+                        mSystemClock,
+                        mGlobalSettings,
+                        mEventLog);
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 
@@ -422,7 +440,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     private long makeWhenHoursAgo(long hoursAgo) {
-        return System.currentTimeMillis() - (1000 * 60 * 60 * hoursAgo);
+        return mSystemClock.currentTimeMillis() - (1000 * 60 * 60 * hoursAgo);
     }
 
     @Test
@@ -694,6 +712,25 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldFullscreen_suppressedInterruptionsWhenNotProvisioned() {
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+        when(mStatusBarStateController.isDreaming()).thenReturn(false);
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(false);
+        mNotifInterruptionStateProvider.addSuppressor(mSuppressInterruptions);
+
+        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
+                .isEqualTo(FullScreenIntentDecision.FSI_NOT_PROVISIONED);
+        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
+                .isTrue();
+        verify(mLogger, never()).logNoFullscreen(any(), any());
+        verify(mLogger, never()).logNoFullscreenWarning(any(), any());
+        verify(mLogger).logFullscreen(entry, "FSI_NOT_PROVISIONED");
+    }
+
+    @Test
     public void testShouldNotFullScreen_willHun() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -962,11 +999,25 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(createBubble())).isFalse();
     }
 
+    @Test
+    public void shouldNotBubbleUp_suspended() {
+        assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(createSuspendedBubble()))
+                .isFalse();
+    }
+
+    private NotificationEntry createSuspendedBubble() {
+        return createBubble(null, null, true);
+    }
+
     private NotificationEntry createBubble() {
-        return createBubble(null, null);
+        return createBubble(null, null, false);
     }
 
     private NotificationEntry createBubble(String groupKey, Integer groupAlert) {
+        return createBubble(groupKey, groupAlert, false);
+    }
+
+    private NotificationEntry createBubble(String groupKey, Integer groupAlert, Boolean suspended) {
         Notification.BubbleMetadata data = new Notification.BubbleMetadata.Builder(
                 PendingIntent.getActivity(mContext, 0,
                         new Intent().setPackage(mContext.getPackageName()),
@@ -994,6 +1045,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .setNotification(n)
                 .setImportance(IMPORTANCE_HIGH)
                 .setCanBubble(true)
+                .setSuspended(suspended)
                 .build();
     }
 

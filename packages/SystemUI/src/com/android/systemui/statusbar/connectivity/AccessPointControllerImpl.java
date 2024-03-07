@@ -87,7 +87,7 @@ public class AccessPointControllerImpl implements AccessPointController,
      */
     public void init() {
         if (mWifiPickerTracker == null) {
-            mWifiPickerTracker = mWifiPickerTrackerFactory.create(this.getLifecycle(), this);
+            mWifiPickerTracker = mWifiPickerTrackerFactory.create(this.getLifecycle(), this, TAG);
         }
     }
 
@@ -213,6 +213,12 @@ public class AccessPointControllerImpl implements AccessPointController,
         }
     }
 
+    private void fireWifiScanCallback(boolean isScan) {
+        for (AccessPointCallback callback : mCallbacks) {
+            callback.onWifiScan(isScan);
+        }
+    }
+
     void dump(PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.println("AccessPointControllerImpl:");
@@ -240,6 +246,14 @@ public class AccessPointControllerImpl implements AccessPointController,
     }
 
     @Override
+    public void onWifiEntriesChanged(@WifiPickerTracker.WifiEntriesChangedReason int reason) {
+        onWifiEntriesChanged();
+        if (reason == WifiPickerTracker.WIFI_ENTRIES_CHANGED_REASON_SCAN_RESULTS) {
+            fireWifiScanCallback(false /* isScan */);
+        }
+    }
+
+    @Override
     public void onNumSavedNetworksChanged() {
         // Do nothing
     }
@@ -247,6 +261,11 @@ public class AccessPointControllerImpl implements AccessPointController,
     @Override
     public void onNumSavedSubscriptionsChanged() {
         // Do nothing
+    }
+
+    @Override
+    public void onScanRequested() {
+        fireWifiScanCallback(true /* isScan */);
     }
 
     private final WifiEntry.ConnectCallback mConnectCallback = new WifiEntry.ConnectCallback() {

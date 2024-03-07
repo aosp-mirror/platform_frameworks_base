@@ -28,23 +28,27 @@ import android.widget.TextView
 import com.android.test.silkfx.R
 
 data class GainmapMetadata(
-    var ratioMin: Float,
-    var ratioMax: Float,
-    var capacityMin: Float,
-    var capacityMax: Float,
-    var gamma: Float,
-    var offsetSdr: Float,
-    var offsetHdr: Float
+        var ratioMin: Float,
+        var ratioMax: Float,
+        var capacityMin: Float,
+        var capacityMax: Float,
+        var gamma: Float,
+        var offsetSdr: Float,
+        var offsetHdr: Float
 )
 
+/**
+ * Note: This can only handle single-channel gainmaps nicely. It will force all 3-channel
+ * metadata to have the same value single value and is not intended to be a robust demonstration
+ * of gainmap metadata editing
+ */
 class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
-    private var gainmap: Gainmap? = null
-    private var showingEdits = false
+    private lateinit var gainmap: Gainmap
 
     private var metadataPopup: PopupWindow? = null
 
     private var originalMetadata: GainmapMetadata = GainmapMetadata(
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f)
+            1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f)
     private var currentMetadata: GainmapMetadata = originalMetadata.copy()
 
     private val maxProgress = 100.0f
@@ -61,23 +65,18 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
     private val maxGamma = 3.0f
     // Min and max offsets are 0.0 and 1.0 respectively
 
-    fun setGainmap(newGainmap: Gainmap?) {
+    fun setGainmap(newGainmap: Gainmap) {
         gainmap = newGainmap
-        originalMetadata = GainmapMetadata(gainmap!!.getRatioMin()[0],
-            gainmap!!.getRatioMax()[0], gainmap!!.getMinDisplayRatioForHdrTransition(),
-            gainmap!!.getDisplayRatioForFullHdr(), gainmap!!.getGamma()[0],
-            gainmap!!.getEpsilonSdr()[0], gainmap!!.getEpsilonHdr()[0])
+        originalMetadata = GainmapMetadata(gainmap.getRatioMin()[0],
+                gainmap.getRatioMax()[0], gainmap.getMinDisplayRatioForHdrTransition(),
+                gainmap.getDisplayRatioForFullHdr(), gainmap.getGamma()[0],
+                gainmap.getEpsilonSdr()[0], gainmap.getEpsilonHdr()[0])
         currentMetadata = originalMetadata.copy()
     }
 
-    fun useOriginalMetadata() {
-        showingEdits = false
-        applyMetadata(originalMetadata)
-    }
-
-    fun useEditMetadata() {
-        showingEdits = true
+    fun editedGainmap(): Gainmap {
         applyMetadata(currentMetadata)
+        return gainmap
     }
 
     fun closeEditor() {
@@ -93,7 +92,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
         val view = LayoutInflater.from(parent.getContext()).inflate(R.layout.gainmap_metadata, null)
 
         metadataPopup = PopupWindow(view, ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT)
+                ViewGroup.LayoutParams.WRAP_CONTENT)
         metadataPopup!!.showAtLocation(view, Gravity.CENTER, 0, 0)
 
         (view.getParent() as ViewGroup).removeView(view)
@@ -117,7 +116,7 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
         val offsetSdrSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_offsetsdr)
         val offsetHdrSeek = view.requireViewById<SeekBar>(R.id.gainmap_metadata_offsethdr)
         arrayOf(gainmapMinSeek, gainmapMaxSeek, capacityMinSeek, capacityMaxSeek, gammaSeek,
-            offsetSdrSeek, offsetHdrSeek).forEach {
+                offsetSdrSeek, offsetHdrSeek).forEach {
             it.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                     if (!fromUser) return
@@ -149,37 +148,37 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
         val offsetHdrSeek = parent.requireViewById<SeekBar>(R.id.gainmap_metadata_offsethdr)
 
         gainmapMinSeek.setProgress(
-            ((currentMetadata.ratioMin - minRatioMin) / maxRatioMin * maxProgress).toInt())
+                ((currentMetadata.ratioMin - minRatioMin) / maxRatioMin * maxProgress).toInt())
         gainmapMaxSeek.setProgress(
-            ((currentMetadata.ratioMax - minRatioMax) / maxRatioMax * maxProgress).toInt())
+                ((currentMetadata.ratioMax - minRatioMax) / maxRatioMax * maxProgress).toInt())
         capacityMinSeek.setProgress(
-            ((currentMetadata.capacityMin - minCapacityMin) / maxCapacityMin * maxProgress).toInt())
+                ((currentMetadata.capacityMin - minCapacityMin) / maxCapacityMin * maxProgress).toInt())
         capacityMaxSeek.setProgress(
-            ((currentMetadata.capacityMax - minCapacityMax) / maxCapacityMax * maxProgress).toInt())
+                ((currentMetadata.capacityMax - minCapacityMax) / maxCapacityMax * maxProgress).toInt())
         gammaSeek.setProgress(
-            ((currentMetadata.gamma - minGamma) / maxGamma * maxProgress).toInt())
+                ((currentMetadata.gamma - minGamma) / maxGamma * maxProgress).toInt())
         // Log base 3 via: log_b(x) = log_y(x) / log_y(b)
         offsetSdrSeek.setProgress(
-            ((1.0 - Math.log(currentMetadata.offsetSdr.toDouble() / Math.log(3.0)) / -11.0)
-             .toFloat() * maxProgress).toInt())
+                ((1.0 - Math.log(currentMetadata.offsetSdr.toDouble() / Math.log(3.0)) / -11.0)
+                        .toFloat() * maxProgress).toInt())
         offsetHdrSeek.setProgress(
-            ((1.0 - Math.log(currentMetadata.offsetHdr.toDouble() / Math.log(3.0)) / -11.0)
-             .toFloat() * maxProgress).toInt())
+                ((1.0 - Math.log(currentMetadata.offsetHdr.toDouble() / Math.log(3.0)) / -11.0)
+                        .toFloat() * maxProgress).toInt())
 
         parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmin_val).setText(
-            "%.3f".format(currentMetadata.ratioMin))
+                "%.3f".format(currentMetadata.ratioMin))
         parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmax_val).setText(
-            "%.3f".format(currentMetadata.ratioMax))
+                "%.3f".format(currentMetadata.ratioMax))
         parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymin_val).setText(
-            "%.3f".format(currentMetadata.capacityMin))
+                "%.3f".format(currentMetadata.capacityMin))
         parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymax_val).setText(
-            "%.3f".format(currentMetadata.capacityMax))
+                "%.3f".format(currentMetadata.capacityMax))
         parent.requireViewById<TextView>(R.id.gainmap_metadata_gamma_val).setText(
-            "%.3f".format(currentMetadata.gamma))
+                "%.3f".format(currentMetadata.gamma))
         parent.requireViewById<TextView>(R.id.gainmap_metadata_offsetsdr_val).setText(
-            "%.5f".format(currentMetadata.offsetSdr))
+                "%.5f".format(currentMetadata.offsetSdr))
         parent.requireViewById<TextView>(R.id.gainmap_metadata_offsethdr_val).setText(
-            "%.5f".format(currentMetadata.offsetHdr))
+                "%.5f".format(currentMetadata.offsetHdr))
     }
 
     private fun resetGainmapMetadata() {
@@ -189,69 +188,59 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
     }
 
     private fun applyMetadata(newMetadata: GainmapMetadata) {
-        gainmap!!.setRatioMin(newMetadata.ratioMin, newMetadata.ratioMin, newMetadata.ratioMin)
-        gainmap!!.setRatioMax(newMetadata.ratioMax, newMetadata.ratioMax, newMetadata.ratioMax)
-        gainmap!!.setMinDisplayRatioForHdrTransition(newMetadata.capacityMin)
-        gainmap!!.setDisplayRatioForFullHdr(newMetadata.capacityMax)
-        gainmap!!.setGamma(newMetadata.gamma, newMetadata.gamma, newMetadata.gamma)
-        gainmap!!.setEpsilonSdr(newMetadata.offsetSdr, newMetadata.offsetSdr, newMetadata.offsetSdr)
-        gainmap!!.setEpsilonHdr(newMetadata.offsetHdr, newMetadata.offsetHdr, newMetadata.offsetHdr)
+        gainmap.setRatioMin(newMetadata.ratioMin, newMetadata.ratioMin, newMetadata.ratioMin)
+        gainmap.setRatioMax(newMetadata.ratioMax, newMetadata.ratioMax, newMetadata.ratioMax)
+        gainmap.setMinDisplayRatioForHdrTransition(newMetadata.capacityMin)
+        gainmap.setDisplayRatioForFullHdr(newMetadata.capacityMax)
+        gainmap.setGamma(newMetadata.gamma, newMetadata.gamma, newMetadata.gamma)
+        gainmap.setEpsilonSdr(newMetadata.offsetSdr, newMetadata.offsetSdr, newMetadata.offsetSdr)
+        gainmap.setEpsilonHdr(newMetadata.offsetHdr, newMetadata.offsetHdr, newMetadata.offsetHdr)
         renderView.invalidate()
     }
 
     private fun updateGainmapMin(normalized: Float) {
         val newValue = minRatioMin + normalized * (maxRatioMin - minRatioMin)
         parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmin_val).setText(
-            "%.3f".format(newValue))
+                "%.3f".format(newValue))
         currentMetadata.ratioMin = newValue
-        if (showingEdits) {
-            gainmap!!.setRatioMin(newValue, newValue, newValue)
-            renderView.invalidate()
-        }
+        gainmap.setRatioMin(newValue, newValue, newValue)
+        renderView.invalidate()
     }
 
     private fun updateGainmapMax(normalized: Float) {
         val newValue = minRatioMax + normalized * (maxRatioMax - minRatioMax)
         parent.requireViewById<TextView>(R.id.gainmap_metadata_gainmapmax_val).setText(
-            "%.3f".format(newValue))
+                "%.3f".format(newValue))
         currentMetadata.ratioMax = newValue
-        if (showingEdits) {
-            gainmap!!.setRatioMax(newValue, newValue, newValue)
-            renderView.invalidate()
-        }
+        gainmap.setRatioMax(newValue, newValue, newValue)
+        renderView.invalidate()
     }
 
     private fun updateCapacityMin(normalized: Float) {
         val newValue = minCapacityMin + normalized * (maxCapacityMin - minCapacityMin)
         parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymin_val).setText(
-            "%.3f".format(newValue))
+                "%.3f".format(newValue))
         currentMetadata.capacityMin = newValue
-        if (showingEdits) {
-            gainmap!!.setMinDisplayRatioForHdrTransition(newValue)
-            renderView.invalidate()
-        }
+        gainmap.setMinDisplayRatioForHdrTransition(newValue)
+        renderView.invalidate()
     }
 
     private fun updateCapacityMax(normalized: Float) {
         val newValue = minCapacityMax + normalized * (maxCapacityMax - minCapacityMax)
         parent.requireViewById<TextView>(R.id.gainmap_metadata_capacitymax_val).setText(
-            "%.3f".format(newValue))
+                "%.3f".format(newValue))
         currentMetadata.capacityMax = newValue
-        if (showingEdits) {
-            gainmap!!.setDisplayRatioForFullHdr(newValue)
-            renderView.invalidate()
-        }
+        gainmap.setDisplayRatioForFullHdr(newValue)
+        renderView.invalidate()
     }
 
     private fun updateGamma(normalized: Float) {
         val newValue = minGamma + normalized * (maxGamma - minGamma)
         parent.requireViewById<TextView>(R.id.gainmap_metadata_gamma_val).setText(
-            "%.3f".format(newValue))
+                "%.3f".format(newValue))
         currentMetadata.gamma = newValue
-        if (showingEdits) {
-            gainmap!!.setGamma(newValue, newValue, newValue)
-            renderView.invalidate()
-        }
+        gainmap.setGamma(newValue, newValue, newValue)
+        renderView.invalidate()
     }
 
     private fun updateOffsetSdr(normalized: Float) {
@@ -260,12 +249,10 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
             newValue = Math.pow(3.0, (1.0 - normalized.toDouble()) * -11.0).toFloat()
         }
         parent.requireViewById<TextView>(R.id.gainmap_metadata_offsetsdr_val).setText(
-            "%.5f".format(newValue))
+                "%.5f".format(newValue))
         currentMetadata.offsetSdr = newValue
-        if (showingEdits) {
-            gainmap!!.setEpsilonSdr(newValue, newValue, newValue)
-            renderView.invalidate()
-        }
+        gainmap.setEpsilonSdr(newValue, newValue, newValue)
+        renderView.invalidate()
     }
 
     private fun updateOffsetHdr(normalized: Float) {
@@ -274,11 +261,9 @@ class GainmapMetadataEditor(val parent: ViewGroup, val renderView: View) {
             newValue = Math.pow(3.0, (1.0 - normalized.toDouble()) * -11.0).toFloat()
         }
         parent.requireViewById<TextView>(R.id.gainmap_metadata_offsethdr_val).setText(
-            "%.5f".format(newValue))
+                "%.5f".format(newValue))
         currentMetadata.offsetHdr = newValue
-        if (showingEdits) {
-            gainmap!!.setEpsilonHdr(newValue, newValue, newValue)
-            renderView.invalidate()
-        }
+        gainmap.setEpsilonHdr(newValue, newValue, newValue)
+        renderView.invalidate()
     }
 }

@@ -39,7 +39,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text.Companion.loadText
@@ -48,9 +47,8 @@ import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
@@ -96,7 +94,6 @@ constructor(
     wakeLockBuilder: WakeLock.Builder,
     systemClock: SystemClock,
     tempViewUiEventLogger: TemporaryViewUiEventLogger,
-    private val featureFlags: FeatureFlags,
 ) :
     TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
@@ -234,18 +231,14 @@ constructor(
         maybeGetAccessibilityFocus(newInfo, currentView)
 
         // ---- Haptics ----
-        if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            vibratorHelper.performHapticFeedback(parent, newInfo.vibrationConstant)
-        } else {
-            newInfo.vibrationEffect?.let {
-                vibratorHelper.vibrate(
-                    Process.myUid(),
-                    context.getApplicationContext().getPackageName(),
-                    it,
-                    newInfo.windowTitle,
-                    VIBRATION_ATTRIBUTES,
-                )
-            }
+        newInfo.vibrationEffect?.let {
+            vibratorHelper.vibrate(
+                Process.myUid(),
+                context.getApplicationContext().getPackageName(),
+                it,
+                newInfo.windowTitle,
+                VIBRATION_ATTRIBUTES,
+            )
         }
     }
 

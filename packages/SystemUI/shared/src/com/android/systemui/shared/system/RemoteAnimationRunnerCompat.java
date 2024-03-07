@@ -233,6 +233,11 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
                 runner.onAnimationCancelled();
                 finishRunnable.run();
             }
+
+            @Override
+            public void onTransitionConsumed(IBinder iBinder, boolean aborted)
+                    throws RemoteException {
+            }
         };
     }
 }

@@ -454,8 +454,10 @@ public class InstallLocationUtils {
         // Include raw dex metadata files
         sizeBytes += DexMetadataHelper.getPackageDexMetadataSize(pkg);
 
-        // Include all relevant native code
-        sizeBytes += NativeLibraryHelper.sumNativeBinariesWithOverride(handle, abiOverride);
+        if (pkg.isExtractNativeLibs()) {
+            // Include all relevant native code
+            sizeBytes += NativeLibraryHelper.sumNativeBinariesWithOverride(handle, abiOverride);
+        }
 
         return sizeBytes;
     }

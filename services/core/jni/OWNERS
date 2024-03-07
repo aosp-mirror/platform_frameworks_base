@@ -24,6 +24,7 @@ per-file com_android_server_pdb_* = file:/services/core/java/com/android/server/
 per-file com_android_server_pm_* = file:/services/core/java/com/android/server/pm/OWNERS
 per-file com_android_server_power_* = file:/services/core/java/com/android/server/power/OWNERS
 per-file com_android_server_powerstats_* = file:/services/core/java/com/android/server/powerstats/OWNERS
+per-file com_android_server_power_stats_* = file:/BATTERY_STATS_OWNERS
 per-file com_android_server_security_* = file:/core/java/android/security/OWNERS
 per-file com_android_server_tv_* = file:/media/java/android/media/tv/OWNERS
 per-file com_android_server_vibrator_* = file:/services/core/java/com/android/server/vibrator/OWNERS

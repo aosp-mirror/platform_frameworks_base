@@ -17,13 +17,13 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.view.MotionEvent
-import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -35,11 +35,16 @@ import kotlinx.coroutines.flow.stateIn
 @SysUISingleton
 class UdfpsOverlayInteractor
 @Inject
-constructor(private val authController: AuthController, @Application scope: CoroutineScope) {
+constructor(
+    private val authController: AuthController,
+    private val selectedUserInteractor: SelectedUserInteractor,
+    @Application scope: CoroutineScope
+) {
 
     /** Whether a touch is within the under-display fingerprint sensor area */
     fun isTouchWithinUdfpsArea(ev: MotionEvent): Boolean {
-        val isUdfpsEnrolled = authController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())
+        val isUdfpsEnrolled =
+            authController.isUdfpsEnrolled(selectedUserInteractor.getSelectedUserId())
         val isWithinOverlayBounds =
             udfpsOverlayParams.value.overlayBounds.contains(ev.rawX.toInt(), ev.rawY.toInt())
         return isUdfpsEnrolled && isWithinOverlayBounds

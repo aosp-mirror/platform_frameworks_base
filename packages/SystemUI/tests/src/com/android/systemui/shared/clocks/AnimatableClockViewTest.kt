@@ -20,7 +20,7 @@ import android.testing.AndroidTestingRunner
 import android.view.LayoutInflater
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
-import com.android.systemui.R
+import com.android.systemui.customization.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.TextAnimator
 import com.android.systemui.util.mockito.any

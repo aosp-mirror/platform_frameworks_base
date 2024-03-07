@@ -556,6 +556,21 @@ public final class UiAutomation {
     }
 
     /**
+     * Provides reference to the cache through a locked connection.
+     *
+     * @return the accessibility cache.
+     * @hide
+     */
+    public @Nullable AccessibilityCache getCache() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        return AccessibilityInteractionClient.getCache(connectionId);
+    }
+
+    /**
      * Adopt the permission identity of the shell UID for all permissions. This allows
      * you to call APIs protected permissions which normal apps cannot hold but are
      * granted to the shell UID. If you already adopted all shell permissions by calling
@@ -830,6 +845,22 @@ public final class UiAutomation {
      *            established.
      */
     public AccessibilityNodeInfo getRootInActiveWindow() {
+        return getRootInActiveWindow(AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+    }
+
+    /**
+     * Gets the root {@link AccessibilityNodeInfo} in the active window.
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The root info.
+     * @throws IllegalStateException If the connection to the accessibility subsystem is not
+     * established.
+     *
+     * @hide
+     */
+    @Nullable
+    public AccessibilityNodeInfo getRootInActiveWindow(
+            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         final int connectionId;
         synchronized (mLock) {
             throwIfNotConnectedLocked();
@@ -837,8 +868,7 @@ public final class UiAutomation {
         }
         // Calling out without a lock held.
         return AccessibilityInteractionClient.getInstance()
-                .getRootInActiveWindow(connectionId,
-                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+                .getRootInActiveWindow(connectionId, prefetchingStrategy);
     }
 
     /**
@@ -1176,12 +1206,14 @@ public final class UiAutomation {
             return null;
         }
 
-        final ScreenshotHardwareBuffer screenshotBuffer =
-                syncScreenCapture.getBuffer();
+        final ScreenshotHardwareBuffer screenshotBuffer = syncScreenCapture.getBuffer();
+        if (screenshotBuffer == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for display=" + mDisplayId);
+            return null;
+        }
         Bitmap screenShot = screenshotBuffer.asBitmap();
         if (screenShot == null) {
-            Log.e(LOG_TAG, "mUiAutomationConnection.takeScreenshot() returned null for display "
-                    + mDisplayId);
+            Log.e(LOG_TAG, "Failed to take screenshot for display=" + mDisplayId);
             return null;
         }
         Bitmap swBitmap;
@@ -1233,16 +1265,23 @@ public final class UiAutomation {
                 ScreenCapture.createSyncCaptureListener();
         try {
             if (!mUiAutomationConnection.takeSurfaceControlScreenshot(sc, syncScreenCapture)) {
+                Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
                 return null;
             }
-
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while taking screenshot!", re);
             return null;
         }
-        ScreenCapture.ScreenshotHardwareBuffer captureBuffer =
-                syncScreenCapture.getBuffer();
+        ScreenCapture.ScreenshotHardwareBuffer captureBuffer = syncScreenCapture.getBuffer();
+        if (captureBuffer == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
+            return null;
+        }
         Bitmap screenShot = captureBuffer.asBitmap();
+        if (screenShot == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
+            return null;
+        }
         Bitmap swBitmap;
         try (HardwareBuffer buffer = captureBuffer.getHardwareBuffer()) {
             swBitmap = screenShot.copy(Bitmap.Config.ARGB_8888, false);

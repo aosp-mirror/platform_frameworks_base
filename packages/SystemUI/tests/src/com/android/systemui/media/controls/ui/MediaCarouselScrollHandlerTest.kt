@@ -21,7 +21,6 @@ import android.testing.TestableLooper
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
@@ -51,7 +50,6 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     @Mock lateinit var translationChangedListener: () -> Unit
     @Mock lateinit var seekBarUpdateListener: (visibleToUser: Boolean) -> Unit
     @Mock lateinit var closeGuts: (immediate: Boolean) -> Unit
-    @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var logSmartspaceImpression: (Boolean) -> Unit
     @Mock lateinit var logger: MediaUiEventLogger
@@ -74,7 +72,6 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
                 translationChangedListener,
                 seekBarUpdateListener,
                 closeGuts,
-                falsingCollector,
                 falsingManager,
                 logSmartspaceImpression,
                 logger
@@ -88,6 +85,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_shortScroll() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(false)
         whenever(mediaCarousel.relativeScrollX).thenReturn(300)
+        whenever(mediaCarousel.scrollX).thenReturn(300)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()
@@ -99,6 +97,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_shortScroll_isRTL() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(true)
         whenever(mediaCarousel.relativeScrollX).thenReturn(300)
+        whenever(mediaCarousel.scrollX).thenReturn(carouselWidth - 300)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()
@@ -110,6 +109,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_longScroll() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(false)
         whenever(mediaCarousel.relativeScrollX).thenReturn(600)
+        whenever(mediaCarousel.scrollX).thenReturn(600)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()
@@ -121,6 +121,7 @@ class MediaCarouselScrollHandlerTest : SysuiTestCase() {
     fun testCarouselScroll_longScroll_isRTL() {
         whenever(mediaCarousel.isLayoutRtl).thenReturn(true)
         whenever(mediaCarousel.relativeScrollX).thenReturn(600)
+        whenever(mediaCarousel.scrollX).thenReturn(carouselWidth - 600)
 
         mediaCarousel.touchListener?.onTouchEvent(motionEventUp)
         executor.runAllReady()

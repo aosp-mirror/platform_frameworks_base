@@ -353,6 +353,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testRecentViewInFixedPortraitWhenTopAppInLandscape() {
+        makeDisplayPortrait(mDefaultDisplay);
         unblockDisplayRotation(mDefaultDisplay);
         mWm.setRecentsAnimationController(mController);
 
@@ -488,6 +489,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testWallpaperHasFixedRotationApplied() {
+        makeDisplayPortrait(mDefaultDisplay);
         unblockDisplayRotation(mDefaultDisplay);
         mWm.setRecentsAnimationController(mController);
 

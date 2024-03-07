@@ -37,8 +37,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
@@ -85,7 +85,8 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
 
         doReturn(mDraggableBounds).when(mMenuView).getMenuDraggableBounds();
         mStubListView = new RecyclerView(mContext);
-        mMenuAnimationController = spy(new MenuAnimationController(mMenuView));
+        mMenuAnimationController = spy(new MenuAnimationController(mMenuView,
+                stubMenuViewAppearance));
         mMenuItemAccessibilityDelegate =
                 new MenuItemAccessibilityDelegate(new RecyclerViewAccessibilityDelegate(
                         mStubListView), mMenuAnimationController);

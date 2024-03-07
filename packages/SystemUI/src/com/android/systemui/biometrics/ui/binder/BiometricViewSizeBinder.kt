@@ -30,8 +30,7 @@ import androidx.core.animation.addListener
 import androidx.core.view.doOnLayout
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
-import com.android.systemui.R
-import com.android.systemui.biometrics.AuthDialog
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.ui.BiometricPromptLayout
@@ -46,6 +45,10 @@ import kotlinx.coroutines.launch
 
 /** Helper for [BiometricViewBinder] to handle resize transitions. */
 object BiometricViewSizeBinder {
+
+    private const val ANIMATE_SMALL_TO_MEDIUM_DURATION_MS = 150
+    // TODO(b/201510778): make private when related misuse is fixed
+    const val ANIMATE_MEDIUM_TO_LARGE_DURATION_MS = 450
 
     /** Resizes [BiometricPromptLayout] and the [panelViewController] via the [PromptViewModel]. */
     fun bind(
@@ -134,7 +137,7 @@ object BiometricViewSizeBinder {
                                     )
                                 }
                                 size.isMedium && currentSize.isSmall -> {
-                                    val duration = AuthDialog.ANIMATE_SMALL_TO_MEDIUM_DURATION_MS
+                                    val duration = ANIMATE_SMALL_TO_MEDIUM_DURATION_MS
                                     panelViewController.updateForContentDimensions(
                                         width,
                                         height,
@@ -165,7 +168,7 @@ object BiometricViewSizeBinder {
                                     )
                                 }
                                 size.isLarge -> {
-                                    val duration = AuthDialog.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS
+                                    val duration = ANIMATE_MEDIUM_TO_LARGE_DURATION_MS
                                     panelViewController.setUseFullScreen(true)
                                     panelViewController.updateForContentDimensions(
                                         panelViewController.containerWidth,

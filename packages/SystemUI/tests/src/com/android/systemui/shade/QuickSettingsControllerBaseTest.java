@@ -22,6 +22,9 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,26 +35,48 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.TestScopeProvider;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
+import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository;
+import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.qs.QSFragment;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.qs.QSFragmentLegacy;
+import com.android.systemui.res.R;
+import com.android.systemui.scene.SceneTestUtils;
+import com.android.systemui.scene.data.repository.SceneContainerRepository;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
+import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
 import com.android.systemui.shade.transition.ShadeTransitionController;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -60,21 +85,28 @@ import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository;
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.policy.CastController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.user.domain.interactor.UserInteractor;
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
+import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
@@ -98,14 +130,14 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
 
     protected QuickSettingsController mQsController;
 
-    protected TestScope mTestScope = TestScopeProvider.getTestScope();
+    protected SceneTestUtils mUtils = new SceneTestUtils(this);
+    protected TestScope mTestScope = mUtils.getTestScope();
 
-    @Mock
-    protected Resources mResources;
+    @Mock protected Resources mResources;
     @Mock protected KeyguardBottomAreaView mQsFrame;
     @Mock protected KeyguardStatusBarView mKeyguardStatusBar;
     @Mock protected QS mQs;
-    @Mock protected QSFragment mQSFragment;
+    @Mock protected QSFragmentLegacy mQSFragment;
     @Mock protected Lazy<NotificationPanelViewController> mPanelViewControllerLazy;
     @Mock protected NotificationPanelViewController mNotificationPanelViewController;
     @Mock protected NotificationPanelView mPanelView;
@@ -123,6 +155,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock protected ShadeHeaderController mShadeHeaderController;
     @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock protected DozeParameters mDozeParameters;
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected KeyguardBypassController mKeyguardBypassController;
     @Mock protected KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -132,7 +165,6 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected AmbientState mAmbientState;
     @Mock protected RecordingController mRecordingController;
     @Mock protected FalsingManager mFalsingManager;
-    @Mock protected FalsingCollector mFalsingCollector;
     @Mock protected AccessibilityManager mAccessibilityManager;
     @Mock protected LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock protected MetricsLogger mMetricsLogger;
@@ -142,14 +174,18 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected DumpManager mDumpManager;
     @Mock protected UiEventLogger mUiEventLogger;
     @Mock protected CastController mCastController;
-    @Mock protected DeviceProvisionedController mDeviceProvisionedController;
-    @Mock protected UserInteractor mUserInteractor;
+    @Mock protected UserSwitcherInteractor mUserSwitcherInteractor;
+    @Mock protected SelectedUserInteractor mSelectedUserInteractor;
+
     protected FakeDisableFlagsRepository mDisableFlagsRepository =
             new FakeDisableFlagsRepository();
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
+    protected FakeShadeRepository mShadeRepository = new FakeShadeRepository();
 
     protected SysuiStatusBarStateController mStatusBarStateController;
     protected ShadeInteractor mShadeInteractor;
+
+    protected ActiveNotificationsInteractor mActiveNotificationsInteractor;
 
     protected Handler mMainHandler;
     protected LockscreenShadeTransitionController.Callback mLockscreenShadeTransitionCallback;
@@ -158,23 +194,119 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
             new ShadeExpansionStateManager();
 
     protected FragmentHostManager.FragmentListener mFragmentListener;
+    private FromLockscreenTransitionInteractor mFromLockscreenTransitionInteractor;
+    private FromPrimaryBouncerTransitionInteractor mFromPrimaryBouncerTransitionInteractor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mPanelViewControllerLazy.get()).thenReturn(mNotificationPanelViewController);
-        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
-                mInteractionJankMonitor, mShadeExpansionStateManager);
+        mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
+                mInteractionJankMonitor, mock(JavaAdapter.class), () -> mShadeInteractor);
 
-        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
-        mShadeInteractor =
-                new ShadeInteractor(
+        FakeDeviceProvisioningRepository deviceProvisioningRepository =
+                new FakeDeviceProvisioningRepository();
+        deviceProvisioningRepository.setDeviceProvisioned(true);
+        FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
+        FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
+
+        PowerInteractor powerInteractor = mUtils.powerInteractor(
+                mUtils.getPowerRepository(),
+                mUtils.falsingCollector(),
+                mock(ScreenOffAnimationController.class),
+                mStatusBarStateController);
+
+        SceneInteractor sceneInteractor = new SceneInteractor(
+                mTestScope.getBackgroundScope(),
+                new SceneContainerRepository(
                         mTestScope.getBackgroundScope(),
-                        mDisableFlagsRepository,
+                        mUtils.fakeSceneContainerConfig()),
+                powerInteractor,
+                mock(SceneLogger.class));
+
+        FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
+        KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
+                mKeyguardRepository,
+                new FakeCommandQueue(),
+                powerInteractor,
+                sceneContainerFlags,
+                new FakeKeyguardBouncerRepository(),
+                new ConfigurationInteractor(configurationRepository),
+                mShadeRepository,
+                () -> sceneInteractor);
+
+        FakeKeyguardTransitionRepository keyguardTransitionRepository =
+                new FakeKeyguardTransitionRepository();
+
+        KeyguardTransitionInteractor keyguardTransitionInteractor =
+                new KeyguardTransitionInteractor(
+                        mTestScope.getBackgroundScope(),
+                        keyguardTransitionRepository,
+                        () -> keyguardInteractor,
+                        () -> mFromLockscreenTransitionInteractor,
+                        () -> mFromPrimaryBouncerTransitionInteractor);
+
+        mFromLockscreenTransitionInteractor = new FromLockscreenTransitionInteractor(
+                keyguardTransitionRepository,
+                keyguardTransitionInteractor,
+                mTestScope.getBackgroundScope(),
+                keyguardInteractor,
+                featureFlags,
+                mShadeRepository,
+                powerInteractor,
+                () ->
+                        new InWindowLauncherUnlockAnimationInteractor(
+                                new InWindowLauncherUnlockAnimationRepository(),
+                                mTestScope.getBackgroundScope(),
+                                keyguardTransitionInteractor,
+                                FakeKeyguardSurfaceBehindRepository::new,
+                                mock(ActivityManagerWrapper.class)
+                        )
+                );
+
+        mFromPrimaryBouncerTransitionInteractor = new FromPrimaryBouncerTransitionInteractor(
+                keyguardTransitionRepository,
+                keyguardTransitionInteractor,
+                mTestScope.getBackgroundScope(),
+                keyguardInteractor,
+                featureFlags,
+                mock(KeyguardSecurityModel.class),
+                mSelectedUserInteractor,
+                powerInteractor);
+
+        ResourcesSplitShadeStateController splitShadeStateController =
+                new ResourcesSplitShadeStateController();
+
+        DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
+                mock(DeviceEntryUdfpsInteractor.class);
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+
+        mShadeInteractor = new ShadeInteractorImpl(
+                mTestScope.getBackgroundScope(),
+                deviceProvisioningRepository,
+                mDisableFlagsRepository,
+                mDozeParameters,
+                mKeyguardRepository,
+                keyguardTransitionInteractor,
+                powerInteractor,
+                new FakeUserSetupRepository(),
+                mUserSwitcherInteractor,
+                new ShadeInteractorLegacyImpl(
+                        mTestScope.getBackgroundScope(),
                         mKeyguardRepository,
-                        new FakeUserSetupRepository(),
-                        mDeviceProvisionedController,
-                        mUserInteractor
+                        new SharedNotificationContainerInteractor(
+                                configurationRepository,
+                                mContext,
+                                splitShadeStateController,
+                                keyguardInteractor,
+                                deviceEntryUdfpsInteractor),
+                        mShadeRepository
+                )
+        );
+
+        mActiveNotificationsInteractor = new ActiveNotificationsInteractor(
+                        new ActiveNotificationListRepository(),
+                        StandardTestDispatcher(/* scheduler = */ null, /* name = */ null)
                 );
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
@@ -240,19 +372,19 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mAmbientState,
                 mRecordingController,
                 mFalsingManager,
-                mFalsingCollector,
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLogger,
                 mDumpManager,
                 mock(KeyguardFaceAuthInteractor.class),
-                mock(ShadeRepository.class),
+                mShadeRepository,
                 mShadeInteractor,
+                mActiveNotificationsInteractor,
                 new JavaAdapter(mTestScope.getBackgroundScope()),
-                mCastController
+                mCastController,
+                splitShadeStateController
         );
         mQsController.init();
 

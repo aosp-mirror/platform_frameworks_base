@@ -28,21 +28,28 @@ abstract class AppsFilterLocked extends AppsFilterBase {
     /**
      * The following locks guard the accesses for the list/set class members
      */
-    protected final Object mForceQueryableLock = new Object();
-    protected final Object mQueriesViaPackageLock = new Object();
-    protected final Object mQueriesViaComponentLock = new Object();
+    protected final PackageManagerTracedLock mForceQueryableLock =
+            new PackageManagerTracedLock();
+    protected final PackageManagerTracedLock mQueriesViaPackageLock =
+            new PackageManagerTracedLock();
+    protected final PackageManagerTracedLock mQueriesViaComponentLock =
+            new PackageManagerTracedLock();
     /**
      * This lock covers both {@link #mImplicitlyQueryable} and {@link #mRetainedImplicitlyQueryable}
      */
-    protected final Object mImplicitlyQueryableLock = new Object();
-    protected final Object mQueryableViaUsesLibraryLock = new Object();
-    protected final Object mProtectedBroadcastsLock = new Object();
-    protected final Object mQueryableViaUsesPermissionLock = new Object();
+    protected final PackageManagerTracedLock mImplicitlyQueryableLock =
+        new PackageManagerTracedLock();
+    protected final PackageManagerTracedLock mQueryableViaUsesLibraryLock =
+        new PackageManagerTracedLock();
+    protected final PackageManagerTracedLock mProtectedBroadcastsLock =
+        new PackageManagerTracedLock();
+    protected final PackageManagerTracedLock mQueryableViaUsesPermissionLock =
+        new PackageManagerTracedLock();
 
     /**
      * Guards the access for {@link AppsFilterBase#mShouldFilterCache};
      */
-    protected final Object mCacheLock = new Object();
+    protected final PackageManagerTracedLock mCacheLock = new PackageManagerTracedLock();
 
     @Override
     protected boolean isForceQueryable(int appId) {

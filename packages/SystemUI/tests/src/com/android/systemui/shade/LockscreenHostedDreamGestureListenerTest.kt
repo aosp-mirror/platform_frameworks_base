@@ -27,9 +27,8 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,7 +53,6 @@ class LockscreenHostedDreamGestureListenerTest : SysuiTestCase() {
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var shadeLogger: ShadeLogger
-    @Mock private lateinit var screenOffAnimationController: ScreenOffAnimationController
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -74,13 +72,11 @@ class LockscreenHostedDreamGestureListenerTest : SysuiTestCase() {
         underTest =
             LockscreenHostedDreamGestureListener(
                 falsingManager,
-                PowerInteractor(
-                    powerRepository,
-                    keyguardRepository,
-                    falsingCollector,
-                    screenOffAnimationController,
-                    statusBarStateController,
-                ),
+                PowerInteractorFactory.create(
+                        repository = powerRepository,
+                        statusBarStateController = statusBarStateController,
+                    )
+                    .powerInteractor,
                 statusBarStateController,
                 primaryBouncerInteractor,
                 keyguardRepository,

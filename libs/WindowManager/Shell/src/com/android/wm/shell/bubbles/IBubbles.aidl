@@ -39,4 +39,6 @@ interface IBubbles {
 
     oneway void onBubbleDrag(in String key, in boolean isBeingDragged) = 7;
 
+    oneway void showUserEducation(in int positionX, in int positionY) = 8;
+
 }

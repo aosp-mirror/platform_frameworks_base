@@ -24,7 +24,7 @@ import android.graphics.Rect;
 import android.util.SparseArray;
 import android.view.View;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.navigationbar.NavigationBarComponent.NavigationBarScope;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.settings.DisplayTracker;

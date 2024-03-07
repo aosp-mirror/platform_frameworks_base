@@ -36,6 +36,7 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -115,11 +116,18 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     static final String XML_ATTR_HIGHEST_DRAIN_PACKAGE = "highest_drain_package";
     static final String XML_ATTR_TIME_IN_FOREGROUND = "time_in_foreground";
     static final String XML_ATTR_TIME_IN_BACKGROUND = "time_in_background";
+    static final String XML_ATTR_TIME_IN_FOREGROUND_SERVICE = "time_in_foreground_service";
 
     // We need about 700 bytes per UID
     private static final long BATTERY_CONSUMER_CURSOR_WINDOW_SIZE = 5_000 * 700;
 
     private static final int STATSD_PULL_ATOM_MAX_BYTES = 45000;
+
+    private static final int[] UID_USAGE_TIME_PROCESS_STATES = {
+            BatteryConsumer.PROCESS_STATE_FOREGROUND,
+            BatteryConsumer.PROCESS_STATE_BACKGROUND,
+            BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE
+    };
 
     private final int mDischargePercentage;
     private final double mBatteryCapacityMah;
@@ -315,7 +323,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             throw new IllegalStateException(
                     "Battery history was not requested in the BatteryUsageStatsQuery");
         }
-        return new BatteryStatsHistoryIterator(mBatteryStatsHistory);
+        return new BatteryStatsHistoryIterator(mBatteryStatsHistory, 0, 0);
     }
 
     @Override
@@ -514,6 +522,22 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             proto.write(
                     BatteryUsageStatsAtomsProto.UidBatteryConsumer.TIME_IN_BACKGROUND_MILLIS,
                     bgMs);
+            for (int processState : UID_USAGE_TIME_PROCESS_STATES) {
+                final long timeInStateMillis = consumer.getTimeInProcessStateMs(processState);
+                if (timeInStateMillis <= 0) {
+                    continue;
+                }
+                final long timeInStateToken = proto.start(
+                        BatteryUsageStatsAtomsProto.UidBatteryConsumer.TIME_IN_STATE);
+                proto.write(
+                        BatteryUsageStatsAtomsProto.UidBatteryConsumer.TimeInState.PROCESS_STATE,
+                        processState);
+                proto.write(
+                        BatteryUsageStatsAtomsProto.UidBatteryConsumer.TimeInState
+                                .TIME_IN_STATE_MILLIS,
+                        timeInStateMillis);
+                proto.end(timeInStateToken);
+            }
             proto.end(token);
 
             if (proto.getRawSize() >= maxRawSize) {
@@ -585,7 +609,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                             + "(" + BatteryConsumer.processStateToString(key.processState) + ")";
                 }
                 printPowerComponent(pw, prefix, label, devicePowerMah, appsPowerMah,
-                        deviceConsumer.getPowerModel(key),
+                        mIncludesPowerModels ? deviceConsumer.getPowerModel(key)
+                                : BatteryConsumer.POWER_MODEL_UNDEFINED,
                         deviceConsumer.getUsageDurationMillis(key));
             }
         }
@@ -771,6 +796,15 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             mBatteryConsumersCursorWindow.close();
         }
         super.finalize();
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        dump(pw, "");
+        pw.flush();
+        return sw.toString();
     }
 
     /**

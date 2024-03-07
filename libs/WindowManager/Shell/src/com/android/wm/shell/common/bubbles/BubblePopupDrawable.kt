@@ -31,7 +31,7 @@ import kotlin.math.sin
 import kotlin.properties.Delegates
 
 /** A drawable for the [BubblePopupView] that draws a popup background with a directional arrow */
-class BubblePopupDrawable(private val config: Config) : Drawable() {
+class BubblePopupDrawable(val config: Config) : Drawable() {
     /** The direction of the arrow in the popup drawable */
     enum class ArrowDirection {
         UP,

@@ -66,13 +66,13 @@ public class AccessibilityRecord {
 
     private static final int UNDEFINED = -1;
 
-    private static final int PROPERTY_CHECKED = 0x00000001;
-    private static final int PROPERTY_ENABLED = 0x00000002;
-    private static final int PROPERTY_PASSWORD = 0x00000004;
-    private static final int PROPERTY_FULL_SCREEN = 0x00000080;
-    private static final int PROPERTY_SCROLLABLE = 0x00000100;
-    private static final int PROPERTY_IMPORTANT_FOR_ACCESSIBILITY = 0x00000200;
-    private static final int PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 0x00000400;
+    private static final int PROPERTY_CHECKED = 1 /* << 0 */;
+    private static final int PROPERTY_ENABLED = 1 << 1;
+    private static final int PROPERTY_PASSWORD = 1 << 2;
+    private static final int PROPERTY_FULL_SCREEN = 1 << 7;
+    private static final int PROPERTY_SCROLLABLE = 1 << 8;
+    private static final int PROPERTY_IMPORTANT_FOR_ACCESSIBILITY = 1 << 9;
+    private static final int PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 1 << 10;
 
     private static final int GET_SOURCE_PREFETCH_FLAGS =
             AccessibilityNodeInfo.FLAG_PREFETCH_ANCESTORS
@@ -198,8 +198,7 @@ public class AccessibilityRecord {
      *
      * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
      */
-    @Nullable
-    public AccessibilityNodeInfo getSource(
+    public @Nullable AccessibilityNodeInfo getSource(
             @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         enforceSealed();
         if ((mConnectionId == UNDEFINED)

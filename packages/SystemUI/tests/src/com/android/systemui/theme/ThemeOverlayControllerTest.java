@@ -16,6 +16,7 @@
 
 package com.android.systemui.theme;
 
+import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -61,10 +62,12 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.monet.Style;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 
 import com.google.common.util.concurrent.MoreExecutors;
@@ -88,7 +91,13 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
     private static final int USER_SYSTEM = UserHandle.USER_SYSTEM;
     private static final int USER_SECONDARY = 10;
+    private static final UserHandle MANAGED_USER_HANDLE = UserHandle.of(100);
+    private static final UserHandle PRIVATE_USER_HANDLE = UserHandle.of(101);
 
+    @Mock
+    private JavaAdapter mJavaAdapter;
+    @Mock
+    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private ThemeOverlayController mThemeOverlayController;
     @Mock
     private Executor mBgExecutor;
@@ -150,11 +159,12 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 .thenReturn(Color.YELLOW);
         when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
                 .thenReturn(Color.BLACK);
+
         mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, mMainExecutor, mBgExecutor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
                 mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
-                mUiModeManager) {
+                mJavaAdapter, mKeyguardTransitionInteractor, mUiModeManager) {
             @VisibleForTesting
             protected boolean isNightMode() {
                 return false;
@@ -167,6 +177,14 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                         .thenReturn(new OverlayIdentifier(
                                 Integer.toHexString(mColorScheme.getSeed() | 0xff000000)));
                 return overlay;
+            }
+
+            @VisibleForTesting
+            protected boolean isPrivateProfile(UserHandle userHandle) {
+                if (userHandle.getIdentifier() == PRIVATE_USER_HANDLE.getIdentifier()) {
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -669,7 +687,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     @Test
     public void onProfileAdded_setsTheme() {
         mBroadcastReceiver.getValue().onReceive(null,
-                new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
+                new Intent(Intent.ACTION_PROFILE_ADDED)
+                        .putExtra(Intent.EXTRA_USER, MANAGED_USER_HANDLE));
         verify(mThemeOverlayApplier).applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
 
@@ -678,7 +697,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         reset(mDeviceProvisionedController);
         when(mUserManager.isManagedProfile(anyInt())).thenReturn(false);
         mBroadcastReceiver.getValue().onReceive(null,
-                new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
+                new Intent(Intent.ACTION_PROFILE_ADDED)
+                        .putExtra(Intent.EXTRA_USER, MANAGED_USER_HANDLE));
         verify(mThemeOverlayApplier)
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
@@ -688,10 +708,24 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         reset(mDeviceProvisionedController);
         when(mUserManager.isManagedProfile(anyInt())).thenReturn(true);
         mBroadcastReceiver.getValue().onReceive(null,
-                new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED));
+                new Intent(Intent.ACTION_PROFILE_ADDED)
+                        .putExtra(Intent.EXTRA_USER, MANAGED_USER_HANDLE));
         verify(mThemeOverlayApplier, never())
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
+
+    @Test
+    public void onPrivateProfileAdded_ignoresUntilStartComplete() {
+        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
+        reset(mDeviceProvisionedController);
+        when(mUserManager.isManagedProfile(anyInt())).thenReturn(false);
+        mBroadcastReceiver.getValue().onReceive(null,
+                (new Intent(Intent.ACTION_PROFILE_ADDED))
+                        .putExtra(Intent.EXTRA_USER, PRIVATE_USER_HANDLE));
+        verify(mThemeOverlayApplier, never())
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
 
     @Test
     public void onWallpaperColorsChanged_firstEventBeforeUserSetup_shouldBeAccepted() {
@@ -736,7 +770,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
                 mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
-                mUiModeManager) {
+                mJavaAdapter, mKeyguardTransitionInteractor, mUiModeManager) {
             @VisibleForTesting
             protected boolean isNightMode() {
                 return false;
@@ -776,7 +810,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
                 mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
-                mUiModeManager) {
+                mJavaAdapter, mKeyguardTransitionInteractor, mUiModeManager) {
             @VisibleForTesting
             protected boolean isNightMode() {
                 return false;

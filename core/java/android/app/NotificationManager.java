@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,8 +26,12 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.annotation.WorkerThread;
 import android.app.Notification.Builder;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,6 +51,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
@@ -268,6 +274,7 @@ public class NotificationManager {
      *     {@link #AUTOMATIC_RULE_STATUS_UNKNOWN}.
      * </p>
      */
+    // TODO (b/309101513): Add new status types to javadoc
     public static final String EXTRA_AUTOMATIC_ZEN_RULE_STATUS =
             "android.app.extra.AUTOMATIC_ZEN_RULE_STATUS";
 
@@ -282,7 +289,8 @@ public class NotificationManager {
     /** @hide */
     @IntDef(prefix = { "AUTOMATIC_RULE_STATUS" }, value = {
             AUTOMATIC_RULE_STATUS_ENABLED, AUTOMATIC_RULE_STATUS_DISABLED,
-            AUTOMATIC_RULE_STATUS_REMOVED, AUTOMATIC_RULE_STATUS_UNKNOWN
+            AUTOMATIC_RULE_STATUS_REMOVED, AUTOMATIC_RULE_STATUS_UNKNOWN,
+            AUTOMATIC_RULE_STATUS_ACTIVATED, AUTOMATIC_RULE_STATUS_DEACTIVATED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutomaticZenRuleStatus {}
@@ -314,6 +322,27 @@ public class NotificationManager {
      * ignored.
      */
     public static final int AUTOMATIC_RULE_STATUS_REMOVED = 3;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule has been
+     * activated by the user or cross device sync. Sent from
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. If the rule owner has a mode that includes
+     * a DND component, the rule owner should activate any extra behavior that's part of that mode
+     * in response to this broadcast.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int AUTOMATIC_RULE_STATUS_ACTIVATED = 4;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule has been
+     * deactivated ("snoozed") by the user. The rule will not return to an activated state until
+     * the app calls {@link #setAutomaticZenRuleState(String, Condition)} with
+     * {@link Condition#STATE_FALSE} (either immediately or when the trigger criteria is no
+     * longer met) and then {@link Condition#STATE_TRUE} when the trigger criteria is freshly met,
+     * or when the user re-activates it.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int AUTOMATIC_RULE_STATUS_DEACTIVATED = 5;
 
     /**
      * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
@@ -1219,6 +1248,23 @@ public class NotificationManager {
     }
 
     /**
+     * Returns true if users can independently and fully manage {@link AutomaticZenRule} rules. This
+     * includes the ability to independently activate/deactivate rules and overwrite/freeze the
+     * behavior (policy) of the rule when activated.
+     * <p>
+     * If this method returns true, calls to
+     * {@link #updateAutomaticZenRule(String, AutomaticZenRule)} may fail and apps should defer
+     * rule management to system settings/uis via
+     * {@link Settings#ACTION_AUTOMATIC_ZEN_RULE_SETTINGS}.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public boolean areAutomaticZenRulesUserManaged() {
+        // modes ui is dependent on modes api
+        return Flags.modesApi() && Flags.modesUi();
+    }
+
+
+    /**
      * Returns AutomaticZenRules owned by the caller.
      *
      * <p>
@@ -1228,17 +1274,21 @@ public class NotificationManager {
     public Map<String, AutomaticZenRule> getAutomaticZenRules() {
         INotificationManager service = getService();
         try {
-            List<ZenModeConfig.ZenRule> rules = service.getZenRules();
-            Map<String, AutomaticZenRule> ruleMap = new HashMap<>();
-            for (ZenModeConfig.ZenRule rule : rules) {
-                AutomaticZenRule azr = new AutomaticZenRule(rule.name, rule.component,
-                        rule.configurationActivity, rule.conditionId, rule.zenPolicy,
-                        zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
-                        rule.creationTime);
-                azr.setPackageName(rule.pkg);
-                ruleMap.put(rule.id, azr);
+            if (Flags.modesApi()) {
+                return service.getAutomaticZenRules();
+            } else {
+                List<ZenModeConfig.ZenRule> rules = service.getZenRules();
+                Map<String, AutomaticZenRule> ruleMap = new HashMap<>();
+                for (ZenModeConfig.ZenRule rule : rules) {
+                    AutomaticZenRule azr = new AutomaticZenRule(rule.name, rule.component,
+                            rule.configurationActivity, rule.conditionId, rule.zenPolicy,
+                            zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
+                            rule.creationTime);
+                    azr.setPackageName(rule.pkg);
+                    ruleMap.put(rule.id, azr);
+                }
+                return ruleMap;
             }
-            return ruleMap;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1614,6 +1664,7 @@ public class NotificationManager {
      *
      * <p>
      */
+    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public Policy getNotificationPolicy() {
         INotificationManager service = getService();
         try {
@@ -1632,6 +1683,7 @@ public class NotificationManager {
      *
      * @param policy The new desired policy.
      */
+    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public void setNotificationPolicy(@NonNull Policy policy) {
         checkRequired("policy", policy);
         INotificationManager service = getService();
@@ -1659,23 +1711,42 @@ public class NotificationManager {
     }
 
     /**
+     * For apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above, the
+     * {@code setNotificationListenerAccessGranted} method will use the user contained within the
+     * context.
+     * For apps targeting an SDK version <em>below</em> this, the user of the calling process will
+     * be used (Process.myUserHandle()).
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long SET_LISTENER_ACCESS_GRANTED_IS_USER_AWARE = 302563478L;
+
+    /**
      * Grants/revokes Notification Listener access to the given component for current user.
      * To grant access for a particular user, obtain this service by using the {@link Context}
      * provided by {@link Context#createPackageContextAsUser}
      *
      * @param listener Name of component to grant/revoke access
-     * @param granted Grant/revoke access
-     * @param userSet Whether the action was triggered explicitly by user
+     * @param granted  Grant/revoke access
+     * @param userSet  Whether the action was triggered explicitly by user
      * @hide
      */
     @SystemApi
     @TestApi
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS)
     public void setNotificationListenerAccessGranted(
             @NonNull ComponentName listener, boolean granted, boolean userSet) {
         INotificationManager service = getService();
         try {
-            service.setNotificationListenerAccessGranted(listener, granted, userSet);
+            if (CompatChanges.isChangeEnabled(SET_LISTENER_ACCESS_GRANTED_IS_USER_AWARE)) {
+                service.setNotificationListenerAccessGrantedForUser(listener, mContext.getUserId(),
+                        granted, userSet);
+            } else {
+                service.setNotificationListenerAccessGranted(listener, granted, userSet);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1987,6 +2058,14 @@ public class NotificationManager {
         public static final int STATE_CHANNELS_BYPASSING_DND = 1 << 0;
 
         /**
+         * Whether the policy indicates that even priority channels are NOT permitted to bypass DND.
+         * Note that this state explicitly marks the "disallow" state because the default behavior
+         * is to allow priority channels to break through.
+         * @hide
+         */
+        public static final int STATE_PRIORITY_CHANNELS_BLOCKED = 1 << 1;
+
+        /**
          * @hide
          */
         public static final int STATE_UNSET = -1;
@@ -2201,20 +2280,34 @@ public class NotificationManager {
 
         @Override
         public String toString() {
-            return "NotificationManager.Policy["
-                    + "priorityCategories=" + priorityCategoriesToString(priorityCategories)
-                    + ",priorityCallSenders=" + prioritySendersToString(priorityCallSenders)
-                    + ",priorityMessageSenders=" + prioritySendersToString(priorityMessageSenders)
-                    + ",priorityConvSenders="
-                    + conversationSendersToString(priorityConversationSenders)
-                    + ",suppressedVisualEffects="
-                    + suppressedEffectsToString(suppressedVisualEffects)
-                    + ",areChannelsBypassingDnd=" + (state == STATE_UNSET
-                        ? "unset"
-                        : ((state & STATE_CHANNELS_BYPASSING_DND) != 0)
-                                ? "true"
-                                : "false")
-                    + "]";
+            StringBuilder sb = new StringBuilder().append("NotificationManager.Policy[")
+                    .append("priorityCategories=")
+                    .append(priorityCategoriesToString(priorityCategories))
+                    .append(",priorityCallSenders=")
+                    .append(prioritySendersToString(priorityCallSenders))
+                    .append(",priorityMessageSenders=")
+                    .append(prioritySendersToString(priorityMessageSenders))
+                    .append(",priorityConvSenders=")
+                    .append(conversationSendersToString(priorityConversationSenders))
+                    .append(",suppressedVisualEffects=")
+                    .append(suppressedEffectsToString(suppressedVisualEffects));
+            if (Flags.modesApi()) {
+                sb.append(",hasPriorityChannels=");
+            } else {
+                sb.append(",areChannelsBypassingDnd=");
+            }
+            sb.append((state == STATE_UNSET
+                    ? "unset"
+                    : ((state & STATE_CHANNELS_BYPASSING_DND) != 0)
+                            ? "true"
+                            : "false"));
+            if (Flags.modesApi()) {
+                sb.append(",allowPriorityChannels=")
+                        .append((state == STATE_UNSET
+                                ? "unset"
+                                : (allowPriorityChannels() ? "true" : "false")));
+            }
+            return sb.append("]").toString();
         }
 
         /** @hide */
@@ -2485,6 +2578,35 @@ public class NotificationManager {
             return (suppressedVisualEffects & SUPPRESSED_EFFECT_NOTIFICATION_LIST) == 0;
         }
 
+        /** @hide **/
+        @FlaggedApi(Flags.FLAG_MODES_API)
+        @TestApi // so CTS tests can read this state without having to use implementation detail
+        public boolean allowPriorityChannels() {
+            if (state == STATE_UNSET) {
+                return true; // default
+            }
+            return (state & STATE_PRIORITY_CHANNELS_BLOCKED) == 0;
+        }
+
+        /** @hide */
+        @FlaggedApi(Flags.FLAG_MODES_API)
+        public boolean hasPriorityChannels() {
+            return (state & STATE_CHANNELS_BYPASSING_DND) != 0;
+        }
+
+        /** @hide **/
+        @FlaggedApi(Flags.FLAG_MODES_API)
+        public static int policyState(boolean hasPriorityChannels, boolean allowPriorityChannels) {
+            int state = 0;
+            if (hasPriorityChannels) {
+                state |= STATE_CHANNELS_BYPASSING_DND;
+            }
+            if (!allowPriorityChannels) {
+                state |= STATE_PRIORITY_CHANNELS_BLOCKED;
+            }
+            return state;
+        }
+
         /**
          * returns a deep copy of this policy
          * @hide
@@ -2561,6 +2683,7 @@ public class NotificationManager {
      * Only available if policy access is granted to this package. See
      * {@link #isNotificationPolicyAccessGranted}.
      */
+    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
         final INotificationManager service = getService();
         try {

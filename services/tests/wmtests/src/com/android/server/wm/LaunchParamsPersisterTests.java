@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -114,8 +115,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         mDisplayUniqueId = "test:" + sNextUniqueId++;
         mTestDisplay = new TestDisplayContent.Builder(mAtm, 1000, 1500)
                 .setUniqueId(mDisplayUniqueId).build();
-        when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId)))
-                .thenReturn(mTestDisplay);
+        doReturn(mTestDisplay).when(mRootWindowContainer).getDisplayContent(mDisplayUniqueId);
 
         Task rootTask = mTestDisplay.getDefaultTaskDisplayArea()
                 .createRootTask(TEST_WINDOWING_MODE, ACTIVITY_TYPE_STANDARD, /* onTop */ true);
@@ -200,7 +200,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
     public void testReturnsEmptyDisplayIfDisplayIsNotFound() {
         mTarget.saveTask(mTestTask);
 
-        when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId))).thenReturn(null);
+        doReturn(null).when(mRootWindowContainer).getDisplayContent(eq(mDisplayUniqueId));
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 

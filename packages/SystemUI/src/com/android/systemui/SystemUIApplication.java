@@ -37,6 +37,7 @@ import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.View;
 
+import com.android.systemui.res.R;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
@@ -108,6 +109,10 @@ public class SystemUIApplication extends Application implements
                 SystemProperties.getBoolean("persist.debug.trace_layouts", false));
         View.setTracedRequestLayoutClassClass(
                 SystemProperties.get("persist.debug.trace_request_layout_class", null));
+
+        if (Flags.enableLayoutTracing()) {
+            View.setTraceLayoutSteps(true);
+        }
 
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter bootCompletedFilter = new
@@ -254,15 +259,15 @@ public class SystemUIApplication extends Application implements
         }
 
         for (i = 0; i < mServices.length; i++) {
-            CoreStartable service = mServices[i];
+            final CoreStartable service = mServices[i];
             if (mBootCompleteCache.isBootComplete()) {
                 notifyBootCompleted(service);
             }
 
             if (service.isDumpCritical()) {
-                dumpManager.registerCriticalDumpable(service.getClass().getName(), service);
+                dumpManager.registerCriticalDumpable(service);
             } else {
-                dumpManager.registerNormalDumpable(service.getClass().getName(), service);
+                dumpManager.registerNormalDumpable(service);
             }
         }
         mSysUIComponent.getInitController().executePostInitTasks();

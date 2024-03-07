@@ -6,6 +6,9 @@ import android.graphics.Rect
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.Display
+import android.view.Surface
+import android.view.Surface.ROTATION_270
+import android.view.Surface.ROTATION_90
 import android.view.SurfaceControl
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
@@ -24,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.never
@@ -76,7 +80,15 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         whenever(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.densityDpi()).thenReturn(DENSITY_DPI)
         whenever(mockDisplayLayout.getStableBounds(any())).thenAnswer { i ->
-            (i.arguments.first() as Rect).set(STABLE_BOUNDS)
+            if (mockWindowDecoration.mTaskInfo.configuration.windowConfiguration
+                    .displayRotation == ROTATION_90 ||
+                mockWindowDecoration.mTaskInfo.configuration.windowConfiguration
+                    .displayRotation == ROTATION_270
+            ) {
+                (i.arguments.first() as Rect).set(STABLE_BOUNDS_LANDSCAPE)
+            } else {
+                (i.arguments.first() as Rect).set(STABLE_BOUNDS_PORTRAIT)
+            }
         }
         `when`(mockDisplayLayout.stableInsets()).thenReturn(STABLE_INSETS)
         `when`(mockTransactionFactory.get()).thenReturn(mockTransaction)
@@ -88,7 +100,8 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
             minHeight = MIN_HEIGHT
             defaultMinSize = DEFAULT_MIN
             displayId = DISPLAY_ID
-            configuration.windowConfiguration.bounds = STARTING_BOUNDS
+            configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
+            configuration.windowConfiguration.displayRotation = ROTATION_90
         }
         mockWindowDecoration.mDisplay = mockDisplay
         whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
@@ -623,7 +636,7 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
         )
 
         val newX = STARTING_BOUNDS.left.toFloat()
-        val newY = STABLE_BOUNDS.top.toFloat() - 5
+        val newY = STABLE_BOUNDS_LANDSCAPE.top.toFloat() - 5
         taskPositioner.onDragPositioningMove(
                 newX,
                 newY
@@ -641,9 +654,81 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 token == taskBinder &&
                         (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
                         change.configuration.windowConfiguration.bounds.top ==
-                        STABLE_BOUNDS.top
+                        STABLE_BOUNDS_LANDSCAPE.top
             }
         })
+    }
+
+    @Test
+    fun testDragResize_drag_updatesStableBoundsOnRotate() {
+        // Test landscape stable bounds
+        performDrag(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat(),
+            STARTING_BOUNDS.right.toFloat() + 2000, STARTING_BOUNDS.bottom.toFloat() + 2000,
+            CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM)
+        val rectAfterDrag = Rect(STARTING_BOUNDS)
+        rectAfterDrag.right += 2000
+        // First drag; we should fetch stable bounds.
+        verify(mockDisplayLayout, Mockito.times(1)).getStableBounds(any())
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds == rectAfterDrag
+            }
+        })
+        // Drag back to starting bounds.
+        performDrag(
+            STARTING_BOUNDS.right.toFloat() + 2000, STARTING_BOUNDS.bottom.toFloat(),
+            STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat(),
+            CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM)
+
+        // Display did not rotate; we should use previous stable bounds
+        verify(mockDisplayLayout, Mockito.times(1)).getStableBounds(any())
+
+        // Rotate the screen to portrait
+        mockWindowDecoration.mTaskInfo.apply {
+            configuration.windowConfiguration.displayRotation = Surface.ROTATION_0
+        }
+        // Test portrait stable bounds
+        performDrag(
+            STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.bottom.toFloat(),
+            STARTING_BOUNDS.right.toFloat() + 2000, STARTING_BOUNDS.bottom.toFloat() + 2000,
+            CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM)
+        rectAfterDrag.right -= 2000
+        rectAfterDrag.bottom += 2000
+
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds == rectAfterDrag
+            }
+        })
+        // Display has rotated; we expect a new stable bounds.
+        verify(mockDisplayLayout, Mockito.times(2)).getStableBounds(any())
+    }
+
+    private fun performDrag(
+        startX: Float,
+        startY: Float,
+        endX: Float,
+        endY: Float,
+        ctrlType: Int
+    ) {
+        taskPositioner.onDragPositioningStart(
+            ctrlType,
+            startX,
+            startY
+        )
+        taskPositioner.onDragPositioningMove(
+            endX,
+            endY
+        )
+
+        taskPositioner.onDragPositioningEnd(
+            endX,
+            endY
+        )
     }
 
     companion object {
@@ -664,11 +749,17 @@ class FluidResizeTaskPositionerTest : ShellTestCase() {
                 DISPLAY_BOUNDS.bottom - NAVBAR_HEIGHT,
                 DISPLAY_BOUNDS.right,
                 DISPLAY_BOUNDS.bottom)
-        private val STABLE_BOUNDS = Rect(
+        private val STABLE_BOUNDS_LANDSCAPE = Rect(
                 DISPLAY_BOUNDS.left,
                 DISPLAY_BOUNDS.top + CAPTION_HEIGHT,
                 DISPLAY_BOUNDS.right,
                 DISPLAY_BOUNDS.bottom - NAVBAR_HEIGHT
+        )
+        private val STABLE_BOUNDS_PORTRAIT = Rect(
+            DISPLAY_BOUNDS.top,
+            DISPLAY_BOUNDS.left + CAPTION_HEIGHT,
+            DISPLAY_BOUNDS.bottom,
+            DISPLAY_BOUNDS.right - NAVBAR_HEIGHT
         )
     }
 }

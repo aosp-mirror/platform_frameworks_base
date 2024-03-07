@@ -57,7 +57,7 @@ public class AppOpsLegacyRestrictionsTest {
     Handler mHandler;
 
     @Mock
-    AppOpsCheckingServiceInterface mLegacyAppOpsService;
+    AppOpsRestrictions.AppOpsRestrictionRemovedListener mRestrictionRemovedListener;
 
     AppOpsRestrictions mAppOpsRestrictions;
 
@@ -75,7 +75,8 @@ public class AppOpsLegacyRestrictionsTest {
             r.run();
             return true;
         });
-        mAppOpsRestrictions = new AppOpsRestrictionsImpl(mContext, mHandler, mLegacyAppOpsService);
+        mAppOpsRestrictions = new AppOpsRestrictionsImpl(mContext, mHandler,
+                mRestrictionRemovedListener);
     }
 
     @After
@@ -271,7 +272,7 @@ public class AppOpsLegacyRestrictionsTest {
     public void testNotify() {
         mAppOpsRestrictions.setUserRestriction(mClientToken, mUserId1, mOpCode1, true, null);
         mAppOpsRestrictions.clearUserRestrictions(mClientToken);
-        Mockito.verify(mLegacyAppOpsService, Mockito.times(1))
-                .notifyWatchersOfChange(mOpCode1, UID_ANY);
+        Mockito.verify(mRestrictionRemovedListener, Mockito.times(1))
+                .onAppOpsRestrictionRemoved(mOpCode1);
     }
 }

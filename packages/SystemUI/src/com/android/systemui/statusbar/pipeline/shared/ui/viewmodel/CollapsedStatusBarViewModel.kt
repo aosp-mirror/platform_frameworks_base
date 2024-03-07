@@ -20,11 +20,17 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -48,12 +54,25 @@ interface CollapsedStatusBarViewModel {
 
     /** Emits whenever a transition from lockscreen to dream has started. */
     val transitionFromLockscreenToDreamStartedEvent: Flow<Unit>
+
+    /**
+     * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
+     * status bar and navigation icons dim. In this mode, a notification dot appears where the
+     * notification icons would appear if they would be shown outside of this mode.
+     *
+     * This flow tells when to show or hide the notification dot in the status bar to indicate
+     * whether there are notifications when the device is in
+     * [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE].
+     */
+    fun areNotificationsLightsOut(displayId: Int): Flow<Boolean>
 }
 
 @SysUISingleton
 class CollapsedStatusBarViewModelImpl
 @Inject
 constructor(
+    private val lightsOutInteractor: LightsOutInteractor,
+    private val notificationsInteractor: ActiveNotificationsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     @Application coroutineScope: CoroutineScope,
 ) : CollapsedStatusBarViewModel {
@@ -69,4 +88,17 @@ constructor(
         keyguardTransitionInteractor.lockscreenToDreamingTransition
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
+
+    override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> =
+        if (NotificationsLiveDataStoreRefactor.isUnexpectedlyInLegacyMode()) {
+            emptyFlow()
+        } else {
+            combine(
+                    notificationsInteractor.areAnyNotificationsPresent,
+                    lightsOutInteractor.isLowProfile(displayId),
+                ) { hasNotifications, isLowProfile ->
+                    hasNotifications && isLowProfile
+                }
+                .distinctUntilChanged()
+        }
 }

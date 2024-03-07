@@ -35,6 +35,9 @@ import android.view.SurfaceControlViewHost
 import android.view.SurfaceSession
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
+import com.android.app.tracing.traceSection
+import com.android.keyguard.logging.ScrimLogger
+import com.android.systemui.Flags.unfoldAnimationBackgroundProgress
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -45,15 +48,16 @@ import com.android.systemui.statusbar.LinearLightRevealEffect
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation.AddOverlayReason.FOLD
 import com.android.systemui.unfold.UnfoldLightRevealOverlayAnimation.AddOverlayReason.UNFOLD
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.dagger.UnfoldBg
 import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider.Companion.areAnimationsEnabled
 import com.android.systemui.util.concurrency.ThreadFactory
-import com.android.systemui.util.traceSection
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper
 import java.util.Optional
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import javax.inject.Inject
+import javax.inject.Provider
 
 @SysUIUnfoldScope
 class UnfoldLightRevealOverlayAnimation
@@ -64,12 +68,16 @@ constructor(
     private val deviceStateManager: DeviceStateManager,
     private val contentResolver: ContentResolver,
     private val displayManager: DisplayManager,
-    private val unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider,
+    @UnfoldBg
+    private val unfoldTransitionBgProgressProvider: Provider<UnfoldTransitionProgressProvider>,
+    private val unfoldTransitionProgressProvider: Provider<UnfoldTransitionProgressProvider>,
     private val displayAreaHelper: Optional<DisplayAreaHelper>,
     @Main private val executor: Executor,
     private val threadFactory: ThreadFactory,
-    private val rotationChangeProvider: RotationChangeProvider,
-    private val displayTracker: DisplayTracker
+    @UnfoldBg private val rotationChangeProvider: RotationChangeProvider,
+    @UnfoldBg private val unfoldProgressHandler: Handler,
+    private val displayTracker: DisplayTracker,
+    private val scrimLogger: ScrimLogger,
 ) {
 
     private val transitionListener = TransitionListener()
@@ -94,11 +102,15 @@ constructor(
     fun init() {
         // This method will be called only on devices where this animation is enabled,
         // so normally this thread won't be created
-        bgHandler = threadFactory.buildHandlerOnNewThread(TAG)
+        bgHandler = unfoldProgressHandler
         bgExecutor = threadFactory.buildDelayableExecutorOnHandler(bgHandler)
 
         deviceStateManager.registerCallback(bgExecutor, FoldListener())
-        unfoldTransitionProgressProvider.addCallback(transitionListener)
+        if (unfoldAnimationBackgroundProgress()) {
+            unfoldTransitionBgProgressProvider.get().addCallback(transitionListener)
+        } else {
+            unfoldTransitionProgressProvider.get().addCallback(transitionListener)
+        }
         rotationChangeProvider.addCallback(rotationWatcher)
 
         val containerBuilder =
@@ -167,8 +179,13 @@ constructor(
 
         overlayAddReason = reason
 
-        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm,
-                "UnfoldLightRevealOverlayAnimation")
+        val newRoot =
+            SurfaceControlViewHost(
+                context,
+                context.display,
+                wwm,
+                "UnfoldLightRevealOverlayAnimation"
+            )
         val params = getLayoutParams()
         val newView =
             LightRevealScrim(
@@ -179,8 +196,8 @@ constructor(
                 )
                 .apply {
                     revealEffect = createLightRevealEffect()
-                    isScrimOpaqueChangedListener = Consumer {}
                     revealAmount = calculateRevealAmount()
+                    scrimLogger = this@UnfoldLightRevealOverlayAnimation.scrimLogger
                 }
 
         newRoot.setView(newView, params)
@@ -351,12 +368,13 @@ constructor(
     }
 
     private fun executeInBackground(f: () -> Unit) {
-        check(Looper.myLooper() != bgHandler.looper) {
-            "Trying to execute using background handler while already running" +
-                " in the background handler"
+        // This is needed to allow progresses to be received both from the main thread (that will
+        // schedule a runnable on the bg thread), and from the bg thread directly (no reposting).
+        if (bgHandler.looper.isCurrentThread) {
+            f()
+        } else {
+            bgHandler.post(f)
         }
-        // The UiBackground executor is not used as it doesn't have a prepared looper.
-        bgHandler.post(f)
     }
 
     private fun ensureInBackground() {

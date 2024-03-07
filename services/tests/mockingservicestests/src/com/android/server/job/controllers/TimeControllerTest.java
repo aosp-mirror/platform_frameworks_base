@@ -48,6 +48,8 @@ import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
 
+import libcore.junit.util.compat.CoreCompatChangeRule;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -141,6 +143,7 @@ public class TimeControllerTest {
     }
 
     @Test
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testMaybeStartTrackingJobLocked_AlreadySatisfied() {
         JobStatus delaySatisfied = createJobStatus(
                 "testMaybeStartTrackingJobLocked_AlreadySatisfied",
@@ -294,6 +297,7 @@ public class TimeControllerTest {
         runTestMaybeStartTrackingJobLocked_DeadlineInOrder();
     }
 
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     private void runTestMaybeStartTrackingJobLocked_DeadlineInOrder() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
@@ -319,6 +323,7 @@ public class TimeControllerTest {
     }
 
     @Test
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testMaybeStartTrackingJobLocked_DeadlineInOrder_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
@@ -357,6 +362,7 @@ public class TimeControllerTest {
         runTestMaybeStartTrackingJobLocked_DeadlineReverseOrder();
     }
 
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     private void runTestMaybeStartTrackingJobLocked_DeadlineReverseOrder() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
@@ -387,6 +393,7 @@ public class TimeControllerTest {
     }
 
     @Test
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testMaybeStartTrackingJobLocked_DeadlineReverseOrder_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
@@ -535,6 +542,7 @@ public class TimeControllerTest {
         runTestCheckExpiredDeadlinesAndResetAlarm();
     }
 
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     private void runTestCheckExpiredDeadlinesAndResetAlarm() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
@@ -585,6 +593,7 @@ public class TimeControllerTest {
     }
 
     @Test
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testCheckExpiredDeadlinesAndResetAlarm_SomeNotReady() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 
@@ -740,6 +749,7 @@ public class TimeControllerTest {
     }
 
     @Test
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testEvaluateStateLocked_Deadline() {
         final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
 

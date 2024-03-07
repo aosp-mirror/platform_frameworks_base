@@ -15,6 +15,7 @@
  */
 package android.telephony.data;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -22,7 +23,7 @@ import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.hardware.radio.V1_5.ApnTypes;
+import android.hardware.radio.data.ApnTypes;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +36,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -116,12 +118,14 @@ public class ApnSetting implements Parcelable {
     /** APN type for XCAP. */
     public static final int TYPE_XCAP = ApnTypes.XCAP;
     /** APN type for VSIM. */
-    public static final int TYPE_VSIM = 1 << 12;  // TODO: Refer to ApnTypes.VSIM
+    public static final int TYPE_VSIM = ApnTypes.VSIM;
     /** APN type for BIP. */
-    public static final int TYPE_BIP = 1 << 13;   // TODO: Refer to ApnTypes.BIP
+    public static final int TYPE_BIP = ApnTypes.BIP;
     /** APN type for ENTERPRISE. */
-    public static final int TYPE_ENTERPRISE = 1 << 14; //TODO: In future should be referenced from
-    // hardware.interfaces.radio.data.ApnTypes
+    public static final int TYPE_ENTERPRISE = ApnTypes.ENTERPRISE;
+    /** APN type for RCS (Rich Communication Services). */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final int TYPE_RCS = ApnTypes.RCS;
 
     /** @hide */
     @IntDef(flag = true, prefix = {"TYPE_"}, value = {
@@ -140,6 +144,7 @@ public class ApnSetting implements Parcelable {
             TYPE_BIP,
             TYPE_VSIM,
             TYPE_ENTERPRISE,
+            TYPE_RCS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {
@@ -357,6 +362,17 @@ public class ApnSetting implements Parcelable {
     @SystemApi
     public static final String TYPE_ENTERPRISE_STRING = "enterprise";
 
+    /**
+     * APN type for RCS (Rich Communication Services)
+     *
+     * Note: String representations of APN types are intended for system apps to communicate with
+     * modem components or carriers. Non-system apps should use the integer variants instead.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    @SystemApi
+    public static final String TYPE_RCS_STRING = "rcs";
+
 
     /** @hide */
     @IntDef(prefix = { "AUTH_TYPE_" }, value = {
@@ -400,6 +416,11 @@ public class ApnSetting implements Parcelable {
     public @interface ProtocolType {}
 
     // Possible values for MVNO type.
+    /**
+     * Default value for MVNO type if it's not set.
+     * @hide
+     */
+    public static final int MVNO_TYPE_UNKNOWN = -1;
     /** MVNO type for service provider name. */
     public static final int MVNO_TYPE_SPN = 0;
     /** MVNO type for IMSI. */
@@ -411,13 +432,34 @@ public class ApnSetting implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = { "MVNO_TYPE_" }, value = {
-        MVNO_TYPE_SPN,
-        MVNO_TYPE_IMSI,
-        MVNO_TYPE_GID,
-        MVNO_TYPE_ICCID,
+            MVNO_TYPE_UNKNOWN,
+            MVNO_TYPE_SPN,
+            MVNO_TYPE_IMSI,
+            MVNO_TYPE_GID,
+            MVNO_TYPE_ICCID,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MvnoType {}
+
+    /**
+     * Indicating this APN can be used when the device is using terrestrial cellular networks.
+     * @hide
+     */
+    public static final int INFRASTRUCTURE_CELLULAR = 1 << 0;
+
+    /**
+     * Indicating this APN can be used when the device is attached to satellites.
+     * @hide
+     */
+    public static final int INFRASTRUCTURE_SATELLITE = 1 << 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "INFRASTRUCTURE_" }, value = {
+            INFRASTRUCTURE_CELLULAR,
+            INFRASTRUCTURE_SATELLITE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InfrastructureBitmask {}
 
     private static final Map<String, Integer> APN_TYPE_STRING_MAP;
     private static final Map<Integer, String> APN_TYPE_INT_MAP;
@@ -444,6 +486,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_STRING_MAP.put(TYPE_ENTERPRISE_STRING, TYPE_ENTERPRISE);
         APN_TYPE_STRING_MAP.put(TYPE_VSIM_STRING, TYPE_VSIM);
         APN_TYPE_STRING_MAP.put(TYPE_BIP_STRING, TYPE_BIP);
+        APN_TYPE_STRING_MAP.put(TYPE_RCS_STRING, TYPE_RCS);
 
         APN_TYPE_INT_MAP = new ArrayMap<>();
         APN_TYPE_INT_MAP.put(TYPE_DEFAULT, TYPE_DEFAULT_STRING);
@@ -461,6 +504,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_INT_MAP.put(TYPE_ENTERPRISE, TYPE_ENTERPRISE_STRING);
         APN_TYPE_INT_MAP.put(TYPE_VSIM, TYPE_VSIM_STRING);
         APN_TYPE_INT_MAP.put(TYPE_BIP, TYPE_BIP_STRING);
+        APN_TYPE_INT_MAP.put(TYPE_RCS, TYPE_RCS_STRING);
 
         PROTOCOL_STRING_MAP = new ArrayMap<>();
         PROTOCOL_STRING_MAP.put("IP", PROTOCOL_IP);
@@ -523,11 +567,13 @@ public class ApnSetting implements Parcelable {
     private final int mCarrierId;
     private final int mSkip464Xlat;
     private final boolean mAlwaysOn;
+    private final @InfrastructureBitmask int mInfrastructureBitmask;
+    private final boolean mEsimBootstrapProvisioning;
 
     /**
      * Returns the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
      * up by this APN setting. Note this value will only be used when MTU size is not provided
-     * in {@link DataCallResponse#getMtuV4()} during network bring up.
+     * in {@code DataCallResponse#getMtuV4()} during network bring up.
      *
      * @return the MTU size in bytes of the route.
      */
@@ -537,7 +583,7 @@ public class ApnSetting implements Parcelable {
 
     /**
      * Returns the MTU size of the IPv6 mobile interface to which the APN connected. Note this value
-     * will only be used when MTU size is not provided in {@link DataCallResponse#getMtuV6()}
+     * will only be used when MTU size is not provided in {@code DataCallResponse#getMtuV6()}
      * during network bring up.
      *
      * @return the MTU size in bytes of the route.
@@ -905,10 +951,45 @@ public class ApnSetting implements Parcelable {
      * See 3GPP TS 23.501 section 5.6.13
      *
      * @return True if the PDU session for this APN should always be on and false otherwise
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
     public boolean isAlwaysOn() {
         return mAlwaysOn;
+    }
+
+    /**
+     * Check if this APN can be used when the device is using certain infrastructure(s).
+     *
+     * @param infrastructures The infrastructure(s) the device is using.
+     *
+     * @return {@code true} if this APN can be used.
+     * @hide
+     */
+    public boolean isForInfrastructure(@InfrastructureBitmask int infrastructures) {
+        return (mInfrastructureBitmask & infrastructures) != 0;
+    }
+
+    /**
+     * @return The infrastructure bitmask of which the APN can be used on. For example, some APNs
+     * can only be used when the device is on cellular, on satellite, or both.
+     *
+     * @hide
+     */
+    @InfrastructureBitmask
+    public int getInfrastructureBitmask() {
+        return mInfrastructureBitmask;
+    }
+
+    /**
+     * Returns esim bootstrap provisioning flag for which the APN can be used on. For example,
+     * some APNs are only allowed to bring up network, when the device esim bootstrap provisioning
+     * is being activated.
+     *
+     * {@code true} if the APN is used for eSIM bootstrap provisioning, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isEsimBootstrapProvisioning() {
+        return mEsimBootstrapProvisioning;
     }
 
     private ApnSetting(Builder builder) {
@@ -947,6 +1028,8 @@ public class ApnSetting implements Parcelable {
         this.mCarrierId = builder.mCarrierId;
         this.mSkip464Xlat = builder.mSkip464Xlat;
         this.mAlwaysOn = builder.mAlwaysOn;
+        this.mInfrastructureBitmask = builder.mInfrastructureBitmask;
+        this.mEsimBootstrapProvisioning = builder.mEsimBootstrapProvisioning;
     }
 
     /**
@@ -1026,6 +1109,10 @@ public class ApnSetting implements Parcelable {
                         cursor.getColumnIndexOrThrow(Telephony.Carriers.CARRIER_ID)))
                 .setSkip464Xlat(cursor.getInt(cursor.getColumnIndexOrThrow(Carriers.SKIP_464XLAT)))
                 .setAlwaysOn(cursor.getInt(cursor.getColumnIndexOrThrow(Carriers.ALWAYS_ON)) == 1)
+                .setInfrastructureBitmask(cursor.getInt(cursor.getColumnIndexOrThrow(
+                        Telephony.Carriers.INFRASTRUCTURE_BITMASK)))
+                .setEsimBootstrapProvisioning(cursor.getInt(
+                        cursor.getColumnIndexOrThrow(Carriers.ESIM_BOOTSTRAP_PROVISIONING)) == 1)
                 .buildWithoutCheck();
     }
 
@@ -1065,6 +1152,8 @@ public class ApnSetting implements Parcelable {
                 .setCarrierId(apn.mCarrierId)
                 .setSkip464Xlat(apn.mSkip464Xlat)
                 .setAlwaysOn(apn.mAlwaysOn)
+                .setInfrastructureBitmask(apn.mInfrastructureBitmask)
+                .setEsimBootstrapProvisioning(apn.mEsimBootstrapProvisioning)
                 .buildWithoutCheck();
     }
 
@@ -1110,7 +1199,9 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mCarrierId);
         sb.append(", ").append(mSkip464Xlat);
         sb.append(", ").append(mAlwaysOn);
+        sb.append(", ").append(mInfrastructureBitmask);
         sb.append(", ").append(Objects.hash(mUser, mPassword));
+        sb.append(", ").append(mEsimBootstrapProvisioning);
         return sb.toString();
     }
 
@@ -1174,7 +1265,7 @@ public class ApnSetting implements Parcelable {
                 mProtocol, mRoamingProtocol, mMtuV4, mMtuV6, mCarrierEnabled, mNetworkTypeBitmask,
                 mLingeringNetworkTypeBitmask, mProfileId, mPersistent, mMaxConns, mWaitTime,
                 mMaxConnsTime, mMvnoType, mMvnoMatchData, mApnSetId, mCarrierId, mSkip464Xlat,
-                mAlwaysOn);
+                mAlwaysOn, mInfrastructureBitmask, mEsimBootstrapProvisioning);
     }
 
     @Override
@@ -1186,36 +1277,38 @@ public class ApnSetting implements Parcelable {
         ApnSetting other = (ApnSetting) o;
 
         return mEntryName.equals(other.mEntryName)
-                && Objects.equals(mId, other.mId)
+                && mId == other.mId
                 && Objects.equals(mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(mApnName, other.mApnName)
                 && Objects.equals(mProxyAddress, other.mProxyAddress)
                 && Objects.equals(mMmsc, other.mMmsc)
                 && Objects.equals(mMmsProxyAddress, other.mMmsProxyAddress)
-                && Objects.equals(mMmsProxyPort, other.mMmsProxyPort)
-                && Objects.equals(mProxyPort, other.mProxyPort)
+                && mMmsProxyPort == other.mMmsProxyPort
+                && mProxyPort == other.mProxyPort
                 && Objects.equals(mUser, other.mUser)
                 && Objects.equals(mPassword, other.mPassword)
-                && Objects.equals(mAuthType, other.mAuthType)
-                && Objects.equals(mApnTypeBitmask, other.mApnTypeBitmask)
-                && Objects.equals(mProtocol, other.mProtocol)
-                && Objects.equals(mRoamingProtocol, other.mRoamingProtocol)
-                && Objects.equals(mCarrierEnabled, other.mCarrierEnabled)
-                && Objects.equals(mProfileId, other.mProfileId)
-                && Objects.equals(mPersistent, other.mPersistent)
-                && Objects.equals(mMaxConns, other.mMaxConns)
-                && Objects.equals(mWaitTime, other.mWaitTime)
-                && Objects.equals(mMaxConnsTime, other.mMaxConnsTime)
-                && Objects.equals(mMtuV4, other.mMtuV4)
-                && Objects.equals(mMtuV6, other.mMtuV6)
-                && Objects.equals(mMvnoType, other.mMvnoType)
+                && mAuthType == other.mAuthType
+                && mApnTypeBitmask == other.mApnTypeBitmask
+                && mProtocol == other.mProtocol
+                && mRoamingProtocol == other.mRoamingProtocol
+                && mCarrierEnabled == other.mCarrierEnabled
+                && mProfileId == other.mProfileId
+                && mPersistent == other.mPersistent
+                && mMaxConns == other.mMaxConns
+                && mWaitTime == other.mWaitTime
+                && mMaxConnsTime == other.mMaxConnsTime
+                && mMtuV4 == other.mMtuV4
+                && mMtuV6 == other.mMtuV6
+                && mMvnoType == other.mMvnoType
                 && Objects.equals(mMvnoMatchData, other.mMvnoMatchData)
-                && Objects.equals(mNetworkTypeBitmask, other.mNetworkTypeBitmask)
-                && Objects.equals(mLingeringNetworkTypeBitmask, other.mLingeringNetworkTypeBitmask)
-                && Objects.equals(mApnSetId, other.mApnSetId)
-                && Objects.equals(mCarrierId, other.mCarrierId)
-                && Objects.equals(mSkip464Xlat, other.mSkip464Xlat)
-                && Objects.equals(mAlwaysOn, other.mAlwaysOn);
+                && mNetworkTypeBitmask == other.mNetworkTypeBitmask
+                && mLingeringNetworkTypeBitmask == other.mLingeringNetworkTypeBitmask
+                && mApnSetId == other.mApnSetId
+                && mCarrierId == other.mCarrierId
+                && mSkip464Xlat == other.mSkip464Xlat
+                && mAlwaysOn == other.mAlwaysOn
+                && mInfrastructureBitmask == other.mInfrastructureBitmask
+                && mEsimBootstrapProvisioning == other.mEsimBootstrapProvisioning;
     }
 
     /**
@@ -1265,7 +1358,9 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(mApnSetId, other.mApnSetId)
                 && Objects.equals(mCarrierId, other.mCarrierId)
                 && Objects.equals(mSkip464Xlat, other.mSkip464Xlat)
-                && Objects.equals(mAlwaysOn, other.mAlwaysOn);
+                && Objects.equals(mAlwaysOn, other.mAlwaysOn)
+                && Objects.equals(mInfrastructureBitmask, other.mInfrastructureBitmask)
+                && Objects.equals(mEsimBootstrapProvisioning, other.mEsimBootstrapProvisioning);
     }
 
     /**
@@ -1302,7 +1397,10 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(this.mApnSetId, other.mApnSetId)
                 && Objects.equals(this.mCarrierId, other.mCarrierId)
                 && Objects.equals(this.mSkip464Xlat, other.mSkip464Xlat)
-                && Objects.equals(this.mAlwaysOn, other.mAlwaysOn);
+                && Objects.equals(this.mAlwaysOn, other.mAlwaysOn)
+                && Objects.equals(this.mInfrastructureBitmask, other.mInfrastructureBitmask)
+                && Objects.equals(this.mEsimBootstrapProvisioning,
+                other.mEsimBootstrapProvisioning);
     }
 
     // Equal or one is null.
@@ -1374,6 +1472,8 @@ public class ApnSetting implements Parcelable {
         apnValue.put(Telephony.Carriers.CARRIER_ID, mCarrierId);
         apnValue.put(Telephony.Carriers.SKIP_464XLAT, mSkip464Xlat);
         apnValue.put(Telephony.Carriers.ALWAYS_ON, mAlwaysOn);
+        apnValue.put(Telephony.Carriers.INFRASTRUCTURE_BITMASK, mInfrastructureBitmask);
+        apnValue.put(Telephony.Carriers.ESIM_BOOTSTRAP_PROVISIONING, mEsimBootstrapProvisioning);
         return apnValue;
     }
 
@@ -1481,7 +1581,7 @@ public class ApnSetting implements Parcelable {
         String mvnoTypeString = TextUtils.isEmpty(mvnoType)
                 ? mvnoType : mvnoType.toLowerCase(Locale.ROOT);
         Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoTypeString);
-        return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
+        return  mvnoTypeInt == null ? MVNO_TYPE_UNKNOWN : mvnoTypeInt;
     }
 
     /** @hide */
@@ -1646,6 +1746,8 @@ public class ApnSetting implements Parcelable {
         dest.writeInt(mCarrierId);
         dest.writeInt(mSkip464Xlat);
         dest.writeBoolean(mAlwaysOn);
+        dest.writeInt(mInfrastructureBitmask);
+        dest.writeBoolean(mEsimBootstrapProvisioning);
     }
 
     private static ApnSetting readFromParcel(Parcel in) {
@@ -1681,6 +1783,8 @@ public class ApnSetting implements Parcelable {
                 .setCarrierId(in.readInt())
                 .setSkip464Xlat(in.readInt())
                 .setAlwaysOn(in.readBoolean())
+                .setInfrastructureBitmask(in.readInt())
+                .setEsimBootstrapProvisioning(in.readBoolean())
                 .buildWithoutCheck();
     }
 
@@ -1756,12 +1860,14 @@ public class ApnSetting implements Parcelable {
         private int mMaxConns;
         private int mWaitTime;
         private int mMaxConnsTime;
-        private int mMvnoType = UNSPECIFIED_INT;
+        private int mMvnoType = MVNO_TYPE_UNKNOWN;
         private String mMvnoMatchData;
         private int mApnSetId;
         private int mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         private int mSkip464Xlat = Carriers.SKIP_464XLAT_DEFAULT;
         private boolean mAlwaysOn;
+        private int mInfrastructureBitmask = INFRASTRUCTURE_CELLULAR | INFRASTRUCTURE_SATELLITE;
+        private boolean mEsimBootstrapProvisioning;
 
         /**
          * Default constructor for Builder.
@@ -1782,7 +1888,7 @@ public class ApnSetting implements Parcelable {
         /**
          * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv4 routes brought
          * up by this APN setting. Note this value will only be used when MTU size is not provided
-         * in {@link DataCallResponse#getMtuV4()} during network bring up.
+         * in {@code DataCallResponse#getMtuV4()} during network bring up.
          *
          * @param mtuV4 the MTU size in bytes of the route.
          */
@@ -1794,7 +1900,7 @@ public class ApnSetting implements Parcelable {
         /**
          * Set the default MTU (Maximum Transmission Unit) size in bytes of the IPv6 routes brought
          * up by this APN setting. Note this value will only be used when MTU size is not provided
-         * in {@link DataCallResponse#getMtuV6()} during network bring up.
+         * in {@code DataCallResponse#getMtuV6()} during network bring up.
          *
          * @param mtuV6 the MTU size in bytes of the route.
          */
@@ -2176,10 +2282,39 @@ public class ApnSetting implements Parcelable {
          * See 3GPP TS 23.501 section 5.6.13
          *
          * @param alwaysOn the always on status to set for this APN
+         */
+        @FlaggedApi(Flags.FLAG_APN_SETTING_FIELD_SUPPORT_FLAG)
+        public @NonNull Builder setAlwaysOn(boolean alwaysOn) {
+            this.mAlwaysOn = alwaysOn;
+            return this;
+        }
+
+        /**
+         * Set the infrastructure bitmask.
+         *
+         * @param infrastructureBitmask The infrastructure bitmask of which the APN can be used on.
+         * For example, some APNs can only be used when the device is on cellular, on satellite, or
+         * both.
+         *
+         * @return The builder.
          * @hide
          */
-        public Builder setAlwaysOn(boolean alwaysOn) {
-            this.mAlwaysOn = alwaysOn;
+        @NonNull
+        public Builder setInfrastructureBitmask(@InfrastructureBitmask int infrastructureBitmask) {
+            this.mInfrastructureBitmask = infrastructureBitmask;
+            return this;
+        }
+
+        /**
+         * Sets esim bootstrap provisioning flag
+         *
+         * @param esimBootstrapProvisioning {@code true} if the APN is used for eSIM bootstrap
+         * provisioning, {@code false} otherwise.
+         * @hide
+         */
+        @NonNull
+        public Builder setEsimBootstrapProvisioning(boolean esimBootstrapProvisioning) {
+            this.mEsimBootstrapProvisioning = esimBootstrapProvisioning;
             return this;
         }
 
@@ -2193,7 +2328,7 @@ public class ApnSetting implements Parcelable {
         public ApnSetting build() {
             if ((mApnTypeBitmask & (TYPE_DEFAULT | TYPE_MMS | TYPE_SUPL | TYPE_DUN | TYPE_HIPRI
                     | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
-                    | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
+                    | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE | TYPE_RCS)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }

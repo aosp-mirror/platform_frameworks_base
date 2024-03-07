@@ -142,12 +142,11 @@ final class RadioModule {
         public void onProgramListUpdated(ProgramListChunk programListChunk) {
             fireLater(() -> {
                 synchronized (mLock) {
-                    android.hardware.radio.ProgramList.Chunk chunk =
-                            ConversionUtils.chunkFromHalProgramListChunk(programListChunk);
-                    mProgramInfoCache.filterAndApplyChunk(chunk);
+                    mProgramInfoCache.filterAndApplyChunk(programListChunk);
 
                     for (int i = 0; i < mAidlTunerSessions.size(); i++) {
-                        mAidlTunerSessions.valueAt(i).onMergedProgramListUpdateFromHal(chunk);
+                        mAidlTunerSessions.valueAt(i).onMergedProgramListUpdateFromHal(
+                                programListChunk);
                     }
                 }
             });
@@ -168,6 +167,11 @@ final class RadioModule {
             fireLater(() -> {
                 synchronized (mLock) {
                     fanoutAidlCallbackLocked((cb, uid) -> {
+                        if (!ConversionUtils.configFlagMeetsSdkVersionRequirement(flag, uid)) {
+                            Slogf.e(TAG, "onConfigFlagUpdated: cannot send program info "
+                                    + "requiring higher target SDK version");
+                            return;
+                        }
                         cb.onConfigFlagUpdated(flag, value);
                     });
                 }

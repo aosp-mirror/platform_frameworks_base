@@ -21,5 +21,5 @@ data class AuthenticationResultModel(
     /** Whether authentication was successful. */
     val isSuccessful: Boolean = false,
     /** If [isSuccessful] is `false`, how long the user must wait before trying again. */
-    val throttleDurationMs: Int = 0,
+    val lockoutDurationMs: Int = 0,
 )

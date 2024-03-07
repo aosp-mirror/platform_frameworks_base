@@ -143,6 +143,8 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
         mSetupObserver.register();
         mUserManager = context.getSystemService(UserManager.class);
         mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(handler));
+        // This registers the alarm broadcast receiver for the current user
+        mUserChangedCallback.onUserChanged(getCurrentUser(), context);
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
@@ -169,6 +171,7 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     @Override
     public void addCallback(@NonNull Callback callback) {
         synchronized (mCallbacksLock) {
+            Log.d(TAG, "Added callback " + callback.getClass());
             mCallbacks.add(callback);
         }
     }
@@ -176,6 +179,7 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     @Override
     public void removeCallback(@NonNull Callback callback) {
         synchronized (mCallbacksLock) {
+            Log.d(TAG, "Removed callback " + callback.getClass());
             mCallbacks.remove(callback);
         }
     }
@@ -212,6 +216,7 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
 
     @Override
     public long getNextAlarm() {
+        // TODO(b/314799105): Migrate usages to NextAlarmController
         final AlarmManager.AlarmClockInfo info = mAlarmManager.getNextAlarmClock(mUserId);
         return info != null ? info.getTriggerTime() : 0;
     }

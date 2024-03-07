@@ -29,11 +29,15 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 
@@ -74,6 +78,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private final TaskViewTaskController mTaskViewTaskController;
     private Region mObscuredTouchRegion;
     private Insets mCaptionInsets;
+    private Handler mHandler;
 
     public TaskView(Context context, TaskViewTaskController taskViewTaskController) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
@@ -81,6 +86,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         // TODO(b/266736992): Think about a better way to set the TaskViewBase on the
         //  TaskViewTaskController and vice-versa
         mTaskViewTaskController.setTaskViewBase(this);
+        mHandler = Handler.getMain();
         getHolder().addCallback(this);
     }
 
@@ -117,14 +123,16 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         onLocationChanged();
         if (taskInfo.taskDescription != null) {
-            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+            final int bgColor = taskInfo.taskDescription.getBackgroundColor();
+            runOnViewThread(() -> setResizeBackgroundColor(bgColor));
         }
     }
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
         if (taskInfo.taskDescription != null) {
-            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+            final int bgColor = taskInfo.taskDescription.getBackgroundColor();
+            runOnViewThread(() -> setResizeBackgroundColor(bgColor));
         }
     }
 
@@ -143,7 +151,14 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void setResizeBgColor(SurfaceControl.Transaction t, int bgColor) {
-        setResizeBackgroundColor(t, bgColor);
+        if (mHandler.getLooper().isCurrentThread()) {
+            // We can only use the transaction if it can updated synchronously, otherwise the tx
+            // will be applied immediately after but also used/updated on the view thread which
+            // will lead to a race and/or crash
+            runOnViewThread(() -> setResizeBackgroundColor(t, bgColor));
+        } else {
+            runOnViewThread(() -> setResizeBackgroundColor(bgColor));
+        }
     }
 
     /**
@@ -272,17 +287,39 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+        mHandler = getHandler();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        mHandler = Handler.getMain();
     }
 
     /** Returns the task info for the task in the TaskView. */
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo() {
         return mTaskViewTaskController.getTaskInfo();
+    }
+
+    /**
+     * Sets the handler, only for testing.
+     */
+    @VisibleForTesting
+    void setHandler(Handler viewHandler) {
+        mHandler = viewHandler;
+    }
+
+    /**
+     * Ensures that the given runnable runs on the view's thread.
+     */
+    private void runOnViewThread(Runnable r) {
+        if (mHandler.getLooper().isCurrentThread()) {
+            r.run();
+        } else {
+            // If this call is not from the same thread as the view, then post it
+            mHandler.post(r);
+        }
     }
 }

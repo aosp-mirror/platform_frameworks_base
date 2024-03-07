@@ -1,0 +1,94 @@
+package: "android.view.accessibility"
+
+# NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
+
+flag {
+    name: "a11y_overlay_callbacks"
+    namespace: "accessibility"
+    description: "Whether to allow the passing of result callbacks when attaching a11y overlays."
+    bug: "304478691"
+}
+
+flag {
+    name: "a11y_qs_shortcut"
+    namespace: "accessibility"
+    description: "Add Quick Setting as one of the a11y shortcut options"
+    bug: "297554934"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "allow_shortcut_chooser_on_lockscreen"
+    description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"
+    bug: "303871725"
+}
+
+flag {
+    name: "cleanup_accessibility_warning_dialog"
+    namespace: "accessibility"
+    description: "Cleans up duplicated or broken logic surrounding the accessibility warning dialog."
+    bug: "303511250"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "collection_info_item_counts"
+    description: "Fields for total items and the number of important for accessibility items in a collection"
+    bug: "302376158"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "copy_events_for_gesture_detection"
+    description: "Creates copies of MotionEvents and GestureEvents in GestureMatcher"
+    bug: "280130713"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "flash_notification_system_api"
+    description: "Makes flash notification APIs as system APIs for calling from mainline module"
+    bug: "303131332"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "force_invert_color"
+    description: "Enable force force-dark for smart inversion and dark theme everywhere"
+    bug: "282821643"
+}
+
+flag {
+    name: "motion_event_observing"
+    namespace: "accessibility"
+    description: "Allows accessibility services to intercept but not consume motion events from specified sources."
+    bug: "297595990"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "granular_scrolling"
+    description: "Allow the use of granular scrolling. This allows scrollable nodes to scroll by increments other than a full screen"
+    bug: "302376158"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "reduce_window_content_changed_event_throttle"
+    description: "Reduces the throttle of AccessibilityEvent of TYPE_WINDOW_CONTENT_CHANGED"
+    bug: "277305460"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "update_always_on_a11y_service"
+    description: "Updates the Always-On A11yService state when the user changes the enablement of the shortcut."
+    bug: "298869916"
+}
+
+flag {
+    name: "enable_system_pinch_zoom_gesture"
+    namespace: "accessibility"
+    description: "Feature flag for system pinch zoom gesture detector and related opt-out apis"
+    bug: "283323770"
+}

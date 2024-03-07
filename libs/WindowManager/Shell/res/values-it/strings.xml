@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Annulla accantonamento"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"L\'app potrebbe non funzionare con lo schermo diviso"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"L\'app non supporta la modalità schermo diviso"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Questa app può essere aperta soltanto in 1 finestra."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Questa app può essere aperta soltanto in 1 finestra"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"L\'app potrebbe non funzionare su un display secondario."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"L\'app non supporta l\'avvio su display secondari."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Strumento per schermo diviso"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Sposta in alto a destra"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Sposta in basso a sinistra"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Sposta in basso a destra"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"espandi <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"comprimi <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Impostazioni <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ignora bolla"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Non mettere la conversazione nella bolla"</string>
@@ -76,17 +78,23 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nessuna bolla recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Le bolle recenti e ignorate appariranno qui"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chatta utilizzando le bolle"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Le nuove conversazioni vengono visualizzate sotto forma di icone in un angolo inferiore dello schermo. Tocca per espanderle o trascina per chiuderle."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Gestisci le bolle in qualsiasi momento"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Tocca qui per gestire le app e le conversazioni per cui mostrare le bolle"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Fumetto"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestisci"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Fumetto ignorato."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Tocca per riavviare quest\'app per una migliore visualizzazione."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Tocca per riavviare l\'app e migliorare la visualizzazione"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Cambia le proporzioni dell\'app nelle Impostazioni"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Cambia proporzioni"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemi con la fotocamera?\nTocca per risolverli"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Il problema non si è risolto?\nTocca per ripristinare"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nessun problema con la fotocamera? Tocca per ignorare."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Visualizza più contenuti e fai di più"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Trascina in un\'altra app per usare lo schermo diviso"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Tocca due volte fuori da un\'app per riposizionarla"</string>
-    <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ok"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Espandi per avere ulteriori informazioni."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Vuoi riavviare per migliorare la visualizzazione?"</string>
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Puoi riavviare l\'app affinché venga visualizzata meglio sullo schermo, ma potresti perdere i tuoi progressi o eventuali modifiche non salvate"</string>

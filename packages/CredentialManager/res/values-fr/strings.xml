@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"Gestionnaire d\'identifiants"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Annuler"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuer"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"Autres options"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Sauver autrement"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"En savoir plus"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Afficher le mot de passe"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Masquer le mot de passe"</string>
@@ -33,10 +49,13 @@
     <string name="sign_ins" msgid="4710739369149469208">"connexions"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informations de connexion"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Enregistrer la <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> dans"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Créer une clé d\'accès sur un autre appareil ?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Créer une clé d\'accès sur un autre appareil ?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Enregistrer le mot de passe sur un autre appareil ?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Enregistrer les identifiants de connexion sur un autre appareil ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Utiliser <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> pour toutes vos connexions ?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Ce gestionnaire de mots de passe pour <xliff:g id="USERNAME">%1$s</xliff:g> stockera vos mots de passe et clés d\'accès pour vous permettre de vous connecter facilement"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Définir par défaut"</string>
+    <string name="settings" msgid="6536394145760913145">"Paramètres"</string>
     <string name="use_once" msgid="9027366575315399714">"Utiliser une fois"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mot(s) de passe • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> clé(s) d\'accès"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> mots de passe"</string>
@@ -50,8 +69,13 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"Fermer"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Fermer"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Utiliser votre clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Utiliser vos informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Choisir des informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Utiliser votre mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Utiliser vos infos de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Déverrouiller les options de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Choisir une clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Choisir un mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Choisir des informations de connexion enregistrées pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Choisir des infos de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Choisir une option pour <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Utiliser ces informations dans <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Se connecter d\'une autre manière"</string>

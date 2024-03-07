@@ -20,8 +20,8 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 
 import static com.android.internal.inputmethod.InputMethodDebug.softInputDisplayReasonToString;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_HIDE_ANIMATION;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_SHOW_ANIMATION;
+import static com.android.internal.jank.Cuj.CUJ_IME_INSETS_HIDE_ANIMATION;
+import static com.android.internal.jank.Cuj.CUJ_IME_INSETS_SHOW_ANIMATION;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_HIDDEN;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_SHOWN;
 
@@ -172,7 +172,6 @@ public interface ImeTracker {
             PHASE_CLIENT_HANDLE_HIDE_INSETS,
             PHASE_CLIENT_APPLY_ANIMATION,
             PHASE_CLIENT_CONTROL_ANIMATION,
-            PHASE_CLIENT_DISABLED_USER_ANIMATION,
             PHASE_CLIENT_COLLECT_SOURCE_CONTROLS,
             PHASE_CLIENT_INSETS_CONSUMER_REQUEST_SHOW,
             PHASE_CLIENT_REQUEST_IME_SHOW,
@@ -291,9 +290,6 @@ public interface ImeTracker {
 
     /** Started the IME window insets show animation. */
     int PHASE_CLIENT_CONTROL_ANIMATION = ImeProtoEnums.PHASE_CLIENT_CONTROL_ANIMATION;
-
-    /** Checked that the IME is controllable. */
-    int PHASE_CLIENT_DISABLED_USER_ANIMATION = ImeProtoEnums.PHASE_CLIENT_DISABLED_USER_ANIMATION;
 
     /** Collecting insets source controls. */
     int PHASE_CLIENT_COLLECT_SOURCE_CONTROLS = ImeProtoEnums.PHASE_CLIENT_COLLECT_SOURCE_CONTROLS;
@@ -432,15 +428,24 @@ public interface ImeTracker {
     ImeTracker LOGGER = new ImeTracker() {
 
         {
-            // Set logging flag initial value.
-            mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false);
-            // Update logging flag dynamically.
-            SystemProperties.addChangeCallback(() ->
-                    mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false));
+            // Read initial system properties.
+            reloadSystemProperties();
+            // Update when system properties change.
+            SystemProperties.addChangeCallback(this::reloadSystemProperties);
         }
 
-        /** Whether progress should be logged. */
+        /** Whether {@link #onProgress} calls should be logged. */
         private boolean mLogProgress;
+
+        /** Whether the stack trace at the request call site should be logged. */
+        private boolean mLogStackTrace;
+
+        private void reloadSystemProperties() {
+            mLogProgress = SystemProperties.getBoolean(
+                    "persist.debug.imetracker", false);
+            mLogStackTrace = SystemProperties.getBoolean(
+                    "persist.debug.imerequest.logstacktrace", false);
+        }
 
         @NonNull
         @Override
@@ -451,7 +456,8 @@ public interface ImeTracker {
                     reason);
 
             Log.i(TAG, token.mTag + ": onRequestShow at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason),
+                    mLogStackTrace ? new Throwable() : null);
 
             return token;
         }
@@ -465,7 +471,8 @@ public interface ImeTracker {
                     reason);
 
             Log.i(TAG, token.mTag + ": onRequestHide at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason),
+                    mLogStackTrace ? new Throwable() : null);
 
             return token;
         }
@@ -730,7 +737,7 @@ public interface ImeTracker {
          */
         public void onCancelAnimation(@AnimationType int animType) {
             final int cujType = getImeInsetsCujFromAnimation(animType);
-            if (cujType == -1) {
+            if (cujType != -1) {
                 InteractionJankMonitor.getInstance().cancel(cujType);
             }
         }
@@ -751,7 +758,7 @@ public interface ImeTracker {
          * A helper method to translate animation type to CUJ type for IME animations.
          *
          * @param animType the animation type.
-         * @return the integer in {@link com.android.internal.jank.InteractionJankMonitor.CujType},
+         * @return the integer in {@link com.android.internal.jank.Cuj.CujType},
          * or {@code -1} if the animation type is not supported for tracking yet.
          */
         private static int getImeInsetsCujFromAnimation(@AnimationType int animType) {
@@ -782,6 +789,7 @@ public interface ImeTracker {
         private boolean shouldMonitorLatency(@SoftInputShowHideReason int reason) {
             return reason == SoftInputShowHideReason.SHOW_SOFT_INPUT
                     || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT
+                    || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW
                     || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API
                     || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API
                     || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME

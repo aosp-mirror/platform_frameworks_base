@@ -112,26 +112,6 @@ public class RestrictedLockUtils {
     }
 
     /**
-     * Shows restricted setting dialog.
-     */
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    public static void sendShowRestrictedSettingDialogIntent(Context context,
-            String packageName, int uid) {
-        final Intent intent = getShowRestrictedSettingsIntent(packageName, uid);
-        context.startActivity(intent);
-    }
-
-    /**
-     * Gets restricted settings dialog intent.
-     */
-    private static Intent getShowRestrictedSettingsIntent(String packageName, int uid) {
-        final Intent intent = new Intent(Settings.ACTION_SHOW_RESTRICTED_SETTING_DIALOG);
-        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-        intent.putExtra(Intent.EXTRA_UID, uid);
-        return intent;
-    }
-
-    /**
      * Checks if current user is profile or not
      */
     @RequiresApi(Build.VERSION_CODES.M)
@@ -237,5 +217,36 @@ public class RestrictedLockUtils {
                     + ", user=" + user
                     + '}';
         }
+    }
+
+
+    /**
+     * Shows restricted setting dialog.
+     *
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    public static void sendShowRestrictedSettingDialogIntent(Context context,
+                                                             String packageName, int uid) {
+        final Intent intent = getShowRestrictedSettingsIntent(packageName, uid);
+        context.startActivity(intent);
+    }
+
+    /**
+     * Gets restricted settings dialog intent.
+     *
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
+    private static Intent getShowRestrictedSettingsIntent(String packageName, int uid) {
+        final Intent intent = new Intent(Settings.ACTION_SHOW_RESTRICTED_SETTING_DIALOG);
+        intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+        intent.putExtra(Intent.EXTRA_UID, uid);
+        return intent;
     }
 }

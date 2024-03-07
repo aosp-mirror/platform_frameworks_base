@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.AudioAttributes;
 import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.VibrationAttributes;
@@ -27,10 +28,13 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,7 +42,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The base class for all vibrations.
  */
 abstract class Vibration {
-    private static final SimpleDateFormat DEBUG_DATE_FORMAT =
+    private static final SimpleDateFormat DEBUG_TIME_FORMAT =
+            new SimpleDateFormat("HH:mm:ss.SSS");
+    private static final SimpleDateFormat DEBUG_DATE_TIME_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
     // Used to generate globally unique vibration ids.
     private static final AtomicInteger sNextVibrationId = new AtomicInteger(1); // 0 = no callback
@@ -76,7 +82,8 @@ abstract class Vibration {
         IGNORED_FOR_RINGER_MODE(VibrationProto.IGNORED_FOR_RINGER_MODE),
         IGNORED_FOR_SETTINGS(VibrationProto.IGNORED_FOR_SETTINGS),
         IGNORED_SUPERSEDED(VibrationProto.IGNORED_SUPERSEDED),
-        IGNORED_FROM_VIRTUAL_DEVICE(VibrationProto.IGNORED_FROM_VIRTUAL_DEVICE);
+        IGNORED_FROM_VIRTUAL_DEVICE(VibrationProto.IGNORED_FROM_VIRTUAL_DEVICE),
+        IGNORED_ON_WIRELESS_CHARGER(VibrationProto.IGNORED_ON_WIRELESS_CHARGER);
 
         private final int mProtoEnumValue;
 
@@ -110,16 +117,16 @@ abstract class Vibration {
     static final class CallerInfo {
         public final VibrationAttributes attrs;
         public final int uid;
-        public final int displayId;
+        public final int deviceId;
         public final String opPkg;
         public final String reason;
 
-        CallerInfo(@NonNull VibrationAttributes attrs, int uid, int displayId,
-                String opPkg, String reason) {
+        CallerInfo(@NonNull VibrationAttributes attrs, int uid, int deviceId, String opPkg,
+                String reason) {
             Objects.requireNonNull(attrs);
             this.attrs = attrs;
             this.uid = uid;
-            this.displayId = displayId;
+            this.deviceId = deviceId;
             this.opPkg = opPkg;
             this.reason = reason;
         }
@@ -131,23 +138,23 @@ abstract class Vibration {
             CallerInfo that = (CallerInfo) o;
             return Objects.equals(attrs, that.attrs)
                     && uid == that.uid
-                    && displayId == that.displayId
+                    && deviceId == that.deviceId
                     && Objects.equals(opPkg, that.opPkg)
                     && Objects.equals(reason, that.reason);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(attrs, uid, displayId, opPkg, reason);
+            return Objects.hash(attrs, uid, deviceId, opPkg, reason);
         }
 
         @Override
         public String toString() {
             return "CallerInfo{"
-                    + " attrs=" + attrs
-                    + ", uid=" + uid
-                    + ", displayId=" + displayId
+                    + " uid=" + uid
                     + ", opPkg=" + opPkg
+                    + ", deviceId=" + deviceId
+                    + ", attrs=" + attrs
                     + ", reason=" + reason
                     + '}';
         }
@@ -201,17 +208,20 @@ abstract class Vibration {
      * potentially expensive or resource-linked objects, such as {@link IBinder}.
      */
     static final class DebugInfo {
-        private final long mCreateTime;
+        final long mCreateTime;
+        final CallerInfo mCallerInfo;
+        @Nullable
+        final CombinedVibration mPlayedEffect;
+
         private final long mStartTime;
         private final long mEndTime;
         private final long mDurationMs;
-        private final CombinedVibration mEffect;
+        @Nullable
         private final CombinedVibration mOriginalEffect;
         private final float mScale;
-        private final CallerInfo mCallerInfo;
         private final Status mStatus;
 
-        DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration effect,
+        DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration playedEffect,
                 @Nullable CombinedVibration originalEffect, float scale,
                 @NonNull CallerInfo callerInfo) {
             Objects.requireNonNull(callerInfo);
@@ -219,7 +229,7 @@ abstract class Vibration {
             mStartTime = stats.getStartTimeDebug();
             mEndTime = stats.getEndTimeDebug();
             mDurationMs = stats.getDurationDebug();
-            mEffect = effect;
+            mPlayedEffect = playedEffect;
             mOriginalEffect = originalEffect;
             mScale = scale;
             mCallerInfo = callerInfo;
@@ -228,31 +238,68 @@ abstract class Vibration {
 
         @Override
         public String toString() {
-            return new StringBuilder()
-                    .append("createTime: ")
-                    .append(DEBUG_DATE_FORMAT.format(new Date(mCreateTime)))
-                    .append(", startTime: ")
-                    .append(DEBUG_DATE_FORMAT.format(new Date(mStartTime)))
-                    .append(", endTime: ")
-                    .append(mEndTime == 0 ? null
-                            : DEBUG_DATE_FORMAT.format(new Date(mEndTime)))
-                    .append(", durationMs: ")
-                    .append(mDurationMs)
-                    .append(", status: ")
-                    .append(mStatus.name().toLowerCase())
-                    .append(", effect: ")
-                    .append(mEffect)
-                    .append(", originalEffect: ")
-                    .append(mOriginalEffect)
-                    .append(", scale: ")
-                    .append(String.format("%.2f", mScale))
-                    .append(", callerInfo: ")
-                    .append(mCallerInfo)
-                    .toString();
+            return "createTime: " + DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime))
+                    + ", startTime: " + DEBUG_DATE_TIME_FORMAT.format(new Date(mStartTime))
+                    + ", endTime: "
+                    + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMAT.format(new Date(mEndTime)))
+                    + ", durationMs: " + mDurationMs
+                    + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
+                    + ", playedEffect: " + mPlayedEffect
+                    + ", originalEffect: " + mOriginalEffect
+                    + ", scale: " + String.format(Locale.ROOT, "%.2f", mScale)
+                    + ", callerInfo: " + mCallerInfo;
+        }
+
+        /**
+         * Write this info in a compact way into given {@link PrintWriter}.
+         *
+         * <p>This is used by dumpsys to log multiple vibration records in single lines that are
+         * easy to skim through by the sorted created time.
+         */
+        void dumpCompact(IndentingPrintWriter pw) {
+            boolean isExternalVibration = mPlayedEffect == null;
+            String timingsStr = String.format(Locale.ROOT,
+                    "%s | %8s | %20s | duration: %5dms | start: %12s | end: %10s",
+                    DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)),
+                    isExternalVibration ? "external" : "effect",
+                    mStatus.name().toLowerCase(Locale.ROOT),
+                    mDurationMs,
+                    mStartTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mStartTime)),
+                    mEndTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mEndTime)));
+            String callerInfoStr = String.format(Locale.ROOT,
+                    " | %s (uid=%d, deviceId=%d) | usage: %s (audio=%s) | flags: %s | reason: %s",
+                    mCallerInfo.opPkg, mCallerInfo.uid, mCallerInfo.deviceId,
+                    mCallerInfo.attrs.usageToString(),
+                    AudioAttributes.usageToString(mCallerInfo.attrs.getAudioUsage()),
+                    Long.toBinaryString(mCallerInfo.attrs.getFlags()),
+                    mCallerInfo.reason);
+            String effectStr = String.format(Locale.ROOT,
+                    " | played: %s | original: %s | scale: %.2f",
+                    mPlayedEffect == null ? null : mPlayedEffect.toDebugString(),
+                    mOriginalEffect == null ? null : mOriginalEffect.toDebugString(),
+                    mScale);
+            pw.println(timingsStr + callerInfoStr + effectStr);
+        }
+
+        /** Write this info into given {@link PrintWriter}. */
+        void dump(IndentingPrintWriter pw) {
+            pw.println("Vibration:");
+            pw.increaseIndent();
+            pw.println("status = " + mStatus.name().toLowerCase(Locale.ROOT));
+            pw.println("durationMs = " + mDurationMs);
+            pw.println("createTime = " + DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)));
+            pw.println("startTime = " + DEBUG_DATE_TIME_FORMAT.format(new Date(mStartTime)));
+            pw.println("endTime = "
+                    + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMAT.format(new Date(mEndTime))));
+            pw.println("playedEffect = " + mPlayedEffect);
+            pw.println("originalEffect = " + mOriginalEffect);
+            pw.println("scale = " + String.format(Locale.ROOT, "%.2f", mScale));
+            pw.println("callerInfo = " + mCallerInfo);
+            pw.decreaseIndent();
         }
 
         /** Write this info into given {@code fieldId} on {@link ProtoOutputStream}. */
-        public void dumpProto(ProtoOutputStream proto, long fieldId) {
+        void dump(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(VibrationProto.START_TIME, mStartTime);
             proto.write(VibrationProto.END_TIME, mEndTime);
@@ -266,8 +313,8 @@ abstract class Vibration {
             proto.write(VibrationAttributesProto.FLAGS, attrs.getFlags());
             proto.end(attrsToken);
 
-            if (mEffect != null) {
-                dumpEffect(proto, VibrationProto.EFFECT, mEffect);
+            if (mPlayedEffect != null) {
+                dumpEffect(proto, VibrationProto.PLAYED_EFFECT, mPlayedEffect);
             }
             if (mOriginalEffect != null) {
                 dumpEffect(proto, VibrationProto.ORIGINAL_EFFECT, mOriginalEffect);

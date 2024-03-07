@@ -18,13 +18,15 @@ package com.android.systemui.smartspace.dagger
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
+import com.android.systemui.smartspace.data.repository.SmartspaceRepositoryModule
 import com.android.systemui.smartspace.preconditions.LockscreenPrecondition
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
 import javax.inject.Named
 
-@Module(subcomponents = [SmartspaceViewComponent::class])
+@Module(subcomponents = [SmartspaceViewComponent::class],
+    includes = [SmartspaceRepositoryModule::class])
 abstract class SmartspaceModule {
     @Module
     companion object {
@@ -57,6 +59,11 @@ abstract class SmartspaceModule {
          * The BcSmartspaceDataPlugin for the standalone weather.
          */
         const val WEATHER_SMARTSPACE_DATA_PLUGIN = "weather_smartspace_data_plugin"
+
+        /**
+         * The BcSmartspaceDataProvider for the glanceable hub.
+         */
+        const val GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN = "glanceable_hub_smartspace_data_plugin"
     }
 
     @BindsOptionalOf
@@ -76,4 +83,8 @@ abstract class SmartspaceModule {
     abstract fun bindSmartspacePrecondition(
         lockscreenPrecondition: LockscreenPrecondition?
     ): SmartspacePrecondition?
+
+    @BindsOptionalOf
+    @Named(GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN)
+    abstract fun optionalBcSmartspaceDataPlugin(): BcSmartspaceDataPlugin?
 }

@@ -25,9 +25,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
-import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.mockito.any

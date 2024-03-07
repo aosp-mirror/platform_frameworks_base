@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"બતાવો"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"વિભાજિત સ્ક્રીન સાથે ઍપ કદાચ કામ ન કરે"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ઍપ વિભાજિત સ્ક્રીનને સપોર્ટ કરતી નથી"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"આ ઍપ માત્ર 1 વિન્ડોમાં ખોલી શકાય છે."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"આ ઍપ માત્ર 1 વિન્ડોમાં ખોલી શકાય છે"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ઍપ્લિકેશન ગૌણ ડિસ્પ્લે પર કદાચ કામ ન કરે."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ઍપ્લિકેશન ગૌણ ડિસ્પ્લે પર લૉન્ચનું સમર્થન કરતી નથી."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"સ્ક્રીનને વિભાજિત કરતું વિભાજક"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ઉપર જમણે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"નીચે ડાબે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"નીચે જમણે ખસેડો"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> મોટું કરો"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> નાનું કરો"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> સેટિંગ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"બબલને છોડી દો"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"વાતચીતને બબલ કરશો નહીં"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"સમજાઈ ગયું"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"તાજેતરના કોઈ બબલ નથી"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"એકદમ નવા બબલ અને છોડી દીધેલા બબલ અહીં દેખાશે"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"બબલનો ઉપયોગ કરીને ચૅટ કરો"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"નવી વાતચીતો તમારી સ્ક્રીનના નીચેના ખૂણામાં આઇકન તરીકે દેખાય છે. તેમને મોટી કરવા માટે, તેમના પર ટૅપ કરો અથવા તેમને છોડી દેવા માટે, તેમને ખેંચો."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"બબલને કોઈપણ સમયે નિયંત્રિત કરે છે"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"કઈ ઍપ અને વાતચીતોને બબલ કરવા માગો છો તે મેનેજ કરવા માટે, અહીં ટૅપ કરો"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"બબલ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"મેનેજ કરો"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"બબલ છોડી દેવાયો."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"વધુ સારા વ્યૂ માટે, આ ઍપને ફરી શરૂ કરવા ટૅપ કરો."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"વધુ સારા વ્યૂ માટે, આ ઍપને ફરી શરૂ કરવા ટૅપ કરો"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"સેટિંગમાં આ ઍપનો સાપેક્ષ ગુણોત્તર બદલો"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"સાપેક્ષ ગુણોત્તર બદલો"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"કૅમેરામાં સમસ્યાઓ છે?\nફરીથી ફિટ કરવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"સુધારો નથી થયો?\nપહેલાંના પર પાછું ફેરવવા માટે ટૅપ કરો"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"કૅમેરામાં કોઈ સમસ્યા નથી? છોડી દેવા માટે ટૅપ કરો."</string>

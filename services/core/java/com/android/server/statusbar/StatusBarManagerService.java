@@ -760,11 +760,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public boolean requestWindowMagnificationConnection(boolean request) {
+        public boolean requestMagnificationConnection(boolean request) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.requestWindowMagnificationConnection(request);
+                    bar.requestMagnificationConnection(request);
                     return true;
                 } catch (RemoteException ex) { }
             }
@@ -950,6 +950,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         if (mBar != null) {
             try {
                 mBar.remQsTile(component);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void setTiles(String tiles) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.setQsTiles(tiles.split(","));
             } catch (RemoteException ex) {
             }
         }
@@ -1825,12 +1836,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void hideCurrentInputMethodForBubbles() {
+    public void hideCurrentInputMethodForBubbles(int displayId) {
         enforceStatusBarService();
         final long token = Binder.clearCallingIdentity();
         try {
-            InputMethodManagerInternal.get().hideCurrentInputMethod(
-                    SoftInputShowHideReason.HIDE_BUBBLES);
+            // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
+            InputMethodManagerInternal.get().hideAllInputMethods(
+                    SoftInputShowHideReason.HIDE_BUBBLES, displayId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -2104,7 +2116,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         IStatusBar bar = mBar;
         if (bar != null) {
             try {
-                bar.requestAddTile(componentName, appName, label, icon, proxyCallback);
+                bar.requestAddTile(callingUid, componentName, appName, label, icon, proxyCallback);
                 return;
             } catch (RemoteException e) {
                 Slog.e(TAG, "requestAddTile", e);

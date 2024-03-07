@@ -23,6 +23,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.content.ContentCaptureOptions;
 import android.content.Context;
+import android.view.WindowManager;
 
 import com.android.internal.util.RingBuffer;
 
@@ -30,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.Collections;
 
 /**
  * Unit test for {@link ContentCaptureManager}.
@@ -69,7 +72,11 @@ public class ContentCaptureManagerTest {
         ContentCaptureOptions options =
                 createOptions(
                         new ContentCaptureOptions.ContentProtectionOptions(
-                                /* enableReceiver= */ false, BUFFER_SIZE));
+                                /* enableReceiver= */ false,
+                                BUFFER_SIZE,
+                                /* requiredGroups= */ Collections.emptyList(),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
 
         ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, options);
@@ -82,7 +89,11 @@ public class ContentCaptureManagerTest {
         ContentCaptureOptions options =
                 createOptions(
                         new ContentCaptureOptions.ContentProtectionOptions(
-                                /* enableReceiver= */ true, /* bufferSize= */ 0));
+                                /* enableReceiver= */ true,
+                                /* bufferSize= */ 0,
+                                /* requiredGroups= */ Collections.emptyList(),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
 
         ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, options);
@@ -95,7 +106,11 @@ public class ContentCaptureManagerTest {
         ContentCaptureOptions options =
                 createOptions(
                         new ContentCaptureOptions.ContentProtectionOptions(
-                                /* enableReceiver= */ true, BUFFER_SIZE));
+                                /* enableReceiver= */ true,
+                                BUFFER_SIZE,
+                                /* requiredGroups= */ Collections.emptyList(),
+                                /* optionalGroups= */ Collections.emptyList(),
+                                /* optionalGroupsThreshold= */ 0));
 
         ContentCaptureManager manager =
                 new ContentCaptureManager(mMockContext, mMockContentCaptureManager, options);
@@ -131,6 +146,52 @@ public class ContentCaptureManagerTest {
         assertThat(manager.getFlushViewTreeAppearingEventDisabled()).isTrue();
         manager.setFlushViewTreeAppearingEventDisabled(false);
         assertThat(manager.getFlushViewTreeAppearingEventDisabled()).isFalse();
+    }
+
+    @Test
+    public void testUpdateWindowAttribute_setFlagSecure() {
+        final ContentCaptureManager manager =
+                new ContentCaptureManager(mMockContext, mMockContentCaptureManager, EMPTY_OPTIONS);
+        // Ensure main session is created.
+        final MainContentCaptureSession unused = manager.getMainContentCaptureSession();
+        final WindowManager.LayoutParams initialParam = new WindowManager.LayoutParams();
+        initialParam.flags |= WindowManager.LayoutParams.FLAG_SECURE;
+
+        manager.updateWindowAttributes(initialParam);
+
+        assertThat(manager.isContentCaptureEnabled()).isFalse();
+    }
+
+    @Test
+    public void testUpdateWindowAttribute_clearFlagSecure() {
+        final ContentCaptureManager manager =
+                new ContentCaptureManager(mMockContext, mMockContentCaptureManager, EMPTY_OPTIONS);
+        // Ensure main session is created.
+        final MainContentCaptureSession unused = manager.getMainContentCaptureSession();
+        final WindowManager.LayoutParams initialParam = new WindowManager.LayoutParams();
+        initialParam.flags |= WindowManager.LayoutParams.FLAG_SECURE;
+        // Default param does not have FLAG_SECURE set.
+        final WindowManager.LayoutParams resetParam = new WindowManager.LayoutParams();
+
+        manager.updateWindowAttributes(initialParam);
+        manager.updateWindowAttributes(resetParam);
+
+        assertThat(manager.isContentCaptureEnabled()).isTrue();
+    }
+
+    @Test
+    public void testUpdateWindowAttribute_clearFlagSecureAfterDisabledByApp() {
+        final ContentCaptureManager manager =
+                new ContentCaptureManager(mMockContext, mMockContentCaptureManager, EMPTY_OPTIONS);
+        // Ensure main session is created.
+        final MainContentCaptureSession unused = manager.getMainContentCaptureSession();
+        // Default param does not have FLAG_SECURE set.
+        final WindowManager.LayoutParams resetParam = new WindowManager.LayoutParams();
+
+        manager.setContentCaptureEnabled(false);
+        manager.updateWindowAttributes(resetParam);
+
+        assertThat(manager.isContentCaptureEnabled()).isFalse();
     }
 
     private ContentCaptureOptions createOptions(

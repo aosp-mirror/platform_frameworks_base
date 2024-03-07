@@ -23,9 +23,9 @@ import com.android.systemui.biometrics.Utils.getCredentialType
 import com.android.systemui.biometrics.Utils.isDeviceCredentialAllowed
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.PromptRepository
-import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.PromptKind

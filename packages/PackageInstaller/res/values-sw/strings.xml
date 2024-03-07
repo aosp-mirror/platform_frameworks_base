@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Imesakinisha programu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ungependa kusakinisha programu hii?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ungependa kusasisha programu hii?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Ungependa kusasisha hii programu kutoka kwa<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nProgramu hii kwa kawaida hupokea masasisho kutoka kwa <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Kwa kusasisha kutoka chanzo tofauti, huenda ukapokea masasisho ya siku zijazo kutoka chanzo chochote kwenye simu yako. Utendaji wa programu unaweza kubadilika."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Sasisha programu hii kutoka kwenye &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Programu hii hupokea masasisho kutoka kwenye &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kwa kusasisha kutoka kwenye chanzo tofauti, unaweza kupokea masasisho ya baadaye kutoka kwenye chanzo chochote katika kishikwambi chako. Huenda utendaji wa programu ukabadilika.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Sasisha programu hii kutoka kwenye &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Programu hii hupokea masasisho kutoka kwenye &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kwa kusasisha kutoka kwenye chanzo tofauti, unaweza kupokea masasisho ya baadaye kutoka kwenye chanzo chochote katika TV yako. Huenda utendaji wa programu ukabadilika.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Sasisha programu hii kutoka kwenye &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Programu hii hupokea masasisho kutoka kwenye &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Kwa kusasisha kutoka kwenye chanzo tofauti, unaweza kupokea masasisho ya baadaye kutoka kwenye chanzo chochote katika simu yako. Huenda utendaji wa programu ukabadilika.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Imeshindwa kusakinisha programu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Kifurushi kimezuiwa kisisakinishwe."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programu haikusakinishwa kwa sababu kifurushi kinakinzana na kifurushi kingine kilichopo."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Dumisha <xliff:g id="SIZE">%1$s</xliff:g> ya data ya programu."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Ungependa kufuta programu hii?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Ungependa kuondoa programu hii? Nakala ya <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> pia itafutwa."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Je, ungependa kuondoa programu hii kwenye nafasi yako ya faragha?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Programu zinazoondolewa"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mara ambazo programu haikuondolewa"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Inaondoa…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Arifa ya kusakinishwa kwa programu"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Imesakinishwa"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"<xliff:g id="APPNAME">%1$s</xliff:g> imesakinishwa"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Je, ungependa kurejesha <xliff:g id="APPNAME">%1$s</xliff:g> kutoka kwenye <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Itaanza kupakua programu hii chinichini"</string>
+    <string name="restore" msgid="8460854736328970444">"Rejesha"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Uko nje ya mtandao"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Programu hii itarejeshwa kiotomatiki utakapounganisha kwenye intaneti"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Hitilafu fulani imetokea"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Hitilafu fulani imetokea wakati wa kujaribu kurejesha programu hii"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Nafasi ya hifadhi haitoshi"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Ili urejeshe programu hii, unaweza kufuta faili ili upate nafasi kwenye kifaa hiki. Nafasi ya hifadhi inayohitajika: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Unahitaji kuchukua hatua"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Fuata hatua zinazofuata ili urejeshe programu hii"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> imezimwa"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> imeondolewa"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Ili urejeshe programu hii, utahitaji kusakinisha <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Endelea"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Futa data kwenye hifadhi"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Mipangilio"</string>
+    <string name="close" msgid="5214897374055647996">"Funga"</string>
 </resources>

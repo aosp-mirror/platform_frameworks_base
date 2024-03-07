@@ -25,12 +25,13 @@ import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
+import android.safetycenter.SafetyCenterManager;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -60,10 +61,11 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             IndividualSensorPrivacyController sensorPrivacyController,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            SafetyCenterManager safetyCenterManager) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger, sensorPrivacyController,
-                keyguardStateController);
+                keyguardStateController, safetyCenterManager);
     }
 
     @Override

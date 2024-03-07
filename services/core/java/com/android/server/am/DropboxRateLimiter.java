@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.os.SystemClock;
+import android.provider.DeviceConfig;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -30,17 +31,26 @@ public class DropboxRateLimiter {
     // After RATE_LIMIT_ALLOWED_ENTRIES have been collected (for a single breakdown of
     // process/eventType) further entries will be rejected until RATE_LIMIT_BUFFER_DURATION has
     // elapsed, after which the current count for this breakdown will be reset.
-    private static final long RATE_LIMIT_BUFFER_DURATION = 10 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long RATE_LIMIT_BUFFER_DURATION_DEFAULT = 10 * DateUtils.MINUTE_IN_MILLIS;
     // Indicated how many buffer durations to wait before the rate limit buffer will be cleared.
     // E.g. if set to 3 will wait 3xRATE_LIMIT_BUFFER_DURATION before clearing the buffer.
-    private static final long RATE_LIMIT_BUFFER_EXPIRY_FACTOR = 3;
+    private static final long RATE_LIMIT_BUFFER_EXPIRY_FACTOR_DEFAULT = 3;
     // The number of entries to keep per breakdown of process/eventType.
-    private static final int RATE_LIMIT_ALLOWED_ENTRIES = 6;
+    private static final int RATE_LIMIT_ALLOWED_ENTRIES_DEFAULT = 6;
 
     // If a process is rate limited twice in a row we consider it crash-looping and rate limit it
     // more aggressively.
-    private static final int STRICT_RATE_LIMIT_ALLOWED_ENTRIES = 1;
-    private static final long STRICT_RATE_LIMIT_BUFFER_DURATION = 20 * DateUtils.MINUTE_IN_MILLIS;
+    private static final int STRICT_RATE_LIMIT_ALLOWED_ENTRIES_DEFAULT = 1;
+    private static final long STRICT_RATE_LIMIT_BUFFER_DURATION_DEFAULT =
+            20 * DateUtils.MINUTE_IN_MILLIS;
+
+    private static final String FLAG_NAMESPACE = "dropbox";
+
+    private long mRateLimitBufferDuration;
+    private long mRateLimitBufferExpiryFactor;
+    private int mRateLimitAllowedEntries;
+    private int mStrictRatelimitAllowedEntries;
+    private long mStrictRateLimitBufferDuration;
 
     @GuardedBy("mErrorClusterRecords")
     private final ArrayMap<String, ErrorRecord> mErrorClusterRecords = new ArrayMap<>();
@@ -54,6 +64,36 @@ public class DropboxRateLimiter {
 
     public DropboxRateLimiter(Clock clock) {
         mClock = clock;
+
+        mRateLimitBufferDuration = RATE_LIMIT_BUFFER_DURATION_DEFAULT;
+        mRateLimitBufferExpiryFactor = RATE_LIMIT_BUFFER_EXPIRY_FACTOR_DEFAULT;
+        mRateLimitAllowedEntries = RATE_LIMIT_ALLOWED_ENTRIES_DEFAULT;
+        mStrictRatelimitAllowedEntries = STRICT_RATE_LIMIT_ALLOWED_ENTRIES_DEFAULT;
+        mStrictRateLimitBufferDuration = STRICT_RATE_LIMIT_BUFFER_DURATION_DEFAULT;
+    }
+
+    /** Initializes the rate limiter parameters from flags. */
+    public void init() {
+        mRateLimitBufferDuration = DeviceConfig.getLong(
+            FLAG_NAMESPACE,
+            "DropboxRateLimiter__rate_limit_buffer_duration",
+            RATE_LIMIT_BUFFER_DURATION_DEFAULT);
+        mRateLimitBufferExpiryFactor = DeviceConfig.getLong(
+            FLAG_NAMESPACE,
+            "DropboxRateLimiter__rate_limit_buffer_expiry_factor",
+            RATE_LIMIT_BUFFER_EXPIRY_FACTOR_DEFAULT);
+        mRateLimitAllowedEntries = DeviceConfig.getInt(
+            FLAG_NAMESPACE,
+            "DropboxRateLimiter__rate_limit_allowed_entries",
+            RATE_LIMIT_ALLOWED_ENTRIES_DEFAULT);
+        mStrictRatelimitAllowedEntries = DeviceConfig.getInt(
+            FLAG_NAMESPACE,
+            "DropboxRateLimiter__strict_rate_limit_allowed_entries",
+            STRICT_RATE_LIMIT_ALLOWED_ENTRIES_DEFAULT);
+        mStrictRateLimitBufferDuration = DeviceConfig.getLong(
+            FLAG_NAMESPACE,
+            "DropboxRateLimiter__strict_rate_limit_buffer_duration",
+            STRICT_RATE_LIMIT_BUFFER_DURATION_DEFAULT);
     }
 
     /** The interface clock to use for tracking the time elapsed. */
@@ -116,7 +156,7 @@ public class DropboxRateLimiter {
 
     private void maybeRemoveExpiredRecords(long currentTime) {
         if (currentTime - mLastMapCleanUp
-                <= RATE_LIMIT_BUFFER_EXPIRY_FACTOR * RATE_LIMIT_BUFFER_DURATION) {
+                <= mRateLimitBufferExpiryFactor * mRateLimitBufferDuration) {
             return;
         }
 
@@ -219,15 +259,15 @@ public class DropboxRateLimiter {
         }
 
         public int getAllowedEntries() {
-            return isRepeated() ? STRICT_RATE_LIMIT_ALLOWED_ENTRIES : RATE_LIMIT_ALLOWED_ENTRIES;
+            return isRepeated() ? mStrictRatelimitAllowedEntries : mRateLimitAllowedEntries;
         }
 
         public long getBufferDuration() {
-            return isRepeated() ? STRICT_RATE_LIMIT_BUFFER_DURATION : RATE_LIMIT_BUFFER_DURATION;
+            return isRepeated() ? mStrictRateLimitBufferDuration : mRateLimitBufferDuration;
         }
 
         public boolean hasExpired(long currentTime) {
-            long bufferExpiry = RATE_LIMIT_BUFFER_EXPIRY_FACTOR * getBufferDuration();
+            long bufferExpiry = mRateLimitBufferExpiryFactor * getBufferDuration();
             return currentTime - mStartTime > bufferExpiry;
         }
     }

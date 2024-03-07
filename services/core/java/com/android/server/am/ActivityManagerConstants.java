@@ -22,6 +22,7 @@ import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_POWER_QUICK;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
 import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
+import static com.android.server.am.BroadcastConstants.getDeviceConfigBoolean;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
@@ -45,6 +46,7 @@ import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -153,6 +155,11 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
     static final String KEY_USE_MODERN_TRIM = "use_modern_trim";
 
+    /**
+     * Whether or not to enable the new oom adjuster implementation.
+     */
+    static final String KEY_ENABLE_NEW_OOMADJ = "enable_new_oom_adj";
+
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 1024;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
@@ -214,6 +221,11 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
 
     private static final boolean DEFAULT_USE_MODERN_TRIM = true;
+
+    /**
+     * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
+     */
+    private static final boolean DEFAULT_ENABLE_NEW_OOM_ADJ = Flags.oomadjusterCorrectnessRewrite();
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
@@ -286,10 +298,6 @@ final class ActivityManagerConstants extends ContentObserver {
       * Depends on KEY_PROACTIVE_KILLS_ENABLED
       */
     private static final String KEY_LOW_SWAP_THRESHOLD_PERCENT = "low_swap_threshold_percent";
-
-    /** Default value for mFlagApplicationStartInfoEnabled. Defaults to false. */
-    private static final String KEY_DEFAULT_APPLICATION_START_INFO_ENABLED =
-            "enable_app_start_info";
 
     /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
@@ -595,9 +603,6 @@ final class ActivityManagerConstants extends ContentObserver {
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
     volatile boolean mFlagActivityStartsLoggingEnabled;
-
-    // Indicates whether ApplicationStartInfo is enabled.
-    volatile boolean mFlagApplicationStartInfoEnabled;
 
     // Indicates whether the background activity starts is enabled.
     // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED.
@@ -1058,6 +1063,29 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_USE_MODERN_TRIM */
     public boolean USE_MODERN_TRIM = DEFAULT_USE_MODERN_TRIM;
 
+    /** @see #KEY_ENABLE_NEW_OOMADJ */
+    public boolean ENABLE_NEW_OOMADJ = DEFAULT_ENABLE_NEW_OOM_ADJ;
+
+    /**
+     * Indicates whether PSS profiling in AppProfiler is disabled or not.
+     */
+    static final String KEY_DISABLE_APP_PROFILER_PSS_PROFILING =
+            "disable_app_profiler_pss_profiling";
+
+    private final boolean mDefaultDisableAppProfilerPssProfiling;
+
+    public boolean APP_PROFILER_PSS_PROFILING_DISABLED;
+
+    /**
+     * The modifier used to adjust PSS thresholds in OomAdjuster when RSS is collected instead.
+     */
+    static final String KEY_PSS_TO_RSS_THRESHOLD_MODIFIER =
+            "pss_to_rss_threshold_modifier";
+
+    private final float mDefaultPssToRssThresholdModifier;
+
+    public float PSS_TO_RSS_THRESHOLD_MODIFIER;
+
     private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
             new OnPropertiesChangedListener() {
                 @Override
@@ -1069,9 +1097,6 @@ final class ActivityManagerConstants extends ContentObserver {
                         switch (name) {
                             case KEY_MAX_CACHED_PROCESSES:
                                 updateMaxCachedProcesses();
-                                break;
-                            case KEY_DEFAULT_APPLICATION_START_INFO_ENABLED:
-                                updateApplicationStartInfoEnabled();
                                 break;
                             case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
                                 updateBackgroundActivityStarts();
@@ -1236,6 +1261,12 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_USE_MODERN_TRIM:
                                 updateUseModernTrim();
                                 break;
+                            case KEY_DISABLE_APP_PROFILER_PSS_PROFILING:
+                                updateDisableAppProfilerPssProfiling();
+                                break;
+                            case KEY_PSS_TO_RSS_THRESHOLD_MODIFIER:
+                                updatePssToRssThresholdModifier();
+                                break;
                             default:
                                 updateFGSPermissionEnforcementFlagsIfNecessary(name);
                                 break;
@@ -1317,7 +1348,14 @@ final class ActivityManagerConstants extends ContentObserver {
         CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses / 2;
         CUR_TRIM_CACHED_PROCESSES = (Integer.min(CUR_MAX_CACHED_PROCESSES, MAX_CACHED_PROCESSES)
                     - rawMaxEmptyProcesses) / 3;
+        loadNativeBootDeviceConfigConstants();
+        mDefaultDisableAppProfilerPssProfiling = context.getResources().getBoolean(
+                R.bool.config_am_disablePssProfiling);
+        APP_PROFILER_PSS_PROFILING_DISABLED = mDefaultDisableAppProfilerPssProfiling;
 
+        mDefaultPssToRssThresholdModifier = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_am_pssToRssThresholdModifier);
+        PSS_TO_RSS_THRESHOLD_MODIFIER = mDefaultPssToRssThresholdModifier;
     }
 
     public void start(ContentResolver resolver) {
@@ -1345,6 +1383,8 @@ final class ActivityManagerConstants extends ContentObserver {
         // The following read from Settings.
         updateActivityStartsLoggingEnabled();
         updateForegroundServiceStartsLoggingEnabled();
+        // Read DropboxRateLimiter params from flags.
+        mService.initDropboxRateLimiter();
     }
 
     void loadDeviceConfigConstants() {
@@ -1353,6 +1393,11 @@ final class ActivityManagerConstants extends ContentObserver {
         mOnDeviceConfigChangedForComponentAliasListener.onPropertiesChanged(
                 DeviceConfig.getProperties(
                         DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_COMPONENT_ALIAS));
+    }
+
+    private void loadNativeBootDeviceConfigConstants() {
+        ENABLE_NEW_OOMADJ = getDeviceConfigBoolean(KEY_ENABLE_NEW_OOMADJ,
+                DEFAULT_ENABLE_NEW_OOM_ADJ);
     }
 
     public void setOverrideMaxCachedProcesses(int value) {
@@ -1489,14 +1534,6 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updateActivityStartsLoggingEnabled() {
         mFlagActivityStartsLoggingEnabled = Settings.Global.getInt(mResolver,
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 1) == 1;
-    }
-
-    private void updateApplicationStartInfoEnabled() {
-        mFlagApplicationStartInfoEnabled =
-                DeviceConfig.getBoolean(
-                        DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                        KEY_DEFAULT_APPLICATION_START_INFO_ENABLED,
-                        /*defaultValue*/ false);
     }
 
     private void updateBackgroundActivityStarts() {
@@ -2013,9 +2050,28 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_USE_MODERN_TRIM);
     }
 
+    private void updateEnableNewOomAdj() {
+        ENABLE_NEW_OOMADJ = DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+            KEY_ENABLE_NEW_OOMADJ,
+            DEFAULT_ENABLE_NEW_OOM_ADJ);
+    }
+
     private void updateFGSPermissionEnforcementFlagsIfNecessary(@NonNull String name) {
         ForegroundServiceTypePolicy.getDefaultPolicy()
-                .updatePermissionEnforcementFlagIfNecessary(name);
+            .updatePermissionEnforcementFlagIfNecessary(name);
+    }
+
+    private void updateDisableAppProfilerPssProfiling() {
+        APP_PROFILER_PSS_PROFILING_DISABLED = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_DISABLE_APP_PROFILER_PSS_PROFILING,
+                mDefaultDisableAppProfilerPssProfiling);
+    }
+
+    private void updatePssToRssThresholdModifier() {
+        PSS_TO_RSS_THRESHOLD_MODIFIER = DeviceConfig.getFloat(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_PSS_TO_RSS_THRESHOLD_MODIFIER,
+                mDefaultPssToRssThresholdModifier);
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -2123,10 +2179,6 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(mFgToBgFgsGraceDuration);
         pw.print("  "); pw.print(KEY_FGS_START_FOREGROUND_TIMEOUT); pw.print("=");
         pw.println(mFgsStartForegroundTimeoutMs);
-        pw.print("  ");
-        pw.print(KEY_DEFAULT_APPLICATION_START_INFO_ENABLED);
-        pw.print("=");
-        pw.println(mFlagApplicationStartInfoEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED); pw.print("=");
         pw.println(mFlagBackgroundActivityStartsEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_FGS_STARTS_RESTRICTION_ENABLED);
@@ -2206,6 +2258,15 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(USE_TIERED_CACHED_ADJ);
         pw.print("  "); pw.print(KEY_TIERED_CACHED_ADJ_DECAY_TIME);
         pw.print("="); pw.println(TIERED_CACHED_ADJ_DECAY_TIME);
+
+        pw.print("  "); pw.print(KEY_ENABLE_NEW_OOMADJ);
+        pw.print("="); pw.println(ENABLE_NEW_OOMADJ);
+
+        pw.print("  "); pw.print(KEY_DISABLE_APP_PROFILER_PSS_PROFILING);
+        pw.print("="); pw.println(APP_PROFILER_PSS_PROFILING_DISABLED);
+
+        pw.print("  "); pw.print(KEY_PSS_TO_RSS_THRESHOLD_MODIFIER);
+        pw.print("="); pw.println(PSS_TO_RSS_THRESHOLD_MODIFIER);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {

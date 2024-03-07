@@ -47,13 +47,13 @@ import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
@@ -305,7 +305,11 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
         MediaOutputBaseDialogImpl(Context context, BroadcastSender broadcastSender,
                 MediaOutputController mediaOutputController) {
-            super(context, broadcastSender, mediaOutputController);
+            super(
+                    context,
+                    broadcastSender,
+                    mediaOutputController, /* includePlaybackAndAppMetadata */
+                    true);
 
             mAdapter = mMediaOutputBaseAdapter;
         }

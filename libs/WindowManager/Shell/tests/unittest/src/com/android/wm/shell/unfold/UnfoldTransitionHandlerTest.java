@@ -17,6 +17,9 @@
 package com.android.wm.shell.unfold;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH;
+import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -27,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.view.Display;
@@ -38,6 +42,7 @@ import android.window.WindowContainerTransaction;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
@@ -87,10 +92,13 @@ public class UnfoldTransitionHandlerTest {
     }
 
     @Test
-    public void handleRequest_physicalDisplayChange_handlesTransition() {
+    public void handleRequest_physicalDisplayChangeUnfold_handlesTransition() {
         ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
-                Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 100, 100))
+                .setEndAbsBounds(new Rect(0, 0, 200, 200));
         TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
 
@@ -98,6 +106,23 @@ public class UnfoldTransitionHandlerTest {
                 requestInfo);
 
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void handleRequest_physicalDisplayChangeFold_doesNotHandleTransition() {
+        ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
+        TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 200, 200))
+                .setEndAbsBounds(new Rect(0, 0, 100, 100));
+        TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
+                triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
+
+        WindowContainerTransaction result = mUnfoldTransitionHandler.handleRequest(mTransition,
+                requestInfo);
+
+        assertThat(result).isNull();
     }
 
     @Test
@@ -129,6 +154,71 @@ public class UnfoldTransitionHandlerTest {
         );
 
         verify(finishCallback, never()).onTransitionFinished(any());
+    }
+
+    @Test
+    public void startAnimation_sameTransitionAsHandleRequest_startsAnimation() {
+        TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
+        mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                mock(TransitionInfo.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isTrue();
+    }
+
+    @Test
+    public void startAnimation_differentTransitionFromRequestWithUnfold_startsAnimation() {
+        mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                createUnfoldTransitionInfo(),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isTrue();
+    }
+
+    @Test
+    public void startAnimation_differentTransitionFromRequestWithResize_doesNotStartAnimation() {
+        mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                createDisplayResizeTransitionInfo(),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isFalse();
+    }
+
+    @Test
+    public void startAnimation_differentTransitionFromRequestWithoutUnfold_doesNotStart() {
+        mUnfoldTransitionHandler.handleRequest(new Binder(), createNoneTransitionInfo());
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+
+        boolean animationStarted = mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                createNonUnfoldTransitionInfo(),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback
+        );
+
+        assertThat(animationStarted).isFalse();
     }
 
     @Test
@@ -207,12 +297,57 @@ public class UnfoldTransitionHandlerTest {
         verify(finishCallback).onTransitionFinished(any());
     }
 
+    @Test
+    public void mergeAnimation_eatsDisplayOnlyTransitions() {
+        TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
+        mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+        TransitionFinishCallback mergeCallback = mock(TransitionFinishCallback.class);
+
+        mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                mock(TransitionInfo.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback);
+
+        // Offer a keyguard unlock transition - this should NOT merge
+        mUnfoldTransitionHandler.mergeAnimation(
+                new Binder(),
+                new TransitionInfoBuilder(TRANSIT_CHANGE, TRANSIT_FLAG_KEYGUARD_GOING_AWAY).build(),
+                mock(SurfaceControl.Transaction.class),
+                mTransition,
+                mergeCallback);
+        verify(finishCallback, never()).onTransitionFinished(any());
+
+        // Offer a CHANGE-only transition - this SHOULD merge (b/278064943)
+        mUnfoldTransitionHandler.mergeAnimation(
+                new Binder(),
+                new TransitionInfoBuilder(TRANSIT_CHANGE).build(),
+                mock(SurfaceControl.Transaction.class),
+                mTransition,
+                mergeCallback);
+        verify(mergeCallback).onTransitionFinished(any());
+
+        // We should never have finished the original transition.
+        verify(finishCallback, never()).onTransitionFinished(any());
+    }
+
     private TransitionRequestInfo createUnfoldTransitionRequestInfo() {
         ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
-                Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 100, 100))
+                .setEndAbsBounds(new Rect(0, 0, 200, 200));
         return new TransitionRequestInfo(TRANSIT_CHANGE,
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
+    }
+
+    private TransitionRequestInfo createNoneTransitionInfo() {
+        return new TransitionRequestInfo(TRANSIT_NONE,
+                /* triggerTask= */ null, /* remoteTransition= */ null,
+                /* displayChange= */ null,  /* flags= */ 0);
     }
 
     private static class TestShellUnfoldProgressProvider implements ShellUnfoldProgressProvider,
@@ -276,5 +411,30 @@ public class UnfoldTransitionHandlerTest {
         public boolean hasCallback(Runnable runnable) {
             return false;
         }
+    }
+
+    private TransitionInfo createUnfoldTransitionInfo() {
+        TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
+        TransitionInfo.Change change = new TransitionInfo.Change(null, mock(SurfaceControl.class));
+        change.setStartAbsBounds(new Rect(0, 0, 10, 10));
+        change.setEndAbsBounds(new Rect(0, 0, 100, 100));
+        change.setFlags(TransitionInfo.FLAG_IS_DISPLAY);
+        transitionInfo.addChange(change);
+        transitionInfo.setFlags(TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH);
+        return transitionInfo;
+    }
+
+    private TransitionInfo createDisplayResizeTransitionInfo() {
+        TransitionInfo transitionInfo = new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
+        TransitionInfo.Change change = new TransitionInfo.Change(null, mock(SurfaceControl.class));
+        change.setStartAbsBounds(new Rect(0, 0, 10, 10));
+        change.setEndAbsBounds(new Rect(0, 0, 100, 100));
+        change.setFlags(TransitionInfo.FLAG_IS_DISPLAY);
+        transitionInfo.addChange(change);
+        return transitionInfo;
+    }
+
+    private TransitionInfo createNonUnfoldTransitionInfo() {
+        return new TransitionInfo(TRANSIT_CHANGE, /* flags= */ 0);
     }
 }

@@ -104,8 +104,8 @@ public class StackTracesDumpHelper {
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseBooleanArray lastPids,
             Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
-            String subject, String criticalEventSection,
-            @NonNull Executor auxiliaryTaskExecutor, AnrLatencyTracker latencyTracker) {
+            String subject, String criticalEventSection, @NonNull Executor auxiliaryTaskExecutor,
+            AnrLatencyTracker latencyTracker) {
         return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePidsFuture,
                 logExceptionCreatingFile, null, subject, criticalEventSection,
                 /* memoryHeaders= */ null, auxiliaryTaskExecutor, null, latencyTracker);
@@ -120,7 +120,7 @@ public class StackTracesDumpHelper {
             Future<ArrayList<Integer>> nativePidsFuture, StringWriter logExceptionCreatingFile,
             AtomicLong firstPidEndOffset, String subject, String criticalEventSection,
             String memoryHeaders, @NonNull Executor auxiliaryTaskExecutor,
-            Future<File> firstPidFilePromise, AnrLatencyTracker latencyTracker) {
+           Future<File> firstPidFilePromise, AnrLatencyTracker latencyTracker) {
         try {
 
             if (latencyTracker != null) {

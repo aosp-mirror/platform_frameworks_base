@@ -20,7 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Schließen"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Maximieren"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Einstellungen"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"„Geteilter Bildschirm“ aktivieren"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Splitscreen aktivieren"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menü „Bild im Bild“"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ist in Bild im Bild"</string>
@@ -32,9 +32,9 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Größe anpassen"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"In Stash legen"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Aus Stash entfernen"</string>
-    <string name="dock_forced_resizable" msgid="7429086980048964687">"Die App funktioniert bei geteiltem Bildschirm unter Umständen nicht"</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"„Geteilter Bildschirm“ wird in dieser App nicht unterstützt"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Diese App kann nur in einem einzigen Fenster geöffnet werden."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Die App funktioniert im Splitscreen-Modus unter Umständen nicht"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Splitscreen wird in dieser App nicht unterstützt"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Diese App kann nur in einem einzigen Fenster geöffnet werden"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Die App funktioniert auf einem sekundären Display möglicherweise nicht."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Die App unterstützt den Start auf sekundären Displays nicht."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Bildschirmteiler"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Nach rechts oben verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Nach unten links verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Nach unten rechts verschieben"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> maximieren"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> minimieren"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Einstellungen für <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Bubble schließen"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Unterhaltung nicht als Bubble anzeigen"</string>
@@ -76,15 +78,21 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Keine kürzlich geschlossenen Bubbles"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Hier werden aktuelle und geschlossene Bubbles angezeigt"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Bubbles zum Chatten verwenden"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Neue Unterhaltungen erscheinen als Symbole unten auf dem Display. Du kannst sie durch Antippen maximieren und durch Ziehen schließen."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Bubble-Einstellungen festlegen"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Tippe hier, um zu verwalten, welche Apps und Unterhaltungen als Bubble angezeigt werden können"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubble"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Verwalten"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubble verworfen."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Tippe, um diese App neu zu starten und die Ansicht zu verbessern."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Tippen, um diese App neu zu starten und die Ansicht zu verbessern"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Seitenverhältnis der App in den Einstellungen ändern"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Seitenverhältnis ändern"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Probleme mit der Kamera?\nZum Anpassen tippen."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Das Problem ist nicht behoben?\nZum Rückgängigmachen tippen."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Keine Probleme mit der Kamera? Zum Schließen tippen."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Mehr sehen und erledigen"</string>
-    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Weitere App hineinziehen, um den Bildschirm zu teilen"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Für Splitscreen-Modus weitere App hineinziehen"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Außerhalb einer App doppeltippen, um die Position zu ändern"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ok"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Für weitere Informationen maximieren."</string>
@@ -102,13 +110,12 @@
     <string name="app_icon_text" msgid="2823268023931811747">"App-Symbol"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Vollbild"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Desktopmodus"</string>
-    <string name="split_screen_text" msgid="1396336058129570886">"Geteilter Bildschirm"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Splitscreen"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Mehr"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Frei schwebend"</string>
     <string name="select_text" msgid="5139083974039906583">"Auswählen"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="close_text" msgid="4986518933445178928">"Schließen"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Menü schließen"</string>
-    <!-- no translation found for expand_menu_text (3847736164494181168) -->
-    <skip />
+    <string name="expand_menu_text" msgid="3847736164494181168">"Menü öffnen"</string>
 </resources>

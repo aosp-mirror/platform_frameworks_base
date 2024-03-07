@@ -16,11 +16,20 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
+import android.annotation.StringRes
+import com.android.systemui.authentication.domain.interactor.AuthenticationResult
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 sealed class AuthMethodBouncerViewModel(
+    protected val viewModelScope: CoroutineScope,
+    protected val interactor: BouncerInteractor,
+
     /**
      * Whether user input is enabled.
      *
@@ -37,6 +46,35 @@ sealed class AuthMethodBouncerViewModel(
      */
     val animateFailure: StateFlow<Boolean> = _animateFailure.asStateFlow()
 
+    /** The authentication method that corresponds to this view model. */
+    abstract val authenticationMethod: AuthenticationMethodModel
+
+    /**
+     * String resource ID of the failure message to be shown during lockout.
+     *
+     * The message must include 2 number parameters: the first one indicating how many unsuccessful
+     * attempts were made, and the second one indicating in how many seconds lockout will expire.
+     */
+    @get:StringRes abstract val lockoutMessageId: Int
+
+    /** Notifies that the UI has been shown to the user. */
+    fun onShown() {
+        interactor.resetMessage()
+    }
+
+    /**
+     * Notifies that the UI has been hidden from the user (after any transitions have completed).
+     */
+    open fun onHidden() {
+        clearInput()
+        interactor.resetMessage()
+    }
+
+    /** Notifies that the user has placed down a pointer. */
+    fun onDown() {
+        interactor.onDown()
+    }
+
     /**
      * Notifies that the failure animation has been shown. This should be called to consume a `true`
      * value in [animateFailure].
@@ -45,8 +83,29 @@ sealed class AuthMethodBouncerViewModel(
         _animateFailure.value = false
     }
 
-    /** Ask the UI to show the failure animation. */
-    protected fun showFailureAnimation() {
-        _animateFailure.value = true
+    /** Clears any previously-entered input. */
+    protected abstract fun clearInput()
+
+    /** Returns the input entered so far. */
+    protected abstract fun getInput(): List<Any>
+
+    /**
+     * Attempts to authenticate the user using the current input value.
+     *
+     * @see BouncerInteractor.authenticate
+     */
+    protected fun tryAuthenticate(
+        input: List<Any> = getInput(),
+        useAutoConfirm: Boolean = false,
+    ) {
+        viewModelScope.launch {
+            val authenticationResult = interactor.authenticate(input, useAutoConfirm)
+            if (authenticationResult == AuthenticationResult.SKIPPED && useAutoConfirm) {
+                return@launch
+            }
+            _animateFailure.value = authenticationResult != AuthenticationResult.SUCCEEDED
+
+            clearInput()
+        }
     }
 }

@@ -20,10 +20,11 @@ import android.content.res.Resources
 import android.os.Build
 import android.os.PowerManager
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.util.settings.GlobalSettings
 import java.io.PrintWriter
 import java.util.stream.Collectors
@@ -38,6 +39,7 @@ constructor(@Main resources: Resources, globalSettings: GlobalSettings, dumpMana
     private val defaultTriggerFaceAuthOnWakeUpFrom: Set<Int> =
         resources.getIntArray(R.array.config_face_auth_wake_up_triggers).toSet()
     private val triggerFaceAuthOnWakeUpFrom: Set<Int>
+    private val wakeSleepReasonsToTriggerFaceAuth: Set<WakeSleepReason>
 
     init {
         triggerFaceAuthOnWakeUpFrom =
@@ -52,12 +54,23 @@ constructor(@Main resources: Resources, globalSettings: GlobalSettings, dumpMana
             } else {
                 defaultTriggerFaceAuthOnWakeUpFrom
             }
+        wakeSleepReasonsToTriggerFaceAuth =
+            triggerFaceAuthOnWakeUpFrom
+                .map {
+                    val enumVal = WakeSleepReason.fromPowerManagerWakeReason(it)
+                    assert(enumVal != WakeSleepReason.OTHER)
+                    enumVal
+                }
+                .toSet()
         dumpManager.registerDumpable(this)
     }
 
     fun shouldTriggerFaceAuthOnWakeUpFrom(@PowerManager.WakeReason pmWakeReason: Int): Boolean {
         return triggerFaceAuthOnWakeUpFrom.contains(pmWakeReason)
     }
+
+    fun shouldTriggerFaceAuthOnWakeUpFrom(wakeReason: WakeSleepReason): Boolean =
+        wakeSleepReasonsToTriggerFaceAuth.contains(wakeReason)
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("FaceWakeUpTriggers:")

@@ -17,3 +17,16 @@ flag {
     bug: "294546335"
 }
 
+flag {
+    namespace: "input_native"
+    name: "keyboard_a11y_bounce_keys_flag"
+    description: "Controls if the bounce keys accessibility feature for physical keyboard is available to the user"
+    bug: "294546335"
+}
+
+flag {
+    namespace: "input_native"
+    name: "pointer_coords_is_resampled_api"
+    description: "Makes MotionEvent.PointerCoords#isResampled() a public API"
+    bug: "298197511"
+}

@@ -82,6 +82,8 @@ public class PipActivity extends Activity {
             "com.android.wm.shell.flicker.testapp.SWITCH_OFF";
     private static final String ACTION_SWITCH_ON = "com.android.wm.shell.flicker.testapp.SWITCH_ON";
     private static final String ACTION_CLEAR = "com.android.wm.shell.flicker.testapp.CLEAR";
+    private static final String ACTION_ASPECT_RATIO =
+            "com.android.wm.shell.flicker.testapp.ASPECT_RATIO";
 
     private final PictureInPictureParams.Builder mPipParamsBuilder =
             new PictureInPictureParams.Builder()
@@ -108,6 +110,9 @@ public class PipActivity extends Activity {
                         break;
                     case ACTION_CLEAR:
                         mPipParamsBuilder.setActions(Collections.emptyList());
+                        break;
+                    case ACTION_ASPECT_RATIO:
+                        mPipParamsBuilder.setAspectRatio(RATIO_TALL);
                         break;
                     case ACTION_NO_OP:
                         return;
@@ -190,6 +195,7 @@ public class PipActivity extends Activity {
         filter.addAction(ACTION_CLEAR);
         filter.addAction(ACTION_SET_REQUESTED_ORIENTATION);
         filter.addAction(ACTION_ENTER_PIP);
+        filter.addAction(ACTION_ASPECT_RATIO);
         registerReceiver(mBroadcastReceiver, filter);
 
         handleIntentExtra(getIntent());

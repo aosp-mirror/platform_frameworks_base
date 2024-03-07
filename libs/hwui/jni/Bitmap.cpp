@@ -1,5 +1,3 @@
-#undef LOG_TAG
-#define LOG_TAG "Bitmap"
 // #define LOG_NDEBUG 0
 #include "Bitmap.h"
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <com_android_input_flags.h>
+#include <flag_macros.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <input/PointerController.h>
@@ -27,6 +29,8 @@
 #include "mocks/MockSpriteController.h"
 
 namespace android {
+
+namespace input_flags = com::android::input::flags;
 
 enum TestCursorType {
     CURSOR_TYPE_DEFAULT = 0,
@@ -148,6 +152,25 @@ void MockPointerControllerPolicyInterface::onPointerDisplayIdChanged(int32_t dis
     latestPointerDisplayId = displayId;
 }
 
+class TestPointerController : public PointerController {
+public:
+    TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
+                          sp<PointerControllerPolicyInterface> policy, const sp<Looper>& looper,
+                          SpriteController& spriteController)
+          : PointerController(
+                    policy, looper, spriteController,
+                    /*enabled=*/true,
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Register listener
+                        registeredListener = listener;
+                    },
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Unregister listener
+                        if (registeredListener == listener) registeredListener = nullptr;
+                    }) {}
+    ~TestPointerController() override {}
+};
+
 class PointerControllerTest : public Test {
 protected:
     PointerControllerTest();
@@ -157,8 +180,9 @@ protected:
 
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
-    sp<MockSpriteController> mSpriteController;
+    std::unique_ptr<MockSpriteController> mSpriteController;
     std::shared_ptr<PointerController> mPointerController;
+    sp<android::gui::WindowInfosListener> mRegisteredListener;
 
 private:
     void loopThread();
@@ -175,17 +199,18 @@ private:
 
 PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<MockSprite>),
         mLooper(new MyLooper), mThread(&PointerControllerTest::loopThread, this) {
-
-    mSpriteController = new NiceMock<MockSpriteController>(mLooper);
+    mSpriteController.reset(new NiceMock<MockSpriteController>(mLooper));
     mPolicy = new MockPointerControllerPolicyInterface();
 
     EXPECT_CALL(*mSpriteController, createSprite())
             .WillOnce(Return(mPointerSprite));
 
-    mPointerController = PointerController::create(mPolicy, mLooper, mSpriteController);
+    mPointerController = std::make_unique<TestPointerController>(mRegisteredListener, mPolicy,
+                                                                 mLooper, *mSpriteController);
 }
 
 PointerControllerTest::~PointerControllerTest() {
+    mPointerController.reset();
     mRunning.store(false, std::memory_order_relaxed);
     mThread.join();
 }
@@ -240,9 +265,40 @@ TEST_F(PointerControllerTest, useStylusTypeForStylusHover) {
     mPointerController->reloadPointerResources();
 }
 
-TEST_F(PointerControllerTest, updatePointerIcon) {
+TEST_F_WITH_FLAGS(PointerControllerTest, setPresentationBeforeDisplayViewportDoesNotLoadResources,
+                  REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(input_flags, enable_pointer_choreographer))) {
+    // Setting the presentation mode before a display viewport is set will not load any resources.
+    mPointerController->setPresentation(PointerController::Presentation::POINTER);
+    ASSERT_TRUE(mPolicy->noResourcesAreLoaded());
+
+    // When the display is set, then the resources are loaded.
+    ensureDisplayViewportIsSet();
+    ASSERT_TRUE(mPolicy->allResourcesAreLoaded());
+}
+
+TEST_F_WITH_FLAGS(PointerControllerTest, updatePointerIcon,
+                  REQUIRES_FLAGS_DISABLED(ACONFIG_FLAG(input_flags,
+                                                       enable_pointer_choreographer))) {
     ensureDisplayViewportIsSet();
     mPointerController->setPresentation(PointerController::Presentation::POINTER);
+    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
+
+    int32_t type = CURSOR_TYPE_ADDITIONAL;
+    std::pair<float, float> hotspot = getHotSpotCoordinatesForType(type);
+    EXPECT_CALL(*mPointerSprite, setVisible(true));
+    EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
+    EXPECT_CALL(*mPointerSprite,
+                setIcon(AllOf(Field(&SpriteIcon::style, static_cast<PointerIconStyle>(type)),
+                              Field(&SpriteIcon::hotSpotX, hotspot.first),
+                              Field(&SpriteIcon::hotSpotY, hotspot.second))));
+    mPointerController->updatePointerIcon(static_cast<PointerIconStyle>(type));
+}
+
+TEST_F_WITH_FLAGS(PointerControllerTest, updatePointerIconWithChoreographer,
+                  REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(input_flags, enable_pointer_choreographer))) {
+    // When PointerChoreographer is enabled, the presentation mode is set before the viewport.
+    mPointerController->setPresentation(PointerController::Presentation::POINTER);
+    ensureDisplayViewportIsSet();
     mPointerController->unfade(PointerController::Transition::IMMEDIATE);
 
     int32_t type = CURSOR_TYPE_ADDITIONAL;
@@ -316,29 +372,16 @@ TEST_F(PointerControllerTest, notifiesPolicyWhenPointerDisplayChanges) {
 
 class PointerControllerWindowInfoListenerTest : public Test {};
 
-class TestPointerController : public PointerController {
-public:
-    TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
-                          const sp<Looper>& looper)
-          : PointerController(
-                    new MockPointerControllerPolicyInterface(), looper,
-                    new NiceMock<MockSpriteController>(looper),
-                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
-                        // Register listener
-                        registeredListener = listener;
-                    },
-                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
-                        // Unregister listener
-                        if (registeredListener == listener) registeredListener = nullptr;
-                    }) {}
-};
-
 TEST_F(PointerControllerWindowInfoListenerTest,
        doesNotCrashIfListenerCalledAfterPointerControllerDestroyed) {
+    sp<Looper> looper = new Looper(false);
+    auto spriteController = NiceMock<MockSpriteController>(looper);
     sp<android::gui::WindowInfosListener> registeredListener;
     sp<android::gui::WindowInfosListener> localListenerCopy;
+    sp<MockPointerControllerPolicyInterface> policy = new MockPointerControllerPolicyInterface();
     {
-        TestPointerController pointerController(registeredListener, new Looper(false));
+        TestPointerController pointerController(registeredListener, policy, looper,
+                                                spriteController);
         ASSERT_NE(nullptr, registeredListener) << "WindowInfosListener was not registered";
         localListenerCopy = registeredListener;
     }

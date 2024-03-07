@@ -36,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * {@hide}
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class LoggingPrintStream extends PrintStream {
 
     private final StringBuilder builder = new StringBuilder();

@@ -81,6 +81,7 @@ public class TvPipBoundsState extends PipBoundsState {
         super(context, sizeSpecSource, pipDisplayLayoutState);
         mContext = context;
         updateDefaultGravity();
+        mTvPipGravity = mDefaultGravity;
         mPreviousCollapsedGravity = mDefaultGravity;
         mIsTvExpandedPipSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EXPANDED_PICTURE_IN_PICTURE);
@@ -130,6 +131,7 @@ public class TvPipBoundsState extends PipBoundsState {
         mTvFixedPipOrientation = ORIENTATION_UNDETERMINED;
         mTvPipGravity = mDefaultGravity;
         mPreviousCollapsedGravity = mDefaultGravity;
+        mIsTvPipExpanded = false;
         mTvPipManuallyCollapsed = false;
     }
 

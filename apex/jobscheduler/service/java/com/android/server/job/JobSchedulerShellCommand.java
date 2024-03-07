@@ -58,6 +58,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return cancelJob(pw);
                 case "monitor-battery":
                     return monitorBattery(pw);
+                case "get-aconfig-flag-state":
+                    return getAconfigFlagState(pw);
                 case "get-battery-seq":
                     return getBatterySeq(pw);
                 case "get-battery-charging":
@@ -180,7 +182,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
                 case "-u":
                 case "--user":
-                    userId = Integer.parseInt(getNextArgRequired());
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;
 
                 case "-n":
@@ -197,6 +199,10 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         if (force && satisfied) {
             pw.println("Cannot specify both --force and --satisfied");
             return -1;
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
         }
 
         final String pkgName = getNextArgRequired();
@@ -328,6 +334,28 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             else pw.println("Battery monitoring disabled");
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+        return 0;
+    }
+
+    private int getAconfigFlagState(PrintWriter pw) throws Exception {
+        checkPermission("get aconfig flag state");
+
+        final String flagName = getNextArgRequired();
+
+        switch (flagName) {
+            case android.app.job.Flags.FLAG_JOB_DEBUG_INFO_APIS:
+                pw.println(android.app.job.Flags.jobDebugInfoApis());
+                break;
+            case android.app.job.Flags.FLAG_ENFORCE_MINIMUM_TIME_WINDOWS:
+                pw.println(android.app.job.Flags.enforceMinimumTimeWindows());
+                break;
+            case com.android.server.job.Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE:
+                pw.println(com.android.server.job.Flags.throwOnUnsupportedBiasUsage());
+                break;
+            default:
+                pw.println("Unknown flag: " + flagName);
+                break;
         }
         return 0;
     }
@@ -689,6 +717,9 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("  monitor-battery [on|off]");
         pw.println("    Control monitoring of all battery changes.  Off by default.  Turning");
         pw.println("    on makes get-battery-seq useful.");
+        pw.println("  get-aconfig-flag-state FULL_FLAG_NAME");
+        pw.println("    Return the state of the specified aconfig flag, if known. The flag name");
+        pw.println("         must be fully qualified.");
         pw.println("  get-battery-seq");
         pw.println("    Return the last battery update sequence number that was received.");
         pw.println("  get-battery-charging");

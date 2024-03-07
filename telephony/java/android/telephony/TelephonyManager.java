@@ -25,6 +25,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.Manifest;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
@@ -76,7 +77,9 @@ import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
 import android.service.carrier.CarrierService;
 import android.sysprop.TelephonyProperties;
+import android.telecom.Call;
 import android.telecom.CallScreeningService;
+import android.telecom.Connection;
 import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -126,6 +129,7 @@ import com.android.internal.telephony.IccLogicalChannelRequest;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.io.IOException;
@@ -1184,6 +1188,62 @@ public class TelephonyManager {
      */
     public static final String EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION =
             "android.telephony.event.EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION";
+
+    /**
+     * Event reported from the Telephony stack to indicate that the {@link Connection} is not
+     * able to find any network and likely will not get connected. Upon receiving this event,
+     * the dialer app should start the app included in the extras bundle of this event if satellite
+     * is provisioned.
+     * <p>
+     * The dialer app receives this event via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * <p>
+     * The {@link Bundle} parameter is expected to include the following extras:
+     * <ul>
+     *     <li>{@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE} - the recommending handover
+     *         type.</li>
+     *     <li>{@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT} - the {@link PendingIntent}
+     *         which will be launched by the Dialer app when receiving this connection event.</li>
+     * </ul>
+     * <p>
+     * If the device is connected to satellite via carrier within the hysteresis time defined by
+     * the carrier config
+     * {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT}, the component of
+     * the {@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT} will be set to the default SMS
+     * app.
+     * <p>
+     * Otherwise, if the overlay config {@code config_oem_enabled_satellite_handover_app} is
+     * present, the app defined by this config will be used as the component of the
+     * {@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT}. If this overlay config is empty,
+     * {@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT} will not be included in the event
+     * {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE}.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String EVENT_DISPLAY_EMERGENCY_MESSAGE =
+            "android.telephony.event.DISPLAY_EMERGENCY_MESSAGE";
+
+    /**
+     * Integer extra key used with {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE} which indicates
+     * the type of handover from emergency call to satellite messaging.
+     * <p>
+     * Will be either
+     * android.telephony.satellite.SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS
+     * or
+     * android.telephony.satellite.SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911
+     * <p>
+     * Set in the extras for the {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE} connection event.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String EXTRA_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE =
+            "android.telephony.extra.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE";
+
+    /**
+     * Extra key used with the {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE} for a {@link PendingIntent}
+     * which will be launched by the Dialer app.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT =
+            "android.telephony.extra.EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT";
 
     /**
      * Integer extra key used with {@link #EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION} which indicates
@@ -2636,10 +2696,6 @@ public class TelephonyManager {
         return getCurrentPhoneType();
     }
 
-    private int getPhoneTypeFromProperty() {
-        return getPhoneTypeFromProperty(getPhoneId());
-    }
-
     /** {@hide} */
     @UnsupportedAppUsage
     private int getPhoneTypeFromProperty(int phoneId) {
@@ -2647,10 +2703,6 @@ public class TelephonyManager {
                 phoneId, TelephonyProperties.current_active_phone(), null);
         if (type != null) return type;
         return getPhoneTypeFromNetworkType(phoneId);
-    }
-
-    private int getPhoneTypeFromNetworkType() {
-        return getPhoneTypeFromNetworkType(getPhoneId());
     }
 
     /** {@hide} */
@@ -3348,6 +3400,7 @@ public class TelephonyManager {
                     SIM_STATE_LOADED,
                     SIM_STATE_PRESENT,
             })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface SimState {}
 
     /**
@@ -5268,7 +5321,11 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getMergedImsisFromGroup(getSubId(), getOpPackageName());
+                String[] mergedImsisFromGroup =
+                        telephony.getMergedImsisFromGroup(getSubId(), getOpPackageName());
+                if (mergedImsisFromGroup != null) {
+                    return mergedImsisFromGroup;
+                }
             }
         } catch (RemoteException ex) {
         }
@@ -10114,6 +10171,7 @@ public class TelephonyManager {
                 CALL_COMPOSER_STATUS_ON,
                 CALL_COMPOSER_STATUS_OFF,
             })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface CallComposerStatus {}
 
     /**
@@ -10650,12 +10708,20 @@ public class TelephonyManager {
      * no reason to power it off. When any of the voters want to power it off, it will be turned
      * off. In case of emergency, the radio will be turned on even if there are some reasons for
      * powering it off, and these radio off votes will be cleared.
-     * Multiple apps can vote for the same reason and the last vote will take effect. Each app is
-     * responsible for its vote. A powering-off vote of a reason will be maintained until it is
-     * cleared by calling {@link clearRadioPowerOffForReason} for that reason, or an emergency call
-     * is made, or the device is rebooted. When an app comes backup from a crash, it needs to make
-     * sure if its vote is as expected. An app can use the API {@link getRadioPowerOffReasons} to
-     * check its vote.
+     * <p>
+     * Each API call is for one reason. However, an app can call the API multiple times for multiple
+     * reasons. Multiple apps can vote for the same reason but the vote of one app does not affect
+     * the vote of another app.
+     * <p>
+     * Each app is responsible for its vote. A powering-off vote for a reason of an app will be
+     * maintained until it is cleared by calling {@link #clearRadioPowerOffForReason(int)} for that
+     * reason by the app, or an emergency call is made, or the device is rebooted. When an app
+     * comes backup from a crash, it needs to make sure if its vote is as expected. An app can use
+     * the API {@link #getRadioPowerOffReasons()} to check its votes. Votes won't be removed when
+     * an app crashes.
+     * <p>
+     * User setting for power state is persistent across device reboots. This applies to all users,
+     * callers must be careful to update the off reasons when the current user changes.
      *
      * @param reason The reason for powering off radio.
      * @throws SecurityException if the caller does not have MODIFY_PHONE_STATE permission.
@@ -10712,10 +10778,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Get reasons for powering off radio, as requested by {@link requestRadioPowerOffForReason}.
-     * If the reason set is empty, the radio is on in all cases.
+     * Get reasons for powering off radio of the calling app, as requested by
+     * {@link #requestRadioPowerOffForReason(int)}.
      *
-     * @return Set of reasons for powering off radio.
+     * @return Set of reasons for powering off radio of the calling app.
      * @throws SecurityException if the caller does not have READ_PRIVILEGED_PHONE_STATE permission.
      * @throws IllegalStateException if the Telephony service is not currently available.
      *
@@ -11279,29 +11345,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the result and response from RIL for oem request
-     *
-     * @param oemReq the data is sent to ril.
-     * @param oemResp the respose data from RIL.
-     * @return negative value request was not handled or get error
-     *         0 request was handled succesfully, but no response data
-     *         positive value success, data length of response
-     * @hide
-     * @deprecated OEM needs a vendor-extension hal and their apps should use that instead
-     */
-    @Deprecated
-    public int invokeOemRilRequestRaw(byte[] oemReq, byte[] oemResp) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.invokeOemRilRequestRaw(oemReq, oemResp);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-        return -1;
-    }
-
-    /**
      * @deprecated Use {@link android.telephony.ims.ImsMmTelManager#setVtSettingEnabled(boolean)}
      * instead.
      * @hide
@@ -11562,16 +11605,6 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.icc_operator_numeric for the default phone.
-    *
-    * @hide
-    */
-    public void setSimOperatorNumeric(String numeric) {
-        int phoneId = getPhoneId();
-        setSimOperatorNumericForPhone(phoneId, numeric);
-    }
-
-   /**
     * Set TelephonyProperties.icc_operator_numeric for the given phone.
     *
     * @hide
@@ -11583,16 +11616,6 @@ public class TelephonyManager {
                     TelephonyProperties.icc_operator_numeric(), phoneId, numeric);
             TelephonyProperties.icc_operator_numeric(newList);
         }
-    }
-
-    /**
-     * Set TelephonyProperties.icc_operator_alpha for the default phone.
-     *
-     * @hide
-     */
-    public void setSimOperatorName(String name) {
-        int phoneId = getPhoneId();
-        setSimOperatorNameForPhone(phoneId, name);
     }
 
     /**
@@ -11848,17 +11871,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Set baseband version for the default phone.
-     *
-     * @param version baseband version
-     * @hide
-     */
-    public void setBasebandVersion(String version) {
-        int phoneId = getPhoneId();
-        setBasebandVersionForPhone(phoneId, version);
-    }
-
-    /**
      * Set baseband version by phone id.
      *
      * @param phoneId for which baseband version is set
@@ -11896,18 +11908,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Set phone type for the default phone.
-     *
-     * @param type phone type
-     *
-     * @hide
-     */
-    public void setPhoneType(int type) {
-        int phoneId = getPhoneId();
-        setPhoneType(phoneId, type);
-    }
-
-    /**
      * Set phone type by phone id.
      *
      * @param phoneId for which phone type is set
@@ -11922,19 +11922,6 @@ public class TelephonyManager {
                     TelephonyProperties.current_active_phone(), phoneId, type);
             TelephonyProperties.current_active_phone(newList);
         }
-    }
-
-    /**
-     * Get OTASP number schema for the default phone.
-     *
-     * @param defaultValue default value
-     * @return OTA SP number schema
-     *
-     * @hide
-     */
-    public String getOtaSpNumberSchema(String defaultValue) {
-        int phoneId = getPhoneId();
-        return getOtaSpNumberSchemaForPhone(phoneId, defaultValue);
     }
 
     /**
@@ -11957,19 +11944,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Get SMS receive capable from system property for the default phone.
-     *
-     * @param defaultValue default value
-     * @return SMS receive capable
-     *
-     * @hide
-     */
-    public boolean getSmsReceiveCapable(boolean defaultValue) {
-        int phoneId = getPhoneId();
-        return getSmsReceiveCapableForPhone(phoneId, defaultValue);
-    }
-
-    /**
      * Get SMS receive capable from system property by phone id.
      *
      * @param phoneId for which SMS receive capable is get
@@ -11984,19 +11958,6 @@ public class TelephonyManager {
         }
 
         return defaultValue;
-    }
-
-    /**
-     * Get SMS send capable from system property for the default phone.
-     *
-     * @param defaultValue default value
-     * @return SMS send capable
-     *
-     * @hide
-     */
-    public boolean getSmsSendCapable(boolean defaultValue) {
-        int phoneId = getPhoneId();
-        return getSmsSendCapableForPhone(phoneId, defaultValue);
     }
 
     /**
@@ -12063,16 +12024,6 @@ public class TelephonyManager {
 
     /**
      * Set the alphabetic name of current registered operator.
-     * @param name the alphabetic name of current registered operator.
-     * @hide
-     */
-    public void setNetworkOperatorName(String name) {
-        int phoneId = getPhoneId();
-        setNetworkOperatorNameForPhone(phoneId, name);
-    }
-
-    /**
-     * Set the alphabetic name of current registered operator.
      * @param phoneId which phone you want to set
      * @param name the alphabetic name of current registered operator.
      * @hide
@@ -12106,16 +12057,6 @@ public class TelephonyManager {
 
     /**
      * Set the numeric name (MCC+MNC) of current registered operator.
-     * @param operator the numeric name (MCC+MNC) of current registered operator
-     * @hide
-     */
-    public void setNetworkOperatorNumeric(String numeric) {
-        int phoneId = getPhoneId();
-        setNetworkOperatorNumericForPhone(phoneId, numeric);
-    }
-
-    /**
-     * Set the numeric name (MCC+MNC) of current registered operator.
      * @param phoneId for which phone type is set
      * @param operator the numeric name (MCC+MNC) of current registered operator
      * @hide
@@ -12127,16 +12068,6 @@ public class TelephonyManager {
                     TelephonyProperties.operator_numeric(), phoneId, numeric);
             TelephonyProperties.operator_numeric(newList);
         }
-    }
-
-    /**
-     * Set roaming state of the current network, for GSM purposes.
-     * @param isRoaming is network in romaing state or not
-     * @hide
-     */
-    public void setNetworkRoaming(boolean isRoaming) {
-        int phoneId = getPhoneId();
-        setNetworkRoamingForPhone(phoneId, isRoaming);
     }
 
     /**
@@ -12312,21 +12243,6 @@ public class TelephonyManager {
                 if (!TextUtils.isEmpty(languageTag)) {
                     return Locale.forLanguageTag(languageTag);
                 }
-            }
-        } catch (RemoteException ex) {
-        }
-        return null;
-    }
-
-    /**
-     * TODO delete after SuW migrates to new API.
-     * @hide
-     */
-    public String getLocaleFromDefaultSim() {
-        try {
-            final ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getSimLocaleForSubscriber(getSubId());
             }
         } catch (RemoteException ex) {
         }
@@ -13243,7 +13159,7 @@ public class TelephonyManager {
             CARRIER_RESTRICTION_STATUS_RESTRICTED,
             CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER
     })
-
+    @Retention(RetentionPolicy.SOURCE)
     public @interface CarrierRestrictionStatus {
     }
 
@@ -13265,8 +13181,8 @@ public class TelephonyManager {
      * </ul>
      *
      * @param executor The executor on which the result listener will be called.
-     * @param resultListener {@link Consumer} that will be called with the result fetched
-     *                       from the radio of type {@link CarrierRestrictionStatus}
+     * @param resultListener {@link Consumer} that will be called with the carrier restriction
+     *                       status result fetched from the radio
      * @throws SecurityException if the caller does not have the required permission/privileges or
      *                           if the caller is not pre-registered.
      */
@@ -13598,7 +13514,7 @@ public class TelephonyManager {
     public static final int DATA_ENABLED_REASON_THERMAL = 3;
 
     /**
-     * To indicate data was enabled or disabled due to {@link MobileDataPolicy} overrides.
+     * To indicate data was enabled or disabled due to mobile data policy overrides.
      * Note that this is not a valid reason for {@link #setDataEnabledForReason(int, boolean)} and
      * is only used to indicate that data enabled was changed due to an override.
      */
@@ -14704,7 +14620,7 @@ public class TelephonyManager {
      * @param needValidation whether validation is needed before switch happens.
      * @param executor The executor of where the callback will execute.
      * @param callback Callback will be triggered once it succeeds or failed.
-     *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
+     *                 See the {@code SET_OPPORTUNISTIC_SUB_*} constants
      *                 for more details. Pass null if don't care about the result.
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_DATA)
@@ -17613,8 +17529,8 @@ public class TelephonyManager {
      * {@link CarrierConfigManager
      * #KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG}
      * and return {@link #PURCHASE_PREMIUM_CAPABILITY_RESULT_THROTTLED}.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_SLICING_ADDITIONAL_ERROR_CODES)
     public static final int PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED = 16;
 
     /**
@@ -17641,7 +17557,7 @@ public class TelephonyManager {
     public @interface PurchasePremiumCapabilityResult {}
 
     /**
-     * Returns the purchase result {@link PurchasePremiumCapabilityResult} as a String.
+     * Returns the purchase result as a String.
      *
      * @param result The purchase premium capability result.
      * @return The purchase result as a String.
@@ -17695,7 +17611,6 @@ public class TelephonyManager {
      * @param capability The premium capability to purchase.
      * @param executor The callback executor for the response.
      * @param callback The result of the purchase request.
-     *                 One of {@link PurchasePremiumCapabilityResult}.
      * @throws SecurityException if the caller does not hold permissions
      *         READ_BASIC_PHONE_STATE or INTERNET.
      * @see #isPremiumCapabilityAvailableForPurchase(int) to check whether the capability is valid.
@@ -18091,6 +18006,64 @@ public class TelephonyManager {
             ex.rethrowFromSystemServer();
         }
         return true;
+    }
+
+    /**
+     * Enable or disable notifications sent for cellular identifier disclosure events.
+     *
+     * Disclosure events are defined as instances where a device has sent a cellular identifier
+     * on the Non-access stratum (NAS) before a security context is established. As a result the
+     * identifier is sent in the clear, which has privacy implications for the user.
+     *
+     * @param enable if notifications about disclosure events should be enabled
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public void enableCellularIdentifierDisclosureNotifications(boolean enable) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.enableCellularIdentifierDisclosureNotifications(enable);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "enableCellularIdentifierDisclosureNotifications RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get whether or not cellular identifier disclosure notifications are enabled.
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_IDENTIFIER_DISCLOSURE_TRANSPARENCY)
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isCellularIdentifierDisclosureNotificationEnabled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isCellularIdentifierDisclosureNotificationEnabled();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "isCellularIdentifierDisclosureNotificationEnabled RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /**

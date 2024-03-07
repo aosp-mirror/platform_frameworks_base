@@ -16,13 +16,24 @@
 
 package android.os;
 
-import android.test.AndroidTestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,7 +41,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class FileObserverTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = FileObserver.class)
+public class FileObserverTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private Observer mObserver;
     private File mTestFile;
 
@@ -57,18 +73,19 @@ public class FileObserverTest extends AndroidTestCase {
         }
     }
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         mTestFile = File.createTempFile(".file_observer_test", ".txt");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (mTestFile != null && mTestFile.exists()) {
             mTestFile.delete();
         }
     }
 
+    @Test
     @MediumTest
     public void testRun() throws Exception {
         // make file changes and wait for them

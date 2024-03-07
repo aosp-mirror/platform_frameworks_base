@@ -16,7 +16,15 @@
 
 package com.android.systemui.biometrics.dagger
 
-import com.android.settingslib.udfps.UdfpsUtils
+import android.content.res.Resources
+import com.android.internal.R
+import com.android.systemui.CoreStartable
+import com.android.systemui.biometrics.EllipseOverlapDetectorParams
+import com.android.systemui.biometrics.UdfpsUtils
+import com.android.systemui.biometrics.data.repository.BiometricStatusRepository
+import com.android.systemui.biometrics.data.repository.BiometricStatusRepositoryImpl
+import com.android.systemui.biometrics.data.repository.DisplayStateRepository
+import com.android.systemui.biometrics.data.repository.DisplayStateRepositoryImpl
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.data.repository.FacePropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.FaceSettingsRepository
@@ -25,23 +33,17 @@ import com.android.systemui.biometrics.data.repository.FingerprintPropertyReposi
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
-import com.android.systemui.biometrics.data.repository.DisplayStateRepository
-import com.android.systemui.biometrics.data.repository.DisplayStateRepositoryImpl
-import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
-import com.android.systemui.biometrics.domain.interactor.CredentialInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
-import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.LogContextInteractor
-import com.android.systemui.biometrics.domain.interactor.LogContextInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
-import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
-import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
+import com.android.systemui.biometrics.udfps.BoundingBoxOverlapDetector
+import com.android.systemui.biometrics.udfps.EllipseOverlapDetector
+import com.android.systemui.biometrics.udfps.OverlapDetector
+import com.android.systemui.biometrics.ui.binder.SideFpsOverlayViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import java.util.concurrent.Executor
 import javax.inject.Qualifier
 
@@ -50,12 +52,15 @@ import javax.inject.Qualifier
 interface BiometricsModule {
 
     @Binds
-    @SysUISingleton
-    fun faceSettings(impl: FaceSettingsRepositoryImpl): FaceSettingsRepository
+    @IntoMap
+    @ClassKey(SideFpsOverlayViewBinder::class)
+    fun bindsSideFpsOverlayViewBinder(viewBinder: SideFpsOverlayViewBinder): CoreStartable
 
     @Binds
     @SysUISingleton
-    fun faceSensors(impl: FacePropertyRepositoryImpl): FacePropertyRepository
+    fun faceSettings(impl: FaceSettingsRepositoryImpl): FaceSettingsRepository
+
+    @Binds @SysUISingleton fun faceSensors(impl: FacePropertyRepositoryImpl): FacePropertyRepository
 
     @Binds
     @SysUISingleton
@@ -63,34 +68,17 @@ interface BiometricsModule {
 
     @Binds
     @SysUISingleton
-    fun fingerprintRepository(impl: FingerprintPropertyRepositoryImpl):
-            FingerprintPropertyRepository
+    fun biometricStatusRepository(impl: BiometricStatusRepositoryImpl): BiometricStatusRepository
+
+    @Binds
+    @SysUISingleton
+    fun fingerprintRepository(
+        impl: FingerprintPropertyRepositoryImpl
+    ): FingerprintPropertyRepository
 
     @Binds
     @SysUISingleton
     fun displayStateRepository(impl: DisplayStateRepositoryImpl): DisplayStateRepository
-
-    @Binds
-    @SysUISingleton
-    fun providesPromptSelectorInteractor(impl: PromptSelectorInteractorImpl):
-            PromptSelectorInteractor
-
-    @Binds
-    @SysUISingleton
-    fun providesCredentialInteractor(impl: CredentialInteractorImpl): CredentialInteractor
-
-    @Binds
-    @SysUISingleton
-    fun providesDisplayStateInteractor(impl: DisplayStateInteractorImpl): DisplayStateInteractor
-
-    @Binds
-    @SysUISingleton
-    fun bindsLogContextInteractor(impl: LogContextInteractorImpl): LogContextInteractor
-
-    @Binds
-    @SysUISingleton
-    fun providesSideFpsOverlayInteractor(impl: SideFpsOverlayInteractorImpl):
-            SideFpsOverlayInteractor
 
     companion object {
         /** Background [Executor] for HAL related operations. */
@@ -101,8 +89,31 @@ interface BiometricsModule {
         fun providesPluginExecutor(threadFactory: ThreadFactory): Executor =
             threadFactory.buildExecutorOnNewThread("biometrics")
 
+        @Provides fun providesUdfpsUtils(): UdfpsUtils = UdfpsUtils()
+
         @Provides
-        fun providesUdfpsUtils(): UdfpsUtils = UdfpsUtils()
+        @SysUISingleton
+        fun providesOverlapDetector(): OverlapDetector {
+            val selectedOption =
+                Resources.getSystem().getInteger(R.integer.config_selected_udfps_touch_detection)
+            val values =
+                Resources.getSystem()
+                    .getStringArray(R.array.config_udfps_touch_detection_options)[selectedOption]
+                    .split(",")
+                    .map { it.toFloat() }
+
+            return if (values[0] == 1f) {
+                EllipseOverlapDetector(
+                    EllipseOverlapDetectorParams(
+                        minOverlap = values[3],
+                        targetSize = values[2],
+                        stepSize = values[4].toInt()
+                    )
+                )
+            } else {
+                BoundingBoxOverlapDetector(values[2])
+            }
+        }
     }
 }
 

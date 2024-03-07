@@ -21,7 +21,7 @@ import androidx.core.animation.AnimatorSet
 import androidx.core.animation.ValueAnimator
 import android.content.res.Resources
 import android.view.View
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_IN
 import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_OUT
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback

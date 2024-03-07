@@ -60,7 +60,6 @@ import com.android.server.utils.WatchedLongSparseArray;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -260,6 +259,19 @@ public interface Computer extends PackageDataSnapshot {
      */
     boolean shouldFilterApplicationIncludingUninstalled(@Nullable PackageStateInternal ps,
             int callingUid, int userId);
+
+    /**
+     * Different from
+     * {@link #shouldFilterApplicationIncludingUninstalled(PackageStateInternal, int, int)}, the
+     * function returns {@code true} if:
+     * <ul>
+     * <li>The target package is not archived.
+     * <li>The package cannot be found in the device or has been uninstalled in the current user.
+     * </ul>
+     */
+    boolean shouldFilterApplicationIncludingUninstalledNotArchived(
+            @Nullable PackageStateInternal ps,
+            int callingUid, int userId);
     /**
      * Different from {@link #shouldFilterApplication(SharedUserSetting, int, int)}, the function
      * returns {@code true} if packages with the same shared user are all uninstalled in the current
@@ -393,9 +405,19 @@ public interface Computer extends PackageDataSnapshot {
     boolean isInstallDisabledForPackage(@NonNull String packageName, int uid,
             @UserIdInt int userId);
 
-    @Nullable
-    List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            @PackageManager.PackageInfoFlagsBits long flags, int callingUid, @UserIdInt int userId);
+    /**
+     * Returns a Pair that contains a list of packages that depend on the target library and the
+     * package library dependency information. The List&lt;VersionedPackage&gt; indicates a list of
+     * packages that depend on the target library, it may be null if no package depends on
+     * the target library. The List&lt;Boolean&gt; indicates whether each VersionedPackage in
+     * the List&lt;VersionedPackage&gt; optionally depends on the target library, where true means
+     * optional and false means required. It may be null if no package depends on
+     * the target library or without dependency information, e.g. uses-static-library.
+     */
+    @NonNull
+    Pair<List<VersionedPackage>, List<Boolean>> getPackagesUsingSharedLibrary(
+            @NonNull SharedLibraryInfo libInfo, @PackageManager.PackageInfoFlagsBits long flags,
+            int callingUid, @UserIdInt int userId);
 
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(
@@ -406,8 +428,7 @@ public interface Computer extends PackageDataSnapshot {
     ProviderInfo getProviderInfo(@NonNull ComponentName component,
             @PackageManager.ComponentInfoFlagsBits long flags, @UserIdInt int userId);
 
-    @Nullable
-    String[] getSystemSharedLibraryNames();
+    ArrayMap<String, String> getSystemSharedLibraryNamesAndPaths();
 
     /**
      * @return the state if the given package is installed and isn't filtered by visibility.
@@ -456,7 +477,7 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
-            int callingUid);
+            int callingUid, boolean forceAllowCrossUser);
 
     @Nullable
     ProviderInfo resolveContentProvider(@NonNull String name,
@@ -487,9 +508,19 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean getApplicationHiddenSettingAsUser(@NonNull String packageName, @UserIdInt int userId);
 
-    boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId);
+    boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
-    boolean isSuspendingAnyPackages(@NonNull String suspendingPackage, @UserIdInt int userId);
+    boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
+
+    /** Check if the package is in a stopped state for a given user. */
+    boolean isPackageStoppedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
+
+    /** Check if the package is suspending any package. */
+    boolean isSuspendingAnyPackages(@NonNull String suspendingPackage,
+            @UserIdInt int suspendingUserId, int targetUserId);
 
     @NonNull
     ParceledListSlice<IntentFilter> getAllIntentFilters(@NonNull String packageName);
@@ -679,5 +710,5 @@ public interface Computer extends PackageDataSnapshot {
     UserInfo[] getUserInfos();
 
     @NonNull
-    Collection<SharedUserSetting> getAllSharedUsers();
+    ArrayMap<String, ? extends SharedUserApi> getSharedUsers();
 }

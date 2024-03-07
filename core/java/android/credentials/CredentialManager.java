@@ -19,6 +19,7 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -114,6 +115,52 @@ public final class CredentialManager {
     public CredentialManager(Context context, ICredentialManager service) {
         mContext = context;
         mService = service;
+    }
+
+    /**
+     * Returns a list of candidate credentials returned from credential manager providers
+     *
+     * @param request the request specifying type(s) of credentials to get from the
+     *                credential providers
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     *
+     * @hide
+     */
+    @Hide
+    public void getCandidateCredentials(
+            @NonNull GetCredentialRequest request,
+            @NonNull String callingPackage,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<GetCandidateCredentialsResponse,
+                    GetCandidateCredentialsException> callback
+    ) {
+        requireNonNull(request, "request must not be null");
+        requireNonNull(callingPackage, "callingPackage must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "getCandidateCredentials already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote =
+                    mService.getCandidateCredentials(
+                            request,
+                            new GetCandidateCredentialsTransport(executor, callback),
+                            callingPackage);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
     }
 
     /**
@@ -390,7 +437,14 @@ public final class CredentialManager {
      * Returns {@code true} if the calling application provides a CredentialProviderService that is
      * enabled for the current user, or {@code false} otherwise. CredentialProviderServices are
      * enabled on a per-service basis so the individual component name of the service should be
-     * passed in here.
+     * passed in here. <strong>Usage of this API is discouraged as it is not fully functional, and
+     * may throw a NullPointerException on certain devices and/or API versions.</strong>
+     *
+     * @throws IllegalArgumentException if the componentName package does not match the calling
+     * package name this call will throw an exception
+     *
+     * @throws NullPointerException Usage of this API is discouraged as it is not fully
+     * functional, and may throw a NullPointerException on certain devices and/or API versions
      *
      * @param componentName the component name to check is enabled
      */
@@ -637,6 +691,44 @@ public final class CredentialManager {
                 }
             } else {
                 Log.d(TAG, "Unexpected onError call before the show invocation");
+            }
+        }
+    }
+
+    private static class GetCandidateCredentialsTransport
+            extends IGetCandidateCredentialsCallback.Stub {
+
+        private final Executor mExecutor;
+        private final OutcomeReceiver<GetCandidateCredentialsResponse,
+                GetCandidateCredentialsException> mCallback;
+
+        private GetCandidateCredentialsTransport(
+                Executor executor,
+                OutcomeReceiver<GetCandidateCredentialsResponse,
+                        GetCandidateCredentialsException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResponse(GetCandidateCredentialsResponse response) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onResult(response));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void onError(String errorType, String message) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(
+                        () -> mCallback.onError(new GetCandidateCredentialsException(
+                                errorType, message)));
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }

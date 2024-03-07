@@ -41,6 +41,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
 import android.view.PointerIcon;
+import android.view.KeyCharacterMap;
 import android.view.VerifiedInputEvent;
 
 /** @hide */
@@ -62,6 +63,8 @@ interface IInputManager {
     // Returns the keyCode produced when pressing the key at the specified location, given the
     // active keyboard layout.
     int getKeyCodeForKeyLocation(int deviceId, in int locationKeyCode);
+
+    KeyCharacterMap getKeyCharacterMap(String layoutDescriptor);
 
     // Returns the mouse pointer speed.
     int getMousePointerSpeed();
@@ -169,6 +172,8 @@ interface IInputManager {
 
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
+    boolean setPointerIcon(in PointerIcon icon, int displayId, int deviceId, int pointerId,
+            in IBinder inputToken);
 
     oneway void requestPointerCapture(IBinder inputChannelToken, boolean enabled);
 

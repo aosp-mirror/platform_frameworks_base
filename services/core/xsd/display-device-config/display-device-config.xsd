@@ -46,10 +46,19 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="powerThrottlingConfig" name="powerThrottlingConfig" minOccurs="0"
+                            maxOccurs="1"/>
                 <xs:element type="luxThrottling" name="luxThrottling" minOccurs="0"
                             maxOccurs="1"/>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
+
+                <xs:element name="hdrBrightnessConfig" type="hdrBrightnessConfig"
+                            minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="nullable"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
+
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="autoBrightness" name="autoBrightness" minOccurs="0"
                             maxOccurs="1"/>
@@ -67,6 +76,18 @@
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Ramp speed used to decrease the screen brightness when in idle mode.
+                     In framework brightness units per second. Must exist with
+                     screenBrightnessRampSlowIncreaseIdle-->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowDecreaseIdle">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Ramp speed used to decrease the screen brightness when in idle mode.
+                     In framework brightness units per second. Must exist with
+                     screenBrightnessRampSlowDecreaseIdle-->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncreaseIdle">
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <!-- Maximum time in milliseconds that a brightness increase animation
                      can take. -->
                 <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampIncreaseMaxMillis">
@@ -75,6 +96,16 @@
                 <!-- Maximum time in milliseconds that a brightness decrease animation
                      can take. -->
                 <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampDecreaseMaxMillis">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Maximum time in milliseconds that a brightness increase animation
+                     can take in idle mode. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampIncreaseMaxIdleMillis">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Maximum time in milliseconds that a brightness decrease animation
+                     can take in idle mode. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampDecreaseMaxIdleMillis">
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="sensorDetails" name="lightSensor">
@@ -126,6 +157,12 @@
                 <!-- The version of the Universal Stylus Initiative
                  (USI, https://universalstylus.org/) protocol supported by the display, if any. -->
                 <xs:element type="usiVersion" name="usiVersion">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Maximum screen brightness setting when screen brightness capped in
+                Wear Bedtime mode. This must be a non-negative decimal within the range defined by
+                the first and the last brightness value in screenBrightnessMap. -->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessCapForWearBedtimeMode">
                     <xs:annotation name="final"/>
                 </xs:element>
             </xs:sequence>
@@ -226,6 +263,31 @@
         </xs:all>
     </xs:complexType>
 
+    <!-- brightness config for HDR content -->
+    <xs:complexType name="hdrBrightnessConfig">
+        <!-- lux level from light sensor to screen brightness recommended max value map. -->
+        <xs:element name="brightnessMap" type="nonNegativeFloatToFloatMap">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Debounce for brightness increase in millis -->
+        <xs:element name="brightnessIncreaseDebounceMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Debounce for brightness decrease in millis -->
+        <xs:element name="brightnessDecreaseDebounceMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Animation speed for brightness increase. In framework brightness units per second. -->
+        <xs:element  name="screenBrightnessRampIncrease" type="nonNegativeDecimal">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <!-- Animation speed for brightness decrease. In framework brightness units per second. -->
+        <xs:element name="screenBrightnessRampDecrease" type="nonNegativeDecimal">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
     <!-- Maps to PowerManager.THERMAL_STATUS_* values. -->
     <xs:simpleType name="thermalStatus">
         <xs:restriction base="xs:string">
@@ -296,6 +358,43 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="powerThrottlingMap">
+        <xs:sequence>
+            <xs:element name="powerThrottlingPoint" type="powerThrottlingPoint" maxOccurs="unbounded" minOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="powerThrottlingPoint">
+        <xs:sequence>
+            <xs:element type="thermalStatus" name="thermalStatus">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="powerQuotaMilliWatts">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="powerThrottlingConfig">
+        <xs:element type="nonNegativeDecimal" name="brightnessLowestCapAllowed">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element type="powerThrottlingMap" name="powerThrottlingMap" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
     <xs:complexType name="nitsMap">
         <xs:sequence>
             <xs:element name="point" type="point" maxOccurs="unbounded" minOccurs="2">
@@ -359,6 +458,20 @@
                 <xs:annotation name="final"/>
             </xs:element>
             <xs:element type="refreshRateRange" name="refreshRate" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- list of supported modes when sensor is ON. Each point corresponds to one mode.
+            Mode format is : first = refreshRate, second = vsyncRate. E.g. :
+            <supportedModes>
+                <point>
+                    <first>60</first>   // refreshRate
+                    <second>60</second> //vsyncRate
+                </point>
+                ....
+            </supportedModes>
+             -->
+            <xs:element type="nonNegativeFloatToFloatMap" name="supportedModes" minOccurs="0">
                 <xs:annotation name="nullable"/>
                 <xs:annotation name="final"/>
             </xs:element>
@@ -459,52 +572,59 @@
     <xs:complexType name="autoBrightness">
         <xs:attribute name="enabled" type="xs:boolean" use="optional" default="true"/>
         <xs:sequence>
-            <!-- Sets the debounce for autoBrightness brightening in millis-->
+            <!-- Sets the debounce for autoBrightness brightening in millis -->
             <xs:element name="brighteningLightDebounceMillis" type="xs:nonNegativeInteger"
                         minOccurs="0" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
-            <!-- Sets the debounce for autoBrightness darkening in millis-->
+            <!-- Sets the debounce for autoBrightness darkening in millis -->
             <xs:element name="darkeningLightDebounceMillis" type="xs:nonNegativeInteger"
                         minOccurs="0" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
-            <!-- Sets the brightness mapping of the desired screen brightness in nits to the
-             corresponding lux for the current display -->
-            <xs:element name="displayBrightnessMapping" type="displayBrightnessMapping"
+            <!-- Sets the debounce for autoBrightness brightening in millis while in idle mode -->
+            <xs:element name="brighteningLightDebounceIdleMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Sets the debounce for autoBrightness darkening in millis while in idle mode -->
+            <xs:element name="darkeningLightDebounceIdleMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Sets the brightness mapping of the desired screen brightness to the corresponding
+            lux for the current display -->
+            <xs:element name="luxToBrightnessMapping" type="luxToBrightnessMapping"
                         minOccurs="0" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
     </xs:complexType>
 
-    <!-- Represents the brightness mapping of the desired screen brightness in nits to the
-             corresponding lux for the current display -->
-    <xs:complexType name="displayBrightnessMapping">
-        <xs:sequence>
-            <!-- Sets the list of display brightness points, each representing the desired screen
-            brightness in nits to the corresponding lux for the current display
+    <!-- Sets the list of display brightness points, each representing the desired screen brightness
+    in a certain lux environment.
 
-            The N entries of this array define N + 1 control points as follows:
-            (1-based arrays)
+    The first value of each point is the lux value and the second value is the brightness value.
 
-            Point 1:            (0, nits[1]):             currentLux <= 0
-            Point 2:     (lux[1], nits[2]):       0 < currentLux <= lux[1]
-            Point 3:     (lux[2], nits[3]):  lux[2] < currentLux <= lux[3]
-            ...
-            Point N+1: (lux[N], nits[N+1]):            lux[N] < currentLux
+    The first lux value must be 0.
 
-            The control points must be strictly increasing. Each control point
-            corresponds to an entry in the brightness backlight values arrays.
-            For example, if currentLux == lux[1] (first element of the levels array)
-            then the brightness will be determined by nits[2] (second element
-            of the brightness values array).
-            -->
-            <xs:element name="displayBrightnessPoint" type="displayBrightnessPoint"
-                        minOccurs="1" maxOccurs="unbounded">
-                <xs:annotation name="final"/>
-            </xs:element>
-        </xs:sequence>
+    The control points must be strictly increasing.
+
+    Example: if currentLux == the second lux value in the mapping then the brightness will be
+    determined by the second brightness value in the mapping. Spline interpolation is used
+    to determine the auto-brightness values for lux levels between these control points.
+
+    The brightness values must be non-negative decimals within the range between the first and
+    the last brightness values in screenBrightnessMap.
+
+    This is used in place of config_autoBrightnessLevels and config_autoBrightnessLcdBacklightValues
+    defined in the config XML resource.
+    -->
+    <xs:complexType name="luxToBrightnessMapping">
+        <xs:element name="map" type="nonNegativeFloatToFloatMap">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <!-- Represents a point in the display brightness mapping, representing the lux level from the

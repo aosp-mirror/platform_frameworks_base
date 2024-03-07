@@ -139,7 +139,7 @@ public class InputConsumerController {
         if (mInputEventReceiver == null) {
             final InputChannel inputChannel = new InputChannel();
             try {
-                mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
+                mWindowManager.destroyInputConsumer(mToken, DEFAULT_DISPLAY);
                 mWindowManager.createInputConsumer(mToken, mName, DEFAULT_DISPLAY, inputChannel);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to create input consumer", e);
@@ -158,7 +158,7 @@ public class InputConsumerController {
     public void unregisterInputConsumer() {
         if (mInputEventReceiver != null) {
             try {
-                mWindowManager.destroyInputConsumer(mName, DEFAULT_DISPLAY);
+                mWindowManager.destroyInputConsumer(mToken, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to destroy input consumer", e);
             }

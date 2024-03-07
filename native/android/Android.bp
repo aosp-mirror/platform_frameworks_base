@@ -46,7 +46,10 @@ cc_defaults {
 
 cc_library_shared {
     name: "libandroid",
-    defaults: ["libandroid_defaults"],
+    defaults: [
+        "libandroid_defaults",
+        "android.hardware.power-ndk_shared",
+    ],
 
     srcs: [
         "activity_manager.cpp",
@@ -95,7 +98,6 @@ cc_library_shared {
         "libpowermanager",
         "android.hardware.configstore@1.0",
         "android.hardware.configstore-utils",
-        "android.hardware.power-V4-ndk",
         "libnativedisplay",
     ],
 

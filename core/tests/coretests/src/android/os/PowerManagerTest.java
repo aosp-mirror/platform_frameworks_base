@@ -17,30 +17,45 @@
 package android.os;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.support.test.uiautomator.UiDevice;
-import android.test.AndroidTestCase;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class PowerManagerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = PowerManager.class)
+public class PowerManagerTest {
 
     private static final String TAG = "PowerManagerTest";
+    private Context mContext;
     private PowerManager mPm;
     private UiDevice mUiDevice;
     private Executor mExec = Executors.newSingleThreadExecutor();
@@ -61,17 +76,27 @@ public class PowerManagerTest extends AndroidTestCase {
             String[] keys, String[] values);
 
     static {
-        System.loadLibrary("powermanagertest_jni");
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            System.loadLibrary("powermanagertest_jni");
+        }
     }
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    // Required for RequiresFlagsEnabled and RequiresFlagsDisabled annotations to take effect.
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isUnderRavenwood() ? null
+            : DeviceFlagsValueProvider.createCheckFlagsRule();
 
     /**
      * Setup any common data for the upcoming tests.
      */
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         mPm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mUiDevice.executeShellCommand("cmd thermalservice override-status 0");
     }
@@ -89,6 +114,7 @@ public class PowerManagerTest extends AndroidTestCase {
      *
      * @throws Exception
      */
+    @Test
     @SmallTest
     public void testPreconditions() throws Exception {
         assertNotNull(mPm);
@@ -99,6 +125,7 @@ public class PowerManagerTest extends AndroidTestCase {
      *
      * @throws Exception
      */
+    @Test
     @SmallTest
     public void testNewWakeLock() throws Exception {
         PowerManager.WakeLock wl = mPm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "FULL_WAKE_LOCK");
@@ -122,6 +149,7 @@ public class PowerManagerTest extends AndroidTestCase {
      *
      * @throws Exception
      */
+    @Test
     @SmallTest
     public void testBadNewWakeLock() throws Exception {
         final int badFlags = PowerManager.SCREEN_BRIGHT_WAKE_LOCK
@@ -141,6 +169,7 @@ public class PowerManagerTest extends AndroidTestCase {
      *
      * @throws Exception
      */
+    @Test
     @SmallTest
     public void testWakeLockWithWorkChains() throws Exception {
         PowerManager.WakeLock wakeLock = mPm.newWakeLock(
@@ -454,4 +483,27 @@ public class PowerManagerTest extends AndroidTestCase {
         parcelBatterySaverPolicyConfigToNativeAndVerify(bs2);
     }
 
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_BATTERY_SAVER_SUPPORTED_CHECK_API)
+    public void testBatterySaverSupported_isSupported() throws RemoteException {
+        IPowerManager powerManager = mock(IPowerManager.class);
+        PowerManager pm = new PowerManager(mContext, powerManager,
+                mock(IThermalService.class),
+                Handler.createAsync(Looper.getMainLooper()));
+        when(powerManager.isBatterySaverSupported()).thenReturn(true);
+
+        assertTrue(pm.isBatterySaverSupported());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_BATTERY_SAVER_SUPPORTED_CHECK_API)
+    public void testBatterySaverSupported_isNotSupported() throws RemoteException {
+        IPowerManager powerManager = mock(IPowerManager.class);
+        PowerManager pm = new PowerManager(mContext, powerManager,
+                mock(IThermalService.class),
+                Handler.createAsync(Looper.getMainLooper()));
+        when(powerManager.isBatterySaverSupported()).thenReturn(false);
+
+        assertFalse(pm.isBatterySaverSupported());
+    }
 }

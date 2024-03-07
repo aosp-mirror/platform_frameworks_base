@@ -20,19 +20,23 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIB
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.SigningDetails.CapabilityMergeRule.MERGE_RESTRICTED_CAPABILITY;
 
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
+import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedLongSparseArray;
 
 import java.util.ArrayList;
@@ -49,6 +53,8 @@ import java.util.Map;
  * as install) led to the request.
  */
 final class ReconcilePackageUtils {
+    private static final boolean ALLOW_NON_PRELOADS_SYSTEM_SIGNATURE = Build.IS_DEBUGGABLE || true;
+
     public static List<ReconciledPackage> reconcilePackages(
             List<InstallRequest> installRequests,
             Map<String, AndroidPackage> allPackages,
@@ -89,6 +95,8 @@ final class ReconcilePackageUtils {
                 }
             }
         }
+
+        final AndroidPackage systemPackage = allPackages.get(KnownPackages.SYSTEM_PACKAGE_NAME);
 
         for (InstallRequest installRequest : installRequests) {
             final String installPackageName = installRequest.getParsedPackage().getPackageName();
@@ -133,6 +141,9 @@ final class ReconcilePackageUtils {
             if (parsedPackage != null) {
                 signingDetails = parsedPackage.getSigningDetails();
             }
+            final boolean isSystemPackage =
+                    ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0);
+            final boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
             SharedUserSetting sharedUserSetting = settings.getSharedUserSettingLPr(
                     signatureCheckPs);
             if (ksms.shouldCheckUpgradeKeySetLocked(
@@ -141,7 +152,7 @@ final class ReconcilePackageUtils {
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
                 } else {
-                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if (!isSystemPackage) {
                         throw new ReconcileFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                                 "Package " + parsedPackage.getPackageName()
                                         + " upgrade keys do not match the previously installed"
@@ -168,9 +179,23 @@ final class ReconcilePackageUtils {
                         removeAppKeySetData = true;
                     }
 
+                    if (!isSystemPackage && !isApex && signingDetails != null
+                            && systemPackage != null && systemPackage.getSigningDetails() != null
+                            && systemPackage.getSigningDetails().checkCapability(
+                                    signingDetails,
+                                    SigningDetails.CertCapabilities.PERMISSION)) {
+                        Slog.d(TAG, "Non-preload app associated with system signature: "
+                                + signatureCheckPs.getPackageName());
+                        if (!ALLOW_NON_PRELOADS_SYSTEM_SIGNATURE) {
+                            throw new ReconcileFailure(
+                                    INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                    "Non-preload app associated with system signature: "
+                                            + signatureCheckPs.getPackageName());
+                        }
+                    }
+
                     // if this is is a sharedUser, check to see if the new package is signed by a
-                    // newer
-                    // signing certificate than the existing one, and if so, copy over the new
+                    // newer signing certificate than the existing one, and if so, copy over the new
                     // details
                     if (sharedUserSetting != null) {
                         // Attempt to merge the existing lineage for the shared SigningDetails with
@@ -203,7 +228,7 @@ final class ReconcilePackageUtils {
                         }
                     }
                 } catch (PackageManagerException e) {
-                    if ((parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) == 0) {
+                    if (!isSystemPackage) {
                         throw new ReconcileFailure(e);
                     }
                     signingDetails = parsedPackage.getSigningDetails();

@@ -34,8 +34,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.util.Log;
 import android.window.ITaskFpsCallback;
 import android.window.TaskFpsCallback;
+import android.window.TrustedPresentationThresholds;
 import android.window.WindowContext;
 import android.window.WindowMetricsController;
 import android.window.WindowProvider;
@@ -80,6 +82,8 @@ import java.util.function.IntConsumer;
  * @hide
  */
 public final class WindowManagerImpl implements WindowManager {
+    private static final String TAG = "WindowManager";
+
     @UnsupportedAppUsage
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
     @UiContext
@@ -466,5 +470,56 @@ public final class WindowManagerImpl implements WindowManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public boolean replaceContentOnDisplayWithMirror(int displayId, @NonNull Window window) {
+        View decorView = window.peekDecorView();
+        if (decorView == null) {
+            Log.e(TAG, "replaceContentOnDisplayWithMirror: Window's decorView was null.");
+            return false;
+        }
+
+        ViewRootImpl viewRoot = decorView.getViewRootImpl();
+        if (viewRoot == null) {
+            Log.e(TAG, "replaceContentOnDisplayWithMirror: Window's viewRootImpl was null.");
+            return false;
+        }
+
+        SurfaceControl sc = viewRoot.getSurfaceControl();
+        if (!sc.isValid()) {
+            Log.e(TAG, "replaceContentOnDisplayWithMirror: Window's SC is invalid.");
+            return false;
+        }
+        return replaceContentOnDisplayWithSc(displayId, SurfaceControl.mirrorSurface(sc));
+    }
+
+    @Override
+    public boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
+        if (!sc.isValid()) {
+            Log.e(TAG, "replaceContentOnDisplayWithSc: Invalid SC.");
+            return false;
+        }
+
+        try {
+            return WindowManagerGlobal.getWindowManagerService()
+                    .replaceContentOnDisplay(displayId, sc);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return false;
+    }
+
+    @Override
+    public void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds, @NonNull Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        mGlobal.registerTrustedPresentationListener(window, thresholds, executor, listener);
+    }
+
+    @Override
+    public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
+        mGlobal.unregisterTrustedPresentationListener(listener);
+
     }
 }

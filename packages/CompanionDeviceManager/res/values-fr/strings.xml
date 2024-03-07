@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Gestionnaire d\'appareils associés"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Autoriser l\'appli &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"montre"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Sélectionnez le/la <xliff:g id="PROFILE_NAME">%1$s</xliff:g> qui sera géré(e) par &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="898569637110705523">"Cette appli est nécessaire pour gérer <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> aura l\'autorisation de synchroniser des infos (comme le nom de l\'appelant), d\'interagir avec vos notifications et d\'accéder à votre téléphone, à votre agenda, ainsi qu\'à vos SMS, contacts, journaux d\'appels et appareils à proximité."</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"Cette appli sera autorisée à synchroniser des infos (comme le nom de l\'appelant) et disposera de ces autorisations sur votre <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Sélectionner l\'appareil qui sera géré par &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Sélectionner votre <xliff:g id="PROFILE_NAME">%1$s</xliff:g> à configurer"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Cette appli sera autorisée à synchroniser des infos (comme le nom de l\'appelant) et disposera de ces autorisations sur votre <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à gérer &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"lunettes"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"Cette appli est nécessaire pour gérer <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> aura l\'autorisation d\'interagir avec vos notifications et d\'accéder aux autorisations du téléphone, des SMS, des contacts, du micro et des appareils à proximité."</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"Cette appli sera autorisée à accéder à ces autorisations sur votre <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"appareil"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Cette appli sera autorisée à accéder à ces autorisations sur votre <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à ces informations depuis votre téléphone"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Services inter-appareils"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> pour caster des applis d\'un appareil à l\'autre"</string>
@@ -38,15 +37,16 @@
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Autoriser &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; à effectuer cette action ?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> demande l\'autorisation au nom de votre <xliff:g id="DEVICE_NAME">%2$s</xliff:g> de diffuser des applis et d\'autres fonctionnalités système en streaming sur des appareils à proximité"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"appareil"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"Cette appli pourra synchroniser des infos, comme le nom de l\'appelant, entre votre téléphone et <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Cette appli pourra synchroniser des infos, comme le nom de l\'appelant, entre votre téléphone et l\'appareil choisi"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Autoriser"</string>
     <string name="consent_no" msgid="2640796915611404382">"Ne pas autoriser"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Annuler"</string>
     <string name="consent_back" msgid="2560683030046918882">"Retour"</string>
+    <string name="permission_expand" msgid="893185038020887411">"Développer <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"Réduire <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Accorder les mêmes autorisations aux applis sur &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; que sur &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Ceci peut inclure l\'accès au &lt;strong&gt;micro&lt;/strong&gt;, à l\'&lt;strong&gt;appareil photo&lt;/strong&gt; et à la &lt;strong&gt;position&lt;/strong&gt;, ainsi que d\'autres autorisations sensibles sur &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Vous pouvez modifier ces autorisations à tout moment dans vos paramètres sur &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Icône d\'application"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Bouton Plus d\'informations"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"En savoir plus"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Téléphone"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
@@ -69,6 +69,6 @@
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Diffuser en streaming les applis de votre téléphone"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Diffusez des applis et d\'autres fonctionnalités système en streaming depuis votre téléphone"</string>
-    <string name="device_type" product="default" msgid="8268703872070046263">"Téléphone"</string>
-    <string name="device_type" product="tablet" msgid="5038791954983067774">"Tablette"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"téléphone"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"tablette"</string>
 </resources>

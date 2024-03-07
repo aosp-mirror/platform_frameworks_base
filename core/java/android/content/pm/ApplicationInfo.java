@@ -19,6 +19,7 @@ package android.content.pm;
 import static android.os.Build.VERSION_CODES.DONUT;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -66,6 +67,7 @@ import java.util.UUID;
  * corresponds to information collected from the AndroidManifest.xml's
  * &lt;application&gt; tag.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     private static final ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
     private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
@@ -1064,9 +1066,23 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving
      * the structure.
      *
+     * NOTE: the list also contains the result of {@link #getOptionalSharedLibraryInfos}.
+     *
      * {@hide}
      */
+    @Nullable
     public List<SharedLibraryInfo> sharedLibraryInfos;
+
+    /**
+     * List of all shared libraries this application is optionally linked against.
+     * This field is only set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
+     * PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving
+     * the structure.
+     *
+     * @hide
+     */
+    @Nullable
+    public List<SharedLibraryInfo> optionalSharedLibraryInfos;
 
     /**
      * Full path to the default directory assigned to the package for its
@@ -1386,6 +1402,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @see #category
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public static CharSequence getCategoryTitle(Context context, @Category int category) {
         switch (category) {
             case ApplicationInfo.CATEGORY_GAME:
@@ -1935,6 +1952,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seInfoUser = orig.seInfoUser;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         sharedLibraryInfos = orig.sharedLibraryInfos;
+        optionalSharedLibraryInfos = orig.optionalSharedLibraryInfos;
         dataDir = orig.dataDir;
         deviceProtectedDataDir = orig.deviceProtectedDataDir;
         credentialProtectedDataDir = orig.credentialProtectedDataDir;
@@ -2027,6 +2045,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString8(seInfoUser);
         dest.writeString8Array(sharedLibraryFiles);
         dest.writeTypedList(sharedLibraryInfos);
+        dest.writeTypedList(optionalSharedLibraryInfos);
         dest.writeString8(dataDir);
         dest.writeString8(deviceProtectedDataDir);
         dest.writeString8(credentialProtectedDataDir);
@@ -2127,6 +2146,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         seInfoUser = source.readString8();
         sharedLibraryFiles = source.createString8Array();
         sharedLibraryInfos = source.createTypedArrayList(SharedLibraryInfo.CREATOR);
+        optionalSharedLibraryInfos = source.createTypedArrayList(SharedLibraryInfo.CREATOR);
         dataDir = source.readString8();
         deviceProtectedDataDir = source.readString8();
         credentialProtectedDataDir = source.readString8();
@@ -2187,6 +2207,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @return Returns a CharSequence containing the application's description.
      * If there is no description, null is returned.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public CharSequence loadDescription(PackageManager pm) {
         if (descriptionRes != 0) {
             CharSequence label = pm.getText(packageName, descriptionRes, this);
@@ -2222,6 +2243,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Environment.class)
     public void initForUser(int userId) {
         uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
 
@@ -2414,6 +2436,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public Drawable loadDefaultIcon(PackageManager pm) {
         if ((flags & FLAG_EXTERNAL_STORAGE) != 0
                 && isPackageUnavailable(pm)) {
@@ -2424,6 +2447,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = PackageManager.class)
     private boolean isPackageUnavailable(PackageManager pm) {
         try {
             return pm.getPackageInfo(packageName, 0) == null;
@@ -2754,6 +2778,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *  list will only be set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
      *  PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving the structure.
      *
+     *  NOTE: the list also contains the result of {@link #getOptionalSharedLibraryInfos}.
+     *
      * @hide
      */
     @NonNull
@@ -2763,6 +2789,23 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             return Collections.EMPTY_LIST;
         }
         return sharedLibraryInfos;
+    }
+
+    /**
+     *  List of all shared libraries this application is optionally linked against. This
+     *  list will only be set if the {@link PackageManager#GET_SHARED_LIBRARY_FILES
+     *  PackageManager.GET_SHARED_LIBRARY_FILES} flag was used when retrieving the structure.
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(Flags.FLAG_SDK_LIB_INDEPENDENCE)
+    public List<SharedLibraryInfo> getOptionalSharedLibraryInfos() {
+        if (optionalSharedLibraryInfos == null) {
+            return Collections.EMPTY_LIST;
+        }
+        return optionalSharedLibraryInfos;
     }
 
     /**

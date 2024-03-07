@@ -1462,7 +1462,7 @@ public final class StrictMode {
 
         if (Build.IS_USER || DISABLE || SystemProperties.getBoolean(DISABLE_PROPERTY, false)) {
             // Detect nothing extra
-        } else if (Build.IS_USERDEBUG) {
+        } else if (Build.IS_USERDEBUG || Build.IS_ENG) {
             // Detect everything in bundled apps
             if (isBundledSystemApp(ai)) {
                 builder.detectAll();
@@ -1470,14 +1470,9 @@ public final class StrictMode {
                 if (SystemProperties.getBoolean(VISUAL_PROPERTY, false)) {
                     builder.penaltyFlashScreen();
                 }
-            }
-        } else if (Build.IS_ENG) {
-            // Detect everything in bundled apps
-            if (isBundledSystemApp(ai)) {
-                builder.detectAll();
-                builder.penaltyDropBox();
-                builder.penaltyLog();
-                builder.penaltyFlashScreen();
+                if (Build.IS_ENG) {
+                    builder.penaltyLog();
+                }
             }
         }
 

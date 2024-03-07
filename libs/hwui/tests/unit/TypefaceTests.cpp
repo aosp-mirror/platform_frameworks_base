@@ -29,6 +29,7 @@
 
 #include "hwui/MinikinSkia.h"
 #include "hwui/Typeface.h"
+#include "utils/TypefaceUtils.h"
 
 using namespace android;
 
@@ -56,7 +57,7 @@ std::shared_ptr<minikin::FontFamily> buildFamily(const char* fileName) {
     sk_sp<SkData> skData =
             SkData::MakeWithProc(data, st.st_size, unmap, reinterpret_cast<void*>(st.st_size));
     std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(skData));
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm = android::FreeTypeFontMgr();
     sk_sp<SkTypeface> typeface(fm->makeFromStream(std::move(fontData)));
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", fileName);
     std::shared_ptr<minikin::MinikinFont> font =

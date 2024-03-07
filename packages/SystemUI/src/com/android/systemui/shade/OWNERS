@@ -6,8 +6,12 @@ per-file *Notification* = file:../statusbar/notification/OWNERS
 
 per-file NotificationsQuickSettingsContainer.java = kozynski@google.com, asc@google.com
 per-file NotificationsQSContainerController.kt = kozynski@google.com, asc@google.com
-per-file *ShadeHeader* = kozynski@google.com, asc@google.com
-per-file *Shade* = justinweir@google.com
+per-file *ShadeHeader* = syeonlee@google.com, kozynski@google.com, asc@google.com
+
+per-file *Interactor* = set noparent
+per-file *Interactor* = justinweir@google.com, syeonlee@google.com, nijamkin@google.com
+per-file *Repository* = set noparent
+per-file *Repository* = justinweir@google.com, syeonlee@google.com, nijamkin@google.com
 
 per-file NotificationShadeWindowViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com
 per-file NotificationShadeWindowView.java = pixel@google.com, cinek@google.com, juliacr@google.com

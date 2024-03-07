@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 慢速充電中"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，充電效能已最佳化"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電配件有問題"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按選單鍵解鎖。"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網路已鎖定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"沒有 SIM 卡"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"請新增 SIM 卡。"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"找不到 SIM 卡或 SIM 卡無法讀取，請新增 SIM 卡。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM 卡無法使用。"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM 卡已永久停用。\n 請向無線服務供應商索取其他 SIM 卡。"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM 卡已鎖定。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM 卡已使用 PUK 碼鎖定。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"正在解鎖 SIM 卡…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"裝置鎖定後，必須輸入 PIN 碼才能解鎖"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"裝置鎖定後，必須輸入密碼才能解鎖"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"裝置鎖定後，必須畫出解鎖圖案才能解鎖"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"裝置會在閒置時安裝更新"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"系統會在裝置處於未使用狀態時安裝更新"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"裝置已有一段時間未鎖定，請使用 PIN 碼鎖定裝置以策安全。"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"裝置已有一段時間未鎖定，請使用密碼鎖定裝置以策安全。"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"裝置已有一段時間未鎖定，請使用解鎖圖案鎖定裝置以策安全。"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"泡泡"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"類比"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"解鎖裝置才能繼續操作"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"請輸入 PIN 碼，系統稍後會安裝更新"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"請輸入密碼，系統稍後會安裝更新"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"請畫出解鎖圖案，系統稍後會安裝更新"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"裝置已更新。如要繼續操作，請輸入 PIN 碼。"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"裝置已更新。如要繼續操作，請輸入密碼。"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"裝置已更新。如要繼續操作，請畫出解鎖圖案。"</string>
 </resources>

@@ -30,7 +30,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -238,6 +239,52 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 // update the text for sure if the estimate in the cache was updated
                 mView.updatePercentText();
             }
+        }
+    }
+
+    /** */
+    @SysUISingleton
+    public static class Factory {
+        private final UserTracker mUserTracker;
+        private final ConfigurationController mConfigurationController;
+        private final TunerService mTunerService;
+        private final @Main Handler mMainHandler;
+        private final ContentResolver mContentResolver;
+        private final FeatureFlags mFeatureFlags;
+        private final BatteryController mBatteryController;
+
+        @Inject
+        public Factory(
+                UserTracker userTracker,
+                ConfigurationController configurationController,
+                TunerService tunerService,
+                @Main Handler mainHandler,
+                ContentResolver contentResolver,
+                FeatureFlags featureFlags,
+                BatteryController batteryController
+        ) {
+            mUserTracker = userTracker;
+            mConfigurationController = configurationController;
+            mTunerService = tunerService;
+            mMainHandler = mainHandler;
+            mContentResolver = contentResolver;
+            mFeatureFlags = featureFlags;
+            mBatteryController = batteryController;
+        }
+
+        /** */
+        public BatteryMeterViewController create(View view, StatusBarLocation location) {
+            return new BatteryMeterViewController(
+                    (BatteryMeterView) view,
+                    location,
+                    mUserTracker,
+                    mConfigurationController,
+                    mTunerService,
+                    mMainHandler,
+                    mContentResolver,
+                    mFeatureFlags,
+                    mBatteryController
+            );
         }
     }
 }

@@ -13,3 +13,8 @@ android_app_certificate {
     name: "FrameworksCoreTests_unit_test_cert",
     certificate: "unit_test",
 }
+
+filegroup {
+    name: "FrameworksCoreTests_unit_test_cert_der",
+    srcs: ["unit_test.der"],
+}

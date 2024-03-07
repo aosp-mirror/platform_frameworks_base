@@ -29,12 +29,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -73,16 +75,18 @@ import org.mockito.MockitoSession;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TileLifecycleManagerTest extends SysuiTestCase {
-    private static final int TEST_FAIL_TIMEOUT = 5000;
 
     private final PackageManagerAdapter mMockPackageManagerAdapter =
             mock(PackageManagerAdapter.class);
     private final BroadcastDispatcher mMockBroadcastDispatcher =
             mock(BroadcastDispatcher.class);
     private final IQSTileService.Stub mMockTileService = mock(IQSTileService.Stub.class);
+    private final ActivityManager mActivityManager = mock(ActivityManager.class);
+
     private ComponentName mTileServiceComponentName;
     private Intent mTileServiceIntent;
     private UserHandle mUser;
+    private FakeSystemClock mClock;
     private FakeExecutor mExecutor;
     private HandlerThread mThread;
     private Handler mHandler;
@@ -112,13 +116,15 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = Handler.createAsync(mThread.getLooper());
-        mExecutor = new FakeExecutor(new FakeSystemClock());
+        mClock = new FakeSystemClock();
+        mExecutor = new FakeExecutor(mClock);
         mStateManager = new TileLifecycleManager(mHandler, mWrappedContext,
                 mock(IQSService.class),
                 mMockPackageManagerAdapter,
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
                 mExecutor);
     }
 
@@ -294,11 +300,32 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mStateManager.onStartListening();
         mStateManager.executeSetBindService(true);
         mExecutor.runAllReady();
-        mStateManager.setBindRetryDelay(0);
+        mStateManager.onServiceDisconnected(mTileServiceComponentName);
+        mClock.advanceTime(5000);
+
+        // Two calls: one for the first bind, one for the restart.
+        verifyBind(2);
+        verify(mMockTileService, times(2)).onStartListening();
+    }
+
+    @Test
+    public void testKillProcessLowMemory() throws Exception {
+        doAnswer(invocation -> {
+            ActivityManager.MemoryInfo memoryInfo = invocation.getArgument(0);
+            memoryInfo.lowMemory = true;
+            return null;
+        }).when(mActivityManager).getMemoryInfo(any());
+        mStateManager.onStartListening();
+        mStateManager.executeSetBindService(true);
         mExecutor.runAllReady();
         mStateManager.onServiceDisconnected(mTileServiceComponentName);
-        mExecutor.runAllReady();
 
+        // Longer delay than a regular one
+        mClock.advanceTime(5000);
+        verifyBind(1);
+        verify(mMockTileService, times(1)).onStartListening();
+
+        mClock.advanceTime(20000);
         // Two calls: one for the first bind, one for the restart.
         verifyBind(2);
         verify(mMockTileService, times(2)).onStartListening();
@@ -319,6 +346,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -340,6 +368,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -361,6 +390,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mMockBroadcastDispatcher,
                 mTileServiceIntent,
                 mUser,
+                mActivityManager,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -371,6 +401,31 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 | Context.BIND_WAIVE_PRIORITY;
 
         verify(falseContext).bindServiceAsUser(any(), any(), eq(flags), any());
+    }
+
+    @Test
+    public void testNullBindingCallsUnbind() {
+        Context mockContext = mock(Context.class);
+        // Binding has to succeed
+        when(mockContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true);
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mockContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mActivityManager,
+                mExecutor);
+
+        manager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        ArgumentCaptor<ServiceConnection> captor = ArgumentCaptor.forClass(ServiceConnection.class);
+        verify(mockContext).bindServiceAsUser(any(), captor.capture(), anyInt(), any());
+
+        captor.getValue().onNullBinding(mTileServiceComponentName);
+        mExecutor.runAllReady();
+        verify(mockContext).unbindService(captor.getValue());
     }
 
     private void mockChangeEnabled(long changeId, boolean enabled) {

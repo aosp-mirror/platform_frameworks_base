@@ -16,84 +16,144 @@
 
 package com.android.systemui.biometrics
 
-import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import androidx.test.filters.RequiresDevice
+import com.android.systemui.SysUITestComponent
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shade.ShadeExpansionStateManager
-import org.junit.Assert
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.flags.Flags
+import com.android.systemui.runCurrent
+import com.android.systemui.runTest
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.user.domain.UserDomainLayerModule
+import dagger.BindsInstance
+import dagger.Component
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.junit.MockitoJUnit
+import org.mockito.MockitoAnnotations
 
-@RequiresDevice
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
 class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
 
-    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
-    private lateinit var detector: AuthDialogPanelInteractionDetector
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
+    interface TestComponent : SysUITestComponent<AuthDialogPanelInteractionDetector> {
+
+        val shadeRepository: FakeShadeRepository
+
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+            ): TestComponent
+        }
+    }
+
+    private val testComponent: TestComponent =
+        DaggerAuthDialogPanelInteractionDetectorTest_TestComponent.factory()
+            .create(
+                test = this,
+                featureFlags =
+                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
+            )
+
+    private val detector: AuthDialogPanelInteractionDetector = testComponent.underTest
 
     @Mock private lateinit var action: Runnable
 
-    @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
-
     @Before
     fun setUp() {
-        shadeExpansionStateManager = ShadeExpansionStateManager()
-        detector =
-            AuthDialogPanelInteractionDetector(shadeExpansionStateManager, mContext.mainExecutor)
+        MockitoAnnotations.initMocks(this)
     }
 
     @Test
-    fun testEnableDetector_expandWithTrack_shouldPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
-        verify(action).run()
-    }
+    fun enableDetector_expand_shouldRunAction() =
+        testComponent.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN shade expands
+            shadeRepository.setLegacyShadeTracking(true)
+            shadeRepository.setLegacyShadeExpansion(.5f)
+            runCurrent()
+
+            // THEN action was run
+            verify(action).run()
+        }
 
     @Test
-    fun testEnableDetector_trackOnly_shouldPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, false, true, 0f)
-        verify(action).run()
-    }
+    fun enableDetector_isUserInteractingTrue_shouldNotPostRunnable() =
+        testComponent.runTest {
+            // GIVEN isInteracting starts true
+            shadeRepository.setLegacyShadeTracking(true)
+            runCurrent()
+            detector.enable(action)
+
+            // THEN action was not run
+            verifyZeroInteractions(action)
+        }
 
     @Test
-    fun testEnableDetector_expandOnly_shouldNotPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, false, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun enableDetector_shadeExpandImmediate_shouldNotPostRunnable() =
+        testComponent.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN shade expands fully instantly
+            shadeRepository.setLegacyShadeExpansion(1f)
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+        }
 
     @Test
-    fun testEnableDetector_expandWithoutFraction_shouldPostRunnable() {
-        detector.enable(action)
-        // simulate headsup notification
-        shadeExpansionStateManager.onPanelExpansionChanged(0.0f, true, false, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun disableDetector_shouldNotPostRunnable() =
+        testComponent.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN detector is disabled and shade opens
+            detector.disable()
+            runCurrent()
+            shadeRepository.setLegacyShadeTracking(true)
+            shadeRepository.setLegacyShadeExpansion(.5f)
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+        }
 
     @Test
-    fun testEnableDetector_shouldNotPostRunnable() {
-        detector.enable(action)
-        detector.disable()
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun enableDetector_beginCollapse_shouldNotPostRunnable() =
+        testComponent.runTest {
+            // GIVEN shade is open and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(1f)
+            detector.enable(action)
+            runCurrent()
 
-    @Test
-    fun testFromOpenState_becomeStateClose_enableDetector_shouldNotPostRunnable() {
-        // STATE_OPEN is 2
-        shadeExpansionStateManager.updateState(2)
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(0.5f, false, false, 0f)
-        verifyZeroInteractions(action)
-        Assert.assertEquals(true, shadeExpansionStateManager.isClosed())
-    }
+            // WHEN shade begins to collapse
+            shadeRepository.setLegacyShadeExpansion(.5f)
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+        }
 }

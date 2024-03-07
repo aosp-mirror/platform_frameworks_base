@@ -39,7 +39,7 @@ std::unique_ptr<IData> FileSegment::OpenAsData() {
   return {};
 }
 
-std::unique_ptr<io::InputStream> FileSegment::OpenInputStream() {
+std::unique_ptr<android::InputStream> FileSegment::OpenInputStream() {
   return OpenAsData();
 }
 

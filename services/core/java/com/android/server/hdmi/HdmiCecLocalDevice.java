@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.HdmiControlService.DEVICE_CLEANUP_TIMEOUT;
+
 import android.annotation.CallSuper;
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
@@ -61,9 +63,6 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     private static final int MAX_HDMI_ACTIVE_SOURCE_HISTORY = 10;
     private static final int MSG_DISABLE_DEVICE_TIMEOUT = 1;
     private static final int MSG_USER_CONTROL_RELEASE_TIMEOUT = 2;
-    // Timeout in millisecond for device clean up (5s).
-    // Normal actions timeout is 2s but some of them would have several sequence of timeout.
-    private static final int DEVICE_CLEANUP_TIMEOUT = 5000;
     // Within the timer, a received <User Control Pressed> will start "Press and Hold" behavior.
     // When it expires, we can assume <User Control Release> is received.
     private static final int FOLLOWER_SAFETY_TIMEOUT = 550;
@@ -173,6 +172,14 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
                     }
                 }
             };
+
+    /**
+     * A callback interface used by local devices use to indicate that they have finished their part
+     * of the standby process.
+     */
+    interface StandbyCompletedCallback {
+        void onStandbyCompleted();
+    }
 
     /**
      * A callback interface to get notified when all pending action is cleared. It can be called
@@ -1008,6 +1015,12 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         assertRunOnServiceThread();
         mActions.add(action);
         if (mService.isPowerStandby() || !mService.isAddressAllocated()) {
+            if (action.getClass() == ResendCecCommandAction.class) {
+                Slog.i(TAG, "Not ready to start ResendCecCommandAction. "
+                        + "This action is cancelled.");
+                removeAction(action);
+                return;
+            }
             Slog.i(TAG, "Not ready to start action. Queued for deferred start:" + action);
             return;
         }
@@ -1033,6 +1046,19 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         for (AbsoluteVolumeAudioStatusAction action :
                 getActions(AbsoluteVolumeAudioStatusAction.class)) {
             action.updateVolume(volumeIndex);
+        }
+    }
+
+    /**
+     * If AVB has been enabled, request the System Audio device's audio status and notify
+     * AudioService of its response.
+     */
+    @ServiceThreadOnly
+    void requestAndUpdateAvbAudioStatus() {
+        assertRunOnServiceThread();
+        for (AbsoluteVolumeAudioStatusAction action :
+                getActions(AbsoluteVolumeAudioStatusAction.class)) {
+            action.requestAndUpdateAudioStatus();
         }
     }
 
@@ -1093,6 +1119,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     }
 
     // Returns all actions matched with given class type.
+    @VisibleForTesting
     @ServiceThreadOnly
     <T extends HdmiCecFeatureAction> List<T> getActions(final Class<T> clazz) {
         assertRunOnServiceThread();
@@ -1262,8 +1289,14 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
      *     messages like &lt;Standby&gt;
      * @param standbyAction Intent action that drives the standby process, either {@link
      *     HdmiControlService#STANDBY_SCREEN_OFF} or {@link HdmiControlService#STANDBY_SHUTDOWN}
+     * @param callback callback invoked after the standby process for the local device is completed.
      */
-    protected void onStandby(boolean initiatedByCec, int standbyAction) {}
+    protected void onStandby(boolean initiatedByCec, int standbyAction,
+            StandbyCompletedCallback callback) {}
+
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        onStandby(initiatedByCec, standbyAction, null);
+    }
 
     /**
      * Called when the initialization of local devices is complete.
@@ -1284,6 +1317,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         removeAction(AbsoluteVolumeAudioStatusAction.class);
         removeAction(SetAudioVolumeLevelDiscoveryAction.class);
         removeAction(ActiveSourceAction.class);
+        removeAction(ResendCecCommandAction.class);
 
         mPendingActionClearedCallback =
                 new PendingActionClearedCallback() {
@@ -1422,6 +1456,16 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         } catch (RemoteException e) {
             Slog.e(TAG, "Invoking callback failed:" + e);
         }
+    }
+
+    @ServiceThreadOnly
+    @VisibleForTesting
+    public void invokeStandbyCompletedCallback(StandbyCompletedCallback callback) {
+        assertRunOnServiceThread();
+        if (callback == null) {
+            return;
+        }
+        callback.onStandbyCompleted();
     }
 
     void sendUserControlPressedAndReleased(int targetAddress, int cecKeycode) {

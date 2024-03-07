@@ -7,19 +7,35 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "FrameworksCoreTests-aidl",
+    srcs: [
+        "src/**/I*.aidl",
+        "aidl/**/I*.aidl",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "FrameworksCoreTests-helpers",
+    srcs: [
+        "DisabledTestApp/src/**/*.java",
+        "EnabledTestApp/src/**/*.java",
+        "BinderProxyCountingTestApp/src/**/*.java",
+        "BinderProxyCountingTestService/src/**/*.java",
+        "BinderDeathRecipientHelperApp/src/**/*.java",
+    ],
+    visibility: ["//visibility:private"],
+}
+
 android_test {
     name: "FrameworksCoreTests",
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
-        "src/**/I*.aidl",
-        "DisabledTestApp/src/**/*.java",
-        "EnabledTestApp/src/**/*.java",
-        "BinderProxyCountingTestApp/src/**/*.java",
-        "BinderProxyCountingTestService/src/**/*.java",
-        "BinderDeathRecipientHelperApp/src/**/*.java",
-        "aidl/**/I*.aidl",
+        ":FrameworksCoreTests-aidl",
+        ":FrameworksCoreTests-helpers",
         ":FrameworksCoreTestDoubles-sources",
     ],
 
@@ -44,16 +60,18 @@ android_test {
         "frameworks-core-util-lib",
         "mockwebserver",
         "guava",
+        "android.view.accessibility.flags-aconfig-java",
         "androidx.core_core",
         "androidx.core_core-ktx",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "androidx.test.rules",
+        "flag-junit",
         "junit-params",
         "kotlin-test",
         "mockito-target-minus-junit4",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "platform-test-annotations",
         "platform-compat-test-rules",
         "truth",
@@ -61,17 +79,21 @@ android_test {
         "testng",
         "servicestests-utils",
         "device-time-shell-utils",
+        "testables",
+        "com.android.text.flags-aconfig-java",
+        "flag-junit",
+        "ravenwood-junit",
     ],
 
     libs: [
         "android.test.runner",
-        "testables",
         "org.apache.http.legacy",
         "android.test.base",
         "android.test.mock",
         "framework",
         "ext",
         "framework-res",
+        "android.view.flags-aconfig-java",
     ],
     jni_libs: [
         "libpowermanagertest_jni",
@@ -88,10 +110,9 @@ android_test {
 
     resource_dirs: ["res"],
     resource_zips: [":FrameworksCoreTests_apks_as_resources"],
-    java_resources: [":ApkVerityTestCertDer"],
+    java_resources: [":FrameworksCoreTests_unit_test_cert_der"],
 
     data: [
-        ":BstatsTestApp",
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
         ":com.android.cts.helpers.aosp",
@@ -158,4 +179,43 @@ android_library {
         "framework",
         "framework-res",
     ],
+}
+
+android_ravenwood_test {
+    name: "FrameworksCoreTestsRavenwood",
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    static_libs: [
+        "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
+        "androidx.core_core",
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "androidx.test.uiautomator_uiautomator",
+        "compatibility-device-util-axt",
+        "flag-junit",
+        "mockito_ravenwood",
+        "platform-test-annotations",
+        "flag-junit",
+        "testng",
+    ],
+    srcs: [
+        "src/android/os/**/*.java",
+        "src/com/android/internal/os/**/*.java",
+        "src/android/util/**/*.java",
+        "src/com/android/internal/os/LongArrayMultiStateCounterTest.java",
+        "src/com/android/internal/util/**/*.java",
+        "src/com/android/internal/power/EnergyConsumerStatsTest.java",
+        ":FrameworksCoreTests{.aapt.srcjar}",
+        ":FrameworksCoreTests-aidl",
+        ":FrameworksCoreTests-helpers",
+        ":FrameworksCoreTestDoubles-sources",
+    ],
+    aidl: {
+        generate_get_transaction_name: true,
+        local_include_dirs: ["aidl"],
+    },
+    auto_gen_config: true,
 }

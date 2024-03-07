@@ -20,15 +20,26 @@
 #ifdef __ANDROID__
 #include "HWUIProperties.sysprop.h"
 #endif
-#include "SkTraceEventCommon.h"
+#include <android-base/properties.h>
+#include <cutils/compiler.h>
+#include <log/log.h>
 
 #include <algorithm>
 #include <cstdlib>
 #include <optional>
 
-#include <android-base/properties.h>
-#include <cutils/compiler.h>
-#include <log/log.h>
+#include "src/core/SkTraceEventCommon.h"
+
+#ifdef __ANDROID__
+#include <com_android_graphics_hwui_flags.h>
+namespace hwui_flags = com::android::graphics::hwui::flags;
+#else
+namespace hwui_flags {
+constexpr bool clip_surfaceviews() {
+    return false;
+}
+}  // namespace hwui_flags
+#endif
 
 namespace android {
 namespace uirenderer {
@@ -91,6 +102,8 @@ bool Properties::isLowRam = false;
 bool Properties::isSystemOrPersistent = false;
 
 float Properties::maxHdrHeadroomOn8bit = 5.f;  // TODO: Refine this number
+
+bool Properties::clipSurfaceViews = false;
 
 StretchEffectBehavior Properties::stretchEffectBehavior = StretchEffectBehavior::ShaderHWUI;
 
@@ -158,6 +171,9 @@ bool Properties::load() {
 
     // call isDrawingEnabled to force loading of the property
     isDrawingEnabled();
+
+    clipSurfaceViews =
+            base::GetBoolProperty("debug.hwui.clip_surfaceviews", hwui_flags::clip_surfaceviews());
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }

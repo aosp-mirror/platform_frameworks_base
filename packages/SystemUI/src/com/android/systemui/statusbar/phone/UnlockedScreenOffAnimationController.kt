@@ -20,6 +20,7 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
@@ -31,7 +32,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.TraceUtils
+import com.android.app.tracing.TraceUtils
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
 
@@ -65,7 +66,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val notifShadeWindowControllerLazy: dagger.Lazy<NotificationShadeWindowController>,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val powerManager: PowerManager,
-    private val handler: Handler = Handler()
+    private val handler: Handler = Handler(),
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
     private lateinit var centralSurfaces: CentralSurfaces
     private lateinit var shadeViewController: ShadeViewController
@@ -285,7 +286,11 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // up, with unpredictable consequences.
                 if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
                         shouldAnimateInKeyguard) {
-                    aodUiAnimationPlaying = true
+                    if (!KeyguardShadeMigrationNssl.isEnabled) {
+                        // Tracking this state should no longer be relevant, as the isInteractive
+                        // check covers it
+                        aodUiAnimationPlaying = true
+                    }
 
                     // Show AOD. That'll cause the KeyguardVisibilityHelper to call
                     // #animateInKeyguard.

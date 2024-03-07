@@ -69,10 +69,13 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.dump.DumpHandler;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.policy.CallbackController;
+
+import dagger.Lazy;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -150,7 +153,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_HIDE_TOAST                        = 53 << MSG_SHIFT;
     private static final int MSG_TRACING_STATE_CHANGED             = 54 << MSG_SHIFT;
     private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 55 << MSG_SHIFT;
-    private static final int MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION = 56 << MSG_SHIFT;
+    private static final int MSG_REQUEST_MAGNIFICATION_CONNECTION = 56 << MSG_SHIFT;
     //TODO(b/169175022) Update name and when feature name is locked.
     private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 58 << MSG_SHIFT;
     private static final int MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED = 59 << MSG_SHIFT;
@@ -172,6 +175,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_LOCK_TASK_MODE_CHANGED = 75 << MSG_SHIFT;
     private static final int MSG_CONFIRM_IMMERSIVE_PROMPT = 77 << MSG_SHIFT;
     private static final int MSG_IMMERSIVE_CHANGED = 78 << MSG_SHIFT;
+    private static final int MSG_SET_QS_TILES = 79 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -194,6 +198,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private final DisplayTracker mDisplayTracker;
     private final @Nullable CommandRegistry mRegistry;
     private final @Nullable DumpHandler mDumpHandler;
+    private final @Nullable Lazy<PowerInteractor> mPowerInteractor;
 
     /**
      * These methods are called back on the main thread.
@@ -301,6 +306,8 @@ public class CommandQueue extends IStatusBar.Stub implements
 
         default void addQsTile(ComponentName tile) { }
         default void remQsTile(ComponentName tile) { }
+
+        default void setQsTiles(String[] tiles) {}
         default void clickTile(ComponentName tile) { }
 
         default void handleSystemKey(KeyEvent arg1) { }
@@ -375,15 +382,8 @@ public class CommandQueue extends IStatusBar.Stub implements
         /**
          * @see IStatusBar#showTransient(int, int, boolean).
          */
-        default void showTransient(int displayId, @InsetsType int types) { }
-
-        /**
-         * @see IStatusBar#showTransient(int, int, boolean).
-         */
         default void showTransient(int displayId, @InsetsType int types,
-                boolean isGestureOnSystemBar) {
-            showTransient(displayId, types);
-        }
+                boolean isGestureOnSystemBar) {}
 
         /**
          * @see IStatusBar#abortTransient(int, int).
@@ -424,13 +424,13 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void onTracingStateChanged(boolean enabled) { }
 
         /**
-         * Requests {@link com.android.systemui.accessibility.WindowMagnification} to invoke
+         * Requests {@link com.android.systemui.accessibility.Magnification} to invoke
          * {@code android.view.accessibility.AccessibilityManager#
-         * setWindowMagnificationConnection(IWindowMagnificationConnection)}
+         * setMagnificationConnection(IMagnificationConnection)}
          *
          * @param connect {@code true} if needs connection, otherwise set the connection to null.
          */
-        default void requestWindowMagnificationConnection(boolean connect) { }
+        default void requestMagnificationConnection(boolean connect) { }
 
         /**
          * @see IStatusBar#setNavigationBarLumaSamplingEnabled(int, boolean)
@@ -446,6 +446,7 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#requestAddTile
          */
         default void requestAddTile(
+                int callingUid,
                 @NonNull ComponentName componentName,
                 @NonNull CharSequence appName,
                 @NonNull CharSequence label,
@@ -515,14 +516,15 @@ public class CommandQueue extends IStatusBar.Stub implements
 
     @VisibleForTesting
     public CommandQueue(Context context, DisplayTracker displayTracker) {
-        this(context, displayTracker, null, null);
+        this(context, displayTracker, null, null, null);
     }
 
     public CommandQueue(
             Context context,
             DisplayTracker displayTracker,
             CommandRegistry registry,
-            DumpHandler dumpHandler
+            DumpHandler dumpHandler,
+            Lazy<PowerInteractor> powerInteractor
     ) {
         mDisplayTracker = displayTracker;
         mRegistry = registry;
@@ -542,6 +544,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         }, new HandlerExecutor(mHandler));
         // We always have default display.
         setDisabled(mDisplayTracker.getDefaultDisplayId(), DISABLE_NONE, DISABLE2_NONE);
+        mPowerInteractor = powerInteractor;
     }
 
     // TODO(b/118592525): add multi-display support if needed.
@@ -882,6 +885,10 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void onCameraLaunchGestureDetected(int source) {
         synchronized (mLock) {
+            if (mPowerInteractor != null) {
+                mPowerInteractor.get().onCameraLaunchGestureDetected();
+            }
+
             mHandler.removeMessages(MSG_CAMERA_LAUNCH_GESTURE);
             mHandler.obtainMessage(MSG_CAMERA_LAUNCH_GESTURE, source, 0).sendToTarget();
         }
@@ -906,6 +913,13 @@ public class CommandQueue extends IStatusBar.Stub implements
     public void remQsTile(ComponentName tile) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_REMOVE_QS_TILE, tile).sendToTarget();
+        }
+    }
+
+    @Override
+    public void setQsTiles(String[] tiles) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SET_QS_TILES, tiles).sendToTarget();
         }
     }
 
@@ -1111,9 +1125,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void requestWindowMagnificationConnection(boolean connect) {
+    public void requestMagnificationConnection(boolean connect) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION, connect)
+            mHandler.obtainMessage(MSG_REQUEST_MAGNIFICATION_CONNECTION, connect)
                     .sendToTarget();
         }
     }
@@ -1311,6 +1325,7 @@ public class CommandQueue extends IStatusBar.Stub implements
 
     @Override
     public void requestAddTile(
+            int callingUid,
             @NonNull ComponentName componentName,
             @NonNull CharSequence appName,
             @NonNull CharSequence label,
@@ -1323,6 +1338,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         args.arg3 = label;
         args.arg4 = icon;
         args.arg5 = callback;
+        args.arg6 = callingUid;
         mHandler.obtainMessage(MSG_TILE_SERVICE_REQUEST_ADD, args).sendToTarget();
     }
 
@@ -1540,6 +1556,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).remQsTile((ComponentName) msg.obj);
                     }
                     break;
+                case MSG_SET_QS_TILES:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setQsTiles((String[]) msg.obj);
+                    }
+                    break;
                 case MSG_CLICK_QS_TILE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).clickTile((ComponentName) msg.obj);
@@ -1746,9 +1767,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                         callbacks.suppressAmbientDisplay((boolean) msg.obj);
                     }
                     break;
-                case MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION:
+                case MSG_REQUEST_MAGNIFICATION_CONNECTION:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).requestWindowMagnificationConnection((Boolean) msg.obj);
+                        mCallbacks.get(i).requestMagnificationConnection((Boolean) msg.obj);
                     }
                     break;
                 case MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED:
@@ -1764,8 +1785,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                     CharSequence label = (CharSequence) args.arg3;
                     Icon icon = (Icon) args.arg4;
                     IAddTileResultCallback callback = (IAddTileResultCallback) args.arg5;
+                    int callingUid = (int) args.arg6;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).requestAddTile(
+                        mCallbacks.get(i).requestAddTile(callingUid,
                                 componentName, appName, label, icon, callback);
                     }
                     args.recycle();

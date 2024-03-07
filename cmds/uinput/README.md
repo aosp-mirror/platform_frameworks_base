@@ -1,87 +1,100 @@
 # Usage
-##  Two options to use the uinput command:
-### 1. Interactive through stdin:
-type `uinput -` into the terminal, then type/paste commands to send to the binary.
-Use Ctrl+D to signal end of stream to the binary (EOF).
 
-This mode can be also used from an app to send uinput events.
-For an example, see the cts test case at: [InputTestCase.java][2]
+There are two ways to use the `uinput` command:
 
-When using another program to control uinput in interactive mode, registering a
-new input device (for example, a bluetooth joystick) should be the first step.
-After the device is added, you need to wait for the _onInputDeviceAdded_
-(see [InputDeviceListener][1]) notification before issuing commands
-to the device.
-Failure to do so will cause missed events and inconsistent behavior.
+* **Recommended:** `uinput -` reads commands from standard input until End-of-File (Ctrl+D) is sent.
+  This mode can be used interactively from a terminal or used to control uinput from another program
+  or app (such as the CTS tests via [`UinputDevice`][UinputDevice]).
+* `uinput <filename>` reads commands from a file instead of standard input.
 
-### 2. Using a file as an input:
-type `uinput <filename>`, and the file will be used an an input to the binary.
-You must add a sufficient delay after a "register" command to ensure device
-is ready. The interactive mode is the recommended method of communicating
-with the uinput binary.
+[UinputDevice]: https://cs.android.com/android/platform/superproject/main/+/main:cts/libs/input/src/com/android/cts/input/UinputDevice.java
 
-All of the input commands should be in pseudo-JSON format as documented below.
-See examples [here][3].
+## Command format
 
-The file can have multiple commands one after the other (which is not strictly
-legal JSON format, as this would imply multiple root elements).
+Input commands should be in JSON format, though the parser is in [lenient mode] to allow comments,
+and integers can be specified in hexadecimal (e.g. `0xABCD`). The input file (or standard input) can
+contain multiple commands, which will be executed in sequence. Simply add multiple JSON objects to
+the file, one after the other without separators:
 
-## Command description
+```json5
+{
+  "id": 1,
+  "command": "register",
+  // ...
+}
+{
+  "id": 1,
+  "command": "delay",
+  // ...
+}
+```
 
-1. `register`
+Many examples of command files can be found [in the CTS tests][cts-example-jsons].
+
+[lenient mode]: https://developer.android.com/reference/android/util/JsonReader#setLenient(boolean)
+[cts-example-jsons]: https://cs.android.com/android/platform/superproject/main/+/main:cts/tests/tests/hardware/res/raw/
+
+## Command reference
+
+### `register`
+
 Register a new uinput device
 
+| Field            | Type           | Description                |
+|:----------------:|:--------------:|:-------------------------- |
+| `id`             | integer        | Device ID                  |
+| `command`        | string         | Must be set to "register"  |
+| `name`           | string         | Device name                |
+| `vid`            | 16-bit integer | Vendor ID                  |
+| `pid`            | 16-bit integer | Product ID                 |
+| `bus`            | string         | Bus that device should use |
+| `port`           | string         | `phys` value to report     |
+| `configuration`  | object array   | uinput device configuration|
+| `ff_effects_max` | integer        | `ff_effects_max` value     |
+| `abs_info`       | array          | Absolute axes information  |
+
+`id` is used for matching the subsequent commands to a specific device to avoid ambiguity when
+multiple devices are registered.
+
+`bus` is used to determine how the uinput device is connected to the host. The options are `"usb"`
+and `"bluetooth"`.
+
+Device configuration is used to configure the uinput device. The `type` field provides a `UI_SET_*`
+control code as an integer value or a string label (e.g. `"UI_SET_EVBIT"`), and data is a vector of
+control values to be sent to the uinput device, which depends on the control code.
+
+| Field         |         Type          | Description            |
+|:-------------:|:---------------------:|:-----------------------|
+| `type`        |    integer\|string    | `UI_SET_` control type |
+| `data`        | integer\|string array | control values         |
+
+Due to the sequential nature in which this is parsed, the `type` field must be specified before
+the `data` field in this JSON Object.
+
+`ff_effects_max` must be provided if `UI_SET_FFBIT` is used in `configuration`.
+
+`abs_info` fields are provided to set the device axes information. It is an array of below objects:
+
+| Field         |      Type       | Description             |
+|:-------------:|:---------------:|:------------------------|
+| `code`        | integer\|string | Axis code or label      |
+| `info`        |     object      | Axis information object |
+
+The axis information object is defined as below, with the fields having the same meaning as those
+Linux's [`struct input_absinfo`][struct input_absinfo]:
+
 | Field         | Type          | Description                |
 |:-------------:|:-------------:|:-------------------------- |
-| id            | integer       | Device id                  |
-| command       | string        | Must be set to "register"  |
-| name          | string        | Device name                |
-| vid           | 16-bit integer| Vendor id                  |
-| pid           | 16-bit integer| Product id                 |
-| bus           | string        | Bus that device should use |
-| configuration | int array     | uinput device configuration|
-| ff_effects_max| integer       | ff_effects_max value       |
-| abs_info      | array         | ABS axes information       |
-
-Device ID is used for matching the subsequent commands to a specific device
-to avoid ambiguity when multiple devices are registered.
-
-Device bus is used to determine how the uinput device is connected to the host.
-The options are "usb" and "bluetooth".
-
-Device configuration is used to configure uinput device.  "type" field provides the UI_SET_*
-control code, and data is a vector of control values to be sent to uinput device, depends on
-the control code.
-
-| Field         | Type          | Description                |
-|:-------------:|:-------------:|:-------------------------- |
-| type          | integer       | UI_SET_ control type       |
-| data          | int array     | control values             |
-
-Device ff_effects_max must be provided if FFBIT is set.
-
-Device abs_info fields are provided to set the device axes information. It is an array of below
-objects:
-| Field         | Type          | Description                |
-|:-------------:|:-------------:|:-------------------------- |
-| code          | integer       | Axis code                  |
-| info          | object        | ABS information object     |
-
-ABS information object is defined as below:
-| Field         | Type          | Description                |
-|:-------------:|:-------------:|:-------------------------- |
-| value         | integer       | Latest reported value      |
-| minimum       | integer       | Minimum value for the axis |
-| maximum       | integer       | Maximum value for the axis |
-| fuzz          | integer       | fuzz value for noise filter|
-| flat          | integer       | values to be discarded     |
-| resolution    | integer       | resolution of axis         |
-
-See [struct input_absinfo][4]) definitions.
+| `value`       | integer       | Latest reported value      |
+| `minimum`     | integer       | Minimum value for the axis |
+| `maximum`     | integer       | Maximum value for the axis |
+| `fuzz`        | integer       | fuzz value for noise filter|
+| `flat`        | integer       | values to be discarded     |
+| `resolution`  | integer       | resolution of axis         |
 
 Example:
-```json
 
+```json5
 {
   "id": 1,
   "command": "register",
@@ -90,33 +103,56 @@ Example:
   "pid": 0x2c42,
   "bus": "usb",
   "configuration":[
-        {"type":100, "data":[1, 21]},  // UI_SET_EVBIT : EV_KEY and EV_FF
-        {"type":101, "data":[11, 2, 3, 4]},   // UI_SET_KEYBIT : KEY_0 KEY_1 KEY_2 KEY_3
-        {"type":107, "data":[80]}    //  UI_SET_FFBIT : FF_RUMBLE
+        {"type":"UI_SET_EVBIT", "data":["EV_KEY", "EV_FF"]},
+        {"type":"UI_SET_KEYBIT", "data":["KEY_0", "KEY_1", "KEY_2", "KEY_3"]},
+        {"type":"UI_SET_ABSBIT", "data":["ABS_Y", "ABS_WHEEL"]},
+        {"type":"UI_SET_FFBIT", "data":["FF_RUMBLE"]}
   ],
   "ff_effects_max" : 1,
   "abs_info": [
-        {"code":1, "info": {"value":20, "minimum":-255,
+        {"code":"ABS_Y", "info": {"value":20, "minimum":-255,
                             "maximum":255, "fuzz":0, "flat":0, "resolution":1}
         },
-        {"code":8, "info": {"value":-50, "minimum":-255,
+        {"code":"ABS_WHEEL", "info": {"value":-50, "minimum":-255,
                             "maximum":255, "fuzz":0, "flat":0, "resolution":1}
         }
   ]
 }
-
 ```
-2. `delay`
+
+[struct input_absinfo]: https://cs.android.com/android/platform/superproject/main/+/main:bionic/libc/kernel/uapi/linux/input.h?q=%22struct%20input_absinfo%22
+
+#### Waiting for registration
+
+After the command is sent, there will be a delay before the device is set up by the Android input
+stack, and `uinput` does not wait for that process to finish. Any commands sent to the device during
+that time will be dropped. If you are controlling `uinput` by sending commands through standard
+input from an app, you need to wait for [`onInputDeviceAdded`][onInputDeviceAdded] to be called on
+an `InputDeviceListener` before issuing commands to the device. If you are passing a file to
+`uinput`, add a `delay` after the `register` command to let registration complete. You can add a
+`sync` in certain positions, like at the end of the file to get a response when all commands have
+finished processing.
+
+[onInputDeviceAdded]: https://developer.android.com/reference/android/hardware/input/InputManager.InputDeviceListener.html
+
+#### Unregistering the device
+
+As soon as EOF is reached (either in interactive mode, or in file mode), the device that was created
+will be unregistered. There is no explicit command for unregistering a device.
+
+### `delay`
+
 Add a delay to command processing
 
 | Field         | Type          | Description                |
 |:-------------:|:-------------:|:-------------------------- |
-| id            | integer       | Device id                  |
-| command       | string        | Must be set to "delay"     |
-| duration      | integer       | Delay in milliseconds      |
+| `id`          | integer       | Device ID                  |
+| `command`     | string        | Must be set to "delay"     |
+| `duration`    | integer       | Delay in milliseconds      |
 
 Example:
-```json
+
+```json5
 {
   "id": 1,
   "command": "delay",
@@ -124,36 +160,37 @@ Example:
 }
 ```
 
-3. `inject`
-Send an array of uinput event packets [type, code, value] to the uinput device
+### `inject`
 
-| Field         | Type          | Description                |
-|:-------------:|:-------------:|:-------------------------- |
-| id            | integer       | Device id                  |
-| command       | string        | Must be set to "inject"    |
-| events        | integer array | events to inject           |
+Send an array of uinput event packets to the uinput device
 
-The "events" parameter is an array of integers, encapsulates evdev input_event type, code and value,
-see the example below.
+| Field         |         Type          | Description                |
+|:-------------:|:---------------------:|:-------------------------- |
+| `id`          |        integer        | Device ID                  |
+| `command`     |        string         | Must be set to "inject"    |
+| `events`      | integer\|string array | events to inject           |
 
-Example:
-```json
+The `events` parameter is an array of integers in sets of three: a type, an axis code, and an axis
+value, like you'd find in Linux's `struct input_event`. For example, sending presses of the 0 and 1
+keys would look like this:
+
+```json5
 {
   "id": 1,
   "command": "inject",
-  "events": [0x01, 0xb,  0x1,   // EV_KEY, KEY_0, DOWN
-             0x00, 0x00, 0x00,  // EV_SYN, SYN_REPORT, 0
-             0x01, 0x0b, 0x00,  // EV_KEY, KEY_0, UP
-             0x00, 0x00, 0x00,  // EV_SYN, SYN_REPORT, 0
-             0x01, 0x2,  0x1,   // EV_KEY, KEY_1, DOWN
-             0x00, 0x00, 0x01,  // EV_SYN, SYN_REPORT, 0
-             0x01, 0x02, 0x00,  // EV_KEY, KEY_1, UP
-             0x00, 0x00, 0x01   // EV_SYN, SYN_REPORT, 0
+  "events": ["EV_KEY", "KEY_0", 1,
+             "EV_SYN", "SYN_REPORT", 0,
+             "EV_KEY", "KEY_0", 0,
+             "EV_SYN", "SYN_REPORT", 0,
+             "EV_KEY", "KEY_1", 1,
+             "EV_SYN", "SYN_REPORT", 0,
+             "EV_KEY", "KEY_1", 0,
+             "EV_SYN", "SYN_REPORT", 0
             ]
 }
 ```
 
-4. `sync`
+### `sync`
 
 A command used to get a response once the command is processed. When several `inject` and `delay`
 commands are used in a row, the `sync` command can be used to track the progress of the command
@@ -185,14 +222,6 @@ This command will result in the following response when it is processed:
 }
 ```
 
-### Notes
-1. As soon as EOF is reached (either in interactive mode, or in file mode),
-the device that was created will be unregistered. There is no
-explicit command for unregistering a device.
-2. The `getevent` utility can used to print out the key events
-for debugging purposes.
+## Notes
 
-[1]: https://developer.android.com/reference/android/hardware/input/InputManager.InputDeviceListener.html
-[2]: ../../../../cts/tests/tests/hardware/src/android/hardware/input/cts/tests/InputTestCase.java
-[3]: ../../../../cts/tests/tests/hardware/res/raw/
-[4]: ../../../../bionic/libc/kernel/uapi/linux/input.h
+The `getevent` utility can used to print out the key events for debugging purposes.

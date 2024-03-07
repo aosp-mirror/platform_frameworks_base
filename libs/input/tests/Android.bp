@@ -26,14 +26,32 @@ cc_test {
     srcs: [
         "PointerController_test.cpp",
     ],
+    sanitize: {
+        hwaddress: true,
+        undefined: true,
+        all_undefined: true,
+        diag: {
+            undefined: true,
+        },
+    },
+    target: {
+        host: {
+            sanitize: {
+                address: true,
+            },
+        },
+    },
     shared_libs: [
         "libandroid_runtime",
+        "libbase",
+        "libinput",
         "libinputservice",
         "libhwui",
         "libgui",
         "libutils",
     ],
     static_libs: [
+        "libflagtest",
         "libgmock",
         "libgtest",
     ],

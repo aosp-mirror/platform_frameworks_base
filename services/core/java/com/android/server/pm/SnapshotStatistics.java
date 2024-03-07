@@ -157,12 +157,12 @@ public class SnapshotStatistics {
     private static class BinMap {
 
         // The number of bins
-        private int mCount;
+        private final int mCount;
         // The maximum mapped value.  Values at or above this are mapped to the
         // top bin.
-        private int mMaxBin;
+        private final int mMaxBin;
         // A copy of the original key
-        private int[] mUserKey;
+        private final int[] mUserKey;
 
         /**
          * Create a bin map.  The input is an array of integers, which must be
@@ -232,13 +232,13 @@ public class SnapshotStatistics {
          * The build-time histogram.  The total number of rebuilds is the sum over the
          * histogram entries.
          */
-        public int[] mTimes;
+        public final int[] mTimes;
 
         /**
          * The reuse histogram.  The total number of snapshot uses is the sum over the
          * histogram entries.
          */
-        public int[] mUsed;
+        public final int[] mUsed;
 
         /**
          * The total number of rebuilds.  This could be computed by summing over the use
@@ -477,12 +477,12 @@ public class SnapshotStatistics {
     /**
      * Long statistics.  These roll over approximately one day.
      */
-    private Stats[] mLong;
+    private final Stats[] mLong;
 
     /**
      * Short statistics.  These roll over approximately every minute;
      */
-    private Stats[] mShort;
+    private final Stats[] mShort;
 
     /**
      * The time of last logging to the FrameworkStatsLog.

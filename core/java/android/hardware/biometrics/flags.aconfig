@@ -13,3 +13,11 @@ flag {
   description: "Feature flag for adding KeyAgreement api to CryptoObject."
   bug: "282058146"
 }
+
+flag {
+  name: "get_op_id_crypto_object"
+  namespace: "biometrics_framework"
+  description: "Feature flag for adding a get operation id api to CryptoObject."
+  bug: "307601768"
+}
+

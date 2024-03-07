@@ -45,6 +45,7 @@ import android.content.Intent;
 import android.content.PermissionChecker;
 import android.content.ServiceConnection;
 import android.net.Network;
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -161,6 +162,7 @@ public final class JobServiceContext implements ServiceConnection {
     private final EconomyManagerInternal mEconomyManagerInternal;
     private final JobPackageTracker mJobPackageTracker;
     private final PowerManager mPowerManager;
+    private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private PowerManager.WakeLock mWakeLock;
 
     // Execution state.
@@ -239,6 +241,14 @@ public final class JobServiceContext implements ServiceConnection {
     private int mDeathMarkStopReason = JobParameters.STOP_REASON_UNDEFINED;
     private int mDeathMarkInternalStopReason;
     private String mDeathMarkDebugReason;
+
+    private long mInitialDownloadedBytesFromSource;
+
+    private long mInitialUploadedBytesFromSource;
+
+    private long mInitialDownloadedBytesFromCalling;
+
+    private long mInitialUploadedBytesFromCalling;
 
     // Debugging: reason this job was last stopped.
     public String mStoppedReason;
@@ -321,6 +331,7 @@ public final class JobServiceContext implements ServiceConnection {
         mNotificationCoordinator = notificationCoordinator;
         mCompletedListener = service;
         mPowerManager = mContext.getSystemService(PowerManager.class);
+        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
         mAvailable = true;
         mVerb = VERB_FINISHED;
         mPreferredUid = NO_PREFERRED_UID;
@@ -396,7 +407,8 @@ public final class JobServiceContext implements ServiceConnection {
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
             job.clearPersistedUtcTimes();
 
-            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, job.getTag());
+            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    job.getWakelockTag());
             mWakeLock.setWorkSource(
                     mService.deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
             mWakeLock.setReferenceCounted(false);
@@ -415,34 +427,30 @@ public final class JobServiceContext implements ServiceConnection {
             boolean binding = false;
             boolean startedWithForegroundFlag = false;
             try {
-                final Context.BindServiceFlags bindFlags;
+                long bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_APP_COMPONENT_USAGE;
                 if (job.shouldTreatAsUserInitiatedJob() && !job.isUserBgRestricted()) {
                     // If the user has bg restricted the app, don't give the job FG privileges
                     // such as bypassing data saver or getting the higher foreground proc state.
                     // If we've gotten to this point, the app is most likely in the foreground,
                     // so the job will run just fine while the user keeps the app in the foreground.
-                    bindFlags = Context.BindServiceFlags.of(
-                            Context.BIND_AUTO_CREATE
-                                    | Context.BIND_ALMOST_PERCEPTIBLE
-                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                                    | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS
-                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
+                    bindFlags |= Context.BIND_ALMOST_PERCEPTIBLE;
+                    if (job.hasConnectivityConstraint()) {
+                        // Only add network restriction bypass flags if the job requires network.
+                        bindFlags |= Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                                | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS;
+                    }
                     startedWithForegroundFlag = true;
                 } else if (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob()) {
-                    bindFlags = Context.BindServiceFlags.of(
-                            Context.BIND_AUTO_CREATE
-                                    | Context.BIND_NOT_FOREGROUND
-                                    | Context.BIND_ALMOST_PERCEPTIBLE
-                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
+                    bindFlags |= Context.BIND_NOT_FOREGROUND | Context.BIND_ALMOST_PERCEPTIBLE;
+                    if (job.hasConnectivityConstraint()) {
+                        // Only add network restriction bypass flags if the job requires network.
+                        bindFlags |= Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS;
+                    }
                 } else {
-                    bindFlags = Context.BindServiceFlags.of(
-                            Context.BIND_AUTO_CREATE
-                                    | Context.BIND_NOT_FOREGROUND
-                                    | Context.BIND_NOT_PERCEPTIBLE
-                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
+                    bindFlags |= Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_PERCEPTIBLE;
                 }
-                binding = mContext.bindServiceAsUser(intent, this, bindFlags,
+                binding = mContext.bindServiceAsUser(intent, this,
+                        Context.BindServiceFlags.of(bindFlags),
                         UserHandle.of(job.getUserId()));
             } catch (SecurityException e) {
                 // Some permission policy, for example INTERACT_ACROSS_USERS and
@@ -468,8 +476,23 @@ public final class JobServiceContext implements ServiceConnection {
                 return false;
             }
             mJobPackageTracker.noteActive(job);
-            FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                    job.getSourceUid(), null, job.getBatteryName(),
+            final int sourceUid = job.getSourceUid();
+
+            // Measure UID baseline traffic for deltas
+            mInitialDownloadedBytesFromSource = TrafficStats.getUidRxBytes(sourceUid);
+            mInitialUploadedBytesFromSource = TrafficStats.getUidTxBytes(sourceUid);
+
+            mInitialDownloadedBytesFromCalling = TrafficStats.getUidRxBytes(job.getUid());
+            mInitialUploadedBytesFromCalling = TrafficStats.getUidTxBytes(job.getUid());
+
+            FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                    job.isProxyJob() ? new int[]{sourceUid, job.getUid()} : new int[]{sourceUid},
+                    // Given that the source tag is set by the calling app, it should be connected
+                    // to the calling app in the attribution for a proxied job.
+                    job.isProxyJob()
+                            ? new String[]{null, job.getSourceTag()}
+                            : new String[]{job.getSourceTag()},
+                    job.getBatteryName(),
                     FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
                     JobProtoEnums.INTERNAL_STOP_REASON_UNKNOWN,
                     job.getStandbyBucket(),
@@ -507,7 +530,11 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getEstimatedNetworkUploadBytes(),
                     job.getWorkCount(),
                     ActivityManager.processStateAmToProto(mService.getUidProcState(job.getUid())),
-                    job.getNamespaceHash());
+                    job.getNamespaceHash(),
+                    /* system_measured_source_download_bytes */ 0,
+                    /* system_measured_source_upload_bytes */ 0,
+                    /* system_measured_calling_download_bytes */ 0,
+                    /* system_measured_calling_upload_bytes */ 0);
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
@@ -530,15 +557,19 @@ public final class JobServiceContext implements ServiceConnection {
                 Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                         traceTag, getId());
             }
+            if (job.getAppTraceTag() != null) {
+                // Use the job's ID to distinguish traces since the ID will be unique per app.
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "JobScheduler",
+                        job.getAppTraceTag(), job.getJobId());
+            }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
                 // Whatever.
             }
             final int jobUserId = job.getSourceUserId();
-            UsageStatsManagerInternal usageStats =
-                    LocalServices.getService(UsageStatsManagerInternal.class);
-            usageStats.setLastJobRunTime(sourcePackage, jobUserId, mExecutionStartTimeElapsed);
+            mUsageStatsManagerInternal
+                    .setLastJobRunTime(sourcePackage, jobUserId, mExecutionStartTimeElapsed);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
@@ -1530,8 +1561,16 @@ public final class JobServiceContext implements ServiceConnection {
         }
         mJobPackageTracker.noteInactive(completedJob,
                 loggingInternalStopReason, loggingDebugReason);
-        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
-                completedJob.getSourceUid(), null, completedJob.getBatteryName(),
+        final int sourceUid = completedJob.getSourceUid();
+        FrameworkStatsLog.write(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                completedJob.isProxyJob()
+                        ? new int[]{sourceUid, completedJob.getUid()} : new int[]{sourceUid},
+                // Given that the source tag is set by the calling app, it should be connected
+                // to the calling app in the attribution for a proxied job.
+                completedJob.isProxyJob()
+                        ? new String[]{null, completedJob.getSourceTag()}
+                        : new String[]{completedJob.getSourceTag()},
+                completedJob.getBatteryName(),
                 FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
                 loggingInternalStopReason, completedJob.getStandbyBucket(),
                 completedJob.getLoggingJobId(),
@@ -1569,10 +1608,22 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getWorkCount(),
                 ActivityManager
                         .processStateAmToProto(mService.getUidProcState(completedJob.getUid())),
-                completedJob.getNamespaceHash());
+                completedJob.getNamespaceHash(),
+                TrafficStats.getUidRxBytes(completedJob.getSourceUid())
+                        - mInitialDownloadedBytesFromSource,
+                TrafficStats.getUidTxBytes(completedJob.getSourceUid())
+                        - mInitialUploadedBytesFromSource,
+                TrafficStats.getUidRxBytes(completedJob.getUid())
+                        - mInitialDownloadedBytesFromCalling,
+                TrafficStats.getUidTxBytes(completedJob.getUid())
+                        - mInitialUploadedBytesFromCalling);
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
+        }
+        if (completedJob.getAppTraceTag() != null) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "JobScheduler",
+                    completedJob.getJobId());
         }
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),

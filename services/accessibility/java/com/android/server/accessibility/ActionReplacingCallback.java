@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -33,6 +34,7 @@ import java.util.List;
  * If we are stripping and/or replacing the actions from a window, we need to intercept the
  * nodes heading back to the service and swap out the actions.
  */
+@SuppressWarnings("MissingPermissionAnnotation")
 public class ActionReplacingCallback extends IAccessibilityInteractionConnectionCallback.Stub {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "ActionReplacingCallback";
@@ -280,5 +282,12 @@ public class ActionReplacingCallback extends IAccessibilityInteractionConnection
             info.setLongClickable(mNodeWithReplacementActions.isLongClickable());
             info.setDismissable(mNodeWithReplacementActions.isDismissable());
         }
+    }
+
+    @Override
+    public void sendAttachOverlayResult(
+            @AccessibilityService.AttachOverlayResult int result, int interactionId)
+            throws RemoteException {
+        mServiceCallback.sendAttachOverlayResult(result, interactionId);
     }
 }

@@ -16,22 +16,29 @@
 
 package com.android.internal.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 
-import junit.framework.TestCase;
+import androidx.test.runner.AndroidJUnit4;
 
-public class TokenBucketTest extends TestCase {
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+public class TokenBucketTest {
 
     static final int FILL_DELTA_VERY_SHORT  = 1;
     static final int FILL_DELTA_VERY_LONG   = Integer.MAX_VALUE;
 
+    @Test
     public void testArgumentValidation() {
         assertThrow(() -> new TokenBucket(0, 1, 1));
         assertThrow(() -> new TokenBucket(1, 0, 1));
-        assertThrow(() -> new TokenBucket(1, 1, 0));
         assertThrow(() -> new TokenBucket(0, 1));
         assertThrow(() -> new TokenBucket(1, 0));
         assertThrow(() -> new TokenBucket(-1, 1, 1));
@@ -46,6 +53,7 @@ public class TokenBucketTest extends TestCase {
         new TokenBucket(5000, 1);
     }
 
+    @Test
     public void testInitialCapacity() {
         drain(new TokenBucket(FILL_DELTA_VERY_LONG, 1), 1);
         drain(new TokenBucket(FILL_DELTA_VERY_LONG, 10), 10);
@@ -62,6 +70,7 @@ public class TokenBucketTest extends TestCase {
         drain(new TokenBucket((int) DateUtils.DAY_IN_MILLIS, 200), 200);
     }
 
+    @Test
     public void testReset() {
         TokenBucket tb = new TokenBucket(FILL_DELTA_VERY_LONG, 100, 10);
         drain(tb, 10);
@@ -77,6 +86,7 @@ public class TokenBucketTest extends TestCase {
         drain(tb, 30);
     }
 
+    @Test
     public void testFill() throws Exception {
         int delta = 50;
         TokenBucket tb = new TokenBucket(delta, 10, 0);
@@ -88,6 +98,7 @@ public class TokenBucketTest extends TestCase {
         assertTrue(tb.has());
     }
 
+    @Test
     public void testRefill() throws Exception {
         TokenBucket tb = new TokenBucket(FILL_DELTA_VERY_SHORT, 10, 10);
 
@@ -107,6 +118,7 @@ public class TokenBucketTest extends TestCase {
         assertEquals(10, tb.get(100));
     }
 
+    @Test
     public void testAverage() throws Exception {
         final int delta = 3;
         final int want = 60;
@@ -124,6 +136,7 @@ public class TokenBucketTest extends TestCase {
         assertDuration(want * delta, SystemClock.elapsedRealtime() - start);
     }
 
+    @Test
     public void testBurst() throws Exception {
         final int delta = 2;
         final int capacity = 20;

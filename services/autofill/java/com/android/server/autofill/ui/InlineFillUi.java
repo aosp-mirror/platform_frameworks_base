@@ -98,6 +98,11 @@ public final class InlineFillUi {
     }
 
     /**
+     * If user enters more characters than this length, the autofill suggestion won't be shown.
+     */
+    private int mMaxInputLengthForAutofill = Integer.MAX_VALUE;
+
+    /**
      * Encapsulates various arguments used by {@link #forAutofill} and {@link #forAugmentedAutofill}
      */
     public static class InlineFillUiInfo {
@@ -128,20 +133,22 @@ public final class InlineFillUi {
     @NonNull
     public static InlineFillUi forAutofill(@NonNull InlineFillUiInfo inlineFillUiInfo,
             @NonNull FillResponse response,
-            @NonNull InlineSuggestionUiCallback uiCallback) {
+            @NonNull InlineSuggestionUiCallback uiCallback, int maxInputLengthForAutofill) {
         if (response.getAuthentication() != null && response.getInlinePresentation() != null) {
             InlineSuggestion inlineAuthentication =
                     InlineSuggestionFactory.createInlineAuthentication(inlineFillUiInfo, response,
                             uiCallback);
-            return new InlineFillUi(inlineFillUiInfo, inlineAuthentication);
+            return new InlineFillUi(inlineFillUiInfo, inlineAuthentication,
+                    maxInputLengthForAutofill);
         } else if (response.getDatasets() != null) {
             SparseArray<Pair<Dataset, InlineSuggestion>> inlineSuggestions =
                     InlineSuggestionFactory.createInlineSuggestions(inlineFillUiInfo,
                             InlineSuggestionInfo.SOURCE_AUTOFILL, response.getDatasets(),
                             uiCallback);
-            return new InlineFillUi(inlineFillUiInfo, inlineSuggestions);
+            return new InlineFillUi(inlineFillUiInfo, inlineSuggestions,
+                    maxInputLengthForAutofill);
         }
-        return new InlineFillUi(inlineFillUiInfo, new SparseArray<>());
+        return new InlineFillUi(inlineFillUiInfo, new SparseArray<>(), maxInputLengthForAutofill);
     }
 
     /**
@@ -157,6 +164,9 @@ public final class InlineFillUi {
         return new InlineFillUi(inlineFillUiInfo, inlineSuggestions);
     }
 
+    /**
+     * Used by augmented autofill
+     */
     private InlineFillUi(@Nullable InlineFillUiInfo inlineFillUiInfo,
             @NonNull SparseArray<Pair<Dataset, InlineSuggestion>> inlineSuggestions) {
         mAutofillId = inlineFillUiInfo.mFocusedId;
@@ -171,13 +181,36 @@ public final class InlineFillUi {
         mFilterText = inlineFillUiInfo.mFilterText;
     }
 
+    /**
+     * Used by normal autofill
+     */
+    private InlineFillUi(@Nullable InlineFillUiInfo inlineFillUiInfo,
+            @NonNull SparseArray<Pair<Dataset, InlineSuggestion>> inlineSuggestions,
+            int maxInputLengthForAutofill) {
+        mAutofillId = inlineFillUiInfo.mFocusedId;
+        int size = inlineSuggestions.size();
+        mDatasets = new ArrayList<>(size);
+        mInlineSuggestions = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            Pair<Dataset, InlineSuggestion> value = inlineSuggestions.valueAt(i);
+            mDatasets.add(value.first);
+            mInlineSuggestions.add(value.second);
+        }
+        mFilterText = inlineFillUiInfo.mFilterText;
+        mMaxInputLengthForAutofill = maxInputLengthForAutofill;
+    }
+
+    /**
+     * Used by normal autofill
+     */
     private InlineFillUi(@NonNull InlineFillUiInfo inlineFillUiInfo,
-            @NonNull InlineSuggestion inlineSuggestion) {
+            @NonNull InlineSuggestion inlineSuggestion, int maxInputLengthForAutofill) {
         mAutofillId = inlineFillUiInfo.mFocusedId;
         mDatasets = null;
         mInlineSuggestions = new ArrayList<>();
         mInlineSuggestions.add(inlineSuggestion);
         mFilterText = inlineFillUiInfo.mFilterText;
+        mMaxInputLengthForAutofill = maxInputLengthForAutofill;
     }
 
     /**
@@ -216,6 +249,16 @@ public final class InlineFillUi {
             }
             return new InlineSuggestionsResponse(inlineSuggestions);
         }
+
+        // Do not show inline suggestion if user entered more than a certain number of characters.
+        if (!TextUtils.isEmpty(mFilterText) && mFilterText.length() > mMaxInputLengthForAutofill) {
+            if (sVerbose) {
+                Slog.v(TAG, "Not showing inline suggestion when user entered more than "
+                         + mMaxInputLengthForAutofill + " characters");
+            }
+            return new InlineSuggestionsResponse(inlineSuggestions);
+        }
+
         for (int i = 0; i < size; i++) {
             final Dataset dataset = mDatasets.get(i);
             final int fieldIndex = dataset.getFieldIds().indexOf(mAutofillId);

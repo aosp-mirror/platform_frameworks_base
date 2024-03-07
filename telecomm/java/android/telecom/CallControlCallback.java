@@ -69,7 +69,7 @@ public interface CallControlCallback {
     /**
      * Telecom is informing the client to answer an incoming call and set it to active.
      *
-     * @param videoState   see {@link android.telecom.CallAttributes.CallType} for valid states
+     * @param videoState   the video state
      * @param wasCompleted The {@link Consumer} to be completed. If the client can answer the call
      *                     on their end, {@link Consumer#accept(Object)} should be called with
      *                     {@link Boolean#TRUE}.

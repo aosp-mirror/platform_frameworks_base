@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -40,46 +41,51 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     private Configuration mConfiguration;
 
     @Override
-    public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
-        client.updatePendingActivityConfiguration(token, mConfiguration);
+        client.updatePendingActivityConfiguration(getActivityToken(), mConfiguration);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client, @Nullable ActivityClientRecord r,
+            @NonNull PendingTransactionActions pendingActions) {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
         client.handleActivityConfigurationChanged(r, mConfiguration, INVALID_DISPLAY);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
+        return client.getActivity(getActivityToken());
+    }
 
     // ObjectPoolItem implementation
 
     private ActivityConfigurationChangeItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static ActivityConfigurationChangeItem obtain(@NonNull Configuration config) {
-        if (config == null) {
-            throw new IllegalArgumentException("Config must not be null.");
-        }
-
+    @NonNull
+    public static ActivityConfigurationChangeItem obtain(@NonNull IBinder activityToken,
+            @NonNull Configuration config) {
         ActivityConfigurationChangeItem instance =
                 ObjectPool.obtain(ActivityConfigurationChangeItem.class);
         if (instance == null) {
             instance = new ActivityConfigurationChangeItem();
         }
-        instance.mConfiguration = config;
+        instance.setActivityToken(activityToken);
+        instance.mConfiguration = new Configuration(config);
 
         return instance;
     }
 
     @Override
     public void recycle() {
-        mConfiguration = Configuration.EMPTY;
+        super.recycle();
+        mConfiguration = null;
         ObjectPool.recycle(this);
     }
 
@@ -88,32 +94,34 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
 
     /** Write to Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeTypedObject(mConfiguration, flags);
     }
 
     /** Read from Parcel. */
-    private ActivityConfigurationChangeItem(Parcel in) {
+    private ActivityConfigurationChangeItem(@NonNull Parcel in) {
+        super(in);
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
     public static final @NonNull Creator<ActivityConfigurationChangeItem> CREATOR =
-            new Creator<ActivityConfigurationChangeItem>() {
-        public ActivityConfigurationChangeItem createFromParcel(Parcel in) {
-            return new ActivityConfigurationChangeItem(in);
-        }
+            new Creator<>() {
+                public ActivityConfigurationChangeItem createFromParcel(@NonNull Parcel in) {
+                    return new ActivityConfigurationChangeItem(in);
+                }
 
-        public ActivityConfigurationChangeItem[] newArray(int size) {
-            return new ActivityConfigurationChangeItem[size];
-        }
-    };
+                public ActivityConfigurationChangeItem[] newArray(int size) {
+                    return new ActivityConfigurationChangeItem[size];
+                }
+            };
 
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final ActivityConfigurationChangeItem other = (ActivityConfigurationChangeItem) o;
@@ -122,11 +130,15 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
 
     @Override
     public int hashCode() {
-        return mConfiguration.hashCode();
+        int result = 17;
+        result = 31 * result + super.hashCode();
+        result = 31 * result + Objects.hashCode(mConfiguration);
+        return result;
     }
 
     @Override
     public String toString() {
-        return "ActivityConfigurationChange{config=" + mConfiguration + "}";
+        return "ActivityConfigurationChange{" + super.toString()
+                + ",config=" + mConfiguration + "}";
     }
 }

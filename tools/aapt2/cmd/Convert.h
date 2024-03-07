@@ -46,6 +46,10 @@ class ConvertCommand : public Command {
                       "This decreases APK size at the cost of resource retrieval performance.\n"
                       "Applies sparse encoding to all resources regardless of minSdk.",
                       &force_sparse_encoding_);
+    AddOptionalSwitch(
+        "--enable-compact-entries",
+        "This decreases APK size by using compact resource entries for simple data types.",
+        &enable_compact_entries_);
     AddOptionalSwitch("--keep-raw-values",
         android::base::StringPrintf("Preserve raw attribute values in xml files when using the"
             " '%s' output format", kOutputFormatBinary),
@@ -85,6 +89,7 @@ class ConvertCommand : public Command {
   bool verbose_ = false;
   bool enable_sparse_encoding_ = false;
   bool force_sparse_encoding_ = false;
+  bool enable_compact_entries_ = false;
   std::optional<std::string> resources_config_path_;
 };
 

@@ -32,12 +32,12 @@ namespace android {
 
 PointerControllerContext::PointerControllerContext(
         const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-        const sp<SpriteController>& spriteController, PointerController& controller)
+        SpriteController& spriteController, PointerController& controller)
       : mPolicy(policy),
         mLooper(looper),
         mSpriteController(spriteController),
-        mHandler(new MessageHandler()),
-        mCallback(new LooperCallback()),
+        mHandler(sp<MessageHandler>::make()),
+        mCallback(sp<LooperCallback>::make()),
         mController(controller),
         mAnimator(*this) {
     std::scoped_lock lock(mLock);
@@ -93,7 +93,7 @@ sp<PointerControllerPolicyInterface> PointerControllerContext::getPolicy() {
     return mPolicy;
 }
 
-sp<SpriteController> PointerControllerContext::getSpriteController() {
+SpriteController& PointerControllerContext::getSpriteController() {
     return mSpriteController;
 }
 

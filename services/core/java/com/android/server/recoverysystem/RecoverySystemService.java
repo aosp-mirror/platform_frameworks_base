@@ -52,7 +52,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
-import android.sysprop.ApexProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FastImmutableArraySet;
@@ -907,10 +906,11 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return RESUME_ON_REBOOT_REBOOT_ERROR_UNSPECIFIED;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.RECOVERY)
     @Override // Binder call for the legacy rebootWithLskf
     public @ResumeOnRebootRebootErrorCode int rebootWithLskfAssumeSlotSwitch(String packageName,
             String reason) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+        rebootWithLskfAssumeSlotSwitch_enforcePermission();
         return rebootWithLskfImpl(packageName, reason, true);
     }
 
@@ -919,10 +919,6 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
             boolean slotSwitch) {
         enforcePermissionForResumeOnReboot();
         return rebootWithLskfImpl(packageName, reason, slotSwitch);
-    }
-
-    public static boolean isUpdatableApexSupported() {
-        return ApexProperties.updatable().orElse(false);
     }
 
     // Metadata should be no more than few MB, if it's larger than 100MB something is wrong.
@@ -971,14 +967,10 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.RECOVERY)
     @Override
     public boolean allocateSpaceForUpdate(String packageFile) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
-        if (!isUpdatableApexSupported()) {
-            Log.i(TAG, "Updatable Apex not supported, "
-                    + "allocateSpaceForUpdate does nothing.");
-            return true;
-        }
+        allocateSpaceForUpdate_enforcePermission();
         final long token = Binder.clearCallingIdentity();
         try {
             CompressedApexInfoList apexInfoList = getCompressedApexInfoList(packageFile);

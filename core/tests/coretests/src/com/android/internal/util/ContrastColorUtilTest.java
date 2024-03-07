@@ -23,6 +23,8 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -32,23 +34,21 @@ import android.text.style.TextAppearanceSpan;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 
-import junit.framework.TestCase;
-
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class ContrastColorUtilTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = Color.class)
+public class ContrastColorUtilTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
-    private Context mContext;
-
-    @Before
-    public void setUp() {
-        mContext = InstrumentationRegistry.getContext();
-    }
-
+    @Test
     @SmallTest
     public void testEnsureTextContrastAgainstDark() {
         int darkBg = 0xFF35302A;
@@ -70,6 +70,7 @@ public class ContrastColorUtilTest extends TestCase {
         assertContrastIsWithinRange(selfContrastColor, darkBg, 4.5, 4.75);
     }
 
+    @Test
     @SmallTest
     public void testEnsureTextContrastAgainstLight() {
         int lightBg = 0xFFFFF8F2;
@@ -91,13 +92,16 @@ public class ContrastColorUtilTest extends TestCase {
         assertContrastIsWithinRange(selfContrastColor, lightBg, 4.5, 4.75);
     }
 
+    @Test
     public void testBuilder_ensureColorSpanContrast_removesAllFullLengthColorSpans() {
+        Context context = InstrumentationRegistry.getContext();
+
         Spannable text = new SpannableString("blue text with yellow and green");
         text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
                 Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
+        TextAppearanceSpan taSpan = new TextAppearanceSpan(context,
                 R.style.TextAppearance_DeviceDefault_Notification_Title);
         assertThat(taSpan.getTextColor()).isNotNull();  // it must be set to prove it is cleared.
         text.setSpan(taSpan, 0, text.length(),
@@ -123,6 +127,7 @@ public class ContrastColorUtilTest extends TestCase {
         assertThat(((ForegroundColorSpan) spans[2]).getForegroundColor()).isEqualTo(Color.GREEN);
     }
 
+    @Test
     public void testBuilder_ensureColorSpanContrast_partialLength_adjusted() {
         int background = 0xFFFF0101;  // Slightly lighter red
         CharSequence text = new SpannableStringBuilder()
@@ -138,14 +143,17 @@ public class ContrastColorUtilTest extends TestCase {
         assertContrastIsWithinRange(foregroundColor, background, 3, 3.2);
     }
 
+    @Test
     public void testBuilder_ensureColorSpanContrast_worksWithComplexInput() {
+        Context context = InstrumentationRegistry.getContext();
+
         Spannable text = new SpannableString("blue text with yellow and green and cyan");
         text.setSpan(new ForegroundColorSpan(Color.YELLOW), 15, 21,
                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setSpan(new ForegroundColorSpan(Color.BLUE), 0, text.length(),
                 Spanned.SPAN_INCLUSIVE_INCLUSIVE);
         // cyan TextAppearanceSpan
-        TextAppearanceSpan taSpan = new TextAppearanceSpan(mContext,
+        TextAppearanceSpan taSpan = new TextAppearanceSpan(context,
                 R.style.TextAppearance_DeviceDefault_Notification_Title);
         taSpan = new TextAppearanceSpan(taSpan.getFamily(), taSpan.getTextStyle(),
                 taSpan.getTextSize(), ColorStateList.valueOf(Color.CYAN), null);

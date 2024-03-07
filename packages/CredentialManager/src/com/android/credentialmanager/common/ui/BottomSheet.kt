@@ -60,12 +60,13 @@ fun ModalBottomSheet(
         sheetContent = sheetContent,
         sheetShape = EntryShape.TopRoundedCorner,
     ) {}
-    LaunchedEffect(state.currentValue) {
+    LaunchedEffect(state.currentValue, state.targetValue) {
         if (state.currentValue == ModalBottomSheetValue.Hidden) {
             if (isInitialRender) {
                 onInitialRenderComplete()
                 scope.launch { state.show() }
-            } else {
+            } else if (state.targetValue == ModalBottomSheetValue.Hidden) {
+                // Only dismiss ui when the motion is downwards
                 onDismiss()
             }
         }

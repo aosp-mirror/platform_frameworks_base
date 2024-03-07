@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -48,13 +49,15 @@ import androidx.annotation.StringRes;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * This is a utility class for defining some utility methods and constants
  * used in the package installer application.
  */
 public class PackageUtil {
-    private static final String LOG_TAG = PackageUtil.class.getSimpleName();
+    private static final String LOG_TAG = "PackageInstaller";
 
     public static final String PREFIX="com.android.packageinstaller.";
     public static final String INTENT_ATTR_INSTALL_STATUS = PREFIX+"installStatus";
@@ -62,15 +65,24 @@ public class PackageUtil {
     public static final String INTENT_ATTR_PERMISSIONS_LIST=PREFIX+"PermissionsList";
     //intent attribute strings related to uninstall
     public static final String INTENT_ATTR_PACKAGE_NAME=PREFIX+"PackageName";
+    private static final String DOWNLOADS_AUTHORITY = "downloads";
+    private static final String SPLIT_BASE_APK_END_WITH = "base.apk";
 
     /**
      * Utility method to get package information for a given {@link File}
      */
     @Nullable
     public static PackageInfo getPackageInfo(Context context, File sourceFile, int flags) {
+        String filePath = sourceFile.getAbsolutePath();
+        if (filePath.endsWith(SPLIT_BASE_APK_END_WITH)) {
+            File dir = sourceFile.getParentFile();
+            if (dir.listFiles().length > 1) {
+                // split apks, use file directory to get archive info
+                filePath = dir.getPath();
+            }
+        }
         try {
-            return context.getPackageManager().getPackageArchiveInfo(sourceFile.getAbsolutePath(),
-                    flags);
+            return context.getPackageManager().getPackageArchiveInfo(filePath, flags);
         } catch (Exception ignored) {
             return null;
         }
@@ -126,7 +138,7 @@ public class PackageUtil {
         @Nullable public Drawable icon;
         public int iconSize;
 
-        public AppSnippet(@NonNull CharSequence label, @Nullable Drawable icon, Context context) {
+        AppSnippet(@NonNull CharSequence label, @Nullable Drawable icon, Context context) {
             this.label = label;
             this.icon = icon;
             final ActivityManager am = context.getSystemService(ActivityManager.class);
@@ -177,7 +189,6 @@ public class PackageUtil {
                 }
                 return scaledBitmap;
             }
-
             return bmp;
         }
 
@@ -204,6 +215,17 @@ public class PackageUtil {
         final String archiveFilePath = sourceFile.getAbsolutePath();
         PackageManager pm = pContext.getPackageManager();
         appInfo.publicSourceDir = archiveFilePath;
+
+        if (appInfo.splitNames != null && appInfo.splitSourceDirs == null) {
+            final File[] files = sourceFile.getParentFile().listFiles();
+            final String[] splits = Arrays.stream(appInfo.splitNames)
+                    .map(i -> findFilePath(files, i + ".apk"))
+                    .filter(Objects::nonNull)
+                    .toArray(String[]::new);
+
+            appInfo.splitSourceDirs = splits;
+            appInfo.splitPublicSourceDirs = splits;
+        }
 
         CharSequence label = null;
         // Try to load the label from the package's resources. If an app has not explicitly
@@ -235,6 +257,16 @@ public class PackageUtil {
             Log.i(LOG_TAG, "Could not load app icon", e);
         }
         return new PackageUtil.AppSnippet(label, icon, pContext);
+    }
+
+    private static String findFilePath(File[] files, String postfix) {
+        for (File file : files) {
+            final String path = file.getAbsolutePath();
+            if (path.endsWith(postfix)) {
+                return path;
+            }
+        }
+        return null;
     }
 
     /**
@@ -307,5 +339,27 @@ public class PackageUtil {
             getActivity().setResult(Activity.RESULT_CANCELED);
             getActivity().finish();
         }
+    }
+
+    /**
+     * Determines if the UID belongs to the system downloads provider and returns the
+     * {@link ApplicationInfo} of the provider
+     *
+     * @param uid UID of the caller
+     * @return {@link ApplicationInfo} of the provider if a downloads provider exists,
+     *          it is a system app, and its UID matches with the passed UID, null otherwise.
+     */
+    public static ApplicationInfo getSystemDownloadsProviderInfo(PackageManager pm, int uid) {
+        final ProviderInfo providerInfo = pm.resolveContentProvider(
+                DOWNLOADS_AUTHORITY, 0);
+        if (providerInfo == null) {
+            // There seems to be no currently enabled downloads provider on the system.
+            return null;
+        }
+        ApplicationInfo appInfo = providerInfo.applicationInfo;
+        if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 && uid == appInfo.uid) {
+            return appInfo;
+        }
+        return null;
     }
 }

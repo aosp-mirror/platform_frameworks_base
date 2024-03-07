@@ -17,6 +17,7 @@
 package android.window.flags;
 
 import static com.android.window.flags.Flags.syncWindowConfigUpdateFlag;
+import static com.android.window.flags.Flags.taskFragmentSystemOrganizerFlag;
 
 import android.platform.test.annotations.Presubmit;
 
@@ -41,5 +42,11 @@ public class WindowFlagsTest {
     public void testSyncWindowConfigUpdateFlag() {
         // No crash when accessing the flag.
         syncWindowConfigUpdateFlag();
+    }
+
+    @Test
+    public void testTaskFragmentSystemOrganizerFlag() {
+        // No crash when accessing the flag.
+        taskFragmentSystemOrganizerFlag();
     }
 }

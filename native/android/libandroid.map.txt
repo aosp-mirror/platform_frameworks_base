@@ -327,6 +327,7 @@ LIBANDROID {
     AThermal_registerThermalStatusListener; # introduced=30
     AThermal_unregisterThermalStatusListener; # introduced=30
     AThermal_getThermalHeadroom; # introduced=31
+    AThermal_getThermalHeadroomThresholds; # introduced=VanillaIceCream
     APerformanceHint_getManager; # introduced=Tiramisu
     APerformanceHint_createSession; # introduced=Tiramisu
     APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
@@ -334,12 +335,21 @@ LIBANDROID {
     APerformanceHint_reportActualWorkDuration; # introduced=Tiramisu
     APerformanceHint_closeSession; # introduced=Tiramisu
     APerformanceHint_setThreads; # introduced=UpsideDownCake
+    APerformanceHint_setPreferPowerEfficiency; # introduced=VanillaIceCream
+    APerformanceHint_reportActualWorkDuration2; # introduced=VanillaIceCream
+    AWorkDuration_create; # introduced=VanillaIceCream
+    AWorkDuration_release; # introduced=VanillaIceCream
+    AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
+    AWorkDuration_setActualTotalDurationNanos; # introduced=VanillaIceCream
+    AWorkDuration_setActualCpuDurationNanos; # introduced=VanillaIceCream
+    AWorkDuration_setActualGpuDurationNanos; # introduced=VanillaIceCream
   local:
     *;
 };
 
 LIBANDROID_PLATFORM {
   global:
+    AThermal_setIThermalServiceForTesting;
     APerformanceHint_setIHintManagerForTesting;
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;

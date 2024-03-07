@@ -26,6 +26,7 @@ import java.util.ArrayList;
  *
  * @param T The observer type.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class Observable<T> {
     /**
      * The list of observers.  An observer can be in the list at most

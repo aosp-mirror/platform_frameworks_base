@@ -22,8 +22,9 @@ android_library {
     name: "SpaLib",
 
     srcs: ["src/**/*.kt"],
-
+    use_resource_processor: true,
     static_libs: [
+        "SettingsLibColor",
         "androidx.slice_slice-builders",
         "androidx.slice_slice-core",
         "androidx.slice_slice-view",
@@ -50,5 +51,6 @@ android_library {
 // Expose the srcs to tests, so the tests can access the internal classes.
 filegroup {
     name: "SpaLib_srcs",
+    visibility: ["//frameworks/base/packages/SettingsLib/Spa/tests"],
     srcs: ["src/**/*.kt"],
 }

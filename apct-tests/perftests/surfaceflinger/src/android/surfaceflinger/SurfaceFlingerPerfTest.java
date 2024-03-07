@@ -16,22 +16,31 @@
 
 package android.surfaceflinger;
 
+import static android.server.wm.CtsWindowInfoUtils.waitForWindowOnTop;
+import static android.provider.Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS;
+
+import android.app.Instrumentation;
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.compatibility.common.util.SystemUtil;
+import com.android.helpers.SimpleperfHelper;
+
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -39,6 +48,8 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -63,13 +74,57 @@ public class SurfaceFlingerPerfTest {
     public final RuleChain mAllRules = RuleChain
             .outerRule(mActivityRule);
 
+    private int mTransformHint;
+    private SimpleperfHelper mSimpleperfHelper = new SimpleperfHelper();
+    private static String sImmersiveModeConfirmationValue;
+    /** Start simpleperf sampling. */
+    public void startSimpleperf(String subcommand, String arguments) {
+        if (!mSimpleperfHelper.startCollecting(subcommand, arguments)) {
+            Log.e(TAG, "Simpleperf did not start successfully.");
+        }
+    }
+
+    /** Stop simpleperf sampling and dump the collected file into the given path. */
+    private void stopSimpleperf(Path path) {
+        if (!mSimpleperfHelper.stopCollecting(path.toString())) {
+            Log.e(TAG, "Failed to collect the simpleperf output.");
+        }
+    }
+
     @BeforeClass
     public static void suiteSetup() {
+        SystemUtil.runWithShellPermissionIdentity(() -> {
+            // hide immersive mode confirmation dialog
+            final ContentResolver resolver =
+                    InstrumentationRegistry.getInstrumentation().getContext().getContentResolver();
+            sImmersiveModeConfirmationValue =
+                    Settings.Secure.getString(resolver, IMMERSIVE_MODE_CONFIRMATIONS);
+            Settings.Secure.putString(
+                    resolver,
+                    IMMERSIVE_MODE_CONFIRMATIONS,
+                    "confirmed");
+        });
         final Bundle arguments = InstrumentationRegistry.getArguments();
         sProfilingIterations = Integer.parseInt(
                 arguments.getString(ARGUMENT_PROFILING_ITERATIONS, DEFAULT_PROFILING_ITERATIONS));
         Log.d(TAG, "suiteSetup: mProfilingIterations = " + sProfilingIterations);
+        // disable transaction tracing
+        InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation()
+                .executeShellCommand("service call SurfaceFlinger 1041 i32 -1");
     }
+
+    @AfterClass
+    public static void suiteTeardown() {
+        SystemUtil.runWithShellPermissionIdentity(() -> {
+            // Restore the immersive mode confirmation state.
+            Settings.Secure.putString(
+                    InstrumentationRegistry.getInstrumentation().getContext().getContentResolver(),
+                    IMMERSIVE_MODE_CONFIRMATIONS,
+                    sImmersiveModeConfirmationValue);
+        });
+    }
+
 
     @Before
     public void setup() {
@@ -77,17 +132,45 @@ public class SurfaceFlingerPerfTest {
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         for (int i = 0; i < MAX_BUFFERS; i++) {
             SurfaceControl sc = createSurfaceControl();
-            BufferFlinger bufferTracker = createBufferTracker(Color.argb(getRandomColorComponent(),
-                    getRandomColorComponent(), getRandomColorComponent(),
-                    getRandomColorComponent()));
+            BufferFlinger bufferTracker =
+                    createBufferTracker(
+                            Color.argb(
+                                    getRandomColorComponent(),
+                                    getRandomColorComponent(),
+                                    getRandomColorComponent(),
+                                    getRandomColorComponent()),
+                            mActivity.getBufferTransformHint());
             bufferTracker.addBuffer(t, sc);
             t.setPosition(sc, i * 10, i * 10);
         }
         t.apply(true);
+        mBufferTrackers.get(0).addBuffer(mTransaction, mSurfaceControls.get(0));
+        mTransaction.show(mSurfaceControls.get(0)).apply(true);
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        instrumentation.waitForIdleSync();
+        // Wait for device animation that shows above the activity to leave.
+        try {
+            waitForWindowOnTop(mActivity.getWindow());
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Failed to wait for window", e);
+        }
+        String args =
+                "-o /data/local/tmp/perf.data -g -e"
+                    + " instructions,cpu-cycles,raw-l3d-cache-refill,sched:sched_waking -p "
+                        + mSimpleperfHelper.getPID("surfaceflinger")
+                        + ","
+                        + mSimpleperfHelper.getPID("android.perftests.surfaceflinger");
+        startSimpleperf("record", args);
     }
 
     @After
     public void teardown() {
+        try {
+            mSimpleperfHelper.stopSimpleperf();
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to stop simpleperf", e);
+        }
         mSurfaceControls.forEach(SurfaceControl::release);
         mBufferTrackers.forEach(BufferFlinger::freeBuffers);
     }
@@ -97,8 +180,9 @@ public class SurfaceFlingerPerfTest {
     }
 
     private final ArrayList<BufferFlinger> mBufferTrackers = new ArrayList<>();
-    private BufferFlinger createBufferTracker(int color) {
-        BufferFlinger bufferTracker = new BufferFlinger(BUFFER_COUNT, color);
+
+    private BufferFlinger createBufferTracker(int color, int bufferTransformHint) {
+        BufferFlinger bufferTracker = new BufferFlinger(BUFFER_COUNT, color, bufferTransformHint);
         mBufferTrackers.add(bufferTracker);
         return bufferTracker;
     }

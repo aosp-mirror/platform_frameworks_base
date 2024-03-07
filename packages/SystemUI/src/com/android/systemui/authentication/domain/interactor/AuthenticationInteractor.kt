@@ -16,22 +16,20 @@
 
 package com.android.systemui.authentication.domain.interactor
 
+import com.android.app.tracing.TraceUtils.Companion.withContext
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,27 +38,30 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-/** Hosts application business logic related to authentication. */
+/**
+ * Hosts application business logic related to user authentication.
+ *
+ * Note: there is a distinction between authentication (determining a user's identity) and device
+ * entry (dismissing the lockscreen). For logic that is specific to device entry, please use
+ * `DeviceEntryInteractor` instead.
+ */
 @SysUISingleton
 class AuthenticationInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val repository: AuthenticationRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val repository: AuthenticationRepository,
     private val userRepository: UserRepository,
-    private val keyguardRepository: KeyguardRepository,
-    sceneInteractor: SceneInteractor,
     private val clock: SystemClock,
 ) {
     /**
@@ -77,95 +78,42 @@ constructor(
      * Note: this layer adds the synthetic authentication method of "swipe" which is special. When
      * the current authentication method is "swipe", the user does not need to complete any
      * authentication challenge to unlock the device; they just need to dismiss the lockscreen to
-     * get past it. This also means that the value of [isUnlocked] remains `false` even when the
-     * lockscreen is showing and still needs to be dismissed by the user to proceed.
+     * get past it. This also means that the value of `DeviceEntryInteractor#isUnlocked` remains
+     * `true` even when the lockscreen is showing and still needs to be dismissed by the user to
+     * proceed.
      */
-    val authenticationMethod: Flow<DomainLayerAuthenticationMethodModel> =
-        repository.authenticationMethod.map { rawModel -> rawModel.toDomainLayer() }
+    val authenticationMethod: Flow<AuthenticationMethodModel> = repository.authenticationMethod
 
     /**
-     * Whether the device is unlocked.
-     *
-     * A device that is not yet unlocked requires unlocking by completing an authentication
-     * challenge according to the current authentication method, unless in cases when the current
-     * authentication method is not "secure" (for example, None and Swipe); in such cases, the value
-     * of this flow will always be `true`, even if the lockscreen is showing and still needs to be
-     * dismissed by the user to proceed.
+     * The current authentication lockout (aka "throttling") state, set when the user has to wait
+     * before being able to try another authentication attempt. `null` indicates lockout isn't
+     * active.
      */
-    val isUnlocked: StateFlow<Boolean> =
-        combine(
-                repository.isUnlocked,
-                authenticationMethod,
-            ) { isUnlocked, authenticationMethod ->
-                !authenticationMethod.isSecure || isUnlocked
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = false,
-            )
+    val lockout: StateFlow<AuthenticationLockoutModel?> = repository.lockout
 
     /**
-     * Whether the lockscreen has been dismissed (by any method). This can be false even when the
-     * device is unlocked, e.g. when swipe to unlock is enabled.
+     * Whether the auto confirm feature is enabled for the currently-selected user.
      *
-     * Note:
-     * - `false` doesn't mean the lockscreen is visible (it may be occluded or covered by other UI).
-     * - `true` doesn't mean the lockscreen is invisible (since this state changes before the
-     *   transition occurs).
+     * Note that the length of the PIN is also important to take into consideration, please see
+     * [hintedPinLength].
      */
-    val isLockscreenDismissed: StateFlow<Boolean> =
-        sceneInteractor.desiredScene
-            .map { it.key }
-            .filter { currentScene ->
-                currentScene == SceneKey.Gone || currentScene == SceneKey.Lockscreen
-            }
-            .map { it == SceneKey.Gone }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
-
-    /**
-     * Whether it's currently possible to swipe up to dismiss the lockscreen without requiring
-     * authentication. This returns false whenever the lockscreen has been dismissed.
-     *
-     * Note: `true` doesn't mean the lockscreen is visible. It may be occluded or covered by other
-     * UI.
-     */
-    val canSwipeToDismiss =
-        combine(authenticationMethod, isLockscreenDismissed) {
-                authenticationMethod,
-                isLockscreenDismissed ->
-                authenticationMethod is DomainLayerAuthenticationMethodModel.Swipe &&
-                    !isLockscreenDismissed
+    val isAutoConfirmEnabled: StateFlow<Boolean> =
+        combine(repository.isAutoConfirmFeatureEnabled, repository.hasLockoutOccurred) {
+                featureEnabled,
+                hasLockoutOccurred ->
+                // Disable auto-confirm if lockout occurred since the last successful
+                // authentication attempt.
+                featureEnabled && !hasLockoutOccurred
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = false,
-            )
-
-    /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
-    val throttling: StateFlow<AuthenticationThrottlingModel> = repository.throttling
-
-    /**
-     * Whether currently throttled and the user has to wait before being able to try another
-     * authentication attempt.
-     */
-    val isThrottled: StateFlow<Boolean> =
-        throttling
-            .map { it.remainingMs > 0 }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = throttling.value.remainingMs > 0,
             )
 
     /** The length of the hinted PIN, or `null` if pin length hint should not be shown. */
     val hintedPinLength: StateFlow<Int?> =
-        repository.isAutoConfirmEnabled
+        isAutoConfirmEnabled
             .map { isAutoConfirmEnabled ->
                 repository.getPinLength().takeIf {
                     isAutoConfirmEnabled && it == repository.hintedPinLength
@@ -179,13 +127,20 @@ constructor(
                 initialValue = null,
             )
 
-    /** Whether the auto confirm feature is enabled for the currently-selected user. */
-    val isAutoConfirmEnabled: StateFlow<Boolean> = repository.isAutoConfirmEnabled
-
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible
 
-    private var throttlingCountdownJob: Job? = null
+    /**
+     * Emits the outcome (successful or unsuccessful) whenever a PIN/Pattern/Password security
+     * challenge is attempted by the user in order to unlock the device.
+     */
+    val authenticationChallengeResult: SharedFlow<Boolean> =
+        repository.authenticationChallengeResult
+
+    /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
+    val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> = repository.isPinEnhancedPrivacyEnabled
+
+    private var lockoutCountdownJob: Job? = null
 
     init {
         applicationScope.launch {
@@ -207,72 +162,51 @@ constructor(
      * The flow should be used for code that wishes to stay up-to-date its logic as the
      * authentication changes over time and this method should be used for simple code that only
      * needs to check the current value.
-     *
-     * Note: this layer adds the synthetic authentication method of "swipe" which is special. When
-     * the current authentication method is "swipe", the user does not need to complete any
-     * authentication challenge to unlock the device; they just need to dismiss the lockscreen to
-     * get past it. This also means that the value of [isUnlocked] remains `false` even when the
-     * lockscreen is showing and still needs to be dismissed by the user to proceed.
      */
-    suspend fun getAuthenticationMethod(): DomainLayerAuthenticationMethodModel {
-        return repository.getAuthenticationMethod().toDomainLayer()
-    }
-
-    /**
-     * Returns `true` if the device currently requires authentication before content can be viewed;
-     * `false` if content can be displayed without unlocking first.
-     */
-    suspend fun isAuthenticationRequired(): Boolean {
-        return !isUnlocked.value && getAuthenticationMethod().isSecure
-    }
-
-    /**
-     * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
-     * dismisses once the authentication challenge is completed. For example, completing a biometric
-     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
-     * lock screen.
-     */
-    fun isBypassEnabled(): Boolean {
-        return keyguardRepository.isBypassEnabled()
-    }
+    suspend fun getAuthenticationMethod() = repository.getAuthenticationMethod()
 
     /**
      * Attempts to authenticate the user and unlock the device.
      *
      * If [tryAutoConfirm] is `true`, authentication is attempted if and only if the auth method
-     * supports auto-confirming, and the input's length is at least the code's length. Otherwise,
-     * `null` is returned.
+     * supports auto-confirming, and the input's length is at least the required length. Otherwise,
+     * `AuthenticationResult.SKIPPED` is returned.
      *
      * @param input The input from the user to try to authenticate with. This can be a list of
      *   different things, based on the current authentication method.
      * @param tryAutoConfirm `true` if called while the user inputs the code, without an explicit
      *   request to validate.
-     * @return `true` if the authentication succeeded and the device is now unlocked; `false` when
-     *   authentication failed, `null` if the check was not performed.
+     * @return The result of this authentication attempt.
      */
-    suspend fun authenticate(input: List<Any>, tryAutoConfirm: Boolean = false): Boolean? {
+    suspend fun authenticate(
+        input: List<Any>,
+        tryAutoConfirm: Boolean = false
+    ): AuthenticationResult {
         if (input.isEmpty()) {
             throw IllegalArgumentException("Input was empty!")
         }
 
+        val authMethod = getAuthenticationMethod()
         val skipCheck =
             when {
-                // We're being throttled, the UI layer should not have called this; skip the
-                // attempt.
-                isThrottled.value -> true
+                // Lockout is active, the UI layer should not have called this; skip the attempt.
+                lockout.value != null -> true
+                // The input is too short; skip the attempt.
+                input.isTooShort(authMethod) -> true
                 // Auto-confirm attempt when the feature is not enabled; skip the attempt.
                 tryAutoConfirm && !isAutoConfirmEnabled.value -> true
                 // Auto-confirm should skip the attempt if the pin entered is too short.
-                tryAutoConfirm && input.size < repository.getPinLength() -> true
+                tryAutoConfirm &&
+                    authMethod == AuthenticationMethodModel.Pin &&
+                    input.size < repository.getPinLength() -> true
                 else -> false
             }
         if (skipCheck) {
-            return null
+            return AuthenticationResult.SKIPPED
         }
 
         // Attempt to authenticate:
-        val authMethod = getAuthenticationMethod()
-        val credential = authMethod.createCredential(input) ?: return null
+        val credential = authMethod.createCredential(input) ?: return AuthenticationResult.SKIPPED
         val authenticationResult = repository.checkCredential(credential)
         credential.zeroize()
 
@@ -282,78 +216,96 @@ constructor(
             )
         }
 
-        // Check if we need to throttle and, if so, kick off the throttle countdown:
-        if (!authenticationResult.isSuccessful && authenticationResult.throttleDurationMs > 0) {
-            repository.setThrottleDuration(
-                durationMs = authenticationResult.throttleDurationMs,
-            )
-            startThrottlingCountdown()
+        // Check if lockout should start and, if so, kick off the countdown:
+        if (!authenticationResult.isSuccessful && authenticationResult.lockoutDurationMs > 0) {
+            repository.apply {
+                setLockoutDuration(durationMs = authenticationResult.lockoutDurationMs)
+                reportLockoutStarted(durationMs = authenticationResult.lockoutDurationMs)
+                hasLockoutOccurred.value = true
+            }
+            startLockoutCountdown()
         }
 
         if (authenticationResult.isSuccessful) {
-            // Since authentication succeeded, we should refresh throttling to make sure that our
-            // state is completely reflecting the upstream source of truth.
-            refreshThrottling()
+            // Since authentication succeeded, refresh lockout to make sure the state is completely
+            // reflecting the upstream source of truth.
+            refreshLockout()
+
+            repository.hasLockoutOccurred.value = false
         }
 
-        return authenticationResult.isSuccessful
+        return if (authenticationResult.isSuccessful) {
+            AuthenticationResult.SUCCEEDED
+        } else {
+            AuthenticationResult.FAILED
+        }
     }
 
-    /** Starts refreshing the throttling state every second. */
-    private suspend fun startThrottlingCountdown() {
-        cancelCountdown()
-        throttlingCountdownJob =
+    private fun List<Any>.isTooShort(authMethod: AuthenticationMethodModel): Boolean {
+        return when (authMethod) {
+            AuthenticationMethodModel.Pattern -> size < repository.minPatternLength
+            AuthenticationMethodModel.Password -> size < repository.minPasswordLength
+            else -> false
+        }
+    }
+
+    /** Starts refreshing the lockout state every second. */
+    private suspend fun startLockoutCountdown() {
+        cancelLockoutCountdown()
+        lockoutCountdownJob =
             applicationScope.launch {
-                while (refreshThrottling() > 0) {
+                while (refreshLockout()) {
                     delay(1.seconds.inWholeMilliseconds)
                 }
             }
     }
 
-    /** Cancels any throttling state countdown started in [startThrottlingCountdown]. */
-    private fun cancelCountdown() {
-        throttlingCountdownJob?.cancel()
-        throttlingCountdownJob = null
+    /** Cancels any lockout state countdown started in [startLockoutCountdown]. */
+    private fun cancelLockoutCountdown() {
+        lockoutCountdownJob?.cancel()
+        lockoutCountdownJob = null
     }
 
     /** Notifies that the currently-selected user has changed. */
     private suspend fun onSelectedUserChanged() {
-        cancelCountdown()
-        if (refreshThrottling() > 0) {
-            startThrottlingCountdown()
+        cancelLockoutCountdown()
+        if (refreshLockout()) {
+            startLockoutCountdown()
         }
     }
 
     /**
-     * Refreshes the throttling state, hydrating the repository with the latest state.
+     * Refreshes the lockout state, hydrating the repository with the latest state.
      *
-     * @return The remaining time for the current throttling countdown, in milliseconds or `0` if
-     *   not being throttled.
+     * @return Whether lockout is active or not.
      */
-    private suspend fun refreshThrottling(): Long {
-        return withContext(backgroundDispatcher) {
+    private suspend fun refreshLockout(): Boolean {
+        withContext("$TAG#refreshLockout", backgroundDispatcher) {
             val failedAttemptCount = async { repository.getFailedAuthenticationAttemptCount() }
-            val deadline = async { repository.getThrottlingEndTimestamp() }
+            val deadline = async { repository.getLockoutEndTimestamp() }
             val remainingMs = max(0, deadline.await() - clock.elapsedRealtime())
-            repository.setThrottling(
-                AuthenticationThrottlingModel(
-                    failedAttemptCount = failedAttemptCount.await(),
-                    remainingMs = remainingMs.toInt(),
-                ),
-            )
-            remainingMs
+            repository.lockout.value =
+                if (remainingMs > 0) {
+                    AuthenticationLockoutModel(
+                        failedAttemptCount = failedAttemptCount.await(),
+                        remainingSeconds = ceil(remainingMs / 1000f).toInt(),
+                    )
+                } else {
+                    null // Lockout ended.
+                }
         }
+        return repository.lockout.value != null
     }
 
-    private fun DomainLayerAuthenticationMethodModel.createCredential(
+    private fun AuthenticationMethodModel.createCredential(
         input: List<Any>
     ): LockscreenCredential? {
         return when (this) {
-            is DomainLayerAuthenticationMethodModel.Pin ->
+            is AuthenticationMethodModel.Pin ->
                 LockscreenCredential.createPin(input.joinToString(""))
-            is DomainLayerAuthenticationMethodModel.Password ->
+            is AuthenticationMethodModel.Password ->
                 LockscreenCredential.createPassword(input.joinToString(""))
-            is DomainLayerAuthenticationMethodModel.Pattern ->
+            is AuthenticationMethodModel.Pattern ->
                 LockscreenCredential.createPattern(
                     input
                         .map { it as AuthenticationPatternCoordinate }
@@ -363,20 +315,17 @@ constructor(
         }
     }
 
-    private suspend fun DataLayerAuthenticationMethodModel.toDomainLayer():
-        DomainLayerAuthenticationMethodModel {
-        return when (this) {
-            is DataLayerAuthenticationMethodModel.None ->
-                if (repository.isLockscreenEnabled()) {
-                    DomainLayerAuthenticationMethodModel.Swipe
-                } else {
-                    DomainLayerAuthenticationMethodModel.None
-                }
-            is DataLayerAuthenticationMethodModel.Pin -> DomainLayerAuthenticationMethodModel.Pin
-            is DataLayerAuthenticationMethodModel.Password ->
-                DomainLayerAuthenticationMethodModel.Password
-            is DataLayerAuthenticationMethodModel.Pattern ->
-                DomainLayerAuthenticationMethodModel.Pattern
-        }
+    companion object {
+        const val TAG = "AuthenticationInteractor"
     }
+}
+
+/** Result of a user authentication attempt. */
+enum class AuthenticationResult {
+    /** Authentication succeeded. */
+    SUCCEEDED,
+    /** Authentication failed. */
+    FAILED,
+    /** Authentication was not performed, e.g. due to insufficient input. */
+    SKIPPED,
 }

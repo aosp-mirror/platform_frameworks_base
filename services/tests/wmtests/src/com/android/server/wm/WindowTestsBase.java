@@ -48,6 +48,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.IntDef;
@@ -92,6 +94,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
+import android.view.IWindowSessionCallback;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -149,9 +152,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
     ActivityTaskManagerService mAtm;
     RootWindowContainer mRootWindowContainer;
     ActivityTaskSupervisor mSupervisor;
+    ClientLifecycleManager mClientLifecycleManager;
     WindowManagerService mWm;
     private final IWindow mIWindow = new TestIWindow();
-    private Session mMockSession;
+    private Session mTestSession;
     private boolean mUseFakeSettingsProvider;
 
     DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -212,6 +216,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mAtm = mSystemServicesTestRule.getActivityTaskManagerService();
         mSupervisor = mAtm.mTaskSupervisor;
         mRootWindowContainer = mAtm.mRootWindowContainer;
+        mClientLifecycleManager = mAtm.getLifecycleManager();
         mWm = mSystemServicesTestRule.getWindowManagerService();
         mOriginalPerDisplayFocusEnabled = mWm.mPerDisplayFocusEnabled;
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
@@ -229,7 +234,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
         suppressInsetsAnimation(insetsPolicy.getPermanentControlTarget());
 
         mTransaction = mSystemServicesTestRule.mTransaction;
-        mMockSession = mock(Session.class);
 
         mContext.getSystemService(DisplayManager.class)
                 .getDisplay(Display.DEFAULT_DISPLAY).getDisplayInfo(mDisplayInfo);
@@ -506,6 +510,54 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return statusBar;
     }
 
+    Session getTestSession() {
+        if (mTestSession != null) {
+            return mTestSession;
+        }
+        mTestSession = createTestSession(mAtm);
+        return mTestSession;
+    }
+
+    private Session getTestSession(WindowToken token) {
+        final ActivityRecord r = token.asActivityRecord();
+        if (r == null || r.app == null) {
+            return getTestSession();
+        }
+        // If the activity has a process, let the window session belonging to activity use the
+        // process of the activity.
+        int pid = r.app.getPid();
+        if (pid == 0) {
+            // See SystemServicesTestRule#addProcess, pid 0 isn't added to the map. So generate
+            // a non-zero pid to initialize it.
+            final int numPid = mAtm.mProcessMap.getPidMap().size();
+            pid = numPid > 0 ? mAtm.mProcessMap.getPidMap().keyAt(numPid - 1) + 1 : 1;
+            r.app.setPid(pid);
+            mAtm.mProcessMap.put(pid, r.app);
+        } else {
+            final WindowState win = mRootWindowContainer.getWindow(w -> w.getProcess() == r.app);
+            if (win != null) {
+                // Reuse the same Session if there is a window uses the same process.
+                return win.mSession;
+            }
+        }
+        return createTestSession(mAtm, pid, r.getUid());
+    }
+
+    static Session createTestSession(ActivityTaskManagerService atms) {
+        return createTestSession(atms, WindowManagerService.MY_PID, WindowManagerService.MY_UID);
+    }
+
+    static Session createTestSession(ActivityTaskManagerService atms, int pid, int uid) {
+        if (atms.mProcessMap.getProcess(pid) == null) {
+            SystemServicesTestRule.addProcess(atms, "testPkg", "testProc", pid, uid);
+        }
+        return new Session(atms.mWindowManager, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {
+            }
+        }, pid, uid);
+    }
+
     WindowState createAppWindow(Task task, int type, String name) {
         final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
@@ -585,7 +637,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow, IWindow iwindow) {
         return createWindow(parent, type, token, name, ownerId, UserHandle.getUserId(ownerId),
-                ownerCanAddInternalSystemWindow, mWm, mMockSession, iwindow,
+                ownerCanAddInternalSystemWindow, mWm, getTestSession(token), iwindow,
                 mSystemServicesTestRule.getPowerManagerWrapper());
     }
 
@@ -889,7 +941,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     TestWindowState createWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
-        return new TestWindowState(mWm, mMockSession, mIWindow, attrs, token);
+        return new TestWindowState(mWm, getTestSession(), mIWindow, attrs, token);
     }
 
     /** Creates a {@link DisplayContent} as parts of simulate display info for test. */
@@ -901,6 +953,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
+        displayInfo.state = Display.STATE_ON;
         displayInfo.ownerUid = SYSTEM_UID;
         return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_FALLBACK_DISPLAY, overrideSettings);
     }
@@ -955,6 +1008,38 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return testPlayer;
     }
 
+    /** Overrides the behavior of config_reverseDefaultRotation for the given display. */
+    void setReverseDefaultRotation(DisplayContent dc, boolean reverse) {
+        final DisplayRotation displayRotation = dc.getDisplayRotation();
+        if (!Mockito.mockingDetails(displayRotation).isSpy()) {
+            spyOn(displayRotation);
+        }
+        doAnswer(invocation -> {
+            invocation.callRealMethod();
+            final int w = invocation.getArgument(0);
+            final int h = invocation.getArgument(1);
+            if (w > h) {
+                if (reverse) {
+                    displayRotation.mPortraitRotation = Surface.ROTATION_90;
+                    displayRotation.mUpsideDownRotation = Surface.ROTATION_270;
+                } else {
+                    displayRotation.mPortraitRotation = Surface.ROTATION_270;
+                    displayRotation.mUpsideDownRotation = Surface.ROTATION_90;
+                }
+            } else {
+                if (reverse) {
+                    displayRotation.mLandscapeRotation = Surface.ROTATION_270;
+                    displayRotation.mSeascapeRotation = Surface.ROTATION_90;
+                } else {
+                    displayRotation.mLandscapeRotation = Surface.ROTATION_90;
+                    displayRotation.mSeascapeRotation = Surface.ROTATION_270;
+                }
+            }
+            return null;
+        }).when(displayRotation).configure(anyInt(), anyInt());
+        displayRotation.configure(dc.mBaseDisplayWidth, dc.mBaseDisplayHeight);
+    }
+
     /**
      * Avoids rotating screen disturbed by some conditions. It is usually used for the default
      * display that is not the instance of {@link TestDisplayContent} (it bypasses the conditions).
@@ -962,6 +1047,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
      * @see DisplayRotation#updateRotationUnchecked
      */
     void unblockDisplayRotation(DisplayContent dc) {
+        dc.mOpeningApps.clear();
+        mWm.mAppsFreezingScreen = 0;
         mWm.stopFreezingDisplayLocked();
         // The rotation animation won't actually play, it needs to be cleared manually.
         dc.setRotationAnimation(null);
@@ -970,9 +1057,17 @@ class WindowTestsBase extends SystemServiceTestsBase {
     static void resizeDisplay(DisplayContent displayContent, int width, int height) {
         displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
                 displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);
+        displayContent.getDisplayRotation().configure(width, height);
         final Configuration c = new Configuration();
         displayContent.computeScreenConfiguration(c);
         displayContent.onRequestedOverrideConfigurationChanged(c);
+    }
+
+    /** Used for the tests that assume the display is portrait by default. */
+    static void makeDisplayPortrait(DisplayContent displayContent) {
+        if (displayContent.mBaseDisplayHeight <= displayContent.mBaseDisplayWidth) {
+            resizeDisplay(displayContent, 500, 1000);
+        }
     }
 
     // The window definition for UseTestDisplay#addWindows. The test can declare to add only
@@ -1091,6 +1186,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mCreateTask = false;
         private Task mParentTask;
         private int mActivityFlags;
+        private int mActivityTheme;
         private int mLaunchMode;
         private int mResizeMode = RESIZE_MODE_RESIZEABLE;
         private float mMaxAspectRatio;
@@ -1136,6 +1232,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         ActivityBuilder setTask(Task task) {
             mTask = task;
+            return this;
+        }
+
+        ActivityBuilder setActivityTheme(int theme) {
+            mActivityTheme = theme;
+            // Use the real package of test so it can get a valid context for theme.
+            mComponent = ComponentName.createRelative(mService.mContext.getPackageName(),
+                    DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
             return this;
         }
 
@@ -1287,6 +1391,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.name = mComponent.getClassName();
             if (mTargetActivity != null) {
                 aInfo.targetActivity = mTargetActivity;
+            }
+            if (mActivityTheme != 0) {
+                aInfo.theme = mActivityTheme;
             }
             aInfo.flags |= mActivityFlags;
             aInfo.launchMode = mLaunchMode;
@@ -1660,8 +1767,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 final WindowState window = WindowTestsBase.createWindow(null,
                         TYPE_APPLICATION_STARTING, activity,
                         "Starting window", 0 /* ownerId */, 0 /* userId*/,
-                        false /* internalWindows */, mWMService, mock(Session.class),
-                        iWindow,
+                        false /* internalWindows */, mWMService, createTestSession(mAtm), iWindow,
                         mPowerManagerWrapper);
                 activity.mStartingWindow = window;
                 mAppWindowMap.put(info.appToken, window);

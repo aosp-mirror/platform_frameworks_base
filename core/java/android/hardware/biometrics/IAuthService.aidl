@@ -16,6 +16,7 @@
 
 package android.hardware.biometrics;
 
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IInvalidationCallback;
@@ -65,6 +66,12 @@ interface IAuthService {
 
     // Register callback for when keyguard biometric eligibility changes.
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
+
+    // Register listener for changes to authentication state.
+    void registerAuthenticationStateListener(AuthenticationStateListener listener);
+
+    // Unregister listener for changes to authentication state.
+    void unregisterAuthenticationStateListener(AuthenticationStateListener listener);
 
     // Requests all BIOMETRIC_STRONG sensors to have their authenticatorId invalidated for the
     // specified user. This happens when enrollments have been added on devices with multiple

@@ -19,11 +19,10 @@
 
 #include <string>
 
-#include "androidfw/StringPiece.h"
-
 #include "ResourceTable.h"
 #include "ResourceValues.h"
-#include "io/Io.h"
+#include "androidfw/Streams.h"
+#include "androidfw/StringPiece.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "text/Printer.h"
@@ -70,12 +69,12 @@ class JavaClassGenerator {
   // All symbols technically belong to a single package, but linked libraries will
   // have their names mangled, denoting that they came from a different package.
   // We need to generate these symbols in a separate file. Returns true on success.
-  bool Generate(android::StringPiece package_name_to_generate, io::OutputStream* out,
-                io::OutputStream* out_r_txt = nullptr);
+  bool Generate(android::StringPiece package_name_to_generate, android::OutputStream* out,
+                android::OutputStream* out_r_txt = nullptr);
 
   bool Generate(android::StringPiece package_name_to_generate,
-                android::StringPiece output_package_name, io::OutputStream* out,
-                io::OutputStream* out_r_txt = nullptr);
+                android::StringPiece output_package_name, android::OutputStream* out,
+                android::OutputStream* out_r_txt = nullptr);
 
   const std::string& GetError() const;
 

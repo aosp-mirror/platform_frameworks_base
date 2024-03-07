@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "ThreadedRenderer"
 #define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <FrameInfo.h>
@@ -27,7 +25,7 @@
 #include <SkColorSpace.h>
 #include <SkData.h>
 #include <SkImage.h>
-#include <SkImagePriv.h>
+#include <SkImageAndroid.h>
 #include <SkPicture.h>
 #include <SkPixmap.h>
 #include <SkSerialProcs.h>
@@ -35,7 +33,9 @@
 #include <SkTypeface.h>
 #include <dlfcn.h>
 #include <gui/TraceUtils.h>
+#include <include/encode/SkPngEncoder.h>
 #include <inttypes.h>
+#include <log/log.h>
 #include <media/NdkImage.h>
 #include <media/NdkImageReader.h>
 #include <nativehelper/JNIPlatformHelp.h>
@@ -58,6 +58,7 @@
 
 #include "JvmErrorReporter.h"
 #include "android_graphics_HardwareRendererObserver.h"
+#include "utils/ForceDark.h"
 
 namespace android {
 
@@ -477,7 +478,7 @@ public:
         // actually cross thread boundaries here, make a copy so it's immutable proper
         if (bitmap && !bitmap->isImmutable()) {
             ATRACE_NAME("Copying mutable bitmap");
-            return SkImage::MakeFromBitmap(*bitmap);
+            return SkImages::RasterFromBitmap(*bitmap);
         }
         if (img->isTextureBacked()) {
             ATRACE_NAME("Readback of texture image");
@@ -497,7 +498,7 @@ public:
                 return sk_ref_sp(img);
             }
             bm.setImmutable();
-            return SkMakeImageFromRasterBitmap(bm, kNever_SkCopyPixelsMode);
+            return SkImages::PinnableRasterFromBitmap(bm);
         }
         return sk_ref_sp(img);
     }
@@ -524,7 +525,16 @@ public:
         if (iter != context->mTextureMap.end()) {
             img = iter->second.get();
         }
-        return img->encodeToData();
+        if (!img) {
+            return nullptr;
+        }
+        // The following encode (specifically the pixel readback) will fail on a
+        // texture-backed image. They should already be raster images, but on
+        // the off-chance they aren't, we will just serialize it as nothing.
+        if (img->isTextureBacked()) {
+            return SkData::MakeEmpty();
+        }
+        return SkPngEncoder::Encode(nullptr, img, {});
     }
 
     void serialize(SkWStream* stream) const override {
@@ -815,10 +825,10 @@ static void android_view_ThreadedRenderer_allocateBuffers(JNIEnv* env, jobject c
     proxy->allocateBuffers();
 }
 
-static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jboolean enable) {
+static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject clazz, jlong proxyPtr,
+                                                       jint type) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setForceDark(enable);
+    proxy->setForceDark(static_cast<ForceDarkType>(type));
 }
 
 static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
@@ -1007,7 +1017,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess},
         {"nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority},
         {"nAllocateBuffers", "(J)V", (void*)android_view_ThreadedRenderer_allocateBuffers},
-        {"nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark},
+        {"nSetForceDark", "(JI)V", (void*)android_view_ThreadedRenderer_setForceDark},
         {"nSetDisplayDensityDpi", "(I)V",
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
         {"nInitDisplayInfo", "(IIFIJJZZ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},

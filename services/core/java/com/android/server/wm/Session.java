@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.ALWAYS_UPDATE_WALLPAPER;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
@@ -41,6 +42,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ClipData;
@@ -84,6 +86,7 @@ import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerService.H;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -99,6 +102,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final IWindowSessionCallback mCallback;
     final int mUid;
     final int mPid;
+    @NonNull
+    final WindowProcessController mProcess;
     private final String mStringName;
     SurfaceSession mSurfaceSession;
     private int mNumWindow = 0;
@@ -114,6 +119,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final boolean mCanCreateSystemApplicationOverlay;
     final boolean mCanHideNonSystemOverlayWindows;
     final boolean mCanSetUnrestrictedGestureExclusion;
+    final boolean mCanAlwaysUpdateWallpaper;
     private AlertWindowNotification mAlertWindowNotification;
     private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
@@ -124,11 +130,23 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final boolean mSetsUnrestrictedKeepClearAreas;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback) {
+        this(service, callback, Binder.getCallingPid(), Binder.getCallingUid());
+    }
+
+    @VisibleForTesting
+    Session(WindowManagerService service, IWindowSessionCallback callback,
+            int callingPid, int callingUid) {
         mService = service;
         mCallback = callback;
-        mUid = Binder.getCallingUid();
-        mPid = Binder.getCallingPid();
-        mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
+        mPid = callingPid;
+        mUid = callingUid;
+        synchronized (service.mGlobalLock) {
+            mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
+            mProcess = service.mAtmService.mProcessMap.getProcess(mPid);
+        }
+        if (mProcess == null) {
+            throw new IllegalStateException("Unknown pid=" + mPid + " uid=" + mUid);
+        }
         mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
                 INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
         mCanForceShowingInsets = service.mAtmService.isCallerRecents(mUid)
@@ -148,6 +166,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                         == PERMISSION_GRANTED;
         mCanSetUnrestrictedGestureExclusion =
                 service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_GESTURE_EXCLUSION)
+                        == PERMISSION_GRANTED;
+        mCanAlwaysUpdateWallpaper = Flags.alwaysUpdateWallpaperPermission()
+                && service.mContext.checkCallingOrSelfPermission(ALWAYS_UPDATE_WALLPAPER)
                         == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         mDragDropController = mService.mDragDropController;
@@ -232,8 +253,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void remove(IWindow window) {
-        mService.removeWindow(this, window);
+    public void remove(IBinder clientToken) {
+        mService.removeClientToken(this, clientToken);
     }
 
     @Override
@@ -319,7 +340,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
+            int touchDeviceId, int touchPointerId, float touchX, float touchY, float thumbCenterX,
+            float thumbCenterY, ClipData data) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         // Validate and resolve ClipDescription data before clearing the calling identity
@@ -328,7 +350,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final long ident = Binder.clearCallingIdentity();
         try {
             return mDragDropController.performDrag(mPid, mUid, window, flags, surface, touchSource,
-                    touchX, touchY, thumbCenterX, thumbCenterY, data);
+                    touchDeviceId, touchPointerId, touchX, touchY, thumbCenterX, thumbCenterY,
+                    data);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -540,6 +563,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public void reportDecorViewGestureInterceptionChanged(IWindow window, boolean intercepted) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mService.reportDecorViewGestureChanged(this, window, intercepted);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void reportKeepClearAreasChanged(IWindow window, List<Rect> restricted,
             List<Rect> unrestricted) {
         if (!mSetsUnrestrictedKeepClearAreas && !unrestricted.isEmpty()) {
@@ -626,8 +659,15 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final long ident = Binder.clearCallingIdentity();
             try {
                 final WindowState windowState = mService.windowForClientLocked(this, window, true);
-                return windowState.getDisplayContent().mWallpaperController
-                        .sendWindowWallpaperCommand(windowState, action, x, y, z, extras, sync);
+                WallpaperController wallpaperController =
+                        windowState.getDisplayContent().mWallpaperController;
+                if (mCanAlwaysUpdateWallpaper
+                        || windowState == wallpaperController.getWallpaperTarget()
+                        || windowState == wallpaperController.getPrevWallpaperTarget()) {
+                    return wallpaperController.sendWindowWallpaperCommandUnchecked(
+                            windowState, action, x, y, z, extras, sync);
+                }
+                return null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -703,13 +743,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     void windowAddedLocked() {
         if (mPackageName == null) {
-            final WindowProcessController wpc = mService.mAtmService.mProcessMap.getProcess(mPid);
-            if (wpc != null) {
-                mPackageName = wpc.mInfo.packageName;
-                mRelayoutTag = "relayoutWindow: " + mPackageName;
-            } else {
-                Slog.e(TAG_WM, "Unknown process pid=" + mPid);
-            }
+            mPackageName = mProcess.mInfo.packageName;
+            mRelayoutTag = "relayoutWindow: " + mPackageName;
         }
         if (mSurfaceSession == null) {
             if (DEBUG) {
@@ -861,9 +896,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
-            IWindow window, IBinder hostInputToken, int flags, int privateFlags, int type,
-            int inputFeatures, IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
-            InputChannel outInputChannel) {
+            IBinder clientToken, IBinder hostInputToken, int flags, int privateFlags, int type,
+            int inputFeatures, IBinder windowToken, IBinder inputTransferToken,
+            String inputHandleName, InputChannel outInputChannel) {
         if (hostInputToken == null && !mCanAddInternalSystemWindow) {
             // Callers without INTERNAL_SYSTEM_WINDOW permission cannot grant input channel to
             // embedded windows without providing a host window input token
@@ -872,9 +907,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.grantInputChannel(this, mUid, mPid, displayId, surface, window, hostInputToken,
-                    flags, mCanAddInternalSystemWindow ? privateFlags : 0,
-                    type, inputFeatures, windowToken, focusGrantToken, inputHandleName,
+            mService.grantInputChannel(this, mUid, mPid, displayId, surface, clientToken,
+                    hostInputToken, flags, mCanAddInternalSystemWindow ? privateFlags : 0,
+                    type, inputFeatures, windowToken, inputTransferToken, inputHandleName,
                     outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -930,6 +965,23 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return didTransfer;
     }
 
+    @Override
+    public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
+            IBinder inputTransferToken) {
+        if (hostWindow == null) {
+            return false;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        boolean didTransfer;
+        try {
+            didTransfer = mService.transferHostTouchGestureToEmbedded(this, hostWindow,
+                    inputTransferToken);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return didTransfer;
+    }
     @Override
     public void generateDisplayHash(IWindow window, Rect boundsInWindow, String hashAlgorithm,
             RemoteCallback callback) {

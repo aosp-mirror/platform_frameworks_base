@@ -789,7 +789,8 @@ public final class InputDevice implements Parcelable {
      * Each gamepad or joystick is given a unique, positive controller number when initially
      * configured by the system. This number may change due to events such as device disconnects /
      * reconnects or user initiated reassignment. Any change in number will trigger an event that
-     * can be observed by registering an {@link InputManagerGlobal.InputDeviceListener}.
+     * can be observed by registering an
+     * {@link android.hardware.input.InputManager.InputDeviceListener}.
      * </p>
      * <p>
      * All input devices which are not gamepads or joysticks will be assigned a controller number
@@ -987,6 +988,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLanguageTag() {
         return mKeyboardLanguageTag;
     }
@@ -997,6 +999,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLayoutType() {
         return mKeyboardLayoutType;
     }
@@ -1305,24 +1308,6 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
-     * Sets the current pointer type.
-     * @param pointerType the type of the pointer icon.
-     * @hide
-     */
-    public void setPointerType(int pointerType) {
-        InputManagerGlobal.getInstance().setPointerIconType(pointerType);
-    }
-
-    /**
-     * Specifies the current custom pointer.
-     * @param icon the icon data.
-     * @hide
-     */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        InputManagerGlobal.getInstance().setCustomPointerIcon(icon);
-    }
-
-    /**
      * Reports whether the device has a battery.
      * @return true if the device has a battery, false otherwise.
      * @hide
@@ -1346,6 +1331,7 @@ public final class InputDevice implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public int getAssociatedDisplayId() {
         return mAssociatedDisplayId;
     }

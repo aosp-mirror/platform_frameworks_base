@@ -22,7 +22,7 @@ java_binary {
     name: "uinput",
     wrapper: "uinput.sh",
     srcs: [
-        "**/*.java",
+        "src/**/*.java",
         ":uinputcommand_aidl",
     ],
     required: ["libuinputcommand_jni"],

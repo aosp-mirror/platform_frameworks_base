@@ -83,6 +83,7 @@
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
+    <uses-permission android:name="android.permission.NETWORK_FACTORY" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -349,6 +350,9 @@
 
     <uses-permission android:name="android.permission.MONITOR_KEYBOARD_BACKLIGHT" />
 
+    <!-- Listen to (dis-)connection of external displays and enable / disable them. -->
+    <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -508,15 +512,6 @@
             </intent-filter>
         </activity-alias>
 
-        <activity
-            android:name="com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity"
-            android:theme="@style/ForcedResizableTheme"
-            android:excludeFromRecents="true"
-            android:stateNotNeeded="true"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
-            android:exported="false">
-        </activity>
-
         <!-- Springboard for launching the share and edit activity. This needs to be in the main
              system ui process since we need to notify the status bar to dismiss the keyguard -->
         <receiver android:name=".screenshot.ActionProxyReceiver"
@@ -549,26 +544,6 @@
         </activity>
 
         <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.tv.TvUsbConfirmActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_USB"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
-        <!-- started from UsbDeviceSettingsManager -->
-        <activity android:name=".usb.tv.TvUsbPermissionActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_USB"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
-        <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbResolverActivity"
             android:exported="true"
             android:permission="android.permission.MANAGE_USB"
@@ -577,46 +552,15 @@
             android:excludeFromRecents="true">
         </activity>
 
-        <!-- started from HdmiCecLocalDevicePlayback -->
-        <activity android:name=".hdmi.HdmiCecSetMenuLanguageActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.CHANGE_CONFIGURATION"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:excludeFromRecents="true">
-        </activity>
-
         <!-- started from SensoryPrivacyService -->
         <activity android:name=".sensorprivacy.SensorUseStartedActivity"
                   android:exported="true"
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert.SensorPrivacy"
                   android:finishOnCloseSystemDialogs="true"
                   android:showForAllUsers="true">
         </activity>
-
-        <!-- started from SensoryPrivacyService -->
-        <activity android:name=".sensorprivacy.television.TvUnblockSensorActivity"
-                  android:exported="true"
-                  android:launchMode="singleTop"
-                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-                  android:theme="@style/BottomSheet"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:showForAllUsers="true">
-        </activity>
-
-        <!-- started from SensoryPrivacyService -->
-        <activity android:name=".sensorprivacy.television.TvSensorPrivacyChangedActivity"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-            android:theme="@style/BottomSheet"
-            android:finishOnCloseSystemDialogs="true"
-            android:showForAllUsers="true">
-        </activity>
-
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
@@ -682,7 +626,7 @@
 
         <!-- started from MediaProjectionManager -->
         <activity
-            android:name=".media.MediaProjectionPermissionActivity"
+            android:name=".mediaprojection.permission.MediaProjectionPermissionActivity"
             android:exported="true"
             android:theme="@style/Theme.SystemUI.MediaProjectionAlertDialog"
             android:finishOnCloseSystemDialogs="true"
@@ -691,7 +635,7 @@
             android:visibleToInstantApps="true"/>
 
         <activity
-            android:name=".media.MediaProjectionAppSelectorActivity"
+            android:name=".mediaprojection.appselector.MediaProjectionAppSelectorActivity"
             android:theme="@style/Theme.SystemUI.MediaProjectionAppSelector"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
@@ -702,14 +646,6 @@
             android:visibleToInstantApps="true"
             android:exported="false"
             android:permission="android.permission.MANAGE_MEDIA_PROJECTION"/>
-
-        <!-- started from TvNotificationPanel -->
-        <activity
-            android:name=".statusbar.tv.notifications.TvNotificationPanelActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:noHistory="true"
-            android:theme="@style/TvSidePanelTheme" />
 
         <!-- started from SliceProvider -->
         <activity android:name=".SlicePermissionActivity"
@@ -1037,6 +973,24 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
+        <activity android:name="com.android.systemui.communal.widgets.WidgetPickerActivity"
+            android:theme="@style/Theme.EditWidgetsActivity"
+            android:excludeFromRecents="true"
+            android:autoRemoveFromRecents="true"
+            android:showOnLockScreen="true"
+            android:launchMode="singleTop"
+            android:exported="false">
+        </activity>
+
+        <activity android:name="com.android.systemui.communal.widgets.EditWidgetsActivity"
+            android:theme="@style/Theme.EditWidgetsActivity"
+            android:excludeFromRecents="true"
+            android:autoRemoveFromRecents="true"
+            android:showOnLockScreen="true"
+            android:launchMode="singleTop"
+            android:exported="false">
+        </activity>
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"
@@ -1081,6 +1035,7 @@
                   android:exported="true">
             <intent-filter android:priority="1">
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_DIALOG" />
+                <action android:name="com.android.systemui.action.LAUNCH_SYSTEM_MEDIA_OUTPUT_DIALOG" />
                 <action android:name="com.android.systemui.action.LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG" />
                 <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
             </intent-filter>
@@ -1118,5 +1073,9 @@
             <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
         </provider>
+
+        <!-- Allow SystemUI to listen for the capabilities defined in the linked xml -->
+        <property android:name="android.net.PROPERTY_SELF_CERTIFIED_CAPABILITIES"
+                  android:value="@xml/self_certified_network_capabilities_both" />
     </application>
 </manifest>

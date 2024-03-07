@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ביטול ההסתרה הזמנית"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"יכול להיות שהאפליקציה לא תפעל עם מסך מפוצל"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"האפליקציה לא תומכת במסך מפוצל"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ניתן לפתוח את האפליקציה הזו רק בחלון אחד."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ניתן לפתוח את האפליקציה הזו רק בחלון אחד"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ייתכן שהאפליקציה לא תפעל במסך משני."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"האפליקציה אינה תומכת בהפעלה במסכים משניים."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"מחלק מסך מפוצל"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"העברה לפינה הימנית העליונה"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"העברה לפינה השמאלית התחתונה"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"העברה לפינה הימנית התחתונה"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"הרחבה של <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"כיווץ של <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"הגדרות <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"סגירת בועה"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"אין להציג בועות לשיחה"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"הבנתי"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"אין בועות מהזמן האחרון"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"בועות אחרונות ובועות שנסגרו יופיעו כאן"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"צ\'אט בבועות"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"שיחות חדשות מופיעות כסמלים בפינה התחתונה של המסך. אפשר להקיש כדי להרחיב אותן או לגרור כדי לסגור אותן."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"שליטה בבועות בכל זמן"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"אפשר להקיש כאן כדי לקבוע אילו אפליקציות ושיחות יוכלו להופיע בבועות"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"בועה"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ניהול"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"הבועה נסגרה."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"כדי לראות טוב יותר יש להקיש ולהפעיל את האפליקציה הזו מחדש."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"כדי לראות טוב יותר יש להקיש ולהפעיל את האפליקציה הזו מחדש"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"אפשר לשנות את יחס הגובה-רוחב של האפליקציה הזו ב\'הגדרות\'"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"שינוי יחס גובה-רוחב"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"בעיות במצלמה?\nאפשר להקיש כדי לבצע התאמה מחדש"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"הבעיה לא נפתרה?\nאפשר להקיש כדי לחזור לגרסה הקודמת"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"אין בעיות במצלמה? אפשר להקיש כדי לסגור."</string>

@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"კომპანიონი მოწყობილობების მენეჯერი"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"მიანიჭებთ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; აპს &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; მოწყობილობაზე წვდომას?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"ნებას რთავთ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; აპს, წვდომა ჰქონდეს &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; მოწყობილობაზე?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"საათი"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"აირჩიეთ <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, რომელიც უნდა მართოს &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;-მა"</string>
-    <string name="summary_watch" msgid="898569637110705523">"ეს აპი საჭიროა თქვენი <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ს სამართავად. <xliff:g id="APP_NAME">%2$s</xliff:g>-ს ექნება ისეთი ინფორმაციის სინქრონიზაციის უფლება, როგორიც იმ ადამიანის სახელია, რომელიც გირეკავთ; ასევე, თქვენს შეტყობინებებთან ინტერაქციისა და თქვენს ტელეფონზე, SMS-ებზე, კონტაქტებზე, კალენდარზე, ზარების ჟურნალებსა და ახლომახლო მოწყობილობების ნებართვებზე წვდომის უფლება."</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"ეს აპი შეძლებს ინფორმაციის სინქრონიზებას (მაგალითად, იმ ადამიანის სახელი, რომელიც გირეკავთ) და ამ წვდომებზე უფლების მოპოვებას თქვენს <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>-ში"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"აირჩიეთ მოწყობილობა, რომელიც უნდა მართოს &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; აპმა"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"აირჩიეთ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> დასაყენებლად"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"ეს აპი შეძლებს, დაასინქრონოს ინფორმაცია, მაგალითად, შემომავალი ზარის ავტორის სახელი და წვდომა იქონიოს ამ ნებართვებზე თქვენს <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ში"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"ნება დართეთ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>-ს&lt;/strong&gt; მართოს &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"სათვალე"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"ეს აპი საჭიროა თქვენი <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ის სამართავად. <xliff:g id="APP_NAME">%2$s</xliff:g> შეძლებს თქვენს შეტყობინებებთან ინტერაქციას და თქვენს ტელეფონზე, SMS-ებზე, კონტაქტებზე, მიკროფონსა და ახლომახლო მოწყობილობების ნებართვებზე წვდომას."</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"ეს აპი შეძლებს ამ ნებართვებზე წვდომას თქვენს <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>-ში"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"მოწყობილობა"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"ეს აპი შეძლებს ამ ნებართვებზე წვდომას თქვენს <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ში"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"ნება დართეთ, რომ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; აპს ჰქონდეს ამ ინფორმაციაზე წვდომა თქვენი ტელეფონიდან"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"მოწყობილობათშორისი სერვისები"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> ითხოვს უფლებას თქვენი <xliff:g id="DISPLAY_NAME">%2$s</xliff:g>-ის სახელით, რომ მოწყობილობებს შორის სტრიმინგი შეძლოს"</string>
@@ -38,15 +37,16 @@
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"გსურთ ნება მისცეთ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ს&lt;/strong&gt; ამ მოქმედების შესასრულებლად?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> ითხოვს თქვენი <xliff:g id="DEVICE_NAME">%2$s</xliff:g>-ის სახელით აპების და სისტემის სხვა ფუნქციების ახლომახლო მოწყობილობებზე სტრიმინგის ნებართვას"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"მოწყობილობა"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"ეს აპი შეძლებს ინფორმაციის სინქრონიზებას თქვენს ტელეფონსა და თქვენ მიერ არჩეულ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ს შორის, მაგალითად, იმ ადამიანის სახელის, რომელიც გირეკავთ"</string>
     <string name="summary_generic" msgid="1761976003668044801">"ეს აპი შეძლებს ინფორმაციის სინქრონიზებას თქვენს ტელეფონსა და თქვენ მიერ არჩეულ მოწყობილობას შორის, მაგალითად, იმ ადამიანის სახელის, რომელიც გირეკავთ"</string>
     <string name="consent_yes" msgid="8344487259618762872">"დაშვება"</string>
     <string name="consent_no" msgid="2640796915611404382">"არ დაიშვას"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"გაუქმება"</string>
     <string name="consent_back" msgid="2560683030046918882">"უკან"</string>
+    <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>-ის გაფართოება"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>-ის ჩაკეცვა"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"გსურთ აპებს &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt;-ზე იგივე ნებართვები მიანიჭოთ, როგორიც აქვს &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;-ზე?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"ეს შესაძლოა მოიცავდეს შემდეგს: &lt;strong&gt;მიკროფონი&lt;/strong&gt;, &lt;strong&gt;კამერა&lt;/strong&gt; და &lt;strong&gt;მდებარეობაზე წვდომა&lt;/strong&gt; და &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;-ის სხვა ნებართვა სენსიტიურ ინფორმაციაზე. &lt;br/&gt;&lt;br/&gt;ამ ნებართვების შეცვლა ნებისმიერ დროს შეგიძლიათ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;-ის პარამეტრებიდან."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"აპის ხატულა"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"დამატებითი ინფორმაციის ღილაკი"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"მეტი ინფორმაცია"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Phone"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"კონტაქტები"</string>

@@ -18,6 +18,7 @@ package android.service.notification;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.app.Flags;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -221,6 +222,7 @@ public class ZenModeDiff {
         public static final String FIELD_ALLOW_CONVERSATIONS_FROM = "allowConversationsFrom";
         public static final String FIELD_SUPPRESSED_VISUAL_EFFECTS = "suppressedVisualEffects";
         public static final String FIELD_ARE_CHANNELS_BYPASSING_DND = "areChannelsBypassingDnd";
+        public static final String FIELD_ALLOW_PRIORITY_CHANNELS = "allowPriorityChannels";
         private static final Set<String> PEOPLE_TYPE_FIELDS =
                 Set.of(FIELD_ALLOW_CALLS_FROM, FIELD_ALLOW_MESSAGES_FROM);
 
@@ -296,6 +298,12 @@ public class ZenModeDiff {
             if (from.areChannelsBypassingDnd != to.areChannelsBypassingDnd) {
                 addField(FIELD_ARE_CHANNELS_BYPASSING_DND,
                         new FieldDiff<>(from.areChannelsBypassingDnd, to.areChannelsBypassingDnd));
+            }
+            if (Flags.modesApi()) {
+                if (from.allowPriorityChannels != to.allowPriorityChannels) {
+                    addField(FIELD_ALLOW_PRIORITY_CHANNELS,
+                            new FieldDiff<>(from.allowPriorityChannels, to.allowPriorityChannels));
+                }
             }
 
             // Compare automatic and manual rules
@@ -452,8 +460,14 @@ public class ZenModeDiff {
         public static final String FIELD_CREATION_TIME = "creationTime";
         public static final String FIELD_ENABLER = "enabler";
         public static final String FIELD_ZEN_POLICY = "zenPolicy";
+        public static final String FIELD_ZEN_DEVICE_EFFECTS = "zenDeviceEffects";
         public static final String FIELD_MODIFIED = "modified";
         public static final String FIELD_PKG = "pkg";
+        public static final String FIELD_ALLOW_MANUAL = "allowManualInvocation";
+        public static final String FIELD_ICON_RES = "iconResName";
+        public static final String FIELD_TRIGGER_DESCRIPTION = "triggerDescription";
+        public static final String FIELD_TYPE = "type";
+        // NOTE: new field strings must match the variable names in ZenModeConfig.ZenRule
 
         // Special field to track whether this rule became active or inactive
         FieldDiff<Boolean> mActiveDiff;
@@ -528,6 +542,26 @@ public class ZenModeDiff {
             }
             if (!Objects.equals(from.pkg, to.pkg)) {
                 addField(FIELD_PKG, new FieldDiff<>(from.pkg, to.pkg));
+            }
+            if (android.app.Flags.modesApi()) {
+                if (!Objects.equals(from.zenDeviceEffects, to.zenDeviceEffects)) {
+                    addField(FIELD_ZEN_DEVICE_EFFECTS,
+                            new FieldDiff<>(from.zenDeviceEffects, to.zenDeviceEffects));
+                }
+                if (!Objects.equals(from.triggerDescription, to.triggerDescription)) {
+                    addField(FIELD_TRIGGER_DESCRIPTION,
+                            new FieldDiff<>(from.triggerDescription, to.triggerDescription));
+                }
+                if (from.type != to.type) {
+                    addField(FIELD_TYPE, new FieldDiff<>(from.type, to.type));
+                }
+                if (from.allowManualInvocation != to.allowManualInvocation) {
+                    addField(FIELD_ALLOW_MANUAL,
+                            new FieldDiff<>(from.allowManualInvocation, to.allowManualInvocation));
+                }
+                if (!Objects.equals(from.iconResName, to.iconResName)) {
+                    addField(FIELD_ICON_RES, new FieldDiff<>(from.iconResName, to.iconResName));
+                }
             }
         }
 

@@ -18,6 +18,7 @@ package android.view;
 
 import static android.view.InsetsSourceProto.FRAME;
 import static android.view.InsetsSourceProto.TYPE;
+import static android.view.InsetsSourceProto.TYPE_NUMBER;
 import static android.view.InsetsSourceProto.VISIBLE;
 import static android.view.InsetsSourceProto.VISIBLE_FRAME;
 import static android.view.WindowInsets.Type.captionBar;
@@ -48,8 +49,9 @@ public class InsetsSource implements Parcelable {
 
     /** The insets source ID of IME */
     public static final int ID_IME = createId(null, 0, ime());
+
     /** The insets source ID of the IME caption bar ("fake" IME navigation bar). */
-    static final int ID_IME_CAPTION_BAR =
+    public static final int ID_IME_CAPTION_BAR =
             InsetsSource.createId(null /* owner */, 1 /* index */, captionBar());
 
     /**
@@ -185,11 +187,6 @@ public class InsetsSource implements Parcelable {
 
     public boolean hasFlags(int flags) {
         return (mFlags & flags) == flags;
-    }
-
-    boolean isUserControllable() {
-        // If mVisibleFrame is null, it will be the same area as mFrame.
-        return mVisibleFrame == null || !mVisibleFrame.isEmpty();
     }
 
     /**
@@ -357,6 +354,7 @@ public class InsetsSource implements Parcelable {
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(TYPE, WindowInsets.Type.toString(mType));
+        proto.write(TYPE_NUMBER, mType);
         mFrame.dumpDebug(proto, FRAME);
         if (mVisibleFrame != null) {
             mVisibleFrame.dumpDebug(proto, VISIBLE_FRAME);

@@ -51,14 +51,14 @@ constructor(
     val scaleForResolution = configRepo.scaleForResolution
 
     /** Burn-in offsets for the UDFPS view to mitigate burn-in on AOD. */
-    val burnInOffsets: Flow<BurnInOffsets> =
+    val burnInOffsets: Flow<Offsets> =
         combine(
             keyguardInteractor.dozeAmount,
-            burnInInteractor.udfpsBurnInXOffset,
-            burnInInteractor.udfpsBurnInYOffset,
-            burnInInteractor.udfpsBurnInProgress
+            burnInInteractor.deviceEntryIconXOffset,
+            burnInInteractor.deviceEntryIconYOffset,
+            burnInInteractor.udfpsProgress
         ) { dozeAmount, fullyDozingBurnInX, fullyDozingBurnInY, fullyDozingBurnInProgress ->
-            BurnInOffsets(
+            Offsets(
                 intEvaluator.evaluate(dozeAmount, 0, fullyDozingBurnInX),
                 intEvaluator.evaluate(dozeAmount, 0, fullyDozingBurnInY),
                 floatEvaluator.evaluate(dozeAmount, 0, fullyDozingBurnInProgress),
@@ -86,8 +86,8 @@ constructor(
             .onStart { emit(0f) }
 }
 
-data class BurnInOffsets(
-    val burnInXOffset: Int, // current x burn in offset based on the aodTransitionAmount
-    val burnInYOffset: Int, // current y burn in offset based on the aodTransitionAmount
-    val burnInProgress: Float, // current progress based on the aodTransitionAmount
+data class Offsets(
+    val x: Int, // current x burn in offset based on the aodTransitionAmount
+    val y: Int, // current y burn in offset based on the aodTransitionAmount
+    val progress: Float, // current progress based on the aodTransitionAmount
 )

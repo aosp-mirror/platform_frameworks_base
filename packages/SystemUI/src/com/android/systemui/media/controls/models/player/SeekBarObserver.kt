@@ -23,7 +23,7 @@ import androidx.annotation.UiThread
 import androidx.lifecycle.Observer
 import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.media.controls.ui.SquigglyProgress
 
 /**

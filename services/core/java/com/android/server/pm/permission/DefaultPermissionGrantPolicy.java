@@ -26,7 +26,6 @@ import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
-import android.companion.CompanionDeviceManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -808,7 +807,7 @@ final class DefaultPermissionGrantPolicy {
                     getDefaultSystemHandlerActivityPackage(pm,
                             SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
                     userId, MICROPHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    NOTIFICATION_PERMISSIONS);
+                    NOTIFICATION_PERMISSIONS, PHONE_PERMISSIONS);
         }
 
         // Voice recognition
@@ -903,7 +902,7 @@ final class DefaultPermissionGrantPolicy {
 
         // Companion devices
         grantSystemFixedPermissionsToSystemPackage(pm,
-                CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, userId,
+                getDefaultCompanionDeviceManagerPackage(), userId,
                 ALWAYS_LOCATION_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS);
 
         // Ringtone Picker
@@ -951,6 +950,10 @@ final class DefaultPermissionGrantPolicy {
 
     private String getDefaultDockManagerPackage() {
         return mContext.getString(R.string.config_defaultDockManagerPackageName);
+    }
+
+    private String getDefaultCompanionDeviceManagerPackage() {
+        return mContext.getString(R.string.config_companionDeviceManagerPackage);
     }
 
     @SafeVarargs
@@ -1745,14 +1748,14 @@ final class DefaultPermissionGrantPolicy {
      */
     private class DelayingPackageManagerCache extends PackageManagerWrapper {
         /** uid -> permission -> isGranted, flags */
-        private SparseArray<ArrayMap<String, PermissionState>> mDelayedPermissionState =
+        private final SparseArray<ArrayMap<String, PermissionState>> mDelayedPermissionState =
                 new SparseArray<>();
         /** userId -> context */
-        private SparseArray<Context> mUserContexts = new SparseArray<>();
+        private final SparseArray<Context> mUserContexts = new SparseArray<>();
         /** Permission name -> info */
-        private ArrayMap<String, PermissionInfo> mPermissionInfos = new ArrayMap<>();
+        private final ArrayMap<String, PermissionInfo> mPermissionInfos = new ArrayMap<>();
         /** Package name -> info */
-        private ArrayMap<String, PackageInfo> mPackageInfos = new ArrayMap<>();
+        private final ArrayMap<String, PackageInfo> mPackageInfos = new ArrayMap<>();
 
         /**
          * Apply the cached state

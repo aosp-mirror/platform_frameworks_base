@@ -97,8 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Идэвхтэй, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Идэвхтэй, Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Зүүн тал <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Баруун тал <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Идэвхтэй"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"Хадгалсан"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Идэвхтэй, зөвхөн зүүн тал"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Идэвхтэй, зөвхөн баруун тал"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Идэвхтэй, зүүн болон баруун тал"</string>
@@ -107,16 +111,16 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл дамжуулалт"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Оруулах төхөөрөмж"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Интернэт хандалт"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Харилцагчид ба дуудлагын түүх хуваалцах"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Харилцагчид ба дуудлагын түүх хуваалцахад ашиглах"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Харилцагч, дуудлагын түүхэд хандахыг зөвшөөр"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Мэдээллийг дуудлагын мэдэгдэл болон бусад зүйлд ашиглана"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Интернэт холболтыг хуваалцах"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Мессеж"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM Хандалт"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD аудио"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Сонсголын төхөөрөмж"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE аудио"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Сонсголын төхөөрөмжтэй холбосон"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Сонсголын төхөөрөмж"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Аудио"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Сонсголын төхөөрөмжтэй холбосон"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE аудионд холбогдсон"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Медиа аудиод холбогдсон"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Утасны аудид холбогдсон"</string>
@@ -134,7 +138,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Утасны аудиод ашиглах"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Файл дамжуулахад ашиглах"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Оруулахад ашиглах"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Сонсголын төхөөрөмжид ашиглах"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Сонсголын төхөөрөмж болгон ашиглах"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_АУДИОНД ашиглах"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Хослуулах"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ХОСЛУУЛАХ"</string>
@@ -157,6 +161,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wifi сүлжээний дохио хоёр баганатай байна."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wifi сүлжээний дохио гурван баганатай байна."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wifi-н дохио дүүрэн байна."</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Таны төхөөрөмжид холбогдсон."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Нээлттэй сүлжээ"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Аюулгүй сүлжээ"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Андройд OS"</string>
@@ -215,6 +220,8 @@
     <string name="choose_profile" msgid="343803890897657450">"Профайл сонгох"</string>
     <string name="category_personal" msgid="6236798763159385225">"Хувийн"</string>
     <string name="category_work" msgid="4014193632325996115">"Ажил"</string>
+    <string name="category_private" msgid="4244892185452788977">"Хувийн"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Хөгжүүлэгчийн тохиргоо"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Хөгжүүлэгчийн сонголтыг идэвхжүүлэх"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Апп хөгжүүлэлтэд зориулсан сонголтуудыг тохируулах"</string>
@@ -257,7 +264,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Цэсэд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Идэвхтэй байлгах"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Цэнэглэж байх үед дэлгэц хэзээ ч амрахгүй"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI снүүп логыг идэвхжүүлэх"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI snoop log-г идэвхжүүлэх"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth-н багцыг авна уу. (Энэ тохиргоог өөрчилсний дараа Bluetooth-г унтрааж/асаана уу)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM түгжээ тайлагч"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Bootloader-н түгжээг тайлахыг зөвшөөрөх"</string>
@@ -268,7 +275,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"Хуурамч байршлын апп: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Сүлжээ"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Утасгүй дэлгэцийн сертификат"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дэлгэрэнгүй лог-г идэвхжүүлэх"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дэлгэрэнгүй логийг идэвхжүүлэх"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi скан бууруулалт"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi-н байнгын бус MAC-г санамсаргүй байдлаар эмхлэх"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобайл дата байнга идэвхтэй"</string>
@@ -325,8 +332,8 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Таны өмнө нь зөвшөөрөл өгсөн бүх компьютерээс USB дебаг хандалтыг нь хураах уу?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Хөгжлийн тохиргоог зөвшөөрөх үү?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликейшнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Апп-г USB-р баталгаажуулах"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT-р суулгасан апп-уудыг хорлонтой авиртай эсэхийг шалгах."</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Аппыг USB-р баталгаажуулах"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT-р суулгасан аппуудыг хорлонтой авиртай эсэхийг шалгана."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Нэргүй Bluetooth төхөөрөмжийг (зөвхөн MAC хаяг) харуулна"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Хэт чанга дуугаралт эсвэл муу тохиргоо зэрэг алсын зайн төхөөрөмжийн дуугаралттай холбоотой асуудлын үед Bluetooth-ийн үнэмлэхүй дууны түвшнийг идэвхгүй болго."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche онцлогийн өрөлтийг идэвхжүүлдэг."</string>
@@ -341,8 +348,8 @@
     <string name="debug_app_set" msgid="6599535090477753651">"Согог засах аппликейшн: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Аппликейшн сонгох"</string>
     <string name="no_application" msgid="9038334538870247690">"Юуг ч биш"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"Дебаг-г хүлээх"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Дебаг хийгдсэн апп гүйцэтгэхийнхээ өмнө дебаг-г хавсаргахыг хүлээнэ"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Дебагийг хүлээх"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Дебаг хийгдсэн апп гүйцэтгэхийнхээ өмнө дебагийг хавсаргахыг хүлээнэ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Оруулах"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Зураг"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Техник хангамжийн хурдасгасан үзүүлэлт"</string>
@@ -354,6 +361,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Дэлгэцийн давхаргаар одоогийн хүрэлтийн өгөгдлийг харуулж байна"</string>
     <string name="show_touches" msgid="8437666942161289025">"Товшилтыг харуулах"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Товшилтын визуал хариу үйлдлийг харуулах"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"Түлхүүрийн даралт харуул"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Биет түлхүүрийн даралтын визуал хариу үйлдлийг харуул"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Гадаргын шинэчлэлтүүдийг харуулах"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Шинэчлэгдэх үед цонхны гадаргыг бүхэлд нь анивчуулах"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Шинэчлэлт харахыг харуулах"</string>
@@ -375,16 +384,16 @@
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Навигацын самбарын дэвсгэр өнгийг өгөгдмөлөөр нэвт харагддаг болгоно"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Цонхны түвшний бүдгэрүүлэлтийг зөвшөөрөх"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Хүчээр 4x MSAA ашиглах"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 апп-уудад 4x MSAA-г идэвхжүүлэх"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 аппуудад 4x MSAA-г идэвхжүүлэх"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Тэгш өнцөгт бус клипийн үйлдлүүдийн согогийг засах"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Профайл HWUI-н буулгалт"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU дебаг хийх давхаргыг идэвхжүүлэх"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дебаг хийх аппад GPU дебаг хийх давхарга ачаалахыг зөвшөөрөх"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Нийлүүлэгчийн дэлгэрэнгүй логийг идэвхжүүлэх"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Төхөөрөмжийн тодорхойлсон нийлүүлэгчийн нэвтрэх үеийн алдааны нэмэлт мэдээг оруулах бөгөөд энэ нь хувийн мэдээлэл агуулж, батарейг илүү ашиглах болон/эсвэл хадгалах сан илүү ашиглаж болзошгүй."</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"Цонхны дүрс амилуулалтын далайц"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн дүрс амилуулалтын далайц"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Дүрс амилуулалт үргэлжлэх далайц"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Цонхны анимацийн масштаб"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн анимацийн масштаб"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Анимацийн хугацааны масштаб"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Хоёр дахь дэлгэцийн симуляци хийх"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Апп"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Үйлдлүүдийг хадгалахгүй"</string>
@@ -400,7 +409,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Тодорхойлогч файлын утгыг үл хамааран, бүх үйл ажиллагааны хэмжээг олон цонхонд өөрчилж болохуйц болгоно уу."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Чөлөөт хэлбэрийн цонхыг идэвхжүүлэх"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Туршилтын чөлөөт хэлбэрийн цонхны дэмжлэгийг идэвхжүүлнэ үү."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Дэлгэцийн горим"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Компьютерын нөөцлөлтийн нууц үг"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Компьютерын бүрэн нөөцлөлт одоогоор хамгаалалтгүй байна"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Компьютерийн бүтэн нөөцлөлтийн нууц үгийг өөрчлөх, устгах бол дарна уу"</string>
@@ -428,6 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Аппыг орчин үеийн форматыг дэмждэг гэж үздэг"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Хөрвүүлгийн мэдэгдэл харуулах"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Хөрвүүлгийн завсрын санах ойг идэвхгүй болгох"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-н тохиргоо"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 нөөцийг хүчлэх"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 нөөцийг хүчлэхийг сонгоно уу"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Ажиллаж байгаа үйлчилгээнүүд"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Одоо ажиллаж байгаа үйлчилгээнүүдийг харах болон хянах"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView хэрэгжилт"</string>
@@ -460,12 +471,6 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их үлдсэн"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Утас удахгүй унтарч болзошгүй"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Таблет удахгүй унтарч болзошгүй"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Төхөөрөмж удахгүй унтарч болзошгүй"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Утас удахгүй унтарч болзошгүй (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Таблет удахгүй унтарч болзошгүй (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Төхөөрөмж удахгүй унтарч болзошгүй (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Дүүрэх хүртэл <xliff:g id="TIME">%1$s</xliff:g> үлдсэн"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - дүүрэх хүртэл <xliff:g id="TIME">%2$s</xliff:g> үлдсэн"</string>
@@ -515,16 +520,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Бүртгээгүй"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Байхгүй"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC хаягийг үүсгэсэн"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 төхөөрөмж холбогдсон}=1{1 төхөөрөмж холбогдсон}other{# төхөөрөмж холбогдсон}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 төхөөрөмж холбогдсон}other{# төхөөрөмж холбогдсон}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Их хугацаа."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Бага хугацаа."</string>
     <string name="cancel" msgid="5665114069455378395">"Цуцлах"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Дараах"</string>
+    <string name="back" msgid="5554327870352703710">"Буцах"</string>
+    <string name="save" msgid="3745809743277153149">"Хадгалах"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Болсон"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Сэрүүлэг болон сануулагч"</string>
@@ -547,6 +549,11 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Дөнгөж сая"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Энэ утас"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Энэ таблет"</string>
+    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Суурилуулагчийн чанга яригч"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Гадаад төхөөрөмж"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Холбогдсон төхөөрөмж"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Энэ утас"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Энэ төхөөрөмжид тоглуулах боломжгүй"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Сэлгэхийн тулд бүртгэлийг сайжруулна уу"</string>
@@ -555,6 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Энд тоглуулахын тулд төхөөрөмжийг сэрээнэ үү"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Төхөөрөмжийг тоглуулахыг зөвшөөрөөгүй"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Энэ медиаг энд тоглуулах боломжгүй"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Холбогдсон"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC-р холбогдсон"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC-р холбогдсон"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ТВ-ийн өгөгдмөл"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI гаралт"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Дотоод чанга яригч"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Холбогдоход асуудал гарлаа. Төхөөрөмжийг унтраагаад дахин асаана уу"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Утастай аудио төхөөрөмж"</string>
     <string name="help_label" msgid="3528360748637781274">"Тусламж, санал хүсэлт"</string>
@@ -578,13 +593,10 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Хязгаарлагдсан профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Шинэ хэрэглэгч нэмэх үү?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Та нэмэлт хэрэглэгч үүсгэх замаар бусад хүмүүстэй энэ төхөөрөмжийг хуваалцаж болно. Хэрэглэгч тус бүр апп, дэлгэцийн зураг болон бусад зүйлээ өөрчлөх боломжтой хувийн орон зайтай байна. Түүнчлэн хэрэглэгч нь бүх хэрэглэгчид нөлөөлөх боломжтой Wi-Fi зэрэг төхөөрөмжийн тохиргоог өөрчлөх боломжтой.\n\nХэрэв та шинэ хэрэглэгч нэмэх бол тухайн хүн хувийн орон зайгаа бүрдүүлэх ёстой.\n\nХэрэглэгч бүр бусад бүх хэрэглэгчийн өмнөөс апп шинэчилж болно. Хандалтын тохиргоо болон үйлчилгээг шинэ хэрэглэгчид шилжүүлэх боломжгүй байж болзошгүй."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн орон зайг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бусад бүх хэрэглэгчийн аппуудыг шинэчлэх боломжтой."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Энэ хэрэглэгчийг админ болгох уу?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Админууд бусад хэрэглэгчид байхгүй тусгай эрхтэй байдаг. Админ нь бүх хэрэглэгчийг удирдах, энэ төхөөрөмжийг шинэчлэх, сэргээх, тохиргоог өөрчлөх, бүх суулгасан аппыг харах болон бусад хэрэглэгчид админы эрх өгөх эсвэл эрхийг нь цуцлах боломжтой."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Админ болгох"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Хэрэглэгчийг одоо тохируулах уу?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Хэрэглэгч төхөөрөмжийг авч өөрийн профайлыг тохируулах боломжтой эсэхийг шалгана уу"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайлыг одоо тохируулах уу?"</string>
@@ -616,10 +628,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Энэ нь шинэ зочны харилцан үйлдэл эхлүүлж, одоогийн харилцан үйлдлээс бүх апп болон өгөгдлийг устгана"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Зочны горимоос гарах уу?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Энэ нь одоогийн зочны харилцан үйлдлээс аппууд болон өгөгдлийг устгана"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Тийм, түүнийг админ болго"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Үгүй, түүнийг админ болгохгүй"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Гарах"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Зочны үйл ажиллагааг хадгалах уу?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Та одоогийн харилцан үйлдлээс үйл ажиллагаа хадгалах эсвэл бүх апп, өгөгдлийг устгаж болно"</string>
@@ -678,7 +688,7 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Гарын бүдүүвчийг сонгох"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Өгөгдмөл"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Дэлгэцийг асаах"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дэлгэцийг асаахыг зөвшөөрнө үү"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дэлгэцийг асаахыг зөвшөөрөх"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Аппад дэлгэцийг асаахыг зөвшөөрнө үү. Зөвшөөрсөн тохиолдолд тухайн апп таны тодорхой оролцоогүйгээр ямар ч үед дэлгэцийг асааж болно."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g>-г нэвтрүүлэхээ зогсоох уу?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Хэрэв та <xliff:g id="SWITCHAPP">%1$s</xliff:g>-г нэвтрүүлсэн эсвэл гаралтыг өөрчилсөн бол таны одоогийн нэвтрүүлэлтийг зогсооно"</string>
@@ -687,11 +697,9 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Таамаглах боломжтой буцаах анимаци"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Таамаглах боломжтой буцаах зангаанд системийн анимацийг идэвхжүүлнэ үү."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Энэ тохиргоо нь таамаглах боломжтой зангааны анимацид системийн анимацийг идэвхжүүлнэ. Үүнд апп бүрд тодорхойлогч файлл enableOnBackInvokedCallback-г үнэн болгож тохируулахыг шаардана."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Зүүн тийш зөөх"</item>
-    <item msgid="5425394847942513942">"Доош зөөх"</item>
-    <item msgid="7728484337962740316">"Баруун тийш зөөх"</item>
-    <item msgid="324200556467459329">"Дээш зөөх"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="not_specified" msgid="5423502443185110328">"Заагаагүй"</string>
+    <string name="neuter" msgid="2075249330106127310">"Саармаг үг"</string>
+    <string name="feminine" msgid="1529155595310784757">"Эм үг"</string>
+    <string name="masculine" msgid="4653978041013996303">"Эр үг"</string>
 </resources>

@@ -22,7 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -39,6 +39,7 @@ constructor(
     override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
+    private val powerInteractor: PowerInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.OCCLUDED,
@@ -50,14 +51,28 @@ constructor(
         listenForOccludedToAodOrDozing()
         listenForOccludedToGone()
         listenForOccludedToAlternateBouncer()
+        listenForOccludedToPrimaryBouncer()
+    }
+
+    private fun listenForOccludedToPrimaryBouncer() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isBouncerShowing, lastStartedTransitionStep) ->
+                    if (
+                        isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.OCCLUDED
+                    ) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
+        }
     }
 
     private fun listenForOccludedToDreaming() {
         scope.launch {
             keyguardInteractor.isAbleToDream
                 .sample(transitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { pair ->
-                    val (isAbleToDream, keyguardState) = pair
+                .collect { (isAbleToDream, keyguardState) ->
                     if (isAbleToDream && keyguardState == KeyguardState.OCCLUDED) {
                         startTransitionTo(KeyguardState.DREAMING)
                     }
@@ -117,7 +132,7 @@ constructor(
 
     private fun listenForOccludedToAodOrDozing() {
         scope.launch {
-            keyguardInteractor.wakefulnessModel
+            powerInteractor.isAsleep
                 .sample(
                     combine(
                         transitionInteractor.startedKeyguardTransitionStep,
@@ -126,11 +141,8 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { (wakefulnessState, lastStartedStep, isAodAvailable) ->
-                    if (
-                        lastStartedStep.to == KeyguardState.OCCLUDED &&
-                            wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP
-                    ) {
+                .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
+                    if (lastStartedStep.to == KeyguardState.OCCLUDED && isAsleep) {
                         startTransitionTo(
                             if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
                         )
@@ -173,5 +185,6 @@ constructor(
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 933.milliseconds
+        val TO_AOD_DURATION = DEFAULT_DURATION
     }
 }

@@ -89,5 +89,12 @@ interface AccessPointController {
          * "wifi_start_connect_ssid" set as an extra
          */
         fun onSettingsActivityTriggered(settingsIntent: Intent?)
+
+        /**
+         * Called whenever a Wi-Fi scan is triggered.
+         *
+         * @param isScan Whether Wi-Fi scan is triggered or not.
+         */
+        fun onWifiScan(isScan: Boolean)
     }
 }

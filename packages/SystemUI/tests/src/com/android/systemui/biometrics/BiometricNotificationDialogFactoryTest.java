@@ -17,17 +17,17 @@
 package com.android.systemui.biometrics;
 
 import static com.google.common.truth.Truth.assertThat;
-
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -58,14 +58,13 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
 
-    @Mock
-    FingerprintManager mFingerprintManager;
-    @Mock
-    FaceManager mFaceManager;
-    @Mock
-    SystemUIDialog mDialog;
+    @Mock Resources mResources;
+    @Mock FingerprintManager mFingerprintManager;
+    @Mock FaceManager mFaceManager;
+    @Mock SystemUIDialog.Factory mSystemUIDialogFactory;
+    @Mock SystemUIDialog mDialog;
+    @Mock BiometricNotificationDialogFactory.ActivityStarter mActivityStarter;
 
-    private Context mContextSpy;
     private final ArgumentCaptor<DialogInterface.OnClickListener> mOnClickListenerArgumentCaptor =
             ArgumentCaptor.forClass(DialogInterface.OnClickListener.class);
     private final ArgumentCaptor<Intent> mIntentArgumentCaptor =
@@ -74,20 +73,24 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
-        mContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
-        mContext.addMockSystemService(FaceManager.class, mFaceManager);
-
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        when(mSystemUIDialogFactory.create()).thenReturn(mDialog);
 
-        mContextSpy = spy(mContext);
-        mDialogFactory = new BiometricNotificationDialogFactory();
+        mDialogFactory = new BiometricNotificationDialogFactory(
+                mResources,
+                mSystemUIDialogFactory,
+                mFingerprintManager,
+                mFaceManager
+        );
     }
 
     @Test
     public void testFingerprintReEnrollDialog_onRemovalSucceeded() {
-        mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
-                BiometricSourceType.FINGERPRINT);
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT));
+
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FINGERPRINT);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 
@@ -102,15 +105,17 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
         removalCallbackArgumentCaptor.getValue().onRemovalSucceeded(null /* fp */,
                 0 /* remaining */);
 
-        verify(mContextSpy).startActivity(mIntentArgumentCaptor.capture());
+        verify(mActivityStarter).startActivity(mIntentArgumentCaptor.capture());
         assertThat(mIntentArgumentCaptor.getValue().getAction()).isEqualTo(
                 Settings.ACTION_FINGERPRINT_ENROLL);
     }
 
     @Test
     public void testFingerprintReEnrollDialog_onRemovalError() {
-        mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
-                BiometricSourceType.FINGERPRINT);
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT));
+
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FINGERPRINT);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 
@@ -125,13 +130,15 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
         removalCallbackArgumentCaptor.getValue().onRemovalError(null /* fp */,
                 0 /* errmsgId */, "Error" /* errString */);
 
-        verify(mContextSpy, never()).startActivity(any());
+        verify(mActivityStarter, never()).startActivity(any());
     }
 
     @Test
     public void testFaceReEnrollDialog_onRemovalSucceeded() {
-        mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
-                BiometricSourceType.FACE);
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FACE));
+
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FACE);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 
@@ -146,15 +153,17 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
         removalCallbackArgumentCaptor.getValue().onRemovalSucceeded(null /* fp */,
                 0 /* remaining */);
 
-        verify(mContextSpy).startActivity(mIntentArgumentCaptor.capture());
+        verify(mActivityStarter).startActivity(mIntentArgumentCaptor.capture());
         assertThat(mIntentArgumentCaptor.getValue().getAction()).isEqualTo(
                 "android.settings.FACE_ENROLL");
     }
 
     @Test
     public void testFaceReEnrollDialog_onRemovalError() {
-        mDialogFactory.createReenrollDialog(mContextSpy, mDialog,
-                BiometricSourceType.FACE);
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FACE));
+
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FACE);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 
@@ -169,6 +178,6 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
         removalCallbackArgumentCaptor.getValue().onRemovalError(null /* face */,
                 0 /* errmsgId */, "Error" /* errString */);
 
-        verify(mContextSpy, never()).startActivity(any());
+        verify(mActivityStarter, never()).startActivity(any());
     }
 }

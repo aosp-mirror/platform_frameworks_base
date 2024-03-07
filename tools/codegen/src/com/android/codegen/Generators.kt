@@ -327,7 +327,8 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
             +"return$maybeCast this;"
         }
 
-        val javadocSeeSetter = "/** @see #$setterName */"
+        val javadocSeeSetter =
+                if (isHidden()) "/** @see #$setterName @hide */" else "/** @see #$setterName */"
         val adderName = "add$SingularName"
 
         val singularNameCustomizationHint = if (SingularNameOrNull == null) {
@@ -748,6 +749,15 @@ fun ClassPrinter.generateGetters() {
             }
         }
     }
+}
+
+fun FieldInfo.isHidden(): Boolean {
+    if (javadocFull != null) {
+        (javadocFull ?: "/**\n */").lines().forEach {
+            if (it.contains("@hide")) return true
+        }
+    }
+    return false
 }
 
 fun FieldInfo.generateFieldJavadoc(forceHide: Boolean = false) = classPrinter {

@@ -20,10 +20,11 @@ import android.graphics.Rect
 import android.test.suitebuilder.annotation.SmallTest
 import android.view.MotionEvent
 import android.view.Surface
-import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -55,6 +56,7 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var udfpsOverlayParams: UdfpsOverlayParams
     @Mock private lateinit var overlayBounds: Rect
+    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
 
     private lateinit var underTest: UdfpsOverlayInteractor
 
@@ -104,7 +106,12 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
         }
 
     private fun createUdpfsOverlayInteractor() {
-        underTest = UdfpsOverlayInteractor(authController, testScope.backgroundScope)
+        underTest =
+            UdfpsOverlayInteractor(
+                authController,
+                selectedUserInteractor,
+                testScope.backgroundScope
+            )
         testScope.runCurrent()
     }
 }

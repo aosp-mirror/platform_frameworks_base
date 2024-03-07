@@ -20,7 +20,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView
 import com.android.systemui.statusbar.pipeline.wifi.ui.binder.WifiViewBinder

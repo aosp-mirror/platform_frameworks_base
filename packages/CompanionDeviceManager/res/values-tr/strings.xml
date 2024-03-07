@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; cihazına erişmesi için &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; uygulamasına izin verin"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; cihazına erişmesi için &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; uygulamasına izin verin"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"saat"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"&lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; tarafından yönetilecek bir <xliff:g id="PROFILE_NAME">%1$s</xliff:g> seçin"</string>
-    <string name="summary_watch" msgid="898569637110705523">"Bu uygulama, <xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazınızın yönetilmesi için gereklidir. <xliff:g id="APP_NAME">%2$s</xliff:g> adlı uygulamanın arayan kişinin adı gibi bilgileri senkronize etmesine, bildirimlerinizle etkileşimde bulunup Telefon, SMS, Kişiler, Takvim, Arama kayıtları ve Yakındaki cihazlar izinlerine erişmesine izin verilir."</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"Bu uygulamanın arayan kişinin adı gibi bilgileri senkronize etmesine ve <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> cihazınızda aşağıdaki izinlere erişmesine izin verilir"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; tarafından yönetilecek bir cihaz seçin"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Ayarlamak için bir <xliff:g id="PROFILE_NAME">%1$s</xliff:g> seçin"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Bu uygulamanın arayan kişinin adı gibi bilgileri senkronize etmesine ve <xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazınızda aşağıdaki izinlere erişmesine izin verilir"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; uygulamasına &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; cihazını yönetmesi için izin verilsin mi?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"glasses"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"Bu uygulama, <xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazının yönetilmesi için gereklidir. <xliff:g id="APP_NAME">%2$s</xliff:g> adlı uygulamanın bildirimlerinizle etkileşimde bulunup Telefon, SMS, Kişiler, Mikrofon ve Yakındaki cihazlar izinlerine erişmesine izin verilir."</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"Bu uygulamanın <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> cihazınızda şu izinlere erişmesine izin verilecek:"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"Cihaz"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Bu uygulamanın <xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazınızda şu izinlere erişmesine izin verilecek:"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; uygulamasının, telefonunuzdaki bu bilgilere erişmesine izin verin"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Cihazlar arası hizmetler"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g>, cihazlarınız arasında uygulama akışı gerçekleştirmek için <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> cihazınız adına izin istiyor"</string>
@@ -33,20 +32,21 @@
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; uygulamasının, telefonunuzdaki bu bilgilere erişmesine izin verin"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play hizmetleri"</string>
+    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Hizmetleri"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g>, telefonunuzdaki fotoğraf, medya ve bildirimlere erişmek için <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> cihazınız adına izin istiyor"</string>
-    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; cihazının bu işlem yapmasına izin verilsin mi?"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"&lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; cihazının bu işlemi yapmasına izin verilsin mi?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması <xliff:g id="DEVICE_NAME">%2$s</xliff:g> cihazınız adına uygulamaları ve diğer sistem özelliklerini yakındaki cihazlara aktarmak için izin istiyor"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"cihaz"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"Bu uygulama, arayan kişinin adı gibi bilgileri telefonunuz ve <xliff:g id="DEVICE_NAME">%1$s</xliff:g> adlı cihaz arasında senkronize edebilir"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Bu uygulama, arayan kişinin adı gibi bilgileri telefonunuz ve seçili cihaz arasında senkronize edebilir"</string>
     <string name="consent_yes" msgid="8344487259618762872">"İzin ver"</string>
     <string name="consent_no" msgid="2640796915611404382">"İzin verme"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"İptal"</string>
     <string name="consent_back" msgid="2560683030046918882">"Geri"</string>
+    <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> panelini genişlet"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> panelini daralt"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; cihazındaki uygulamalara, &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; cihazındakiyle aynı izinler verilsin mi?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Bu; &lt;strong&gt;Mikrofon&lt;/strong&gt;, &lt;strong&gt;Kamera&lt;/strong&gt; ve &lt;strong&gt;Konum erişimi&lt;/strong&gt; izinlerinin yanı sıra &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; cihazındaki diğer hassas bilgilere erişim izinlerini içerebilir. &lt;br/&gt;&lt;br/&gt;&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; cihazının Ayarlar bölümünden istediğiniz zaman bu izinleri değiştirebilirsiniz."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Uygulama Simgesi"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Daha Fazla Bilgi Düğmesi"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Daha Fazla Bilgi"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Kişiler"</string>
@@ -59,16 +59,16 @@
     <string name="permission_app_streaming" msgid="6009695219091526422">"Uygulamalar"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Yayınlama"</string>
     <string name="permission_phone_summary" msgid="6684396967861278044">"Telefon aramaları yapabilir ve telefon aramalarını yönetebilir"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Telefon arama kaydını okuma ve yazma"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Telefon arama kaydını okuyabilir ve yazabilir"</string>
     <string name="permission_sms_summary" msgid="3508442683678912017">"SMS mesajları gönderebilir ve görüntüleyebilir"</string>
     <string name="permission_contacts_summary" msgid="675861979475628708">"Kişilerinize erişebilir"</string>
     <string name="permission_calendar_summary" msgid="6460000922511766226">"Takviminize erişebilir"</string>
     <string name="permission_microphone_summary" msgid="3692091540613093394">"Ses kaydedebilir"</string>
     <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Yakındaki cihazları keşfedip bağlanabilir ve bu cihazların göreli konumunu belirleyebilir"</string>
     <string name="permission_notification_summary" msgid="884075314530071011">"Kişiler, mesajlar ve fotoğraflar da dahil olmak üzere tüm bildirimleri okuyabilir"</string>
-    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefonunuzun uygulamalarını yayınlama"</string>
+    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Telefonunuzun uygulamalarını yayınlayabilir"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Telefonunuzdan uygulamaları ve diğer sistem özelliklerini yayınlayın"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Telefonunuzdan uygulamaları ve diğer sistem özelliklerini yayınlayabilir"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

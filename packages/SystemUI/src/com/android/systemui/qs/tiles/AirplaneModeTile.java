@@ -36,7 +36,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -49,14 +48,13 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import dagger.Lazy;
 
 import javax.inject.Inject;
-
-
 
 /** Quick settings tile: Airplane mode **/
 public class AirplaneModeTile extends QSTileImpl<BooleanState> {
@@ -90,8 +88,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
         mBroadcastDispatcher = broadcastDispatcher;
         mLazyConnectivityManager = lazyConnectivityManager;
 
-        mSetting = new SettingObserver(globalSettings, mHandler, Global.AIRPLANE_MODE_ON,
-                userTracker.getUserId()) {
+        mSetting = new SettingObserver(globalSettings, mHandler, Global.AIRPLANE_MODE_ON) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 // mHandler is the background handler so calling this is OK

@@ -25,7 +25,7 @@ JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, std::shared_ptr<ITvInputWrap
     mThiz = env->NewWeakGlobalRef(thiz);
     mTvInput = tvInput;
     mLooper = looper;
-    mTvInputCallback = ::ndk::SharedRefBase::make<TvInputCallback>(this);
+    mTvInputCallback = std::shared_ptr<TvInputCallbackWrapper>(new TvInputCallbackWrapper(this));
     mTvInput->setCallback(mTvInputCallback);
 }
 
@@ -147,7 +147,6 @@ int JTvInputHal::removeStream(int deviceId, int streamId) {
 }
 
 int JTvInputHal::setTvMessageEnabled(int deviceId, int streamId, int type, bool enabled) {
-    Mutex::Autolock autoLock(&mLock);
     if (!mTvInput->setTvMessageEnabled(deviceId, streamId,
                                        static_cast<AidlTvMessageEventType>(type), enabled)
                  .isOk()) {
@@ -168,9 +167,27 @@ const std::vector<AidlTvStreamConfig> JTvInputHal::getStreamConfigs(int deviceId
     return list;
 }
 
+static const std::map<std::pair<AidlAudioDeviceType, std::string>, audio_devices_t>
+        aidlToNativeAudioType = {
+    {{AidlAudioDeviceType::IN_DEVICE, AidlAudioDeviceDescription::CONNECTION_ANALOG},
+        AUDIO_DEVICE_IN_LINE},
+    {{AidlAudioDeviceType::IN_DEVICE, AidlAudioDeviceDescription::CONNECTION_HDMI},
+        AUDIO_DEVICE_IN_HDMI},
+    {{AidlAudioDeviceType::IN_DEVICE, AidlAudioDeviceDescription::CONNECTION_HDMI_ARC},
+        AUDIO_DEVICE_IN_HDMI_ARC},
+    {{AidlAudioDeviceType::IN_DEVICE, AidlAudioDeviceDescription::CONNECTION_HDMI_EARC},
+        AUDIO_DEVICE_IN_HDMI_EARC},
+    {{AidlAudioDeviceType::IN_DEVICE, AidlAudioDeviceDescription::CONNECTION_IP_V4},
+        AUDIO_DEVICE_IN_IP},
+    {{AidlAudioDeviceType::IN_DEVICE, AidlAudioDeviceDescription::CONNECTION_SPDIF},
+        AUDIO_DEVICE_IN_SPDIF},
+    {{AidlAudioDeviceType::IN_LOOPBACK, ""}, AUDIO_DEVICE_IN_LOOPBACK},
+    {{AidlAudioDeviceType::IN_TV_TUNER, ""}, AUDIO_DEVICE_IN_TV_TUNER},
+};
+
 void JTvInputHal::onDeviceAvailable(const TvInputDeviceInfoWrapper& info) {
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         mConnections.add(info.deviceId, KeyedVector<int, Connection>());
     }
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -187,9 +204,15 @@ void JTvInputHal::onDeviceAvailable(const TvInputDeviceInfoWrapper& info) {
     if (info.isHidl) {
         hidlSetUpAudioInfo(env, builder, info);
     } else {
-        AidlAudioDeviceType audioType = info.aidlAudioDevice.type.type;
-        env->CallObjectMethod(builder, gTvInputHardwareInfoBuilderClassInfo.audioType, audioType);
-        if (audioType != AidlAudioDeviceType::NONE) {
+        auto it = aidlToNativeAudioType.find({info.aidlAudioDevice.type.type,
+                                    info.aidlAudioDevice.type.connection});
+        audio_devices_t nativeAudioType = AUDIO_DEVICE_NONE;
+        if (it != aidlToNativeAudioType.end()) {
+            nativeAudioType = it->second;
+        }
+        env->CallObjectMethod(builder, gTvInputHardwareInfoBuilderClassInfo.audioType,
+            nativeAudioType);
+        if (info.aidlAudioDevice.type.type != AidlAudioDeviceType::NONE) {
             std::stringstream ss;
             switch (info.aidlAudioDevice.address.getTag()) {
                 case AidlAudioDeviceAddress::id:
@@ -251,7 +274,7 @@ void JTvInputHal::onDeviceAvailable(const TvInputDeviceInfoWrapper& info) {
 
 void JTvInputHal::onDeviceUnavailable(int deviceId) {
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
         for (size_t i = 0; i < connections.size(); ++i) {
             removeStream(deviceId, connections.keyAt(i));
@@ -265,7 +288,7 @@ void JTvInputHal::onDeviceUnavailable(int deviceId) {
 
 void JTvInputHal::onStreamConfigurationsChanged(int deviceId, int cableConnectionStatus) {
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
         for (size_t i = 0; i < connections.size(); ++i) {
             removeStream(deviceId, connections.keyAt(i));
@@ -306,7 +329,7 @@ void JTvInputHal::onTvMessage(int deviceId, int streamId, AidlTvMessageEventType
 void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded) {
     sp<BufferProducerThread> thread;
     {
-        Mutex::Autolock autoLock(&mLock);
+        Mutex::Autolock autoLock(&mStreamLock);
         KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
         Connection& connection = connections.editValueFor(streamId);
         if (connection.mThread == NULL) {
@@ -345,12 +368,20 @@ JTvInputHal::TvInputEventWrapper JTvInputHal::TvInputEventWrapper::createEventWr
 }
 
 JTvInputHal::TvMessageEventWrapper JTvInputHal::TvMessageEventWrapper::createEventWrapper(
-        const AidlTvMessageEvent& aidlTvMessageEvent) {
+        const AidlTvMessageEvent& aidlTvMessageEvent, bool isLegacyMessage) {
+    auto messageList = aidlTvMessageEvent.messages;
     TvMessageEventWrapper event;
-    event.messages.insert(event.messages.begin(), std::begin(aidlTvMessageEvent.messages) + 1,
-                          std::end(aidlTvMessageEvent.messages));
+    // Handle backwards compatibility for V1
+    if (isLegacyMessage) {
+        event.deviceId = messageList[0].groupId;
+        event.messages.insert(event.messages.begin(), std::begin(messageList) + 1,
+                              std::end(messageList));
+    } else {
+        event.deviceId = aidlTvMessageEvent.deviceId;
+        event.messages.insert(event.messages.begin(), std::begin(messageList),
+                              std::end(messageList));
+    }
     event.streamId = aidlTvMessageEvent.streamId;
-    event.deviceId = aidlTvMessageEvent.messages[0].groupId;
     event.type = aidlTvMessageEvent.type;
     return event;
 }
@@ -412,40 +443,72 @@ void JTvInputHal::NotifyTvMessageHandler::handleMessage(const Message& message) 
     }
 }
 
-JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
+JTvInputHal::TvInputCallbackWrapper::TvInputCallbackWrapper(JTvInputHal* hal) {
+    aidlTvInputCallback = ::ndk::SharedRefBase::make<AidlTvInputCallback>(hal);
+    hidlTvInputCallback = sp<HidlTvInputCallback>::make(hal);
+}
+
+JTvInputHal::AidlTvInputCallback::AidlTvInputCallback(JTvInputHal* hal) {
     mHal = hal;
 }
 
-::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notify(const AidlTvInputEvent& event) {
+::ndk::ScopedAStatus JTvInputHal::AidlTvInputCallback::notify(const AidlTvInputEvent& event) {
     mHal->mLooper->sendMessage(new NotifyHandler(mHal,
                                                  TvInputEventWrapper::createEventWrapper(event)),
                                static_cast<int>(event.type));
     return ::ndk::ScopedAStatus::ok();
 }
 
-::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notifyTvMessageEvent(
+::ndk::ScopedAStatus JTvInputHal::AidlTvInputCallback::notifyTvMessageEvent(
         const AidlTvMessageEvent& event) {
     const std::string DEVICE_ID_SUBTYPE = "device_id";
-    if (event.messages.size() > 1 && event.messages[0].subType == DEVICE_ID_SUBTYPE) {
-        mHal->mLooper
-                ->sendMessage(new NotifyTvMessageHandler(mHal,
-                                                         TvMessageEventWrapper::createEventWrapper(
-                                                                 event)),
-                              static_cast<int>(event.type));
+    ::ndk::ScopedAStatus status = ::ndk::ScopedAStatus::ok();
+    int32_t aidlVersion = 0;
+    if (mHal->mTvInput->getAidlInterfaceVersion(&aidlVersion).isOk() && event.messages.size() > 0) {
+        bool validLegacyMessage = aidlVersion == 1 &&
+                event.messages[0].subType == DEVICE_ID_SUBTYPE && event.messages.size() > 1;
+        bool validTvMessage = aidlVersion > 1 && event.messages.size() > 0;
+        if (validLegacyMessage || validTvMessage) {
+            mHal->mLooper->sendMessage(
+                    new NotifyTvMessageHandler(mHal,
+                                               TvMessageEventWrapper::
+                                                       createEventWrapper(event,
+                                                                          validLegacyMessage)),
+                    static_cast<int>(event.type));
+        } else {
+            status = ::ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
+            ALOGE("The TVMessage event was malformed for HAL version: %d", aidlVersion);
+        }
+    } else {
+        status = ::ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
+        ALOGE("The TVMessage event was empty or the HAL version (version: %d) could not "
+              "be inferred.",
+              aidlVersion);
     }
-
-    return ::ndk::ScopedAStatus::ok();
+    return status;
 }
 
 JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aidlTvInput)
       : mIsHidl(false), mAidlTvInput(aidlTvInput) {}
 
 ::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::setCallback(
-        const std::shared_ptr<TvInputCallback>& in_callback) {
+        const std::shared_ptr<TvInputCallbackWrapper>& in_callback) {
     if (mIsHidl) {
-        return hidlSetCallback(in_callback);
+        if (in_callback == nullptr) {
+            return hidlSetCallback(nullptr);
+        }
+        else {
+            in_callback->aidlTvInputCallback = nullptr;
+            return hidlSetCallback(in_callback->hidlTvInputCallback);
+        }
     } else {
-        return mAidlTvInput->setCallback(in_callback);
+        if (in_callback == nullptr) {
+            return mAidlTvInput->setCallback(nullptr);
+        }
+        else {
+            in_callback->hidlTvInputCallback = nullptr;
+            return mAidlTvInput->setCallback(in_callback->aidlTvInputCallback);
+        }
     }
 }
 
@@ -495,6 +558,14 @@ JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aid
         return ::ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
     } else {
         return mAidlTvInput->getTvMessageQueueDesc(out_queue, in_deviceId, in_streamId);
+    }
+}
+
+::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::getAidlInterfaceVersion(int32_t* _aidl_return) {
+    if (mIsHidl) {
+        return ::ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
+    } else {
+        return mAidlTvInput->getInterfaceVersion(_aidl_return);
     }
 }
 

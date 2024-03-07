@@ -26,6 +26,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
@@ -33,11 +34,14 @@ import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatu
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates state about device entry fingerprint auth mechanism. */
@@ -58,6 +62,9 @@ interface DeviceEntryFingerprintAuthRepository {
 
     /** Provide the current status of fingerprint authentication. */
     val authenticationStatus: Flow<FingerprintAuthenticationStatus>
+
+    /** Indicates whether to update the side fingerprint sensor indicator visibility. */
+    val shouldUpdateIndicatorVisibility: Flow<Boolean>
 }
 
 /**
@@ -74,6 +81,7 @@ constructor(
     val authController: AuthController,
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Application scope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
 ) : DeviceEntryFingerprintAuthRepository {
 
     override val availableFpSensorType: Flow<BiometricType?>
@@ -137,30 +145,34 @@ constructor(
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val isRunning: Flow<Boolean>
-        get() = conflatedCallbackFlow {
-            val callback =
-                object : KeyguardUpdateMonitorCallback() {
-                    override fun onBiometricRunningStateChanged(
-                        running: Boolean,
-                        biometricSourceType: BiometricSourceType?
-                    ) {
-                        if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
-                            trySendWithFailureLogging(
-                                running,
-                                TAG,
-                                "Fingerprint running state changed"
-                            )
+        get() =
+            conflatedCallbackFlow {
+                    val callback =
+                        object : KeyguardUpdateMonitorCallback() {
+                            override fun onBiometricRunningStateChanged(
+                                running: Boolean,
+                                biometricSourceType: BiometricSourceType?
+                            ) {
+                                if (biometricSourceType == BiometricSourceType.FINGERPRINT) {
+                                    trySendWithFailureLogging(
+                                        running,
+                                        TAG,
+                                        "Fingerprint running state changed"
+                                    )
+                                }
+                            }
                         }
-                    }
+                    keyguardUpdateMonitor.registerCallback(callback)
+                    trySendWithFailureLogging(
+                        keyguardUpdateMonitor.isFingerprintDetectionRunning,
+                        TAG,
+                        "Initial fingerprint running state"
+                    )
+                    awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
                 }
-            keyguardUpdateMonitor.registerCallback(callback)
-            trySendWithFailureLogging(
-                keyguardUpdateMonitor.isFingerprintDetectionRunning,
-                TAG,
-                "Initial fingerprint running state"
-            )
-            awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
-        }
+                .flowOn(
+                    mainDispatcher
+                ) // keyguardUpdateMonitor requires registration on main thread.
 
     override val authenticationStatus: Flow<FingerprintAuthenticationStatus>
         get() = conflatedCallbackFlow {
@@ -171,7 +183,6 @@ constructor(
                         biometricSourceType: BiometricSourceType,
                         isStrongBiometric: Boolean,
                     ) {
-
                         sendUpdateIfFingerprint(
                             biometricSourceType,
                             SuccessFingerprintAuthenticationStatus(
@@ -248,6 +259,37 @@ constructor(
             keyguardUpdateMonitor.registerCallback(callback)
             awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
         }
+
+    override val shouldUpdateIndicatorVisibility: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val sendShouldUpdateIndicatorVisibility =
+                    { shouldUpdateIndicatorVisibility: Boolean ->
+                        trySendWithFailureLogging(
+                            shouldUpdateIndicatorVisibility,
+                            TAG,
+                            "Error sending shouldUpdateIndicatorVisibility " +
+                                "$shouldUpdateIndicatorVisibility"
+                        )
+                    }
+
+                val callback =
+                    object : KeyguardUpdateMonitorCallback() {
+                        override fun onBiometricRunningStateChanged(
+                            running: Boolean,
+                            biometricSourceType: BiometricSourceType?
+                        ) {
+                            sendShouldUpdateIndicatorVisibility(true)
+                        }
+                        override fun onStrongAuthStateChanged(userId: Int) {
+                            sendShouldUpdateIndicatorVisibility(true)
+                        }
+                    }
+                sendShouldUpdateIndicatorVisibility(false)
+                keyguardUpdateMonitor.registerCallback(callback)
+                awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+            }
+            .flowOn(mainDispatcher)
+            .shareIn(scope, started = SharingStarted.WhileSubscribed(), replay = 1)
 
     companion object {
         const val TAG = "DeviceEntryFingerprintAuthRepositoryImpl"

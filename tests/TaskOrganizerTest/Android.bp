@@ -42,6 +42,7 @@ android_test {
         "kotlin-stdlib",
         "kotlinx-coroutines-android",
         "flickerlib",
+        "flickerlib-trace_processor_shell",
         "truth",
     ],
 }

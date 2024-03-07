@@ -135,11 +135,12 @@
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
     <drawable name="notification_template_divider">#29000000</drawable>
     <drawable name="notification_template_divider_media">#29ffffff</drawable>
-    <color name="notification_primary_text_color_light">@color/primary_text_default_material_light</color>
-    <color name="notification_primary_text_color_dark">@color/primary_text_default_material_dark</color>
-    <color name="notification_secondary_text_color_light">@color/primary_text_default_material_light</color>
+    <color name="notification_primary_text_color_light">@color/system_on_surface_light</color>
+    <color name="notification_primary_text_color_dark">@color/system_on_surface_dark</color>
+    <!-- Note that the primary and secondary notification text colors are, in fact, the same. -->
+    <color name="notification_secondary_text_color_light">@color/system_on_surface_light</color>
+    <color name="notification_secondary_text_color_dark">@color/system_on_surface_dark</color>
     <item name="notification_secondary_text_disabled_alpha" format="float" type="dimen">0.38</item>
-    <color name="notification_secondary_text_color_dark">@color/primary_text_default_material_dark</color>
     <color name="notification_default_color_dark">#ddffffff</color>
     <color name="notification_default_color_light">#a3202124</color>
 
@@ -520,7 +521,7 @@
     <color name="system_surface_dim_dark">#121316</color>
     <color name="system_surface_variant_dark">#44474F</color>
     <color name="system_on_surface_variant_dark">#C4C6D0</color>
-    <color name="system_outline_dark">#72747D</color>
+    <color name="system_outline_dark">#8E9099</color>
     <color name="system_outline_variant_dark">#444746</color>
     <color name="system_error_dark">#FFB4A8</color>
     <color name="system_on_error_dark">#690001</color>
@@ -567,6 +568,10 @@
     <color name="side_fps_button_color">#00677E</color>
 
     <!-- Color for system bars -->
+    <color name="status_bar_compatible">@android:color/black</color>
+    <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
+         color is set by the framework or not. -->
+    <color name="status_bar_default">#00808080</color>
     <color name="navigation_bar_compatible">@android:color/black</color>
     <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
          color is set by the framework or not. -->

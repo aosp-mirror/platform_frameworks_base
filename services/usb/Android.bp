@@ -33,7 +33,7 @@ java_library_static {
         "android.hardware.usb-V1.1-java",
         "android.hardware.usb-V1.2-java",
         "android.hardware.usb-V1.3-java",
-        "android.hardware.usb-V2-java",
+        "android.hardware.usb-V3-java",
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",

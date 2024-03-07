@@ -903,6 +903,9 @@ public class Tuner implements AutoCloseable  {
         }
     }
 
+    /**
+     * Releases Lnb resource if held. TRMS lock must be acquired prior to calling this function.
+     */
     private void closeLnb() {
         mLnbLock.lock();
         try {
@@ -1571,6 +1574,10 @@ public class Tuner implements AutoCloseable  {
         mFrontendCiCamLock.lock();
         mFrontendLock.lock();
         try {
+            if (mFrontendHandle == null) {
+                Log.d(TAG, "Operation cannot be done without frontend");
+                return RESULT_INVALID_STATE;
+            }
             if (mFeOwnerTuner != null) {
                 Log.d(TAG, "Operation cannot be done by sharee of tuner");
                 return RESULT_INVALID_STATE;
@@ -1638,6 +1645,10 @@ public class Tuner implements AutoCloseable  {
     public int disconnectFrontendToCiCam(int ciCamId) {
         acquireTRMSLock("disconnectFrontendToCiCam()");
         try {
+            if (mFrontendHandle == null) {
+                Log.d(TAG, "Operation cannot be done without frontend");
+                return RESULT_INVALID_STATE;
+            }
             if (mFeOwnerTuner != null) {
                 Log.d(TAG, "Operation cannot be done by sharee of tuner");
                 return RESULT_INVALID_STATE;
@@ -2398,13 +2409,16 @@ public class Tuner implements AutoCloseable  {
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER)
     @Nullable
     public Descrambler openDescrambler() {
+        acquireTRMSLock("openDescrambler()");
         mDemuxLock.lock();
         try {
-            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, mDemuxLock)) {
+            // no need to unlock mDemuxLock (so pass null instead) as TRMS lock is already acquired
+            if (!checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, null)) {
                 return null;
             }
             return requestDescrambler();
         } finally {
+            releaseTRMSLock();
             mDemuxLock.unlock();
         }
     }
@@ -2796,6 +2810,10 @@ public class Tuner implements AutoCloseable  {
     /** @hide */
     public int getClientId() {
         return mClientId;
+    }
+
+    /* package */ TunerResourceManager getTunerResourceManager() {
+        return mTunerResourceManager;
     }
 
     private void acquireTRMSLock(String functionNameForLog) {

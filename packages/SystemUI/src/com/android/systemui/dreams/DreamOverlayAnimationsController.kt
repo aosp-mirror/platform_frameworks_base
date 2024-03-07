@@ -27,7 +27,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.dream.lowlight.util.TruncatedInterpolator
-import com.android.systemui.R
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutParams
 import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM
@@ -39,6 +38,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.DreamLog
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -101,47 +101,50 @@ constructor(
 
             configController.addCallback(configCallback)
 
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                /* Translation animations, when moving from DREAMING->LOCKSCREEN state */
-                launch {
-                    configurationBasedDimensions
-                        .flatMapLatest {
-                            transitionViewModel.dreamOverlayTranslationY(it.translationYPx)
-                        }
-                        .collect { px ->
+            try {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    /* Translation animations, when moving from DREAMING->LOCKSCREEN state */
+                    launch {
+                        configurationBasedDimensions
+                            .flatMapLatest {
+                                transitionViewModel.dreamOverlayTranslationY(it.translationYPx)
+                            }
+                            .collect { px ->
+                                ComplicationLayoutParams.iteratePositions(
+                                    { position: Int ->
+                                        setElementsTranslationYAtPosition(px, position)
+                                    },
+                                    POSITION_TOP or POSITION_BOTTOM
+                                )
+                            }
+                    }
+
+                    /* Alpha animations, when moving from DREAMING->LOCKSCREEN state */
+                    launch {
+                        transitionViewModel.dreamOverlayAlpha.collect { alpha ->
                             ComplicationLayoutParams.iteratePositions(
                                 { position: Int ->
-                                    setElementsTranslationYAtPosition(px, position)
+                                    setElementsAlphaAtPosition(
+                                        alpha = alpha,
+                                        position = position,
+                                        fadingOut = true,
+                                    )
                                 },
                                 POSITION_TOP or POSITION_BOTTOM
                             )
                         }
-                }
+                    }
 
-                /* Alpha animations, when moving from DREAMING->LOCKSCREEN state */
-                launch {
-                    transitionViewModel.dreamOverlayAlpha.collect { alpha ->
-                        ComplicationLayoutParams.iteratePositions(
-                            { position: Int ->
-                                setElementsAlphaAtPosition(
-                                    alpha = alpha,
-                                    position = position,
-                                    fadingOut = true,
-                                )
-                            },
-                            POSITION_TOP or POSITION_BOTTOM
-                        )
+                    launch {
+                        transitionViewModel.transitionEnded.collect { _ ->
+                            mOverlayStateController.setExitAnimationsRunning(false)
+                        }
                     }
                 }
-
-                launch {
-                    transitionViewModel.transitionEnded.collect { _ ->
-                        mOverlayStateController.setExitAnimationsRunning(false)
-                    }
-                }
+            } finally {
+                // Ensure the callback is removed when cancellation happens
+                configController.removeCallback(configCallback)
             }
-
-            configController.removeCallback(configCallback)
         }
     }
 

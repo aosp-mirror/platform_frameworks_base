@@ -2,13 +2,13 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
-import com.android.systemui.R
-import com.android.systemui.biometrics.AuthDialog
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialPatternView
@@ -20,6 +20,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+
+private const val ANIMATE_CREDENTIAL_INITIAL_DURATION_MS = 150
 
 /**
  * View binder for all credential variants of BiometricPrompt, including [CredentialPatternView] and
@@ -46,6 +48,8 @@ object CredentialViewBinder {
         val descriptionView: TextView = view.requireViewById(R.id.description)
         val iconView: ImageView? = view.findViewById(R.id.icon)
         val errorView: TextView = view.requireViewById(R.id.error)
+        val cancelButton: Button? = view.findViewById(R.id.cancel_button)
+        val emergencyButtonView: Button = view.requireViewById(R.id.emergencyCallButton)
 
         var errorTimer: Job? = null
 
@@ -58,7 +62,7 @@ object CredentialViewBinder {
                     updateForContentDimensions(
                         containerWidth,
                         containerHeight,
-                        0 /* animateDurationMs */
+                        0 // animateDurationMs
                     )
                 }
             }
@@ -74,6 +78,13 @@ object CredentialViewBinder {
                         descriptionView.textOrHide = header.description
 
                         iconView?.setImageDrawable(header.icon)
+
+                        if (header.showEmergencyCallButton) {
+                            emergencyButtonView.visibility = View.VISIBLE
+                            emergencyButtonView.setOnClickListener {
+                                viewModel.doEmergencyCall(view.context)
+                            }
+                        }
 
                         // Only animate this if we're transitioning from a biometric view.
                         if (viewModel.animateContents.value) {
@@ -94,7 +105,18 @@ object CredentialViewBinder {
                                 }
                             }
                         }
-                        .collect { errorView.textOrHide = it }
+                        .collect { it ->
+                            val hasError = !it.isNullOrBlank()
+                            errorView.visibility =
+                                if (hasError) {
+                                    View.VISIBLE
+                                } else if (cancelButton != null) {
+                                    View.INVISIBLE
+                                } else {
+                                    View.GONE
+                                }
+                            errorView.text = if (hasError) it else ""
+                        }
                 }
 
                 // show an extra dialog if the remaining attempts becomes low
@@ -107,6 +129,8 @@ object CredentialViewBinder {
                 }
             }
         }
+
+        cancelButton?.setOnClickListener { host.onCredentialAborted() }
 
         // bind the auth widget
         when (view) {
@@ -124,7 +148,7 @@ private fun View.animateCredentialViewIn() {
     postOnAnimation {
         animate()
             .translationY(0f)
-            .setDuration(AuthDialog.ANIMATE_CREDENTIAL_INITIAL_DURATION_MS.toLong())
+            .setDuration(ANIMATE_CREDENTIAL_INITIAL_DURATION_MS.toLong())
             .alpha(1f)
             .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
             .withLayer()

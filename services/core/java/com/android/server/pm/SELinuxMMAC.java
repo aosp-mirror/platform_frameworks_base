@@ -68,12 +68,12 @@ public final class SELinuxMMAC {
 
     // All policy stanzas read from mac_permissions.xml. This is also the lock
     // to synchronize access during policy load and access attempts.
-    private static List<Policy> sPolicies = new ArrayList<>();
+    private static final List<Policy> sPolicies = new ArrayList<>();
     /** Whether or not the policy files have been read */
     private static boolean sPolicyRead;
 
     /** Required MAC permissions files */
-    private static List<File> sMacPermissions = new ArrayList<>();
+    private static final List<File> sMacPermissions = new ArrayList<>();
 
     private static final String DEFAULT_SEINFO = "default";
 
@@ -605,7 +605,7 @@ final class Policy {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
         if (pkg.getSigningDetails() != SigningDetails.UNKNOWN
-                && !Signature.areExactMatch(certs, pkg.getSigningDetails().getSignatures())) {
+                && !Signature.areExactMatch(pkg.getSigningDetails(), certs)) {
 
             // certs aren't exact match, but the package may have rotated from the known system cert
             if (certs.length > 1 || !pkg.getSigningDetails().hasCertificate(certs[0])) {

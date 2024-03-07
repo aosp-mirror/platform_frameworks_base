@@ -27,6 +27,7 @@ package {
 
 android_app {
     name: "SettingsLibShell",
+    use_resource_processor: true,
     defaults: ["SettingsLibDefaults"],
     platform_apis: true,
 
@@ -42,9 +43,14 @@ android_robolectric_test {
     name: "SettingsLibRoboTests",
     srcs: ["src/**/*.java"],
     static_libs: [
+        "Settings_robolectric_meta_service_file",
+        "Robolectric_shadows_androidx_fragment_upstream",
         "SettingsLib-robo-testutils",
+        "androidx.fragment_fragment",
         "androidx.test.core",
         "androidx.core_core",
+        "flag-junit",
+        "settingslib_flags_lib",
         "testng", // TODO: remove once JUnit on Android provides assertThrows
     ],
     java_resource_dirs: ["config"],
@@ -53,6 +59,20 @@ android_robolectric_test {
     test_options: {
         timeout: 36000,
     },
+    upstream: true,
+}
+
+java_genrule {
+    name: "Settings_robolectric_meta_service_file",
+    out: ["robolectric_meta_service_file.jar"],
+    tools: ["soong_zip"],
+    cmd: "mkdir -p $(genDir)/META-INF/services/ && touch $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider &&" +
+        "echo -e 'org.robolectric.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
+        "echo -e 'org.robolectric.shadows.multidex.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
+        "echo -e 'org.robolectric.shadows.httpclient.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
+        //"echo -e 'com.android.settings.testutils.shadow.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
+        "echo -e 'com.android.settingslib.testutils.shadow.Shadows' >> $(genDir)/META-INF/services/org.robolectric.internal.ShadowProvider && " +
+        "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)/META-INF/services/",
 }
 
 java_library {
@@ -60,9 +80,23 @@ java_library {
     srcs: [
         "testutils/com/android/settingslib/testutils/**/*.java",
     ],
-
+    javacflags: [
+        "-Aorg.robolectric.annotation.processing.shadowPackage=com.android.settingslib.testutils.shadow",
+        "-Aorg.robolectric.annotation.processing.sdkCheckMode=ERROR",
+        // Uncomment the below to debug annotation processors not firing.
+        //"-verbose",
+        //"-XprintRounds",
+        //"-XprintProcessorInfo",
+        //"-Xlint",
+        //"-J-verbose",
+    ],
+    plugins: [
+        "auto_value_plugin_1.9",
+        "auto_value_builder_plugin_1.9",
+        "Robolectric_processor_upstream",
+    ],
     libs: [
-        "Robolectric_all-target",
+        "Robolectric_all-target_upstream",
         "mockito-robolectric-prebuilt",
         "truth",
     ],

@@ -124,7 +124,7 @@ class WallpaperDisplayHelper {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mWindowManagerInternal.shouldShowSystemDecorOnDisplay(displayId);
+            return mWindowManagerInternal.isHomeSupportedOnDisplay(displayId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

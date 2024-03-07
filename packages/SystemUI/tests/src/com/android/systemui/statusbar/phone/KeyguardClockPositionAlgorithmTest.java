@@ -30,9 +30,11 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.util.BurnInHelperKt;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.core.FakeLogBuffer;
+import com.android.systemui.res.R;
 
 import org.junit.After;
 import org.junit.Before;
@@ -51,8 +53,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private static final float OPAQUE = 1.f;
     private static final float TRANSPARENT = 0.f;
 
-    @Mock
-    private Resources mResources;
+    @Mock private Resources mResources;
 
     private KeyguardClockPositionAlgorithm mClockPositionAlgorithm;
     private KeyguardClockPositionAlgorithm.Result mClockPosition;
@@ -80,7 +81,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
                 .mockStatic(BurnInHelperKt.class)
                 .startMocking();
 
-        mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm();
+        LogBuffer logBuffer = FakeLogBuffer.Factory.Companion.create();
+        mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm(logBuffer);
         when(mResources.getDimensionPixelSize(anyInt())).thenReturn(0);
         mClockPositionAlgorithm.loadDimens(mResources);
 

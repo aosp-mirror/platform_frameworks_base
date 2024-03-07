@@ -18,15 +18,19 @@ package com.android.server.audio;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.UserProperties;
 import android.media.AudioAttributes;
 import android.media.AudioFocusInfo;
 import android.media.AudioManager;
 import android.media.IAudioFocusDispatcher;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 import com.android.server.audio.MediaFocusControl.AudioFocusDeathHandler;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.PrintWriter;
 
@@ -39,7 +43,7 @@ import java.io.PrintWriter;
 public class FocusRequester {
 
     // on purpose not using this classe's name, as it will only be used from MediaFocusControl
-    private static final String TAG = "MediaFocusControl";
+    private static final String TAG = "FocusRequester";
     private static final boolean DEBUG = false;
 
     private AudioFocusDeathHandler mDeathHandler; // may be null
@@ -164,6 +168,12 @@ public class FocusRequester {
 
     boolean hasSameUid(int uid) {
         return mCallingUid == uid;
+    }
+
+    boolean isAlwaysVisibleUser() {
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final UserProperties properties = umi.getUserProperties(UserHandle.getUserId(mCallingUid));
+        return properties != null && properties.getAlwaysVisible();
     }
 
     int getClientUid() {
@@ -330,6 +340,9 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     boolean handleFocusLossFromGain(int focusGain, final FocusRequester frWinner, boolean forceDuck)
     {
+        if (DEBUG) {
+            Log.i(TAG, "handleFocusLossFromGain for " + mClientId + " gain:" + focusGain);
+        }
         final int focusLoss = focusLossForGainRequest(focusGain);
         handleFocusLoss(focusLoss, frWinner, forceDuck);
         return (focusLoss == AudioManager.AUDIOFOCUS_LOSS);
@@ -368,6 +381,9 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     void handleFocusLoss(int focusLoss, @Nullable final FocusRequester frWinner, boolean forceDuck)
     {
+        if (DEBUG) {
+            Log.i(TAG, "handleFocusLoss for " + mClientId + " loss:" + focusLoss);
+        }
         try {
             if (focusLoss != mFocusLossReceived) {
                 mFocusLossReceived = focusLoss;
@@ -417,6 +433,9 @@ public class FocusRequester {
                             toAudioFocusInfo(), true /* wasDispatched */);
                     mFocusLossWasNotified = true;
                     fd.dispatchAudioFocusChange(mFocusLossReceived, mClientId);
+                } else if (DEBUG) {
+                    Log.i(TAG, "NOT dispatching " + focusChangeToString(mFocusLossReceived)
+                            + " to " + mClientId + " no IAudioFocusDispatcher");
                 }
             }
         } catch (android.os.RemoteException e) {
@@ -476,7 +495,8 @@ public class FocusRequester {
                 // will be dispatched later, it is now in limbo mode
                 mFocusLossFadeLimbo = true;
                 mFocusController.postDelayedLossAfterFade(this,
-                        FadeOutManager.FADE_OUT_DURATION_MS);
+                        mFocusController.getFadeOutDurationOnFocusLossMillis(
+                                this.getAudioAttributes()));
                 return true;
             }
         }

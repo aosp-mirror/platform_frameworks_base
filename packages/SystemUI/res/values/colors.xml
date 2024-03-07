@@ -115,13 +115,12 @@
     <!-- Chosen so fill over background matches single tone -->
     <color name="dark_mode_qs_icon_color_dual_tone_fill">#99000000</color>
 
-    <color name="notif_pill_text">@color/material_dynamic_neutral10</color>
+    <color name="notif_pill_text">@android:color/system_on_surface_light</color>
 
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
-    <color name="ksh_key_item_color">@color/material_grey_600</color>
-    <color name="ksh_key_item_background">@color/material_grey_100</color>
-    <color name="ksh_key_item_new_background">@color/transparent</color>
+    <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_light</color>
+    <color name="ksh_key_item_background">?androidprv:attr/materialColorSurfaceContainerHighest</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>
 

@@ -20,12 +20,10 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
-import com.android.keyguard.FaceAuthApiRequestReason
-import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /**
@@ -37,12 +35,11 @@ class FaceAuthAccessibilityDelegate
 @Inject
 constructor(
     @Main private val resources: Resources,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val faceAuthInteractor: KeyguardFaceAuthInteractor,
 ) : View.AccessibilityDelegate() {
     override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(host, info)
-        if (keyguardUpdateMonitor.shouldListenForFace()) {
+        if (faceAuthInteractor.canFaceAuthRun()) {
             val clickActionToRetryFace =
                 AccessibilityNodeInfo.AccessibilityAction(
                     AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id,
@@ -54,7 +51,6 @@ constructor(
 
     override fun performAccessibilityAction(host: View, action: Int, args: Bundle?): Boolean {
         return if (action == AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id) {
-            keyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.ACCESSIBILITY_ACTION)
             faceAuthInteractor.onAccessibilityAction()
             true
         } else super.performAccessibilityAction(host, action, args)

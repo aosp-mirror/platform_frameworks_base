@@ -29,4 +29,7 @@ interface BubbleProperties {
      * When this is `false`, bubbles will be floating.
      */
     val isBubbleBarEnabled: Boolean
+
+    /** Refreshes the current value of [isBubbleBarEnabled]. */
+    fun refresh()
 }

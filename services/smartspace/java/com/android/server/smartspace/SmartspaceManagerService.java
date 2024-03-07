@@ -17,6 +17,7 @@
 package com.android.server.smartspace;
 
 import static android.Manifest.permission.MANAGE_SMARTSPACE;
+import static android.Manifest.permission.ACCESS_SMARTSPACE;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.content.Context.SMARTSPACE_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -30,6 +31,7 @@ import android.app.smartspace.ISmartspaceManager;
 import android.app.smartspace.SmartspaceConfig;
 import android.app.smartspace.SmartspaceSessionId;
 import android.app.smartspace.SmartspaceTargetEvent;
+import android.app.smartspace.flags.Flags;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -164,6 +166,8 @@ public class SmartspaceManagerService extends
             }
             Context ctx = getContext();
             if (!(ctx.checkCallingPermission(MANAGE_SMARTSPACE) == PERMISSION_GRANTED
+                    || (Flags.accessSmartspace()
+                    && ctx.checkCallingPermission(ACCESS_SMARTSPACE) == PERMISSION_GRANTED)
                     || mServiceNameResolver.isTemporary(userId)
                     || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid()))) {
 

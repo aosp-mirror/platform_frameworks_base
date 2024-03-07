@@ -167,7 +167,8 @@ public class AccessPointPreference extends Preference {
         ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
         bindFrictionImage(frictionImageView);
 
-        final View divider = view.findViewById(R.id.two_target_divider);
+        final View divider = view.findViewById(
+                com.android.settingslib.widget.preference.twotarget.R.id.two_target_divider);
         divider.setVisibility(shouldShowDivider() ? View.VISIBLE : View.INVISIBLE);
     }
 

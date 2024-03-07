@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -35,16 +34,16 @@ fun MainSwitchPreference(model: SwitchPreferenceModel) {
     EntryHighlight {
         Surface(
             modifier = Modifier.padding(SettingsDimension.itemPaddingEnd),
-            color = when (model.checked.value) {
+            color = when (model.checked()) {
                 true -> MaterialTheme.colorScheme.primaryContainer
                 else -> MaterialTheme.colorScheme.secondaryContainer
             },
-            shape = SettingsShape.CornerLarge,
+            shape = SettingsShape.CornerExtraLarge,
         ) {
             InternalSwitchPreference(
                 title = model.title,
-                checked = model.checked,
-                changeable = model.changeable,
+                checked = model.checked(),
+                changeable = model.changeable(),
                 onCheckedChange = model.onCheckedChange,
                 paddingStart = 20.dp,
                 paddingEnd = 20.dp,
@@ -61,12 +60,12 @@ fun MainSwitchPreferencePreview() {
         Column {
             MainSwitchPreference(object : SwitchPreferenceModel {
                 override val title = "Use Dark theme"
-                override val checked = true.toState()
+                override val checked = { true }
                 override val onCheckedChange: (Boolean) -> Unit = {}
             })
             MainSwitchPreference(object : SwitchPreferenceModel {
                 override val title = "Use Dark theme"
-                override val checked = false.toState()
+                override val checked = { false }
                 override val onCheckedChange: (Boolean) -> Unit = {}
             })
         }

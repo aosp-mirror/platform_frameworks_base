@@ -64,6 +64,7 @@ import android.location.LocationManagerInternal;
 import android.location.LocationManagerInternal.ProviderEnabledListener;
 import android.location.LocationRequest;
 import android.location.LocationResult;
+import android.location.altitude.AltitudeConverter;
 import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
 import android.location.provider.ProviderRequest;
@@ -81,6 +82,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.DeviceConfig;
 import android.stats.location.LocationStatsEnums;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -94,6 +96,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
+import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.LocationPermissions.PermissionLevel;
@@ -122,6 +125,7 @@ import com.android.server.location.settings.LocationSettings;
 import com.android.server.location.settings.LocationUserSettings;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -886,6 +890,15 @@ public class LocationProviderManager extends
 
                         @Override
                         public boolean test(Location location) {
+                            if (Double.isNaN(location.getLatitude()) || location.getLatitude() < -90
+                                    || location.getLatitude() > 90
+                                    || Double.isNaN(location.getLongitude())
+                                    || location.getLongitude() < -180
+                                    || location.getLongitude() > 180) {
+                                Log.e(TAG, mName + " provider registration " + getIdentity()
+                                        + " dropped delivery - invalid latitude or longitude.");
+                                return false;
+                            }
                             if (mPreviousLocation != null) {
                                 // check fastest interval
                                 long deltaMs = location.getElapsedRealtimeMillis()
@@ -1440,6 +1453,10 @@ public class LocationProviderManager extends
 
     @GuardedBy("mMultiplexerLock")
     @Nullable private StateChangedListener mStateChangedListener;
+
+    /** Enables missing MSL altitudes to be added on behalf of the provider. */
+    private final AltitudeConverter mAltitudeConverter = new AltitudeConverter();
+    private volatile boolean mIsAltitudeConverterIdle = true;
 
     public LocationProviderManager(Context context, Injector injector,
             String name, @Nullable PassiveLocationProviderManager passiveManager) {
@@ -2512,33 +2529,18 @@ public class LocationProviderManager extends
     @GuardedBy("mMultiplexerLock")
     @Override
     public void onReportLocation(LocationResult locationResult) {
-        LocationResult filtered;
+        LocationResult processed;
         if (mPassiveManager != null) {
-            filtered = locationResult.filter(location -> {
-                if (!location.isMock()) {
-                    if (location.getLatitude() == 0 && location.getLongitude() == 0) {
-                        Log.e(TAG, "blocking 0,0 location from " + mName + " provider");
-                        return false;
-                    }
-                }
-
-                if (!location.isComplete()) {
-                    Log.e(TAG, "blocking incomplete location from " + mName + " provider");
-                    return false;
-                }
-
-                return true;
-            });
-
-            if (filtered == null) {
+            processed = processReportedLocation(locationResult);
+            if (processed == null) {
                 return;
             }
 
             // don't log location received for passive provider because it's spammy
-            EVENT_LOG.logProviderReceivedLocations(mName, filtered.size());
+            EVENT_LOG.logProviderReceivedLocations(mName, processed.size());
         } else {
-            // passive provider should get already filtered results as input
-            filtered = locationResult;
+            // passive provider should get already processed results as input
+            processed = locationResult;
         }
 
         // check for non-monotonic locations if we're not the passive manager. the passive manager
@@ -2554,17 +2556,75 @@ public class LocationProviderManager extends
         }
 
         // update last location
-        setLastLocation(filtered.getLastLocation(), UserHandle.USER_ALL);
+        setLastLocation(processed.getLastLocation(), UserHandle.USER_ALL);
 
         // attempt listener delivery
         deliverToListeners(registration -> {
-            return registration.acceptLocationChange(filtered);
+            return registration.acceptLocationChange(processed);
         });
 
         // notify passive provider
         if (mPassiveManager != null) {
-            mPassiveManager.updateLocation(filtered);
+            mPassiveManager.updateLocation(processed);
         }
+    }
+
+    @GuardedBy("mMultiplexerLock")
+    @Nullable
+    private LocationResult processReportedLocation(LocationResult locationResult) {
+        LocationResult processed = locationResult.filter(location -> {
+            if (!location.isMock()) {
+                if (location.getLatitude() == 0 && location.getLongitude() == 0) {
+                    Log.e(TAG, "blocking 0,0 location from " + mName + " provider");
+                    return false;
+                }
+            }
+
+            if (!location.isComplete()) {
+                Log.e(TAG, "blocking incomplete location from " + mName + " provider");
+                return false;
+            }
+
+            return true;
+        });
+        if (processed == null) {
+            return null;
+        }
+
+        // Attempt to add a missing MSL altitude on behalf of the provider.
+        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_LOCATION,
+                "enable_location_provider_manager_msl", true)) {
+            return processed.map(location -> {
+                if (!location.hasMslAltitude() && location.hasAltitude()) {
+                    try {
+                        Location locationCopy = new Location(location);
+                        if (mAltitudeConverter.addMslAltitudeToLocation(locationCopy)) {
+                            return locationCopy;
+                        }
+                        // Only queue up one IO thread runnable.
+                        if (mIsAltitudeConverterIdle) {
+                            mIsAltitudeConverterIdle = false;
+                            IoThread.getExecutor().execute(() -> {
+                                try {
+                                    // Results added to the location copy are essentially discarded.
+                                    // We only rely on the side effect of loading altitude assets
+                                    // into the converter's memory cache.
+                                    mAltitudeConverter.addMslAltitudeToLocation(mContext,
+                                            locationCopy);
+                                } catch (IOException e) {
+                                    Log.e(TAG, "not loading MSL altitude assets: " + e);
+                                }
+                                mIsAltitudeConverterIdle = true;
+                            });
+                        }
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, "not adding MSL altitude to location: " + e);
+                    }
+                }
+                return location;
+            });
+        }
+        return processed;
     }
 
     @GuardedBy("mMultiplexerLock")

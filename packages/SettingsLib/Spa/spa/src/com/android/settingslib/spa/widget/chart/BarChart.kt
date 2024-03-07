@@ -31,12 +31,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.settingslib.spa.framework.theme.divider
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.components.YAxis.AxisDependency
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
@@ -50,6 +53,11 @@ interface BarChartModel {
      * The chart data list for [BarChart].
      */
     val chartDataList: List<BarChartData>
+
+    /**
+     * The color list for [BarChart].
+     */
+    val colors: List<Color>
 
     /**
      * The label text formatter for x value.
@@ -80,37 +88,25 @@ interface BarChartModel {
      */
     val yAxisLabelCount: Int
         get() = 3
+
+    /** If set to true, touch gestures are enabled on the [BarChart]. */
+    val enableBarchartTouch: Boolean
+        get() = true
+
+    /** The renderer provider for x-axis. */
+    val xAxisRendererProvider: XAxisRendererProvider?
+        get() = null
 }
 
 data class BarChartData(
-    var x: Float?,
-    var y: Float?,
+    var x: Float,
+    var y: List<Float>,
 )
 
 @Composable
 fun BarChart(barChartModel: BarChartModel) {
-    BarChart(
-        chartDataList = barChartModel.chartDataList,
-        xValueFormatter = barChartModel.xValueFormatter,
-        yValueFormatter = barChartModel.yValueFormatter,
-        yAxisMinValue = barChartModel.yAxisMinValue,
-        yAxisMaxValue = barChartModel.yAxisMaxValue,
-        yAxisLabelCount = barChartModel.yAxisLabelCount,
-    )
-}
-
-@Composable
-fun BarChart(
-    chartDataList: List<BarChartData>,
-    modifier: Modifier = Modifier,
-    xValueFormatter: IAxisValueFormatter? = null,
-    yValueFormatter: IAxisValueFormatter? = null,
-    yAxisMinValue: Float = 0f,
-    yAxisMaxValue: Float = 30f,
-    yAxisLabelCount: Int = 4,
-) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -126,50 +122,72 @@ fun BarChart(
             val colorScheme = MaterialTheme.colorScheme
             val labelTextColor = colorScheme.onSurfaceVariant.toArgb()
             val labelTextSize = MaterialTheme.typography.bodyMedium.fontSize.value
-            Crossfade(targetState = chartDataList) { barChartData ->
-                AndroidView(factory = { context ->
-                    BarChart(context).apply {
-                        // Fixed Settings.
-                        layoutParams = LinearLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                        )
-                        this.description.isEnabled = false
-                        this.legend.isEnabled = false
-                        this.extraBottomOffset = 4f
-                        this.setScaleEnabled(false)
+            Crossfade(
+                targetState = barChartModel.chartDataList,
+                label = "chartDataList",
+            ) { barChartData ->
+                AndroidView(
+                    factory = { context ->
+                        BarChart(context).apply {
+                            layoutParams = LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            )
+                            description.isEnabled = false
+                            legend.isEnabled = false
+                            extraBottomOffset = 4f
+                            setScaleEnabled(false)
+                            setTouchEnabled(barChartModel.enableBarchartTouch)
 
-                        this.xAxis.position = XAxis.XAxisPosition.BOTTOM
-                        this.xAxis.setDrawGridLines(false)
-                        this.xAxis.setDrawAxisLine(false)
-                        this.xAxis.textColor = labelTextColor
-                        this.xAxis.textSize = labelTextSize
-                        this.xAxis.yOffset = 10f
+                            xAxis.apply {
+                                position = XAxis.XAxisPosition.BOTTOM
+                                setDrawAxisLine(false)
+                                setDrawGridLines(false)
+                                textColor = labelTextColor
+                                textSize = labelTextSize
+                                valueFormatter = barChartModel.xValueFormatter
+                                yOffset = 10f
+                            }
 
-                        this.axisLeft.isEnabled = false
-                        this.axisRight.setDrawAxisLine(false)
-                        this.axisRight.textSize = labelTextSize
-                        this.axisRight.textColor = labelTextColor
-                        this.axisRight.gridColor = colorScheme.divider.toArgb()
-                        this.axisRight.xOffset = 10f
+                            barChartModel.xAxisRendererProvider?.let {
+                                setXAxisRenderer(
+                                    it.provideXAxisRenderer(
+                                        getViewPortHandler(),
+                                        getXAxis(),
+                                        getTransformer(YAxis.AxisDependency.LEFT)
+                                    )
+                                )
+                            }
 
-                        // Customizable Settings.
-                        this.xAxis.valueFormatter = xValueFormatter
-                        this.axisRight.valueFormatter = yValueFormatter
+                            axisLeft.apply {
+                                axisMaximum = barChartModel.yAxisMaxValue
+                                axisMinimum = barChartModel.yAxisMinValue
+                                isEnabled = false
+                            }
 
-                        this.axisLeft.axisMinimum = yAxisMinValue
-                        this.axisLeft.axisMaximum = yAxisMaxValue
-                        this.axisRight.axisMinimum = yAxisMinValue
-                        this.axisRight.axisMaximum = yAxisMaxValue
-
-                        this.axisRight.setLabelCount(yAxisLabelCount, true)
-                    }
-                },
+                            axisRight.apply {
+                                axisMaximum = barChartModel.yAxisMaxValue
+                                axisMinimum = barChartModel.yAxisMinValue
+                                gridColor = colorScheme.divider.toArgb()
+                                setDrawAxisLine(false)
+                                setLabelCount(barChartModel.yAxisLabelCount, true)
+                                textColor = labelTextColor
+                                textSize = labelTextSize
+                                valueFormatter = barChartModel.yValueFormatter
+                                xOffset = 10f
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .wrapContentSize()
                         .padding(4.dp),
-                    update = {
-                        updateBarChartWithData(it, barChartData, colorScheme)
+                    update = { barChart ->
+                        updateBarChartWithData(
+                            chart = barChart,
+                            data = barChartData,
+                            colorList = barChartModel.colors,
+                            colorScheme = colorScheme,
+                        )
                     }
                 )
             }
@@ -177,26 +195,25 @@ fun BarChart(
     }
 }
 
-fun updateBarChartWithData(
+private fun updateBarChartWithData(
     chart: BarChart,
     data: List<BarChartData>,
+    colorList: List<Color>,
     colorScheme: ColorScheme
 ) {
-    val entries = ArrayList<BarEntry>()
-    for (i in data.indices) {
-        val item = data[i]
-        entries.add(BarEntry(item.x ?: 0.toFloat(), item.y ?: 0.toFloat()))
+    val entries = data.map { item ->
+        BarEntry(item.x, item.y.toFloatArray())
     }
 
-    val ds = BarDataSet(entries, "")
-    ds.colors = arrayListOf(colorScheme.surfaceVariant.toArgb())
-    ds.setDrawValues(false)
-    ds.isHighlightEnabled = true
-    ds.highLightColor = colorScheme.primary.toArgb()
-    ds.highLightAlpha = 255
+    val ds = BarDataSet(entries, "").apply {
+        colors = colorList.map(Color::toArgb)
+        setDrawValues(false)
+        isHighlightEnabled = true
+        highLightColor = colorScheme.primary.toArgb()
+        highLightAlpha = 255
+    }
     // TODO: Sets round corners for bars.
 
-    val d = BarData(ds)
-    chart.data = d
+    chart.data = BarData(ds)
     chart.invalidate()
 }

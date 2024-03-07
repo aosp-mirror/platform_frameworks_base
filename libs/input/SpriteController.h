@@ -109,15 +109,19 @@ public:
  *
  * Clients are responsible for animating sprites by periodically updating their properties.
  */
-class SpriteController : public MessageHandler {
-protected:
-    virtual ~SpriteController();
-
+class SpriteController {
 public:
     using ParentSurfaceProvider = std::function<sp<SurfaceControl>(int /*displayId*/)>;
     SpriteController(const sp<Looper>& looper, int32_t overlayLayer, ParentSurfaceProvider parent);
+    SpriteController(const SpriteController&) = delete;
+    SpriteController& operator=(const SpriteController&) = delete;
+    virtual ~SpriteController();
 
-    /* Creates a new sprite, initially invisible. */
+    /* Initialize the callback for the message handler. */
+    void setHandlerController(const std::shared_ptr<SpriteController>& controller);
+
+    /* Creates a new sprite, initially invisible. The lifecycle of the sprite must not extend beyond
+     * the lifecycle of this SpriteController. */
     virtual sp<Sprite> createSprite();
 
     /* Opens or closes a transaction to perform a batch of sprite updates as part of
@@ -129,9 +133,12 @@ public:
     virtual void closeTransaction();
 
 private:
-    enum {
-        MSG_UPDATE_SPRITES,
-        MSG_DISPOSE_SURFACES,
+    class Handler : public virtual android::MessageHandler {
+    public:
+        enum { MSG_UPDATE_SPRITES, MSG_DISPOSE_SURFACES };
+
+        void handleMessage(const Message& message) override;
+        std::weak_ptr<SpriteController> spriteController;
     };
 
     enum {
@@ -192,7 +199,7 @@ private:
         virtual ~SpriteImpl();
 
     public:
-        explicit SpriteImpl(const sp<SpriteController> controller);
+        explicit SpriteImpl(SpriteController& controller);
 
         virtual void setIcon(const SpriteIcon& icon);
         virtual void setVisible(bool visible);
@@ -220,7 +227,7 @@ private:
         }
 
     private:
-        sp<SpriteController> mController;
+        SpriteController& mController;
 
         struct Locked {
             SpriteState state;
@@ -245,7 +252,7 @@ private:
 
     sp<Looper> mLooper;
     const int32_t mOverlayLayer;
-    sp<WeakMessageHandler> mHandler;
+    sp<Handler> mHandler;
     ParentSurfaceProvider mParentSurfaceProvider;
 
     sp<SurfaceComposerClient> mSurfaceComposerClient;
@@ -260,7 +267,6 @@ private:
     void invalidateSpriteLocked(const sp<SpriteImpl>& sprite);
     void disposeSurfaceLocked(const sp<SurfaceControl>& surfaceControl);
 
-    void handleMessage(const Message& message);
     void doUpdateSprites();
     void doDisposeSurfaces();
 

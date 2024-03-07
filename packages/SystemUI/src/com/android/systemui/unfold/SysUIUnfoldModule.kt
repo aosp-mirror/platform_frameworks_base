@@ -20,11 +20,13 @@ import com.android.keyguard.KeyguardUnfoldTransition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.NotificationPanelUnfoldAnimationController
 import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
-import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
+import com.android.systemui.unfold.dagger.UnfoldBg
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
 import com.android.systemui.util.kotlin.getOrNull
 import dagger.BindsInstance
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
@@ -32,10 +34,7 @@ import java.util.Optional
 import javax.inject.Named
 import javax.inject.Scope
 
-@Scope
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class SysUIUnfoldScope
+@Scope @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class SysUIUnfoldScope
 
 /**
  * Creates an injectable [SysUIUnfoldComponent] that provides objects that have been scoped with
@@ -57,15 +56,18 @@ class SysUIUnfoldModule {
         provider: Optional<UnfoldTransitionProgressProvider>,
         rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,
         @Named(UNFOLD_STATUS_BAR) scopedProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
+        @UnfoldBg bgProvider: Optional<UnfoldTransitionProgressProvider>,
+        unfoldLatencyTracker: Lazy<UnfoldLatencyTracker>,
         factory: SysUIUnfoldComponent.Factory
     ): Optional<SysUIUnfoldComponent> {
         val p1 = provider.getOrNull()
         val p2 = rotationProvider.getOrNull()
         val p3 = scopedProvider.getOrNull()
-        return if (p1 == null || p2 == null || p3 == null) {
+        val p4 = bgProvider.getOrNull()
+        return if (p1 == null || p2 == null || p3 == null || p4 == null) {
             Optional.empty()
         } else {
-            Optional.of(factory.create(p1, p2, p3))
+            Optional.of(factory.create(p1, p2, p3, p4, unfoldLatencyTracker.get()))
         }
     }
 }
@@ -79,7 +81,9 @@ interface SysUIUnfoldComponent {
         fun create(
             @BindsInstance p1: UnfoldTransitionProgressProvider,
             @BindsInstance p2: NaturalRotationUnfoldProgressProvider,
-            @BindsInstance p3: ScopedUnfoldTransitionProgressProvider
+            @BindsInstance p3: ScopedUnfoldTransitionProgressProvider,
+            @BindsInstance @UnfoldBg p4: UnfoldTransitionProgressProvider,
+            @BindsInstance p5: UnfoldLatencyTracker,
         ): SysUIUnfoldComponent
     }
 
@@ -98,4 +102,8 @@ interface SysUIUnfoldComponent {
     fun getUnfoldLightRevealOverlayAnimation(): UnfoldLightRevealOverlayAnimation
 
     fun getUnfoldKeyguardVisibilityManager(): UnfoldKeyguardVisibilityManager
+
+    fun getUnfoldLatencyTracker(): UnfoldLatencyTracker
+
+    fun getNaturalRotationUnfoldProgressProvider(): NaturalRotationUnfoldProgressProvider
 }

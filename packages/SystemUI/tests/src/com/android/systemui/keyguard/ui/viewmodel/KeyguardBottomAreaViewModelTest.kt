@@ -22,7 +22,6 @@ import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
@@ -52,11 +51,14 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -108,6 +110,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private lateinit var dockManager: DockManagerFake
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
+    private val kosmos = testKosmos()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -116,9 +120,11 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         overrideResource(
             R.array.config_keyguardQuickAffordanceDefaults,
             arrayOf(
-                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START + ":" +
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START +
+                    ":" +
                     BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
-                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END + ":" +
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END +
+                    ":" +
                     BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
             )
         )
@@ -138,7 +144,6 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         val featureFlags =
             FakeFeatureFlags().apply {
-                set(Flags.FACE_AUTH_REFACTOR, true)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
             }
@@ -220,6 +225,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,
+                        shadeInteractor = kosmos.shadeInteractor,
                         lockPatternUtils = lockPatternUtils,
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,

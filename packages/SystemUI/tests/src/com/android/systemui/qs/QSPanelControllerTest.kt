@@ -4,9 +4,10 @@ import android.content.res.Configuration
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableResources
+import android.view.ContextThemeWrapper
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.MediaHost
@@ -15,9 +16,11 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.tuner.TunerService
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -59,6 +62,8 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var configuration: Configuration
     @Mock private lateinit var pagedTileLayout: PagedTileLayout
 
+    private val sceneContainerFlags = FakeSceneContainerFlags()
+
     private lateinit var controller: QSPanelController
     private val testableResources: TestableResources = mContext.orCreateTestableResources
 
@@ -70,6 +75,8 @@ class QSPanelControllerTest : SysuiTestCase() {
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
         setShouldUseSplitShade(false)
         whenever(qsPanel.resources).thenReturn(testableResources.resources)
+        whenever(qsPanel.context)
+                .thenReturn( ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings))
         whenever(qsPanel.getOrCreateTileLayout()).thenReturn(pagedTileLayout)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
         whenever(qsPanel.setListening(anyBoolean())).then {
@@ -91,7 +98,9 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            statusBarKeyguardViewManager
+            statusBarKeyguardViewManager,
+            ResourcesSplitShadeStateController(),
+            sceneContainerFlags,
         )
     }
 

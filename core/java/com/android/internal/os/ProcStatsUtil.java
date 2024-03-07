@@ -30,6 +30,7 @@ import java.io.IOException;
  * Utility functions for reading {@code proc} files
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ProcStatsUtil {
 
     private static final boolean DEBUG = false;
@@ -92,10 +93,24 @@ public final class ProcStatsUtil {
      * seen, or at the end of the file
      */
     @Nullable
+    @android.ravenwood.annotation.RavenwoodReplace
     public static String readTerminatedProcFile(String path, byte terminator) {
         // Permit disk reads here, as /proc isn't really "on disk" and should be fast.
         // TODO: make BlockGuard ignore /proc/ and /sys/ files perhaps?
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            return readTerminatedProcFileInternal(path, terminator);
+        } finally {
+            StrictMode.setThreadPolicy(savedPolicy);
+        }
+    }
+
+    public static String readTerminatedProcFile$ravenwood(String path, byte terminator) {
+        // No StrictMode under Ravenwood
+        return readTerminatedProcFileInternal(path, terminator);
+    }
+
+    private static String readTerminatedProcFileInternal(String path, byte terminator) {
         try (FileInputStream is = new FileInputStream(path)) {
             ByteArrayOutputStream byteStream = null;
             final byte[] buffer = new byte[READ_SIZE];
@@ -147,8 +162,6 @@ public final class ProcStatsUtil {
                 Slog.d(TAG, "Failed to open proc file", e);
             }
             return null;
-        } finally {
-            StrictMode.setThreadPolicy(savedPolicy);
         }
     }
 }

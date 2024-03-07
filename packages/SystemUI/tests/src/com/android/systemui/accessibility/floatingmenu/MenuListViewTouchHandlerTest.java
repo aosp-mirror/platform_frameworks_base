@@ -33,6 +33,7 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.filters.SmallTest;
 
@@ -87,7 +88,8 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
         mStubMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance);
         mStubMenuView.setTranslationX(0);
         mStubMenuView.setTranslationY(0);
-        mMenuAnimationController = spy(new MenuAnimationController(mStubMenuView));
+        mMenuAnimationController = spy(new MenuAnimationController(
+                mStubMenuView, stubMenuViewAppearance));
         mDismissView = spy(new DismissView(mContext));
         DismissViewUtils.setup(mDismissView);
         mDismissAnimationController =
@@ -213,5 +215,6 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
     @After
     public void tearDown() {
         mMotionEventHelper.recycleEvents();
+        mMenuAnimationController.mPositionAnimations.values().forEach(DynamicAnimation::cancel);
     }
 }

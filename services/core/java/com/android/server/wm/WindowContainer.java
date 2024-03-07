@@ -1106,7 +1106,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mInsetsSourceProviders;
     }
 
-    public DisplayContent getDisplayContent() {
+    public final DisplayContent getDisplayContent() {
         return mDisplayContent;
     }
 
@@ -1133,13 +1133,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     boolean isAttached() {
         WindowContainer parent = getParent();
         return parent != null && parent.isAttached();
-    }
-
-    void setWaitingForDrawnIfResizingChanged() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            wc.setWaitingForDrawnIfResizingChanged();
-        }
     }
 
     void onResize() {
@@ -2995,12 +2988,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /** Whether we can start change transition with this window and current display status. */
     boolean canStartChangeTransition() {
-        return !mWmService.mDisableTransitionAnimation && mDisplayContent != null
-                && getSurfaceControl() != null && !mDisplayContent.inTransition()
-                && isVisible() && isVisibleRequested() && okToAnimate()
-                // Pip animation will be handled by PipTaskOrganizer.
-                && !inPinnedWindowingMode() && getParent() != null
-                && !getParent().inPinnedWindowingMode();
+        if (mWmService.mDisableTransitionAnimation || !okToAnimate()) return false;
+
+        // Change transition only make sense as we go from "visible" to "visible".
+        if (mDisplayContent == null || getSurfaceControl() == null
+                || !isVisible() || !isVisibleRequested()) {
+            return false;
+        }
+
+        // Make sure display isn't a part of the transition already - needed for legacy transitions.
+        if (mDisplayContent.inTransition()) return false;
+
+        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
+            // Screenshots are turned off when PiP is undergoing changes.
+            return !inPinnedWindowingMode() && getParent() != null
+                    && !getParent().inPinnedWindowingMode();
+        }
+        return true;
     }
 
     /**
@@ -3957,7 +3961,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
-    boolean useBLASTSync() {
+    boolean syncNextBuffer() {
         return mSyncState != SYNC_STATE_NONE;
     }
 

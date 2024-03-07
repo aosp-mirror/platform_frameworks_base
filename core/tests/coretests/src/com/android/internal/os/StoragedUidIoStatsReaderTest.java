@@ -20,10 +20,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import android.content.Context;
 import android.os.FileUtils;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -48,7 +46,6 @@ import java.nio.file.Files;
 @RunWith(AndroidJUnit4.class)
 public class StoragedUidIoStatsReaderTest {
 
-    private File mRoot;
     private File mTestDir;
     private File mTestFile;
     // private Random mRand = new Random();
@@ -57,15 +54,10 @@ public class StoragedUidIoStatsReaderTest {
     @Mock
     private StoragedUidIoStatsReader.Callback mCallback;
 
-    private Context getContext() {
-        return InstrumentationRegistry.getContext();
-    }
-
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTestDir = getContext().getDir("test", Context.MODE_PRIVATE);
-        mRoot = getContext().getFilesDir();
+        mTestDir = Files.createTempDirectory("StoragedUidIoStatsReaderTest").toFile();
         mTestFile = new File(mTestDir, "test.file");
         mStoragedUidIoStatsReader = new StoragedUidIoStatsReader(mTestFile.getAbsolutePath());
     }
@@ -73,9 +65,7 @@ public class StoragedUidIoStatsReaderTest {
     @After
     public void tearDown() throws Exception {
         FileUtils.deleteContents(mTestDir);
-        FileUtils.deleteContents(mRoot);
     }
-
 
     /**
      * Tests that reading will never call the callback.

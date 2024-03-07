@@ -45,8 +45,13 @@ constructor(
     /**
      * Whether the lockscreen is showing, which we pass to [IActivityTaskManager.setLockScreenShown]
      * in order to show the lockscreen and hide the surface behind the keyguard (or the inverse).
+     *
+     * This value is null if we have not yet called setLockScreenShown with any value. This will
+     * happen during the boot sequence, but we can't default to true here since otherwise we'll
+     * short-circuit on the first call to setLockScreenShown since we'll think we're already
+     * showing.
      */
-    private var isLockscreenShowing = true
+    private var isLockscreenShowing: Boolean? = null
 
     /**
      * Whether AOD is showing, which we pass to [IActivityTaskManager.setLockScreenShown] in order
@@ -102,7 +107,7 @@ constructor(
 
         // The surface behind is always visible if the lockscreen is not showing, so we're already
         // visible.
-        if (visible && !isLockscreenShowing) {
+        if (visible && isLockscreenShowing != true) {
             Log.d(TAG, "#setVisibility -> already visible since the lockscreen isn't showing")
             return
         }
@@ -159,9 +164,23 @@ constructor(
         }
     }
 
+    /**
+     * Sets the lockscreen state WM-side by calling ATMS#setLockScreenShown.
+     *
+     * [lockscreenShowing] defaults to true, since it's only ever null during the boot sequence,
+     * when we haven't yet called ATMS#setLockScreenShown. Typically,
+     * setWmLockscreenState(lockscreenShowing = true) is called early in the boot sequence, before
+     * setWmLockscreenState(aodVisible = true), so we don't expect to need to use this default, but
+     * if so, true should be the right choice.
+     */
     private fun setWmLockscreenState(
-        lockscreenShowing: Boolean = this.isLockscreenShowing,
-        aodVisible: Boolean = this.isAodVisible
+            lockscreenShowing: Boolean = this.isLockscreenShowing ?: true.also {
+                Log.d(TAG, "Using isLockscreenShowing=true default in setWmLockscreenState, " +
+                        "because setAodVisible was called before the first setLockscreenShown " +
+                        "call during boot. This is not typical, but is theoretically possible. " +
+                        "If you're investigating the lockscreen showing unexpectedly, start here.")
+            },
+            aodVisible: Boolean = this.isAodVisible
     ) {
         Log.d(
             TAG,
@@ -201,6 +220,6 @@ constructor(
     }
 
     companion object {
-        private val TAG = this::class.java.simpleName
+        private val TAG = WindowManagerLockscreenVisibilityManager::class.java.simpleName
     }
 }

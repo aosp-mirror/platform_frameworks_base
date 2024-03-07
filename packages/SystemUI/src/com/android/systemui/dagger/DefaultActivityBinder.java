@@ -19,8 +19,9 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.communal.widgets.EditWidgetsActivity;
+import com.android.systemui.communal.widgets.WidgetPickerActivity;
 import com.android.systemui.contrast.ContrastDialogActivity;
-import com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
@@ -28,10 +29,7 @@ import com.android.systemui.screenshot.LongScreenshotActivity;
 import com.android.systemui.screenshot.appclips.AppClipsActivity;
 import com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
-import com.android.systemui.sensorprivacy.television.TvSensorPrivacyChangedActivity;
-import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
-import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
 import com.android.systemui.telephony.ui.activity.SwitchToManagedProfileForCallActivity;
 import com.android.systemui.tuner.TunerActivity;
 import com.android.systemui.usb.UsbAccessoryUriActivity;
@@ -118,12 +116,6 @@ public abstract class DefaultActivityBinder {
     @ClassKey(CreateUserActivity.class)
     public abstract Activity bindCreateUserActivity(CreateUserActivity activity);
 
-    /** Inject into TvNotificationPanelActivity. */
-    @Binds
-    @IntoMap
-    @ClassKey(TvNotificationPanelActivity.class)
-    public abstract Activity bindTvNotificationPanelActivity(TvNotificationPanelActivity activity);
-
     /** Inject into PeopleSpaceActivity. */
     @Binds
     @IntoMap
@@ -160,25 +152,17 @@ public abstract class DefaultActivityBinder {
     @ClassKey(SensorUseStartedActivity.class)
     public abstract Activity bindSensorUseStartedActivity(SensorUseStartedActivity activity);
 
-    /** Inject into TvUnblockSensorActivity. */
+    /** Inject into EditWidgetsActivity. */
     @Binds
     @IntoMap
-    @ClassKey(TvUnblockSensorActivity.class)
-    public abstract Activity bindTvUnblockSensorActivity(TvUnblockSensorActivity activity);
+    @ClassKey(EditWidgetsActivity.class)
+    public abstract Activity bindEditWidgetsActivity(EditWidgetsActivity activity);
 
-    /** Inject into HdmiCecSetMenuLanguageActivity. */
+    /** Inject into WidgetPickerActivity. */
     @Binds
     @IntoMap
-    @ClassKey(HdmiCecSetMenuLanguageActivity.class)
-    public abstract Activity bindHdmiCecSetMenuLanguageActivity(
-            HdmiCecSetMenuLanguageActivity activity);
-
-    /** Inject into TvSensorPrivacyChangedActivity. */
-    @Binds
-    @IntoMap
-    @ClassKey(TvSensorPrivacyChangedActivity.class)
-    public abstract Activity bindTvSensorPrivacyChangedActivity(
-            TvSensorPrivacyChangedActivity activity);
+    @ClassKey(WidgetPickerActivity.class)
+    public abstract Activity bindWidgetPickerActivity(WidgetPickerActivity activity);
 
     /** Inject into SwitchToManagedProfileForCallActivity. */
     @Binds

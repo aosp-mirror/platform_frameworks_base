@@ -62,14 +62,14 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
 
     // Used within steps.
     public final VibrationSettings vibrationSettings;
-    public final DeviceVibrationEffectAdapter deviceEffectAdapter;
     public final VibrationThread.VibratorManagerHooks vibratorManagerHooks;
 
-    // Not guarded by lock because they're not modified by this conductor, it's used here only to
-    // check immutable attributes. The status and other mutable states are changed by the service or
-    // by the vibrator steps.
+    private final DeviceAdapter mDeviceAdapter;
+
+    // Not guarded by lock because it's mostly used to read immutable fields by this conductor.
+    // This is only modified here at the prepareToStart method which always runs at the vibration
+    // thread, to update the adapted effect and report start time.
     private final HalVibration mVibration;
-    private final SparseArray<VibratorController> mVibrators = new SparseArray<>();
 
     private final PriorityQueue<Step> mNextSteps = new PriorityQueue<>();
     private final Queue<Step> mPendingOnVibratorCompleteSteps = new LinkedList<>();
@@ -96,21 +96,14 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     private int mSuccessfulVibratorOnSteps;
 
     VibrationStepConductor(HalVibration vib, VibrationSettings vibrationSettings,
-            DeviceVibrationEffectAdapter effectAdapter,
-            SparseArray<VibratorController> availableVibrators,
+            DeviceAdapter deviceAdapter,
             VibrationThread.VibratorManagerHooks vibratorManagerHooks) {
         this.mVibration = vib;
         this.vibrationSettings = vibrationSettings;
-        this.deviceEffectAdapter = effectAdapter;
+        this.mDeviceAdapter = deviceAdapter;
         this.vibratorManagerHooks = vibratorManagerHooks;
-
-        CombinedVibration effect = vib.getEffect();
-        for (int i = 0; i < availableVibrators.size(); i++) {
-            if (effect.hasVibrator(availableVibrators.keyAt(i))) {
-                mVibrators.put(availableVibrators.keyAt(i), availableVibrators.valueAt(i));
-            }
-        }
-        this.mSignalVibratorsComplete = new IntArray(mVibrators.size());
+        this.mSignalVibratorsComplete =
+                new IntArray(mDeviceAdapter.getAvailableVibratorIds().length);
     }
 
     @Nullable
@@ -150,7 +143,9 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if (Build.IS_DEBUGGABLE) {
             expectIsVibrationThread(true);
         }
-        CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffect());
+        // Scaling happened before the effect was dispatched to this conductor (or to input devices)
+        mVibration.adaptToDevice(mDeviceAdapter);
+        CombinedVibration.Sequential sequentialEffect = toSequential(mVibration.getEffectToPlay());
         mPendingVibrateSteps++;
         // This count is decremented at the completion of the step, so we don't subtract one.
         mRemainingStartSequentialEffectSteps = sequentialEffect.getEffects().size();
@@ -167,7 +162,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
 
     SparseArray<VibratorController> getVibrators() {
         // No thread assertion: immutable
-        return mVibrators;
+        return mDeviceAdapter.getAvailableVibrators();
     }
 
     public boolean isFinished() {
@@ -408,8 +403,8 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         }
 
         synchronized (mLock) {
-            for (int i = 0; i < mVibrators.size(); i++) {
-                mSignalVibratorsComplete.add(mVibrators.keyAt(i));
+            for (int vibratorId : mDeviceAdapter.getAvailableVibratorIds()) {
+                mSignalVibratorsComplete.add(vibratorId);
             }
             mLock.notify();
         }

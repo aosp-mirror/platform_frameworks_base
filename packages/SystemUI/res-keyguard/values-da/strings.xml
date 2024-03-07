@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader langsomt"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladning er optimeret for at beskytte batteriet"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem med opladertilbehør"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Tryk på menuen for at låse op."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netværket er låst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Intet SIM-kort"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Tilføj et SIM-kort."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-kortet mangler eller kan ikke læses. Tilføj et SIM-kort."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Deaktiveret SIM-kort."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Dit SIM-kort er permanent deaktiveret.\n Kontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-kortet er låst."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-kortet er låst med PUK-koden."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-kortet låses op…"</string>
@@ -73,10 +69,10 @@
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Lås op med adgangskode eller fingeraftryk"</string>
     <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Lås op med mønster eller fingeraftryk"</string>
     <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Enhed låst af arbejdspolitik af hensyn til sikkerhed"</string>
-    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pinkode er påkrævet efter brug af ekstralås"</string>
-    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Adgangskode er påkrævet efter brug af ekstralås"</string>
-    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mønster er påkrævet efter brug af ekstralås"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Opdateringen installeres under inaktivitet"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pinkode er påkrævet efter brug af låsning"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Adgangskode er påkrævet efter brug af låsning"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mønster er påkrævet efter brug af låsning"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Opdateringen installeres, når enheden ikke er i brug"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Mere sikkerhed er påkrævet. Pinkoden er ikke blevet brugt i et stykke tid."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Mere sikkerhed er påkrævet. Adgangskoden er ikke blevet brugt i et stykke tid."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Mere sikkerhed er påkrævet. Mønsteret er ikke blevet brugt i et stykke tid."</string>
@@ -118,11 +114,17 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Enheden er blevet låst af administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheden blev låst manuelt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ikke genkendt"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aktivér kameraadgang i Indstillinger for at bruge ansigtslås"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aktivér kameraadgang i Indstillinger for at bruge ansigtsoplåsning"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage, før du skal kontakte dit mobilselskab for at låse din enhed op.}one{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage.}other{Angiv pinkoden til SIM-kortet. Du har # forsøg tilbage.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}one{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}other{SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har # forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Standard"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Boble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Lås din enhed op for at fortsætte"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Angiv din pinkode for at installere opdateringen senere"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Angiv din adgangskode for at installere opdateringen senere"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Tegn dit mønster for at installere opdateringen senere"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Enheden er opdateret. Angiv din pinkode for at fortsætte."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Enheden er opdateret. Angiv din adgangskode for at fortsætte."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Enheden er opdateret. Tegn dit mønster for at fortsætte."</string>
 </resources>

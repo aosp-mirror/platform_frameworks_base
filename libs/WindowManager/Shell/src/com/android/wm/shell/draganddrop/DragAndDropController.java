@@ -94,6 +94,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
     private ShellExecutor mMainExecutor;
     private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
 
+    // Map of displayId -> per-display info
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
 
     /**
@@ -362,7 +363,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
      */
     private boolean isReadyToHandleDrag() {
         for (int i = 0; i < mDisplayDropTargets.size(); i++) {
-            if (mDisplayDropTargets.valueAt(i).mHasDrawn) {
+            if (mDisplayDropTargets.valueAt(i).hasDrawn) {
                 return true;
             }
         }
@@ -398,8 +399,13 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
      * Dumps information about this controller.
      */
     public void dump(@NonNull PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(prefix + " listeners=" + mListeners.size());
+        pw.println(innerPrefix + "listeners=" + mListeners.size());
+        pw.println(innerPrefix + "Per display:");
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.valueAt(i).dump(pw, innerPrefix);
+        }
     }
     
     /**
@@ -440,7 +446,7 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
         final FrameLayout rootView;
         final DragLayout dragLayout;
         // Tracks whether the window has fully drawn since it was last made visible
-        boolean mHasDrawn;
+        boolean hasDrawn;
 
         boolean isHandlingDrag;
         // A count of the number of active drags in progress to ensure that we only hide the window
@@ -464,17 +470,29 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             rootView.setVisibility(visibility);
             if (visibility == View.VISIBLE) {
                 rootView.requestApplyInsets();
-                if (!mHasDrawn && rootView.getViewRootImpl() != null) {
+                if (!hasDrawn && rootView.getViewRootImpl() != null) {
                     rootView.getViewRootImpl().registerRtFrameCallback(this);
                 }
             } else {
-                mHasDrawn = false;
+                hasDrawn = false;
             }
         }
 
         @Override
         public void onFrameDraw(long frame) {
-            mHasDrawn = true;
+            hasDrawn = true;
+        }
+
+        /**
+         * Dumps information about this display's shell drop target.
+         */
+        public void dump(@NonNull PrintWriter pw, String prefix) {
+            final String innerPrefix = prefix + "  ";
+            pw.println(innerPrefix + "displayId=" + displayId);
+            pw.println(innerPrefix + "hasDrawn=" + hasDrawn);
+            pw.println(innerPrefix + "isHandlingDrag=" + isHandlingDrag);
+            pw.println(innerPrefix + "activeDragCount=" + activeDragCount);
+            dragLayout.dump(pw, innerPrefix);
         }
     }
 }

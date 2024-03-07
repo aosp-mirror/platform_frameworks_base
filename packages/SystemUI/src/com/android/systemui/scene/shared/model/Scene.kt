@@ -16,9 +16,7 @@
 
 package com.android.systemui.scene.shared.model
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Defines interface for classes that can describe a "scene".
@@ -34,31 +32,26 @@ interface Scene {
     val key: SceneKey
 
     /**
-     * Returns a mapping between [UserAction] and flows that emit a [SceneModel].
+     * The mapping between [UserAction] and destination [SceneModel]s.
      *
-     * When the scene framework detects the user action, it starts a transition to the scene
-     * described by the latest value in the flow that's mapped from that user action.
+     * When the scene framework detects a user action, if the current scene has a map entry for that
+     * user action, the framework starts a transition to the scene in the map.
      *
-     * Once the [Scene] becomes the current one, the scene framework will invoke this method and set
-     * up collectors to watch for new values emitted to each of the flows. If a value is added to
-     * the map at a given [UserAction], the framework will set up user input handling for that
-     * [UserAction] and, if such a user action is detected, the framework will initiate a transition
-     * to that [SceneModel].
+     * Once the [Scene] becomes the current one, the scene framework will read this property and set
+     * up a collector to watch for new mapping values. If every map entry provided by the scene, the
+     * framework will set up user input handling for its [UserAction] and, if such a user action is
+     * detected, initiate a transition to the specified [SceneModel].
      *
-     * Note that calling this method does _not_ mean that the given user action has occurred.
-     * Instead, the method is called before any user action/gesture is detected so that the
-     * framework can decide whether to set up gesture/input detectors/listeners for that type of
-     * user action.
+     * Note that reading from this method does _not_ mean that any user action has occurred.
+     * Instead, the property is read before any user action/gesture is detected so that the
+     * framework can decide whether to set up gesture/input detectors/listeners in case user actions
+     * of the given types ever occur.
      *
      * Note that a missing value for a specific [UserAction] means that the user action of the given
      * type is not currently active in the scene and should be ignored by the framework, while the
      * current scene is this one.
-     *
-     * The API is designed such that it's possible to emit ever-changing values for each
-     * [UserAction] to enable, disable, or change the destination scene of a given user action.
      */
-    fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
-        MutableStateFlow(emptyMap<UserAction, SceneModel>()).asStateFlow()
+    val destinationScenes: StateFlow<Map<UserAction, SceneModel>>
 }
 
 /** Enumerates all scene framework supported user actions. */
@@ -68,12 +61,17 @@ sealed interface UserAction {
     data class Swipe(
         /** The direction of the swipe. */
         val direction: Direction,
+        /**
+         * The edge from which the swipe originated or `null`, if the swipe didn't start close to an
+         * edge.
+         */
+        val fromEdge: Edge? = null,
         /** The number of pointers that were used (for example, one or two fingers). */
         val pointerCount: Int = 1,
     ) : UserAction
 
     /** The user has hit the back button or performed the back navigation gesture. */
-    object Back : UserAction
+    data object Back : UserAction
 }
 
 /** Enumerates all known "cardinal" directions for user actions. */
@@ -82,4 +80,12 @@ enum class Direction {
     UP,
     RIGHT,
     DOWN,
+}
+
+/** Enumerates all known edges from which a swipe can start. */
+enum class Edge {
+    LEFT,
+    TOP,
+    RIGHT,
+    BOTTOM,
 }

@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"അൺസ്റ്റാഷ് ചെയ്യൽ"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"സ്‌ക്രീൻ വിഭജന മോഡിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"സ്‌ക്രീൻ വിഭജന മോഡിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ഈ ആപ്പ് ഒരു വിൻഡോയിൽ മാത്രമേ തുറക്കാനാകൂ."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ഈ ആപ്പ് ഒരു വിൻഡോയിൽ മാത്രമേ തുറക്കാനാകൂ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നതിനെ ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"സ്‌ക്രീൻ വിഭജന മോഡ് ഡിവൈഡർ"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"മുകളിൽ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ചുവടെ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> വികസിപ്പിക്കുക"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ചുരുക്കുക"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ക്രമീകരണം"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ബബിൾ ഡിസ്മിസ് ചെയ്യൂ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"സംഭാഷണം ബബിൾ ചെയ്യരുത്"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"മനസ്സിലായി"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ബബിളുകൾ ഉപയോഗിച്ച് ചാറ്റ് ചെയ്യുക"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"പുതിയ സംഭാഷണങ്ങൾ, നിങ്ങളുടെ സ്ക്രീനിന്റെ താഴെ മൂലയിൽ ഐക്കണുകളായി ദൃശ്യമാകും. വികസിപ്പിക്കാൻ അവയിൽ ടാപ്പ് ചെയ്യുക അല്ലെങ്കിൽ ഡിസ്‌മിസ് ചെയ്യാൻ വലിച്ചിടുക."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ബബിളുകൾ ഏതുസമയത്തും നിയന്ത്രിക്കുക"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ഏതൊക്കെ ആപ്പുകളും സംഭാഷണങ്ങളും ബബിൾ ചെയ്യാനാകുമെന്നത് മാനേജ് ചെയ്യാൻ ഇവിടെ ടാപ്പ് ചെയ്യുക"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ബബിൾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"മാനേജ് ചെയ്യുക"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബിൾ ഡിസ്മിസ് ചെയ്തു."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"മികച്ച കാഴ്‌ചയ്‌ക്കായി ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"മികച്ച കാഴ്‌ചയ്‌ക്കായി ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ഈ ആപ്പിന്റെ വീക്ഷണ അനുപാതം, ക്രമീകരണത്തിൽ മാറ്റുക"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"വീക്ഷണ അനുപാതം മാറ്റുക"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ക്യാമറ പ്രശ്നങ്ങളുണ്ടോ?\nശരിയാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"അത് പരിഹരിച്ചില്ലേ?\nപുനഃസ്ഥാപിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ക്യാമറാ പ്രശ്നങ്ങളൊന്നുമില്ലേ? നിരസിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>

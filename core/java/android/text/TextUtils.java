@@ -27,6 +27,7 @@ import android.annotation.PluralsRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.icu.lang.UCharacter;
 import android.icu.text.CaseMap;
 import android.icu.text.Edits;
@@ -46,6 +47,7 @@ import android.text.style.EasyEditSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LineBackgroundSpan;
+import android.text.style.LineBreakConfigSpan;
 import android.text.style.LineHeightSpan;
 import android.text.style.LocaleSpan;
 import android.text.style.ParagraphStyle;
@@ -66,6 +68,7 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.text.style.UpdateAppearance;
+import android.util.EmptyArray;
 import android.util.Log;
 import android.util.Printer;
 import android.view.View;
@@ -139,9 +142,9 @@ public class TextUtils {
         return (method == TextUtils.TruncateAt.END_SMALL) ? ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL;
     }
 
-
     private TextUtils() { /* cannot be instantiated */ }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void getChars(CharSequence s, int start, int end,
                                 char[] dest, int destoff) {
         Class<? extends CharSequence> c = s.getClass();
@@ -160,10 +163,12 @@ public class TextUtils {
         }
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int indexOf(CharSequence s, char ch) {
         return indexOf(s, ch, 0);
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int indexOf(CharSequence s, char ch, int start) {
         Class<? extends CharSequence> c = s.getClass();
 
@@ -173,6 +178,7 @@ public class TextUtils {
         return indexOf(s, ch, start, s.length());
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int indexOf(CharSequence s, char ch, int start, int end) {
         Class<? extends CharSequence> c = s.getClass();
 
@@ -210,10 +216,12 @@ public class TextUtils {
         return -1;
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int lastIndexOf(CharSequence s, char ch) {
         return lastIndexOf(s, ch, s.length() - 1);
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int lastIndexOf(CharSequence s, char ch, int last) {
         Class<? extends CharSequence> c = s.getClass();
 
@@ -223,6 +231,7 @@ public class TextUtils {
         return lastIndexOf(s, ch, 0, last);
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int lastIndexOf(CharSequence s, char ch,
                                   int start, int last) {
         if (last < 0)
@@ -268,14 +277,17 @@ public class TextUtils {
         return -1;
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int indexOf(CharSequence s, CharSequence needle) {
         return indexOf(s, needle, 0, s.length());
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int indexOf(CharSequence s, CharSequence needle, int start) {
         return indexOf(s, needle, start, s.length());
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int indexOf(CharSequence s, CharSequence needle,
                               int start, int end) {
         int nlen = needle.length();
@@ -303,6 +315,7 @@ public class TextUtils {
         return -1;
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean regionMatches(CharSequence one, int toffset,
                                         CharSequence two, int ooffset,
                                         int len) {
@@ -335,6 +348,7 @@ public class TextUtils {
      * in that it does not preserve any style runs in the source sequence,
      * allowing a more efficient implementation.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String substring(CharSequence source, int start, int end) {
         if (source instanceof String)
             return ((String) source).substring(start, end);
@@ -407,6 +421,7 @@ public class TextUtils {
      *     calling object.toString(). If tokens is null, a NullPointerException will be thrown. If
      *     tokens is an empty array, an empty string will be returned.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String join(@NonNull CharSequence delimiter, @NonNull Object[] tokens) {
         final int length = tokens.length;
         if (length == 0) {
@@ -430,6 +445,7 @@ public class TextUtils {
      *     calling object.toString(). If tokens is null, a NullPointerException will be thrown. If
      *     tokens is empty, an empty string will be returned.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String join(@NonNull CharSequence delimiter, @NonNull Iterable tokens) {
         final Iterator<?> it = tokens.iterator();
         if (!it.hasNext()) {
@@ -462,9 +478,10 @@ public class TextUtils {
      *
      * @throws NullPointerException if expression or text is null
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String[] split(String text, String expression) {
         if (text.length() == 0) {
-            return EMPTY_STRING_ARRAY;
+            return EmptyArray.STRING;
         } else {
             return text.split(expression, -1);
         }
@@ -487,9 +504,10 @@ public class TextUtils {
      *
      * @throws NullPointerException if expression or text is null
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String[] split(String text, Pattern pattern) {
         if (text.length() == 0) {
-            return EMPTY_STRING_ARRAY;
+            return EmptyArray.STRING;
         } else {
             return pattern.split(text, -1);
         }
@@ -524,6 +542,7 @@ public class TextUtils {
      * be returned for the empty string after that delimeter. That is, splitting <tt>"a,b,"</tt> on
      * comma will return <tt>"a", "b"</tt>, not <tt>"a", "b", ""</tt>.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static class SimpleStringSplitter implements StringSplitter, Iterator<String> {
         private String mString;
         private char mDelimiter;
@@ -587,26 +606,31 @@ public class TextUtils {
      * @param str the string to be examined
      * @return true if str is null or zero length
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isEmpty(@Nullable CharSequence str) {
         return str == null || str.length() == 0;
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String nullIfEmpty(@Nullable String str) {
         return isEmpty(str) ? null : str;
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String emptyIfNull(@Nullable String str) {
         return str == null ? "" : str;
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String firstNotEmpty(@Nullable String a, @NonNull String b) {
         return !isEmpty(a) ? a : Preconditions.checkStringNotEmpty(b);
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int length(@Nullable String s) {
         return s != null ? s.length() : 0;
     }
@@ -615,6 +639,7 @@ public class TextUtils {
      * @return interned string if it's null.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String safeIntern(String s) {
         return (s != null) ? s.intern() : null;
     }
@@ -624,6 +649,7 @@ public class TextUtils {
      * spaces and ASCII control characters were trimmed from the start and end,
      * as by {@link String#trim}.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int getTrimmedLength(CharSequence s) {
         int len = s.length();
 
@@ -648,6 +674,7 @@ public class TextUtils {
      * @param b second CharSequence to check
      * @return true if a and b are equal
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean equals(CharSequence a, CharSequence b) {
         if (a == b) return true;
         int length;
@@ -786,7 +813,9 @@ public class TextUtils {
     /** @hide */
     public static final int ACCESSIBILITY_REPLACEMENT_SPAN = 29;
     /** @hide */
-    public static final int LAST_SPAN = ACCESSIBILITY_REPLACEMENT_SPAN;
+    public static final int LINE_BREAK_CONFIG_SPAN = 30;
+    /** @hide */
+    public static final int LAST_SPAN = LINE_BREAK_CONFIG_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -988,6 +1017,10 @@ public class TextUtils {
 
                 case ACCESSIBILITY_REPLACEMENT_SPAN:
                     span = new AccessibilityReplacementSpan(p);
+                    break;
+
+                case LINE_BREAK_CONFIG_SPAN:
+                    span = LineBreakConfigSpan.CREATOR.createFromParcel(p);
                     break;
 
                 default:
@@ -1671,6 +1704,7 @@ public class TextUtils {
         return true;
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     /* package */ static char[] obtain(int len) {
         char[] buf;
 
@@ -1685,6 +1719,11 @@ public class TextUtils {
         return buf;
     }
 
+    /* package */ static char[] obtain$ravenwood(int len) {
+        return new char[len];
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
     /* package */ static void recycle(char[] temp) {
         if (temp.length > 1000)
             return;
@@ -1694,11 +1733,16 @@ public class TextUtils {
         }
     }
 
+    /* package */ static void recycle$ravenwood(char[] temp) {
+        // Handled by typical GC
+    }
+
     /**
      * Html-encode the string.
      * @param s the string to be encoded
      * @return the encoded string
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String htmlEncode(String s) {
         StringBuilder sb = new StringBuilder();
         char c;
@@ -1785,6 +1829,7 @@ public class TextUtils {
     /**
      * Returns whether the given CharSequence contains any printable characters.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isGraphic(CharSequence str) {
         final int len = str.length();
         for (int cp, i=0; i<len; i+=Character.charCount(cp)) {
@@ -1811,6 +1856,7 @@ public class TextUtils {
      * @deprecated Use {@link #isGraphic(CharSequence)} instead.
      */
     @Deprecated
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isGraphic(char c) {
         int gc = Character.getType(c);
         return     gc != Character.CONTROL
@@ -1825,6 +1871,7 @@ public class TextUtils {
     /**
      * Returns whether the given CharSequence contains only digits.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isDigitsOnly(CharSequence str) {
         final int len = str.length();
         for (int cp, i = 0; i < len; i += Character.charCount(cp)) {
@@ -1839,6 +1886,7 @@ public class TextUtils {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isPrintableAscii(final char c) {
         final int asciiFirst = 0x20;
         final int asciiLast = 0x7E;  // included
@@ -1849,6 +1897,7 @@ public class TextUtils {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isPrintableAsciiOnly(final CharSequence str) {
         final int len = str.length();
         for (int i = 0; i < len; i++) {
@@ -1900,6 +1949,7 @@ public class TextUtils {
      * {@link #CAP_MODE_CHARACTERS}, {@link #CAP_MODE_WORDS}, and
      * {@link #CAP_MODE_SENTENCES}.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int getCapsMode(CharSequence cs, int off, int reqModes) {
         if (off < 0) {
             return 0;
@@ -2145,6 +2195,7 @@ public class TextUtils {
      *             match the supported grammar described above.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static @NonNull String formatSimple(@NonNull String format, Object... args) {
         final StringBuilder sb = new StringBuilder(format);
         int j = 0;
@@ -2334,6 +2385,7 @@ public class TextUtils {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isNewline(int codePoint) {
         int type = Character.getType(codePoint);
         return type == Character.PARAGRAPH_SEPARATOR || type == Character.LINE_SEPARATOR
@@ -2341,16 +2393,19 @@ public class TextUtils {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isWhitespace(int codePoint) {
         return Character.isWhitespace(codePoint) || codePoint == NBSP_CODE_POINT;
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isWhitespaceExceptNewline(int codePoint) {
         return isWhitespace(codePoint) && !isNewline(codePoint);
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isPunctuation(int codePoint) {
         int type = Character.getType(codePoint);
         return type == Character.CONNECTOR_PUNCTUATION
@@ -2482,12 +2537,34 @@ public class TextUtils {
         if (ellipsizeDip == 0) {
             return gettingCleaned.toString();
         } else {
-            // Truncate
-            final TextPaint paint = new TextPaint();
-            paint.setTextSize(42);
+            final float assumedFontSizePx = 42;
+            if (Typeface.getSystemFontMap().isEmpty()) {
+                // In the system server, the font files may not be loaded, so unable to perform
+                // ellipsize, so use the estimated char count for the ellipsize.
 
-            return TextUtils.ellipsize(gettingCleaned.toString(), paint, ellipsizeDip,
-                    TextUtils.TruncateAt.END);
+                // The median of glyph widths of the Roboto is 0.57em, so use it as a reference
+                // of the glyph width.
+                final float assumedCharWidthInEm = 0.57f;
+                final float assumedCharWidthInPx = assumedFontSizePx * assumedCharWidthInEm;
+
+                // Even if the argument name is `ellipsizeDip`, the unit of this argument is pixels.
+                final int charCount = (int) ((ellipsizeDip + 0.5f) / assumedCharWidthInPx);
+
+                final String text = gettingCleaned.toString();
+                if (TextUtils.isEmpty(text) || text.length() <= charCount) {
+                    return text;
+                } else {
+                    return TextUtils.trimToSize(text, charCount)
+                            + getEllipsisString(TruncateAt.END);
+                }
+            } else {
+                // Truncate
+                final TextPaint paint = new TextPaint();
+                paint.setTextSize(assumedFontSizePx);
+
+                return TextUtils.ellipsize(gettingCleaned.toString(), paint, ellipsizeDip,
+                        TextUtils.TruncateAt.END);
+            }
         }
     }
 
@@ -2578,6 +2655,4 @@ public class TextUtils {
     private static Object sLock = new Object();
 
     private static char[] sTemp = null;
-
-    private static String[] EMPTY_STRING_ARRAY = new String[]{};
 }

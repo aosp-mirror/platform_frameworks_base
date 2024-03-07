@@ -32,8 +32,10 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -42,6 +44,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,10 +93,26 @@ public final class RadioManagerTest {
     private static final RadioManager.ModuleProperties AMFM_PROPERTIES =
             createAmFmProperties(/* dabFrequencyTable= */ null);
 
+    private static final int DAB_INFO_FLAG_LIVE_VALUE = 1;
+    private static final int DAB_INFO_FLAG_TUNED_VALUE = 1 << 4;
+    private static final int DAB_INFO_FLAG_STEREO_VALUE = 1 << 5;
+    private static final int HD_INFO_FLAG_LIVE_VALUE = 1;
+    private static final int HD_INFO_FLAG_TUNED_VALUE = 1 << 4;
+    private static final int HD_INFO_FLAG_STEREO_VALUE = 1 << 5;
+    private static final int HD_INFO_FLAG_SIGNAL_ACQUISITION_VALUE = 1 << 6;
+    private static final int HD_INFO_FLAG_SIS_ACQUISITION_VALUE = 1 << 7;
     /**
-     * Info flags with live, tuned and stereo enabled
+     * Info flags with live, tuned, and stereo enabled for DAB program
      */
-    private static final int INFO_FLAGS = 0b110001;
+    private static final int INFO_FLAGS_DAB = DAB_INFO_FLAG_LIVE_VALUE | DAB_INFO_FLAG_TUNED_VALUE
+            | DAB_INFO_FLAG_STEREO_VALUE;
+    /**
+     * HD program info flags with live, tuned, stereo enabled, signal acquired, SIS information
+     * available but audio unavailable
+     */
+    private static final int INFO_FLAGS_HD = HD_INFO_FLAG_LIVE_VALUE | HD_INFO_FLAG_TUNED_VALUE
+            | HD_INFO_FLAG_STEREO_VALUE | HD_INFO_FLAG_SIGNAL_ACQUISITION_VALUE
+            | HD_INFO_FLAG_SIS_ACQUISITION_VALUE;
     private static final int SIGNAL_QUALITY = 2;
     private static final ProgramSelector.Identifier DAB_SID_EXT_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT,
@@ -112,9 +131,20 @@ public final class RadioManagerTest {
                     new ProgramSelector.Identifier[]{
                             DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER},
                     /* vendorIds= */ null);
+
+    private static final long HD_FREQUENCY = 97_100;
+    private static final ProgramSelector.Identifier HD_STATION_EXT_IDENTIFIER =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT,
+                    /* value= */ (HD_FREQUENCY << 36) | 0x1L);
+    private static final ProgramSelector HD_SELECTOR = new ProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_FM_HD, HD_STATION_EXT_IDENTIFIER,
+            new ProgramSelector.Identifier[]{}, /* vendorIds= */ null);
+
     private static final RadioMetadata METADATA = createMetadata();
     private static final RadioManager.ProgramInfo DAB_PROGRAM_INFO =
             createDabProgramInfo(DAB_SELECTOR);
+    private static final RadioManager.ProgramInfo HD_PROGRAM_INFO = createHdProgramInfo(
+            HD_SELECTOR);
 
     private static final int EVENT_ANNOUNCEMENT_TYPE = Announcement.TYPE_EVENT;
     private static final List<Announcement> TEST_ANNOUNCEMENT_LIST = Arrays.asList(
@@ -134,6 +164,9 @@ public final class RadioManagerTest {
     private Announcement.OnListUpdatedListener mEventListener;
     @Mock
     private ICloseHandle mCloseHandleMock;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void getType_forBandDescriptor() {
@@ -927,6 +960,30 @@ public final class RadioManagerTest {
     }
 
     @Test
+    public void isSignalAcquired_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        assertWithMessage("Signal acquisition status for HD program info")
+                .that(HD_PROGRAM_INFO.isSignalAcquired()).isTrue();
+    }
+
+    @Test
+    public void isHdSisAvailable_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        assertWithMessage("SIS information acquisition status for HD program")
+                .that(HD_PROGRAM_INFO.isHdSisAvailable()).isTrue();
+    }
+
+    @Test
+    public void isHdAudioAvailable_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
+        assertWithMessage("Audio acquisition status for HD program")
+                .that(HD_PROGRAM_INFO.isHdAudioAvailable()).isFalse();
+    }
+
+    @Test
     public void getSignalStrength_forProgramInfo() {
         assertWithMessage("Signal strength of DAB program info")
                 .that(DAB_PROGRAM_INFO.getSignalStrength()).isEqualTo(SIGNAL_QUALITY);
@@ -1156,9 +1213,18 @@ public final class RadioManagerTest {
     }
 
     private static RadioManager.ProgramInfo createDabProgramInfo(ProgramSelector selector) {
-        return new RadioManager.ProgramInfo(selector, DAB_SID_EXT_IDENTIFIER,
-                DAB_FREQUENCY_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED), INFO_FLAGS,
-                SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
+        return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(),
+                DAB_FREQUENCY_IDENTIFIER, Arrays.asList(DAB_SID_EXT_IDENTIFIER_RELATED),
+                INFO_FLAGS_DAB, SIGNAL_QUALITY, METADATA, /* vendorInfo= */ null);
+    }
+
+    private static RadioManager.ProgramInfo createHdProgramInfo(ProgramSelector selector) {
+        long frequency = (selector.getPrimaryId().getValue() >> 32);
+        ProgramSelector.Identifier physicallyTunedToId = new ProgramSelector.Identifier(
+                ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, frequency);
+        return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(), physicallyTunedToId,
+                Collections.emptyList(), INFO_FLAGS_HD, SIGNAL_QUALITY, METADATA,
+                /* vendorInfo= */ null);
     }
 
     private void createRadioManager() throws RemoteException {

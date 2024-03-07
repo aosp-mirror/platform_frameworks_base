@@ -237,7 +237,7 @@
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"El teléfono se apagará."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"¿Seguro que quieres apagar el teléfono?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar en modo Seguro"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Quieres reiniciar el sistema en modo Seguro? Se inhabilitarán todas las aplicaciones externas que hayas instalado. Esas aplicaciones se restaurarán la próxima vez que reinicies del sistema."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"¿Quieres reiniciar el sistema en modo Seguro? Se inhabilitarán todas las aplicaciones externas que hayas instalado. Esas aplicaciones se restaurarán la próxima vez que reinicies el sistema."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"Reciente"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"No hay aplicaciones recientes."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opciones del tablet"</string>
@@ -251,7 +251,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Informe de errores"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalizar sesión"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Captura de pantalla"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Informar error"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Informe de errores"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Informe interactivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, introducir más información sobre el problema y hacer capturas de pantalla. Es posible que se omitan algunas secciones menos utilizadas y que requieran más tiempo."</string>
@@ -291,6 +291,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplicaciones que consumen batería"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ampliación"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Uso de accesibilidad"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Pantalla"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando la batería"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> aplicaciones están usando la batería"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
@@ -299,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Cambiar al perfil personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Cambiar al perfil de trabajo"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Cambiar a <xliff:g id="APP_NAME">%1$s</xliff:g> personal"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Cambiar a <xliff:g id="APP_NAME">%1$s</xliff:g> de trabajo"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acceder a tus contactos"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicación"</string>
@@ -500,11 +503,13 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Esta aplicación del sistema o con privilegios puede hacer fotos y grabar vídeos en cualquier momento con una cámara del sistema, aunque debe tener también el permiso android.permission.CAMERA para hacerlo"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que una aplicación o servicio reciba retrollamadas cada vez que se abra o cierre una cámara."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta aplicación puede recibir retrollamadas cuando se abre o se cierra la cámara con cualquier aplicación."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Permitir que una aplicación o servicio acceda a la cámara como un usuario del sistema sin interfaz gráfica."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Esta aplicación puede acceder a la cámara como un usuario del sistema sin interfaz gráfica."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la función de vibración."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la aplicación acceda al ajuste de vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Permite que la aplicación haga llamadas sin intervención del usuario, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que las aplicaciones no pueden usar este servicio para realizar llamadas a números de emergencia, pero las aplicaciones malintencionadas pueden causarte gastos imprevistos al realizar llamadas sin tu confirmación."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Permite que la aplicación llame a números de teléfono sin tu intervención, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que esto no permite que la aplicación llame a números de emergencia. Las aplicaciones maliciosas pueden incurrir en gastos al hacer llamadas sin tu confirmación o marcar códigos de operador que desvían automáticamente las llamadas entrantes a otro número."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acceder al servicio de llamadas IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que la aplicación utilice el servicio IMS para realizar llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"consultar la identidad y el estado del teléfono"</string>
@@ -589,6 +594,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que la aplicación obtenga información sobre el servicio de pago por NFC preferido, como identificadores de aplicación registrados y destinos de rutas."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar Comunicación de campo cercano (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite que la aplicación se comunique con lectores, tarjetas y etiquetas de Comunicación de campo cercano (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Evento de transacción de elemento seguro"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Permite que la aplicación reciba información sobre las transacciones que ocurren en un elemento seguro."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"inhabilitar el bloqueo de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que la aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Por ejemplo, el teléfono puede inhabilitar el bloqueo del teclado cuando se recibe una llamada telefónica y volver a habilitarlo cuando finaliza la llamada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"solicitar complejidad del bloqueo de pantalla"</string>
@@ -619,6 +626,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biométrico no disponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autenticación cancelada"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"No se reconoce"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Cara no reconocida"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autenticación cancelada"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"No se ha definido el PIN, el patrón o la contraseña"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"No se ha podido autenticar"</string>
@@ -639,6 +647,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Huella digital no reconocida"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Huella digital no reconocida"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"No se reconoce la cara. Usa la huella digital."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Se ha autenticado la huella digital"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Se ha autenticado la cara, pulsa para confirmar"</string>
@@ -664,14 +673,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Se ha producido un error. Inténtalo de nuevo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icono de huella digital"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Desbloqueo del dispositivo"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Prueba otro método de desbloqueo"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Usa Desbloqueo facial cuando no se reconozca tu huella (p. ej., si tienes los dedos mojados)"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Usa Desbloqueo con huella digital cuando no se reconozca tu cara (p. ej., si hay poca luz)"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca para eliminar tu modelo facial y luego añade de nuevo tu cara"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueo facial"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloquea el teléfono con solo mirarlo"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar Desbloqueo Facial, habilita el "<b>"acceso a la cámara"</b>" en Ajustes y privacidad"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura más formas de desbloqueo"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca para añadir una huella digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueo con huella digital"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"No se puede usar el sensor de huellas digitales"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un proveedor de reparaciones."</string>
@@ -693,15 +702,15 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira al teléfono de forma más directa"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retira cualquier objeto que te tape la cara."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retira cualquier objeto que te tape la cara"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpia la parte superior de la pantalla, incluida la barra de color negro"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
     <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"No se puede crear tu modelo. Inténtalo de nuevo."</string>
-    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Gafas oscuras detectadas. Tu cara se debe poder ver por completo."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Mascarilla detectada. Tu cara se debe poder ver por completo."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Gafas oscuras detectadas. Tu cara se debe poder ver entera."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Cara parcialmente cubierta. Debe verse toda."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se puede verificar. Hardware no disponible."</string>
@@ -710,8 +719,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Se ha cancelado el reconocimiento facial."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"El usuario ha cancelado Desbloqueo facial"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Demasiados intentos. Desbloqueo facial no disponible."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Demasiados intentos. Usa el bloqueo de pantalla."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se ha verificado tu cara. Vuelve a intentarlo."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"No has configurado Desbloqueo facial"</string>
@@ -822,7 +830,7 @@
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Borrar datos del perfil"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Borrar datos del usuario"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en este tablet sin avisar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en esta tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Eliminar los datos de este usuario del dispositivo Android TV sin previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Borra los datos del perfil de este sistema de infoentretenimiento sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Borra los datos del usuario en este teléfono sin avisar."</string>
@@ -1365,12 +1373,12 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Modo MIDI por USB activado"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo conectado como cámara web"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accesorio USB conectado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toca para ver más opciones."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toca para ver más opciones"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Cargando el dispositivo conectado. Toca para ver más opciones."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activa"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración por USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
@@ -1392,8 +1400,8 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECHAZAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona un método de entrada"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Mientras el teclado físico está activo"</string>
-    <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Mantenlo en pantalla mientras el teclado físico está activo"</string>
+    <string name="hardware" msgid="3611039921284836033">"Usar teclado en pantalla"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura teclados físicos"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toca para seleccionar el idioma y el diseño"</string>
@@ -1567,7 +1575,7 @@
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Compartir con"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Compartir con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Mantén pulsado el icono de desbloqueo y deslízalo."</string>
-    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Desliza el dedo para desbloquear."</string>
+    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Desliza para desbloquear"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Ir al escritorio"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Más opciones"</string>
@@ -1682,10 +1690,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos fuertes durante mucho tiempo puede dañar los oídos."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Atención:\nHas superado la cantidad de señales acústicas elevadas que se considera seguro escuchar en una semana a través de auriculares.\n\nSuperar este límite dañará tu audición de forma permanente."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Atención:\nHas superado cinco veces la cantidad de señales acústicas elevadas que se considera seguro escuchar en una semana a través de auriculares.\n\nSe ha bajado el volumen para proteger tu audición."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"El volumen al que estás escuchando contenido multimedia puede provocar daños de audición si se mantiene durante un periodo prolongado.\n\nSi sigues reproduciendo audio a este volumen durante largos periodos, puede que perjudique tu audición."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Atención:\nEstás escuchando contenido a un volumen no seguro.\n\nSi sigues escuchando audio tan alto, tu audición se dañará de forma permanente."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"¿Seguir escuchando a un volumen alto?\n\nEl volumen de los auriculares ha estado alto durante más tiempo del recomendado, lo que puede dañar tu audición."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Volumen alto detectado\n\nEl volumen de los auriculares está más alto de lo recomendado, lo que puede dañar tu audición."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Utilizar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si el acceso directo está activado, pulsa los dos botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"¿Quieres activar el acceso directo a las funciones de accesibilidad?"</string>
@@ -1705,6 +1711,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Puede registrar tus interacciones con una aplicación o un sensor de hardware, así como interactuar con las aplicaciones en tu nombre."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denegar"</string>
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Desinstalar"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Una aplicación está ocultando la solicitud de permiso, por lo que no se puede verificar tu respuesta."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una función para empezar a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Selecciona qué funciones usar con el botón de accesibilidad"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Selecciona qué funciones usar con la tecla de volumen"</string>
@@ -1852,7 +1860,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para salir, desliza el dedo de arriba abajo."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira la pantalla para verlo mejor"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sal de la pantalla dividida para verlo mejor"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Abre <xliff:g id="NAME">%s</xliff:g> en pantalla completa para verlo mejor"</string>
     <string name="done_label" msgid="7283767013231718521">"Hecho"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control deslizante circular de horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control deslizante circular de minutos"</string>
@@ -1865,6 +1873,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clon de <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> privado"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para desactivar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pedir patrón de desbloqueo para dejar de fijar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar contraseña para desactivar"</string>
@@ -1898,6 +1907,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Durmiendo"</string>
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activado"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivado"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> silencia algunos sonidos"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Se ha producido un problema interno en el dispositivo y es posible que este no sea estable hasta que restablezcas el estado de fábrica."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Se ha producido un problema interno en el dispositivo. Ponte en contacto con el fabricante para obtener más información."</string>
@@ -1958,7 +1969,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"La aplicación no está disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"En estos momentos, <xliff:g id="APP_NAME">%1$s</xliff:g> no está disponible."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no disponible"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Se necesita permiso"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Solicitud de permiso rechazada"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Cámara no disponible"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continúa en el teléfono"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Micrófono no disponible"</string>
@@ -1969,6 +1980,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"En estos momentos, no se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Esta aplicación está solicitando permisos adicionales, pero no se pueden dar durante una sesión de streaming. Da primero el permiso en tu dispositivo Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Esta aplicación está solicitando permisos adicionales, pero no se pueden dar durante una sesión de streaming. Da primero el permiso en tu tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Esta aplicación está solicitando permisos adicionales, pero no se pueden dar durante una sesión de streaming. Da primero el permiso en tu teléfono."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Esta aplicación solicita seguridad adicional. Prueba en tu dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Esta aplicación solicita seguridad adicional. Prueba en tu tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Esta aplicación solicita seguridad adicional. Prueba en tu teléfono."</string>
@@ -1977,6 +1991,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No se puede acceder desde tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Esta aplicación se creó para una versión anterior de Android. Puede que no funcione correctamente y que no incluya las protecciones de seguridad y privacidad más recientes. Comprueba si hay actualizaciones o ponte en contacto con el desarrollador de la aplicación."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualizaciones"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Esta aplicación no es compatible con la última versión de Android. Comprueba si hay actualizaciones o contacta con el desarrollador de la aplicación."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tienes mensajes nuevos"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abre la aplicación de SMS para ver el mensaje"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algunas funciones limitadas"</string>
@@ -2025,7 +2040,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"¿Actualizar en "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"¿Actualizar <xliff:g id="TYPE">%1$s</xliff:g> en "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"¿Actualizar <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"¿Actualizar estos elementos en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g>)?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"¿Actualizar estos elementos en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g>)?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Guardar"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"No, gracias"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Ahora no"</string>
@@ -2160,16 +2175,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Este contenido no se puede abrir con aplicaciones de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Este contenido no se puede compartir con aplicaciones personales"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Este contenido no se puede abrir con aplicaciones personales"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"El perfil de trabajo está en pausa"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Toca para activar"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Las aplicaciones de trabajo están en pausa"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reactivar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ninguna aplicación de trabajo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ninguna aplicación personal"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"¿Abrir <xliff:g id="APP">%s</xliff:g> de trabajo?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"¿Abrir en <xliff:g id="APP">%s</xliff:g> personal?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"¿Abrir en <xliff:g id="APP">%s</xliff:g> de trabajo?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"¿Llamar desde la aplicación de trabajo?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"¿Cambiar a la aplicación de trabajo?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Tu organización solo te permite hacer llamadas desde aplicaciones de trabajo"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Tu organización solo te permite enviar mensajes desde aplicaciones de trabajo"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar navegador de trabajo"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Llamar"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Cambiar"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo de red de tarjeta SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN de desbloqueo de subconjunto de red SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN de desbloqueo corporativo de SIM"</string>
@@ -2306,6 +2326,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del teléfono desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara del tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"No se puede acceder a este contenido durante una emisión. Prueba en tu teléfono."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No se puede usar imagen en imagen mientras se emite contenido"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARJETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permiso del perfil del reloj complementario para gestionar relojes"</string>
@@ -2318,20 +2339,32 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que una aplicación complementaria inicie servicios en primer plano desde el segundo plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micrófono está disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micrófono está bloqueado"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Cámara Dual"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Cámara Dual está activada"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"No se puede proyectar a la pantalla"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Usa otro cable y vuelve a intentarlo"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Tu dispositivo está demasiado caliente y no puede proyectar a la pantalla hasta que se enfríe"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"El cable puede no ser compatible con pantallas"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Puede que tu cable USB‑C no sea adecuado para conectarse a pantallas"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Dual Screen está activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas pantallas para mostrar contenido"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositivo está demasiado caliente"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Cámara Dual no está disponible porque el teléfono se está calentando demasiado"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen no está disponible porque el teléfono se está calentando demasiado"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen no está disponible"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen no está disponible porque la función Ahorro de batería está activada. Puedes desactivarla en Ajustes."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ir a Ajustes"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactivar"</string>
-    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Se ha configurado <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> configurado"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%s</xliff:g>. Toca para cambiarlo."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g> y <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Toca para cambiarlo."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> y <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Toca para cambiarlo."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Toca para cambiarlo."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Toca para cambiarlo."</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toca para cambiarlo."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toca para ver los teclados"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privado"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clon"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Trabajo"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Trabajo 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Trabajo 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Prueba"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Común"</string>
 </resources>

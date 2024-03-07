@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#include <VectorDrawable.h>
-#include <gtest/gtest.h>
-
 #include <SkBlendMode.h>
 #include <SkClipStack.h>
 #include <SkSurface_Base.h>
+#include <VectorDrawable.h>
+#include <gtest/gtest.h>
 #include <include/effects/SkImageFilters.h>
 #include <string.h>
 
@@ -144,7 +143,7 @@ TEST(RenderNodeDrawable, zReorder) {
 }
 
 TEST(RenderNodeDrawable, composeOnLayer) {
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     SkCanvas& canvas = *surface->getCanvas();
     canvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
@@ -155,7 +154,7 @@ TEST(RenderNodeDrawable, composeOnLayer) {
             });
 
     // attach a layer to the render node
-    auto surfaceLayer = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surfaceLayer = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     auto canvas2 = surfaceLayer->getCanvas();
     canvas2->drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     rootNode->setLayerSurface(surfaceLayer);
@@ -190,7 +189,7 @@ static SkMatrix getRecorderMatrix(const SkiaRecordingCanvas& recorder) {
 }
 
 TEST(RenderNodeDrawable, saveLayerClipAndMatrixRestore) {
-    auto surface = SkSurface::MakeRasterN32Premul(400, 800);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(400, 800));
     SkCanvas& canvas = *surface->getCanvas();
     canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
@@ -356,7 +355,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
     EXPECT_EQ(3, canvas.getIndex());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
+RENDERTHREAD_TEST(RenderNodeDrawable, emptyReceiver) {
     class ProjectionTestCanvas : public SkCanvas {
     public:
         ProjectionTestCanvas(int width, int height) : SkCanvas(width, height) {}
@@ -420,7 +419,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
     EXPECT_EQ(2, canvas.getDrawCounter());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     /* R is backward projected on B and C is a layer.
                 A
                / \
@@ -1053,7 +1052,7 @@ TEST(RenderNodeDrawable, renderNode) {
 }
 
 // Verify that layers are composed with linear filtering.
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
+RENDERTHREAD_TEST(RenderNodeDrawable, layerComposeQuality) {
     static const int CANVAS_WIDTH = 1;
     static const int CANVAS_HEIGHT = 1;
     static const int LAYER_WIDTH = 1;
@@ -1077,7 +1076,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
             });
 
     layerNode->animatorProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-    layerNode->setLayerSurface(SkSurface::MakeRasterN32Premul(LAYER_WIDTH, LAYER_HEIGHT));
+    layerNode->setLayerSurface(SkSurfaces::Raster(SkImageInfo::MakeN32Premul(LAYER_WIDTH, 
+                                                                             LAYER_HEIGHT)));
 
     FrameTestCanvas canvas;
     RenderNodeDrawable drawable(layerNode.get(), &canvas, true);
@@ -1170,7 +1170,7 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
 }
 
 // Draw a vector drawable twice but with different bounds and verify correct bounds are used.
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
+RENDERTHREAD_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
     static const int CANVAS_WIDTH = 100;
     static const int CANVAS_HEIGHT = 200;
     class VectorDrawableTestCanvas : public TestCanvasBase {
@@ -1243,7 +1243,7 @@ RENDERTHREAD_TEST(BackdropFilterDrawable, drawing) {
             SkBitmap bitmap;
             bitmap.allocN32Pixels(CANVAS_WIDTH, CANVAS_HEIGHT);
             bitmap.setImmutable();
-            return SkImage::MakeFromBitmap(bitmap);
+            return bitmap.asImage();
         }
         SkCanvas* onNewCanvas() override { return new SimpleTestCanvas(); }
         sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override { return nullptr; }

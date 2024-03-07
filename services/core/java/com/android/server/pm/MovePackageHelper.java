@@ -118,16 +118,13 @@ public final class MovePackageHelper {
                     "3rd party apps are not allowed on internal storage");
         }
 
-
-        final String currentVolumeUuid = packageState.getVolumeUuid();
-
         final File probe = new File(pkg.getPath());
-        final File probeOat = new File(probe, "oat");
-        if (!probe.isDirectory() || !probeOat.isDirectory()) {
+        if (!probe.isDirectory()) {
             throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                     "Move only supported for modern cluster style installs");
         }
 
+        final String currentVolumeUuid = packageState.getVolumeUuid();
         if (Objects.equals(currentVolumeUuid, volumeUuid)) {
             throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
                     "Package already moved to " + volumeUuid);
@@ -163,7 +160,8 @@ public final class MovePackageHelper {
         final PackageFreezer freezer;
         synchronized (mPm.mLock) {
             freezer = mPm.freezePackage(packageName, UserHandle.USER_ALL,
-                    "movePackageInternal", ApplicationExitInfo.REASON_USER_REQUESTED);
+                    "movePackageInternal", ApplicationExitInfo.REASON_USER_REQUESTED,
+                    null /* request */);
         }
 
         final Bundle extras = new Bundle();

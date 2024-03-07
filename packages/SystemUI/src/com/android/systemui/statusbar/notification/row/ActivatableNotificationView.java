@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.Flags.notificationBackgroundTintOptimization;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -36,11 +38,12 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.util.DumpUtilsKt;
@@ -121,7 +124,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void updateColors() {
         mNormalColor = Utils.getColorAttrDefaultColor(mContext,
-                com.android.internal.R.attr.colorSurface);
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh);
         mTintedRippleColor = mContext.getColor(
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
@@ -188,12 +191,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return super.onInterceptTouchEvent(ev);
     }
 
-    /**
-     * Called by the TouchHandler when this view is tapped. This will be called for actual taps
-     * only, i.e. taps that have been filtered by the FalsingManager.
-     */
-    public void onTap() {}
-
     /** Sets the last action up time this view was touched. */
     public void setLastActionUpTime(long eventTime) {
         mLastActionUpTime = eventTime;
@@ -227,10 +224,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setState(getDrawableState());
     }
 
-    void setRippleAllowed(boolean allowed) {
-        mBackgroundNormal.setPressedAllowed(allowed);
-    }
-
     private void updateOutlineAlpha() {
         float alpha = NotificationStackScrollLayout.BACKGROUND_ALPHA_DIMMED;
         alpha = (alpha + (1.0f - alpha) * mNormalBackgroundVisibilityAmount);
@@ -239,15 +232,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public void setBelowSpeedBump(boolean below) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         super.setBelowSpeedBump(below);
         if (below != mIsBelowSpeedBump) {
             mIsBelowSpeedBump = below;
             updateBackgroundTint();
-            onBelowSpeedBumpChanged();
         }
-    }
-
-    protected void onBelowSpeedBumpChanged() {
     }
 
     /**
@@ -321,8 +311,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void setBackgroundTintColor(int color) {
         if (color != mCurrentBackgroundTint) {
             mCurrentBackgroundTint = color;
-            // TODO(282173943): re-enable this tinting optimization when Resources are thread-safe
-            if (false && color == mNormalColor) {
+            if (notificationBackgroundTintOptimization() && color == mNormalColor) {
                 // We don't need to tint a normal notification
                 color = 0;
             }
@@ -361,15 +350,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public long performRemoveAnimation(long duration, long delay, float translationDirection,
-            boolean isHeadsUpAnimation, Runnable onFinishedRunnable,
+            boolean isHeadsUpAnimation, Runnable onStartedRunnable, Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAnimation;
         if (mDrawingAppearAnimation) {
             startAppearAnimation(false /* isAppearing */, translationDirection,
-                    delay, duration, onFinishedRunnable, animationListener);
-        } else if (onFinishedRunnable != null) {
-            onFinishedRunnable.run();
+                    delay, duration, onStartedRunnable, onFinishedRunnable, animationListener);
+        } else {
+            if (onStartedRunnable != null) {
+                onStartedRunnable.run();
+            }
+            if (onFinishedRunnable != null) {
+                onFinishedRunnable.run();
+            }
         }
         return 0;
     }
@@ -381,12 +375,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mIsHeadsUpAnimation = isHeadsUpAppear;
         if (mDrawingAppearAnimation) {
             startAppearAnimation(true /* isAppearing */, isHeadsUpAppear ? 0.0f : -1.0f, delay,
-                    duration, null, null);
+                    duration, null, null, null);
         }
     }
 
     private void startAppearAnimation(boolean isAppearing, float translationDirection, long delay,
-            long duration, final Runnable onFinishedRunnable,
+            long duration, final Runnable onStartedRunnable, final Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         mAnimationTranslationY = translationDirection * getActualHeight();
         cancelAppearAnimation();
@@ -450,6 +444,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
             @Override
             public void onAnimationStart(Animator animation) {
+                if (onStartedRunnable != null) {
+                    onStartedRunnable.run();
+                }
                 mRunWithoutInterruptions = true;
                 Configuration.Builder builder = Configuration.Builder
                         .withView(getCujType(isAppearing), ActivatableNotificationView.this);

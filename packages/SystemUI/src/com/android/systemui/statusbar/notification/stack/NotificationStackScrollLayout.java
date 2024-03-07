@@ -20,6 +20,8 @@ import static android.os.Trace.TRACE_TAG_APP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
+import static com.android.systemui.Flags.newAodTransition;
+import static com.android.systemui.flags.Flags.UNCLEARED_TRANSIENT_HUN_FIX;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.util.DumpUtilsKt.println;
@@ -86,18 +88,17 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
-import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.ViewRefactorFlag;
+import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
@@ -106,21 +107,22 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
+import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.DumpUtilsKt;
-import com.android.systemui.util.LargeScreenUtils;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
 
@@ -200,9 +202,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private Set<Integer> mDebugTextUsedYPositions;
     private final boolean mDebugRemoveAnimation;
     private final boolean mSensitiveRevealAnimEndabled;
-    private final ViewRefactorFlag mAnimatedInsets;
-    private final ViewRefactorFlag mShelfRefactor;
-
+    private final RefactorFlag mAnimatedInsets;
     private int mContentHeight;
     private float mIntrinsicContentHeight;
     private int mPaddingBetweenElements;
@@ -251,6 +251,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationLogger.OnChildLocationsChangedListener mListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
+    private Runnable mOnHeightChangedRunnable;
     private OnEmptySpaceClickListener mOnEmptySpaceClickListener;
     private boolean mNeedsAnimation;
     private boolean mTopPaddingNeedsAnimation;
@@ -321,7 +322,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationsController mNotificationsController;
     private ActivityStarter mActivityStarter;
     private final int[] mTempInt2 = new int[2];
-    private boolean mGenerateChildOrderChangedEvent;
     private final HashSet<Runnable> mAnimationFinishedRunnables = new HashSet<>();
     private final HashSet<ExpandableView> mClearTransientViewsWhenFinished = new HashSet<>();
     private final HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
@@ -341,7 +341,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mAnimateNextBackgroundTop;
     private boolean mAnimateNextBackgroundBottom;
     private boolean mAnimateNextSectionBoundsChange;
-    private int mBgColor;
+    private @ColorInt int mBgColor;
     private float mDimAmount;
     private ValueAnimator mDimAnimator;
     private final ArrayList<ExpandableView> mTmpSortedChildren = new ArrayList<>();
@@ -485,8 +485,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private ShadeController mShadeController;
     private Consumer<Boolean> mOnStackYChanged;
 
-    protected boolean mClearAllEnabled;
-
     private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     private final NotificationSectionsManager mSectionsManager;
@@ -567,7 +565,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private boolean mShouldUseSplitNotificationShade;
+    private boolean mShouldSkipTopPaddingAnimationAfterFold = false;
     private boolean mHasFilteredOutSeenNotifications;
+    @Nullable private SplitShadeStateController mSplitShadeStateController = null;
+    private boolean mIsSmallLandscapeLockscreenEnabled = false;
+
+    /** Pass splitShadeStateController to view and update split shade */
+    public void passSplitShadeStateController(SplitShadeStateController splitShadeStateController) {
+        mSplitShadeStateController = splitShadeStateController;
+        updateSplitNotificationShade();
+    }
+    private FeatureFlags mFeatureFlags;
 
     private final ExpandableView.OnHeightChangedListener mOnChildHeightChangedListener =
             new ExpandableView.OnHeightChangedListener() {
@@ -620,23 +628,23 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
-        FeatureFlags featureFlags = Dependency.get(FeatureFlags.class);
-        mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
-        mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
-        mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
+        mFeatureFlags = Dependency.get(FeatureFlags.class);
+        mIsSmallLandscapeLockscreenEnabled = mFeatureFlags.isEnabled(
+                Flags.LOCKSCREEN_ENABLE_LANDSCAPE);
+        mDebugLines = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
+        mDebugRemoveAnimation = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
+        mSensitiveRevealAnimEndabled = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         mAnimatedInsets =
-                new ViewRefactorFlag(featureFlags, Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
-        mShelfRefactor = new ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
+                new RefactorFlag(mFeatureFlags, Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
         mScreenOffAnimationController =
                 Dependency.get(ScreenOffAnimationController.class);
-        updateSplitNotificationShade();
         mSectionsManager.initialize(this);
         mSections = mSectionsManager.createSectionsForBuckets();
 
         mAmbientState = Dependency.get(AmbientState.class);
-        mBgColor = Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating)
-                .getDefaultColor();
+        mBgColor = Utils.getColorAttr(mContext,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh).getDefaultColor();
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = res.getDimensionPixelSize(R.dimen.notification_max_height);
         mSplitShadeMinContentHeight = res.getDimensionPixelSize(
@@ -661,7 +669,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mDebugPaint.setStyle(Paint.Style.STROKE);
             mDebugPaint.setTextSize(25f);
         }
-        mClearAllEnabled = res.getBoolean(R.bool.config_enableNotificationsClearAll);
         mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
         mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
@@ -684,7 +691,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         super.onFinishInflate();
 
         inflateEmptyShadeView();
-        inflateFooterView();
+        if (!FooterViewRefactor.isEnabled()) {
+            inflateFooterView();
+        }
     }
 
     /**
@@ -719,9 +728,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void reinflateViews() {
-        inflateFooterView();
+        if (!FooterViewRefactor.isEnabled()) {
+            inflateFooterView();
+            updateFooter();
+        }
         inflateEmptyShadeView();
-        updateFooter();
         mSectionsManager.reinflateViews();
     }
 
@@ -730,16 +741,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         updateFooter();
     }
 
-    void setHasFilteredOutSeenNotifications(boolean hasFilteredOutSeenNotifications) {
+    /** Setter for filtered notifs, to be removed with the FooterViewRefactor flag. */
+    public void setHasFilteredOutSeenNotifications(boolean hasFilteredOutSeenNotifications) {
+        FooterViewRefactor.assertInLegacyMode();
         mHasFilteredOutSeenNotifications = hasFilteredOutSeenNotifications;
     }
 
     @VisibleForTesting
     public void updateFooter() {
-        if (mFooterView == null) {
+        if (mFooterView == null || mController == null) {
             return;
         }
-        // TODO: move this logic to controller, which will invoke updateFooterView directly
         final boolean showHistory = mController.isHistoryEnabled();
         final boolean showDismissView = shouldShowDismissView();
 
@@ -749,8 +761,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     private boolean shouldShowDismissView() {
-        return mClearAllEnabled
-                && mController.hasActiveClearableNotifications(ROWS_ALL);
+        return mController.hasActiveClearableNotifications(ROWS_ALL);
     }
 
     private boolean shouldShowFooterView(boolean showDismissView) {
@@ -764,20 +775,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 && !mIsRemoteInputActive;
     }
 
-    /**
-     * Return whether there are any clearable notifications
-     */
-    boolean hasActiveClearableNotifications(@SelectedRows int selection) {
-        return mController.hasActiveClearableNotifications(selection);
-    }
-
     public NotificationSwipeActionHelper getSwipeActionHelper() {
         return mSwipeHelper;
     }
 
     void updateBgColor() {
-        mBgColor = Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating)
-                .getDefaultColor();
+        mBgColor = Utils.getColorAttr(mContext,
+                com.android.internal.R.attr.materialColorSurfaceContainerHigh).getDefaultColor();
         updateBackgroundDimming();
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
@@ -1048,6 +1052,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mOverflingDistance = configuration.getScaledOverflingDistance();
 
         Resources res = context.getResources();
+        boolean useSmallLandscapeLockscreenResources = mIsSmallLandscapeLockscreenEnabled
+                && res.getBoolean(R.bool.is_small_screen_landscape);
+        // TODO (b/293252410) remove condition here when flag is launched
+        //  Instead update the config_skinnyNotifsInLandscape to be false whenever
+        //  is_small_screen_landscape is true. Then, only use the config_skinnyNotifsInLandscape.
+        if (useSmallLandscapeLockscreenResources) {
+            mSkinnyNotifsInLandscape = false;
+        } else {
+            mSkinnyNotifsInLandscape = res.getBoolean(
+                    R.bool.config_skinnyNotifsInLandscape);
+        }
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
         mStackScrollAlgorithm.initView(context);
         mAmbientState.reload(context);
@@ -1059,7 +1074,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mBottomPadding = res.getDimensionPixelSize(R.dimen.notification_panel_padding_bottom);
         mMinimumPaddings = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mQsTilePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_margin_horizontal);
-        mSkinnyNotifsInLandscape = res.getBoolean(R.bool.config_skinnyNotifsInLandscape);
         mSidePaddings = mMinimumPaddings;  // Updated in onMeasure by updateSidePadding()
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
@@ -1100,6 +1114,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onHeightChanged(view, needsAnimation);
         }
+
+        if (mOnHeightChangedRunnable != null) {
+            mOnHeightChangedRunnable.run();
+        }
     }
 
     public boolean isPulseExpanding() {
@@ -1136,6 +1154,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mSpeedBumpIndex;
     }
 
+    private boolean mSuppressChildrenMeasureAndLayout = false;
+
+    /**
+     * Similar to {@link ViewGroup#suppressLayout} but still performs layout of
+     * the container itself and suppresses only measure and layout calls to children.
+     */
+    public void suppressChildrenMeasureAndLayout(boolean suppress) {
+        mSuppressChildrenMeasureAndLayout = suppress;
+
+        if (!suppress) {
+            requestLayout();
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Trace.beginSection("NotificationStackScrollLayout#onMeasure");
@@ -1148,6 +1180,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
         int width = MeasureSpec.getSize(widthMeasureSpec);
         updateSidePadding(width);
+
+        if (mSuppressChildrenMeasureAndLayout) {
+            Trace.endSection();
+            return;
+        }
+
         int childWidthSpec = MeasureSpec.makeMeasureSpec(width - mSidePaddings * 2,
                 MeasureSpec.getMode(widthMeasureSpec));
         // Don't constrain the height of the children so we know how big they'd like to be
@@ -1171,18 +1209,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        // we layout all our children centered on the top
-        float centerX = getWidth() / 2.0f;
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            // We need to layout all children even the GONE ones, such that the heights are
-            // calculated correctly as they are used to calculate how many we can fit on the screen
-            float width = child.getMeasuredWidth();
-            float height = child.getMeasuredHeight();
-            child.layout((int) (centerX - width / 2.0f),
-                    0,
-                    (int) (centerX + width / 2.0f),
-                    (int) height);
+        if (!mSuppressChildrenMeasureAndLayout) {
+            // we layout all our children centered on the top
+            float centerX = getWidth() / 2.0f;
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                // We need to layout all children even the GONE ones, such that the heights are
+                // calculated correctly as they are used to calculate how many we can fit on
+                // the screen
+                float width = child.getMeasuredWidth();
+                float height = child.getMeasuredHeight();
+                child.layout((int) (centerX - width / 2.0f),
+                        0,
+                        (int) (centerX + width / 2.0f),
+                        (int) height);
+            }
         }
         setMaxLayoutHeight(getHeight());
         updateContentHeight();
@@ -1234,6 +1275,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
     private void updateChildren() {
+        Trace.beginSection("NSSL#updateChildren");
         updateScrollStateForAddedChildren();
         mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
                 ? 0
@@ -1244,6 +1286,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             startAnimationToState();
         }
+        Trace.endSection();
     }
 
     private void onPreDrawDuringAnimation() {
@@ -1324,7 +1367,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mTopPadding = topPadding;
             updateAlgorithmHeightAndPadding();
             updateContentHeight();
-            if (shouldAnimate && mAnimationsEnabled && mIsExpanded) {
+            if (mAmbientState.isOnKeyguard()
+                    && !mShouldUseSplitNotificationShade
+                    && mShouldSkipTopPaddingAnimationAfterFold) {
+                mShouldSkipTopPaddingAnimationAfterFold = false;
+            } else if (shouldAnimate && mAnimationsEnabled && mIsExpanded) {
                 mTopPaddingNeedsAnimation = true;
                 mNeedsAnimation = true;
             }
@@ -1350,8 +1397,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private boolean shouldSkipHeightUpdate() {
         return mAmbientState.isOnKeyguard()
-                && (mAmbientState.isUnlockHintRunning()
-                || mAmbientState.isSwipingUp()
+                && (mAmbientState.isSwipingUp()
                 || mAmbientState.isFlingingAfterSwipeUpOnLockscreen());
     }
 
@@ -1414,12 +1460,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @VisibleForTesting
     public void updateStackHeight(float endHeight, float fraction) {
-        // During the (AOD<=>LS) transition where dozeAmount is changing,
-        // apply dozeAmount to stack height instead of expansionFraction
-        // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
-        final float dozeAmount = mAmbientState.getDozeAmount();
-        if (0f < dozeAmount && dozeAmount < 1f) {
-            fraction = 1f - dozeAmount;
+        if (!newAodTransition()) {
+            // During the (AOD<=>LS) transition where dozeAmount is changing,
+            // apply dozeAmount to stack height instead of expansionFraction
+            // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
+            final float dozeAmount = mAmbientState.getDozeAmount();
+            if (0f < dozeAmount && dozeAmount < 1f) {
+                fraction = 1f - dozeAmount;
+            }
         }
         mAmbientState.setStackHeight(
                 MathUtils.lerp(endHeight * StackScrollAlgorithm.START_FRACTION,
@@ -1611,8 +1659,44 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * @return the position from where the appear transition ends when expanding.
      * Measured in absolute height.
+     *
+     * TODO(b/308591475): This entire logic can probably be improved as part of the empty shade
+     *  refactor, but for now:
+     *  - if the empty shade is visible, we can assume that the visible notif count is not 0;
+     *  - if the shelf is visible, we can assume there are at least 2 notifications present (this
+     *    is not true for AOD, but this logic refers to the expansion of the shade, where we never
+     *    have the shelf on its own)
      */
     private float getAppearEndPosition() {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            return getAppearEndPositionLegacy();
+        }
+
+        int appearPosition = mAmbientState.getStackTopMargin();
+        if (mEmptyShadeView.getVisibility() == GONE) {
+            if (isHeadsUpTransition()
+                    || (mInHeadsUpPinnedMode && !mAmbientState.isDozing())) {
+                if (mShelf.getVisibility() != GONE) {
+                    appearPosition += mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
+                }
+                appearPosition += getTopHeadsUpPinnedHeight()
+                        + getPositionInLinearLayout(mAmbientState.getTrackedHeadsUpRow());
+            } else if (mShelf.getVisibility() != GONE) {
+                appearPosition += mShelf.getIntrinsicHeight();
+            }
+        } else {
+            appearPosition = mEmptyShadeView.getHeight();
+        }
+        return appearPosition + (onKeyguard() ? mTopPadding : mIntrinsicPadding);
+    }
+
+    /**
+     * The version of {@code getAppearEndPosition} that uses the notif count. The view shouldn't
+     * need to know about that, so we want to phase this out with the footer view refactor.
+     */
+    private float getAppearEndPositionLegacy() {
+        FooterViewRefactor.assertInLegacyMode();
+
         int appearPosition = mAmbientState.getStackTopMargin();
         int visibleNotifCount = mController.getVisibleNotificationCount();
         if (mEmptyShadeView.getVisibility() == GONE && visibleNotifCount > 0) {
@@ -1651,7 +1735,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             // This can't use expansion fraction as that goes only from 0 to 1. Also when
             // appear fraction for HUN is 0, expansion fraction will be already around 0.2-0.3
             // and that makes translation jump immediately.
-            float appearEndPosition = getAppearEndPosition();
+            float appearEndPosition = FooterViewRefactor.isEnabled() ? getAppearEndPosition()
+                    : getAppearEndPositionLegacy();
             float appearStartPosition = getAppearStartPosition();
             float hunAppearFraction = (height - appearStartPosition)
                     / (appearEndPosition - appearStartPosition);
@@ -2709,15 +2794,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mChildTransferInProgress = childTransferInProgress;
     }
 
-    /**
-     * Set the remove notification listener
-     * @param listener callback for notification removed
-     */
-    public void setOnNotificationRemovedListener(OnNotificationRemovedListener listener) {
-        mShelfRefactor.assertDisabled();
-        mOnNotificationRemovedListener = listener;
-    }
-
     @Override
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
@@ -2727,15 +2803,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (!mChildTransferInProgress) {
             onViewRemovedInternal(expandableView, this);
         }
-        if (mShelfRefactor.isEnabled()) {
-            mShelf.requestRoundnessResetFor(expandableView);
-        } else {
-            if (mOnNotificationRemovedListener != null) {
-                mOnNotificationRemovedListener.onNotificationRemoved(
-                        expandableView,
-                        mChildTransferInProgress);
-            }
-        }
+        mShelf.requestRoundnessResetFor(expandableView);
     }
 
     public void cleanUpViewStateForEntry(NotificationEntry entry) {
@@ -2760,8 +2828,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
                 logAddTransientChild(child, container);
-                container.addTransientView(child, 0);
-                child.setTransientContainer(container);
+                child.addToTransientContainer(container, 0);
             }
         } else {
             mSwipedOutViews.remove(child);
@@ -2851,7 +2918,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * Generate a remove animation for a child view.
      *
      * @param child The view to generate the remove animation for.
-     * @return Whether an animation was generated.
+     * @return Whether a new animation was generated or an existing animation was detected by this
+     * method. We need this to determine if a transient view is needed.
      */
     boolean generateRemoveAnimation(ExpandableView child) {
         String key = "";
@@ -2868,10 +2936,23 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
-        if (isClickedHeadsUp(child)) {
-            // An animation is already running, add it transiently
-            mClearTransientViewsWhenFinished.add(child);
-            return true;
+        if (mFeatureFlags.isEnabled(UNCLEARED_TRANSIENT_HUN_FIX)) {
+            // Skip adding animation for clicked heads up notifications when the
+            // Shade is closed, because the animation event is generated in
+            // generateHeadsUpAnimationEvents. Only report that an animation was
+            // actually generated (thus requesting the transient view be added)
+            // if a removal animation is in progress.
+            if (!isExpanded() && isClickedHeadsUp(child)) {
+                // An animation is already running, add it transiently
+                mClearTransientViewsWhenFinished.add(child);
+                return child.inRemovalAnimation();
+            }
+        } else {
+            if (isClickedHeadsUp(child)) {
+                // An animation is already running, add it transiently
+                mClearTransientViewsWhenFinished.add(child);
+                return true;
+            }
         }
         if (mDebugRemoveAnimation) {
             Log.d(TAG, "generateRemove " + key
@@ -3108,10 +3189,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mExpandingNotificationRow = row;
         updateLaunchedNotificationClipPath();
         requestChildrenUpdate();
-    }
-
-    public boolean containsView(View v) {
-        return v.getParent() == this;
     }
 
     public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
@@ -3376,11 +3453,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAnimationEvents.add(animEvent);
         }
         mChildrenChangingPositions.clear();
-        if (mGenerateChildOrderChangedEvent) {
-            mAnimationEvents.add(new AnimationEvent(null,
-                    AnimationEvent.ANIMATION_TYPE_CHANGE_POSITION));
-            mGenerateChildOrderChangedEvent = false;
-        }
     }
 
     private void generateChildAdditionEvents() {
@@ -3686,6 +3758,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     protected boolean isInsideQsHeader(MotionEvent ev) {
+        if (mQsHeader == null) {
+            Log.wtf(TAG, "qsHeader is null while NSSL is handling a touch");
+            return false;
+        }
+
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
         /**
          * One-handed mode defines a feature FEATURE_ONE_HANDED of DisplayArea {@link DisplayArea}
@@ -4220,6 +4297,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         this.mOnHeightChangedListener = onHeightChangedListener;
     }
 
+    void setOnHeightChangedRunnable(Runnable r) {
+        this.mOnHeightChangedRunnable = r;
+    }
+
     void onChildAnimationFinished() {
         setAnimationRunning(false);
         requestChildrenUpdate();
@@ -4392,14 +4473,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /**
-     * Update colors of "dismiss" and "empty shade" views.
+     * Update colors of section headers, shade footer, and empty shade views.
      */
     void updateDecorViews() {
-        final @ColorInt int textColor =
-                Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
-        mSectionsManager.setHeaderForegroundColor(textColor);
+        final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(
+                mContext, com.android.internal.R.attr.materialColorOnSurface);
+        final @ColorInt int onSurfaceVariant = Utils.getColorAttrDefaultColor(
+                mContext, com.android.internal.R.attr.materialColorOnSurfaceVariant);
+
+        mSectionsManager.setHeaderForegroundColors(onSurface, onSurfaceVariant);
+
         mFooterView.updateColors();
-        mEmptyShadeView.setTextColor(textColor);
+
+        mEmptyShadeView.setTextColors(onSurface, onSurfaceVariant);
     }
 
     void goToFullShade(long delay) {
@@ -4522,7 +4608,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mFooterView != null && mFooterView.isHistoryShown();
     }
 
-    void setFooterView(@NonNull FooterView footerView) {
+    /** Bind the {@link FooterView} to the NSSL. */
+    public void setFooterView(@NonNull FooterView footerView) {
         int index = -1;
         if (mFooterView != null) {
             index = indexOfChild(mFooterView);
@@ -4532,6 +4619,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         addView(mFooterView, index);
         if (mManageButtonClickListener != null) {
             mFooterView.setManageButtonClickListener(mManageButtonClickListener);
+        }
+        if (!FooterViewRefactor.isEnabled()) {
+            mFooterView.setClearAllButtonClickListener(v -> {
+                if (mFooterClearAllListener != null) {
+                    mFooterClearAllListener.onClearAll();
+                }
+                clearNotifications(ROWS_ALL, true /* closeShade */);
+                footerView.setClearAllButtonVisible(false /* visible */, true /* animate */);
+            });
+        }
+        if (FooterViewRefactor.isEnabled()) {
+            updateFooter();
         }
     }
 
@@ -4545,12 +4644,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         addView(mEmptyShadeView, index);
     }
 
-    void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
+    /** Legacy version, should be removed with the footer refactor flag. */
+    public void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
+        FooterViewRefactor.assertInLegacyMode();
+        updateEmptyShadeView(visible, areNotificationsHiddenInShade,
+                mHasFilteredOutSeenNotifications);
+    }
+
+    /** Trigger an update for the empty shade resources and visibility. */
+    public void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade,
+            boolean hasFilteredOutSeenNotifications) {
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         if (areNotificationsHiddenInShade) {
             updateEmptyShadeView(R.string.dnd_suppressing_shade_text, 0, 0);
-        } else if (mHasFilteredOutSeenNotifications) {
+        } else if (hasFilteredOutSeenNotifications) {
             updateEmptyShadeView(
                     R.string.no_unseen_notif_text,
                     R.string.unlock_to_see_notif_text,
@@ -4593,9 +4701,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         boolean animate = mIsExpanded && mAnimationsEnabled;
         mFooterView.setVisible(visible, animate);
-        mFooterView.setSecondaryVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
-        mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
+        if (!FooterViewRefactor.isEnabled()) {
+            mFooterView.setClearAllButtonVisible(showDismissView, animate);
+            mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
+        }
     }
 
     @VisibleForTesting
@@ -4607,22 +4717,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     boolean getClearAllInProgress() {
         return mClearAllInProgress;
-    }
-
-    public boolean isFooterViewNotGone() {
-        return mFooterView != null
-                && mFooterView.getVisibility() != View.GONE
-                && !mFooterView.willBeGone();
-    }
-
-    public boolean isFooterViewContentVisible() {
-        return mFooterView != null && mFooterView.isContentVisible();
-    }
-
-    public int getFooterViewHeightWithPadding() {
-        return mFooterView == null ? 0 : mFooterView.getHeight()
-                + mPaddingBetweenElements
-                + mGapHeight;
     }
 
     /**
@@ -4730,14 +4824,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         info.setClassName(ScrollView.class.getName());
     }
 
-    public void generateChildOrderChangedEvent() {
-        if (mIsExpanded && mAnimationsEnabled) {
-            mGenerateChildOrderChangedEvent = true;
-            mNeedsAnimation = true;
-            requestChildrenUpdate();
-        }
-    }
-
     public int getContainerChildCount() {
         return getChildCount();
     }
@@ -4749,10 +4835,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void removeContainerView(View v) {
         Assert.isMainThread();
         removeView(v);
-        if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
-            mController.updateShowEmptyShadeView();
-            updateFooter();
-            mController.updateImportantForAccessibility();
+        if (!FooterViewRefactor.isEnabled()) {
+            // A notification was removed, and we're not currently showing the empty shade view.
+            if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
+                mController.updateShowEmptyShadeView();
+                updateFooter();
+                mController.updateImportantForAccessibility();
+            }
         }
 
         updateSpeedBumpIndex();
@@ -4761,10 +4850,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void addContainerView(View v) {
         Assert.isMainThread();
         addView(v);
-        if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
-            mController.updateShowEmptyShadeView();
-            updateFooter();
-            mController.updateImportantForAccessibility();
+        if (!FooterViewRefactor.isEnabled()) {
+            // A notification was added, and we're currently showing the empty shade view.
+            if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
+                mController.updateShowEmptyShadeView();
+                updateFooter();
+                mController.updateImportantForAccessibility();
+            }
         }
 
         updateSpeedBumpIndex();
@@ -4774,7 +4866,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         Assert.isMainThread();
         ensureRemovedFromTransientContainer(v);
         addView(v, index);
-        if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
+        // A notification was added, and we're currently showing the empty shade view.
+        if (!FooterViewRefactor.isEnabled() && v instanceof ExpandableNotificationRow
+                && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
             mController.updateImportantForAccessibility();
@@ -4924,7 +5018,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         // Avoid Flicking during clear all
         // when the shade finishes closing, onExpansionStopped will call
         // resetScrollPosition to setOwnScrollY to 0
-        if (mAmbientState.isClosing()) {
+        if (mAmbientState.isClosing() || mAmbientState.isClearAllInProgress()) {
             return;
         }
 
@@ -4948,12 +5042,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Nullable
     public ExpandableView getShelf() {
-        if (!mShelfRefactor.expectEnabled()) return null;
         return mShelf;
     }
 
     public void setShelf(NotificationShelf shelf) {
-        if (!mShelfRefactor.expectEnabled()) return;
         int index = -1;
         if (mShelf != null) {
             index = indexOfChild(mShelf);
@@ -4964,20 +5056,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mAmbientState.setShelf(mShelf);
         mStateAnimator.setShelf(mShelf);
         shelf.bind(mAmbientState, this, mController.getNotificationRoundnessManager());
-    }
-
-    public void setShelfController(NotificationShelfController notificationShelfController) {
-        mShelfRefactor.assertDisabled();
-        int index = -1;
-        if (mShelf != null) {
-            index = indexOfChild(mShelf);
-            removeView(mShelf);
-        }
-        mShelf = notificationShelfController.getView();
-        addView(mShelf, index);
-        mAmbientState.setShelf(mShelf);
-        mStateAnimator.setShelf(mShelf);
-        notificationShelfController.bind(mAmbientState, mController);
     }
 
     public void setMaxDisplayedNotifications(int maxDisplayedNotifications) {
@@ -5063,20 +5141,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mEmptyShadeView.getVisibility() == GONE) {
             return getMinExpansionHeight();
         } else {
-            return getAppearEndPosition();
+            return FooterViewRefactor.isEnabled() ? getAppearEndPosition()
+                    : getAppearEndPositionLegacy();
         }
     }
 
     public void setIsFullWidth(boolean isFullWidth) {
         mAmbientState.setSmallScreen(isFullWidth);
-    }
-
-    public void setUnlockHintRunning(boolean running) {
-        mAmbientState.setUnlockHintRunning(running);
-        if (!running) {
-            // re-calculate the stack height which was frozen while running this animation
-            updateStackPosition();
-        }
     }
 
     public void setPanelFlinging(boolean flinging) {
@@ -5102,6 +5173,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             println(pw, "qsClipDismiss", mDismissUsingRowTranslationX);
             println(pw, "visibility", visibilityString(getVisibility()));
             println(pw, "alpha", getAlpha());
+            println(pw, "suppressChildrenMeasureLayout", mSuppressChildrenMeasureAndLayout);
             println(pw, "scrollY", mAmbientState.getScrollY());
             println(pw, "maxTopPadding", mMaxTopPadding);
             println(pw, "showShelfOnly", mShouldShowShelfOnly);
@@ -5163,7 +5235,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     DumpUtilsKt.withIncreasedIndent(
                             pw,
                             () -> {
-                                pw.println("mClearAllEnabled: " + mClearAllEnabled);
                                 pw.println(
                                         "hasActiveClearableNotifications: "
                                                 + mController.hasActiveClearableNotifications(
@@ -5298,11 +5369,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return viewsToRemove;
     }
 
+    /** Clear all clearable notifications when the user requests it. */
+    public void clearAllNotifications() {
+        clearNotifications(ROWS_ALL, /* closeShade = */ true);
+    }
+
     /**
      * Collects a list of visible rows, and animates them away in a staggered fashion as if they
      * were dismissed. Notifications are dismissed in the backend via onClearAllAnimationsEnd.
      */
-    @VisibleForTesting
     void clearNotifications(@SelectedRows int selection, boolean closeShade) {
         // Animate-swipe all dismissable notifications, then animate the shade closed
         final ArrayList<View> viewsToAnimateAway = getVisibleViewsToAnimateAway(selection);
@@ -5363,15 +5438,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @VisibleForTesting
     protected void inflateFooterView() {
+        FooterViewRefactor.assertInLegacyMode();
         FooterView footerView = (FooterView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_notification_footer, this, false);
-        footerView.setClearAllButtonClickListener(v -> {
-            if (mFooterClearAllListener != null) {
-                mFooterClearAllListener.onClearAll();
-            }
-            clearNotifications(ROWS_ALL, true /* closeShade */);
-            footerView.setSecondaryVisible(false /* visible */, true /* animate */);
-        });
         setFooterView(footerView);
     }
 
@@ -5608,6 +5677,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void setFooterClearAllListener(FooterClearAllListener listener) {
+        FooterViewRefactor.assertInLegacyMode();
         mFooterClearAllListener = listener;
     }
 
@@ -5675,9 +5745,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @VisibleForTesting
     void updateSplitNotificationShade() {
-        boolean split = LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+        boolean split = mSplitShadeStateController.shouldUseSplitNotificationShade(getResources());
         if (split != mShouldUseSplitNotificationShade) {
             mShouldUseSplitNotificationShade = split;
+            mShouldSkipTopPaddingAnimationAfterFold = true;
+            mAmbientState.setUseSplitShade(split);
             updateDismissBehavior();
             updateUseRoundedRectClipping();
         }

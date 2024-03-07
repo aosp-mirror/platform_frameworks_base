@@ -97,8 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"ဖွင့်ထားသည်၊ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"သုံးနေသည်၊ L− ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>၊ R− ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L− ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>၊ R− ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"ဘယ် <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"ညာ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ဖွင့်ထားသည်"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"သိမ်းထားသည်များ"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ဖွင့်ထားသည်၊ ဘယ်သီးသန့်"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ဖွင့်ထားသည်၊ ညာသီးသန့်"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ဖွင့်ထားသည်၊ ဘယ်နှင့် ညာ"</string>
@@ -107,16 +111,16 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ဖိုင်လွဲပြောင်းခြင်း"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ထည့်သွင်းသော စက်"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"အင်တာနက်ချိတ်ဆက်ခြင်း"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"အဆက်အသွယ်၊ ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေခြင်း"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"အဆက်အသွယ်နှင့် ခေါ်ဆိုမှုမှတ်တမ်း မျှဝေရန် သုံးသည်"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"အဆက်အသွယ်၊ ခေါ်ဆိုမှုမှတ်တမ်း သုံးခွင့်ပေးရန်"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"အချက်အလက်ကို ဖုန်းခေါ်ဆိုမှု ကြေညာချက်စသည်တို့တွင် သုံးမည်"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"မိုဘိုင်းမက်ဆေ့ဂျ်များ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM အသုံးပြုခြင်း"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD အသံ- <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD အသံ"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"နားကြားကိရိယာ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE အသံ"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"နားကြားကိရိယာနှင့် ချိတ်ဆက်ပြီးပါပြီ"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"နားကြားကိရိယာ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"နားကြားကိရိယာနှင့် ချိတ်ဆက်ပြီးပါပြီ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE အသံနှင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"မီဒီယာအသံအား ချိတ်ဆက်ရန်"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"ဖုန်းအသံအား ချိတ်ဆက်ရန်"</string>
@@ -134,7 +138,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"ဖုန်းအသံအားအသုံးပြုရန်"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"ဖိုင်လွဲပြောင်းရန်အတွက်အသုံးပြုရန်"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"ထည့်သွင်းရန်အသုံးပြုသည်"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"နားကြားကိရိယာအတွက် အသုံးပြုသည်"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"နားကြားကိရိယာအတွက် အသုံးပြုသည်"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"LE_AUDIO အတွက် သုံးသည်"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"တွဲချိတ်ရန်"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"တွဲချိတ်ရန်"</string>
@@ -157,6 +161,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi  ၂ ဘား"</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi  ၃ ဘား"</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wi-Fi  အပြည့်ရှိ"</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"သင့်စက်သို့ ချိတ်ဆက်ထားသည်။"</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"အများသုံး ကွန်ရက်"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"လုံခြုံသည့် ကွန်ရက်"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
@@ -213,8 +218,10 @@
     <item msgid="6946761421234586000">"၄၀၀%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ပရိုဖိုင်ကို ရွေးရန်"</string>
-    <string name="category_personal" msgid="6236798763159385225">"ကိုယ်ရေး"</string>
+    <string name="category_personal" msgid="6236798763159385225">"ကိုယ်ပိုင်"</string>
     <string name="category_work" msgid="4014193632325996115">"အလုပ်"</string>
+    <string name="category_private" msgid="4244892185452788977">"သီးသန့်"</string>
+    <string name="category_clone" msgid="1554511758987195974">"ပုံတူပွားရန်"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ဆော့ဝဲလ်ရေးသူ ရွေးစရာများ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ဆော့ဖ်ဝဲရေးသူအတွက် ရွေးစရာများကို ဖွင့်ပါ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"အပလီကေးရှင်းတိုးတက်မှုအတွက် ရွေးချယ်မှုကိုသတ်မှတ်သည်"</string>
@@ -263,8 +270,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"အစပြုခြင်းကိရိယာအား သော့ဖွင့်ရန် ခွင့်ပြုမည်"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM သော့ဖွင့်ခြင်း ခွင့်ပြုမလား?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"သတိပေးချက်: ဤချိန်ညှိချက်ဖွင့်ထားလျှင်၊ ဤစက်ပစ္စည်းပေါ်တွင် စက်ပစ္စည်းကာကွယ်သည့် အထူးပြုလုပ်ချက် အလုပ်လုပ်မည်မဟုတ်ပါ။"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"တည်နေရာအတုပြု အက်ပ်ရွေးရန်"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"တည်နေရာအတုပြု အက်ပ်သတ်မှတ်ထားခြင်းမရှိပါ"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"တည်နေရာဖန်တီးသည့် အက်ပ်ရွေးရန်"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"တည်နေရာဖန်တီးသည့်အက်ပ် သတ်မှတ်ထားခြင်းမရှိပါ"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"တည်နေရာအတုပြ အက်ပ်- <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ချိတ်ဆက်ဆောင်ရွက်ခြင်း"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
@@ -299,7 +306,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"သီးသန့် DNS ဝန်ဆောင်မှုပေးသူအမည်"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS ဝန်ဆောင်ပေးသူအမည်ကို ထည့်ပါ"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"ချိတ်ဆက်၍ မရပါ"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြသည်"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ဘက်ထရီအသုံးပြုမှု လျှော့ချပြီး ကွန်ရက်စွမ်းဆောင်ရည် ပိုမိုကောင်းမွန်သည်"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"ဤမုဒ်ကို ဖွင့်ထားသည့်အခါ MAC ကျပန်းပြုလုပ်ထားသည့် ကွန်ရက်သို့ ချိတ်ဆက်လိုက်သည့်အခါတိုင်း ဤစက်၏ MAC လိပ်စာ ပြောင်းသွားနိုင်သည်။"</string>
@@ -315,7 +322,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB စီစဉ်ဖွဲ့စည်းမှု ရွေးရန်"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"ပုံစံတုတည်နေရာများကို ခွင့်ပြုရန်"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"ပုံစံတုတည်နေရာများကို ခွင့်ပြုရန်"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"ရည်ညွှန်းချက်စိစစ်ခြင်း မြင်ကွင်း"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"ရည်ညွှန်းချက်စိစစ်ခြင်း မြင်ကွင်းဖွင့်ရန်"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Wi-Fi ဖွင့်ထားချိန်တွင်လည်း မိုဘိုင်းဒေတာ အမြဲတမ်းဖွင့်မည် (မြန်ဆန်သည့် ကွန်ရက် ပြောင်းခြင်းအတွက်)။"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"အရှိန်မြှင့်တင်ရန် မိုဘိုင်းသုံး၍ ချိတ်ဆက်သည့် စက်ပစ္စည်းကို ရနိုင်လျှင် သုံးပါ"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB ပြသနာရှာခြင်း ခွင့်ပြုပါမလား?"</string>
@@ -328,7 +335,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB ဖြင့် အက်ပ်များစိစစ်ရန်"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT မှတစ်ဆင့် ထည့်သွင်းသော အက်ပ်များ အန္တရာယ်ဖြစ်နိုင်ခြင်း ရှိမရှိ စစ်ဆေးသည်။"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"အမည်မရှိသော (MAC လိပ်စာများသာပါသော) ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသပါမည်"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ချိတ်ဆက်ထားသည့် ကိရိယာတွင် လက်မခံနိုင်လောက်အောင် ဆူညံ သို့မဟုတ် ထိန်းညှိမရနိုင်သော အသံပိုင်းပြဿနာ ရှိခဲ့လျှင် ဘလူးတုသ် ပကတိ အသံနှုန်းကို ပိတ်ပါ။"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ချိတ်ဆက်ထားသည့် ကိရိယာတွင် လက်မခံနိုင်လောက်အောင် ဆူညံ (သို့) ထိန်းညှိမရနိုင်သော အသံပိုင်းပြဿနာ ရှိခဲ့လျှင် ဘလူးတုသ် ပကတိ အသံနှုန်းကို ပိတ်သည်။"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ဘလူးတုသ် Gabeldorsche လုပ်ဆောင်ချက်အပိုင်းကို ဖွင့်သည်။"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"အရည်အသွေးမြှင့်တင်ထားသော ချိတ်ဆက်နိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်ပါ။"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"လိုကယ်တာမီနယ်"</string>
@@ -341,7 +348,7 @@
     <string name="debug_app_set" msgid="6599535090477753651">"အမှားရှာသည့်အပလီကေးရှင်း: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"အပလီကေးရှင်းရွေးချယ်ရန်"</string>
     <string name="no_application" msgid="9038334538870247690">"တခုမှမရှိ"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"အမှားရှာဖွေ ဖယ်ရှားချက်ကို စောင့်ရန်"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"အမှားရှာပြင်ကိရိယာကို စောင့်ရန်"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"အမှားပြင်ဆင်ရှာဖွေသည့် အပလီကေးရှင်းသည် လုပ်ငန်းမစမီ တွဲဖက်ရန် အမှားရှာဖွေမည့်သူကို စောင့်နေသည်။"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ထည့်သွင်းရန်"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ရေးဆွဲခြင်း"</string>
@@ -353,34 +360,36 @@
     <string name="pointer_location" msgid="7516929526199520173">"မြား၏တည်နေရာ"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"လက်ရှိထိတွေ့မှုဒေတာကို ဖန်သားပေါ်တွင်ထပ်၍ ပြသသည်"</string>
     <string name="show_touches" msgid="8437666942161289025">"တို့ခြင်းများကို ပြပါ"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"တို့ခြင်းများအတွက် အမြင်ဖြင့် တုံ့ပြန်မှုပြပါ"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"မျက်နှာပြင်အပ်ဒိတ်များ ပြခြင်း"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"တို့ခြင်းများအတွက် အမြင်ဖြင့် တုံ့ပြန်မှုပြသည်"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"ကီးနှိပ်မှုများ ပြပါ"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"ပကတိကီးနှိပ်မှုများအတွက် ရုပ်မြင်အကြံပြုချက် ပြပါ"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"မျက်နှာပြင်အပ်ဒိတ်ပြရန်"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"အပ်ဒိတ်လုပ်စဉ် ဝင်းဒိုးမျက်နှာပြင်တွင် အချက်ပြရန်"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"မြင်ကွင်းအပ်ဒိတ်များ ပြခြင်း"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"ပုံဆွဲစဉ် ဝင်းဒိုးအတွင်း တဒင်္ဂပြပါ"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"ဟာ့ဒ်ဝဲအလွှာ အပ်ဒိတ်များပြခြင်း"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"အပ်ဒိတ်လုပ်ချိန် ဟာ့ဒ်ဝဲအလွှာများ အစိမ်းရောင်ပြပါ"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU ပိုသုံးစွဲမှု ပြင်ဆင်ခြင်း"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"HW ထပ်ဆင့်ခြင်းများပိတ်ခြင်း"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"HW ထပ်ပိုးခြင်းများ ပိတ်ရန်"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"GPU ကိုမျက်နှာပြင်ခင်းကျင်းရာတွင် အမြဲသုံးပါ။"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"အရောင်စနစ် ပြင်ဆင်ခြင်း"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"အရောင်စနစ် ပြောင်းရန်"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ခြေရာခံခြင်းဖွင့်ပါ။"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB အသံလမ်းကြောင်း ပိတ်ခြင်း"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB အသံစက်ပစ္စည်းများသို့ အလိုအလျောက် ချိတ်ဆက်ခြင်းကို ပိတ်ရန်"</string>
-    <string name="debug_layout" msgid="1659216803043339741">"ပြကွက်၏ဘောင်များ ပြခြင်း"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"ပြကွက်၏ဘောင်များ ပြရန်"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ဖြတ်ပိုင်းအနားသတ်များ၊ အနားများ စသဖြင့် ပြပါ။"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL အပြင်အဆင်အတိုင်း ဖြစ်စေခြင်း"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ဘာသာစကားအားလုံးအတွက် RTL အပြင်အဆင်အတိုင်း ဖြစ်စေသည်"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"လမ်းညွှန်ဘား အကြည်"</string>
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"လမ်းညွှန်ဘား၏ နောက်ခံအရောင်ကို မူရင်းအားဖြင့် အကြည်ဖြစ်အောင် လုပ်သည်"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ဝင်းဒိုးအဆင့် မှုန်ဝါးမှု ခွင့်ပြုရန်"</string>
-    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA မဖြစ်မနေဖွင့်ခြင်း"</string>
+    <string name="force_msaa" msgid="4081288296137775550">"4x MSAA မဖြစ်မနေဖွင့်ရန်"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 အက်ပ်များတွင် 4x MSAA ဖွင့်သည်"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"စတုဂံပုံမကျသောဖြတ်ပိုင်း လုပ်ဆောင်ချက်များကို အမှားဖယ်ရှားသည်"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"စတုဂံပုံမကျသော ဖြတ်ပိုင်း လုပ်ဆောင်ချက်များကို အမှားဖယ်ရှားရန်"</string>
     <string name="track_frame_time" msgid="522674651937771106">"HWUI ပရိုဖိုင် ဆောင်ရွက်ခြင်း"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU အမှားရှာအလွှာဖွင့်ရန်"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ထည့်သွင်းခွင့်ပြုပါ"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"verbose vendor မှတ်တမ်းဖွင့်ရန်"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"အကျယ်ရှင်းလင်းချက်ပံ့ပိုးသူ မှတ်တမ်းဖွင့်ရန်"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ချွတ်ယွင်းမှု အစီရင်ခံချက်တွင် စက်ပစ္စည်းအလိုက် ထုတ်လုပ်သူမှတ်တမ်းများကို ထည့်သွင်းခြင်းဖြင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များ ပါဝင်ခြင်း၊ ဘက်ထရီပိုသုံးခြင်း နှင့်/သို့မဟုတ် သိုလှောင်ခန်းပိုသုံးခြင်းတို့ ဖြစ်စေနိုင်သည်။"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"သက်ဝင်အသွင်ပြောင်းခြင်း"</string>
@@ -395,12 +404,11 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ချန်နယ်သတိပေးချက်များပြရန်"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ချန်နယ်မရှိဘဲ အကြောင်းကြားလျှင် စကရင်တွင်သတိပေးသည်"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ပြင်ပစက်တွင် အက်ပ်များခွင့်ပြုရန်"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"တိကျစွာ သတ်မှတ်ထားသည့်တန်ဖိုးများရှိသော်လည်း၊ ပြင်ပသိုလှောင်ခန်းများသို့ မည်သည့်အက်ပ်ကိုမဆို ဝင်ရောက်ခွင့်ပြုပါ"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"သတ်မှတ်တန်ဖိုးများ မည်သို့ပင်ရှိစေ ပြင်ပသိုလှောင်ခန်းများသို့ မည်သည့်အက်ပ်ကိုမဆို ဝင်ရောက်ခွင့်ပြုသည်"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"လုပ်ဆောင်ချက်များ အရွယ်ပြောင်းနိုင်ခြင်း"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"သတ်မှတ်တန်ဖိုး မည်သို့ပင်ရှိစေ ဝင်းဒိုးများ၏ လုပ်ဆောင်မှုအားလုံးကို အရွယ်အစားပြင်သည်။"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"ရွှေ့နိုင်ပြင်နိုင်သော ဝင်းဒိုးများ ဖွင့်ရန်"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ပုံစံမျိုးစုံဝင်းဒိုးများ စမ်းသပ်မှုအတွက် အထောက်အပံ့ကို ဖွင့်ပါ"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ဒက်စ်တော့မုဒ်"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"ပုံစံမျိုးစုံ ဝင်းဒိုးများ ဖွင့်ရန်"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ပုံစံမျိုးစုံဝင်းဒိုးများ စမ်းသပ်ခြင်းအတွက် ပံ့ပိုးမှုကို ဖွင့်သည်"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ဒက်စ်တော့ အရန်စကားဝှက်"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ဒက်စ်တော့ အရန်သိမ်းဆည်းခြင်းအားလုံးကို လောလောဆယ် ကာကွယ်မထားပါ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ဒက်စ်တော့ အပြည့်အဝ အရန်သိမ်းခြင်းအတွက် စကားဝှက်ကို ပြောင်းရန် သို့မဟုတ် ဖယ်ရှားရန် တို့ပါ။"</string>
@@ -428,6 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"ဤအက်ပ်များက ဖော်မက်အသစ်များကို ပံ့ပိုးသည်"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"အမျိုးအစားပြောင်းခြင်း အကြောင်းကြားချက်များကို ပြရန်"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"အမျိူးအစားပြောင်းခြင်း ကက်ရှ်ကို ပိတ်ရန်"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine ဆက်တင်များ"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 နောက်ပြန်ဆုတ်မှု မဖြစ်မနေလုပ်ခြင်း"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 နောက်ပြန်ဆုတ်မှု မဖြစ်မနေလုပ်ရန် ရွေးပါ"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"အလုပ်လုပ်နေသောဝန်ဆောင်မှုများ"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"လက်ရှိ ဝန်ဆောင်မှုများကို ကြည့်ရှု ထိန်းသိမ်းသည်"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView အကောင်အထည်ဖော်မှု"</string>
@@ -440,7 +451,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ဆင်မှု"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ခြင်း"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -460,15 +471,9 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> အောက် (<xliff:g id="LEVEL">%2$s</xliff:g>) ကျန်သည်"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> အထက် (<xliff:g id="LEVEL">%2$s</xliff:g>) ကျန်သည်"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> အထက် ကျန်သည်"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည်"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"မကြာမီ တက်ဘလက် ပိတ်သွားနိုင်သည်"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"မကြာမီ စက်ပိတ်သွားနိုင်သည်"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"မကြာမီ တက်ဘလက် ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"မကြာမီ စက်ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုသည်"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"အားပြည့်ရန် <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> လိုသည်"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> လိုသည်"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားသွင်းခြင်းကို အကောင်းဆုံးပြင်ဆင်ထားသည်"</string>
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - အားသွင်းခြင်းကို အကောင်းဆုံးပြင်ဆင်ထားသည်"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"မသိ"</string>
@@ -515,16 +520,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"မှတ်ပုံတင်မထားပါ"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"မရရှိနိုင်ပါ။"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ကို ကျပန်းပေးထားသည်"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{စက်တစ်ခုမျှ ချိတ်ဆက်မထားပါ}=1{စက် 1 ခု ချိတ်ဆက်ထားသည်}other{စက် # ခု ချိတ်ဆက်ထားသည်}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{စက် ၁ ခု ချိတ်ဆက်ထားသည်}other{စက် # ခု ချိတ်ဆက်ထားသည်}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"အချိန်တိုးရန်။"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"အချိန်လျှော့ရန်။"</string>
     <string name="cancel" msgid="5665114069455378395">"မလုပ်တော့"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ရှေ့သို့"</string>
+    <string name="back" msgid="5554327870352703710">"နောက်သို့"</string>
+    <string name="save" msgid="3745809743277153149">"သိမ်းရန်"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"ပြီးပြီ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
@@ -547,14 +549,27 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ယခုလေးတင်"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ဤဖုန်း"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ဤတက်ဘလက်"</string>
+    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"အထိုင် စပီကာ"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ပြင်ပစက်"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ချိတ်ဆက်ကိရိယာ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ဤဖုန်း"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ဤစက်ပစ္စည်းတွင် ဖွင့်၍မရပါ"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ပြောင်းရန်အကောင့်ကို အဆင့်မြှင့်ပါ"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ဤနေရာတွင် ဒေါင်းလုဒ်များကို ဖွင့်၍မရပါ"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ပြောင်းရန် အကောင့်အဆင့်ကိုမြှင့်ပါ"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ဤနေရာတွင် ဒေါင်းလုဒ်များ ဖွင့်မရပါ"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ကြော်ငြာအပြီးတွင် ထပ်စမ်းကြည့်ပါ"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ဤနေရာတွင်ဖွင့်ရန် စက်ပစ္စည်းကိုနှိုးပါ"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ဒီမှာဖွင့်ရန် စက်ပစ္စည်းကိုနှိုးပါ"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"စက်ပစ္စည်းက ဖွင့်ခွင့်မပြုပါ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ဤမီဒီယာကို ဒီမှာဖွင့်၍မရပါ"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"ချိတ်ဆက်ထားသည်"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV မူရင်း"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI အထွက်"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"စက်ရှိ စပီကာများ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ချိတ်ဆက်ရာတွင် ပြဿနာရှိပါသည်။ စက်ကိုပိတ်ပြီး ပြန်ဖွင့်ပါ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ကြိုးတပ် အသံစက်ပစ္စည်း"</string>
     <string name="help_label" msgid="3528360748637781274">"အကူအညီနှင့် အကြံပြုချက်"</string>
@@ -578,13 +593,10 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ကန့်သတ်ထားသော ကိုယ်ရေးအချက်အလက်များ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"အသုံးပြုသူအသစ် ထည့်မလား။"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"နောက်ထပ် အသုံးပြုသူများ ထည့်သွင်းခြင်းဖြင့် ဤစက်ပစ္စည်းကို အခြားသူများနှင့် မျှဝေအသုံးပြုနိုင်သည်။ အသုံးပြုသူတိုင်းသည် မိမိတို့ကိုယ်ပိုင်နေရာ ရရှိမည်ဖြစ်ပြီး အက်ပ်၊ နောက်ခံပုံနှင့် အခြားအရာတို့ဖြင့် စိတ်ကြိုက်ပြင်ဆင်နိုင်ပါမည်။ အားလုံးကို အကျိုးသက်ရောက်မှု ရှိစေနိုင်သည့် Wi-Fi ကဲ့သို့ ဆက်တင်များကိုလည်း ချိန်ညှိနိုင်ပါမည်။\n\nအသုံးပြုသူအသစ် ထည့်သည့်အခါ ထိုသူသည် မိမိ၏ကိုယ်ပိုင်နေရာကို သတ်မှတ်ရပါမည်။\n\nအသုံးပြုသူ မည်သူမဆို အခြားအသုံးပြုသူများအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်နိုင်သည်။ အများသုံးစွဲနိုင်မှုဆက်တင်များနှင့် ဝန်ဆောင်မှုများကို အသုံးပြုသူအသစ်ထံသို့ လွှဲပြောင်းပေးမည် မဟုတ်ပါ။"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်ပေးနိုင်သည်။"</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"သင်က အသုံးပြုသူအသစ် ထည့်လိုက်လျှင် ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရပါမည်။\n\n အသုံးပြုသူတိုင်းက ကျန်အသုံးပြုသူ အားလုံးအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်နိုင်သည်။"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ဤအသုံးပြုသူကို စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်မလား။"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"စီမံခန့်ခွဲသူများ၌ အခြားအသုံးပြုသူများတွင်မရှိသော အထူးဆောင်ရွက်ခွင့်များရှိသည်။ စီမံခန့်ခွဲသူက အသုံးပြုသူအားလုံးကို စီမံခြင်း၊ ဤစက်ပစ္စည်းကို အပ်ဒိတ်လုပ်ခြင်း (သို့) ပြင်ဆင်သတ်မှတ်ခြင်း၊ ဆက်တင်များပြင်ဆင်ခြင်း၊ ထည့်သွင်းထားသောအက်ပ်အားလုံးကို ကြည့်ခြင်းနှင့် အခြားသူများအတွက် စီမံခန့်ခွဲသူ ဆောင်ရွက်ခွင့်များပေးခြင်း (သို့) ရုပ်သိမ်းခြင်းတို့ လုပ်နိုင်သည်။"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်ရန်"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"အသုံးပြုသူကို ယခုသတ်မှတ်မလား။"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ထိုသူသည် ကိရိယာကိုယူ၍ ၎င်းတို့၏နေရာများကို ယခုသတ်မှတ်နိုင်ရမည်"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ယခု ကိုယ်ရေးအချက်အလက်ကို အစီအမံလုပ်မည်လား?"</string>
@@ -605,7 +617,7 @@
     <string name="user_nickname" msgid="262624187455825083">"နာမည်ပြောင်"</string>
     <string name="user_add_user" msgid="7876449291500212468">"အသုံးပြုသူ ထည့်ရန်"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ဧည့်သည် ထည့်ရန်"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"ဧည့်သည်ကို ဖယ်ရှားရန်"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ဧည့်သည်ကို ပြင်ဆင်သတ်မှတ်ရန်"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"ဧည့်သည်ကို ပြင်ဆင်သတ်မှတ်မလား။"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"ဧည့်သည်ကို ဖယ်ရှားမလား။"</string>
@@ -616,10 +628,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"၎င်းသည် ဧည့်သည် စက်ရှင်အသစ်ကို စတင်မည်ဖြစ်ပြီး လက်ရှိစက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်ပါမည်"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ဧည့်သည်မုဒ်မှ ထွက်မလား။"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"၎င်းသည် လက်ရှိဧည့်သည် စက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်လိုက်ပါမည်"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်ရန်"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"စီမံခန့်ခွဲသူအဖြစ် မသတ်မှတ်ပါနှင့်"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ထွက်ရန်"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ဧည့်သည်လုပ်ဆောင်ချက် သိမ်းမလား။"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"လက်ရှိစက်ရှင်မှ လုပ်ဆောင်ချက် သိမ်းနိုင်သည် (သို့) အက်ပ်နှင့် ဒေတာအားလုံး ဖျက်နိုင်သည်"</string>
@@ -679,7 +689,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"မူရင်း"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ဖန်သားပြင် ဖွင့်ခြင်း"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ဖန်သားပြင် ဖွင့်ခွင့်ပြုရန်"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"အက်ပ်ကို ဖန်သားပြင် ဖွင့်ခွင့်ပြုနိုင်သည်။ ခွင့်ပြုထားပါက အက်ပ်သည် သင့်ထံမှ တိကျသောရည်ရွယ်ချက်မလိုဘဲ ဖန်သားပြင်ကို အချိန်မရွေး ဖွင့်နိုင်မည်။"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"အက်ပ်ကို ဖန်သားပြင် ဖွင့်ခွင့်ပြုနိုင်သည်။ ခွင့်ပြုထားပါက သင်က တစ်စုံတစ်ခု လုပ်ဆောင်ရန် မရည်ရွယ်သော်လည်း အက်ပ်သည် ဖန်သားပြင်ကို အချိန်မရွေး ဖွင့်နိုင်မည်။"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ထုတ်လွှင့်ခြင်းကို ရပ်မလား။"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ကို ထုတ်လွှင့်သောအခါ (သို့) အထွက်ကို ပြောင်းသောအခါ သင့်လက်ရှိထုတ်လွှင့်ခြင်း ရပ်သွားမည်"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ထုတ်လွှင့်ခြင်း"</string>
@@ -687,11 +697,9 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"နောက်ခလုတ်၏ ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"နောက်ခလုတ်ရှေ့ပြေးအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ဤဆက်တင်သည် လက်ဟန် ရှေ့ပြေးလှုပ်ရှားသက်ဝင်ပုံအတွက် စနစ်လှုပ်ရှားသက်ဝင်ပုံများကို ဖွင့်ပါသည်။ အက်ပ်တစ်ခုစီ၏ ဆက်တင်အတွက် enableOnBackInvokedCallback ကို မန်နီးဖက်စ် (manifest) ဖိုင်၌ ဖွင့်ထားရန်လိုအပ်သည်။"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"ဘယ်သို့ရွှေ့ရန်"</item>
-    <item msgid="5425394847942513942">"အောက်သို့ရွှေ့ရန်"</item>
-    <item msgid="7728484337962740316">"ညာသို့ရွှေ့ရန်"</item>
-    <item msgid="324200556467459329">"အပေါ်သို့ရွှေ့ရန်"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="not_specified" msgid="5423502443185110328">"သတ်မှတ်မထားပါ"</string>
+    <string name="neuter" msgid="2075249330106127310">"နပုလ္လိင်"</string>
+    <string name="feminine" msgid="1529155595310784757">"ဣတ္ထိလိင်"</string>
+    <string name="masculine" msgid="4653978041013996303">"ပုလ္လိင်"</string>
 </resources>

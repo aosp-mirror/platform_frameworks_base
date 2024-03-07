@@ -37,8 +37,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,7 +70,7 @@ import com.android.settingslib.spa.widget.preference.PreferenceModel
 fun SearchScaffold(
     title: String,
     actions: @Composable RowScope.() -> Unit = {},
-    content: @Composable (bottomPadding: Dp, searchQuery: State<String>) -> Unit,
+    content: @Composable (bottomPadding: Dp, searchQuery: () -> String) -> Unit,
 ) {
     ActivityTitle(title)
     var isSearchMode by rememberSaveable { mutableStateOf(false) }
@@ -100,12 +98,9 @@ fun SearchScaffold(
                 .focusable()
                 .fillMaxSize()
         ) {
-            content(
-                bottomPadding = paddingValues.calculateBottomPadding(),
-                searchQuery = remember {
-                    derivedStateOf { if (isSearchMode) viewModel.searchQuery.text else "" }
-                },
-            )
+            content(paddingValues.calculateBottomPadding()) {
+                if (isSearchMode) viewModel.searchQuery.text else ""
+            }
         }
     }
 }

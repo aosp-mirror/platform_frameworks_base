@@ -16,36 +16,46 @@
 
 package com.android.server.backup;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
+import android.annotation.UserIdInt;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
+import android.testing.TestableContext;
 import android.util.FeatureFlagUtils;
+import android.util.KeyValueListParser;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.LifecycleOperationStorage;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.BackupParams;
@@ -76,8 +86,8 @@ public class UserBackupManagerServiceTest {
     private static final String[] TEST_PACKAGES = new String[] { TEST_PACKAGE };
     private static final String TEST_TRANSPORT = "transport";
     private static final int WORKER_THREAD_TIMEOUT_MILLISECONDS = 100;
+    @UserIdInt private static final int USER_ID = 0;
 
-    @Mock Context mContext;
     @Mock IBackupManagerMonitor mBackupManagerMonitor;
     @Mock IBackupObserver mBackupObserver;
     @Mock PackageManager mPackageManager;
@@ -86,8 +96,11 @@ public class UserBackupManagerServiceTest {
     @Mock BackupTransportClient mBackupTransport;
     @Mock BackupEligibilityRules mBackupEligibilityRules;
     @Mock LifecycleOperationStorage mOperationStorage;
+    @Mock JobScheduler mJobScheduler;
+    @Mock BackupHandler mBackupHandler;
     @Mock BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
+    private TestableContext mContext;
     private MockitoSession mSession;
     private TestBackupService mService;
 
@@ -102,17 +115,55 @@ public class UserBackupManagerServiceTest {
                 .startMocking();
         MockitoAnnotations.initMocks(this);
 
+        mContext = new TestableContext(ApplicationProvider.getApplicationContext());
+        mContext.addMockSystemService(JobScheduler.class, mJobScheduler);
+        mContext.getTestablePermissions().setPermission(android.Manifest.permission.BACKUP,
+                PackageManager.PERMISSION_GRANTED);
+
         mService = new TestBackupService(mContext, mPackageManager, mOperationStorage,
-                mTransportManager);
+                mTransportManager, mBackupHandler);
         mService.setEnabled(true);
         mService.setSetupComplete(true);
-    }
+        mService.enqueueFullBackup("com.test.backup.app", /* lastBackedUp= */ 0);
+        }
 
     @After
     public void tearDown() {
         if (mSession != null) {
             mSession.finishMocking();
         }
+    }
+
+    @Test
+    public void testSetFrameworkSchedulingEnabled_enablesAndSchedulesBackups() throws Exception {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.BACKUP_SCHEDULING_ENABLED, 0);
+
+        mService.setFrameworkSchedulingEnabled(true);
+
+        assertThat(mService.isFrameworkSchedulingEnabled()).isTrue();
+        verify(mJobScheduler).schedule(
+                matchesJobWithId(KeyValueBackupJob.getJobIdForUserId(
+                        USER_ID)));
+        verify(mJobScheduler).schedule(
+                matchesJobWithId(FullBackupJob.getJobIdForUserId(
+                        USER_ID)));
+    }
+
+    private static JobInfo matchesJobWithId(int id) {
+        return argThat((jobInfo) -> jobInfo.getId() == id);
+    }
+
+    @Test
+    public void testSetFrameworkSchedulingEnabled_disablesAndCancelBackups() throws Exception {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.BACKUP_SCHEDULING_ENABLED, 1);
+
+        mService.setFrameworkSchedulingEnabled(false);
+
+        assertThat(mService.isFrameworkSchedulingEnabled()).isFalse();
+        verify(mJobScheduler).cancel(FullBackupJob.getJobIdForUserId(USER_ID));
+        verify(mJobScheduler).cancel(KeyValueBackupJob.getJobIdForUserId(USER_ID));
     }
 
     @Test
@@ -266,8 +317,20 @@ public class UserBackupManagerServiceTest {
         private volatile Thread mWorkerThread = null;
 
         TestBackupService(Context context, PackageManager packageManager,
-                LifecycleOperationStorage operationStorage, TransportManager transportManager) {
-            super(context, packageManager, operationStorage, transportManager);
+                LifecycleOperationStorage operationStorage, TransportManager transportManager,
+                BackupHandler backupHandler) {
+            super(context, packageManager, operationStorage, transportManager, backupHandler,
+                    createConstants(context));
+        }
+
+        private static BackupManagerConstants createConstants(Context context) {
+            BackupManagerConstants constants = new BackupManagerConstants(
+                    Handler.getMain(),
+                    context.getContentResolver());
+            // This will trigger constants default values to be set thus preventing invalid values
+            // being used in tests.
+            constants.update(new KeyValueListParser(','));
+            return constants;
         }
 
         @Override

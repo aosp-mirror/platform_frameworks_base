@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-
 package com.android.keyguard
-
 import kotlinx.coroutines.test.TestScope
-
 class TestScopeProvider {
     companion object {
         @JvmStatic fun getTestScope() = TestScope()

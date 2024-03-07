@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
@@ -58,7 +59,7 @@ public class WindowlessWindowManager implements IWindowSession {
         SurfaceControl mLeash;
         Rect mFrame;
         Rect mAttachedFrame;
-        IBinder mFocusGrantToken;
+        IBinder mInputTransferToken;
 
         State(SurfaceControl sc, WindowManager.LayoutParams p, int displayId, IWindow client,
                 SurfaceControl leash, Rect frame) {
@@ -89,7 +90,7 @@ public class WindowlessWindowManager implements IWindowSession {
     private final Configuration mConfiguration;
     private final IWindowSession mRealWm;
     private final IBinder mHostInputToken;
-    private final IBinder mFocusGrantToken = new Binder();
+    private final IBinder mInputTransferToken = new Binder();
     private InsetsState mInsetsState;
     private final ClientWindowFrames mTmpFrames = new ClientWindowFrames();
     private final MergedConfiguration mTmpConfig = new MergedConfiguration();
@@ -109,17 +110,17 @@ public class WindowlessWindowManager implements IWindowSession {
         mConfiguration.setTo(configuration);
     }
 
-    IBinder getFocusGrantToken(IBinder window) {
+    IBinder getInputTransferToken(IBinder window) {
         synchronized (this) {
             // This can only happen if someone requested the focusGrantToken before setView was
             // called for the SCVH. In that case, use the root focusGrantToken since this will be
             // the same token sent to WMS for the root window once setView is called.
             if (mStateForWindow.isEmpty()) {
-                return mFocusGrantToken;
+                return mInputTransferToken;
             }
             State state = mStateForWindow.get(window);
             if (state != null) {
-                return state.mFocusGrantToken;
+                return state.mInputTransferToken;
             }
         }
 
@@ -207,9 +208,9 @@ public class WindowlessWindowManager implements IWindowSession {
             // Give the first window the mFocusGrantToken since that's the token the host can use
             // to give focus to the embedded.
             if (mStateForWindow.isEmpty()) {
-                state.mFocusGrantToken = mFocusGrantToken;
+                state.mInputTransferToken = mInputTransferToken;
             } else {
-                state.mFocusGrantToken = new Binder();
+                state.mInputTransferToken = new Binder();
             }
 
             mStateForWindow.put(window.asBinder(), state);
@@ -228,14 +229,15 @@ public class WindowlessWindowManager implements IWindowSession {
                 if (mRealWm instanceof IWindowSession.Stub) {
                     mRealWm.grantInputChannel(displayId,
                             new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
-                            window, mHostInputToken, attrs.flags, attrs.privateFlags,
+                            window.asBinder(), mHostInputToken, attrs.flags, attrs.privateFlags,
                             attrs.inputFeatures, attrs.type,
-                            attrs.token, state.mFocusGrantToken, attrs.getTitle().toString(),
+                            attrs.token, state.mInputTransferToken, attrs.getTitle().toString(),
                             outInputChannel);
                 } else {
-                    mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
-                            attrs.privateFlags, attrs.inputFeatures, attrs.type, attrs.token,
-                            state.mFocusGrantToken, attrs.getTitle().toString(), outInputChannel);
+                    mRealWm.grantInputChannel(displayId, sc, window.asBinder(), mHostInputToken,
+                            attrs.flags, attrs.privateFlags, attrs.inputFeatures, attrs.type,
+                            attrs.token, state.mInputTransferToken, attrs.getTitle().toString(),
+                            outInputChannel);
                 }
                 state.mInputChannelToken =
                         outInputChannel != null ? outInputChannel.getToken() : null;
@@ -244,8 +246,7 @@ public class WindowlessWindowManager implements IWindowSession {
             }
         }
 
-        final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
-                        WindowManagerGlobal.ADD_FLAG_USE_BLAST;
+        final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
 
         sendLayoutParamsToParent();
         // Include whether the window is in touch mode.
@@ -276,11 +277,11 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void remove(android.view.IWindow window) throws RemoteException {
-        mRealWm.remove(window);
+    public void remove(IBinder clientToken) throws RemoteException {
+        mRealWm.remove(clientToken);
         State state;
         synchronized (this) {
-            state = mStateForWindow.remove(window.asBinder());
+            state = mStateForWindow.remove(clientToken);
         }
         if (state == null) {
             throw new IllegalArgumentException(
@@ -488,8 +489,9 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public android.os.IBinder performDrag(android.view.IWindow window, int flags,
-            android.view.SurfaceControl surface, int touchSource, float touchX, float touchY,
-            float thumbCenterX, float thumbCenterY, android.content.ClipData data) {
+            android.view.SurfaceControl surface, int touchSource, int touchDeviceId,
+            int touchPointerId, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
+            android.content.ClipData data) {
         return null;
     }
 
@@ -583,12 +585,16 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void reportKeepClearAreasChanged(android.view.IWindow window, List<Rect> restrictedRects,
-            List<Rect> unrestrictedRects) {
-    }
+    public void reportDecorViewGestureInterceptionChanged(IWindow window, boolean intercepted) {}
 
     @Override
-    public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
+    public void reportKeepClearAreasChanged(
+            android.view.IWindow window,
+            List<Rect> restrictedRects,
+            List<Rect> unrestrictedRects) {}
+
+    @Override
+    public void grantInputChannel(int displayId, SurfaceControl surface, IBinder clientToken,
             IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
             IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
             InputChannel outInputChannel) {
@@ -651,6 +657,14 @@ public class WindowlessWindowManager implements IWindowSession {
         return false;
     }
 
+    @Override
+    public boolean transferHostTouchGestureToEmbedded(IWindow hostWindow,
+            IBinder embeddedInputToken) {
+        Log.e(TAG, "Received request to transferHostTouchGestureToEmbedded on"
+                + " WindowlessWindowManager. We shouldn't get here!");
+        return false;
+    }
+
     void setParentInterface(@Nullable ISurfaceControlViewHostParent parentInterface) {
         IBinder oldInterface = mParentInterface == null ? null : mParentInterface.asBinder();
         IBinder newInterface = parentInterface == null ? null : parentInterface.asBinder();
@@ -690,5 +704,18 @@ public class WindowlessWindowManager implements IWindowSession {
             } catch (RemoteException e) {
             }
         }
+    }
+
+    boolean forwardBackKeyToParent(@NonNull KeyEvent keyEvent) {
+        if (mParentInterface == null) {
+            return false;
+        }
+        try {
+            mParentInterface.forwardBackKeyToParent(keyEvent);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to forward back key To Parent: ", e);
+            return false;
+        }
+        return true;
     }
 }

@@ -16,10 +16,12 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricOverlayConstants;
+import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -43,7 +45,8 @@ import java.util.function.Supplier;
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
  * have the same haptic, lockout counter is not increased).
  */
-class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements DetectionConsumer {
+public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
+        implements DetectionConsumer {
 
     private static final String TAG = "FingerprintDetectClient";
 
@@ -52,7 +55,8 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
     @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    FingerprintDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+    public FingerprintDetectClient(@NonNull Context context,
+            @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener,
             @NonNull FingerprintAuthenticateOptions options,
@@ -64,7 +68,12 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
                 true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
-        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController*/);
+        if (sidefpsControllerRefactor()) {
+            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
+        } else {
+            mSensorOverlays = new SensorOverlays(
+                    udfpsOverlayController, null /* sideFpsController */);
+        }
         mOptions = options;
     }
 
@@ -91,7 +100,7 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
 
     @Override
     protected void startHalOperation() {
-        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD,
+        mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
 
         try {

@@ -26,6 +26,7 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_I
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
 import static com.android.server.wm.WindowOrganizerController.configurationsAreEqualForOrganizer;
 
@@ -48,14 +49,17 @@ import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
 import android.window.ITaskFragmentOrganizer;
 import android.window.ITaskFragmentOrganizerController;
+import android.window.RemoteTransition;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOperation;
 import android.window.TaskFragmentParentInfo;
 import android.window.TaskFragmentTransaction;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -133,6 +137,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 new WeakHashMap<>();
 
         /**
+         * Whether this {@link android.window.TaskFragmentOrganizer} is a system organizer. If true,
+         * the {@link android.view.SurfaceControl} of the {@link TaskFragment} is provided to the
+         * client in the {@link TYPE_TASK_FRAGMENT_APPEARED} event.
+         */
+        private final boolean mIsSystemOrganizer;
+
+        /**
          * {@link RemoteAnimationDefinition} for embedded activities transition animation that is
          * organized by this organizer.
          */
@@ -147,10 +158,21 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
          */
         private final ArrayMap<IBinder, Integer> mDeferredTransitions = new ArrayMap<>();
 
-        TaskFragmentOrganizerState(ITaskFragmentOrganizer organizer, int pid, int uid) {
+        /**
+         * Map from {@link TaskFragmentTransaction#getTransactionToken()} to a
+         * {@link Transition.ReadyCondition} that is waiting for the {@link TaskFragmentTransaction}
+         * to complete.
+         * @see #onTransactionHandled
+         */
+        private final ArrayMap<IBinder, Transition.ReadyCondition> mInFlightTransactions =
+                new ArrayMap<>();
+
+        TaskFragmentOrganizerState(@NonNull ITaskFragmentOrganizer organizer, int pid, int uid,
+                boolean isSystemOrganizer) {
             mOrganizer = organizer;
             mOrganizerPid = pid;
             mOrganizerUid = uid;
+            mIsSystemOrganizer = isSystemOrganizer;
             try {
                 mOrganizer.asBinder().linkToDeath(this, 0 /*flags*/);
             } catch (RemoteException e) {
@@ -161,7 +183,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                removeOrganizer(mOrganizer);
+                removeOrganizer(mOrganizer, "client died");
             }
         }
 
@@ -183,7 +205,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             mOrganizedTaskFragments.remove(taskFragment);
         }
 
-        void dispose() {
+        void dispose(@NonNull String reason) {
             boolean wasVisible = false;
             for (int i = mOrganizedTaskFragments.size() - 1; i >= 0; i--) {
                 final TaskFragment taskFragment = mOrganizedTaskFragments.get(i);
@@ -224,6 +246,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 // Cleanup any running transaction to unblock the current transition.
                 onTransactionFinished(mDeferredTransitions.keyAt(i));
             }
+            for (int i = mInFlightTransactions.size() - 1; i >= 0; i--) {
+                // Cleanup any in-flight transactions to unblock the transition.
+                mInFlightTransactions.valueAt(i).meetAlternate("disposed(" + reason + ")");
+            }
             mOrganizer.asBinder().unlinkToDeath(this, 0 /* flags */);
         }
 
@@ -235,11 +261,15 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             tf.mTaskFragmentAppearedSent = true;
             mLastSentTaskFragmentInfos.put(tf, info);
             mTaskFragmentTaskIds.put(tf, taskId);
-            return new TaskFragmentTransaction.Change(
+            final TaskFragmentTransaction.Change change = new TaskFragmentTransaction.Change(
                     TYPE_TASK_FRAGMENT_APPEARED)
                     .setTaskFragmentToken(tf.getFragmentToken())
                     .setTaskFragmentInfo(info)
                     .setTaskId(taskId);
+            if (mIsSystemOrganizer) {
+                change.setTaskFragmentSurfaceControl(tf.getSurfaceControl());
+            }
+            return change;
         }
 
         @NonNull
@@ -382,11 +412,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 Slog.d(TAG, "Exception sending TaskFragmentTransaction", e);
                 return;
             }
-            onTransactionStarted(transaction.getTransactionToken());
-        }
-
-        /** Called when the transaction is sent to the organizer. */
-        void onTransactionStarted(@NonNull IBinder transactionToken) {
             if (!mWindowOrganizerController.getTransitionController().isCollecting()) {
                 return;
             }
@@ -394,9 +419,13 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     .getCollectingTransitionId();
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Defer transition id=%d for TaskFragmentTransaction=%s", transitionId,
-                    transactionToken);
-            mDeferredTransitions.put(transactionToken, transitionId);
+                    transaction.getTransactionToken());
+            mDeferredTransitions.put(transaction.getTransactionToken(), transitionId);
             mWindowOrganizerController.getTransitionController().deferTransitionReady();
+            final Transition.ReadyCondition transactionApplied = new Transition.ReadyCondition(
+                    "task-fragment transaction", transaction);
+            mWindowOrganizerController.getTransitionController().waitFor(transactionApplied);
+            mInFlightTransactions.put(transaction.getTransactionToken(), transactionApplied);
         }
 
         /** Called when the transaction is finished. */
@@ -435,8 +464,25 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 : null;
     }
 
+    @VisibleForTesting
+    void registerOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
+        registerOrganizerInternal(organizer, false /* isSystemOrganizer */);
+    }
+
     @Override
-    public void registerOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
+    public void registerOrganizer(
+            @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
+        registerOrganizerInternal(
+                organizer,
+                Flags.taskFragmentSystemOrganizerFlag() && isSystemOrganizer);
+    }
+
+    @VisibleForTesting
+    void registerOrganizerInternal(
+            @NonNull ITaskFragmentOrganizer organizer, boolean isSystemOrganizer) {
+        if (isSystemOrganizer) {
+            enforceTaskPermission("registerSystemOrganizer()");
+        }
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         synchronized (mGlobalLock) {
@@ -448,7 +494,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                         "Replacing existing organizer currently unsupported");
             }
             mTaskFragmentOrganizerState.put(organizer.asBinder(),
-                    new TaskFragmentOrganizerState(organizer, pid, uid));
+                    new TaskFragmentOrganizerState(organizer, pid, uid, isSystemOrganizer));
             mPendingTaskFragmentEvents.put(organizer.asBinder(), new ArrayList<>());
         }
     }
@@ -463,7 +509,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER,
                         "Unregister task fragment organizer=%s uid=%d pid=%d",
                         organizer.asBinder(), uid, pid);
-                removeOrganizer(organizer);
+                removeOrganizer(organizer, "unregistered");
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -521,7 +567,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
             if (isValidTransaction(wct)) {
-                applyTransaction(wct, transitionType, shouldApplyIndependently);
+                applyTransaction(
+                        wct, transitionType, shouldApplyIndependently, null /* remoteTransition */);
             }
             // Even if the transaction is empty, we still need to invoke #onTransactionFinished
             // unless the organizer has been unregistered.
@@ -531,20 +578,26 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     : null;
             if (state != null) {
                 state.onTransactionFinished(transactionToken);
+                final Transition.ReadyCondition condition =
+                        state.mInFlightTransactions.remove(transactionToken);
+                if (condition != null) {
+                    condition.meet();
+                }
             }
         }
     }
 
     @Override
     public void applyTransaction(@NonNull WindowContainerTransaction wct,
-            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently) {
+            @WindowManager.TransitionType int transitionType, boolean shouldApplyIndependently,
+            @Nullable RemoteTransition remoteTransition) {
         // Keep the calling identity to avoid unsecure change.
         synchronized (mGlobalLock) {
             if (!isValidTransaction(wct)) {
                 return;
             }
             mWindowOrganizerController.applyTaskFragmentTransactionLocked(wct, transitionType,
-                    shouldApplyIndependently);
+                    shouldApplyIndependently, remoteTransition);
         }
     }
 
@@ -709,6 +762,14 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                     .setTask(task)
                     .build());
         }
+        // Make sure the parent info changed event will be dispatched if there are no other changes.
+        mAtmService.mWindowManager.mWindowPlacerLocked.requestTraversal();
+    }
+
+    boolean isSystemOrganizer(@NonNull IBinder organizerToken) {
+        final TaskFragmentOrganizerState state =
+                mTaskFragmentOrganizerState.get(organizerToken);
+        return state != null && state.mIsSystemOrganizer;
     }
 
     @Nullable
@@ -738,7 +799,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         return mTaskFragmentOrganizerState.containsKey(organizer.asBinder());
     }
 
-    private void removeOrganizer(@NonNull ITaskFragmentOrganizer organizer) {
+    private void removeOrganizer(@NonNull ITaskFragmentOrganizer organizer,
+            @NonNull String reason) {
         final TaskFragmentOrganizerState state = mTaskFragmentOrganizerState.get(
                 organizer.asBinder());
         if (state == null) {
@@ -749,7 +811,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         // event dispatch as result of surface placement.
         mPendingTaskFragmentEvents.remove(organizer.asBinder());
         // remove all of the children of the organized TaskFragment
-        state.dispose();
+        state.dispose(reason);
         mTaskFragmentOrganizerState.remove(organizer.asBinder());
     }
 
@@ -782,6 +844,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             Slog.e(TAG, "Caller organizer=" + organizer + " is no longer registered");
             return false;
         }
+
         return true;
     }
 

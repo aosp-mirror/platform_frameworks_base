@@ -106,6 +106,7 @@ public class AuthenticationStatsCollectorTest {
         when(mSharedPreferences.getStringSet(anyString(), anySet())).thenReturn(emptySet());
         when(mSharedPreferences.edit()).thenReturn(mEditor);
         when(mEditor.putFloat(anyString(), anyFloat())).thenReturn(mEditor);
+        when(mEditor.putStringSet(anyString(), anySet())).thenReturn(mEditor);
 
         mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
                 0 /* modality */, mBiometricNotification);

@@ -174,6 +174,15 @@ public class BackgroundStartPrivileges {
 
     @Override
     public String toString() {
+        if (this == ALLOW_BAL) {
+            return "BSP.ALLOW_BAL";
+        }
+        if (this == ALLOW_FGS) {
+            return "BSP.ALLOW_FGS";
+        }
+        if (this == NONE) {
+            return "BSP.NONE";
+        }
         return "BackgroundStartPrivileges["
                 + "allowsBackgroundActivityStarts=" + mAllowsBackgroundActivityStarts
                 + ", allowsBackgroundForegroundServiceStarts="

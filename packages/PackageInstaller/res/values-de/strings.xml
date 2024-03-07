@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"App wurde installiert."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Möchtest du diese App installieren?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Möchtest du diese App aktualisieren?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Diese App mit einem Update von <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> aktualisieren?\n\nSie erhält normalerweise Updates von <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Wenn du ein Update von einer anderen Quelle verwendest, erhältst du möglicherweise zukünftige Updates von beliebigen Quellen auf deinem Smartphone. Die Funktionalität der App kann sich ändern."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Soll diese App von &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; aktualisiert werden?&lt;/p&gt;&lt;p&gt;Normalerweise erhält diese App Updates von &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Wenn du ein Update von einer anderen Quelle verwendest, erhältst du künftige Updates auf deinem Tablet möglicherweise aus unklaren Quellen. Der Funktionsumfang der App kann sich dadurch ändern.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Soll diese App von &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; aktualisiert werden?&lt;/p&gt;&lt;p&gt;Normalerweise erhält diese App Updates von &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Wenn du ein Update von einer anderen Quelle verwendest, erhältst du künftige Updates auf deinem Fernseher möglicherweise aus unklaren Quellen. Der Funktionsumfang der App kann sich dadurch ändern.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Soll diese App von &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt; aktualisiert werden?&lt;/p&gt;&lt;p&gt;Normalerweise erhält diese App Updates von &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Wenn du ein Update von einer anderen Quelle verwendest, erhältst du künftige Updates auf deinem Smartphone möglicherweise aus unklaren Quellen. Der Funktionsumfang der App kann sich dadurch ändern.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"App wurde nicht installiert."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die Installation des Pakets wurde blockiert."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Die App wurde nicht installiert, da das Paket in Konflikt mit einem bestehenden Paket steht."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> an App-Daten behalten."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Möchtest du diese App löschen?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Möchtest du diese App deinstallieren? Der <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-Klon wird ebenfalls gelöscht."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Möchtest du diese App in deinem privaten Bereich deinstallieren?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Laufende Deinstallationen"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Fehlgeschlagene Deinstallationen"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Wird deinstalliert..."</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Installationsbenachrichtigung für App"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Erfolgreich installiert"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" wurde erfolgreich installiert"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> von <xliff:g id="INSTALLERNAME">%1$s</xliff:g> wiederherstellen?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Diese App beginnt im Hintergrund mit dem Herunterladen"</string>
+    <string name="restore" msgid="8460854736328970444">"Wiederherstellen"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Du bist offline"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Die App wird automatisch wiederhergestellt, sobald du mit dem Internet verbunden bist"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Ein Fehler ist aufgetreten"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Beim Wiederherstellen der App ist ein Fehler aufgetreten"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Nicht genügend Speicherplatz"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Um die App wiederherzustellen, musst du erst Speicherplatz auf diesem Gerät freigeben. Erforderlicher Speicherplatz: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Aktion erforderlich"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Folge den nächsten Schritten, um die App wiederherzustellen"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ist deaktiviert"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ist deinstalliert"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Um die App wiederherzustellen, musst du den <xliff:g id="INSTALLERNAME">%1$s</xliff:g> installieren"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Weiter"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Speicherinhalt löschen"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Einstellungen"</string>
+    <string name="close" msgid="5214897374055647996">"Schließen"</string>
 </resources>

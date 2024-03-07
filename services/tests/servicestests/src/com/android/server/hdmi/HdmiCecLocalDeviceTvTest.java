@@ -23,6 +23,7 @@ import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_RECORDER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
+import static com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -175,6 +176,20 @@ public class HdmiCecLocalDeviceTvTest {
                     @Override
                     protected boolean earcBlocksArcConnection() {
                         return mEarcBlocksArc;
+                    }
+
+                    /**
+                     * Override displayOsd to prevent it from broadcasting an intent, which
+                     * can trigger a SecurityException.
+                    */
+                    @Override
+                    void displayOsd(int messageId) {
+                        // do nothing
+                    }
+
+                    @Override
+                    void displayOsd(int messageId, int extra) {
+                        // do nothing
                     }
                 };
 
@@ -1015,6 +1030,24 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
+    public void receiveSetAudioVolumeLevel_volumeOutOfBounds_noVolumeChange() {
+        mAudioFramework.setStreamMaxVolume(AudioManager.STREAM_MUSIC, 25);
+
+        // Max volume of STREAM_MUSIC is retrieved on boot
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onCecMessage(SetAudioVolumeLevelMessage.build(
+                ADDR_PLAYBACK_1,
+                ADDR_TV,
+                127));
+        mTestLooper.dispatchAll();
+
+        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), anyInt(),
+                anyInt());
+    }
+
+    @Test
     public void tvSendRequestArcTerminationOnSleep() {
         // Emulate Audio device on port 0x2000 (supports ARC)
         mNativeWrapper.setPortConnectionStatus(2, true);
@@ -1652,13 +1685,117 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
+    public void onAddressAllocated_startRequestActiveSourceAction_playbackActiveSource() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1, 0x1000);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        mNativeWrapper.clearResultMessages();
+        mNativeWrapper.onCecMessage(activeSourceFromPlayback);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+    }
+
+    @Test
+    public void onAddressAllocated_startRequestActiveSourceAction_noActiveSource() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        assertThat(mHdmiControlService.getLocalActiveSource()).isEqualTo(
+                new ActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS));
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+
+        // Skip the retry.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSourceFromTv);
+        assertThat(mHdmiControlService.getLocalActiveSource()).isEqualTo(
+                new ActiveSource(mTvLogicalAddress, mTvPhysicalAddress));
+    }
+
+    @Test
+    public void requestActiveSourceActionComplete_validLocalActiveSource_doNotSendActiveSource() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        mHdmiControlService.setActiveSource(mTvLogicalAddress, mTvPhysicalAddress,
+                "HdmiCecLocalDeviceTvTest");
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+    }
+
+    @Test
+    public void onAddressAllocated_startRequestActiveSourceAction_cancelOnDeviceSelect() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        HdmiDeviceInfo playbackDevice = HdmiDeviceInfo.cecDeviceBuilder()
+                .setLogicalAddress(ADDR_PLAYBACK_1)
+                .setPhysicalAddress(0x1000)
+                .setPortId(PORT_1)
+                .setDeviceType(HdmiDeviceInfo.DEVICE_PLAYBACK)
+                .setVendorId(0x1234)
+                .setDisplayName("Playback 1")
+                .setDevicePowerStatus(HdmiControlManager.POWER_STATUS_ON)
+                .setCecVersion(HdmiControlManager.HDMI_CEC_VERSION_1_4_B)
+                .build();
+        mHdmiControlService.getHdmiCecNetwork().addCecDevice(playbackDevice);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        mNativeWrapper.clearResultMessages();
+        mHdmiCecLocalDeviceTv.deviceSelect(playbackDevice.getId(), null);
+        mTestLooper.dispatchAll();
+
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.dispatchAll();
+
+        // RequestActiveSourceAction should be cancelled and TV will not broadcast <Active Source>.
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+    }
+
+
+    @Test
     public void newDeviceConnectedIfOnlyOneGiveOsdNameSent() {
         mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
         assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
                 .isEmpty();
         HdmiCecMessage reportPhysicalAddress =
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                ADDR_PLAYBACK_2, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
+                        ADDR_PLAYBACK_2, 0x1000, HdmiDeviceInfo.DEVICE_PLAYBACK);
         HdmiCecMessage giveOsdName = HdmiCecMessageBuilder.buildGiveOsdNameCommand(
                 ADDR_TV, ADDR_PLAYBACK_2);
         mNativeWrapper.onCecMessage(reportPhysicalAddress);

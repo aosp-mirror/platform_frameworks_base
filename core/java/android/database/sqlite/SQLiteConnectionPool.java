@@ -111,6 +111,13 @@ public final class SQLiteConnectionPool implements Closeable {
     @GuardedBy("mLock")
     private IdleConnectionHandler mIdleConnectionHandler;
 
+    // The database schema sequence number.  This counter is incremented every time a schema
+    // change is detected.  Every prepared statement records its schema sequence when the
+    // statement is created.  The prepared statement is not put back in the cache if the sequence
+    // number has changed.  The counter starts at 1, which allows clients to use 0 as a
+    // distinguished value.
+    private long mDatabaseSeqNum = 1;
+
     // whole execution time for this connection in milliseconds.
     private final AtomicLong mTotalStatementsTime = new AtomicLong(0);
 
@@ -1124,6 +1131,18 @@ public final class SQLiteConnectionPool implements Closeable {
         waiter.mException = null;
         waiter.mNonce += 1;
         mConnectionWaiterPool = waiter;
+    }
+
+    void clearAcquiredConnectionsPreparedStatementCache() {
+        // Invalidate prepared statements that have an earlier schema sequence number.
+        synchronized (mLock) {
+            mDatabaseSeqNum++;
+            if (!mAcquiredConnections.isEmpty()) {
+                for (SQLiteConnection connection : mAcquiredConnections.keySet()) {
+                    connection.setDatabaseSeqNum(mDatabaseSeqNum);
+                }
+            }
+        }
     }
 
     /**

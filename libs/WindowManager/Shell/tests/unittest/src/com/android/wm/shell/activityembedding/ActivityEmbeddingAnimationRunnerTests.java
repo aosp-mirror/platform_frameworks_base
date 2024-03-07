@@ -35,7 +35,7 @@ import android.window.TransitionInfo;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.TransitionInfoBuilder;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +96,23 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
                 new ArrayList());
 
         // The animation should be empty when it is behind starting window.
+        assertEquals(0, animator.getDuration());
+    }
+
+    @Test
+    public void testInvalidCustomAnimation() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(createChange(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY))
+                .build();
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("packageName", 0 /* enterResId */, 0 /* exitResId */,
+                        0 /* backgroundColor */, false /* overrideTaskTransition */));
+        final Animator animator = mAnimRunner.createAnimator(
+                info, mStartTransaction, mFinishTransaction,
+                () -> mFinishCallback.onTransitionFinished(null /* wct */),
+                new ArrayList<>());
+
+        // An invalid custom animation is equivalent to jump-cut.
         assertEquals(0, animator.getDuration());
     }
 }

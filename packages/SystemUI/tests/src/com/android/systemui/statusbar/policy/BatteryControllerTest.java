@@ -17,12 +17,10 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.os.BatteryManager.EXTRA_PRESENT;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker;
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
-
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -91,6 +89,7 @@ public class BatteryControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mDemoModeController,
                 mock(DumpManager.class),
+                mock(BatteryControllerLogger.class),
                 new Handler(),
                 new Handler());
         // Can throw if updateEstimate is called on the main thread
@@ -295,6 +294,6 @@ public class BatteryControllerTest extends SysuiTestCase {
         when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
         when(mUsbPortStatus.isConnected()).thenReturn(true);
         when(mUsbPortStatus.getComplianceWarnings())
-                .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_OTHER});
+                .thenReturn(new int[]{UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY});
     }
 }

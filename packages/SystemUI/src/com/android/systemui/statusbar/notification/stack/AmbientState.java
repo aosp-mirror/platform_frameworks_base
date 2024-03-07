@@ -26,7 +26,7 @@ import android.util.MathUtils;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
@@ -86,7 +86,6 @@ public class AmbientState implements Dumpable {
     private boolean mExpansionChanging;
     private boolean mIsSmallScreen;
     private boolean mPulsing;
-    private boolean mUnlockHintRunning;
     private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
@@ -122,6 +121,7 @@ public class AmbientState implements Dumpable {
     private float mAppearFraction;
     private float mOverExpansion;
     private int mStackTopMargin;
+    private boolean mUseSplitShade;
 
     /** Distance of top of notifications panel from top of screen. */
     private float mStackY = 0;
@@ -226,6 +226,20 @@ public class AmbientState implements Dumpable {
             mIsFlingRequiredAfterLockScreenSwipeUp = false;
         }
         mIsFlinging = isFlinging;
+    }
+
+    /**
+     * @param useSplitShade True if we are showing split shade.
+     */
+    public void setUseSplitShade(boolean useSplitShade) {
+        mUseSplitShade = useSplitShade;
+    }
+
+    /**
+     * @return True if we are showing split shade.
+     */
+    public boolean getUseSplitShade() {
+        return mUseSplitShade;
     }
 
     /**
@@ -592,14 +606,6 @@ public class AmbientState implements Dumpable {
         mIsSmallScreen = smallScreen;
     }
 
-    public void setUnlockHintRunning(boolean unlockHintRunning) {
-        mUnlockHintRunning = unlockHintRunning;
-    }
-
-    public boolean isUnlockHintRunning() {
-        return mUnlockHintRunning;
-    }
-
     /**
      * @return Whether we need to do a fling down after swiping up on lockscreen.
      */
@@ -770,7 +776,6 @@ public class AmbientState implements Dumpable {
         pw.println("mPulseHeight=" + mPulseHeight);
         pw.println("mTrackedHeadsUpRow.key=" + logKey(mTrackedHeadsUpRow));
         pw.println("mMaxHeadsUpTranslation=" + mMaxHeadsUpTranslation);
-        pw.println("mUnlockHintRunning=" + mUnlockHintRunning);
         pw.println("mDozeAmount=" + mDozeAmount);
         pw.println("mDozing=" + mDozing);
         pw.println("mFractionToShade=" + mFractionToShade);

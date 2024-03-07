@@ -27,7 +27,7 @@ import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Customized widget for use in the GlobalActionsDialog. Ensures common positioning and user

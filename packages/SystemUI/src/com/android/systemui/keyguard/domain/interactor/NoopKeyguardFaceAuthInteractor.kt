@@ -42,7 +42,11 @@ class NoopKeyguardFaceAuthInteractor @Inject constructor() : KeyguardFaceAuthInt
 
     override fun isLockedOut(): Boolean = false
 
-    override fun isEnabled() = false
+    override fun isFaceAuthEnabledAndEnrolled(): Boolean = false
+
+    override fun isFaceAuthStrong(): Boolean = false
+
+    override fun isAuthenticated(): Boolean = false
 
     override fun registerListener(listener: FaceAuthenticationListener) {}
 
@@ -61,4 +65,5 @@ class NoopKeyguardFaceAuthInteractor @Inject constructor() : KeyguardFaceAuthInt
     override fun onSwipeUpOnBouncer() {}
     override fun onPrimaryBouncerUserInput() {}
     override fun onAccessibilityAction() {}
+    override fun onWalletLaunched() = Unit
 }

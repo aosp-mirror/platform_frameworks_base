@@ -32,7 +32,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -46,12 +45,14 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -83,11 +84,13 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var trustRepository: FakeTrustRepository
     private lateinit var powerRepository: FakePowerRepository
+    private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var indicationHelper: IndicationHelper
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mockedContext: Context
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
     @Before
     fun setup() {
@@ -99,13 +102,17 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         configurationRepository = FakeConfigurationRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FACE_AUTH_REFACTOR, false)
-                set(Flags.DELAY_BOUNCER, false)
-            }
+        featureFlags = FakeFeatureFlags()
         trustRepository = FakeTrustRepository()
         powerRepository = FakePowerRepository()
+        powerInteractor =
+            PowerInteractor(
+                powerRepository,
+                falsingCollector = mock(),
+                screenOffAnimationController = mock(),
+                statusBarStateController = mock(),
+            )
+
         underTest =
             OccludingAppDeviceEntryInteractor(
                 BiometricMessageInteractor(
@@ -116,13 +123,16 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     keyguardUpdateMonitor,
                 ),
                 fingerprintAuthRepository,
-                KeyguardInteractor(
-                    keyguardRepository,
-                    commandQueue = mock(),
-                    featureFlags,
-                    bouncerRepository,
-                    configurationRepository,
-                ),
+                KeyguardInteractorFactory.create(
+                        featureFlags = featureFlags,
+                        repository = keyguardRepository,
+                        bouncerRepository = bouncerRepository,
+                        configurationRepository = configurationRepository,
+                        sceneInteractor =
+                            mock { whenever(transitioningTo).thenReturn(MutableStateFlow(null)) },
+                        powerInteractor = powerInteractor,
+                    )
+                    .keyguardInteractor,
                 PrimaryBouncerInteractor(
                     bouncerRepository,
                     primaryBouncerView = mock(),
@@ -135,28 +145,24 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     context,
                     keyguardUpdateMonitor,
                     trustRepository,
-                    featureFlags,
                     testScope.backgroundScope,
+                    mSelectedUserInteractor,
+                    keyguardFaceAuthInteractor = mock(),
                 ),
                 AlternateBouncerInteractor(
                     statusBarStateController = mock(),
                     keyguardStateController = mock(),
                     bouncerRepository,
+                    FakeFingerprintPropertyRepository(),
                     biometricSettingsRepository,
                     FakeSystemClock(),
                     keyguardUpdateMonitor,
+                    scope = testScope.backgroundScope,
                 ),
                 testScope.backgroundScope,
                 mockedContext,
                 activityStarter,
-                PowerInteractor(
-                    powerRepository,
-                    keyguardRepository,
-                    falsingCollector = mock(),
-                    screenOffAnimationController = mock(),
-                    statusBarStateController = mock(),
-                ),
-                FakeFeatureFlags().apply { set(Flags.FP_LISTEN_OCCLUDING_APPS, true) },
+                powerInteractor,
             )
     }
 

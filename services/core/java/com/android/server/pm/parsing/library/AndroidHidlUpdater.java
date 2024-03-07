@@ -21,7 +21,7 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_H
 import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates a package to ensure that if it targets <= P that the android.hidl.base-V1.0-java

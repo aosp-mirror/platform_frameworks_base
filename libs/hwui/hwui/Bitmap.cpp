@@ -43,12 +43,15 @@
 #include <SkColor.h>
 #include <SkEncodedImageFormat.h>
 #include <SkHighContrastFilter.h>
-#include <SkImageEncoder.h>
+#include <SkImage.h>
+#include <SkImageAndroid.h>
 #include <SkImagePriv.h>
 #include <SkJpegGainmapEncoder.h>
 #include <SkPixmap.h>
 #include <SkRect.h>
 #include <SkStream.h>
+#include <SkJpegEncoder.h>
+#include <SkPngEncoder.h>
 #include <SkWebpEncoder.h>
 
 #include <limits>
@@ -296,7 +299,8 @@ Bitmap::Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes
     mPixelStorage.hardware.size = AHardwareBuffer_getAllocationSize(buffer);
     AHardwareBuffer_acquire(buffer);
     setImmutable();  // HW bitmaps are always immutable
-    mImage = SkImage::MakeFromAHardwareBuffer(buffer, mInfo.alphaType(), mInfo.refColorSpace());
+    mImage = SkImages::DeferredFromAHardwareBuffer(buffer, mInfo.alphaType(),
+                                                   mInfo.refColorSpace());
 }
 #endif
 
@@ -407,7 +411,12 @@ sk_sp<SkImage> Bitmap::makeImage() {
         // Note we don't cache in this case, because the raster image holds a pointer to this Bitmap
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
+#ifdef __ANDROID__
+        // pinnable images are only supported with the Ganesh GPU backend compiled in.
+        image = SkImages::PinnableRasterFromBitmap(skiaBitmap);
+#else
         image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
+#endif
     }
     return image;
 }
@@ -528,17 +537,25 @@ bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
         return false;
     }
 
-    SkEncodedImageFormat fm;
     switch (format) {
-        case JavaCompressFormat::Jpeg:
-            fm = SkEncodedImageFormat::kJPEG;
-            break;
+        case JavaCompressFormat::Jpeg: {
+            SkJpegEncoder::Options options;
+            options.fQuality = quality;
+            return SkJpegEncoder::Encode(stream, bitmap.pixmap(), options);
+        }
         case JavaCompressFormat::Png:
-            fm = SkEncodedImageFormat::kPNG;
-            break;
-        case JavaCompressFormat::Webp:
-            fm = SkEncodedImageFormat::kWEBP;
-            break;
+            return SkPngEncoder::Encode(stream, bitmap.pixmap(), {});
+        case JavaCompressFormat::Webp: {
+            SkWebpEncoder::Options options;
+            if (quality >= 100) {
+                options.fCompression = SkWebpEncoder::Compression::kLossless;
+                options.fQuality = 75; // This is effort to compress
+            } else {
+                options.fCompression = SkWebpEncoder::Compression::kLossy;
+                options.fQuality = quality;
+            }
+            return SkWebpEncoder::Encode(stream, bitmap.pixmap(), options);
+        }
         case JavaCompressFormat::WebpLossy:
         case JavaCompressFormat::WebpLossless: {
             SkWebpEncoder::Options options;
@@ -548,8 +565,6 @@ bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
             return SkWebpEncoder::Encode(stream, bitmap.pixmap(), options);
         }
     }
-
-    return SkEncodeImage(stream, bitmap, fm, quality);
 }
 
 sp<uirenderer::Gainmap> Bitmap::gainmap() const {

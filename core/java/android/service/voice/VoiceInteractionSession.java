@@ -1809,7 +1809,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * in milliseconds of the KeyEvent that triggered Assistant and
      * Intent.EXTRA_ASSIST_INPUT_DEVICE_ID (android.intent.extra.ASSIST_INPUT_DEVICE_ID)
      *  referring to the device that sent the request. Starting from Android 14, the system will
-     * add {@link VoiceInteractionService#KEY_SHOW_SESSION_ID}, the Bundle is not null. But the
+     * add {@link #KEY_SHOW_SESSION_ID}, the Bundle is not null. But the
      * application should handle null case before Android 14.
      * @param showFlags The show flags originally provided to
      * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.

@@ -39,7 +39,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.CarrierTextManager;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.mobile.TelephonyIcons;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;

@@ -68,9 +68,8 @@ struct OverlayableChunk {
 class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, const ResourceTablePackageView& package,
-                   const std::map<size_t, std::string>* shared_libs,
-                   SparseEntriesMode sparse_entries,
-                   bool compact_entries,
+                   const ResourceTable::ReferencedPackages* shared_libs,
+                   SparseEntriesMode sparse_entries, bool compact_entries,
                    bool collapse_key_stringpool,
                    const std::set<ResourceName>& name_collapse_exemptions,
                    bool deduplicate_entry_values)
@@ -145,10 +144,9 @@ class PackageFlattener {
   // 2) the entries will be accessed on platforms U+, and
   // 3) all entry keys can be encoded in 16 bits
   bool UseCompactEntries(const ConfigDescription& config, std::vector<FlatEntry>* entries) const {
-    return compact_entries_ &&
-        (context_->GetMinSdkVersion() > SDK_TIRAMISU || config.sdkVersion > SDK_TIRAMISU) &&
-        std::none_of(entries->cbegin(), entries->cend(),
-          [](const auto& e) { return e.entry_key >= std::numeric_limits<uint16_t>::max(); });
+    return compact_entries_ && context_->GetMinSdkVersion() > SDK_TIRAMISU &&
+      std::none_of(entries->cbegin(), entries->cend(),
+        [](const auto& e) { return e.entry_key >= std::numeric_limits<uint16_t>::max(); });
   }
 
   std::unique_ptr<ResEntryWriter> GetResEntryWriter(bool dedup, bool compact, BigBuffer* buffer) {
@@ -548,7 +546,7 @@ class PackageFlattener {
   IAaptContext* context_;
   android::IDiagnostics* diag_;
   const ResourceTablePackageView package_;
-  const std::map<size_t, std::string>* shared_libs_;
+  const ResourceTable::ReferencedPackages* shared_libs_;
   SparseEntriesMode sparse_entries_;
   bool compact_entries_;
   android::StringPool type_pool_;

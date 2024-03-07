@@ -1,0 +1,232 @@
+package: "com.android.systemui"
+
+flag {
+    name: "example_flag"
+    namespace: "systemui"
+    description: "An Example Flag"
+    bug: "292511372"
+}
+
+flag {
+    name: "sysui_teamfood"
+    namespace: "systemui"
+    description: "Enables all the sysui classic flags that are marked as being in teamfood"
+    bug: "302578396"
+}
+
+flag {
+    name: "notification_async_hybrid_view_inflation"
+    namespace: "systemui"
+    description: "Inflates hybrid (single-line) notification views from the background thread."
+    bug: "217799515"
+}
+
+flag {
+    name: "notifications_footer_view_refactor"
+    namespace: "systemui"
+    description: "Enables the refactored version of the footer view in the notification shade "
+        "(containing the \"Clear all\" button). Should not bring any behavior changes"
+    bug: "293167744"
+}
+
+flag {
+    name: "notifications_icon_container_refactor"
+    namespace: "systemui"
+    description: "Enables the refactored version of the notification icon container in StatusBar, "
+        "AOD, and the notification shelf. Should not bring any behavioral changes."
+    bug: "278765923"
+}
+
+flag {
+    name: "notifications_hide_on_display_switch"
+    namespace: "systemui"
+    description: "Temporary hides notifications when folding/unfolding to reduce unfold latency"
+    bug: "293824309"
+}
+
+flag {
+    name: "notification_lifetime_extension_refactor"
+    namespace: "systemui"
+    description: "Enables moving notification lifetime extension management from SystemUI to "
+        "Notification Manager Service"
+    bug: "299448097"
+}
+
+flag {
+    name: "notifications_live_data_store_refactor"
+    namespace: "systemui"
+    description: "Replaces NotifLiveDataStore with ActiveNotificationListRepository, and updates consumers. "
+        "Should not bring any behavior changes."
+    bug: "308623704"
+}
+
+flag {
+    name: "refactor_get_current_user"
+    namespace: "systemui"
+    description: "KeyguardUpdateMonitor.getCurrentUser() was providing outdated results."
+    bug: "305984787"
+}
+
+flag {
+    name: "notification_throttle_hun"
+    namespace: "systemui"
+    description: "During notification avalanche, throttle HUNs showing in fast succession."
+    bug: "307288824"
+}
+
+flag {
+    name: "notification_background_tint_optimization"
+    namespace: "systemui"
+    description: "Re-enable the codepath that removed tinting of notifications when the"
+        " standard background color is desired.  This was the behavior before we discovered"
+        " a resources threading issue, which we worked around by tinting the notification"
+        " backgrounds and footer buttons."
+    bug: "294347738"
+}
+
+flag {
+    name: "scene_container"
+    namespace: "systemui"
+    description: "Enables the scene container framework go/flexiglass."
+    bug: "283121968"
+}
+
+flag {
+    name: "keyguard_bottom_area_refactor"
+    namespace: "systemui"
+    description: "Bottom area of keyguard refactor move into KeyguardRootView. Includes "
+        "lock icon and others."
+    bug: "290652751"
+}
+
+flag {
+    name: "device_entry_udfps_refactor"
+    namespace: "systemui"
+    description: "Refactoring device entry UDFPS icon to use modern architecture and "
+        "consolidating it with the lock/unlock icon to create a combined DeviceEntryIconView"
+    bug: "279440316"
+}
+
+flag {
+    name: "visual_interruptions_refactor"
+    namespace: "systemui"
+    description: "Enables the refactored version of the code to decide when notifications "
+        "HUN, bubble, pulse, or FSI."
+    bug: "261728888"
+}
+
+flag {
+    name: "haptic_brightness_slider"
+    namespace: "systemui"
+    description: "Adds haptic feedback to the brightness slider."
+    bug: "296467915"
+}
+
+flag {
+    name: "keyguard_shade_migration_nssl"
+    namespace: "systemui"
+    description: "Moves NSSL into a shared element between the notification_panel and "
+        "keyguard_root_view."
+    bug: "278054201"
+}
+
+flag {
+    name: "unfold_animation_background_progress"
+    namespace: "systemui"
+    description: "Moves unfold animation progress calculation to a background thread"
+    bug: "277879146"
+}
+
+flag {
+    name: "qs_new_pipeline"
+    namespace: "systemui"
+    description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
+    bug: "241772429"
+}
+
+flag {
+   name: "qs_new_tiles"
+   namespace: "systemui"
+   description: "Use the new tiles in the Quick Settings. Should have no behavior changes."
+   bug: "241772429"
+}
+
+flag {
+    name: "coroutine_tracing"
+    namespace: "systemui"
+    description: "Adds thread-local data to System UI's global coroutine scopes to "
+        "allow for tracing of coroutine continuations using System UI's tracinglib"
+    bug: "289353932"
+}
+
+flag {
+    name: "new_aod_transition"
+    namespace: "systemui"
+    description: "New LOCKSCREEN <=> AOD transition"
+    bug: "301915812"
+}
+
+flag {
+    name: "light_reveal_migration"
+    namespace: "systemui"
+    description: "Move LightRevealScrim to recommended architecture"
+    bug: "281655028"
+}
+
+flag {
+   name: "theme_overlay_controller_wakefulness_deprecation"
+   namespace: "systemui"
+   description: "Replacing WakefulnessLifecycle by KeyguardTransitionInteractor in "
+        "ThemOverlayController to mitigate flickering when locking the device"
+   bug: "308676488"
+}
+
+flag {
+   name: "media_in_scene_container"
+   namespace: "systemui"
+   description: "Enable media in the scene container framework"
+   bug: "296122467"
+}
+
+flag {
+   name: "rest_to_unlock"
+   namespace: "systemui"
+   description: "Require prolonged touch for fingerprint authentication"
+   bug: "303672286"
+}
+
+flag {
+   name: "record_issue_qs_tile"
+   namespace: "systemui"
+   description: "Replace Record Trace QS Tile with expanded Record Issue QS Tile"
+   bug: "305049544"
+}
+
+flag {
+   name: "migrate_clocks_to_blueprint"
+   namespace: "systemui"
+   description: "Move clock related views from KeyguardStatusView to KeyguardRootView, "
+        "and use modern architecture for lockscreen clocks"
+   bug: "301502635"
+}
+
+flag {
+   name: "fast_unlock_transition"
+   namespace: "systemui"
+   description: "Faster wallpaper unlock transition"
+   bug: "298186160"
+}
+
+flag {
+  name: "enable_layout_tracing"
+  namespace: "systemui"
+  description: "Enables detailed traversal slices during measure and layout in perfetto traces"
+  bug: "315274804"
+}
+
+flag {
+   name: "quick_settings_visual_haptics_longpress"
+   namespace: "systemui"
+   description: "Enable special visual and haptic effects for quick settings tiles with long-press actions"
+   bug: "229856884"
+}

@@ -49,6 +49,7 @@ import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
+import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -80,6 +81,9 @@ import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -3994,8 +3998,7 @@ public class DevicePolicyManager {
 
     /**
      * An integer array extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate which
-     * resource IDs (see {@link DevicePolicyResources.Drawables} and
-     * {@link DevicePolicyResources.Strings}) have been updated.
+     * resource IDs (i.e. strings and drawables) have been updated.
      */
     public static final String EXTRA_RESOURCE_IDS =
             "android.app.extra.RESOURCE_IDS";
@@ -8366,9 +8369,7 @@ public class DevicePolicyManager {
      * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
      * successfully set or not. This callback will contain:
      * <ul>
-     * <li> The policy identifier returned from
-     * {@link DevicePolicyIdentifiers#getIdentifierForUserRestriction(String)} with user restriction
-     * {@link UserManager#DISALLOW_CAMERA}
+     * <li> The policy identifier: userRestriction_no_camera
      * <li> The {@link TargetUser} that this policy relates to
      * <li> The {@link PolicyUpdateResult}, which will be
      * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
@@ -9117,6 +9118,19 @@ public class DevicePolicyManager {
     }
 
     /**
+     * For apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above, the
+     * {@link #isDeviceOwnerApp} method will use the user contained within the
+     * context.
+     * For apps targeting an SDK version <em>below</em> this, the user of the calling process will
+     * be used (Process.myUserHandle()).
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long IS_DEVICE_OWNER_USER_AWARE = 307233716L;
+
+    /**
      * Used to determine if a particular package has been registered as a Device Owner app.
      * A device owner app is a special device admin that cannot be deactivated by the user, once
      * activated as a device admin. It also cannot be uninstalled. To check whether a particular
@@ -9129,8 +9143,13 @@ public class DevicePolicyManager {
      * app, if any.
      * @return whether or not the package is registered as the device owner app.
      */
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public boolean isDeviceOwnerApp(String packageName) {
         throwIfParentInstance("isDeviceOwnerApp");
+        if (android.permission.flags.Flags.systemServerRoleControllerEnabled()
+                && CompatChanges.isChangeEnabled(IS_DEVICE_OWNER_USER_AWARE)) {
+            return isDeviceOwnerAppOnContextUser(packageName);
+        }
         return isDeviceOwnerAppOnCallingUser(packageName);
     }
 
@@ -9185,6 +9204,24 @@ public class DevicePolicyManager {
             return false;
         }
         final ComponentName deviceOwner = getDeviceOwnerComponentInner(callingUserOnly);
+        if (deviceOwner == null) {
+            return false;
+        }
+        return packageName.equals(deviceOwner.getPackageName());
+    }
+
+    private boolean isDeviceOwnerAppOnContextUser(String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        ComponentName deviceOwner = null;
+        if (mService != null) {
+            try {
+                deviceOwner = mService.getDeviceOwnerComponentOnUser(myUserId());
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
         if (deviceOwner == null) {
             return false;
         }
@@ -9607,6 +9644,7 @@ public class DevicePolicyManager {
      * @param packageName The package name of the app to compare with the registered profile owner.
      * @return Whether or not the package is registered as the profile owner.
      */
+    @UserHandleAware
     public boolean isProfileOwnerApp(String packageName) {
         throwIfParentInstance("isProfileOwnerApp");
         if (mService != null) {
@@ -13024,7 +13062,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owners or profile owners of an organization-owned managed profile to to set
+     * Called by device owners or profile owners of an organization-owned managed profile to set
      * a local system update policy. When a new policy is set,
      * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcast.
      * <p>
@@ -13362,7 +13400,7 @@ public class DevicePolicyManager {
      * A device owner, by default, may continue granting these permissions. However, for increased
      * user control, the admin may opt out of controlling grants for these permissions by including
      * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
-     * In that case the device owner's control will be limited do denying these permissions.
+     * In that case the device owner's control will be limited to denying these permissions.
      * <p>
      * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, control over
      * the following permissions are restricted for managed profile owners:
@@ -14818,12 +14856,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the system to find out whether the current user's IME was set by the device/profile
-     * owner or the user.
+     * Returns true if the current user's IME was set by an admin.
      *
-     * @return {@code true} if the user's IME was set by the device or profile owner, {@code false}
-     *         otherwise.
-     * @throws SecurityException if the caller is not the device owner/profile owner.
+     * <p>Requires the caller to be the system server, a device owner or profile owner, or a holder
+     * of the QUERY_ADMIN_POLICY permission.
+     *
+     * @throws SecurityException if the caller is not authorized
      *
      * @hide
      */
@@ -16602,6 +16640,7 @@ public class DevicePolicyManager {
                 == DEVICE_OWNER_TYPE_FINANCED;
     }
 
+    // TODO(b/315298076): revert ag/25574027 and update the doc
     /**
      * Called by a device owner or profile owner of an organization-owned managed profile to enable
      * or disable USB data signaling for the device. When disabled, USB data connections
@@ -16611,10 +16650,27 @@ public class DevicePolicyManager {
      * {@link #canUsbDataSignalingBeDisabled()} to check whether enabling or disabling USB data
      * signaling is supported on the device.
      *
+     * Starting from Android 15, after the USB data signaling
+     * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
+     *
      * @param enabled whether USB data signaling should be enabled or not.
      * @throws SecurityException if the caller is not permitted to set this policy
      * @throws IllegalStateException if disabling USB data signaling is not supported or
-     *         if USB data signaling fails to be enabled/disabled.
+     * if USB data signaling fails to be enabled/disabled.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING, conditional = true)
     public void setUsbDataSignalingEnabled(boolean enabled) {
@@ -16642,25 +16698,6 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.isUsbDataSignalingEnabled(mContext.getPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Called by the system to check whether USB data signaling is currently enabled for this user.
-     *
-     * @param userId which user to check for.
-     * @return {@code true} if USB data signaling is enabled, {@code false} otherwise.
-     * @hide
-     */
-    public boolean isUsbDataSignalingEnabledForUser(@UserIdInt int userId) {
-        throwIfParentInstance("isUsbDataSignalingEnabledForUser");
-        if (mService != null) {
-            try {
-                return mService.isUsbDataSignalingEnabledForUser(userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -17048,23 +17085,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Overrides the effective cached value of enable_keep_profiles_running for testing purposes.
-     *
-     * @hide
-     */
-    @TestApi
-    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
-    public void setOverrideKeepProfilesRunning(boolean enabled) {
-        if (mService != null) {
-            try {
-                mService.setOverrideKeepProfilesRunning(enabled);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
      * Triggers the data migration of device policies for existing DPCs to the Device Policy Engine.
      * If {@code forceMigration} is set to {@code true} it skips the prerequisite checks before
      * triggering the migration.
@@ -17090,19 +17110,19 @@ public class DevicePolicyManager {
      * Returns {@code true} if this device is marked as a financed device.
      *
      * <p>A financed device can be entered into lock task mode (see {@link #setLockTaskPackages})
-     * by the holder of the role {@link android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
+     * by the holder of the role {@code android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK}.
      * If this occurs, Device Owners and Profile Owners that have set lock task packages or
      * features, or that attempt to set lock task packages or features, will receive a callback
      * indicating that it could not be set. See {@link PolicyUpdateReceiver#onPolicyChanged} and
      * {@link PolicyUpdateReceiver#onPolicySetResult}.
      *
      * <p>To be informed of changes to this status you can subscribe to the broadcast
-     * {@link ACTION_DEVICE_FINANCING_STATE_CHANGED}.
+     * {@link #ACTION_DEVICE_FINANCING_STATE_CHANGED}.
      *
      * @throws SecurityException if the caller is not a device owner, profile owner of an
      * organization-owned managed profile, profile owner on the primary user or holder of one of the
-     * following roles: {@link android.app.role.RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT},
-     * android.app.role.RoleManager.ROLE_SYSTEM_SUPERVISION.
+     * following roles: {@code android.app.role.RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT},
+     * {@code android.app.role.RoleManager.ROLE_SYSTEM_SUPERVISION}.
      */
     public boolean isDeviceFinanced() {
         throwIfParentInstance("isDeviceFinanced");
@@ -17136,5 +17156,16 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    // TODO(b/308755220): Remove once the build is finalised.
+    /**
+     * Returns true if the flag for the onboarding bugreport V2 is enabled.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public boolean isOnboardingBugreportV2FlagEnabled() {
+        return onboardingBugreportV2Enabled();
     }
 }

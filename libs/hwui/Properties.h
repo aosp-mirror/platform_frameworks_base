@@ -325,6 +325,8 @@ public:
 
     static float maxHdrHeadroomOn8bit;
 
+    static bool clipSurfaceViews;
+
     static StretchEffectBehavior getStretchEffectBehavior() {
         return stretchEffectBehavior;
     }

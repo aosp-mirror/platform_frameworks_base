@@ -22,6 +22,8 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -54,6 +56,7 @@ public final class AudioHalVersionInfo implements Parcelable, Comparable<AudioHa
             flag = false,
             prefix = "AUDIO_HAL_TYPE_",
             value = {AUDIO_HAL_TYPE_HIDL, AUDIO_HAL_TYPE_AIDL})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface AudioHalType {}
 
     /** AudioHalVersionInfo object of all valid Audio HAL versions. */

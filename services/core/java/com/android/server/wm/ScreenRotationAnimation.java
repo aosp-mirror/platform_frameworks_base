@@ -32,6 +32,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATI
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.utils.CoordinateTransforms.computeRotationMatrix;
+import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -170,7 +171,7 @@ class ScreenRotationAnimation {
 
         try {
             final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
-            if (isSizeChanged) {
+            if (isSizeChanged && !deleteCaptureDisplay()) {
                 final DisplayAddress address = displayInfo.address;
                 if (!(address instanceof DisplayAddress.Physical)) {
                     Slog.e(TAG, "Display does not have a physical address: " + displayId);
@@ -196,6 +197,19 @@ class ScreenRotationAnimation {
                                 .setHintForSeamlessTransition(true)
                                 .build();
                 screenshotBuffer = ScreenCapture.captureDisplay(captureArgs);
+            } else if (isSizeChanged) {
+                // Temporarily not skip screenshot for the rounded corner overlays and screenshot
+                // the whole display to include the rounded corner overlays.
+                setSkipScreenshotForRoundedCornerOverlays(false, t);
+                ScreenCapture.LayerCaptureArgs captureArgs =
+                        new ScreenCapture.LayerCaptureArgs.Builder(
+                                displayContent.getSurfaceControl())
+                                .setCaptureSecureLayers(true)
+                                .setAllowProtected(true)
+                                .setSourceCrop(new Rect(0, 0, width, height))
+                                .setHintForSeamlessTransition(true)
+                                .build();
+                screenshotBuffer = ScreenCapture.captureLayers(captureArgs);
             } else {
                 ScreenCapture.LayerCaptureArgs captureArgs =
                         new ScreenCapture.LayerCaptureArgs.Builder(

@@ -16,12 +16,27 @@
 
 package android.os;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
 
-public class VintfObjectTest extends TestCase {
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = VintfObject.class)
+public class VintfObjectTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     /**
      * Quick check for {@link VintfObject#report VintfObject.report()}.
      */
+    @Test
     public void testReport() {
         String[] xmls = VintfObject.report();
         assertTrue(xmls.length > 0);

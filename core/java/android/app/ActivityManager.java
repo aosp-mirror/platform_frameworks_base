@@ -24,6 +24,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import android.Manifest;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -107,6 +108,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -193,6 +195,11 @@ public class ActivityManager {
      * @hide
      */
     public static final int INSTR_FLAG_INSTRUMENT_SDK_SANDBOX = 1 << 5;
+    /**
+     * Instrument an Sdk Sandbox process corresponding to an Sdk running inside the sandbox.
+     * @hide
+     */
+    public static final int INSTR_FLAG_INSTRUMENT_SDK_IN_SANDBOX = 1 << 6;
 
     static final class MyUidObserver extends UidObserver {
         final OnUidImportanceListener mListener;
@@ -2304,6 +2311,32 @@ public class ActivityManager {
         }
 
         @Override
+        public int hashCode() {
+            int result = 17;
+            if (mLabel != null) {
+                result = result * 31 + mLabel.hashCode();
+            }
+            if (mIcon != null) {
+                result = result * 31 + mIcon.hashCode();
+            }
+            if (mIconFilename != null) {
+                result = result * 31 + mIconFilename.hashCode();
+            }
+            result = result * 31 + mColorPrimary;
+            result = result * 31 + mColorBackground;
+            result = result * 31 + mColorBackgroundFloating;
+            result = result * 31 + mStatusBarColor;
+            result = result * 31 + mNavigationBarColor;
+            result = result * 31 + mStatusBarAppearance;
+            result = result * 31 + (mEnsureStatusBarContrastWhenTransparent ? 1 : 0);
+            result = result * 31 + (mEnsureNavigationBarContrastWhenTransparent ? 1 : 0);
+            result = result * 31 + mResizeMode;
+            result = result * 31 + mMinWidth;
+            result = result * 31 + mMinHeight;
+            return result;
+        }
+
+        @Override
         public boolean equals(@Nullable Object obj) {
             if (!(obj instanceof TaskDescription)) {
                 return false;
@@ -3975,10 +4008,9 @@ public class ActivityManager {
      *
      * @return a list of {@link ApplicationStartInfo} records matching the criteria, sorted in
      *         the order from most recent to least recent.
-     *
-     * @hide
      */
     @NonNull
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
     public List<ApplicationStartInfo> getHistoricalProcessStartReasons(
             @IntRange(from = 0) int maxNum) {
         try {
@@ -4008,6 +4040,8 @@ public class ActivityManager {
      * @hide
      */
     @NonNull
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
     @RequiresPermission(Manifest.permission.DUMP)
     public List<ApplicationStartInfo> getExternalHistoricalProcessStartReasons(
             @NonNull String packageName, @IntRange(from = 0) int maxNum) {
@@ -4018,18 +4052,6 @@ public class ActivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Callback to receive {@link ApplicationStartInfo} object once recording of startup related
-     * metrics is complete.
-     * Use with {@link #setApplicationStartInfoCompleteListener}.
-     *
-     * @hide
-     */
-    public interface ApplicationStartInfoCompleteListener {
-        /** {@link ApplicationStartInfo} is complete, no more info will be added. */
-        void onApplicationStartInfoComplete(@NonNull ApplicationStartInfo applicationStartInfo);
     }
 
     /**
@@ -4051,19 +4073,17 @@ public class ActivityManager {
      *                    complete. Will replace existing listener if one is already attached.
      *
      * @throws IllegalArgumentException if executor or listener are null.
-     *
-     * @hide
      */
-    public void setApplicationStartInfoCompleteListener(@NonNull final Executor executor,
-            @NonNull final ApplicationStartInfoCompleteListener listener) {
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
+    public void setApplicationStartInfoCompletionListener(@NonNull final Executor executor,
+            @NonNull final Consumer<ApplicationStartInfo> listener) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(listener, "listener cannot be null");
         IApplicationStartInfoCompleteListener callback =
                 new IApplicationStartInfoCompleteListener.Stub() {
             @Override
             public void onApplicationStartInfoComplete(ApplicationStartInfo applicationStartInfo) {
-                executor.execute(() ->
-                        listener.onApplicationStartInfoComplete(applicationStartInfo));
+                executor.execute(() -> listener.accept(applicationStartInfo));
             }
         };
         try {
@@ -4074,13 +4094,44 @@ public class ActivityManager {
     }
 
     /**
-     * Removes the callback set by {@link #setApplicationStartInfoCompleteListener} if there is one.
-     *
-     * @hide
+     * Removes the callback set by {@link #setApplicationStartInfoCompletionListener} if there is one.
      */
-    public void removeApplicationStartInfoCompleteListener() {
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
+    public void clearApplicationStartInfoCompletionListener() {
         try {
-            getService().removeApplicationStartInfoCompleteListener(mContext.getUserId());
+            getService().clearApplicationStartInfoCompleteListener(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds an optional developer supplied timestamp to the calling apps most recent
+     * {@link ApplicationStartInfo}. This is in addition to system recorded timestamps.
+     *
+     * <p class="note"> Note: timestamps added after {@link Activity#reportFullyDrawn} is called
+     * will be discarded.</p>
+     *
+     * <p class="note"> Note: will overwrite existing timestamp if called with same key.</p>
+     *
+     * @param key         Unique key for timestamp. Must be greater than
+     *                    {@link ApplicationStartInfo#START_TIMESTAMP_RESERVED_RANGE_SYSTEM} and
+     *                    less than or equal to
+     *                    {@link ApplicationStartInfo#START_TIMESTAMP_RESERVED_RANGE_DEVELOPER}.
+     *                    Will thow {@link java.lang.IllegalArgumentException} if not in range.
+     * @param timestampNs Clock monotonic time in nanoseconds of event to be recorded.
+     */
+    @FlaggedApi(Flags.FLAG_APP_START_INFO)
+    public void addStartInfoTimestamp(@IntRange(
+            from = ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER_START,
+            to = ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER) int key,
+            long timestampNs) {
+        if (key <= ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_SYSTEM
+                || key > ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER) {
+            throw new IllegalArgumentException("Key not in allowed range.");
+        }
+        try {
+            getService().addStartInfoTimestamp(key, timestampNs, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4245,6 +4296,33 @@ public class ActivityManager {
     }
 
     /**
+     * Same as {@link #getUidImportance(int)}, but it only works on UIDs that currently
+     * have a service binding, or provider reference, to the calling UID, even if the target UID
+     * belong to another android user or profile.
+     *
+     * <p>This will return {@link RunningAppProcessInfo#IMPORTANCE_GONE} on all other UIDs,
+     * regardless of if they're valid or not.
+     *
+     * <p>Privileged system apps may prefer this API to {@link #getUidImportance(int)} to
+     * avoid requesting the permission {@link Manifest.permission#PACKAGE_USAGE_STATS}, which
+     * would allow access to APIs that return more senstive information.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_GET_BINDING_UID_IMPORTANCE)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GET_BINDING_UID_IMPORTANCE)
+    public @RunningAppProcessInfo.Importance int getBindingUidImportance(int uid) {
+        try {
+            int procState = getService().getBindingUidProcessState(uid,
+                    mContext.getOpPackageName());
+            return RunningAppProcessInfo.procStateToImportanceForClient(procState, mContext);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Callback to get reports about changes to the importance of a uid.  Use with
      * {@link #addOnUidImportanceListener}.
      * @hide
@@ -4264,7 +4342,7 @@ public class ActivityManager {
     }
 
     /**
-     * Start monitoring changes to the imoportance of uids running in the system.
+     * Start monitoring changes to the importance of uids running in the system.
      * @param listener The listener callback that will receive change reports.
      * @param importanceCutpoint The level of importance in which the caller is interested
      * in differences.  For example, if {@link RunningAppProcessInfo#IMPORTANCE_PERCEPTIBLE}
@@ -4696,8 +4774,14 @@ public class ActivityManager {
     @UnsupportedAppUsage
     public static int checkComponentPermission(String permission, int uid,
             int owningUid, boolean exported) {
+        return checkComponentPermission(permission, uid, Context.DEVICE_ID_DEFAULT,
+                owningUid, exported);
+    }
+
+    /** @hide */
+    public static int checkComponentPermission(String permission, int uid, int deviceId,
+            int owningUid, boolean exported) {
         // Root, system server get to do everything.
-        final int appId = UserHandle.getAppId(uid);
         if (canAccessUnexportedComponents(uid)) {
             return PackageManager.PERMISSION_GRANTED;
         }
@@ -4724,8 +4808,7 @@ public class ActivityManager {
             return PackageManager.PERMISSION_GRANTED;
         }
         try {
-            return AppGlobals.getPackageManager()
-                    .checkUidPermission(permission, uid);
+            return AppGlobals.getPermissionManager().checkUidPermission(uid, permission, deviceId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4734,8 +4817,8 @@ public class ActivityManager {
     /** @hide */
     public static int checkUidPermission(String permission, int uid) {
         try {
-            return AppGlobals.getPackageManager()
-                    .checkUidPermission(permission, uid);
+            return AppGlobals.getPermissionManager().checkUidPermission(
+                    uid, permission, Context.DEVICE_ID_DEFAULT);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4943,6 +5026,7 @@ public class ActivityManager {
             STOP_USER_ON_SWITCH_TRUE,
             STOP_USER_ON_SWITCH_FALSE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface StopUserOnSwitch {}
 
     /**

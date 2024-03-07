@@ -168,6 +168,9 @@ class TvPipMenuEduTextDrawer extends FrameLayout {
      * that the edu text will be marqueed
      */
     private boolean isEduTextMarqueed() {
+        if (mEduTextView.getLayout() == null) {
+            return false;
+        }
         final int availableWidth = (int) mEduTextView.getWidth()
                 - mEduTextView.getCompoundPaddingLeft()
                 - mEduTextView.getCompoundPaddingRight();

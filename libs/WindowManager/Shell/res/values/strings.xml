@@ -72,7 +72,7 @@
     <!-- Warning message when we try to dock a non-resizeable task and launch it in fullscreen instead  [CHAR LIMIT=NONE] -->
     <string name="dock_non_resizeble_failed_to_dock_text">App does not support split screen</string>
     <!-- Warning message when we try to dock an app not supporting multiple instances split into multiple sides [CHAR LIMIT=NONE] -->
-    <string name="dock_multi_instances_not_supported_text">This app can only be opened in 1 window.</string>
+    <string name="dock_multi_instances_not_supported_text">This app can only be opened in 1 window</string>
     <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity to be displayed on a secondary display and that things might crash/not work properly [CHAR LIMIT=NONE] -->
     <string name="forced_resizable_secondary_display">App may not work on a secondary display.</string>
     <!-- Warning message when we try to launch a non-resizeable activity on a secondary display and launch it on the primary instead. -->
@@ -142,6 +142,10 @@
     <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
     <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
+    <!-- Accessibility announcement when the stack of bubbles expands. [CHAR LIMIT=NONE]-->
+    <string name="bubble_accessibility_announce_expand">expand <xliff:g id="bubble_title" example="Messages">%1$s</xliff:g></string>
+    <!-- Accessibility announcement when the stack of bubbles collapses. [CHAR LIMIT=NONE]-->
+    <string name="bubble_accessibility_announce_collapse">collapse <xliff:g id="bubble_title" example="Messages">%1$s</xliff:g></string>
     <!-- Label for the button that takes the user to the notification settings for the given app. -->
     <string name="bubbles_app_settings"><xliff:g id="notification_title" example="Android Messages">%1$s</xliff:g> settings</string>
     <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=30] -->
@@ -163,6 +167,10 @@
     <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
     <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here</string>
 
+    <!-- Title text for the bubble bar feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=60]-->
+    <string name="bubble_bar_education_stack_title">Chat using bubbles</string>
+    <!-- Descriptive text for the bubble bar feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=NONE] -->
+    <string name="bubble_bar_education_stack_text">New conversations appear as icons in a bottom corner of your screen. Tap to expand them or drag to dismiss them.</string>
     <!-- Title text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=60]-->
     <string name="bubble_bar_education_manage_title">Control bubbles anytime</string>
     <!-- Descriptive text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=80]-->

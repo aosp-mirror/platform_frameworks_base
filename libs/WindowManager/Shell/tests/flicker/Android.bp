@@ -28,36 +28,6 @@ filegroup {
     srcs: ["src/com/android/wm/shell/flicker/utils/*.kt"],
 }
 
-filegroup {
-    name: "WMShellFlickerTestsBase-src",
-    srcs: ["src/com/android/wm/shell/flicker/*.kt"],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsBubbles-src",
-    srcs: ["src/com/android/wm/shell/flicker/bubble/*.kt"],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsPip-src",
-    srcs: ["src/com/android/wm/shell/flicker/pip/*.kt"],
-}
-
-filegroup {
-    name: "WMShellFlickerTestsSplitScreen-src",
-    srcs: [
-        "src/com/android/wm/shell/flicker/splitscreen/*.kt",
-        "src/com/android/wm/shell/flicker/splitscreen/benchmark/*.kt",
-    ],
-}
-
-filegroup {
-    name: "WMShellFlickerServiceTests-src",
-    srcs: [
-        "src/com/android/wm/shell/flicker/service/**/*.kt",
-    ],
-}
-
 java_library {
     name: "wm-shell-flicker-utils",
     platform_apis: true,
@@ -77,13 +47,12 @@ java_library {
         "wm-flicker-common-assertions",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
+        "com_android_wm_shell_flags_lib",
     ],
 }
 
 java_defaults {
     name: "WMShellFlickerTestsDefault",
-    manifest: "manifests/AndroidManifest.xml",
-    test_config_template: "AndroidTestTemplate.xml",
     platform_apis: true,
     certificate: "platform",
     optimize: {
@@ -97,6 +66,7 @@ java_defaults {
         "flickertestapplib",
         "flickerlib",
         "flickerlib-helpers",
+        "flickerlib-trace_processor_shell",
         "platform-test-annotations",
         "wm-flicker-common-app-helpers",
         "wm-flicker-common-assertions",
@@ -105,72 +75,11 @@ java_defaults {
     ],
     data: [
         ":FlickerTestApp",
-        "trace_config/*",
     ],
 }
 
-android_test {
-    name: "WMShellFlickerTestsOther",
+java_library {
+    name: "WMShellFlickerTestsBase",
     defaults: ["WMShellFlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestOther.xml"],
-    package_name: "com.android.wm.shell.flicker",
-    instrumentation_target_package: "com.android.wm.shell.flicker",
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
-    exclude_srcs: [
-        ":WMShellFlickerTestsBubbles-src",
-        ":WMShellFlickerTestsPip-src",
-        ":WMShellFlickerTestsSplitScreen-src",
-        ":WMShellFlickerServiceTests-src",
-    ],
-}
-
-android_test {
-    name: "WMShellFlickerTestsBubbles",
-    defaults: ["WMShellFlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestBubbles.xml"],
-    package_name: "com.android.wm.shell.flicker.bubbles",
-    instrumentation_target_package: "com.android.wm.shell.flicker.bubbles",
-    srcs: [
-        ":WMShellFlickerTestsBase-src",
-        ":WMShellFlickerTestsBubbles-src",
-    ],
-}
-
-android_test {
-    name: "WMShellFlickerTestsPip",
-    defaults: ["WMShellFlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestPip.xml"],
-    package_name: "com.android.wm.shell.flicker.pip",
-    instrumentation_target_package: "com.android.wm.shell.flicker.pip",
-    srcs: [
-        ":WMShellFlickerTestsBase-src",
-        ":WMShellFlickerTestsPip-src",
-    ],
-}
-
-android_test {
-    name: "WMShellFlickerTestsSplitScreen",
-    defaults: ["WMShellFlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestSplitScreen.xml"],
-    package_name: "com.android.wm.shell.flicker.splitscreen",
-    instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
-    srcs: [
-        ":WMShellFlickerTestsBase-src",
-        ":WMShellFlickerTestsSplitScreen-src",
-    ],
-}
-
-android_test {
-    name: "WMShellFlickerServiceTests",
-    defaults: ["WMShellFlickerTestsDefault"],
-    additional_manifests: ["manifests/AndroidManifestService.xml"],
-    package_name: "com.android.wm.shell.flicker.service",
-    instrumentation_target_package: "com.android.wm.shell.flicker.service",
-    srcs: [
-        ":WMShellFlickerTestsBase-src",
-        ":WMShellFlickerServiceTests-src",
-    ],
+    srcs: ["src/com/android/wm/shell/flicker/*.kt"],
 }

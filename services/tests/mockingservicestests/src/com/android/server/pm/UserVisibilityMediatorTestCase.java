@@ -148,27 +148,28 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
     @Test
     public final void testAssignUserToDisplayOnStart_invalidUserIds() {
         assertThrows(IllegalArgumentException.class, () -> mMediator
-                .assignUserToDisplayOnStart(USER_NULL, USER_ID, FG, DEFAULT_DISPLAY));
+                .assignUserToDisplayOnStart(USER_NULL, USER_ID, FG, DEFAULT_DISPLAY, false));
         assertThrows(IllegalArgumentException.class, () -> mMediator
-                .assignUserToDisplayOnStart(USER_ALL, USER_ID, FG, DEFAULT_DISPLAY));
+                .assignUserToDisplayOnStart(USER_ALL, USER_ID, FG, DEFAULT_DISPLAY, false));
         assertThrows(IllegalArgumentException.class, () -> mMediator
-                .assignUserToDisplayOnStart(USER_CURRENT, USER_ID, FG, DEFAULT_DISPLAY));
+                .assignUserToDisplayOnStart(USER_CURRENT, USER_ID, FG, DEFAULT_DISPLAY, false));
         assertThrows(IllegalArgumentException.class, () -> mMediator
-                .assignUserToDisplayOnStart(USER_CURRENT_OR_SELF, USER_ID, FG, DEFAULT_DISPLAY));
+                .assignUserToDisplayOnStart(USER_CURRENT_OR_SELF, USER_ID, FG, DEFAULT_DISPLAY,
+                        false));
     }
 
     @Test
     public final void testAssignUserToDisplayOnStart_invalidUserStartMode() {
         assertThrows(IllegalArgumentException.class, () -> mMediator
-                .assignUserToDisplayOnStart(USER_ID, USER_ID, 666, DEFAULT_DISPLAY));
+                .assignUserToDisplayOnStart(USER_ID, USER_ID, 666, DEFAULT_DISPLAY, false));
     }
 
     @Test
     public final void testStartFgUser_onSecondaryDisplay() throws Exception {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
-        int result =
-                mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG, SECONDARY_DISPLAY_ID);
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, FG,
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(USER_ID);
@@ -182,7 +183,8 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
     public final void testStartBgUser_onDefaultDisplay() throws Exception {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
-        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG, DEFAULT_DISPLAY);
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG, DEFAULT_DISPLAY,
+                false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
 
         expectUserIsNotVisibleAtAll(USER_ID);
@@ -199,7 +201,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(USER_ID);
@@ -215,7 +217,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(USER_ID);
@@ -236,7 +238,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         startForegroundUser(USER_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(USER_SYSTEM, USER_SYSTEM, BG,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(USER_SYSTEM);
@@ -297,7 +299,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -313,7 +315,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         startBackgroundUser(PARENT_USER_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -332,7 +334,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, SECONDARY_DISPLAY_ID);
+                BG_VISIBLE, SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -352,7 +354,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -368,7 +370,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         startBackgroundUser(PARENT_USER_ID);
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -386,7 +388,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, BG,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -405,7 +407,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, FG,
-                DEFAULT_DISPLAY);
+                DEFAULT_DISPLAY, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -424,7 +426,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         AsyncUserVisibilityListener listener = addListenerForNoEvents();
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID, FG,
-                SECONDARY_DISPLAY_ID);
+                SECONDARY_DISPLAY_ID, false);
         assertStartUserResult(result, USER_ASSIGNMENT_RESULT_FAILURE);
 
         expectUserIsNotVisibleAtAll(PROFILE_USER_ID);
@@ -482,7 +484,8 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
      */
     protected void startForegroundUser(@UserIdInt int userId) {
         Log.d(TAG, "startForegroundUSer(" + userId + ")");
-        int result = mMediator.assignUserToDisplayOnStart(userId, userId, FG, DEFAULT_DISPLAY);
+        int result = mMediator.assignUserToDisplayOnStart(userId, userId, FG, DEFAULT_DISPLAY,
+                false);
         if (result != USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE) {
             throw new IllegalStateException("Failed to start foreground user " + userId
                     + ": mediator returned " + userAssignmentResultToString(result));
@@ -498,7 +501,8 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
      */
     protected void startBackgroundUser(@UserIdInt int userId) {
         Log.d(TAG, "startBackgroundUser(" + userId + ")");
-        int result = mMediator.assignUserToDisplayOnStart(userId, userId, BG, DEFAULT_DISPLAY);
+        int result = mMediator.assignUserToDisplayOnStart(userId, userId, BG, DEFAULT_DISPLAY,
+                false);
         if (result != USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE) {
             throw new IllegalStateException("Failed to start background user " + userId
                     + ": mediator returned " + userAssignmentResultToString(result));
@@ -520,7 +524,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
                 + " its parent (" + PARENT_USER_ID + ") on foreground");
 
         int result = mMediator.assignUserToDisplayOnStart(PROFILE_USER_ID, PARENT_USER_ID,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+                BG_VISIBLE, DEFAULT_DISPLAY, false);
         if (result != USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE) {
             throw new IllegalStateException("Failed to start profile user " + PROFILE_USER_ID
                     + ": mediator returned " + userAssignmentResultToString(result));
@@ -536,7 +540,8 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
      */
     protected final void startUserInSecondaryDisplay(@UserIdInt int userId, int displayId) {
         Log.d(TAG, "startUserInSecondaryDisplay(" + userId + ", " + displayId + ")");
-        int result = mMediator.assignUserToDisplayOnStart(userId, userId, BG_VISIBLE, displayId);
+        int result = mMediator.assignUserToDisplayOnStart(userId, userId, BG_VISIBLE, displayId,
+                false);
         if (result != USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE) {
             throw new IllegalStateException("Failed to startuser " + userId
                     + " on background: mediator returned " + userAssignmentResultToString(result));

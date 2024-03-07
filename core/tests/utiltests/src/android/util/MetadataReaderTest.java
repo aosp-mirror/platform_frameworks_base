@@ -16,37 +16,47 @@
 
 package android.util;
 
+import static org.junit.Assert.assertEquals;
+
 import android.media.ExifInterface;
 import android.os.Bundle;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.DocumentsContract;
 import android.provider.MetadataReader;
 
-import libcore.io.IoUtils;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import libcore.io.IoUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MetadataReaderTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = MetadataReader.class)
+public class MetadataReaderTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private InputStream mInputStream;
     private Bundle mData;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         mInputStream = getClass().getClassLoader().getResourceAsStream("res/drawable/image.jpg");
         mData = new Bundle();
     }
 
     @After
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         IoUtils.closeQuietly(mInputStream);
     }
 

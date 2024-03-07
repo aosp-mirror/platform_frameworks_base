@@ -3,6 +3,9 @@ package com.android.server.job;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+
+import static com.android.server.job.JobStore.JOB_FILE_SPLIT_PREFIX;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -46,6 +49,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -138,7 +142,7 @@ public class JobStoreTest {
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setOverrideDeadline(30000L)
+                .setOverrideDeadline(4 * HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
@@ -191,7 +195,7 @@ public class JobStoreTest {
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setOverrideDeadline(30000L)
+                .setOverrideDeadline(3 * HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
@@ -207,6 +211,43 @@ public class JobStoreTest {
         JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Incorrect # of persisted tasks.", 0, jobStatusSet.size());
+    }
+
+    @Test
+    public void testSkipExtraFiles() throws Exception {
+        setUseSplitFiles(true);
+        final JobInfo task1 = new Builder(8, mComponent)
+                .setRequiresDeviceIdle(true)
+                .setPeriodic(10000L)
+                .setRequiresCharging(true)
+                .setPersisted(true)
+                .build();
+        final JobInfo task2 = new Builder(12, mComponent)
+                .setMinimumLatency(5000L)
+                .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
+                .setOverrideDeadline(5 * HOUR_IN_MILLIS)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                .setPersisted(true)
+                .build();
+        final int uid1 = SOME_UID;
+        final int uid2 = uid1 + 1;
+        final JobStatus JobStatus1 = JobStatus.createFromJobInfo(task1, uid1, null, -1, null, null);
+        final JobStatus JobStatus2 = JobStatus.createFromJobInfo(task2, uid2, null, -1, null, null);
+        runWritingJobsToDisk(JobStatus1, JobStatus2);
+
+        final File rootDir = new File(mTestContext.getFilesDir(), "system/job");
+        final File file1 = new File(rootDir, JOB_FILE_SPLIT_PREFIX + uid1 + ".xml");
+        final File file2 = new File(rootDir, JOB_FILE_SPLIT_PREFIX + uid2 + ".xml");
+
+        Files.copy(file1.toPath(),
+                new File(rootDir, JOB_FILE_SPLIT_PREFIX + uid1 + ".xml.bak").toPath());
+        Files.copy(file1.toPath(), new File(rootDir, "random.xml").toPath());
+        Files.copy(file2.toPath(),
+                new File(rootDir, "blah" + JOB_FILE_SPLIT_PREFIX + uid1 + ".xml").toPath());
+
+        JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        assertEquals("Incorrect # of persisted tasks.", 2, jobStatusSet.size());
     }
 
     /**
@@ -254,22 +295,22 @@ public class JobStoreTest {
         file = new File(mTestContext.getFilesDir(), "10000");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX);
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX);
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "text.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "text.xml");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + ".xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + ".xml");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "-10123.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "-10123.xml");
         assertEquals(JobStore.INVALID_UID, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "1.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "1.xml");
         assertEquals(1, JobStore.extractUidFromJobFileName(file));
 
-        file = new File(mTestContext.getFilesDir(), JobStore.JOB_FILE_SPLIT_PREFIX + "101023.xml");
+        file = new File(mTestContext.getFilesDir(), JOB_FILE_SPLIT_PREFIX + "101023.xml");
         assertEquals(101023, JobStore.extractUidFromJobFileName(file));
     }
 
@@ -290,7 +331,6 @@ public class JobStoreTest {
     @Test
     public void testMaybeWriteStatusToDisk() throws Exception {
         int taskId = 5;
-        long runByMillis = 20000L; // 20s
         long runFromMillis = 2000L; // 2s
         long initialBackoff = 10000L; // 10s
 
@@ -298,7 +338,7 @@ public class JobStoreTest {
                 .setRequiresCharging(true)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setBackoffCriteria(initialBackoff, JobInfo.BACKOFF_POLICY_EXPONENTIAL)
-                .setOverrideDeadline(runByMillis)
+                .setOverrideDeadline(6 * HOUR_IN_MILLIS)
                 .setMinimumLatency(runFromMillis)
                 .setPersisted(true)
                 .build();
@@ -339,7 +379,7 @@ public class JobStoreTest {
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setOverrideDeadline(30000L)
+                .setOverrideDeadline(7 * HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
@@ -502,7 +542,7 @@ public class JobStoreTest {
     @Test
     public void testBiasPersisted() throws Exception {
         JobInfo.Builder b = new Builder(92, mComponent)
-                .setOverrideDeadline(5000)
+                .setOverrideDeadline(8 * HOUR_IN_MILLIS)
                 .setBias(42)
                 .setPersisted(true);
         final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
@@ -531,6 +571,29 @@ public class JobStoreTest {
     }
 
     @Test
+    public void testDebugTagsPersisted() throws Exception {
+        JobInfo ji = new Builder(53, mComponent)
+                .setPersisted(true)
+                .addDebugTag("a")
+                .addDebugTag("b")
+                .addDebugTag("c")
+                .addDebugTag("d")
+                .removeDebugTag("d")
+                .build();
+        final JobStatus js = JobStatus.createFromJobInfo(ji, SOME_UID, null, -1, null, null);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        Set<String> expectedTags = Set.of("a", "b", "c");
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Debug tags not correctly persisted",
+                expectedTags, loaded.getJob().getDebugTags());
+    }
+
+    @Test
     public void testNamespacePersisted() throws Exception {
         final String namespace = "my.test.namespace";
         JobInfo.Builder b = new Builder(93, mComponent)
@@ -550,7 +613,7 @@ public class JobStoreTest {
     @Test
     public void testPriorityPersisted() throws Exception {
         final JobInfo job = new Builder(92, mComponent)
-                .setOverrideDeadline(5000)
+                .setOverrideDeadline(9 * HOUR_IN_MILLIS)
                 .setPriority(JobInfo.PRIORITY_MIN)
                 .setPersisted(true)
                 .build();
@@ -571,13 +634,13 @@ public class JobStoreTest {
     @Test
     public void testNonPersistedTaskIsNotPersisted() throws Exception {
         JobInfo.Builder b = new Builder(42, mComponent)
-                .setOverrideDeadline(10000)
+                .setOverrideDeadline(10 * HOUR_IN_MILLIS)
                 .setPersisted(false);
         JobStatus jsNonPersisted = JobStatus.createFromJobInfo(b.build(),
                 SOME_UID, null, -1, null, null);
         mTaskStoreUnderTest.add(jsNonPersisted);
         b = new Builder(43, mComponent)
-                .setOverrideDeadline(10000)
+                .setOverrideDeadline(11 * HOUR_IN_MILLIS)
                 .setPersisted(true);
         JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(),
                 SOME_UID, null, -1, null, null);
@@ -632,6 +695,22 @@ public class JobStoreTest {
                         .addForbiddenCapability(NET_CAPABILITY_OEM_PAID)
                         .build())
                 .build());
+    }
+
+    @Test
+    public void testTraceTagPersisted() throws Exception {
+        JobInfo ji = new Builder(53, mComponent)
+                .setPersisted(true)
+                .setTraceTag("tag")
+                .build();
+        final JobStatus js = JobStatus.createFromJobInfo(ji, SOME_UID, null, -1, null, null);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Trace tag not correctly persisted", "tag", loaded.getJob().getTraceTag());
     }
 
     @Test
@@ -741,66 +820,6 @@ public class JobStoreTest {
         assertEquals("Battery-not-low constraint not persisted correctly.",
                 loaded.getJob().isRequireBatteryNotLow(),
                 taskStatus.getJob().isRequireBatteryNotLow());
-    }
-
-    @Test
-    public void testPersistedPreferredBatteryNotLowConstraint() throws Exception {
-        JobInfo.Builder b = new Builder(8, mComponent)
-                .setPrefersBatteryNotLow(true)
-                .setPersisted(true);
-        JobStatus taskStatus =
-                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
-
-        mTaskStoreUnderTest.add(taskStatus);
-        waitForPendingIo();
-
-        final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
-        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
-        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
-        assertEquals("Battery-not-low constraint not persisted correctly.",
-                taskStatus.getJob().isPreferBatteryNotLow(),
-                loaded.getJob().isPreferBatteryNotLow());
-    }
-
-    @Test
-    public void testPersistedPreferredChargingConstraint() throws Exception {
-        JobInfo.Builder b = new Builder(8, mComponent)
-                .setPrefersCharging(true)
-                .setPersisted(true);
-        JobStatus taskStatus =
-                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
-
-        mTaskStoreUnderTest.add(taskStatus);
-        waitForPendingIo();
-
-        final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
-        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
-        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
-        assertEquals("Charging constraint not persisted correctly.",
-                taskStatus.getJob().isPreferCharging(),
-                loaded.getJob().isPreferCharging());
-    }
-
-    @Test
-    public void testPersistedPreferredDeviceIdleConstraint() throws Exception {
-        JobInfo.Builder b = new Builder(8, mComponent)
-                .setPrefersDeviceIdle(true)
-                .setPersisted(true);
-        JobStatus taskStatus =
-                JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
-
-        mTaskStoreUnderTest.add(taskStatus);
-        waitForPendingIo();
-
-        final JobSet jobStatusSet = new JobSet();
-        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
-        assertEquals("Incorrect # of persisted tasks.", 1, jobStatusSet.size());
-        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
-        assertEquals("Idle constraint not persisted correctly.",
-                taskStatus.getJob().isPreferDeviceIdle(),
-                loaded.getJob().isPreferDeviceIdle());
     }
 
     @Test

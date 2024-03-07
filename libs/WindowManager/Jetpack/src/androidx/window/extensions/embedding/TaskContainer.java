@@ -30,7 +30,10 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowInsets;
+import android.view.WindowMetrics;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
@@ -61,12 +64,18 @@ class TaskContainer {
     @Nullable
     private SplitPinContainer mSplitPinContainer;
 
+    /** The overlay container in this Task. */
+    @Nullable
+    private TaskFragmentContainer mOverlayContainer;
+
     @NonNull
     private final Configuration mConfiguration;
 
     private int mDisplayId;
 
     private boolean mIsVisible;
+
+    private boolean mHasDirectActivity;
 
     /**
      * TaskFragments that the organizer has requested to be closed. They should be removed when
@@ -95,8 +104,9 @@ class TaskContainer {
         mConfiguration = taskProperties.getConfiguration();
         mDisplayId = taskProperties.getDisplayId();
         // Note that it is always called when there's a new Activity is started, which implies
-        // the host task is visible.
+        // the host task is visible and has an activity in the task.
         mIsVisible = true;
+        mHasDirectActivity = true;
     }
 
     int getTaskId() {
@@ -111,6 +121,10 @@ class TaskContainer {
         return mIsVisible;
     }
 
+    boolean hasDirectActivity() {
+        return mHasDirectActivity;
+    }
+
     @NonNull
     TaskProperties getTaskProperties() {
         return new TaskProperties(mDisplayId, mConfiguration);
@@ -120,6 +134,7 @@ class TaskContainer {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.getDisplayId();
         mIsVisible = info.isVisible();
+        mHasDirectActivity = info.hasDirectActivity();
     }
 
     /**
@@ -184,9 +199,18 @@ class TaskContainer {
 
     @Nullable
     TaskFragmentContainer getTopNonFinishingTaskFragmentContainer(boolean includePin) {
+        return getTopNonFinishingTaskFragmentContainer(includePin, false /* includeOverlay */);
+    }
+
+    @Nullable
+    TaskFragmentContainer getTopNonFinishingTaskFragmentContainer(boolean includePin,
+                                                                  boolean includeOverlay) {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = mContainers.get(i);
             if (!includePin && isTaskFragmentContainerPinned(container)) {
+                continue;
+            }
+            if (!includeOverlay && container.isOverlay()) {
                 continue;
             }
             if (!container.isFinished()) {
@@ -211,14 +235,24 @@ class TaskContainer {
     }
 
     @Nullable
-    Activity getTopNonFinishingActivity() {
+    Activity getTopNonFinishingActivity(boolean includeOverlay) {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
-            final Activity activity = mContainers.get(i).getTopNonFinishingActivity();
+            final TaskFragmentContainer container = mContainers.get(i);
+            if (!includeOverlay && container.isOverlay()) {
+                continue;
+            }
+            final Activity activity = container.getTopNonFinishingActivity();
             if (activity != null) {
                 return activity;
             }
         }
         return null;
+    }
+
+    /** Returns the overlay container in the task, or {@code null} if it doesn't exist. */
+    @Nullable
+    TaskFragmentContainer getOverlayContainer() {
+        return mOverlayContainer;
     }
 
     int indexOf(@NonNull TaskFragmentContainer child) {
@@ -311,8 +345,8 @@ class TaskContainer {
         onTaskFragmentContainerUpdated();
     }
 
-    void removeTaskFragmentContainers(@NonNull List<TaskFragmentContainer> taskFragmentContainer) {
-        mContainers.removeAll(taskFragmentContainer);
+    void removeTaskFragmentContainers(@NonNull List<TaskFragmentContainer> taskFragmentContainers) {
+        mContainers.removeAll(taskFragmentContainers);
         onTaskFragmentContainerUpdated();
     }
 
@@ -332,6 +366,15 @@ class TaskContainer {
     }
 
     private void onTaskFragmentContainerUpdated() {
+        // TODO(b/300211704): Find a better mechanism to handle the z-order in case we introduce
+        //  another special container that should also be on top in the future.
+        updateSplitPinContainerIfNecessary();
+        // Update overlay container after split pin container since the overlay should be on top of
+        // pin container.
+        updateOverlayContainerIfNecessary();
+    }
+
+    private void updateSplitPinContainerIfNecessary() {
         if (mSplitPinContainer == null) {
             return;
         }
@@ -344,10 +387,7 @@ class TaskContainer {
         }
 
         // Ensure the pinned container is top-most.
-        if (pinnedContainerIndex != mContainers.size() - 1) {
-            mContainers.remove(pinnedContainer);
-            mContainers.add(pinnedContainer);
-        }
+        moveContainerToLastIfNecessary(pinnedContainer);
 
         // Update the primary container adjacent to the pinned container if needed.
         final TaskFragmentContainer adjacentContainer =
@@ -359,11 +399,48 @@ class TaskContainer {
         }
     }
 
-    /** Adds the descriptors of split states in this Task to {@code outSplitStates}. */
-    void getSplitStates(@NonNull List<SplitInfo> outSplitStates) {
-        for (SplitContainer container : mSplitContainers) {
-            outSplitStates.add(container.toSplitInfo());
+    private void updateOverlayContainerIfNecessary() {
+        final List<TaskFragmentContainer> overlayContainers = mContainers.stream()
+                .filter(TaskFragmentContainer::isOverlay).toList();
+        if (overlayContainers.size() > 1) {
+            throw new IllegalStateException("There must be at most one overlay container per Task");
         }
+        mOverlayContainer = overlayContainers.isEmpty() ? null : overlayContainers.get(0);
+        if (mOverlayContainer != null) {
+            moveContainerToLastIfNecessary(mOverlayContainer);
+        }
+    }
+
+    /** Moves the {@code container} to the last to align taskFragments' z-order. */
+    private void moveContainerToLastIfNecessary(@NonNull TaskFragmentContainer container) {
+        final int index = mContainers.indexOf(container);
+        if (index < 0) {
+            Log.w(TAG, "The container:" + container + " is not in the container list!");
+            return;
+        }
+        if (index != mContainers.size() - 1) {
+            mContainers.remove(container);
+            mContainers.add(container);
+        }
+    }
+
+    /**
+     * Gets the descriptors of split states in this Task.
+     *
+     * @return a list of {@code SplitInfo} if all the SplitContainers are stable, or {@code null} if
+     * any SplitContainer is in an intermediate state.
+     */
+    @Nullable
+    List<SplitInfo> getSplitStatesIfStable() {
+        final List<SplitInfo> splitStates = new ArrayList<>();
+        for (SplitContainer container : mSplitContainers) {
+            final SplitInfo splitInfo = container.toSplitInfoIfStable();
+            if (splitInfo == null) {
+                return null;
+            }
+            splitStates.add(splitInfo);
+        }
+        return splitStates;
     }
 
     /** A wrapper class which contains the information of {@link TaskContainer} */
@@ -384,6 +461,15 @@ class TaskContainer {
         @NonNull
         Configuration getConfiguration() {
             return mConfiguration;
+        }
+
+        /** A helper method to return task {@link WindowMetrics} from this {@link TaskProperties} */
+        @NonNull
+        WindowMetrics getTaskMetrics() {
+            final Rect taskBounds = mConfiguration.windowConfiguration.getBounds();
+            // TODO(b/190433398): Supply correct insets.
+            final float density = mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+            return new WindowMetrics(taskBounds, WindowInsets.CONSUMED, density);
         }
 
         /** Translates the given absolute bounds to relative bounds in this Task coordinate. */

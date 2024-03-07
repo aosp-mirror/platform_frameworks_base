@@ -37,7 +37,7 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
      * The repeating waveform keeps the vibrator ON all the time. Use a minimum duration to
      * prevent short patterns from turning the vibrator ON too frequently.
      */
-    private static final int REPEATING_EFFECT_ON_DURATION = 5000; // 5s
+    static final int REPEATING_EFFECT_ON_DURATION = 5000; // 5s
 
     SetAmplitudeVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,

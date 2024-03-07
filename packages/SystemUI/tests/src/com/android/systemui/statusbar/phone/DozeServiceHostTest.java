@@ -42,6 +42,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -53,6 +54,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,7 +74,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
 
     private DozeServiceHost mDozeServiceHost;
 
-    @Mock private HeadsUpManagerPhone mHeadsUpManager;
+    @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
@@ -95,18 +97,20 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
     @Mock private DozeHost.Callback mCallback;
-
     @Mock private DozeInteractor mDozeInteractor;
+
+    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mDozeServiceHost = new DozeServiceHost(mDozeLog, mPowerManager, mWakefullnessLifecycle,
-                mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
-                mBatteryController, mScrimController, () -> mBiometricUnlockController,
-                () -> mAssistManager, mDozeScrimController,
-                mKeyguardUpdateMonitor, mPulseExpansionHandler,
-                mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mAuthController, mNotificationIconAreaController, mDozeInteractor);
+                mStatusBarStateController, mDeviceProvisionedController, mFeatureFlags,
+                mHeadsUpManager, mBatteryController, mScrimController,
+                () -> mBiometricUnlockController, () -> mAssistManager, mDozeScrimController,
+                mKeyguardUpdateMonitor, mPulseExpansionHandler, mNotificationShadeWindowController,
+                mNotificationWakeUpCoordinator, mAuthController, mNotificationIconAreaController,
+                mDozeInteractor);
 
         mDozeServiceHost.initialize(
                 mCentralSurfaces,

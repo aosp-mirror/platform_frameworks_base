@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.text.InputType
 import com.android.internal.widget.LockPatternView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.CredentialStatus
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
@@ -41,6 +41,7 @@ constructor(
                 subtitle = request.subtitle,
                 description = request.description,
                 icon = applicationContext.asLockIcon(request.userInfo.deviceCredentialOwnerId),
+                showEmergencyCallButton = request.showEmergencyCallButton
             )
         }
 
@@ -136,6 +137,18 @@ constructor(
             }
         }
     }
+
+    fun doEmergencyCall(context: Context) {
+        val intent =
+            context
+                .getSystemService(android.telecom.TelecomManager::class.java)!!
+                .createLaunchEmergencyDialerIntent(null)
+                .setFlags(
+                    android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                            android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+                )
+        context.startActivity(intent)
+    }
 }
 
 private fun Context.asBadCredentialErrorMessage(prompt: BiometricPromptRequest?): String =
@@ -174,6 +187,7 @@ private class BiometricPromptHeaderViewModelImpl(
     override val subtitle: String,
     override val description: String,
     override val icon: Drawable,
+    override val showEmergencyCallButton: Boolean,
 ) : CredentialHeaderViewModel
 
 private fun CredentialHeaderViewModel.asRequest(): BiometricPromptRequest.Credential =

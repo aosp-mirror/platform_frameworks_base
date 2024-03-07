@@ -162,7 +162,7 @@
     <string name="httpErrorAuth" msgid="469553140922938968">"ప్రామాణీకరించడం సాధ్యపడలేదు."</string>
     <string name="httpErrorProxyAuth" msgid="7229662162030113406">"ప్రాక్సీ సర్వర్ ద్వారా ప్రామాణీకరణ విజయవంతం కాలేదు."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"సర్వర్‌కు కనెక్ట్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="httpErrorIO" msgid="3860318696166314490">"సర్వర్‌తో కమ్యూనికేట్ చేయడం సాధ్యపడలేదు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
+    <string name="httpErrorIO" msgid="3860318696166314490">"సర్వర్‌తో కమ్యూనికేట్ చేయడం సాధ్యపడలేదు. తర్వాత మళ్లీ ట్రై చేయండి."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"సర్వర్‌కు కనెక్షన్ సమయం ముగిసింది."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"పేజీ చాలా ఎక్కువ సర్వర్ మళ్లింపులను కలిగి ఉంది."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"ప్రోటోకాల్‌కి మద్దతు లేదు."</string>
@@ -170,7 +170,7 @@
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL చెల్లనిది అయినందువలన పేజీని తెరవడం సాధ్యపడలేదు."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"ఫైల్‌ను యాక్సెస్ చేయడం సాధ్యపడలేదు."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"రిక్వెస్ట్ చేసిన ఫైల్‌ను కనుగొనడం సాధ్యపడలేదు."</string>
-    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"చాలా ఎక్కువ రిక్వెస్ట్‌లు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
+    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"చాలా ఎక్కువ రిక్వెస్ట్‌లు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ట్రై చేయండి."</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g>కు సైన్‌ఇన్ ఎర్రర్"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"సింక్‌"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"సింక్ చేయడం సాధ్యపడదు"</string>
@@ -219,7 +219,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"వైర్‌లెస్‌ను ప్రారంభించండి"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"వైర్‌లెస్‌ను ఆపివేయండి"</string>
     <string name="screen_lock" msgid="2072642720826409809">"స్క్రీన్ లాక్"</string>
-    <string name="power_off" msgid="4111692782492232778">"పవర్ ఆఫ్ చేయండి"</string>
+    <string name="power_off" msgid="4111692782492232778">"పవర్ ఆఫ్"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"రింగర్ ఆఫ్‌లో ఉంది"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"రింగర్ వైబ్రేట్‌లో ఉంది"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"రింగర్ ఆన్‌లో ఉంది"</string>
@@ -243,7 +243,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ఎంపికలు"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ఫోన్ ఎంపికలు"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"స్క్రీన్ లాక్"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"పవర్ ఆఫ్ చేయండి"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"పవర్ ఆఫ్"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"పవర్"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"రీస్టార్ట్ చేయండి"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ఎమర్జెన్సీ"</string>
@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"బ్యాటరీని ఉపయోగిస్తున్న యాప్‌లు"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"మ్యాగ్నిఫికేషన్"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"యాక్సెసిబిలిటీ వినియోగం"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"డిస్‌ప్లే చేయండి"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> బ్యాటరీని ఉపయోగిస్తోంది"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> యాప్‌లు బ్యాటరీని ఉపయోగిస్తున్నాయి"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"బ్యాటరీ మరియు డేటా వినియోగ వివరాల కోసం నొక్కండి"</string>
@@ -298,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android సిస్టమ్"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"వ్యక్తిగత ప్రొఫైల్‌కి మార్చు"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"కార్యాలయ ప్రొఫైల్‌కి మార్చు"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"వ్యక్తిగత <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు మార్చండి"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"వర్క్ <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు మార్చండి"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"కాంటాక్ట్‌లు"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
@@ -320,7 +323,7 @@
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"సమీపంలోని పరికరాలు"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"సమీప పరికరాలను కనుగొనండి అలాగే కనెక్ట్ చేయండి"</string>
-    <string name="permgrouplab_calllog" msgid="7926834372073550288">"కాల్ లాగ్‌లు"</string>
+    <string name="permgrouplab_calllog" msgid="7926834372073550288">"కాల్ లాగ్స్‌"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ఫోన్ కాల్ లాగ్‌ని చదవండి మరియు రాయండి"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ఫోన్ కాల్స్‌ చేయడం మరియు నిర్వహించడం"</string>
@@ -499,11 +502,13 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"ఈ విశేష లేదా సిస్టమ్ యాప్ ఎప్పుడైనా సిస్టమ్ కెమెరాను ఉపయోగించి ఫోటోలు తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు. యాప్‌కు android.permission.CAMERA అనుమతి ఇవ్వడం కూడా అవసరం"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ఏదైనా కెమెరా పరికరం తెరుచుకుంటున్నప్పుడు (ఏదైనా యాప్ ద్వారా) లేదా మూసుకుంటున్నప్పుడు ఈ యాప్ కాల్‌బ్యాక్‌లను అందుకోగలదు."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"హెడ్‌లెస్ సిస్టమ్ యూజర్‌గా కెమెరాను యాక్సెస్ చేయడానికి అప్లికేషన్ లేదా సర్వీస్‌ను అనుమతించండి."</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"ఈ యాప్ హెడ్‌లెస్ సిస్టమ్ యూజర్‌గా కెమెరాను యాక్సెస్ చేయగలదు."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"వైబ్రేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"వైబ్రేటర్‌ను నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"వైబ్రేటర్ స్థితిని యాక్సెస్ చేసేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"నేరుగా కాల్ చేసే ఫోన్ నంబర్‌లు"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"మీ ప్రమేయం లేకుండా ఫోన్ నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. దీని వలన అనుకోని ఛార్జీలు విధించబడవచ్చు లేదా కాల్స్‌ రావచ్చు. ఇది అత్యవసర నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతించదని గుర్తుంచుకోండి. హానికరమైన యాప్‌లు మీ నిర్ధారణ లేకుండానే కాల్స్‌ చేయడం ద్వారా మీకు డబ్బు ఖర్చయ్యేలా చేయవచ్చు."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"మీ ప్రమేయం లేకుండానే ఫోన్ నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఇది ఊహించని ఛార్జీలు విధించబడవచ్చు లేదా కాల్స్ చేయవచ్చు. ఇది అత్యవసర నంబర్‌లకు కాల్ చేయడానికి యాప్‌ను అనుమతించదని గుర్తుంచుకోండి. హానికరమైన యాప్‌లు మీరు నిర్ధారించకుండా కాల్స్ చేయవచ్చు, లేదా ఇన్‌కమింగ్ కాల్స్‌ను ఆటోమేటిక్‌గా మరొక నంబర్‌కు ఫార్వర్డ్ అవ్వడానికి కారణమయ్యే క్యారియర్ కోడ్‌లను డయల్ చేయవచ్చు, వీటి వల్ల మీకు డబ్బు ఖర్చు అవ్వచ్చు."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS కాల్ సేవ యాక్సెస్ అనుమతి"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"మీ ప్రమేయం లేకుండా కాల్స్‌ చేయడం కోసం IMS సేవను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్టేటస్‌ మరియు గుర్తింపుని చదవడం"</string>
@@ -588,6 +593,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారాన్ని, అంటే రిజిస్టర్ చేయబడిన సహాయక సాధనాలు, మార్గం, గమ్యస్థానం వంటి వాటిని పొందేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"సెక్యూర్ ఎలిమెంట్ లావాదేవీ ఈవెంట్"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"సెక్యూర్ ఎలిమెంట్‌లో జరుగుతున్న లావాదేవీల గురించిన సమాచారాన్ని స్వీకరించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"కీలాక్‌ను, అలాగే ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ సెక్యూరిటీని డిజేబుల్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను డిజేబుల్ చేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ఎనేబుల్ చేస్తుంది."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"స్క్రీన్ లాక్ సంక్లిష్టత రిక్వెస్ట్‌"</string>
@@ -618,6 +625,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"బయోమెట్రిక్ హార్డ్‌వేర్‌ అందుబాటులో లేదు"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ప్రమాణీకరణ రద్దు చేయబడింది"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"గుర్తించలేదు"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"ముఖం గుర్తించబడలేదు"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"ప్రమాణీకరణ రద్దు చేయబడింది"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"పిన్, ఆకృతి లేదా పాస్‌వర్డ్‌ సెట్ చేయబడలేదు"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"ప్రామాణీకరిస్తున్నప్పుడు ఎర్రర్ ఏర్పడింది"</string>
@@ -628,16 +636,17 @@
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"వేలిముద్ర సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
-    <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"పవర్ బటన్ కనుగొనబడింది"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"సర్దుబాటు చేయడానికి ట్రై చేయండి"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారీ మీ వేళ్ల స్థానాన్ని కొద్దిగా మార్చండి"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారి మీ వేలిని కొద్ది కొద్దిగా జరపండి"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"వేలిముద్ర గుర్తించబడలేదు"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"వేలిముద్ర గుర్తించబడలేదు"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"ముఖం గుర్తించలేము. బదులుగా వేలిముద్ర ఉపయోగించండి."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ముఖం ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ముఖం ప్రమాణీకరించబడింది, దయచేసి ధృవీకరించును నొక్కండి"</string>
@@ -654,7 +663,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>వ వేలు"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"వేలిముద్ర లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"కొనసాగించడానికి మీ వేలిముద్రను ఉపయోగించండి"</string>
@@ -663,28 +672,28 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"ఏదో తప్పు జరిగింది. మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"వేలిముద్ర చిహ్నం"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"పరికర అన్‌లాక్"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"అన్‌లాక్ చేయడానికి మరొక మార్గాన్ని ట్రై చేయండి"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"మీ వేళ్లు తడిగా ఉండటం లేక ఇతరత్రా కారణాల వల్ల మీ వేలిముద్రను గుర్తించకపోతే, ఫేస్ అన్‌లాక్‌ను ఉపయోగించండి"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"తగినంత వెలుతురు లేకపోవడం లేక ఇతరత్రా కారణాల వల్ల మీ ఫేస్ గుర్తించబడనప్పుడు, వేలిముద్ర అన్‌లాక్‌ను ఉపయోగించండి"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ఫేస్ అన్‌లాక్"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ఫేస్ అన్‌లాక్‌తో సమస్య"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ఫేస్ మోడల్‌ను తొలగించడానికి నొక్కండి, ఆపై మీ ముఖాన్ని మళ్లీ జోడించండి"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ఫేస్ అన్‌లాక్‌ను సెటప్ చేయండి"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"మీ ఫోన్‌ను చూడటం ద్వారా దాన్ని అన్‌లాక్ చేయండి"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ఫేస్ అన్‌లాక్‌ను ఉపయోగించడానికి, సెట్టింగ్‌లు &gt; గోప్యతలో "<b>"కెమెరా యాక్సెస్"</b>"ను ఆన్ చేయండి"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"అన్‌లాక్ చేయడానికి మరిన్ని మార్గాలను సెటప్ చేయండి"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"వేలిముద్రను జోడించడానికి ట్యాప్ చేయండి"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"వేలిముద్ర అన్‌లాక్"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"మీ ఫేస్‌మోడల్ క్రియేషన్ కుదరదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"వెలుతురు అధికంగా ఉంది. తక్కువ ఉండేలా చూడండి."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"తగిన కాంతి లేదు"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"తగినంత వెలుతురు లేదు"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ఫోన్‌ను కాస్త దూరంగా జరపండి"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ఫోన్‌ను దగ్గరగా పట్టుకోండి"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ఫోన్‌ను పైకి పట్టుకోండి"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ఫోన్‌ను కిందికి దించండి"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ఫోన్‌ను కిందికి జరపండి"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ఫోన్‌ను మీ ఎడమ వైపునకు జరపండి"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ఫోన్‌ను మీ కుడి వైపునకు జరపండి"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"దయచేసి మీ పరికరం వైపు మరింత నేరుగా చూడండి."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"మీ ముఖం కనిపించడం లేదు. మీ ఫోన్‌ను కంటి స్థాయిలో పట్టుకోండి."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"మీ ముఖం కనిపించడం లేదు. మీ ఫోన్‌ను కళ్లకు ఎదురుగా పట్టుకోండి."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
@@ -692,7 +701,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేయండి."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి ఏదైనా అడ్డుగా ఉంటే దాన్ని తీసివేయండి."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"నల్లని బార్‌తో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -700,7 +709,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"మీ ఫేస్‌మోడల్ క్రియేషన్ కుదరదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"డార్క్ గ్లాసెస్ గుర్తించబడ్డాయి. మీ ముఖం పూర్తిగా కనిపించాలి."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ముఖం కవర్ చేయబడింది. మీ ముఖం పూర్తిగా కనిపించాలి."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ముఖం మీద ఏదో  కవరింగ్ ఉన్నట్టు గుర్తించబడింది."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
@@ -708,11 +717,10 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"కొత్త ముఖం డేటాను స్టోరేజ్‌ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ యాక్టివిటీ రద్దయింది."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ఫేస్ అన్‌లాక్‌ను యూజర్ రద్దు చేశారు"</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ట్రై చేయండి."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ఎక్కువ సార్లు ట్రై చేశారు. ఫేస్ అన్‌లాక్ అందుబాటులో లేదు."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి."</string>
-    <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"మీరు ఫేస్ అన్‌లాక్‌ను సెటప్ చేయలేదు"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"ఫేస్ అన్‌లాక్‌ను ఈ పరికరం సపోర్ట్ చేయదు"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
@@ -751,8 +759,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడం"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"టెలికామ్ కనెక్షన్‌లను మేనేజ్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"వినియోగదారునికి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ఇన్-కాల్ స్క్రీన్‌తో ఇంటరాక్ట్ చేయగలదు"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"యూజర్‌కి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"కాల్స్‌ చేయడం/స్వీకరించడం కోసం టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"ఇన్-కాల్ వినియోగదారు అనుభవాన్ని అందించడం"</string>
@@ -964,11 +972,11 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"అన్‌లాక్ చేయడానికి లేదా అత్యవసర కాల్ చేయడానికి మెనూ నొక్కండి."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"అన్‌లాక్ చేయడానికి మెనూ నొక్కండి."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"అన్‌లాక్ చేయడానికి నమూనాను గీయండి"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"అత్యవసరం"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ఎమర్జెన్సీ"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"కాల్‌కు తిరిగి వెళ్లు"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"సరైనది!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ప్రయత్నించండి"</string>
-    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"మళ్లీ ప్రయత్నించండి"</string>
+    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ట్రై చేయండి"</string>
+    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"మళ్లీ ట్రై చేయండి"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"అన్ని లక్షణాలు మరియు డేటా కోసం అన్‌లాక్ చేయండి"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ఫేస్ అన్‌లాక్ ప్రయత్నాల గరిష్ఠ పరిమితిని మించిపోయారు"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM లేదు"</string>
@@ -992,19 +1000,19 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"వినియోగదారు గైడ్‌ను చూడండి లేదా కస్టమర్ కేర్‌ను సంప్రదించండి."</string>
     <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM లాక్ చేయబడింది."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIMను అన్‌లాక్ చేస్తోంది…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ Android TV పరికరాన్ని అన్‌లాక్ చేయాల్సిందిగా మీకు తెలపబడుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ Android TV పరికరాన్ని అన్‌లాక్ చేయాల్సిందిగా మీకు తెలపబడుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీ Android TV పరికరం ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే యూజర్ డేటా మొత్తాన్ని కోల్పోతారు."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఫోన్, ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. టాబ్లెట్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మీ Android TV పరికరం ఇప్పుడు ఫ్యాక్టరీ రీసెట్ చేయబడుతుంది."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. ఫోన్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"నమూనాను మర్చిపోయారా?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"ఖాతా అన్‌లాక్"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"చాలా ఎక్కువ ఆకృతి ప్రయత్నాలు చేశారు"</string>
@@ -1197,7 +1205,7 @@
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"షేర్ చేయి"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$sని ఉపయోగించి పంపండి"</string>
-    <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపు"</string>
+    <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"పంపండి"</string>
     <string name="whichHomeApplication" msgid="8276350727038396616">"హోమ్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"%1$sని హోమ్‌గా ఉపయోగించండి"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"చిత్రాన్ని క్యాప్చర్ చేయి"</string>
@@ -1255,7 +1263,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"యాప్‌లను ప్రారంభిస్తోంది."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"బూట్‌ను ముగిస్తోంది."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను సెటప్ చేస్తున్నప్పుడు తేలికగా ట్యాప్ చేయడానికి ట్రై చేయండి."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"సెటప్ ముగించడానికి, స్క్రీన్‌ను ఆఫ్ చేయి"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"సెటప్ ముగించడానికి, స్క్రీన్ ఆఫ్ చేయండి"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ఆఫ్ చేయండి"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"మీ వేలిముద్ర వెరిఫై‌ను కొనసాగించాలా?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను వెరిఫై చేయడానికి తేలికగా ట్యాప్ చేయడం ట్రై చేయండి."</string>
@@ -1329,7 +1337,7 @@
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ఒక మెసేజ్‌ను &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;కి పంపాలనుకుంటోంది."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"దీని వలన మీ మొబైల్ ఖాతాకు "<b>"ఛార్జీలు విధించబడవచ్చు"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"దీని వలన మీ మొబైల్ ఖాతాకు ఛార్జీలు విధించబడవచ్చు."</b></string>
-    <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"పంపు"</string>
+    <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"పంపండి"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"రద్దు చేయండి"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"నా ఎంపికను గుర్తుంచుకో"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"మీరు దీన్ని తర్వాత సెట్టింగ్‌లు &gt; అనువర్తనాలులో మార్చవచ్చు"</string>
@@ -1364,7 +1372,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ద్వారా MIDI ఆన్ చేయబడింది"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"పరికరం వెబ్‌క్యామ్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ఉపకరణం కనెక్ట్ చేయబడింది"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఆప్షన్ల కోసం ట్యాప్ చేయండి."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"కనెక్ట్ చేయబడిన పరికరాన్ని ఛార్జ్ చేస్తోంది. మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"అనలాగ్ ఆడియో ఉపకరణం కనుగొనబడింది"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"జోడించిన పరికరం ఈ ఫోన్‌కు అనుకూలంగా లేదు. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
@@ -1392,10 +1400,10 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
     <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ యాక్టివ్‌గా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
-    <string name="hardware" msgid="1800597768237606953">"వర్చువల్ కీబోర్డ్‌ను చూపు"</string>
+    <string name="hardware" msgid="3611039921284836033">"స్క్రీన్‌పై కీబోర్డ్ ఉపయోగించు"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>‌ను కాన్ఫిగర్ చేయండి"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ఫిజికల్ కీబోర్డ్‌లను కాన్ఫిగ‌ర్ చేయండి"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాష మరియు లేఅవుట్‌ను ఎంచుకోవడానికి నొక్కండి"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాషను, లేఅవుట్‌ను ఎంచుకోవడానికి ట్యాప్ చేయండి"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"ఇతర యాప్‌ల ఎగువన ప్రదర్శన"</string>
@@ -1440,7 +1448,7 @@
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"కంటెంట్ బదిలీ పూర్తయింది"</string>
     <string name="ext_media_move_success_message" msgid="9159542002276982979">"కంటెంట్ <xliff:g id="NAME">%s</xliff:g>కి తరలించబడింది"</string>
     <string name="ext_media_move_failure_title" msgid="3184577479181333665">"కంటెంట్‌ని తరలించడం సాధ్యం కాలేదు"</string>
-    <string name="ext_media_move_failure_message" msgid="4197306718121869335">"కంటెంట్‌ని తరలించడానికి మళ్లీ ప్రయత్నించండి"</string>
+    <string name="ext_media_move_failure_message" msgid="4197306718121869335">"కంటెంట్‌ని తరలించడానికి మళ్లీ ట్రై చేయండి"</string>
     <string name="ext_media_status_removed" msgid="241223931135751691">"తీసివేయబడింది"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"తొలగించబడింది"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"చెక్ చేస్తోంది..."</string>
@@ -1469,7 +1477,7 @@
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"విడ్జెట్‌ను జోడించడం సాధ్యపడలేదు."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"వెళ్లు"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"సెర్చ్"</string>
-    <string name="ime_action_send" msgid="8456843745664334138">"పంపు"</string>
+    <string name="ime_action_send" msgid="8456843745664334138">"పంపండి"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"తర్వాత"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"పూర్తయింది"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"మునుపటి"</string>
@@ -1666,25 +1674,23 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"చెల్లని వినియోగదారు పేరు లేదా పాస్‌వర్డ్."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"ఖాతాను చెక్ చేస్తోంది…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీ Android TV పరికరం ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే యూజర్, డేటా మొత్తాన్ని కోల్పోతారు."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఫోన్ ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. టాబ్లెట్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మీ Android TV పరికరం ఇప్పుడు ఫ్యాక్టరీ రీసెట్ చేయబడుతుంది."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. ఫోన్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత మీ Android TV పరికరాన్ని ఈమెయిల్‌ ఖాతా ద్వారా అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని కోరడం జరుగుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత మీ Android TV పరికరాన్ని ఈమెయిల్‌ ఖాతా ద్వారా అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని కోరడం జరుగుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయండి"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"హెచ్చరిక,\nమీరు ఒక వారంలో హెడ్‌ఫోన్స్ ద్వారా సురక్షితంగా వినగలిగే భారీ సౌండ్ సిగ్నల్స్ పరిమాణాన్ని మించిపోయారు.\n\nఈ పరిమితిని మించిపోవడం వల్ల మీ వినికిడి శాశ్వతంగా దెబ్బతింటుంది."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"హెచ్చరిక,\nమీరు ఒక వారంలో హెడ్‌ఫోన్స్ ద్వారా సురక్షితంగా వినగలిగే భారీ సౌండ్ సిగ్నల్స్ కంటే 5 రెట్లు మించిపోయారు.\n\nమీ వినికిడిని రక్షించడానికి వాల్యూమ్ తగ్గించబడింది."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"మీరు ప్రస్తుతం వింటున్న వాల్యూమ్‌లో మీడియాను వినడం కొనసాగిస్తే, మీ వినికిడి దెబ్బతినవచ్చు.\n\nఎక్కువ సమయం పాటు ఈ స్థాయిలో మీడియాను ప్లే చేయడం వల్ల మీ వినికిడి దెబ్బతినవచ్చు."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"హెచ్చరిక,\nమీరు ప్రస్తుతం బిగ్గరగా వినిపించే కంటెంట్‌ను అసురక్షిత వాల్యూమ్ స్థాయిలో వింటున్నారు.\n\nఇంత బిగ్గరగా వినడం కొనసాగించడం వల్ల మీ వినికిడి శాశ్వతంగా దెబ్బతింటుంది."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"అధిక వాల్యూమ్‌లో వినడం కొనసాగించాలనుకుంటున్నారా?\n\nహెడ్‌ఫోన్ వాల్యూమ్, సిఫార్సు చేసిన సమయం కంటే ఎక్కువసేపు అధిక వాల్యూమ్‌లో ఉంది, ఇది మీ వినికిడిని దెబ్బతీయవచ్చు"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"అధిక సౌండ్‌ను గుర్తించడం జరిగింది\n\nహెడ్‌ఫోన్ వాల్యూమ్, సిఫార్సు చేసిన సమయం కంటే ఎక్కువసేపు అధిక వాల్యూమ్‌లో ఉంది, ఇది మీ వినికిడిని దెబ్బతీయవచ్చు"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"షార్ట్‌కట్ ఆన్ చేసి ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కి ఉంచితే యాక్సెస్ సౌలభ్య ఫీచర్ ప్రారంభం అవుతుంది."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"యాక్సెస్ సౌలభ్య ఫీచర్‌ల కోసం షార్ట్‌కట్‌ను ఆన్ చేయాలా?"</string>
@@ -1697,13 +1703,15 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ఆన్"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ఆఫ్"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>కి మీ పరికరంపై పూర్తి కంట్రోల్‌ను ఇవ్వాలనుకుంటున్నారా?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"అవసరమైన యాక్సెసిబిలిటీ కోసం యాప్‌లకు పూర్తి కంట్రోల్ ఇవ్వడం తగిన పనే అయినా, అన్ని యాప్‌లకు అలా ఇవ్వడం సరికాదు."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"యాక్సెసిబిలిటీ అవసరాలు ఉన్నప్పుడు మీకు సహాయం చేయడానికి యాప్‌లకు ఫుల్‌ కంట్రోల్‌ ఇవ్వడం సమంజసమే. అయితే అన్ని యాప్‌లకు అలా కంట్రోల్ ఇవ్వడం సరికాదు."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"స్క్రీన్‌ను చూసి, కంట్రోల్ చేయగలగడం"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది మరియు ఇతర యాప్‌లలో కూడా ఈ కంటెంట్‌ను ప్రదర్శిస్తుంది."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది. అంతే కాక, ఇతర యాప్‌లపై కంటెంట్‌ను డిస్‌ప్లే చేస్తుంది."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయగలగడం"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు ఒక యాప్‌‌తో చేసే ఇంటరాక్షన్‌లను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో ఇంటరాక్ట్ చేయగలదు."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించండి"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"నిరాకరించు"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"వద్దు"</string>
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"అన్ఇన్‌స్టాల్ చేయండి"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ఒక యాప్ అనుమతి రిక్వెస్ట్‌కు అడ్డు తగులుతోంది కాబట్టి మీ సమాధానం వెరిఫై చేయడం సాధ్యం కాదు."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
@@ -1716,7 +1724,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"కలర్ కరెక్షన్"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"వన్-హ్యాండెడ్ మోడ్"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ఎక్స్‌ట్రా డిమ్"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"వినికిడి పరికరం"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"వినికిడి పరికరాలు"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"వాల్యూమ్ కీలను రిలీజ్ చేయండి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>‌ను ఆన్ చేయడానికి, రెండు వాల్యూమ్ కీలను మళ్లీ 3 సెకన్ల పాటు నొక్కి పట్టుకోండి."</string>
@@ -1844,14 +1852,14 @@
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"కొత్త పిన్‌"</string>
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"కొత్త పిన్‌ను నిర్ధారించండి"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"నియంత్రణలను ఎడిట్ చేయడానికి పిన్‌ను రూపొందించండి"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"పిన్‌లు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"పిన్‌లు సరిపోలలేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
-    <string name="restr_pin_try_later" msgid="5897719962541636727">"తర్వాత మళ్లీ ప్రయత్నించండి"</string>
+    <string name="restr_pin_try_later" msgid="5897719962541636727">"తర్వాత మళ్లీ ట్రై చేయండి"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ఫుల్-స్క్రీన్‌లో వీక్షిస్తున్నారు"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"నిష్క్రమించడానికి, పై నుండి క్రిందికి స్వైప్ చేయండి."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"అర్థమైంది"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"మెరుగైన వీక్షణ కోసం తిప్పండి"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"మెరుగైన వీక్షణ కోసం స్ప్లిట్ స్క్రీన్ నుండి నిష్క్రమించండి"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"మెరుగైన వీక్షణ కోసం <xliff:g id="NAME">%s</xliff:g>‌ను ఫుల్ స్క్రీన్‌లో తెరవండి"</string>
     <string name="done_label" msgid="7283767013231718521">"పూర్తయింది"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"గంటల వృత్తాకార స్లయిడర్"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"నిమిషాల వృత్తాకార స్లయిడర్"</string>
@@ -1864,6 +1872,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"క్లోన్ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"ప్రైవేట్ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ ఆకృతి కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
@@ -1897,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్రావస్థ"</string>
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ఆన్‌లో ఉంది"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ఆఫ్‌లో ఉంది"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
@@ -1957,7 +1968,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"యాప్ అందుబాటులో లేదు"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> అందుబాటులో లేదు"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"అనుమతి అవసరం"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"అనుమతి రిక్వెస్ట్ బ్లాక్ చేయబడింది"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"కెమెరా అందుబాటులో లేదు"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ఫోన్‌లో కొనసాగించండి"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"మైక్రోఫోన్ అందుబాటులో లేదు"</string>
@@ -1968,6 +1979,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ఈ సమయంలో మీ <xliff:g id="DEVICE">%1$s</xliff:g>లో దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ Android TV పరికరంలో ట్రై చేయండి."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ఈ సమయంలో మీ <xliff:g id="DEVICE">%1$s</xliff:g>లో దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ టాబ్లెట్‌లో ట్రై చేయండి."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ఈ సమయంలో మీ <xliff:g id="DEVICE">%1$s</xliff:g>లో దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ ఫోన్‌లో ట్రై చేయండి."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"ఈ యాప్ అదనపు అనుమతి కోసం రిక్వెస్ట్ చేస్తోంది, కానీ స్ట్రీమింగ్ సెషన్‌లో అనుమతులను మంజూరు చేయడం సాధ్యం కాదు. ముందుగా మీ Android TV పరికరంలో అనుమతిని మంజూరు చేయండి."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"ఈ యాప్ అదనపు అనుమతి కోసం రిక్వెస్ట్ చేస్తోంది, కానీ స్ట్రీమింగ్ సెషన్‌లో అనుమతులను మంజూరు చేయడం సాధ్యం కాదు. ముందుగా మీ టాబ్లెట్‌లో అనుమతిని మంజూరు చేయండి."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"ఈ యాప్ అదనపు అనుమతి కోసం రిక్వెస్ట్ చేస్తోంది, కానీ స్ట్రీమింగ్ సెషన్‌లో అనుమతులను మంజూరు చేయడం సాధ్యం కాదు. ముందుగా మీ ఫోన్‌లో అనుమతిని మంజూరు చేయండి."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ఈ యాప్ అదనపు సెక్యూరిటీ కోసం రిక్వెస్ట్ చేస్తోంది. బదులుగా మీ Android TV పరికరంలో ట్రై చేయండి."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ఈ యాప్ అదనపు సెక్యూరిటీ కోసం రిక్వెస్ట్ చేస్తోంది. బదులుగా మీ టాబ్లెట్‌లో ట్రై చేయండి."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ఈ యాప్ అదనపు సెక్యూరిటీ కోసం రిక్వెస్ట్ చేస్తోంది. బదులుగా మీ ఫోన్‌లో ట్రై చేయండి."</string>
@@ -1976,6 +1990,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"మీ <xliff:g id="DEVICE">%1$s</xliff:g>లో దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ ఫోన్‌లో ట్రై చేయండి."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ఈ యాప్ పాత Android వెర్షన్ కోసం రూపొందించబడింది. ఇది సరిగ్గా పని చేయకపోవచ్చు, ఇంకా దీనిలో తాజా సెక్యూరిటీ, గోప్యతా రక్షణలు ఉండకపోవచ్చు. అప్‌డేట్ కోసం చెక్ చేయండి, లేదా యాప్ డెవలపర్‌ను సంప్రదించండి."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"అప్‌డేట్ కోసం చెక్ చేయండి"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ఈ యాప్ Android ఇటీవలి వెర్షన్‌కు అనుకూలంగా లేదు. అప్‌డేట్ కోసం చెక్ చేయండి లేదా యాప్ డెవలపర్‌ను కాంటాక్ట్ చేయండి."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"మీకు కొత్త మెసేజ్‌లు ఉన్నాయి"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"చూడటానికి SMS యాప్‌ను తెరవండి"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"కొంత ఫంక్షనాలిటీ పరిమితం కావచ్చు"</string>
@@ -1983,7 +1998,7 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"కార్యాలయ ప్రొఫైల్ అన్‌లాక్ చేయుటకు నొక్కండి"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ఫైళ్లను చూడటానికి నొక్కండి"</string>
-    <string name="pin_target" msgid="8036028973110156895">"పిన్ చేయి"</string>
+    <string name="pin_target" msgid="8036028973110156895">"పిన్ చేయండి"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>ను పిన్ చేయండి"</string>
     <string name="unpin_target" msgid="3963318576590204447">"అన్‌‌పిన్‌ ‌చేయి"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>ను అన్‌పిన్ చేయి"</string>
@@ -2024,7 +2039,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> మరియు <xliff:g id="TYPE_1">%2$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ఈ అంశాలను "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"లో అప్‌డేట్ చేయాలా: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> మరియు <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"ఈ ఐటెమ్‌లను "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"లో అప్‌డేట్ చేయండి: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> అలాగే <xliff:g id="TYPE_2">%3$s</xliff:g> అప్‌డేట్ చేయాలా?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"సేవ్ చేయండి"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"వద్దు, ధన్యవాదాలు"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ఇప్పుడు కాదు"</string>
@@ -2151,7 +2166,7 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"గ్రూప్ సంభాషణ"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"వ్యక్తిగతం"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"ఆఫీస్"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"వర్క్ ప్లేస్"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"వ్యక్తిగత వీక్షణ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"పని వీక్షణ"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"మీ IT అడ్మిన్ ద్వారా బ్లాక్ చేయబడింది"</string>
@@ -2159,16 +2174,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ఈ కంటెంట్ వర్క్ యాప్‌తో తెరవడం సాధ్యం కాదు"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ఈ కంటెంట్ వ్యక్తిగత యాప్‌తో షేర్ చేయడం సాధ్యం కాదు"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ఈ కంటెంట్ వ్యక్తిగత యాప్‌తో తెరవడం సాధ్యం కాదు"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"వర్క్ ప్రొఫైల్ పాజ్ చేయబడింది"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ఆన్ చేయడానికి ట్యాప్ చేయండి"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"వర్క్ యాప్‌లు పాజ్ అయ్యాయి"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"అన్‌పాజ్ చేయండి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> వర్క్ యాప్‌ను తెరవాలా?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"వ్యక్తిగత <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"వర్క్ యాప్ నుండి కాల్ చేయాలా?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"వర్క్ యాప్‌నకు మారాలా?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"మీ సంస్థ, వర్క్ యాప్‌ల నుండి మాత్రమే కాల్స్ చేయడానికి మిమ్మల్ని అనుమతిస్తుంది"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"మీ సంస్థ, వర్క్ యాప్‌ల నుండి మాత్రమే మెసేజ్‌లను పంపడానికి మిమ్మల్ని అనుమతిస్తుంది"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"వ్యక్తిగత బ్రౌజర్‌ను ఉపయోగించండి"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"వర్క్ బ్రౌజర్‌ను ఉపయోగించండి"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"కాల్ చేయండి"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"మారండి"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM నెట్‌వర్క్ అన్‌లాక్ పిన్‌"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM నెట్‌వర్క్ సబ్‌సెట్ అన్‌లాక్ పిన్"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM కార్పొరేట్ అన్‌లాక్ పిన్"</string>
@@ -2305,6 +2325,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి ఫోన్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"మీ <xliff:g id="DEVICE">%1$s</xliff:g> నుండి టాబ్లెట్ కెమెరాను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"స్ట్రీమింగ్ చేస్తున్నప్పుడు దీన్ని యాక్సెస్ చేయడం సాధ్యపడదు. బదులుగా మీ ఫోన్‌లో ట్రై చేయండి."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"స్ట్రీమింగ్ చేస్తున్నప్పుడు పిక్చర్-ఇన్-పిక్చర్ చూడలేరు"</string>
     <string name="system_locale_title" msgid="711882686834677268">"సిస్టమ్ ఆటోమేటిక్ సెట్టింగ్"</string>
     <string name="default_card_name" msgid="9198284935962911468">"కార్డ్ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"వాచ్‌లను మేనేజ్ చేయడానికి సహాయక వాచ్ ప్రొఫైల్ అనుమతి"</string>
@@ -2317,13 +2338,18 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"బ్యాక్‌గ్రౌండ్ నుండి ఫోర్‌గ్రౌండ్ సర్వీస్‌లను ప్రారంభించడానికి సహాయక యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"మైక్రోఫోన్ అందుబాటులో ఉంది"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"మైక్రోఫోన్ బ్లాక్ చేయబడింది"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"డ్యూయల్ స్క్రీన్"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"డ్యూయల్ స్క్రీన్ ఆన్‌లో ఉంది"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"కంటెంట్‌ను చూపడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రెండు డిస్‌ప్లేలనూ ఉపయోగిస్తుంది"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"డిస్‌ప్లే చేయడానికి మిర్రర్ చేయడం సాధ్యపడదు"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"వేరే కేబుల్‌ను ఉపయోగించి, మళ్లీ ట్రై చేయండి"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"మీ పరికరం చాలా వెచ్చగా ఉంది, అది చల్లబడే వరకు డిస్‌ప్లే చేయడానికి మిర్రర్ చేయడం సాధ్యపడదు"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"డిస్‌ప్లేలను కేబుల్ సపోర్ట్ చేయకపోవచ్చు"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"మీ USB-C కేబుల్, డిస్‌ప్లేలకు సరిగ్గా కనెక్ట్ కాకపోవచ్చు"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ఆన్‌లో ఉంది"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"కంటెంట్‌ను చూపడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రెండు డిస్‌ప్లేలనూ ఉపయోగిస్తోంది"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"పరికరం చాలా వేడిగా ఉంది"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"మీ ఫోన్ చాలా వేడిగా అవుతున్నందున, డ్యూయల్ స్క్రీన్ అందుబాటులో లేదు"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"డ్యూయల్ స్క్రీన్ అందుబాటులో లేదు"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"బ్యాటరీ సేవర్ ఆన్‌లో ఉన్నందున డ్యూయల్ స్క్రీన్ అందుబాటులో లేదు. మీరు దీన్ని సెట్టింగ్‌లలో ఆఫ్ చేయవచ్చు."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"మీ ఫోన్ చాలా వేడిగా అవుతున్నందున, Dual Screen అందుబాటులో లేదు"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen అందుబాటులో లేదు"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"బ్యాటరీ సేవర్ ఆన్‌లో ఉన్నందున Dual Screen అందుబాటులో లేదు. మీరు దీన్ని సెట్టింగ్‌లలో ఆఫ్ చేయవచ్చు."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"సెట్టింగ్‌లకు వెళ్లండి"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ఆఫ్ చేయండి"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> కాన్ఫిగర్ చేయబడింది"</string>
@@ -2333,4 +2359,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"కీబోర్డ్ లేఅవుట్ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>‌కు సెట్ చేయబడింది… మార్చడానికి ట్యాప్ చేయండి."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ఫిజికల్ కీబోర్డ్‌లు కాన్ఫిగర్ చేయబడ్డాయి"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"కీబోర్డ్‌లను చూడటానికి ట్యాప్ చేయండి"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ప్రైవేట్"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"క్లోన్ చేయండి"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ఆఫీస్"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ఆఫీస్ 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ఆఫీస్ 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"పరీక్ష"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"కమ్యూనల్"</string>
 </resources>

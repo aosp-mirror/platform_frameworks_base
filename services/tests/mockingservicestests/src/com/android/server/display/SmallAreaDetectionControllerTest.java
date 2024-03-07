@@ -16,8 +16,6 @@
 
 package com.android.server.display;
 
-import static android.os.Process.INVALID_UID;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -35,7 +33,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
-import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,7 +53,10 @@ public class SmallAreaDetectionControllerTest {
     @Mock
     private PackageManagerInternal mMockPackageManagerInternal;
     @Mock
-    private UserManagerInternal mMockUserManagerInternal;
+    private PackageStateInternal mMockPkgStateA;
+    @Mock
+    private PackageStateInternal mMockPkgStateB;
+
 
     private SmallAreaDetectionController mSmallAreaDetectionController;
 
@@ -64,29 +65,18 @@ public class SmallAreaDetectionControllerTest {
     private static final String PKG_NOT_INSTALLED = "com.not.installed";
     private static final float THRESHOLD_A = 0.05f;
     private static final float THRESHOLD_B = 0.07f;
-    private static final int USER_1 = 110;
-    private static final int USER_2 = 111;
-    private static final int UID_A_1 = 11011111;
-    private static final int UID_A_2 = 11111111;
-    private static final int UID_B_1 = 11022222;
-    private static final int UID_B_2 = 11122222;
+    private static final int APP_ID_A = 11111;
+    private static final int APP_ID_B = 22222;
 
     @Before
     public void setup() {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
-        LocalServices.removeServiceForTest(UserManagerInternal.class);
-        LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
 
-        when(mMockUserManagerInternal.getUserIds()).thenReturn(new int[]{USER_1, USER_2});
-        when(mMockPackageManagerInternal.getPackageUid(PKG_A, 0, USER_1)).thenReturn(UID_A_1);
-        when(mMockPackageManagerInternal.getPackageUid(PKG_A, 0, USER_2)).thenReturn(UID_A_2);
-        when(mMockPackageManagerInternal.getPackageUid(PKG_B, 0, USER_1)).thenReturn(UID_B_1);
-        when(mMockPackageManagerInternal.getPackageUid(PKG_B, 0, USER_2)).thenReturn(UID_B_2);
-        when(mMockPackageManagerInternal.getPackageUid(PKG_NOT_INSTALLED, 0, USER_1)).thenReturn(
-                INVALID_UID);
-        when(mMockPackageManagerInternal.getPackageUid(PKG_NOT_INSTALLED, 0, USER_2)).thenReturn(
-                INVALID_UID);
+        when(mMockPackageManagerInternal.getPackageStateInternal(PKG_A)).thenReturn(mMockPkgStateA);
+        when(mMockPackageManagerInternal.getPackageStateInternal(PKG_B)).thenReturn(mMockPkgStateB);
+        when(mMockPkgStateA.getAppId()).thenReturn(APP_ID_A);
+        when(mMockPkgStateB.getAppId()).thenReturn(APP_ID_B);
 
         mSmallAreaDetectionController = spy(new SmallAreaDetectionController(
                 new ContextWrapper(ApplicationProvider.getApplicationContext()),
@@ -99,9 +89,9 @@ public class SmallAreaDetectionControllerTest {
         final String property = PKG_A + ":" + THRESHOLD_A + "," + PKG_B + ":" + THRESHOLD_B;
         mSmallAreaDetectionController.updateAllowlist(property);
 
-        final int[] resultUidArray = {UID_A_1, UID_B_1, UID_A_2, UID_B_2};
-        final float[] resultThresholdArray = {THRESHOLD_A, THRESHOLD_B, THRESHOLD_A, THRESHOLD_B};
-        verify(mSmallAreaDetectionController).updateSmallAreaDetection(eq(resultUidArray),
+        final int[] resultAppIdArray = {APP_ID_A, APP_ID_B};
+        final float[] resultThresholdArray = {THRESHOLD_A, THRESHOLD_B};
+        verify(mSmallAreaDetectionController).updateSmallAreaDetection(eq(resultAppIdArray),
                 eq(resultThresholdArray));
     }
 
@@ -110,9 +100,9 @@ public class SmallAreaDetectionControllerTest {
         final String property = PKG_A + "," + PKG_B + ":" + THRESHOLD_B;
         mSmallAreaDetectionController.updateAllowlist(property);
 
-        final int[] resultUidArray = {UID_B_1, UID_B_2};
-        final float[] resultThresholdArray = {THRESHOLD_B, THRESHOLD_B};
-        verify(mSmallAreaDetectionController).updateSmallAreaDetection(eq(resultUidArray),
+        final int[] resultAppIdArray = {APP_ID_B};
+        final float[] resultThresholdArray = {THRESHOLD_B};
+        verify(mSmallAreaDetectionController).updateSmallAreaDetection(eq(resultAppIdArray),
                 eq(resultThresholdArray));
     }
 
@@ -122,9 +112,9 @@ public class SmallAreaDetectionControllerTest {
                 PKG_A + ":" + THRESHOLD_A + "," + PKG_NOT_INSTALLED + ":" + THRESHOLD_B;
         mSmallAreaDetectionController.updateAllowlist(property);
 
-        final int[] resultUidArray = {UID_A_1, UID_A_2};
-        final float[] resultThresholdArray = {THRESHOLD_A, THRESHOLD_A};
-        verify(mSmallAreaDetectionController).updateSmallAreaDetection(eq(resultUidArray),
+        final int[] resultAppIdArray = {APP_ID_A};
+        final float[] resultThresholdArray = {THRESHOLD_A};
+        verify(mSmallAreaDetectionController).updateSmallAreaDetection(eq(resultAppIdArray),
                 eq(resultThresholdArray));
     }
 

@@ -32,7 +32,7 @@ import androidx.annotation.StyleRes;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.keyguard.KeyguardIndication;
 
 /**
@@ -296,6 +296,6 @@ public class KeyguardIndicationTextView extends TextView {
 
     private int getYTranslationPixels() {
         return mContext.getResources().getDimensionPixelSize(
-                com.android.systemui.R.dimen.keyguard_indication_y_translation);
+                com.android.systemui.res.R.dimen.keyguard_indication_y_translation);
     }
 }

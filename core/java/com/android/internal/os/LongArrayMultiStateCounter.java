@@ -55,15 +55,20 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+        "com.android.hoststubgen.nativesubstitution.LongArrayMultiStateCounter_host")
 public final class LongArrayMultiStateCounter implements Parcelable {
 
     /**
      * Container for a native equivalent of a long[].
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
+    @android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+            "com.android.hoststubgen.nativesubstitution"
+            + ".LongArrayMultiStateCounter_host$LongArrayContainer_host")
     public static class LongArrayContainer {
-        private static final NativeAllocationRegistry sRegistry =
-                NativeAllocationRegistry.createMalloced(
-                        LongArrayContainer.class.getClassLoader(), native_getReleaseFunc());
+        private static NativeAllocationRegistry sRegistry;
 
         // Visible to other objects in this package so that it can be passed to @CriticalNative
         // methods.
@@ -73,7 +78,24 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         public LongArrayContainer(int length) {
             mLength = length;
             mNativeObject = native_init(length);
+            registerNativeAllocation();
+        }
+
+        @android.ravenwood.annotation.RavenwoodReplace
+        private void registerNativeAllocation() {
+            if (sRegistry == null) {
+                synchronized (LongArrayMultiStateCounter.class) {
+                    if (sRegistry == null) {
+                        sRegistry = NativeAllocationRegistry.createMalloced(
+                                LongArrayContainer.class.getClassLoader(), native_getReleaseFunc());
+                    }
+                }
+            }
             sRegistry.registerNativeAllocation(this, mNativeObject);
+        }
+
+        private void registerNativeAllocation$ravenwood() {
+            // No-op under ravenwood
         }
 
         /**
@@ -124,19 +146,17 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         private static native long native_getReleaseFunc();
 
         @FastNative
-        private native void native_setValues(long nativeObject, long[] array);
+        private static native void native_setValues(long nativeObject, long[] array);
 
         @FastNative
-        private native void native_getValues(long nativeObject, long[] array);
+        private static native void native_getValues(long nativeObject, long[] array);
 
         @FastNative
-        private native boolean native_combineValues(long nativeObject, long[] array,
+        private static native boolean native_combineValues(long nativeObject, long[] array,
                 int[] indexMap);
     }
 
-    private static final NativeAllocationRegistry sRegistry =
-            NativeAllocationRegistry.createMalloced(
-                    LongArrayMultiStateCounter.class.getClassLoader(), native_getReleaseFunc());
+    private static volatile NativeAllocationRegistry sRegistry;
     private static final AtomicReference<LongArrayContainer> sTmpArrayContainer =
             new AtomicReference<>();
 
@@ -152,12 +172,30 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         mStateCount = stateCount;
         mLength = arrayLength;
         mNativeObject = native_init(stateCount, arrayLength);
+        registerNativeAllocation();
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private void registerNativeAllocation() {
+        if (sRegistry == null) {
+            synchronized (LongArrayMultiStateCounter.class) {
+                if (sRegistry == null) {
+                    sRegistry = NativeAllocationRegistry.createMalloced(
+                            LongArrayMultiStateCounter.class.getClassLoader(),
+                            native_getReleaseFunc());
+                }
+            }
+        }
         sRegistry.registerNativeAllocation(this, mNativeObject);
+    }
+
+    private void registerNativeAllocation$ravenwood() {
+        // No-op under ravenwood
     }
 
     private LongArrayMultiStateCounter(Parcel in) {
         mNativeObject = native_initFromParcel(in);
-        sRegistry.registerNativeAllocation(this, mNativeObject);
+        registerNativeAllocation();
 
         mStateCount = native_getStateCount(mNativeObject);
         mLength = native_getArrayLength(mNativeObject);
@@ -188,6 +226,55 @@ public final class LongArrayMultiStateCounter implements Parcelable {
                     "State: " + state + ", outside the range: [0-" + (mStateCount - 1) + "]");
         }
         native_setState(mNativeObject, state, timestampMs);
+    }
+
+    /**
+     * Sets the new values for the given state.
+     */
+    public void setValues(int state, long[] values) {
+        if (state < 0 || state >= mStateCount) {
+            throw new IllegalArgumentException(
+                    "State: " + state + ", outside the range: [0-" + (mStateCount - 1) + "]");
+        }
+        if (values.length != mLength) {
+            throw new IllegalArgumentException(
+                    "Invalid array length: " + values.length + ", expected: " + mLength);
+        }
+        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
+        if (container == null || container.mLength != values.length) {
+            container = new LongArrayContainer(values.length);
+        }
+        container.setValues(values);
+        native_setValues(mNativeObject, state, container.mNativeObject);
+        sTmpArrayContainer.set(container);
+    }
+
+    /**
+     * Sets the new values.  The delta between the previously set values and these values
+     * is distributed among the state according to the time the object spent in those states
+     * since the previous call to updateValues.
+     */
+    public void updateValues(long[] values, long timestampMs) {
+        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
+        if (container == null || container.mLength != values.length) {
+            container = new LongArrayContainer(values.length);
+        }
+        container.setValues(values);
+        updateValues(container, timestampMs);
+        sTmpArrayContainer.set(container);
+    }
+
+    /**
+     * Adds the supplied values to the current accumulated values in the counter.
+     */
+    public void incrementValues(long[] values, long timestampMs) {
+        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
+        if (container == null || container.mLength != values.length) {
+            container = new LongArrayContainer(values.length);
+        }
+        container.setValues(values);
+        native_incrementValues(mNativeObject, container.mNativeObject, timestampMs);
+        sTmpArrayContainer.set(container);
     }
 
     /**
@@ -289,7 +376,15 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     private static native void native_setState(long nativeObject, int state, long timestampMs);
 
     @CriticalNative
+    private static native void native_setValues(long nativeObject, int state,
+            long longArrayContainerNativeObject);
+
+    @CriticalNative
     private static native void native_updateValues(long nativeObject,
+            long longArrayContainerNativeObject, long timestampMs);
+
+    @CriticalNative
+    private static native void native_incrementValues(long nativeObject,
             long longArrayContainerNativeObject, long timestampMs);
 
     @CriticalNative
@@ -304,10 +399,10 @@ public final class LongArrayMultiStateCounter implements Parcelable {
             long longArrayContainerNativeObject, int state);
 
     @FastNative
-    private native String native_toString(long nativeObject);
+    private static native String native_toString(long nativeObject);
 
     @FastNative
-    private native void native_writeToParcel(long nativeObject, Parcel dest, int flags);
+    private static native void native_writeToParcel(long nativeObject, Parcel dest, int flags);
 
     @FastNative
     private static native long native_initFromParcel(Parcel parcel);

@@ -150,16 +150,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     public boolean isChangeEnabledByUid(long changeId, int uid) {
         super.isChangeEnabledByUid_enforcePermission();
 
-        String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
-        if (packages == null || packages.length == 0) {
-            return mCompatConfig.defaultChangeIdValue(changeId);
-        }
-        boolean enabled = true;
-        for (String packageName : packages) {
-            enabled &= isChangeEnabledByPackageName(changeId, packageName,
-                    UserHandle.getUserId(uid));
-        }
-        return enabled;
+        return isChangeEnabledByUidInternal(changeId, uid);
     }
 
     /**
@@ -206,6 +197,25 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             return isChangeEnabledInternalNoLogging(changeId, appInfo);
         }
         return false;
+    }
+
+    /**
+     * Internal version of {@link #isChangeEnabledByUid(long, int)}.
+     *
+     * <p>Does not perform costly permission check.
+     */
+    public boolean isChangeEnabledByUidInternal(long changeId, int uid) {
+        String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
+        if (packages == null || packages.length == 0) {
+            return mCompatConfig.defaultChangeIdValue(changeId);
+        }
+        boolean enabled = true;
+        final int userId = UserHandle.getUserId(uid);
+        for (String packageName : packages) {
+            final var appInfo = getApplicationInfo(packageName, userId);
+            enabled &= isChangeEnabledInternal(changeId, appInfo);
+        }
+        return enabled;
     }
 
     @Override

@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.UserIcons;
@@ -42,6 +43,10 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.settingslib.utils.CustomDialogHelper;
 import com.android.settingslib.utils.ThreadUtils;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -80,6 +85,7 @@ public class CreateUserDialogController {
     private Bitmap mSavedPhoto;
     private String mSavedName;
     private Drawable mSavedDrawable;
+    private String mCachedDrawablePath;
     private String mUserName;
     private Drawable mNewUserIcon;
     private Boolean mIsAdmin;
@@ -117,6 +123,7 @@ public class CreateUserDialogController {
         mUserNameView = null;
         mSuccessCallback = null;
         mCancelCallback = null;
+        mCachedDrawablePath = null;
         mCurrentState = INITIAL_DIALOG;
     }
 
@@ -124,13 +131,7 @@ public class CreateUserDialogController {
      * Notifies that the containing activity or fragment was reinitialized.
      */
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-        String pendingPhoto = savedInstanceState.getString(KEY_SAVED_PHOTO);
-        if (pendingPhoto != null) {
-            ThreadUtils.postOnBackgroundThread(() -> {
-                mSavedPhoto = EditUserPhotoController.loadNewUserPhotoBitmap(
-                        new File(pendingPhoto));
-            });
-        }
+        mCachedDrawablePath = savedInstanceState.getString(KEY_SAVED_PHOTO);
         mCurrentState = savedInstanceState.getInt(KEY_CURRENT_STATE);
         if (savedInstanceState.containsKey(KEY_IS_ADMIN)) {
             mIsAdmin = savedInstanceState.getBoolean(KEY_IS_ADMIN);
@@ -143,15 +144,12 @@ public class CreateUserDialogController {
      * Notifies that the containing activity or fragment is saving its state for later use.
      */
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        if (mUserCreationDialog != null && mEditUserPhotoController != null) {
-            // Bitmap cannot be stored into bundle because it may exceed parcel limit
-            // Store it in a temporary file instead
-            ThreadUtils.postOnBackgroundThread(() -> {
-                File file = mEditUserPhotoController.saveNewUserPhotoBitmap();
-                if (file != null) {
-                    savedInstanceState.putString(KEY_SAVED_PHOTO, file.getPath());
-                }
-            });
+        if (mUserCreationDialog != null && mEditUserPhotoController != null
+                && mCachedDrawablePath == null) {
+            mCachedDrawablePath = mEditUserPhotoController.getCachedDrawablePath();
+        }
+        if (mCachedDrawablePath != null) {
+            savedInstanceState.putString(KEY_SAVED_PHOTO, mCachedDrawablePath);
         }
         if (mIsAdmin != null) {
             savedInstanceState.putBoolean(KEY_IS_ADMIN, Boolean.TRUE.equals(mIsAdmin));
@@ -271,9 +269,10 @@ public class CreateUserDialogController {
                 mGrantAdminView.setVisibility(View.GONE);
                 break;
             case CREATE_USER_AND_CLOSE:
-                mNewUserIcon = mEditUserPhotoController != null
+                mNewUserIcon = (mEditUserPhotoController != null
+                        && mEditUserPhotoController.getNewUserPhotoDrawable() != null)
                         ? mEditUserPhotoController.getNewUserPhotoDrawable()
-                        : null;
+                        : mSavedDrawable;
 
                 String newName = mUserNameView.getText().toString().trim();
                 String defaultName = mActivity.getString(R.string.user_new_user_name);
@@ -295,12 +294,27 @@ public class CreateUserDialogController {
         }
     }
 
-    private Drawable getUserIcon(Drawable defaultUserIcon) {
-        if (mSavedPhoto != null) {
-            mSavedDrawable = CircleFramedDrawable.getInstance(mActivity, mSavedPhoto);
-            return mSavedDrawable;
+    private void setUserIcon(Drawable defaultUserIcon, ImageView userPhotoView) {
+        if (mCachedDrawablePath != null) {
+            ListenableFuture<Drawable> future = ThreadUtils.getBackgroundExecutor()
+                    .submit(() -> {
+                        mSavedPhoto = EditUserPhotoController.loadNewUserPhotoBitmap(
+                                new File(mCachedDrawablePath));
+                        mSavedDrawable = CircleFramedDrawable.getInstance(mActivity, mSavedPhoto);
+                        return mSavedDrawable;
+                    });
+            Futures.addCallback(future, new FutureCallback<>() {
+                @Override
+                public void onSuccess(@NonNull Drawable result) {
+                    userPhotoView.setImageDrawable(result);
+                }
+
+                @Override
+                public void onFailure(Throwable t) {}
+            }, mActivity.getMainExecutor());
+        } else {
+            userPhotoView.setImageDrawable(defaultUserIcon);
         }
-        return defaultUserIcon;
     }
 
     private void addUserInfoEditView() {
@@ -312,10 +326,7 @@ public class CreateUserDialogController {
         // if oldUserIcon param is null then we use a default gray user icon
         Drawable defaultUserIcon = UserIcons.getDefaultUserIcon(
                 mActivity.getResources(), UserHandle.USER_NULL, false);
-        // in case a new photo was selected and the activity got recreated we have to load the image
-        Drawable userIcon = getUserIcon(defaultUserIcon);
-        userPhotoView.setImageDrawable(userIcon);
-
+        setUserIcon(defaultUserIcon, userPhotoView);
         if (isChangePhotoRestrictedByBase(mActivity)) {
             // some users can't change their photos so we need to remove the suggestive icon
             mEditUserInfoView.findViewById(R.id.add_a_photo_icon).setVisibility(View.GONE);

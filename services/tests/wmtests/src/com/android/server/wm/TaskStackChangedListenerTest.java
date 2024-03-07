@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.os.Build.HW_TIMEOUT_MULTIPLIER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -39,6 +40,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -54,9 +56,13 @@ import android.widget.LinearLayout;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.server.wm.utils.CommonUtils;
+
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -73,9 +79,15 @@ public class TaskStackChangedListenerTest {
     private ITaskStackListener mTaskStackListener;
     private VirtualDisplay mVirtualDisplay;
     private ImageReader mImageReader;
+    private final ArrayList<Activity> mStartedActivities = new ArrayList<>();
 
-    private static final int WAIT_TIMEOUT_MS = 5000;
+    private static final int WAIT_TIMEOUT_MS = 5000 * HW_TIMEOUT_MULTIPLIER;
     private static final Object sLock = new Object();
+
+    @Before
+    public void setUp() {
+        CommonUtils.dismissKeyguard();
+    }
 
     @After
     public void tearDown() throws Exception {
@@ -86,6 +98,19 @@ public class TaskStackChangedListenerTest {
             mVirtualDisplay.release();
             mImageReader.close();
         }
+        // Finish from bottom to top.
+        final int size = mStartedActivities.size();
+        for (int i = 0; i < size; i++) {
+            final Activity activity = mStartedActivities.get(i);
+            if (!activity.isFinishing()) {
+                activity.finish();
+            }
+        }
+        // Wait for the last launched activity to be removed.
+        if (size > 0) {
+            CommonUtils.waitUntilActivityRemoved(mStartedActivities.get(size - 1));
+        }
+        mStartedActivities.clear();
     }
 
     private VirtualDisplay createVirtualDisplay() {
@@ -143,7 +168,7 @@ public class TaskStackChangedListenerTest {
     @Presubmit
     public void testTaskDescriptionChanged() throws Exception {
         final Object[] params = new Object[2];
-        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(2);
         registerTaskStackChangedListener(new TaskStackListener() {
             int mTaskId = -1;
 
@@ -331,25 +356,37 @@ public class TaskStackChangedListenerTest {
             }
         });
 
-        final LandscapeActivity activity =
-                (LandscapeActivity) startTestActivity(LandscapeActivity.class);
+        final boolean isIgnoringOrientationRequest =
+                CommonUtils.getIgnoreOrientationRequest(Display.DEFAULT_DISPLAY);
+        if (isIgnoringOrientationRequest) {
+            CommonUtils.setIgnoreOrientationRequest(Display.DEFAULT_DISPLAY, false);
+        }
 
-        int[] taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
-                candidate -> candidate[0] == activity.getTaskId());
-        assertNotNull(taskIdAndOrientation);
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE, taskIdAndOrientation[1]);
+        try {
+            final LandscapeActivity activity =
+                    (LandscapeActivity) startTestActivity(LandscapeActivity.class);
 
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
-                candidate -> candidate[0] == activity.getTaskId());
-        assertNotNull(taskIdAndOrientation);
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT, taskIdAndOrientation[1]);
+            int[] taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                    candidate -> candidate[0] == activity.getTaskId());
+            assertNotNull(taskIdAndOrientation);
+            assertEquals(
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE, taskIdAndOrientation[1]);
 
-        activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
-                candidate -> candidate[0] == activity.getTaskId());
-        assertNotNull(taskIdAndOrientation);
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, taskIdAndOrientation[1]);
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+            taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                    candidate -> candidate[0] == activity.getTaskId());
+            assertNotNull(taskIdAndOrientation);
+            assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT, taskIdAndOrientation[1]);
+
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            taskIdAndOrientation = waitForResult(taskIdAndOrientationQueue,
+                    candidate -> candidate[0] == activity.getTaskId());
+            assertNotNull(taskIdAndOrientation);
+            assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, taskIdAndOrientation[1]);
+        } finally {
+            CommonUtils.setIgnoreOrientationRequest(
+                    Display.DEFAULT_DISPLAY, isIgnoringOrientationRequest);
+        }
     }
 
     /**
@@ -373,6 +410,7 @@ public class TaskStackChangedListenerTest {
             throw new RuntimeException("Timed out waiting for Activity");
         }
         activity.waitForResumeStateChange(true);
+        mStartedActivities.add(activity);
         return activity;
     }
 
@@ -473,6 +511,8 @@ public class TaskStackChangedListenerTest {
         protected void onPostResume() {
             super.onPostResume();
             setTaskDescription(new TaskDescription("Test Label"));
+            // Sets the color of the status-bar should update the TaskDescription again.
+            getWindow().setStatusBarColor(Color.RED);
             synchronized (sLock) {
                 // Hold the lock to ensure no one is trying to access fields of this Activity in
                 // this test.

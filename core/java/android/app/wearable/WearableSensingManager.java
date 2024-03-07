@@ -35,6 +35,8 @@ import android.os.SharedMemory;
 import android.service.wearable.WearableSensingService;
 import android.system.OsConstants;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -105,7 +107,9 @@ public class WearableSensingManager {
             STATUS_SERVICE_UNAVAILABLE,
             STATUS_WEARABLE_UNAVAILABLE,
             STATUS_ACCESS_DENIED
-    }) public @interface StatusCode {}
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StatusCode {}
 
     private final Context mContext;
     private final IWearableSensingManager mService;

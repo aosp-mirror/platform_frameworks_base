@@ -407,6 +407,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                         mRingtone.setAudioAttributes(new AudioAttributes.Builder(mRingtone
                                 .getAudioAttributes())
                                 .setFlags(AudioAttributes.FLAG_BYPASS_MUTE)
+                                .addTag("VX_AOSP_SAMPLESOUND")
                                 .build());
                         mRingtone.play();
                     } catch (Throwable e) {

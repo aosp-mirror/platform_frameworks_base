@@ -16,22 +16,29 @@
 ** limitations under the License.
 */
 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="380dp"
-        android:layout_height="match_parent"
-        android:clipToPadding="false">
-    <LinearLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="380dp"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
             android:paddingLeft="24dp"
             android:paddingRight="24dp"
             android:paddingTop="24dp"
-            android:paddingBottom="24dp">
+            android:paddingBottom="24dp"
+            android:gravity="center">
 
-        <ImageView
+            <ImageView
                 android:id="@+id/log_access_image_view"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -41,7 +48,7 @@
                 tools:layout_editor_absoluteY="35dp"
                 android:gravity="center" />
 
-        <TextView
+            <TextView
                 android:id="@+id/log_access_dialog_title"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
@@ -51,7 +58,7 @@
                 android:textColor="?android:attr/textColorPrimary"
                 android:gravity="center" />
 
-        <TextView
+            <TextView
                 android:id="@+id/log_access_dialog_body"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
@@ -60,42 +67,37 @@
                 android:textAppearance="@style/PrimaryAllowLogAccess"
                 android:textColor="?android:attr/textColorPrimary"
                 android:gravity="center" />
-
-        <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-        <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            <Button
-                    android:id="@+id/log_access_dialog_allow_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/log_access_confirmation_allow"
-                    style="?permissionGrantButtonTopStyle"
-                    android:textAppearance="@style/PermissionGrantButtonTextAppearance"
-                    android:layout_marginBottom="5dp"
-                    android:layout_centerHorizontal="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentBottom="true"
-                    android:clipToOutline="true"
-                    android:gravity="center" />
-
-            <Button
-                    android:id="@+id/log_access_dialog_deny_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/log_access_confirmation_deny"
-                    style="?permissionGrantButtonBottomStyle"
-                    android:textAppearance="@style/PermissionGrantButtonTextAppearance"
-                    android:layout_centerHorizontal="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentBottom="true"
-                    android:clipToOutline="true"
-                    android:gravity="center" />
         </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="24dp">
+
+        <Button
+            android:id="@+id/log_access_dialog_allow_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/log_access_confirmation_allow"
+            style="?permissionGrantButtonTopStyle"
+            android:textAppearance="@style/PermissionGrantButtonTextAppearance"
+            android:layout_marginBottom="5dp"
+            android:clipToOutline="true"
+            android:gravity="center" />
+
+        <Button
+            android:id="@+id/log_access_dialog_deny_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/log_access_confirmation_deny"
+            style="?permissionGrantButtonBottomStyle"
+            android:textAppearance="@style/PermissionGrantButtonTextAppearance"
+            android:clipToOutline="true"
+            android:gravity="center" />
     </LinearLayout>
-</ScrollView>
+</LinearLayout>

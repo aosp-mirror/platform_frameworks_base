@@ -1,0 +1,8 @@
+package: "android.provider"
+
+flag {
+    name: "system_settings_default"
+    namespace: "package_manager_service"
+    description: "Enable Settings.System.resetToDefault APIs."
+    bug: "279083734"
+}

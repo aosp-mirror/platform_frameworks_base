@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"क्रिडेन्सियल म्यानेजर"</string>
     <string name="string_cancel" msgid="6369133483981306063">"रद्द गर्नुहोस्"</string>
     <string name="string_continue" msgid="1346732695941131882">"जारी राख्नुहोस्"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"थप विकल्पहरू"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"अर्को तरिकाले सेभ गर्नुहोस्"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"थप जान्नुहोस्"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड देखाइयोस्"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड लुकाइयोस्"</string>
@@ -33,10 +49,13 @@
     <string name="sign_ins" msgid="4710739369149469208">"साइन इनसम्बन्धी जानकारी"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"साइन इन गर्न प्रयोग गरिने जानकारी"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> यहाँ सेभ गर्नुहोस्:"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"अर्को डिभाइसमा पासकी बनाउने हो?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"अर्को डिभाइसमा पासकी बनाउने हो?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"अर्को डिभाइसमा पासवर्ड सेभ गर्ने हो?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"साइन इन गर्न प्रयोग गरिने युजरनेम र पासवर्ड अर्को डिभाइसमा सेभ गर्ने हो?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"तपाईंले साइन इन गर्ने सबै डिभाइसहरूमा <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> प्रयोग गर्ने हो?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"तपाईं सजिलैसँग साइन इन गर्न सक्नुहोस् भन्नाका लागि <xliff:g id="USERNAME">%1$s</xliff:g> को यो पासवर्ड म्यानेजरले तपाईंका पासवर्ड र पासकीहरू सेभ गर्छ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"डिफल्ट जानकारीका रूपमा सेट गर्नुहोस्"</string>
+    <string name="settings" msgid="6536394145760913145">"सेटिङ"</string>
     <string name="use_once" msgid="9027366575315399714">"एक पटक प्रयोग गर्नुहोस्"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> वटा पासवर्ड • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> वटा पासकी"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> वटा पासवर्ड"</string>
@@ -50,8 +69,13 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"बन्द गर्नुहोस्"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"हटाउनुहोस्"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"आफूले सेभ गरेको पासकी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"आफूले सेभ गरेको साइन इनसम्बन्धी जानकारी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि सेभ गरिएका साइन इनसम्बन्धी जानकारी छनौट गर्नुहोस्"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न सेभ गरिएको पासवर्ड प्रयोग गर्ने हो?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि तपाईंका क्रिडेन्सियलहरू प्रयोग गर्ने हो?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> का साइन इनसम्बन्धी विकल्पहरू अनलक गर्ने हो?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न सेभ गरिएको पासकी छनौट गर्नुहोस्"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न सेभ गरिएको पासवर्ड छनौट गर्नुहोस्"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न सेभ गरिएका क्रिडेन्सियल छनौट गर्नुहोस्"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न प्रयोग गरिने क्रिडेन्सियलहरू छनौट गर्नुहोस्"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन गर्न प्रयोग गरिने क्रिडेन्सियल छनौट गर्ने हो?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन गर्न गर्नका निम्ति यो जानकारी प्रयोग गर्ने हो?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"अर्कै विधि प्रयोग गरी साइन इन गर्नुहोस्"</string>

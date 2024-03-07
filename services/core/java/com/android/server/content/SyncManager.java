@@ -105,6 +105,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
@@ -220,8 +221,9 @@ public class SyncManager {
     private static final int SYNC_OP_STATE_INVALID_SYNC_DISABLED = 5;
 
     /** Flags used when connecting to a sync adapter service */
-    private static final int SYNC_ADAPTER_CONNECTION_FLAGS = Context.BIND_AUTO_CREATE
-            | Context.BIND_NOT_FOREGROUND | Context.BIND_ALLOW_OOM_MANAGEMENT;
+    private static final Context.BindServiceFlags SYNC_ADAPTER_CONNECTION_FLAGS =
+            Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                    | Context.BIND_ALLOW_OOM_MANAGEMENT);
 
     /** Singleton instance. */
     @GuardedBy("SyncManager.class")
@@ -433,6 +435,27 @@ public class SyncManager {
                 onUserUnlocked(userId);
             } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
                 onUserStopped(userId);
+            }
+        }
+    };
+
+    private static class PackageMonitorImpl extends PackageMonitor {
+        @Override
+        public boolean onHandleForceStop(Intent intent, String[] packageNames, int uid,
+                boolean doit, Bundle extras) {
+            final boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
+            if (isLoggable) {
+                Log.d(TAG, "Package force-stopped: " + Arrays.toString(packageNames)
+                        + ", uid: " + uid);
+            }
+            return false;
+        }
+
+        @Override
+        public void onPackageUnstopped(String packageName, int uid, Bundle extras) {
+            final boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
+            if (isLoggable) {
+                Log.d(TAG, "Package unstopped: " + packageName + ", uid: " + uid);
             }
         }
     };
@@ -699,6 +722,11 @@ public class SyncManager {
         intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
+
+
+        final PackageMonitor packageMonitor = new PackageMonitorImpl();
+        packageMonitor.register(mContext, null /* thread */, UserHandle.ALL,
+                false /* externalStorage */);
 
         intentFilter = new IntentFilter(Intent.ACTION_TIME_CHANGED);
         context.registerReceiver(mOtherIntentsReceiver, intentFilter);
@@ -1107,7 +1135,7 @@ public class SyncManager {
 
             for (String authority : syncableAuthorities) {
                 int isSyncable = computeSyncable(account.account, account.userId, authority,
-                        !checkIfAccountReady);
+                        !checkIfAccountReady, /*checkStoppedState=*/ true);
 
                 if (isSyncable == AuthorityInfo.NOT_SYNCABLE) {
                     continue;
@@ -1227,7 +1255,7 @@ public class SyncManager {
     }
 
     public int computeSyncable(Account account, int userId, String authority,
-            boolean checkAccountAccess) {
+            boolean checkAccountAccess, boolean checkStoppedState) {
         final int status = getIsSyncable(account, userId, authority);
         if (status == AuthorityInfo.NOT_SYNCABLE) {
             return AuthorityInfo.NOT_SYNCABLE;
@@ -1240,6 +1268,9 @@ public class SyncManager {
         }
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
+        if (checkStoppedState && isPackageStopped(owningPackage, userId)) {
+            return AuthorityInfo.NOT_SYNCABLE;
+        }
         if (mAmi.isAppStartModeDisabled(owningUid, owningPackage)) {
             Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
                     + syncAdapterInfo.componentName
@@ -1253,6 +1284,21 @@ public class SyncManager {
         }
 
         return status;
+    }
+
+    /**
+     * Returns whether the package is in a stopped state or not.
+     * Always returns {@code false} if the {@code android.content.pm.stay_stopped} flag is not set.
+     */
+    private boolean isPackageStopped(String packageName, int userId) {
+        if (android.content.pm.Flags.stayStopped()) {
+            try {
+                return mPackageManagerInternal.isPackageStopped(packageName, userId);
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Couldn't determine stopped state for unknown package: " + packageName);
+            }
+        }
+        return false;
     }
 
     private boolean canAccessAccount(Account account, String packageName, int uid) {
@@ -3044,7 +3090,7 @@ public class SyncManager {
 
     public static void sendMessage(Message message) {
         final SyncManager instance = getInstance();
-        if (instance != null) {
+        if (instance != null && instance.mSyncHandler != null) {
             instance.mSyncHandler.sendMessage(message);
         }
     }
@@ -3495,6 +3541,9 @@ public class SyncManager {
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && op.target.matchesSpec(target)
                         && op.areExtrasEqual(extras, /*includeSyncSettings=*/ true)) {
+                    if (isPackageStopped(op.owningPackage, target.userId)) {
+                        continue; // skip stopped package
+                    }
                     maybeUpdateSyncPeriodH(op, pollFrequencyMillis, flexMillis);
                     return;
                 }
@@ -3626,7 +3675,8 @@ public class SyncManager {
                 }
             }
             // Drop this sync request if it isn't syncable.
-            state = computeSyncable(target.account, target.userId, target.provider, true);
+            state = computeSyncable(target.account, target.userId, target.provider, true,
+                    /*checkStoppedState=*/ true);
             if (state == AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS) {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: "

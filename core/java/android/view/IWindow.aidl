@@ -54,6 +54,10 @@ oneway interface IWindow {
      */
     void executeCommand(String command, String parameters, in ParcelFileDescriptor descriptor);
 
+    /**
+     * Please dispatch through WindowStateResizeItem instead of directly calling this method from
+     * the system server.
+     */
     void resized(in ClientWindowFrames frames, boolean reportDraw,
             in MergedConfiguration newMergedConfiguration, in InsetsState insetsState,
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,

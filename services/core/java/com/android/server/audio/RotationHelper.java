@@ -80,6 +80,7 @@ class RotationHelper {
         sContext = context;
         sHandler = handler;
         sDisplayListener = new AudioDisplayListener();
+        sFoldStateListener = new FoldStateListener(sContext, RotationHelper::updateFoldState);
         sRotationCallback = rotationCallback;
         sFoldStateCallback = foldStateCallback;
         enable();
@@ -90,7 +91,6 @@ class RotationHelper {
                 .registerDisplayListener(sDisplayListener, sHandler);
         updateOrientation();
 
-        sFoldStateListener = new FoldStateListener(sContext, folded -> updateFoldState(folded));
         sContext.getSystemService(DeviceStateManager.class)
                 .registerCallback(new HandlerExecutor(sHandler), sFoldStateListener);
     }

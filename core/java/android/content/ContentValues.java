@@ -35,6 +35,7 @@ import java.util.Set;
  * This class is used to store a set of values that the {@link ContentResolver}
  * can process.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ContentValues implements Parcelable {
     public static final String TAG = "ContentValues";
 

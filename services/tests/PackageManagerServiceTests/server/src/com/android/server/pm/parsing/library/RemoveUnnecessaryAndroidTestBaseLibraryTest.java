@@ -23,9 +23,9 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility.RemoveUnnecessaryAndroidTestBaseLibrary;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.Test;

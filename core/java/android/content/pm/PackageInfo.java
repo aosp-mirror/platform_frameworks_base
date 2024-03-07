@@ -16,6 +16,9 @@
 
 package android.content.pm;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -26,16 +29,19 @@ import android.os.Parcelable;
  * Overall information about the contents of a package.  This corresponds
  * to all of the information collected from AndroidManifest.xml.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PackageInfo implements Parcelable {
     /**
      * The name of this package.  From the &lt;manifest&gt; tag's "name"
      * attribute.
      */
+    @NonNull
     public String packageName;
 
     /**
      * The names of any installed split APKs for this package.
      */
+    @NonNull
     public String[] splitNames;
 
     /**
@@ -93,6 +99,7 @@ public class PackageInfo implements Parcelable {
      * tag's {@link android.R.styleable#AndroidManifest_versionName versionName}
      * attribute, or null if there was none.
      */
+    @Nullable
     public String versionName;
 
     /**
@@ -109,6 +116,7 @@ public class PackageInfo implements Parcelable {
      * {@link android.R.styleable#AndroidManifest_revisionCode revisionCode}
      * attribute. Indexes are a 1:1 mapping against {@link #splitNames}.
      */
+    @NonNull
     public int[] splitRevisionCodes;
 
     /**
@@ -116,21 +124,23 @@ public class PackageInfo implements Parcelable {
      * tag's {@link android.R.styleable#AndroidManifest_sharedUserId sharedUserId}
      * attribute.
      */
+    @Nullable
     public String sharedUserId;
-    
+
     /**
      * The shared user ID label of this package, as specified by the &lt;manifest&gt;
      * tag's {@link android.R.styleable#AndroidManifest_sharedUserLabel sharedUserLabel}
      * attribute.
      */
     public int sharedUserLabel;
-    
+
     /**
      * Information collected from the &lt;application&gt; tag, or null if
      * there was none.
      */
+    @Nullable
     public ApplicationInfo applicationInfo;
-    
+
     /**
      * The time at which the app was first installed.  Units are as
      * per {@link System#currentTimeMillis()}.
@@ -147,6 +157,7 @@ public class PackageInfo implements Parcelable {
      * All kernel group-IDs that have been assigned to this package.
      * This is only filled in if the flag {@link PackageManager#GET_GIDS} was set.
      */
+    @Nullable
     public int[] gids;
 
     /**
@@ -155,6 +166,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_ACTIVITIES} was set.
      */
+    @Nullable
     public ActivityInfo[] activities;
 
     /**
@@ -163,6 +175,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_RECEIVERS} was set.
      */
+    @Nullable
     public ActivityInfo[] receivers;
 
     /**
@@ -171,6 +184,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_SERVICES} was set.
      */
+    @Nullable
     public ServiceInfo[] services;
 
     /**
@@ -179,6 +193,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PROVIDERS} was set.
      */
+    @Nullable
     public ProviderInfo[] providers;
 
     /**
@@ -187,6 +202,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_INSTRUMENTATION} was set.
      */
+    @Nullable
     public InstrumentationInfo[] instrumentation;
 
     /**
@@ -195,6 +211,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PERMISSIONS} was set.
      */
+    @Nullable
     public PermissionInfo[] permissions;
 
     /**
@@ -205,6 +222,7 @@ public class PackageInfo implements Parcelable {
      * all permissions requested, even those that were not granted or known
      * by the system at install time.
      */
+    @Nullable
     public String[] requestedPermissions;
 
     /**
@@ -213,9 +231,10 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PERMISSIONS} was set.  Each value matches
      * the corresponding entry in {@link #requestedPermissions}, and will have
-     * the flags {@link #REQUESTED_PERMISSION_GRANTED} and
+     * the flags {@link #REQUESTED_PERMISSION_GRANTED}, {@link #REQUESTED_PERMISSION_IMPLICIT}, and
      * {@link #REQUESTED_PERMISSION_NEVER_FOR_LOCATION} set as appropriate.
      */
+    @Nullable
     public int[] requestedPermissionsFlags;
 
     /**
@@ -224,7 +243,16 @@ public class PackageInfo implements Parcelable {
      * is only filled if the flag {@link PackageManager#GET_ATTRIBUTIONS_LONG} was set.
      */
     @SuppressWarnings({"ArrayReturn", "NullableCollection"})
-    public @Nullable Attribution[] attributions;
+    @Nullable
+    public Attribution[] attributions;
+
+    /**
+     * The time at which the app was archived for the user.  Units are as
+     * per {@link System#currentTimeMillis()}.
+     * @hide
+     */
+    @CurrentTimeMillisLong
+    private long mArchiveTimeMillis;
 
     /**
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
@@ -281,6 +309,7 @@ public class PackageInfo implements Parcelable {
      * @deprecated use {@code signingInfo} instead
      */
     @Deprecated
+    @Nullable
     public Signature[] signatures;
 
     /**
@@ -292,6 +321,7 @@ public class PackageInfo implements Parcelable {
      * Use this field instead of the deprecated {@code signatures} field.
      * See {@link SigningInfo} for more information on its contents.
      */
+    @Nullable
     public SigningInfo signingInfo;
 
     /**
@@ -301,6 +331,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none. This is only filled in if the flag
      * {@link PackageManager#GET_CONFIGURATIONS} was set.
      */
+    @Nullable
     public ConfigurationInfo[] configPreferences;
 
     /**
@@ -308,6 +339,7 @@ public class PackageInfo implements Parcelable {
      *
      * @see FeatureInfo#FLAG_REQUIRED
      */
+    @Nullable
     public FeatureInfo[] reqFeatures;
 
     /**
@@ -318,6 +350,7 @@ public class PackageInfo implements Parcelable {
      *
      * @see FeatureInfo#FLAG_REQUIRED
      */
+    @Nullable
     public FeatureGroupInfo[] featureGroups;
 
     /**
@@ -386,12 +419,14 @@ public class PackageInfo implements Parcelable {
      * The restricted account authenticator type that is used by this application.
      * @hide
      */
+    @Nullable
     public String restrictedAccountType;
 
     /**
      * The required account type without which this application will not function.
      * @hide
      */
+    @Nullable
     public String requiredAccountType;
 
     /**
@@ -401,6 +436,7 @@ public class PackageInfo implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @Nullable
     public String overlayTarget;
 
     /**
@@ -409,6 +445,7 @@ public class PackageInfo implements Parcelable {
      * Overlayable name defined within the target package, or null.
      * @hide
      */
+    @Nullable
     public String targetOverlayableName;
 
     /**
@@ -416,6 +453,7 @@ public class PackageInfo implements Parcelable {
      *
      * @hide
      */
+    @Nullable
     public String overlayCategory;
 
     /** @hide */
@@ -479,6 +517,22 @@ public class PackageInfo implements Parcelable {
      */
     public boolean isStaticOverlayPackage() {
         return overlayTarget != null && mOverlayIsStatic;
+    }
+
+    /**
+     * Returns the time at which the app was archived for the user.  Units are as
+     * per {@link System#currentTimeMillis()}.
+     */
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public @CurrentTimeMillisLong long getArchiveTimeMillis() {
+        return mArchiveTimeMillis;
+    }
+
+    /**
+     * @hide
+     */
+    public void setArchiveTimeMillis(@CurrentTimeMillisLong long value) {
+        mArchiveTimeMillis = value;
     }
 
     @Override
@@ -548,6 +602,7 @@ public class PackageInfo implements Parcelable {
         }
         dest.writeBoolean(isApex);
         dest.writeBoolean(isActiveApex);
+        dest.writeLong(mArchiveTimeMillis);
         dest.restoreAllowSquashing(prevAllowSquashing);
     }
 
@@ -613,5 +668,6 @@ public class PackageInfo implements Parcelable {
         }
         isApex = source.readBoolean();
         isActiveApex = source.readBoolean();
+        mArchiveTimeMillis = source.readLong();
     }
 }

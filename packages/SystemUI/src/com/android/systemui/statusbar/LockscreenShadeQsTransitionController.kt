@@ -21,10 +21,11 @@ import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import androidx.annotation.FloatRange
 import androidx.annotation.Px
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -38,7 +39,14 @@ constructor(
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
     @Assisted private val qsProvider: () -> QS,
-) : AbstractLockscreenShadeTransitionController(context, configurationController, dumpManager) {
+    splitShadeStateController: SplitShadeStateController
+) :
+    AbstractLockscreenShadeTransitionController(
+        context,
+        configurationController,
+        dumpManager,
+        splitShadeStateController
+    ) {
 
     private val qs: QS
         get() = qsProvider()

@@ -25,9 +25,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirp
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
@@ -90,6 +91,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
                 AirplaneModeInteractor(
                     airplaneModeRepository,
                     connectivityRepository,
+                    FakeMobileConnectionsRepository(),
                 ),
                 tableLogBuffer,
                 scope,
@@ -229,7 +231,8 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         val color = 0x12345678
-        view.onDarkChanged(arrayListOf(), 1.0f, color)
+        val contrast = 0x12344321
+        view.onDarkChangedWithContrast(arrayListOf(), color, contrast)
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
@@ -244,7 +247,8 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         val color = 0x23456789
-        view.setStaticDrawableColor(color)
+        val contrast = 0x12344321
+        view.setStaticDrawableColor(color, contrast)
         testableLooper.processAllMessages()
 
         assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))

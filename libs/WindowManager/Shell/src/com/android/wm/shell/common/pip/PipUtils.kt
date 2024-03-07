@@ -21,13 +21,13 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
 import android.os.RemoteException
-import android.os.SystemProperties
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Pair
 import android.util.TypedValue
 import android.window.TaskSnapshot
 import com.android.internal.protolog.common.ProtoLog
+import com.android.wm.shell.Flags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import kotlin.math.abs
 
@@ -37,7 +37,6 @@ object PipUtils {
 
     // Minimum difference between two floats (e.g. aspect ratios) to consider them not equal.
     private const val EPSILON = 1e-7
-    private const val ENABLE_PIP2_IMPLEMENTATION = "persist.wm.debug.enable_pip2_implementation"
 
     /**
      * @return the ComponentName and user id of the top non-SystemUI activity in the pinned stack.
@@ -129,9 +128,7 @@ object PipUtils {
     @JvmStatic
     fun getTaskSnapshot(taskId: Int, isLowResolution: Boolean): TaskSnapshot? {
         return if (taskId <= 0) null else try {
-            ActivityTaskManager.getService().getTaskSnapshot(
-                taskId, isLowResolution, false /* takeSnapshotIfNeeded */
-            )
+            ActivityTaskManager.getService().getTaskSnapshot(taskId, isLowResolution)
         } catch (e: RemoteException) {
             Log.e(TAG, "Failed to get task snapshot, taskId=$taskId", e)
             null
@@ -140,5 +137,5 @@ object PipUtils {
 
     @JvmStatic
     val isPip2ExperimentEnabled: Boolean
-        get() = SystemProperties.getBoolean(ENABLE_PIP2_IMPLEMENTATION, false)
+        get() = Flags.enablePip2Implementation()
 }

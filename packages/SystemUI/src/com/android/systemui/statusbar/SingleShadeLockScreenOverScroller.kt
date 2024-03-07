@@ -3,7 +3,7 @@ package com.android.systemui.statusbar
 import android.content.Context
 import android.content.res.Configuration
 import android.util.MathUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.app.animation.Interpolators
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.policy.ConfigurationController

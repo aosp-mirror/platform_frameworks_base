@@ -22,7 +22,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.util.SparseArray;
 
-import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
 
 /** @hide */
 public class PackageStateUtils {

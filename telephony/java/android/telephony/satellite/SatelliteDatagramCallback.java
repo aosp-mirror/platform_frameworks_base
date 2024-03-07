@@ -16,7 +16,11 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.util.function.Consumer;
 
@@ -25,6 +29,8 @@ import java.util.function.Consumer;
  *
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public interface SatelliteDatagramCallback {
     /**
      * Called when there is an incoming datagram to be received.
@@ -36,6 +42,7 @@ public interface SatelliteDatagramCallback {
      *                 that they received the datagram. If the callback is not received within
      *                 five minutes, Telephony will resend the datagram.
      */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     void onSatelliteDatagramReceived(long datagramId, @NonNull SatelliteDatagram datagram,
             int pendingCount, @NonNull Consumer<Void> callback);
 }

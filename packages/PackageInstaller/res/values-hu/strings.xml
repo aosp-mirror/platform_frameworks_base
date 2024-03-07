@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Alkalmazás telepítve."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Telepíti ezt az alkalmazást?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Frissíti ezt az alkalmazást?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"A(z) <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> forrásból rissíti ezt az appot?\n\nEz az app általában a következő forrásból kap frissítéseket: <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Ha másik forrásból frissíti, a későbbiekben bármelyik forrásból kaphat frissítéseket a telefonján. Emiatt megváltozhat az app működése."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Frissítse ezt az alkalmazást innen: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ez az alkalmazás általában a következő forrásból kap frissítéseket: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ha másik forrásból frissíti, a későbbiekben bármelyik forrásból kaphat frissítéseket a táblagépén. Emiatt megváltozhat az alkalmazás működése.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Frissítse ezt az alkalmazást innen: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ez az alkalmazás általában a következő forrásból kap frissítéseket: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ha másik forrásból frissíti, a későbbiekben bármelyik forrásból kaphat frissítéseket a tévéjén. Emiatt megváltozhat az alkalmazás működése.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Frissítse ezt az alkalmazást innen: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ez az alkalmazás általában a következő forrásból kap frissítéseket: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Ha másik forrásból frissíti, a későbbiekben bármelyik forrásból kaphat frissítéseket a telefonján. Emiatt megváltozhat az alkalmazás működése.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Az alkalmazás nincs telepítve."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"A csomag telepítését letiltotta a rendszer."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"A nem csomagként telepített alkalmazás ütközik egy már létező csomaggal."</string>
@@ -42,7 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ez a felhasználó nem telepíthet ismeretlen alkalmazásokat"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ez a felhasználó nem telepíthet alkalmazásokat"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <string name="update_anyway" msgid="8792432341346261969">"Frissítés mindenképp"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Frissítés"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Alkalmazáskezelés"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nincs elég hely"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazást nem lehet telepíteni. Szabadítson fel egy kis helyet, és próbálkozzon újra."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> alkalmazásadat megtartása."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Szeretné törölni ezt az alkalmazást?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Eltávolítja ezt az alkalmazást? A klónozott <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> is törlésre kerül."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Eltávolítja ezt az alkalmazást a privát területről?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Futó eltávolítások"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Sikertelen telepítések"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Eltávolítás…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Alkalmazás telepítve értesítés"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Sikeresen telepítve"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> alkalmazás sikeresen telepítve"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Visszaállítja a(z) <xliff:g id="APPNAME">%1$s</xliff:g> appot innen: <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"A háttérben megkezdődik az app letöltése"</string>
+    <string name="restore" msgid="8460854736328970444">"Visszaállítás"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Az eszköz offline állapotban van"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Automatikusan megtörténik az alkalmazás visszaállítása, amikor Ön csatlakozik az internethez."</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Hiba történt"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Hiba történt az alkalmazás visszaállítása során."</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Nincs elegendő tárhely"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Az alkalmazás visszaállításához szabadítson fel tárhelyet ezen az eszközön. Szükséges tárhely: <xliff:g id="BYTES">%1$s</xliff:g>."</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Fontos teendő"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Az alkalmazás visszaállításához kövesse a következő lépéseket."</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"A(z) <xliff:g id="INSTALLERNAME">%1$s</xliff:g> le van tiltva"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"A(z) <xliff:g id="INSTALLERNAME">%1$s</xliff:g> nincs telepítve"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Az alkalmazás app visszaállításához telepítse a következőt: <xliff:g id="INSTALLERNAME">%1$s</xliff:g>."</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Tovább"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Tárhely ürítése"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Beállítások"</string>
+    <string name="close" msgid="5214897374055647996">"Bezárás"</string>
 </resources>
