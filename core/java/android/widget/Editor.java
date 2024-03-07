@@ -2112,6 +2112,17 @@ public class Editor {
             }
         }
 
+        boolean shouldDrawHighlightsOnTop = highContrastTextSmallTextRect()
+                && canvas.isHighContrastTextEnabled();
+
+        // If high contrast text is drawing background rectangles behind the text, those cover up
+        // the cursor and correction highlighter etc. So just draw the text first, then draw the
+        // others on top of the text. If high contrast text isn't enabled: draw text last, as usual.
+        if (shouldDrawHighlightsOnTop) {
+            drawLayout(canvas, layout, highlightPaths, highlightPaints, selectionHighlight,
+                    selectionHighlightPaint, cursorOffsetVertical, shouldDrawHighlightsOnTop);
+        }
+
         if (mCorrectionHighlighter != null) {
             mCorrectionHighlighter.draw(canvas, cursorOffsetVertical);
         }
@@ -2136,9 +2147,19 @@ public class Editor {
             mInsertModeController.onDraw(canvas);
         }
 
+        if (!shouldDrawHighlightsOnTop) {
+            drawLayout(canvas, layout, highlightPaths, highlightPaints, selectionHighlight,
+                    selectionHighlightPaint, cursorOffsetVertical, shouldDrawHighlightsOnTop);
+        }
+    }
+
+    private void drawLayout(Canvas canvas, Layout layout, List<Path> highlightPaths,
+            List<Paint> highlightPaints, Path selectionHighlight, Paint selectionHighlightPaint,
+            int cursorOffsetVertical, boolean shouldDrawHighlightsOnTop) {
         if (mTextView.canHaveDisplayList() && canvas.isHardwareAccelerated()) {
             drawHardwareAccelerated(canvas, layout, highlightPaths, highlightPaints,
-                    selectionHighlight, selectionHighlightPaint, cursorOffsetVertical);
+                    selectionHighlight, selectionHighlightPaint, cursorOffsetVertical,
+                    shouldDrawHighlightsOnTop);
         } else {
             layout.draw(canvas, highlightPaths, highlightPaints, selectionHighlight,
                     selectionHighlightPaint, cursorOffsetVertical);
@@ -2147,14 +2168,13 @@ public class Editor {
 
     private void drawHardwareAccelerated(Canvas canvas, Layout layout,
             List<Path> highlightPaths, List<Paint> highlightPaints,
-            Path selectionHighlight, Paint selectionHighlightPaint, int cursorOffsetVertical) {
+            Path selectionHighlight, Paint selectionHighlightPaint, int cursorOffsetVertical,
+            boolean shouldDrawHighlightsOnTop) {
         final long lineRange = layout.getLineRangeForDraw(canvas);
         int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
         int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
         if (lastLine < 0) return;
 
-        boolean shouldDrawHighlightsOnTop = highContrastTextSmallTextRect()
-                && canvas.isHighContrastTextEnabled();
 
         if (!shouldDrawHighlightsOnTop) {
             layout.drawWithoutText(canvas, highlightPaths, highlightPaints, selectionHighlight,
