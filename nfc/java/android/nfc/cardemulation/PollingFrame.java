@@ -133,12 +133,23 @@ public final class PollingFrame implements Parcelable{
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public static final String KEY_POLLING_LOOP_TIMESTAMP = "android.nfc.cardemulation.TIMESTAMP";
 
+    /**
+     * KEY_POLLING_LOOP_TIMESTAMP is the Bundle key for whether this polling frame triggered
+     * autoTransact in the Bundle included in MSG_POLLING_LOOP.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static final String KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT =
+            "android.nfc.cardemulation.TRIGGERED_AUTOTRANSACT";
+
 
     @PollingFrameType
     private final int mType;
     private final byte[] mData;
     private final int mGain;
     private final int mTimestamp;
+    private final boolean mTriggeredAutoTransact;
 
     public static final @NonNull Parcelable.Creator<PollingFrame> CREATOR =
             new Parcelable.Creator<>() {
@@ -159,14 +170,17 @@ public final class PollingFrame implements Parcelable{
         mData = (data == null) ? new byte[0] : data;
         mGain = frame.getInt(KEY_POLLING_LOOP_GAIN, -1);
         mTimestamp = frame.getInt(KEY_POLLING_LOOP_TIMESTAMP);
+        mTriggeredAutoTransact = frame.containsKey(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT)
+                && frame.getBoolean(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT);
     }
 
     public PollingFrame(@PollingFrameType int type, @Nullable byte[] data,
-            int gain, int timestamp) {
+            int gain, int timestamp, boolean triggeredAutoTransact) {
         mType = type;
         mData = data == null ? new byte[0] : data;
         mGain = gain;
         mTimestamp = timestamp;
+        mTriggeredAutoTransact = triggeredAutoTransact;
     }
 
     /**
@@ -210,6 +224,14 @@ public final class PollingFrame implements Parcelable{
         return mTimestamp;
     }
 
+    /**
+     * Returns whether this frame triggered the device to automatically disable observe mode and
+     * allow one transaction.
+     */
+    public boolean getTriggeredAutoTransact() {
+        return mTriggeredAutoTransact;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -233,6 +255,7 @@ public final class PollingFrame implements Parcelable{
         }
         frame.putByteArray(KEY_POLLING_LOOP_DATA, getData());
         frame.putInt(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
+        frame.putBoolean(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT, getTriggeredAutoTransact());
         return frame;
     }
 
