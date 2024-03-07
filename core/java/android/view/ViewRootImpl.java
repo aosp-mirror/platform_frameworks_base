@@ -12360,7 +12360,9 @@ public final class ViewRootImpl implements ViewParent,
         // For now, FRAME_RATE_CATEGORY_HIGH_HINT is used for boosting with user interaction.
         // FRAME_RATE_CATEGORY_HIGH is for boosting without user interaction
         // (e.g., Window Initialization).
-        if (mIsFrameRateBoosting || mInsetsAnimationRunning) {
+        if (mIsFrameRateBoosting || mInsetsAnimationRunning
+                || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
+                        && mPreferredFrameRate > 0)) {
             frameRateCategory = FRAME_RATE_CATEGORY_HIGH;
         }
 
@@ -12383,7 +12385,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void setPreferredFrameRate(float preferredFrameRate) {
-        if (!shouldSetFrameRate()) {
+        if (!shouldSetFrameRate() || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
+                && preferredFrameRate > 0)) {
             return;
         }
 
@@ -12540,6 +12543,14 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public float getPreferredFrameRate() {
         return mPreferredFrameRate >= 0 ? mPreferredFrameRate : mLastPreferredFrameRate;
+    }
+
+    /**
+     * Get the value of mLastPreferredFrameRate
+     */
+    @VisibleForTesting
+    public float getLastPreferredFrameRate() {
+        return mLastPreferredFrameRate;
     }
 
     /**
