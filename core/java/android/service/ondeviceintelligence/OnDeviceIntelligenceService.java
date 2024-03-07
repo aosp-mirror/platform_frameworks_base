@@ -32,6 +32,7 @@ import android.app.ondeviceintelligence.IDownloadCallback;
 import android.app.ondeviceintelligence.IFeatureCallback;
 import android.app.ondeviceintelligence.IFeatureDetailsCallback;
 import android.app.ondeviceintelligence.IListFeaturesCallback;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
 import android.content.Intent;
 import android.os.Binder;
@@ -48,14 +49,8 @@ import android.util.Slog;
 
 import com.android.internal.infra.AndroidFuture;
 
-import androidx.annotation.IntDef;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -234,7 +229,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
      */
     public final void updateProcessingState(@NonNull Bundle processingState,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull OutcomeReceiver<PersistableBundle, OnDeviceUpdateProcessingException> statusReceiver) {
+            @NonNull OutcomeReceiver<PersistableBundle, OnDeviceIntelligenceException> statusReceiver) {
         Objects.requireNonNull(callbackExecutor);
         if (mRemoteProcessingService == null) {
             throw new IllegalStateException("Remote processing service is unavailable.");
@@ -254,7 +249,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
                         public void onFailure(int errorCode, String errorMessage) {
                             Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                                     () -> statusReceiver.onError(
-                                            new OnDeviceUpdateProcessingException(
+                                            new OnDeviceIntelligenceException(
                                                     errorCode, errorMessage))));
                         }
                     });
@@ -265,7 +260,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
     }
 
     private OutcomeReceiver<Feature,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> wrapFeatureCallback(
+            OnDeviceIntelligenceException> wrapFeatureCallback(
             IFeatureCallback featureCallback) {
         return new OutcomeReceiver<>() {
             @Override
@@ -279,7 +274,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
 
             @Override
             public void onError(
-                    @NonNull OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException exception) {
+                    @NonNull OnDeviceIntelligenceException exception) {
                 try {
                     featureCallback.onFailure(exception.getErrorCode(), exception.getMessage(),
                             exception.getErrorParams());
@@ -291,7 +286,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
     }
 
     private OutcomeReceiver<List<Feature>,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> wrapListFeaturesCallback(
+            OnDeviceIntelligenceException> wrapListFeaturesCallback(
             IListFeaturesCallback listFeaturesCallback) {
         return new OutcomeReceiver<>() {
             @Override
@@ -305,7 +300,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
 
             @Override
             public void onError(
-                    @NonNull OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException exception) {
+                    @NonNull OnDeviceIntelligenceException exception) {
                 try {
                     listFeaturesCallback.onFailure(exception.getErrorCode(), exception.getMessage(),
                             exception.getErrorParams());
@@ -317,7 +312,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
     }
 
     private OutcomeReceiver<FeatureDetails,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> wrapFeatureDetailsCallback(
+            OnDeviceIntelligenceException> wrapFeatureDetailsCallback(
             IFeatureDetailsCallback featureStatusCallback) {
         return new OutcomeReceiver<>() {
             @Override
@@ -331,7 +326,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
 
             @Override
             public void onError(
-                    @NonNull OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException exception) {
+                    @NonNull OnDeviceIntelligenceException exception) {
                 try {
                     featureStatusCallback.onFailure(exception.getErrorCode(),
                             exception.getMessage(), exception.getErrorParams());
@@ -444,7 +439,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
      */
     public abstract void onGetFeatureDetails(int callerUid, @NonNull Feature feature,
             @NonNull OutcomeReceiver<FeatureDetails,
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> featureDetailsCallback);
+                    OnDeviceIntelligenceException> featureDetailsCallback);
 
 
     /**
@@ -455,7 +450,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
      */
     public abstract void onGetFeature(int callerUid, int featureId,
             @NonNull OutcomeReceiver<Feature,
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> featureCallback);
+                    OnDeviceIntelligenceException> featureCallback);
 
     /**
      * List all features which are available in the remote implementation. The implementation might
@@ -465,7 +460,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * @param listFeaturesCallback callback to populate the features list.
      */
     public abstract void onListFeatures(int callerUid, @NonNull OutcomeReceiver<List<Feature>,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> listFeaturesCallback);
+            OnDeviceIntelligenceException> listFeaturesCallback);
 
     /**
      * Provides a long value representing the version of the remote implementation processing
@@ -474,60 +469,4 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * @param versionConsumer consumer to populate the version.
      */
     public abstract void onGetVersion(@NonNull LongConsumer versionConsumer);
-
-
-    /**
-     * Exception type to be populated when calls to {@link #updateProcessingState} fail.
-     */
-    public static class OnDeviceUpdateProcessingException extends
-            OnDeviceIntelligenceServiceException {
-        /**
-         * The connection to remote service failed and the processing state could not be updated.
-         */
-        public static final int PROCESSING_UPDATE_STATUS_CONNECTION_FAILED = 1;
-
-
-        /**
-         * @hide
-         */
-        @IntDef(value = {
-                PROCESSING_UPDATE_STATUS_CONNECTION_FAILED
-        }, open = true)
-        @Target({ElementType.TYPE_USE, ElementType.METHOD, ElementType.PARAMETER,
-                ElementType.FIELD})
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface ErrorCode {
-        }
-
-        public OnDeviceUpdateProcessingException(@ErrorCode int errorCode) {
-            super(errorCode);
-        }
-
-        public OnDeviceUpdateProcessingException(@ErrorCode int errorCode,
-                @NonNull String errorMessage) {
-            super(errorCode, errorMessage);
-        }
-    }
-
-    /**
-     * Exception type to be used for surfacing errors to service implementation.
-     */
-    public abstract static class OnDeviceIntelligenceServiceException extends Exception {
-        private final int mErrorCode;
-
-        public OnDeviceIntelligenceServiceException(int errorCode) {
-            this.mErrorCode = errorCode;
-        }
-
-        public OnDeviceIntelligenceServiceException(int errorCode,
-                @NonNull String errorMessage) {
-            super(errorMessage);
-            this.mErrorCode = errorCode;
-        }
-
-        public int getErrorCode() {
-            return mErrorCode;
-        }
-
-    }
 }

@@ -21,34 +21,49 @@ import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.os.OutcomeReceiver;
+import android.os.Bundle;
 
 import java.util.function.Consumer;
 
 /**
- * Response Callback to populate the processed response or any error that occurred during the
+ * Callback to populate the processed response or any error that occurred during the
  * request processing. This callback also provides a method to request additional data to be
- * augmented to the request-processing, using  the partial {@link Content} that was already
+ * augmented to the request-processing, using the partial response that was already
  * processed in the remote implementation.
  *
  * @hide
  */
 @SystemApi
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
-public interface ProcessingOutcomeReceiver extends
-        OutcomeReceiver<Content,
-                OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> {
+public interface ProcessingCallback {
+    /**
+     * Invoked when request has been processed and result is ready to be propagated to the
+     * caller.
+     *
+     * @param result Response to be passed as a result.
+     */
+    void onResult(@NonNull Bundle result);
+
+    /**
+     * Called when the request processing fails. The failure details are indicated by the
+     * {@link OnDeviceIntelligenceException} passed as an argument to this method.
+     *
+     * @param error An exception with more details about the error that occurred.
+     */
+    void onError(@NonNull OnDeviceIntelligenceException error);
+
     /**
      * Callback to be invoked in cases where the remote service needs to perform retrieval or
      * transformation operations based on a partially processed request, in order to augment the
      * final response, by using the additional context sent via this callback.
      *
-     * @param content         The content payload that should be used to augment ongoing request.
-     * @param contentConsumer The augmentation data that should be sent to remote
-     *                        service for further processing a request.
+     * @param processedContent The content payload that should be used to augment ongoing request.
+     * @param contentConsumer  The augmentation data that should be sent to remote
+     *                         service for further processing a request. Bundle passed in here is
+     *                         expected to be non-null or EMPTY when there is no response.
      */
-    default void onDataAugmentRequest(@NonNull Content content,
-            @NonNull Consumer<Content> contentConsumer) {
-        contentConsumer.accept(null);
+    default void onDataAugmentRequest(@NonNull Bundle processedContent,
+            @NonNull Consumer<Bundle> contentConsumer) {
+        contentConsumer.accept(Bundle.EMPTY);
     }
 }

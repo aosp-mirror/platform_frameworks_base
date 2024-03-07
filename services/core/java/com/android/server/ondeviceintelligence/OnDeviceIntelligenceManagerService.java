@@ -16,12 +16,9 @@
 
 package com.android.server.ondeviceintelligence;
 
-import static android.service.ondeviceintelligence.OnDeviceIntelligenceService.OnDeviceUpdateProcessingException.PROCESSING_UPDATE_STATUS_CONNECTION_FAILED;
-
 import android.Manifest;
 import android.annotation.NonNull;
 import android.app.AppGlobals;
-import android.app.ondeviceintelligence.Content;
 import android.app.ondeviceintelligence.DownloadCallback;
 import android.app.ondeviceintelligence.Feature;
 import android.app.ondeviceintelligence.IDownloadCallback;
@@ -33,7 +30,7 @@ import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
-import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -49,9 +46,9 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.service.ondeviceintelligence.IOnDeviceIntelligenceService;
 import android.service.ondeviceintelligence.IOnDeviceSandboxedInferenceService;
+import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
 import android.service.ondeviceintelligence.IRemoteProcessingService;
 import android.service.ondeviceintelligence.IRemoteStorageService;
-import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
 import android.service.ondeviceintelligence.OnDeviceIntelligenceService;
 import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
 import android.text.TextUtils;
@@ -160,7 +157,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available");
                 featureCallback.onFailure(
-                        OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
+                        OnDeviceIntelligenceException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
                         "OnDeviceIntelligenceManagerService is unavailable",
                         new PersistableBundle());
                 return;
@@ -180,7 +177,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available");
                 listFeaturesCallback.onFailure(
-                        OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
+                        OnDeviceIntelligenceException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
                         "OnDeviceIntelligenceManagerService is unavailable",
                         new PersistableBundle());
                 return;
@@ -202,7 +199,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available");
                 featureDetailsCallback.onFailure(
-                        OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
+                        OnDeviceIntelligenceException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
                         "OnDeviceIntelligenceManagerService is unavailable",
                         new PersistableBundle());
                 return;
@@ -238,7 +235,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
         @Override
         public void requestTokenInfo(Feature feature,
-                Content request, ICancellationSignal cancellationSignal,
+                Bundle request, ICancellationSignal cancellationSignal,
                 ITokenInfoCallback tokenInfoCallback) throws RemoteException {
             Slog.i(TAG, "OnDeviceIntelligenceManagerInternal prepareFeatureProcessing");
             Objects.requireNonNull(feature);
@@ -250,7 +247,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available");
                 tokenInfoCallback.onFailure(
-                        OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
+                        OnDeviceIntelligenceException.ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE,
                         "OnDeviceIntelligenceManagerService is unavailable",
                         new PersistableBundle());
             }
@@ -263,7 +260,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
         @Override
         public void processRequest(Feature feature,
-                Content request,
+                Bundle request,
                 int requestType,
                 ICancellationSignal cancellationSignal,
                 IProcessingSignal processingSignal,
@@ -277,7 +274,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available");
                 responseCallback.onFailure(
-                        OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException.PROCESSING_ERROR_SERVICE_UNAVAILABLE,
+                        OnDeviceIntelligenceException.PROCESSING_ERROR_SERVICE_UNAVAILABLE,
                         "OnDeviceIntelligenceManagerService is unavailable",
                         new PersistableBundle());
             }
@@ -291,7 +288,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
         @Override
         public void processRequestStreaming(Feature feature,
-                Content request,
+                Bundle request,
                 int requestType,
                 ICancellationSignal cancellationSignal,
                 IProcessingSignal processingSignal,
@@ -304,7 +301,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available");
                 streamingCallback.onFailure(
-                        OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException.PROCESSING_ERROR_SERVICE_UNAVAILABLE,
+                        OnDeviceIntelligenceException.PROCESSING_ERROR_SERVICE_UNAVAILABLE,
                         "OnDeviceIntelligenceManagerService is unavailable",
                         new PersistableBundle());
             }
@@ -358,7 +355,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 } catch (RemoteException unused) {
                     try {
                         callback.onFailure(
-                                PROCESSING_UPDATE_STATUS_CONNECTION_FAILED,
+                                OnDeviceIntelligenceException.PROCESSING_UPDATE_STATUS_CONNECTION_FAILED,
                                 "Received failure invoking the remote processing service.");
                     } catch (RemoteException ex) {
                         Slog.w(TAG, "Failed to send failure status.", ex);

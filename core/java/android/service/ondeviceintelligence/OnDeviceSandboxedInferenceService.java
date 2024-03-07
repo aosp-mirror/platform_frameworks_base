@@ -27,7 +27,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
-import android.app.ondeviceintelligence.Content;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
+import android.os.Bundle;
 import android.app.ondeviceintelligence.Feature;
 import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.IResponseCallback;
@@ -35,12 +36,11 @@ import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
 import android.app.ondeviceintelligence.ProcessingSignal;
-import android.app.ondeviceintelligence.ProcessingOutcomeReceiver;
-import android.app.ondeviceintelligence.StreamedProcessingOutcomeReceiver;
+import android.app.ondeviceintelligence.ProcessingCallback;
+import android.app.ondeviceintelligence.StreamingProcessingCallback;
 import android.app.ondeviceintelligence.TokenInfo;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -51,7 +51,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.service.ondeviceintelligence.OnDeviceIntelligenceService.OnDeviceUpdateProcessingException;
 import android.util.Log;
 import android.util.Slog;
 
@@ -121,7 +120,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                 }
 
                 @Override
-                public void requestTokenInfo(int callerUid, Feature feature, Content request,
+                public void requestTokenInfo(int callerUid, Feature feature, Bundle request,
                         ICancellationSignal cancellationSignal,
                         ITokenInfoCallback tokenInfoCallback) {
                     Objects.requireNonNull(feature);
@@ -134,7 +133,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                 }
 
                 @Override
-                public void processRequestStreaming(int callerUid, Feature feature, Content request,
+                public void processRequestStreaming(int callerUid, Feature feature, Bundle request,
                         int requestType, ICancellationSignal cancellationSignal,
                         IProcessingSignal processingSignal,
                         IStreamingResponseCallback callback) {
@@ -151,7 +150,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                 }
 
                 @Override
-                public void processRequest(int callerUid, Feature feature, Content request,
+                public void processRequest(int callerUid, Feature feature, Bundle request,
                         int requestType, ICancellationSignal cancellationSignal,
                         IProcessingSignal processingSignal,
                         IResponseCallback callback) {
@@ -198,18 +197,17 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     @NonNull
     public abstract void onTokenInfoRequest(
             int callerUid, @NonNull Feature feature,
-            @NonNull Content request,
+            @NonNull Bundle request,
             @Nullable CancellationSignal cancellationSignal,
-            @NonNull OutcomeReceiver<TokenInfo,
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> callback);
+            @NonNull OutcomeReceiver<TokenInfo, OnDeviceIntelligenceException> callback);
 
     /**
      * Invoked when caller provides a request for a particular feature to be processed in a
      * streaming manner. The expectation from the implementation is that when processing the
      * request,
-     * it periodically populates the {@link StreamedProcessingOutcomeReceiver#onNewContent} to continuously
-     * provide partial Content results for the caller to utilize. Optionally the implementation can
-     * provide the complete response in the {@link StreamedProcessingOutcomeReceiver#onResult} upon
+     * it periodically populates the {@link StreamingProcessingCallback#onPartialResult} to continuously
+     * provide partial Bundle results for the caller to utilize. Optionally the implementation can
+     * provide the complete response in the {@link StreamingProcessingCallback#onResult} upon
      * processing completion.
      *
      * @param callerUid          UID of the caller that initiated this call chain.
@@ -225,11 +223,11 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     @NonNull
     public abstract void onProcessRequestStreaming(
             int callerUid, @NonNull Feature feature,
-            @Nullable Content request,
+            @NonNull Bundle request,
             @OnDeviceIntelligenceManager.RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
-            @NonNull StreamedProcessingOutcomeReceiver callback);
+            @NonNull StreamingProcessingCallback callback);
 
     /**
      * Invoked when caller provides a request for a particular feature to be processed in one shot
@@ -251,11 +249,11 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     @NonNull
     public abstract void onProcessRequest(
             int callerUid, @NonNull Feature feature,
-            @Nullable Content request,
+            @NonNull Bundle request,
             @OnDeviceIntelligenceManager.RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
-            @NonNull ProcessingOutcomeReceiver callback);
+            @NonNull ProcessingCallback callback);
 
 
     /**
@@ -269,7 +267,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      */
     public abstract void onUpdateProcessingState(@NonNull Bundle processingState,
             @NonNull OutcomeReceiver<PersistableBundle,
-                    OnDeviceUpdateProcessingException> callback);
+                    OnDeviceIntelligenceException> callback);
 
 
     /**
@@ -344,7 +342,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     /**
      * Returns the {@link Executor} to use for incoming IPC from request sender into your service
      * implementation. For e.g. see
-     * {@link ProcessingOutcomeReceiver#onDataAugmentRequest(Content,
+     * {@link ProcessingCallback#onDataAugmentRequest(Bundle,
      * Consumer)} where we use the executor to populate the consumer.
      * <p>
      * Override this method in your {@link OnDeviceSandboxedInferenceService} implementation to
@@ -380,13 +378,13 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
         });
     }
 
-    private ProcessingOutcomeReceiver wrapResponseCallback(
+    private ProcessingCallback wrapResponseCallback(
             IResponseCallback callback) {
-        return new ProcessingOutcomeReceiver() {
+        return new ProcessingCallback() {
             @Override
-            public void onResult(@androidx.annotation.NonNull Content response) {
+            public void onResult(@androidx.annotation.NonNull Bundle result) {
                 try {
-                    callback.onSuccess(response);
+                    callback.onSuccess(result);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error sending result: " + e);
                 }
@@ -394,7 +392,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
 
             @Override
             public void onError(
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException exception) {
+                    OnDeviceIntelligenceException exception) {
                 try {
                     callback.onFailure(exception.getErrorCode(), exception.getMessage(),
                             exception.getErrorParams());
@@ -404,8 +402,8 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
             }
 
             @Override
-            public void onDataAugmentRequest(@NonNull Content content,
-                    @NonNull Consumer<Content> contentCallback) {
+            public void onDataAugmentRequest(@NonNull Bundle content,
+                    @NonNull Consumer<Bundle> contentCallback) {
                 try {
                     callback.onDataAugmentRequest(content, wrapRemoteCallback(contentCallback));
 
@@ -416,22 +414,22 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
         };
     }
 
-    private StreamedProcessingOutcomeReceiver wrapStreamingResponseCallback(
+    private StreamingProcessingCallback wrapStreamingResponseCallback(
             IStreamingResponseCallback callback) {
-        return new StreamedProcessingOutcomeReceiver() {
+        return new StreamingProcessingCallback() {
             @Override
-            public void onNewContent(@androidx.annotation.NonNull Content content) {
+            public void onPartialResult(@androidx.annotation.NonNull Bundle partialResult) {
                 try {
-                    callback.onNewContent(content);
+                    callback.onNewContent(partialResult);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error sending result: " + e);
                 }
             }
 
             @Override
-            public void onResult(@androidx.annotation.NonNull Content response) {
+            public void onResult(@androidx.annotation.NonNull Bundle result) {
                 try {
-                    callback.onSuccess(response);
+                    callback.onSuccess(result);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error sending result: " + e);
                 }
@@ -439,7 +437,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
 
             @Override
             public void onError(
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException exception) {
+                    OnDeviceIntelligenceException exception) {
                 try {
                     callback.onFailure(exception.getErrorCode(), exception.getMessage(),
                             exception.getErrorParams());
@@ -449,8 +447,8 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
             }
 
             @Override
-            public void onDataAugmentRequest(@NonNull Content content,
-                    @NonNull Consumer<Content> contentCallback) {
+            public void onDataAugmentRequest(@NonNull Bundle content,
+                    @NonNull Consumer<Bundle> contentCallback) {
                 try {
                     callback.onDataAugmentRequest(content, wrapRemoteCallback(contentCallback));
 
@@ -462,13 +460,13 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     }
 
     private RemoteCallback wrapRemoteCallback(
-            @androidx.annotation.NonNull Consumer<Content> contentCallback) {
+            @androidx.annotation.NonNull Consumer<Bundle> contentCallback) {
         return new RemoteCallback(
                 result -> {
                     if (result != null) {
                         getCallbackExecutor().execute(() -> contentCallback.accept(
                                 result.getParcelable(AUGMENT_REQUEST_CONTENT_BUNDLE_KEY,
-                                        Content.class)));
+                                        Bundle.class)));
                     } else {
                         getCallbackExecutor().execute(
                                 () -> contentCallback.accept(null));
@@ -476,8 +474,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                 });
     }
 
-    private OutcomeReceiver<TokenInfo,
-            OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> wrapTokenInfoCallback(
+    private OutcomeReceiver<TokenInfo, OnDeviceIntelligenceException> wrapTokenInfoCallback(
             ITokenInfoCallback tokenInfoCallback) {
         return new OutcomeReceiver<>() {
             @Override
@@ -491,7 +488,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
 
             @Override
             public void onError(
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException exception) {
+                    OnDeviceIntelligenceException exception) {
                 try {
                     tokenInfoCallback.onFailure(exception.getErrorCode(), exception.getMessage(),
                             exception.getErrorParams());
@@ -503,7 +500,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     }
 
     @NonNull
-    private static OutcomeReceiver<PersistableBundle, OnDeviceUpdateProcessingException> wrapOutcomeReceiver(
+    private static OutcomeReceiver<PersistableBundle, OnDeviceIntelligenceException> wrapOutcomeReceiver(
             IProcessingUpdateStatusCallback callback) {
         return new OutcomeReceiver<>() {
             @Override
@@ -518,7 +515,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
 
             @Override
             public void onError(
-                    @androidx.annotation.NonNull OnDeviceUpdateProcessingException error) {
+                    @androidx.annotation.NonNull OnDeviceIntelligenceException error) {
                 try {
                     callback.onFailure(error.getErrorCode(), error.getMessage());
                 } catch (RemoteException e) {

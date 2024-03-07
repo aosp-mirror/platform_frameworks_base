@@ -63,7 +63,7 @@ import java.util.function.LongConsumer;
 @SystemApi
 @SystemService(Context.ON_DEVICE_INTELLIGENCE_SERVICE)
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
-public class OnDeviceIntelligenceManager {
+public final class OnDeviceIntelligenceManager {
     /**
      * @hide
      */
@@ -139,7 +139,7 @@ public class OnDeviceIntelligenceManager {
     public void getFeature(
             int featureId,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull OutcomeReceiver<Feature, OnDeviceIntelligenceManagerException> featureReceiver) {
+            @NonNull OutcomeReceiver<Feature, OnDeviceIntelligenceException> featureReceiver) {
         try {
             IFeatureCallback callback =
                     new IFeatureCallback.Stub() {
@@ -154,7 +154,7 @@ public class OnDeviceIntelligenceManager {
                                 PersistableBundle errorParams) {
                             Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                                     () -> featureReceiver.onError(
-                                            new OnDeviceIntelligenceManagerException(
+                                            new OnDeviceIntelligenceException(
                                                     errorCode, errorMessage, errorParams))));
                         }
                     };
@@ -173,7 +173,7 @@ public class OnDeviceIntelligenceManager {
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public void listFeatures(
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull OutcomeReceiver<List<Feature>, OnDeviceIntelligenceManagerException> featureListReceiver) {
+            @NonNull OutcomeReceiver<List<Feature>, OnDeviceIntelligenceException> featureListReceiver) {
         try {
             IListFeaturesCallback callback =
                     new IListFeaturesCallback.Stub() {
@@ -188,7 +188,7 @@ public class OnDeviceIntelligenceManager {
                                 PersistableBundle errorParams) {
                             Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                                     () -> featureListReceiver.onError(
-                                            new OnDeviceIntelligenceManagerException(
+                                            new OnDeviceIntelligenceException(
                                                     errorCode, errorMessage, errorParams))));
                         }
                     };
@@ -211,7 +211,7 @@ public class OnDeviceIntelligenceManager {
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public void getFeatureDetails(@NonNull Feature feature,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull OutcomeReceiver<FeatureDetails, OnDeviceIntelligenceManagerException> featureDetailsReceiver) {
+            @NonNull OutcomeReceiver<FeatureDetails, OnDeviceIntelligenceException> featureDetailsReceiver) {
         try {
             IFeatureDetailsCallback callback = new IFeatureDetailsCallback.Stub() {
 
@@ -226,7 +226,7 @@ public class OnDeviceIntelligenceManager {
                         PersistableBundle errorParams) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> featureDetailsReceiver.onError(
-                                    new OnDeviceIntelligenceManagerException(errorCode,
+                                    new OnDeviceIntelligenceException(errorCode,
                                             errorMessage, errorParams))));
                 }
             };
@@ -243,9 +243,8 @@ public class OnDeviceIntelligenceManager {
      *
      * Note: If a feature was already requested for downloaded previously, the onDownloadFailed
      * callback would be invoked with {@link DownloadCallback#DOWNLOAD_FAILURE_STATUS_DOWNLOADING}.
-     * In such cases, clients should query the feature status via {@link #getFeatureStatus} to
-     * check
-     * on the feature's download status.
+     * In such cases, clients should query the feature status via {@link #getFeatureDetails} to
+     * check on the feature's download status.
      *
      * @param feature            feature to request download for.
      * @param callback           callback to populate updates about download status.
@@ -284,7 +283,7 @@ public class OnDeviceIntelligenceManager {
                 @Override
                 public void onDownloadCompleted(PersistableBundle downloadParams) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
-                            () -> onDownloadCompleted(downloadParams)));
+                            () -> callback.onDownloadCompleted(downloadParams)));
                 }
             };
 
@@ -305,7 +304,8 @@ public class OnDeviceIntelligenceManager {
      * provided {@link Feature}.
      *
      * @param feature            feature associated with the request.
-     * @param request            request that contains the content data and associated params.
+     * @param request            request and associated params represented by the Bundle
+     *                           data.
      * @param outcomeReceiver    callback to populate the token info or exception in case of
      *                           failure.
      * @param cancellationSignal signal to invoke cancellation on the operation in the remote
@@ -313,11 +313,11 @@ public class OnDeviceIntelligenceManager {
      * @param callbackExecutor   executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-    public void requestTokenInfo(@NonNull Feature feature, @NonNull Content request,
+    public void requestTokenInfo(@NonNull Feature feature, @NonNull Bundle request,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull OutcomeReceiver<TokenInfo,
-                    OnDeviceIntelligenceManagerException> outcomeReceiver) {
+                    OnDeviceIntelligenceException> outcomeReceiver) {
         try {
             ITokenInfoCallback callback = new ITokenInfoCallback.Stub() {
                 @Override
@@ -331,7 +331,7 @@ public class OnDeviceIntelligenceManager {
                         PersistableBundle errorParams) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> outcomeReceiver.onError(
-                                    new OnDeviceIntelligenceManagerProcessingException(
+                                    new OnDeviceIntelligenceException(
                                             errorCode, errorMessage, errorParams))));
                 }
             };
@@ -357,30 +357,30 @@ public class OnDeviceIntelligenceManager {
      * failure.
      *
      * @param feature            feature associated with the request.
-     * @param request            request that contains the Content data and
-     *                           associated params.
+     * @param request            request and associated params represented by the Bundle
+     *                           data.
      * @param requestType        type of request being sent for processing the content.
      * @param cancellationSignal signal to invoke cancellation.
      * @param processingSignal   signal to send custom signals in the
      *                           remote implementation.
      * @param callbackExecutor   executor to run the callback on.
-     * @param responseCallback   callback to populate the response content and
+     * @param processingCallback callback to populate the response content and
      *                           associated params.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
 
-    public void processRequest(@NonNull Feature feature, @Nullable Content request,
+    public void processRequest(@NonNull Feature feature, @NonNull Bundle request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull ProcessingOutcomeReceiver responseCallback) {
+            @NonNull ProcessingCallback processingCallback) {
         try {
             IResponseCallback callback = new IResponseCallback.Stub() {
                 @Override
-                public void onSuccess(Content result) {
+                public void onSuccess(Bundle result) {
                     Binder.withCleanCallingIdentity(() -> {
-                        callbackExecutor.execute(() -> responseCallback.onResult(result));
+                        callbackExecutor.execute(() -> processingCallback.onResult(result));
                     });
                 }
 
@@ -388,16 +388,15 @@ public class OnDeviceIntelligenceManager {
                 public void onFailure(int errorCode, String errorMessage,
                         PersistableBundle errorParams) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
-                            () -> responseCallback.onError(
-                                    new OnDeviceIntelligenceManagerProcessingException(
+                            () -> processingCallback.onError(
+                                    new OnDeviceIntelligenceException(
                                             errorCode, errorMessage, errorParams))));
                 }
 
                 @Override
-                public void onDataAugmentRequest(@NonNull Content content,
-                        @NonNull RemoteCallback contentCallback) {
+                public void onDataAugmentRequest(Bundle request, RemoteCallback contentCallback) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
-                            () -> responseCallback.onDataAugmentRequest(content, result -> {
+                            () -> processingCallback.onDataAugmentRequest(request, result -> {
                                 Bundle bundle = new Bundle();
                                 bundle.putParcelable(AUGMENT_REQUEST_CONTENT_BUNDLE_KEY, result);
                                 callbackExecutor.execute(() -> contentCallback.sendResult(bundle));
@@ -430,15 +429,15 @@ public class OnDeviceIntelligenceManager {
      * Variation of {@link #processRequest} that asynchronously processes a request in a
      * streaming
      * fashion, where new content is pushed to caller in chunks via the
-     * {@link StreamedProcessingOutcomeReceiver#onNewContent}. After the streaming is complete,
-     * the service should call {@link StreamedProcessingOutcomeReceiver#onResult} and can optionally
-     * populate the complete the full response {@link Content} as part of the callback in cases
-     * when the final response contains an enhanced aggregation of the Contents already
+     * {@link StreamingProcessingCallback#onPartialResult}. After the streaming is complete,
+     * the service should call {@link StreamingProcessingCallback#onResult} and can optionally
+     * populate the complete the full response {@link Bundle} as part of the callback in cases
+     * when the final response contains an enhanced aggregation of the contents already
      * streamed.
      *
      * @param feature                   feature associated with the request.
-     * @param request                   request that contains the Content data and associated
-     *                                  params.
+     * @param request                   request and associated params represented by the Bundle
+     *                                  data.
      * @param requestType               type of request being sent for processing the content.
      * @param cancellationSignal        signal to invoke cancellation.
      * @param processingSignal          signal to send custom signals in the
@@ -448,27 +447,27 @@ public class OnDeviceIntelligenceManager {
      * @param callbackExecutor          executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-    public void processRequestStreaming(@NonNull Feature feature, @Nullable Content request,
+    public void processRequestStreaming(@NonNull Feature feature, @NonNull Bundle request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
             @NonNull @CallbackExecutor Executor callbackExecutor,
-            @NonNull StreamedProcessingOutcomeReceiver streamingResponseCallback) {
+            @NonNull StreamingProcessingCallback streamingProcessingCallback) {
         try {
             IStreamingResponseCallback callback = new IStreamingResponseCallback.Stub() {
                 @Override
-                public void onNewContent(Content result) {
+                public void onNewContent(Bundle result) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
-                                () -> streamingResponseCallback.onNewContent(result));
+                                () -> streamingProcessingCallback.onPartialResult(result));
                     });
                 }
 
                 @Override
-                public void onSuccess(Content result) {
+                public void onSuccess(Bundle result) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
-                                () -> streamingResponseCallback.onResult(result));
+                                () -> streamingProcessingCallback.onResult(result));
                     });
                 }
 
@@ -477,18 +476,18 @@ public class OnDeviceIntelligenceManager {
                         PersistableBundle errorParams) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
-                                () -> streamingResponseCallback.onError(
-                                        new OnDeviceIntelligenceManagerProcessingException(
+                                () -> streamingProcessingCallback.onError(
+                                        new OnDeviceIntelligenceException(
                                                 errorCode, errorMessage, errorParams)));
                     });
                 }
 
 
                 @Override
-                public void onDataAugmentRequest(@NonNull Content content,
+                public void onDataAugmentRequest(@NonNull Bundle content,
                         @NonNull RemoteCallback contentCallback) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
-                            () -> streamingResponseCallback.onDataAugmentRequest(content,
+                            () -> streamingProcessingCallback.onDataAugmentRequest(content,
                                     contentResponse -> {
                                         Bundle bundle = new Bundle();
                                         bundle.putParcelable(AUGMENT_REQUEST_CONTENT_BUNDLE_KEY,
@@ -519,7 +518,7 @@ public class OnDeviceIntelligenceManager {
     }
 
 
-    /** Request inference with provided Content and Params. */
+    /** Request inference with provided Bundle and Params. */
     public static final int REQUEST_TYPE_INFERENCE = 0;
 
     /**
@@ -530,7 +529,7 @@ public class OnDeviceIntelligenceManager {
      */
     public static final int REQUEST_TYPE_PREPARE = 1;
 
-    /** Request Embeddings of the passed-in Content. */
+    /** Request Embeddings of the passed-in Bundle. */
     public static final int REQUEST_TYPE_EMBEDDINGS = 2;
 
     /**
@@ -545,156 +544,5 @@ public class OnDeviceIntelligenceManager {
             ElementType.FIELD})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestType {
-    }
-
-
-    /**
-     * Exception type to be populated in callbacks to the methods under
-     * {@link OnDeviceIntelligenceManager}.
-     */
-    public static class OnDeviceIntelligenceManagerException extends Exception {
-        /**
-         * Error code returned when the OnDeviceIntelligenceManager service is unavailable.
-         */
-        public static final int ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE = 1000;
-
-        /**
-         * Error code to be used for on device intelligence manager failures.
-         *
-         * @hide
-         */
-        @IntDef(
-                value = {
-                        ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE
-                }, open = true)
-        @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-        @interface OnDeviceIntelligenceManagerErrorCode {
-        }
-
-        private final int mErrorCode;
-        private final PersistableBundle errorParams;
-
-        public OnDeviceIntelligenceManagerException(
-                @OnDeviceIntelligenceManagerErrorCode int errorCode, @NonNull String errorMessage,
-                @NonNull PersistableBundle errorParams) {
-            super(errorMessage);
-            this.mErrorCode = errorCode;
-            this.errorParams = errorParams;
-        }
-
-        public OnDeviceIntelligenceManagerException(
-                @OnDeviceIntelligenceManagerErrorCode int errorCode,
-                @NonNull PersistableBundle errorParams) {
-            this.mErrorCode = errorCode;
-            this.errorParams = errorParams;
-        }
-
-        public int getErrorCode() {
-            return mErrorCode;
-        }
-
-        @NonNull
-        public PersistableBundle getErrorParams() {
-            return errorParams;
-        }
-    }
-
-    /**
-     * Exception type to be populated in callbacks to the methods under
-     * {@link OnDeviceIntelligenceManager#processRequest} or
-     * {@link OnDeviceIntelligenceManager#processRequestStreaming} .
-     */
-    public static class OnDeviceIntelligenceManagerProcessingException extends
-            OnDeviceIntelligenceManagerException {
-
-        public static final int PROCESSING_ERROR_UNKNOWN = 1;
-
-        /** Request passed contains bad data for e.g. format. */
-        public static final int PROCESSING_ERROR_BAD_DATA = 2;
-
-        /** Bad request for inputs. */
-        public static final int PROCESSING_ERROR_BAD_REQUEST = 3;
-
-        /** Whole request was classified as not safe, and no response will be generated. */
-        public static final int PROCESSING_ERROR_REQUEST_NOT_SAFE = 4;
-
-        /** Underlying processing encountered an error and failed to compute results. */
-        public static final int PROCESSING_ERROR_COMPUTE_ERROR = 5;
-
-        /** Encountered an error while performing IPC */
-        public static final int PROCESSING_ERROR_IPC_ERROR = 6;
-
-        /** Request was cancelled either by user signal or by the underlying implementation. */
-        public static final int PROCESSING_ERROR_CANCELLED = 7;
-
-        /** Underlying processing in the remote implementation is not available. */
-        public static final int PROCESSING_ERROR_NOT_AVAILABLE = 8;
-
-        /** The service is currently busy. Callers should retry with exponential backoff. */
-        public static final int PROCESSING_ERROR_BUSY = 9;
-
-        /** Something went wrong with safety classification service. */
-        public static final int PROCESSING_ERROR_SAFETY_ERROR = 10;
-
-        /** Response generated was classified unsafe. */
-        public static final int PROCESSING_ERROR_RESPONSE_NOT_SAFE = 11;
-
-        /** Request is too large to be processed. */
-        public static final int PROCESSING_ERROR_REQUEST_TOO_LARGE = 12;
-
-        /** Inference suspended so that higher-priority inference can run. */
-        public static final int PROCESSING_ERROR_SUSPENDED = 13;
-
-        /**
-         * Underlying processing encountered an internal error, like a violated precondition
-         * .
-         */
-        public static final int PROCESSING_ERROR_INTERNAL = 14;
-
-        /**
-         * The processing was not able to be passed on to the remote implementation, as the
-         * service
-         * was unavailable.
-         */
-        public static final int PROCESSING_ERROR_SERVICE_UNAVAILABLE = 15;
-
-        /**
-         * Error code of failed processing request.
-         *
-         * @hide
-         */
-        @IntDef(
-                value = {
-                        PROCESSING_ERROR_UNKNOWN,
-                        PROCESSING_ERROR_BAD_DATA,
-                        PROCESSING_ERROR_BAD_REQUEST,
-                        PROCESSING_ERROR_REQUEST_NOT_SAFE,
-                        PROCESSING_ERROR_COMPUTE_ERROR,
-                        PROCESSING_ERROR_IPC_ERROR,
-                        PROCESSING_ERROR_CANCELLED,
-                        PROCESSING_ERROR_NOT_AVAILABLE,
-                        PROCESSING_ERROR_BUSY,
-                        PROCESSING_ERROR_SAFETY_ERROR,
-                        PROCESSING_ERROR_RESPONSE_NOT_SAFE,
-                        PROCESSING_ERROR_REQUEST_TOO_LARGE,
-                        PROCESSING_ERROR_SUSPENDED,
-                        PROCESSING_ERROR_INTERNAL,
-                        PROCESSING_ERROR_SERVICE_UNAVAILABLE
-                }, open = true)
-        @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-        @interface ProcessingError {
-        }
-
-        public OnDeviceIntelligenceManagerProcessingException(
-                @ProcessingError int errorCode, @NonNull String errorMessage,
-                @NonNull PersistableBundle errorParams) {
-            super(errorCode, errorMessage, errorParams);
-        }
-
-        public OnDeviceIntelligenceManagerProcessingException(
-                @ProcessingError int errorCode,
-                @NonNull PersistableBundle errorParams) {
-            super(errorCode, errorParams);
-        }
     }
 }

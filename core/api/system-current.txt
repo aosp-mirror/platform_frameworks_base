@@ -2190,14 +2190,6 @@ package android.app.job {
 
 package android.app.ondeviceintelligence {
 
-  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class Content implements android.os.Parcelable {
-    ctor public Content(@NonNull android.os.Bundle);
-    method public int describeContents();
-    method @NonNull public android.os.Bundle getData();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.Content> CREATOR;
-  }
-
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public interface DownloadCallback {
     method public void onDownloadCompleted(@NonNull android.os.PersistableBundle);
     method public void onDownloadFailed(int, @Nullable String, @NonNull android.os.PersistableBundle);
@@ -2233,11 +2225,11 @@ package android.app.ondeviceintelligence {
   }
 
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class FeatureDetails implements android.os.Parcelable {
-    ctor public FeatureDetails(@android.app.ondeviceintelligence.FeatureDetails.Status int, @NonNull android.os.PersistableBundle);
-    ctor public FeatureDetails(@android.app.ondeviceintelligence.FeatureDetails.Status int);
+    ctor public FeatureDetails(int, @NonNull android.os.PersistableBundle);
+    ctor public FeatureDetails(int);
     method public int describeContents();
     method @NonNull public android.os.PersistableBundle getFeatureDetailParams();
-    method @android.app.ondeviceintelligence.FeatureDetails.Status public int getFeatureStatus();
+    method public int getFeatureStatus();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.ondeviceintelligence.FeatureDetails> CREATOR;
     field public static final int FEATURE_STATUS_AVAILABLE = 3; // 0x3
@@ -2247,35 +2239,14 @@ package android.app.ondeviceintelligence {
     field public static final int FEATURE_STATUS_UNAVAILABLE = 0; // 0x0
   }
 
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE_USE, java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.PARAMETER, java.lang.annotation.ElementType.FIELD}) public static @interface FeatureDetails.Status {
-  }
-
-  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public class OnDeviceIntelligenceManager {
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeature(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Feature,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeatureDetails(@NonNull android.app.ondeviceintelligence.Feature, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.FeatureDetails,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
-    method @Nullable @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public String getRemoteServicePackageName();
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getVersion(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.LongConsumer);
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void listFeatures(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.util.List<android.app.ondeviceintelligence.Feature>,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void processRequest(@NonNull android.app.ondeviceintelligence.Feature, @Nullable android.app.ondeviceintelligence.Content, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.ProcessingOutcomeReceiver);
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void processRequestStreaming(@NonNull android.app.ondeviceintelligence.Feature, @Nullable android.app.ondeviceintelligence.Content, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.StreamedProcessingOutcomeReceiver);
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void requestFeatureDownload(@NonNull android.app.ondeviceintelligence.Feature, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.DownloadCallback);
-    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void requestTokenInfo(@NonNull android.app.ondeviceintelligence.Feature, @NonNull android.app.ondeviceintelligence.Content, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.TokenInfo,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
-    field public static final int REQUEST_TYPE_EMBEDDINGS = 2; // 0x2
-    field public static final int REQUEST_TYPE_INFERENCE = 0; // 0x0
-    field public static final int REQUEST_TYPE_PREPARE = 1; // 0x1
-  }
-
-  public static class OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException extends java.lang.Exception {
-    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException(int, @NonNull String, @NonNull android.os.PersistableBundle);
-    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException(int, @NonNull android.os.PersistableBundle);
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public class OnDeviceIntelligenceException extends java.lang.Exception {
+    ctor public OnDeviceIntelligenceException(int, @NonNull String, @NonNull android.os.PersistableBundle);
+    ctor public OnDeviceIntelligenceException(int, @NonNull android.os.PersistableBundle);
+    ctor public OnDeviceIntelligenceException(int, @NonNull String);
+    ctor public OnDeviceIntelligenceException(int);
     method public int getErrorCode();
     method @NonNull public android.os.PersistableBundle getErrorParams();
-    field public static final int ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE = 1000; // 0x3e8
-  }
-
-  public static class OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException extends android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException {
-    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException(int, @NonNull String, @NonNull android.os.PersistableBundle);
-    ctor public OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException(int, @NonNull android.os.PersistableBundle);
+    field public static final int ON_DEVICE_INTELLIGENCE_SERVICE_UNAVAILABLE = 100; // 0x64
     field public static final int PROCESSING_ERROR_BAD_DATA = 2; // 0x2
     field public static final int PROCESSING_ERROR_BAD_REQUEST = 3; // 0x3
     field public static final int PROCESSING_ERROR_BUSY = 9; // 0x9
@@ -2291,10 +2262,28 @@ package android.app.ondeviceintelligence {
     field public static final int PROCESSING_ERROR_SERVICE_UNAVAILABLE = 15; // 0xf
     field public static final int PROCESSING_ERROR_SUSPENDED = 13; // 0xd
     field public static final int PROCESSING_ERROR_UNKNOWN = 1; // 0x1
+    field public static final int PROCESSING_UPDATE_STATUS_CONNECTION_FAILED = 200; // 0xc8
   }
 
-  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public interface ProcessingOutcomeReceiver extends android.os.OutcomeReceiver<android.app.ondeviceintelligence.Content,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException> {
-    method public default void onDataAugmentRequest(@NonNull android.app.ondeviceintelligence.Content, @NonNull java.util.function.Consumer<android.app.ondeviceintelligence.Content>);
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class OnDeviceIntelligenceManager {
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeature(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Feature,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getFeatureDetails(@NonNull android.app.ondeviceintelligence.Feature, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.FeatureDetails,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method @Nullable @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public String getRemoteServicePackageName();
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void getVersion(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.LongConsumer);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void listFeatures(@NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.util.List<android.app.ondeviceintelligence.Feature>,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void processRequest(@NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.Bundle, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.ProcessingCallback);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void processRequestStreaming(@NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.Bundle, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.StreamingProcessingCallback);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void requestFeatureDownload(@NonNull android.app.ondeviceintelligence.Feature, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.app.ondeviceintelligence.DownloadCallback);
+    method @RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE) public void requestTokenInfo(@NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.Bundle, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.TokenInfo,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    field public static final int REQUEST_TYPE_EMBEDDINGS = 2; // 0x2
+    field public static final int REQUEST_TYPE_INFERENCE = 0; // 0x0
+    field public static final int REQUEST_TYPE_PREPARE = 1; // 0x1
+  }
+
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public interface ProcessingCallback {
+    method public default void onDataAugmentRequest(@NonNull android.os.Bundle, @NonNull java.util.function.Consumer<android.os.Bundle>);
+    method public void onError(@NonNull android.app.ondeviceintelligence.OnDeviceIntelligenceException);
+    method public void onResult(@NonNull android.os.Bundle);
   }
 
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class ProcessingSignal {
@@ -2307,8 +2296,8 @@ package android.app.ondeviceintelligence {
     method public void onSignalReceived(@NonNull android.os.PersistableBundle);
   }
 
-  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public interface StreamedProcessingOutcomeReceiver extends android.app.ondeviceintelligence.ProcessingOutcomeReceiver {
-    method public void onNewContent(@NonNull android.app.ondeviceintelligence.Content);
+  @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public interface StreamingProcessingCallback extends android.app.ondeviceintelligence.ProcessingCallback {
+    method public void onPartialResult(@NonNull android.os.Bundle);
   }
 
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public final class TokenInfo implements android.os.Parcelable {
@@ -12956,27 +12945,15 @@ package android.service.ondeviceintelligence {
     ctor public OnDeviceIntelligenceService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onDownloadFeature(int, @NonNull android.app.ondeviceintelligence.Feature, @Nullable android.os.CancellationSignal, @NonNull android.app.ondeviceintelligence.DownloadCallback);
-    method public abstract void onGetFeature(int, int, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Feature,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
-    method public abstract void onGetFeatureDetails(int, @NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.FeatureDetails,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
+    method public abstract void onGetFeature(int, int, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.Feature,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method public abstract void onGetFeatureDetails(int, @NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.FeatureDetails,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
     method public abstract void onGetReadOnlyFeatureFileDescriptorMap(@NonNull android.app.ondeviceintelligence.Feature, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,android.os.ParcelFileDescriptor>>);
     method public abstract void onGetVersion(@NonNull java.util.function.LongConsumer);
     method public abstract void onInferenceServiceConnected();
     method public abstract void onInferenceServiceDisconnected();
-    method public abstract void onListFeatures(int, @NonNull android.os.OutcomeReceiver<java.util.List<android.app.ondeviceintelligence.Feature>,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException>);
-    method public final void updateProcessingState(@NonNull android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.PersistableBundle,android.service.ondeviceintelligence.OnDeviceIntelligenceService.OnDeviceUpdateProcessingException>);
+    method public abstract void onListFeatures(int, @NonNull android.os.OutcomeReceiver<java.util.List<android.app.ondeviceintelligence.Feature>,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method public final void updateProcessingState(@NonNull android.os.Bundle, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.os.PersistableBundle,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
     field public static final String SERVICE_INTERFACE = "android.service.ondeviceintelligence.OnDeviceIntelligenceService";
-  }
-
-  public abstract static class OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException extends java.lang.Exception {
-    ctor public OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException(int);
-    ctor public OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException(int, @NonNull String);
-    method public int getErrorCode();
-  }
-
-  public static class OnDeviceIntelligenceService.OnDeviceUpdateProcessingException extends android.service.ondeviceintelligence.OnDeviceIntelligenceService.OnDeviceIntelligenceServiceException {
-    ctor public OnDeviceIntelligenceService.OnDeviceUpdateProcessingException(int);
-    ctor public OnDeviceIntelligenceService.OnDeviceUpdateProcessingException(int, @NonNull String);
-    field public static final int PROCESSING_UPDATE_STATUS_CONNECTION_FAILED = 1; // 0x1
   }
 
   @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public abstract class OnDeviceSandboxedInferenceService extends android.app.Service {
@@ -12984,10 +12961,10 @@ package android.service.ondeviceintelligence {
     method public final void fetchFeatureFileInputStreamMap(@NonNull android.app.ondeviceintelligence.Feature, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.io.FileInputStream>>);
     method @NonNull public java.util.concurrent.Executor getCallbackExecutor();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @NonNull public abstract void onProcessRequest(int, @NonNull android.app.ondeviceintelligence.Feature, @Nullable android.app.ondeviceintelligence.Content, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull android.app.ondeviceintelligence.ProcessingOutcomeReceiver);
-    method @NonNull public abstract void onProcessRequestStreaming(int, @NonNull android.app.ondeviceintelligence.Feature, @Nullable android.app.ondeviceintelligence.Content, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull android.app.ondeviceintelligence.StreamedProcessingOutcomeReceiver);
-    method @NonNull public abstract void onTokenInfoRequest(int, @NonNull android.app.ondeviceintelligence.Feature, @NonNull android.app.ondeviceintelligence.Content, @Nullable android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.TokenInfo,android.app.ondeviceintelligence.OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerProcessingException>);
-    method public abstract void onUpdateProcessingState(@NonNull android.os.Bundle, @NonNull android.os.OutcomeReceiver<android.os.PersistableBundle,android.service.ondeviceintelligence.OnDeviceIntelligenceService.OnDeviceUpdateProcessingException>);
+    method @NonNull public abstract void onProcessRequest(int, @NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.Bundle, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull android.app.ondeviceintelligence.ProcessingCallback);
+    method @NonNull public abstract void onProcessRequestStreaming(int, @NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.Bundle, int, @Nullable android.os.CancellationSignal, @Nullable android.app.ondeviceintelligence.ProcessingSignal, @NonNull android.app.ondeviceintelligence.StreamingProcessingCallback);
+    method @NonNull public abstract void onTokenInfoRequest(int, @NonNull android.app.ondeviceintelligence.Feature, @NonNull android.os.Bundle, @Nullable android.os.CancellationSignal, @NonNull android.os.OutcomeReceiver<android.app.ondeviceintelligence.TokenInfo,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
+    method public abstract void onUpdateProcessingState(@NonNull android.os.Bundle, @NonNull android.os.OutcomeReceiver<android.os.PersistableBundle,android.app.ondeviceintelligence.OnDeviceIntelligenceException>);
     method public final java.io.FileInputStream openFileInput(@NonNull String) throws java.io.FileNotFoundException;
     method public final void openFileInputAsync(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.io.FileInputStream>) throws java.io.FileNotFoundException;
     field public static final String SERVICE_INTERFACE = "android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService";
