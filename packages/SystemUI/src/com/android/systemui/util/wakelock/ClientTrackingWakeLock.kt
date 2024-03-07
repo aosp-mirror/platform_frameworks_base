@@ -18,6 +18,7 @@ package com.android.systemui.util.wakelock
 
 import android.os.PowerManager
 import android.util.Log
+import com.android.systemui.util.wakelock.WakeLock.Builder.NO_TIMEOUT
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -36,7 +37,11 @@ class ClientTrackingWakeLock(
     override fun acquire(why: String) {
         val count = activeClients.computeIfAbsent(why) { _ -> AtomicInteger(0) }.incrementAndGet()
         logger?.logAcquire(pmWakeLock, why, count)
-        pmWakeLock.acquire(maxTimeout)
+        if (maxTimeout == NO_TIMEOUT) {
+            pmWakeLock.acquire()
+        } else {
+            pmWakeLock.acquire(maxTimeout)
+        }
     }
 
     override fun release(why: String) {
