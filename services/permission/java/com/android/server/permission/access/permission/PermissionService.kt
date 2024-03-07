@@ -1112,6 +1112,8 @@ class PermissionService(private val service: AccessCheckingService) :
         )
         enforceCallingOrSelfAnyPermission(
             "getAllPermissionStates",
+            Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
             Manifest.permission.GET_RUNTIME_PERMISSIONS
         )
 

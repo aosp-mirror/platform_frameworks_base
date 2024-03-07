@@ -1800,7 +1800,11 @@ public final class PermissionManager {
      */
     @SystemApi
     @NonNull
-    @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
+    })
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
             @NonNull String persistentDeviceId) {
