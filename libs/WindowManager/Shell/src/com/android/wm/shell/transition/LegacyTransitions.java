@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.transition;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
+
 import android.annotation.NonNull;
 import android.os.RemoteException;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -25,6 +27,8 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IWindowContainerTransactionCallback;
+
+import com.android.internal.protolog.common.ProtoLog;
 
 /**
  * Utilities and interfaces for transition-like usage on top of the legacy app-transition and
@@ -87,9 +91,11 @@ public class LegacyTransitions {
             @Override
             public void onTransactionReady(int id, SurfaceControl.Transaction t)
                     throws RemoteException {
+                ProtoLog.v(WM_SHELL_TRANSITIONS,
+                        "LegacyTransitions.onTransactionReady(): syncId=%d", id);
                 mSyncId = id;
                 mTransaction = t;
-                checkApply();
+                checkApply(true /* log */);
             }
         }
 
@@ -103,20 +109,29 @@ public class LegacyTransitions {
                 mWallpapers = wallpapers;
                 mNonApps = nonApps;
                 mFinishCallback = finishedCallback;
-                checkApply();
+                checkApply(false /* log */);
             }
 
             @Override
             public void onAnimationCancelled() throws RemoteException {
                 mCancelled = true;
                 mApps = mWallpapers = mNonApps = null;
-                checkApply();
+                checkApply(false /* log */);
             }
         }
 
 
-        private void checkApply() throws RemoteException {
-            if (mSyncId < 0 || (mFinishCallback == null && !mCancelled)) return;
+        private void checkApply(boolean log) throws RemoteException {
+            if (mSyncId < 0 || (mFinishCallback == null && !mCancelled)) {
+                if (log) {
+                    ProtoLog.v(WM_SHELL_TRANSITIONS, "\tSkipping hasFinishedCb=%b canceled=%b",
+                            mFinishCallback != null, mCancelled);
+                }
+                return;
+            }
+            if (log) {
+                ProtoLog.v(WM_SHELL_TRANSITIONS, "\tapply");
+            }
             mLegacyTransition.onAnimationStart(mTransit, mApps, mWallpapers,
                     mNonApps, mFinishCallback, mTransaction);
         }
