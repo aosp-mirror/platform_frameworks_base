@@ -6458,12 +6458,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 } else if (response != null) {
                     if (viewId.isVirtualInt()) {
                         ViewNode viewNode = getViewNodeFromContextsLocked(viewId);
-                        if (viewNode != null && viewNode.getCredentialManagerCallback() != null) {
+                        if (viewNode != null && viewNode.getPendingCredentialCallback() != null) {
                             Bundle resultData = new Bundle();
                             resultData.putParcelable(
                                     CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
                                     response);
-                            viewNode.getCredentialManagerCallback().send(SUCCESS_CREDMAN_SELECTOR,
+                            viewNode.getPendingCredentialCallback().send(SUCCESS_CREDMAN_SELECTOR,
                                         resultData);
                         } else {
                             Slog.w(TAG, "View node not found after GetCredentialResponse");

@@ -1297,7 +1297,7 @@ public class AssistStructure implements Parcelable {
          */
         @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
         @Nullable
-        public GetCredentialRequest getCredentialManagerRequest() {
+        public GetCredentialRequest getPendingCredentialRequest() {
             return mGetCredentialRequest;
         }
 
@@ -1306,7 +1306,7 @@ public class AssistStructure implements Parcelable {
          */
         @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
         @Nullable
-        public ResultReceiver getCredentialManagerCallback() {
+        public ResultReceiver getPendingCredentialCallback() {
             return mGetCredentialResultReceiver;
         }
 
@@ -2191,14 +2191,14 @@ public class AssistStructure implements Parcelable {
 
         @Nullable
         @Override
-        public GetCredentialRequest getCredentialManagerRequest() {
+        public GetCredentialRequest getPendingCredentialRequest() {
             return mNode.mGetCredentialRequest;
         }
 
         @Nullable
         @Override
         public OutcomeReceiver<
-                GetCredentialResponse, GetCredentialException> getCredentialManagerCallback() {
+                GetCredentialResponse, GetCredentialException> getPendingCredentialCallback() {
             return mNode.mGetCredentialCallback;
         }
 
@@ -2267,7 +2267,7 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
-        public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+        public void setPendingCredentialRequest(@NonNull GetCredentialRequest request,
                 @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
             mNode.mGetCredentialRequest = request;
             mNode.mGetCredentialCallback = callback;
@@ -2654,7 +2654,7 @@ public class AssistStructure implements Parcelable {
                     + ", isCredential=" + node.isCredential()
             );
         }
-        GetCredentialRequest getCredentialRequest = node.getCredentialManagerRequest();
+        GetCredentialRequest getCredentialRequest = node.getPendingCredentialRequest();
         if (getCredentialRequest == null) {
             Log.i(TAG, prefix + " No Credential Manager Request");
         } else {
