@@ -198,7 +198,7 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_CEC_VERSION,
                 oneByteValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
-                new AsciiValidator(3), ADDR_NOT_UNREGISTERED, ADDR_BROADCAST);
+                new AsciiValidator(3), ADDR_TV, ADDR_BROADCAST);
 
         ParameterValidator statusRequestValidator = new MinimumOneByteRangeValidator(0x01, 0x03);
         addValidationInfo(Constants.MESSAGE_DECK_CONTROL,
