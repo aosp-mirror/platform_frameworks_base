@@ -231,5 +231,6 @@ constructor(
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_GLANCEABLE_HUB_DURATION = 1.seconds
         val TO_LOCKSCREEN_DURATION = 1167.milliseconds
+        val TO_GONE_DURATION = DEFAULT_DURATION
     }
 }
