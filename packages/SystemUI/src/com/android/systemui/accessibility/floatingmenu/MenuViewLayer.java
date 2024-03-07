@@ -319,6 +319,9 @@ class MenuViewLayer extends FrameLayout implements
         if (Flags.floatingMenuAnimatedTuck()) {
             setClipChildren(true);
         }
+        setClickable(false);
+        setFocusable(false);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     @Override
