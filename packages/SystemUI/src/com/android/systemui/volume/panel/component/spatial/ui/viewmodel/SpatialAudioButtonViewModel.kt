@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.shared.model
+package com.android.systemui.volume.panel.component.spatial.ui.viewmodel
 
-import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
+import com.android.systemui.common.shared.model.Color
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 
-object VolumePanelComponents {
-
-    const val MEDIA_OUTPUT: VolumePanelComponentKey = "media_output"
-    const val BOTTOM_BAR: VolumePanelComponentKey = "bottom_bar"
-    const val VOLUME_SLIDERS: VolumePanelComponentKey = "volume_sliders"
-    const val CAPTIONING: VolumePanelComponentKey = "captioning"
-    const val SPATIAL_AUDIO: VolumePanelComponentKey = "spatial_audio"
-    const val ANC: VolumePanelComponentKey = "anc"
-}
+data class SpatialAudioButtonViewModel(
+    val model: SpatialAudioEnabledModel,
+    val button: ToggleButtonViewModel,
+    val iconColor: Color,
+    val labelColor: Color,
+)

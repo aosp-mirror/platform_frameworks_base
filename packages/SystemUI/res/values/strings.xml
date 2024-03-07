@@ -1538,8 +1538,16 @@
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
 
-    <!-- Label for button to enabled/disable live caption [CHAR_LIMIT=30] -->
+    <!-- Label for button to enabled/disable active noise cancellation [CHAR_LIMIT=30] -->
     <string name="volume_panel_noise_control_title">Noise Control</string>
+    <!-- Label for button to enabled/disable spatial audio [CHAR_LIMIT=30] -->
+    <string name="volume_panel_spatial_audio_title">Spatial Audio</string>
+    <!-- Label for button to disable spatial audio [CHAR_LIMIT=20] -->
+    <string name="volume_panel_spatial_audio_off">Off</string>
+    <!-- Label for button to enabled spatial audio [CHAR_LIMIT=20] -->
+    <string name="volume_panel_spatial_audio_fixed">Fixed</string>
+    <!-- Label for button to enabled head tracking [CHAR_LIMIT=20] -->
+    <string name="volume_panel_spatial_audio_tracking">Head Tracking</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
 

@@ -18,23 +18,27 @@ package com.android.systemui.media.data.repository
 
 import android.media.AudioDeviceAttributes
 import com.android.settingslib.media.data.repository.SpatializerRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class FakeSpatializerRepository : SpatializerRepository {
 
     var defaultSpatialAudioAvailable: Boolean = false
+    var defaultHeadTrackingAvailable: Boolean = false
 
     private val spatialAudioAvailabilityByDevice: MutableMap<AudioDeviceAttributes, Boolean> =
         mutableMapOf()
+    private val headTrackingAvailabilityByDevice: MutableMap<AudioDeviceAttributes, Boolean> =
+        mutableMapOf()
     private val spatialAudioCompatibleDevices: MutableList<AudioDeviceAttributes> = mutableListOf()
 
-    private val mutableHeadTrackingAvailable = MutableStateFlow(false)
     private val headTrackingEnabledByDevice = mutableMapOf<AudioDeviceAttributes, Boolean>()
 
-    override val isHeadTrackingAvailable: StateFlow<Boolean> =
-        mutableHeadTrackingAvailable.asStateFlow()
+    override suspend fun isHeadTrackingAvailableForDevice(
+        audioDeviceAttributes: AudioDeviceAttributes
+    ): Boolean =
+        headTrackingAvailabilityByDevice.getOrDefault(
+            audioDeviceAttributes,
+            defaultHeadTrackingAvailable
+        )
 
     override suspend fun isSpatialAudioAvailableForDevice(
         audioDeviceAttributes: AudioDeviceAttributes
@@ -77,7 +81,10 @@ class FakeSpatializerRepository : SpatializerRepository {
         spatialAudioAvailabilityByDevice[audioDeviceAttributes] = isAvailable
     }
 
-    fun setIsHeadTrackingAvailable(isAvailable: Boolean) {
-        mutableHeadTrackingAvailable.value = isAvailable
+    fun setIsHeadTrackingAvailable(
+        audioDeviceAttributes: AudioDeviceAttributes,
+        isAvailable: Boolean,
+    ) {
+        headTrackingAvailabilityByDevice[audioDeviceAttributes] = isAvailable
     }
 }

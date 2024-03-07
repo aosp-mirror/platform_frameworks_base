@@ -23,3 +23,6 @@ data class ToggleButtonViewModel(
     val icon: Icon,
     val label: CharSequence,
 )
+
+fun ToggleButtonViewModel.toButtonViewModel(): ButtonViewModel =
+    ButtonViewModel(icon = icon, label = label)
