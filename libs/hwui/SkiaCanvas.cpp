@@ -596,8 +596,8 @@ void SkiaCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Pain
     if (recordingContext) {
         context = recordingContext->asDirectContext();
     }
-    mesh.updateSkMesh(context);
-    mCanvas->drawMesh(mesh.getSkMesh(), blender, paint);
+    mesh.refBufferData()->updateBuffers(context);
+    mCanvas->drawMesh(mesh.takeSnapshot().getSkMesh(), blender, paint);
 }
 
 // ----------------------------------------------------------------------------

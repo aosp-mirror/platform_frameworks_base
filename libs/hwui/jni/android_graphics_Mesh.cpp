@@ -38,8 +38,8 @@ static jlong make(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject verte
         return 0;
     }
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);
-    auto meshPtr = new Mesh(skMeshSpec, mode, std::move(buffer), vertexCount, vertexOffset,
-                            std::make_unique<MeshUniformBuilder>(skMeshSpec), skRect);
+    auto meshPtr = new Mesh(skMeshSpec, static_cast<SkMesh::Mode>(mode), std::move(buffer),
+                            vertexCount, vertexOffset, skRect);
     auto [valid, msg] = meshPtr->validate();
     if (!valid) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", msg.c_str());
@@ -63,9 +63,9 @@ static jlong makeIndexed(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobjec
         return 0;
     }
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);
-    auto meshPtr = new Mesh(skMeshSpec, mode, std::move(vBuf), vertexCount, vertexOffset,
-                            std::move(iBuf), indexCount, indexOffset,
-                            std::make_unique<MeshUniformBuilder>(skMeshSpec), skRect);
+    auto meshPtr =
+            new Mesh(skMeshSpec, static_cast<SkMesh::Mode>(mode), std::move(vBuf), vertexCount,
+                     vertexOffset, std::move(iBuf), indexCount, indexOffset, skRect);
     auto [valid, msg] = meshPtr->validate();
     if (!valid) {
         jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", msg.c_str());
@@ -133,7 +133,6 @@ static void updateFloatUniforms(JNIEnv* env, jobject, jlong meshWrapper, jstring
     ScopedUtfChars name(env, uniformName);
     const float values[4] = {value1, value2, value3, value4};
     nativeUpdateFloatUniforms(env, wrapper->uniformBuilder(), name.c_str(), values, count, false);
-    wrapper->markDirty();
 }
 
 static void updateFloatArrayUniforms(JNIEnv* env, jobject, jlong meshWrapper, jstring jUniformName,
@@ -143,7 +142,6 @@ static void updateFloatArrayUniforms(JNIEnv* env, jobject, jlong meshWrapper, js
     AutoJavaFloatArray autoValues(env, jvalues, 0, kRO_JNIAccess);
     nativeUpdateFloatUniforms(env, wrapper->uniformBuilder(), name.c_str(), autoValues.ptr(),
                               autoValues.length(), isColor);
-    wrapper->markDirty();
 }
 
 static void nativeUpdateIntUniforms(JNIEnv* env, MeshUniformBuilder* builder,
@@ -166,7 +164,6 @@ static void updateIntUniforms(JNIEnv* env, jobject, jlong meshWrapper, jstring u
     ScopedUtfChars name(env, uniformName);
     const int values[4] = {value1, value2, value3, value4};
     nativeUpdateIntUniforms(env, wrapper->uniformBuilder(), name.c_str(), values, count);
-    wrapper->markDirty();
 }
 
 static void updateIntArrayUniforms(JNIEnv* env, jobject, jlong meshWrapper, jstring uniformName,
@@ -176,7 +173,6 @@ static void updateIntArrayUniforms(JNIEnv* env, jobject, jlong meshWrapper, jstr
     AutoJavaIntArray autoValues(env, values, 0);
     nativeUpdateIntUniforms(env, wrapper->uniformBuilder(), name.c_str(), autoValues.ptr(),
                             autoValues.length());
-    wrapper->markDirty();
 }
 
 static void MeshWrapper_destroy(Mesh* wrapper) {

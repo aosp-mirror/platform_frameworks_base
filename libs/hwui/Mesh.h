@@ -25,6 +25,8 @@
 
 #include <utility>
 
+namespace android {
+
 class MeshUniformBuilder {
 public:
     struct MeshUniform {
@@ -103,32 +105,146 @@ private:
     sk_sp<SkMeshSpecification> fMeshSpec;
 };
 
-class Mesh {
+// Storage for CPU and GPU copies of the vertex and index data of a mesh.
+class MeshBufferData {
 public:
-    Mesh(const sk_sp<SkMeshSpecification>& meshSpec, int mode,
-         std::vector<uint8_t>&& vertexBufferData, jint vertexCount, jint vertexOffset,
-         std::unique_ptr<MeshUniformBuilder> builder, const SkRect& bounds)
-            : mMeshSpec(meshSpec)
-            , mMode(mode)
-            , mVertexBufferData(std::move(vertexBufferData))
-            , mVertexCount(vertexCount)
+    MeshBufferData(std::vector<uint8_t> vertexData, int32_t vertexCount, int32_t vertexOffset,
+                   std::vector<uint8_t> indexData, int32_t indexCount, int32_t indexOffset)
+            : mVertexCount(vertexCount)
             , mVertexOffset(vertexOffset)
-            , mBuilder(std::move(builder))
-            , mBounds(bounds) {}
-
-    Mesh(const sk_sp<SkMeshSpecification>& meshSpec, int mode,
-         std::vector<uint8_t>&& vertexBufferData, jint vertexCount, jint vertexOffset,
-         std::vector<uint8_t>&& indexBuffer, jint indexCount, jint indexOffset,
-         std::unique_ptr<MeshUniformBuilder> builder, const SkRect& bounds)
-            : mMeshSpec(meshSpec)
-            , mMode(mode)
-            , mVertexBufferData(std::move(vertexBufferData))
-            , mVertexCount(vertexCount)
-            , mVertexOffset(vertexOffset)
-            , mIndexBufferData(std::move(indexBuffer))
             , mIndexCount(indexCount)
             , mIndexOffset(indexOffset)
-            , mBuilder(std::move(builder))
+            , mVertexData(std::move(vertexData))
+            , mIndexData(std::move(indexData)) {}
+
+    void updateBuffers(GrDirectContext* context) const {
+        GrDirectContext::DirectContextID currentId = context == nullptr
+                                                             ? GrDirectContext::DirectContextID()
+                                                             : context->directContextID();
+        if (currentId == mSkiaBuffers.fGenerationId && mSkiaBuffers.fVertexBuffer != nullptr) {
+            // Nothing to update since the Android API does not support partial updates yet.
+            return;
+        }
+
+        mSkiaBuffers.fVertexBuffer =
+#ifdef __ANDROID__
+                SkMeshes::MakeVertexBuffer(context, mVertexData.data(), mVertexData.size());
+#else
+                SkMeshes::MakeVertexBuffer(mVertexData.data(), mVertexData.size());
+#endif
+        if (mIndexCount != 0) {
+            mSkiaBuffers.fIndexBuffer =
+#ifdef __ANDROID__
+                    SkMeshes::MakeIndexBuffer(context, mIndexData.data(), mIndexData.size());
+#else
+                    SkMeshes::MakeIndexBuffer(mIndexData.data(), mIndexData.size());
+#endif
+        }
+        mSkiaBuffers.fGenerationId = currentId;
+    }
+
+    SkMesh::VertexBuffer* vertexBuffer() const { return mSkiaBuffers.fVertexBuffer.get(); }
+
+    sk_sp<SkMesh::VertexBuffer> refVertexBuffer() const { return mSkiaBuffers.fVertexBuffer; }
+    int32_t vertexCount() const { return mVertexCount; }
+    int32_t vertexOffset() const { return mVertexOffset; }
+
+    sk_sp<SkMesh::IndexBuffer> refIndexBuffer() const { return mSkiaBuffers.fIndexBuffer; }
+    int32_t indexCount() const { return mIndexCount; }
+    int32_t indexOffset() const { return mIndexOffset; }
+
+    const std::vector<uint8_t>& vertexData() const { return mVertexData; }
+    const std::vector<uint8_t>& indexData() const { return mIndexData; }
+
+private:
+    struct CachedSkiaBuffers {
+        sk_sp<SkMesh::VertexBuffer> fVertexBuffer;
+        sk_sp<SkMesh::IndexBuffer> fIndexBuffer;
+        GrDirectContext::DirectContextID fGenerationId = GrDirectContext::DirectContextID();
+    };
+
+    mutable CachedSkiaBuffers mSkiaBuffers;
+    int32_t mVertexCount = 0;
+    int32_t mVertexOffset = 0;
+    int32_t mIndexCount = 0;
+    int32_t mIndexOffset = 0;
+    std::vector<uint8_t> mVertexData;
+    std::vector<uint8_t> mIndexData;
+};
+
+class Mesh {
+public:
+    // A snapshot of the mesh for use by the render thread.
+    //
+    // After a snapshot is taken, future uniform changes to the original Mesh will not modify the
+    // uniforms returned by makeSkMesh.
+    class Snapshot {
+    public:
+        Snapshot() = delete;
+        Snapshot(const Snapshot&) = default;
+        Snapshot(Snapshot&&) = default;
+        Snapshot& operator=(const Snapshot&) = default;
+        Snapshot& operator=(Snapshot&&) = default;
+        ~Snapshot() = default;
+
+        const SkMesh& getSkMesh() const {
+            SkMesh::VertexBuffer* vertexBuffer = mBufferData->vertexBuffer();
+            LOG_FATAL_IF(vertexBuffer == nullptr,
+                         "Attempt to obtain SkMesh when vertexBuffer has not been created, did you "
+                         "forget to call MeshBufferData::updateBuffers with a GrDirectContext?");
+            if (vertexBuffer != mMesh.vertexBuffer()) mMesh = makeSkMesh();
+            return mMesh;
+        }
+
+    private:
+        friend class Mesh;
+
+        Snapshot(sk_sp<SkMeshSpecification> meshSpec, SkMesh::Mode mode,
+                 std::shared_ptr<const MeshBufferData> bufferData, sk_sp<const SkData> uniforms,
+                 const SkRect& bounds)
+                : mMeshSpec(std::move(meshSpec))
+                , mMode(mode)
+                , mBufferData(std::move(bufferData))
+                , mUniforms(std::move(uniforms))
+                , mBounds(bounds) {}
+
+        SkMesh makeSkMesh() const {
+            const MeshBufferData& d = *mBufferData;
+            if (d.indexCount() != 0) {
+                return SkMesh::MakeIndexed(mMeshSpec, mMode, d.refVertexBuffer(), d.vertexCount(),
+                                           d.vertexOffset(), d.refIndexBuffer(), d.indexCount(),
+                                           d.indexOffset(), mUniforms,
+                                           SkSpan<SkRuntimeEffect::ChildPtr>(), mBounds)
+                        .mesh;
+            }
+            return SkMesh::Make(mMeshSpec, mMode, d.refVertexBuffer(), d.vertexCount(),
+                                d.vertexOffset(), mUniforms, SkSpan<SkRuntimeEffect::ChildPtr>(),
+                                mBounds)
+                    .mesh;
+        }
+
+        mutable SkMesh mMesh;
+        sk_sp<SkMeshSpecification> mMeshSpec;
+        SkMesh::Mode mMode;
+        std::shared_ptr<const MeshBufferData> mBufferData;
+        sk_sp<const SkData> mUniforms;
+        SkRect mBounds;
+    };
+
+    Mesh(sk_sp<SkMeshSpecification> meshSpec, SkMesh::Mode mode, std::vector<uint8_t> vertexData,
+         int32_t vertexCount, int32_t vertexOffset, const SkRect& bounds)
+            : Mesh(std::move(meshSpec), mode, std::move(vertexData), vertexCount, vertexOffset,
+                   /* indexData = */ {}, /* indexCount = */ 0, /* indexOffset = */ 0, bounds) {}
+
+    Mesh(sk_sp<SkMeshSpecification> meshSpec, SkMesh::Mode mode, std::vector<uint8_t> vertexData,
+         int32_t vertexCount, int32_t vertexOffset, std::vector<uint8_t> indexData,
+         int32_t indexCount, int32_t indexOffset, const SkRect& bounds)
+            : mMeshSpec(std::move(meshSpec))
+            , mMode(mode)
+            , mBufferData(std::make_shared<MeshBufferData>(std::move(vertexData), vertexCount,
+                                                           vertexOffset, std::move(indexData),
+                                                           indexCount, indexOffset))
+            , mUniformBuilder(mMeshSpec)
             , mBounds(bounds) {}
 
     Mesh(Mesh&&) = default;
@@ -137,77 +253,22 @@ public:
 
     [[nodiscard]] std::tuple<bool, SkString> validate();
 
-    void updateSkMesh(GrDirectContext* context) const {
-        GrDirectContext::DirectContextID genId = GrDirectContext::DirectContextID();
-        if (context) {
-            genId = context->directContextID();
-        }
+    std::shared_ptr<const MeshBufferData> refBufferData() const { return mBufferData; }
 
-        if (mIsDirty || genId != mGenerationId) {
-            auto vertexData = reinterpret_cast<const void*>(mVertexBufferData.data());
-#ifdef __ANDROID__
-            auto vb = SkMeshes::MakeVertexBuffer(context,
-                                                 vertexData,
-                                                 mVertexBufferData.size());
-#else
-            auto vb = SkMeshes::MakeVertexBuffer(vertexData,
-                                                 mVertexBufferData.size());
-#endif
-            auto meshMode = SkMesh::Mode(mMode);
-            if (!mIndexBufferData.empty()) {
-                auto indexData = reinterpret_cast<const void*>(mIndexBufferData.data());
-#ifdef __ANDROID__
-                auto ib = SkMeshes::MakeIndexBuffer(context,
-                                                    indexData,
-                                                    mIndexBufferData.size());
-#else
-                auto ib = SkMeshes::MakeIndexBuffer(indexData,
-                                                    mIndexBufferData.size());
-#endif
-                mMesh = SkMesh::MakeIndexed(mMeshSpec, meshMode, vb, mVertexCount, mVertexOffset,
-                                            ib, mIndexCount, mIndexOffset, mBuilder->fUniforms,
-                                            SkSpan<SkRuntimeEffect::ChildPtr>(), mBounds)
-                                .mesh;
-            } else {
-                mMesh = SkMesh::Make(mMeshSpec, meshMode, vb, mVertexCount, mVertexOffset,
-                                     mBuilder->fUniforms, SkSpan<SkRuntimeEffect::ChildPtr>(),
-                                     mBounds)
-                                .mesh;
-            }
-            mIsDirty = false;
-            mGenerationId = genId;
-        }
+    Snapshot takeSnapshot() const {
+        return Snapshot(mMeshSpec, mMode, mBufferData, mUniformBuilder.fUniforms, mBounds);
     }
 
-    SkMesh& getSkMesh() const {
-        LOG_FATAL_IF(mIsDirty,
-                     "Attempt to obtain SkMesh when Mesh is dirty, did you "
-                     "forget to call updateSkMesh with a GrDirectContext? "
-                     "Defensively creating a CPU mesh");
-        return mMesh;
-    }
-
-    void markDirty() { mIsDirty = true; }
-
-    MeshUniformBuilder* uniformBuilder() { return mBuilder.get(); }
+    MeshUniformBuilder* uniformBuilder() { return &mUniformBuilder; }
 
 private:
     sk_sp<SkMeshSpecification> mMeshSpec;
-    int mMode = 0;
-
-    std::vector<uint8_t> mVertexBufferData;
-    size_t mVertexCount = 0;
-    size_t mVertexOffset = 0;
-
-    std::vector<uint8_t> mIndexBufferData;
-    size_t mIndexCount = 0;
-    size_t mIndexOffset = 0;
-
-    std::unique_ptr<MeshUniformBuilder> mBuilder;
-    SkRect mBounds{};
-
-    mutable SkMesh mMesh{};
-    mutable bool mIsDirty = true;
-    mutable GrDirectContext::DirectContextID mGenerationId = GrDirectContext::DirectContextID();
+    SkMesh::Mode mMode;
+    std::shared_ptr<MeshBufferData> mBufferData;
+    MeshUniformBuilder mUniformBuilder;
+    SkRect mBounds;
 };
+
+}  // namespace android
+
 #endif  // MESH_H_

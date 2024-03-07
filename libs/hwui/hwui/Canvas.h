@@ -34,7 +34,6 @@ class SkCanvasState;
 class SkRRect;
 class SkRuntimeShaderBuilder;
 class SkVertices;
-class Mesh;
 
 namespace minikin {
 class Font;
@@ -61,6 +60,7 @@ typedef std::function<void(uint16_t* text, float* positions)> ReadGlyphFunc;
 
 class AnimatedImageDrawable;
 class Bitmap;
+class Mesh;
 class Paint;
 struct Typeface;
 
