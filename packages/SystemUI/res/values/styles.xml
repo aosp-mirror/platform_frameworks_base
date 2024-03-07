@@ -965,6 +965,10 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
 
+    <style name="Widget.SliceView.VolumePanel">
+        <item name="hideHeaderRow">true</item>
+    </style>
+
     <style name="Theme.VolumePanelActivity.Popup" parent="@style/Theme.SystemUI.Dialog">
         <item name="android:dialogCornerRadius">44dp</item>
         <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainerHigh
