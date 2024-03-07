@@ -28,6 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner.MAX_HEIGHT
+import com.android.wm.shell.common.bubbles.BubbleBarLocation
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import org.junit.Before
@@ -484,6 +485,32 @@ class BubblePositionerTest {
                 false /* isOverflow */)
         assertThat(taskViewWidth).isEqualTo(
                 positioner.screenRect.width() - paddings[0] - paddings[2])
+    }
+
+    @Test
+    fun testIsBubbleBarOnLeft_defaultsToRight() {
+        positioner.bubbleBarLocation = BubbleBarLocation.DEFAULT
+        assertThat(positioner.isBubbleBarOnLeft).isFalse()
+
+        // Check that left and right return expected position
+        positioner.bubbleBarLocation = BubbleBarLocation.LEFT
+        assertThat(positioner.isBubbleBarOnLeft).isTrue()
+        positioner.bubbleBarLocation = BubbleBarLocation.RIGHT
+        assertThat(positioner.isBubbleBarOnLeft).isFalse()
+    }
+
+    @Test
+    fun testIsBubbleBarOnLeft_rtlEnabled_defaultsToLeft() {
+        positioner.update(defaultDeviceConfig.copy(isRtl = true))
+
+        positioner.bubbleBarLocation = BubbleBarLocation.DEFAULT
+        assertThat(positioner.isBubbleBarOnLeft).isTrue()
+
+        // Check that left and right return expected position
+        positioner.bubbleBarLocation = BubbleBarLocation.LEFT
+        assertThat(positioner.isBubbleBarOnLeft).isTrue()
+        positioner.bubbleBarLocation = BubbleBarLocation.RIGHT
+        assertThat(positioner.isBubbleBarOnLeft).isFalse()
     }
 
     private val defaultYPosition: Float

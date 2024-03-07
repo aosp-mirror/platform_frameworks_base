@@ -103,6 +103,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
@@ -708,6 +709,30 @@ public class BubbleController implements ConfigurationChangeListener,
         return mBubbleProperties.isBubbleBarEnabled() && mBubblePositioner.isLargeScreen();
     }
 
+    /**
+     * Returns current {@link BubbleBarLocation} if bubble bar is being used.
+     * Otherwise returns <code>null</code>
+     */
+    @Nullable
+    public BubbleBarLocation getBubbleBarLocation() {
+        if (canShowAsBubbleBar()) {
+            return mBubblePositioner.getBubbleBarLocation();
+        }
+        return null;
+    }
+
+    /**
+     * Update bubble bar location and trigger and update to listeners
+     */
+    public void setBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
+        if (canShowAsBubbleBar()) {
+            mBubblePositioner.setBubbleBarLocation(bubbleBarLocation);
+            BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
+            bubbleBarUpdate.bubbleBarLocation = bubbleBarLocation;
+            mBubbleStateListener.onBubbleStateChange(bubbleBarUpdate);
+        }
+    }
+
     /** Whether this userId belongs to the current user. */
     private boolean isCurrentProfile(int userId) {
         return userId == UserHandle.USER_ALL
@@ -1179,7 +1204,7 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     @VisibleForTesting
     public void expandStackAndSelectBubbleFromLauncher(String key, Rect bubbleBarBounds) {
-        mBubblePositioner.setBubbleBarPosition(bubbleBarBounds);
+        mBubblePositioner.setBubbleBarBounds(bubbleBarBounds);
 
         if (BubbleOverflow.KEY.equals(key)) {
             mBubbleData.setSelectedBubbleFromLauncher(mBubbleData.getOverflow());
