@@ -2691,6 +2691,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
 
                 float maxDimAmount = getHighestDimAmountFromMap(wallpaper.mUidToDimAmount);
+                if (wallpaper.mWallpaperDimAmount == maxDimAmount) return;
                 wallpaper.mWallpaperDimAmount = maxDimAmount;
                 // Also set the dim amount to the lock screen wallpaper if the lock and home screen
                 // do not share the same wallpaper
