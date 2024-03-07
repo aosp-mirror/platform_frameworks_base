@@ -40,7 +40,7 @@ struct SpriteIcon {
     PointerIconStyle style{PointerIconStyle::TYPE_NULL};
     float hotSpotX{};
     float hotSpotY{};
-    bool drawNativeDropShadow{false};
+    bool drawNativeDropShadow{};
 
     inline bool isValid() const { return bitmap.isValid() && !bitmap.isEmpty(); }
 
