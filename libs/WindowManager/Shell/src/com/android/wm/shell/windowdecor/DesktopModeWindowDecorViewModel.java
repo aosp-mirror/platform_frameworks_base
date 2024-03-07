@@ -1052,8 +1052,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop()
-                && mDisplayController.getDisplayContext(taskInfo.displayId)
-                .getResources().getConfiguration().smallestScreenWidthDp >= 600;
+                && DesktopModeStatus.meetsMinimumDisplayRequirements(taskInfo);
     }
 
     private void createWindowDecoration(
