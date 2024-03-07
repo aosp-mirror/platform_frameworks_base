@@ -641,6 +641,7 @@ public class IntentForwarderActivityTest {
     public void shouldForwardToParent_telephony_privateProfile() throws Exception {
         mSetFlagsRule.enableFlags(
                 android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES,
                 android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_INTENT_REDIRECTION);
 
         sComponentName = FORWARD_TO_PARENT_COMPONENT_NAME;
