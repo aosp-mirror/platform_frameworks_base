@@ -603,6 +603,7 @@ constructor(
                 }
             }
             val cancelHandler = Runnable {
+                statusBarStateController.setLeaveOpenOnKeyguardHide(false)
                 draggedDownEntry?.apply {
                     setUserLocked(false)
                     notifyHeightChanged(
