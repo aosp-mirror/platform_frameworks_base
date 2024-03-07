@@ -301,8 +301,15 @@ public class VisualQueryDetector {
     }
 
     /**
-     * A class that lets a VoiceInteractionService implementation interact with
-     * visual query detection APIs.
+     * A class that lets a VoiceInteractionService implementation interact with visual query
+     * detection APIs.
+     *
+     * Note that methods in this callbacks are not thread-safe so the invocation of each
+     * methods will have different order from how they are called in the
+     * {@link VisualQueryDetectionService}. It is expected to pass a single thread executor or a
+     * serial executor as the callback executor when creating the {@link VisualQueryDetector}
+     * with {@link VoiceInteractionService#createVisualQueryDetector(
+     * PersistableBundle, SharedMemory, Executor, Callback)}.
      */
     public interface Callback {
 
@@ -456,7 +463,7 @@ public class VisualQueryDetector {
             Slog.v(TAG, "BinderCallback#onResultDetected");
             Binder.withCleanCallingIdentity(() -> {
                 synchronized (mLock) {
-                    mCallback.onQueryDetected(partialResult);
+                    mExecutor.execute(()->mCallback.onQueryDetected(partialResult));
                 }
             });
         }
