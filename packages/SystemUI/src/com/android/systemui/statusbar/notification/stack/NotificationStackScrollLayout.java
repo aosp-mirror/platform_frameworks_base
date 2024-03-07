@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.view.MotionEvent.ACTION_CANCEL;
+import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
@@ -3306,7 +3308,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (SceneContainerFlag.isEnabled() && mIsBeingDragged) {
-            if (!mSendingTouchesToSceneFramework) {
+            int action = ev.getActionMasked();
+            boolean isUpOrCancel = action == ACTION_UP || action == ACTION_CANCEL;
+            if (mSendingTouchesToSceneFramework) {
+                mController.sendTouchToSceneFramework(ev);
+            } else if (!isUpOrCancel) {
                 // if this is the first touch being sent to the scene framework,
                 // convert it into a synthetic DOWN event.
                 mSendingTouchesToSceneFramework = true;
@@ -3314,14 +3320,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 downEvent.setAction(MotionEvent.ACTION_DOWN);
                 mController.sendTouchToSceneFramework(downEvent);
                 downEvent.recycle();
-            } else {
-                mController.sendTouchToSceneFramework(ev);
             }
 
-            if (
-                    ev.getActionMasked() == MotionEvent.ACTION_UP
-                    || ev.getActionMasked() == MotionEvent.ACTION_CANCEL
-            ) {
+            if (isUpOrCancel) {
                 setIsBeingDragged(false);
             }
             return false;
@@ -3478,7 +3479,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     }
                 }
                 break;
-            case MotionEvent.ACTION_UP:
+            case ACTION_UP:
                 if (mIsBeingDragged) {
                     final VelocityTracker velocityTracker = mVelocityTracker;
                     velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
@@ -3515,7 +3516,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 }
 
                 break;
-            case MotionEvent.ACTION_CANCEL:
+            case ACTION_CANCEL:
                 if (mIsBeingDragged && getChildCount() > 0) {
                     if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
                             getScrollRange())) {
@@ -3624,7 +3625,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     mTouchIsClick = false;
                 }
                 break;
-            case MotionEvent.ACTION_UP:
+            case ACTION_UP:
                 if (mStatusBarState != StatusBarState.KEYGUARD && mTouchIsClick &&
                         isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
                     debugShadeLog("handleEmptySpaceClick: touch event propagated further");
@@ -3765,8 +3766,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 break;
             }
 
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
+            case ACTION_CANCEL:
+            case ACTION_UP:
                 /* Release the drag */
                 setIsBeingDragged(false);
                 mActivePointerId = INVALID_POINTER;
