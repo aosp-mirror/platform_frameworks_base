@@ -16877,6 +16877,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private int checkDeviceOwnerProvisioningPreCondition(@UserIdInt int callingUserId) {
         synchronized (getLockObject()) {
             final int deviceOwnerUserId = mInjector.userManagerIsHeadlessSystemUserMode()
+                    && (!Flags.headlessDeviceOwnerProvisioningFixEnabled()
+                    || getHeadlessDeviceOwnerMode() == HEADLESS_DEVICE_OWNER_MODE_AFFILIATED)
                     ? UserHandle.USER_SYSTEM
                     : callingUserId;
             Slogf.i(LOG_TAG, "Calling user %d, device owner will be set on user %d",
@@ -21549,10 +21551,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
             setLocale(provisioningParams.getLocale());
 
+
+
+            boolean isSingleUserMode;
+            if (Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
+                DeviceAdminInfo adminInfo = findAdmin(
+                        deviceAdmin, caller.getUserId(), /* throwForMissingPermission= */ false);
+                isSingleUserMode = (adminInfo != null && adminInfo.getHeadlessDeviceOwnerMode()
+                        == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER);
+            } else {
+                isSingleUserMode =
+                        (getHeadlessDeviceOwnerMode() == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER);
+            }
             int deviceOwnerUserId = Flags.headlessDeviceOwnerSingleUserEnabled()
-                    && getHeadlessDeviceOwnerMode() == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER
-                    ? mUserManagerInternal.getMainUserId()
-                    : UserHandle.USER_SYSTEM;
+                    && isSingleUserMode
+                    ? mUserManagerInternal.getMainUserId() : UserHandle.USER_SYSTEM;
 
             if (!removeNonRequiredAppsForManagedDevice(
                     deviceOwnerUserId,
@@ -24255,5 +24268,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 caller.getUserId());
 
         return mDevicePolicyEngine.getMaxPolicyStorageLimit();
+    }
+
+    @Override
+    public int getHeadlessDeviceOwnerMode(String callerPackageName) {
+        final CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforcePermission(MANAGE_PROFILE_AND_DEVICE_OWNERS, caller.getPackageName(),
+                caller.getUserId());
+
+        return Binder.withCleanCallingIdentity(() -> getHeadlessDeviceOwnerMode());
     }
 }

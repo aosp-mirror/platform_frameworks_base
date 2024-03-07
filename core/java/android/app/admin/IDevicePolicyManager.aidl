@@ -625,4 +625,6 @@ interface IDevicePolicyManager {
 
     void setMaxPolicyStorageLimit(String packageName, int storageLimit);
     int getMaxPolicyStorageLimit(String packageName);
+
+    int getHeadlessDeviceOwnerMode(String callerPackageName);
 }
