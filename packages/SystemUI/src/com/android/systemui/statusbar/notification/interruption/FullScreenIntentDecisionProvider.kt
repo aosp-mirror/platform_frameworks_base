@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.interruption.FullScreenIntent
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_KEYGUARD_OCCLUDED
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_KEYGUARD_SHOWING
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_LOCKED_SHADE
+import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.FSI_USER_SETUP_INCOMPLETE
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_EXPECTED_TO_HUN
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_NOT_IMPORTANT_ENOUGH
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_NO_FULL_SCREEN_INTENT
@@ -101,6 +102,7 @@ class FullScreenIntentDecisionProvider(
         FSI_KEYGUARD_OCCLUDED(true, "keyguard is occluded"),
         FSI_LOCKED_SHADE(true, "locked shade"),
         FSI_DEVICE_NOT_PROVISIONED(true, "device not provisioned"),
+        FSI_USER_SETUP_INCOMPLETE(true, "user setup incomplete"),
         NO_FSI_NO_HUN_OR_KEYGUARD(
             false,
             "no HUN or keyguard",
@@ -187,6 +189,10 @@ class FullScreenIntentDecisionProvider(
 
         if (!deviceProvisionedController.isDeviceProvisioned) {
             return FSI_DEVICE_NOT_PROVISIONED
+        }
+
+        if (!deviceProvisionedController.isCurrentUserSetup) {
+            return FSI_USER_SETUP_INCOMPLETE
         }
 
         return NO_FSI_NO_HUN_OR_KEYGUARD
