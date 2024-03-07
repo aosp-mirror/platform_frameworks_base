@@ -81,6 +81,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.Adjustment.KEY_CONTEXTUAL_ACTIONS;
@@ -5619,8 +5620,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
                 + "</dnd_apps>"
                 + "</notification-policy>";
-        UserInfo ui = new UserInfo();
-        ui.id = 10;
+        UserInfo ui = new UserInfo(10, "Clone", UserInfo.FLAG_PROFILE);
         ui.userType = USER_TYPE_PROFILE_CLONE;
         when(mUmInternal.getUserInfo(10)).thenReturn(ui);
         mService.readPolicyXml(
@@ -5646,9 +5646,36 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
                 + "</dnd_apps>"
                 + "</notification-policy>";
-        UserInfo ui = new UserInfo();
-        ui.id = 10;
+        UserInfo ui = new UserInfo(10, "Work", UserInfo.FLAG_PROFILE);
         ui.userType = USER_TYPE_PROFILE_MANAGED;
+        when(mUmInternal.getUserInfo(10)).thenReturn(ui);
+        mService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
+                true,
+                10);
+        verify(mListeners, never()).readXml(any(), any(), eq(true), eq(10));
+        verify(mConditionProviders, never()).readXml(any(), any(), eq(true), eq(10));
+        verify(mAssistants, never()).readXml(any(), any(), eq(true), eq(10));
+    }
+
+    @Test
+    public void testReadPolicyXml_doesNotRestoreManagedServicesForPrivateUser() throws Exception {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
+        final String policyXml = "<notification-policy version=\"1\">"
+                + "<ranking></ranking>"
+                + "<enabled_listeners>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_listeners>"
+                + "<enabled_assistants>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</enabled_assistants>"
+                + "<dnd_apps>"
+                + "<service_listing approved=\"test\" user=\"10\" primary=\"true\" />"
+                + "</dnd_apps>"
+                + "</notification-policy>";
+        UserInfo ui = new UserInfo(10, "Private", UserInfo.FLAG_PROFILE);
+        ui.userType = USER_TYPE_PROFILE_PRIVATE;
         when(mUmInternal.getUserInfo(10)).thenReturn(ui);
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(policyXml.getBytes())),
