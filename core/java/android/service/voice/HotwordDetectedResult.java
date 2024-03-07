@@ -662,6 +662,8 @@ public final class HotwordDetectedResult implements Parcelable {
 
     /**
      * Id of the current speaker
+     *
+     * <p>Only values between 0 and {@link #getMaxSpeakerId} (inclusive) are accepted.
      */
     @DataClass.Generated.Member
     @FlaggedApi(Flags.FLAG_ALLOW_SPEAKER_ID_EGRESS)
@@ -982,6 +984,8 @@ public final class HotwordDetectedResult implements Parcelable {
 
         /**
          * Id of the current speaker
+         *
+         * <p>Only values between 0 and {@link #getMaxSpeakerId} (inclusive) are accepted.
          */
         @DataClass.Generated.Member
         @FlaggedApi(Flags.FLAG_ALLOW_SPEAKER_ID_EGRESS)
@@ -1228,7 +1232,7 @@ public final class HotwordDetectedResult implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1704944087827L,
+            time = 1709773165191L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordDetectedResult.java",
             inputSignatures = "public static final  int CONFIDENCE_LEVEL_NONE\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\npublic static final  int CONFIDENCE_LEVEL_VERY_HIGH\npublic static final  int HOTWORD_OFFSET_UNSET\npublic static final  int AUDIO_CHANNEL_UNSET\npublic static final  int BACKGROUND_AUDIO_POWER_UNSET\nprivate static final  int LIMIT_HOTWORD_OFFSET_MAX_VALUE\nprivate static final  int LIMIT_AUDIO_CHANNEL_MAX_VALUE\nprivate static final  java.lang.String EXTRA_PROXIMITY\npublic static final  int PROXIMITY_UNKNOWN\npublic static final  int PROXIMITY_NEAR\npublic static final  int PROXIMITY_FAR\nprivate final  int mSpeakerId\nprivate final @android.service.voice.HotwordDetectedResult.HotwordConfidenceLevelValue int mConfidenceLevel\nprivate @android.annotation.Nullable android.media.MediaSyncEvent mMediaSyncEvent\nprivate  int mHotwordOffsetMillis\nprivate  int mHotwordDurationMillis\nprivate  int mAudioChannel\nprivate  boolean mHotwordDetectionPersonalized\nprivate final  int mScore\nprivate final  int mPersonalizedScore\nprivate final  int mHotwordPhraseId\nprivate final @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> mAudioStreams\nprivate final @android.annotation.NonNull android.os.PersistableBundle mExtras\nprivate static  int sMaxBundleSize\nprivate final  int mBackgroundAudioPower\nprivate static  int defaultSpeakerId()\npublic static @android.annotation.FlaggedApi int getMaxSpeakerId()\nprivate static  int defaultConfidenceLevel()\nprivate static  int defaultScore()\nprivate static  int defaultPersonalizedScore()\npublic static  int getMaxScore()\nprivate static  int defaultHotwordPhraseId()\npublic static  int getMaxHotwordPhraseId()\nprivate static  java.util.List<android.service.voice.HotwordAudioStream> defaultAudioStreams()\nprivate static  android.os.PersistableBundle defaultExtras()\npublic static  int getMaxBundleSize()\npublic @android.annotation.Nullable android.media.MediaSyncEvent getMediaSyncEvent()\nprivate static  int defaultBackgroundAudioPower()\npublic static  int getMaxBackgroundAudioPower()\npublic static  int getParcelableSize(android.os.Parcelable)\npublic static  int getUsageSize(android.service.voice.HotwordDetectedResult)\nprivate static  int bitCount(long)\nprivate  void onConstructed()\npublic @android.annotation.NonNull java.util.List<android.service.voice.HotwordAudioStream> getAudioStreams()\npublic  void setProximity(double)\npublic @android.service.voice.HotwordDetectedResult.ProximityValue int getProximity()\nprivate @android.service.voice.HotwordDetectedResult.ProximityValue int convertToProximityLevel(double)\npublic  android.service.voice.HotwordDetectedResult.Builder buildUpon()\nclass HotwordDetectedResult extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.NonNull android.service.voice.HotwordDetectedResult.Builder setAudioStreams(java.util.List<android.service.voice.HotwordAudioStream>)\nclass BaseBuilder extends java.lang.Object implements []")
