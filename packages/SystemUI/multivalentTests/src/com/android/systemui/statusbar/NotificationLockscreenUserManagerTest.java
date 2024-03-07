@@ -25,6 +25,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
 import static android.app.Flags.FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS;
+import static android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.os.UserHandle.USER_ALL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
@@ -115,7 +116,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(
                 FLAG_ALLOW_PRIVATE_PROFILE,
-                FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS);
+                FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS,
+                FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
     }
 
     public NotificationLockscreenUserManagerTest(FlagsParameterization flags) {
@@ -872,7 +874,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
+    @EnableFlags({FLAG_ALLOW_PRIVATE_PROFILE, FLAG_ENABLE_PRIVATE_SPACE_FEATURES})
     public void testProfileAvailabilityIntent() {
         mLockscreenUserManager.mCurrentProfiles.clear();
         assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
@@ -883,7 +885,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
+    @EnableFlags({FLAG_ALLOW_PRIVATE_PROFILE, FLAG_ENABLE_PRIVATE_SPACE_FEATURES})
     public void testProfileUnAvailabilityIntent() {
         mLockscreenUserManager.mCurrentProfiles.clear();
         assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
@@ -894,7 +896,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
+    @DisableFlags({FLAG_ALLOW_PRIVATE_PROFILE, FLAG_ENABLE_PRIVATE_SPACE_FEATURES})
     public void testManagedProfileAvailabilityIntent() {
         mLockscreenUserManager.mCurrentProfiles.clear();
         mLockscreenUserManager.mCurrentManagedProfiles.clear();
@@ -908,7 +910,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
+    @DisableFlags({FLAG_ALLOW_PRIVATE_PROFILE, FLAG_ENABLE_PRIVATE_SPACE_FEATURES})
     public void testManagedProfileUnAvailabilityIntent() {
         mLockscreenUserManager.mCurrentProfiles.clear();
         mLockscreenUserManager.mCurrentManagedProfiles.clear();

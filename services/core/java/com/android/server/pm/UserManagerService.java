@@ -1020,7 +1020,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static boolean isAutoLockForPrivateSpaceEnabled() {
         return android.os.Flags.allowPrivateProfile()
-                && Flags.supportAutolockForPrivateSpace();
+                && Flags.supportAutolockForPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     void systemReady() {
@@ -1064,7 +1065,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
         return android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enablePrivateSpaceAutolockOnRestarts();
+                && android.multiuser.Flags.enablePrivateSpaceAutolockOnRestarts()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     /**
@@ -1505,7 +1507,8 @@ public class UserManagerService extends IUserManager.Stub {
     private boolean isProfileHidden(int userId) {
         UserProperties userProperties = getUserPropertiesCopy(userId);
         if (android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enableHidingProfiles()) {
+                && android.multiuser.Flags.enableHidingProfiles()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             return userProperties.getProfileApiVisibility()
                     == UserProperties.PROFILE_API_VISIBILITY_HIDDEN;
         }
@@ -1705,7 +1708,8 @@ public class UserManagerService extends IUserManager.Stub {
                 setQuietModeEnabled(userId, true /* enableQuietMode */, target, callingPackage);
                 return true;
             }
-            if (android.os.Flags.allowPrivateProfile()) {
+            if (android.os.Flags.allowPrivateProfile()
+                    && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
                 final UserProperties userProperties = getUserPropertiesInternal(userId);
                 if (userProperties != null
                         && userProperties.isAuthAlwaysRequiredToDisableQuietMode()) {
@@ -1851,7 +1855,8 @@ public class UserManagerService extends IUserManager.Stub {
         logQuietModeEnabled(userId, enableQuietMode, callingPackage);
 
         // Broadcast generic intents for all profiles
-        if (android.os.Flags.allowPrivateProfile()) {
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             broadcastProfileAvailabilityChanges(profile, parent.getUserHandle(),
                     enableQuietMode, false);
         }
@@ -1864,7 +1869,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void stopUserForQuietMode(int userId) throws RemoteException {
         if (android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             // Allow delayed locking since some profile types want to be able to unlock again via
             // biometrics.
             ActivityManager.getService()

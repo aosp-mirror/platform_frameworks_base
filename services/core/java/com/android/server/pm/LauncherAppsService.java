@@ -584,7 +584,8 @@ public class LauncherAppsService extends SystemService {
             return android.os.Flags.allowPrivateProfile()
                     && Flags.enableHidingProfiles()
                     && Flags.enableLauncherAppsHiddenProfileChecks()
-                    && Flags.enablePermissionToAccessHiddenProfiles();
+                    && Flags.enablePermissionToAccessHiddenProfiles()
+                    && Flags.enablePrivateSpaceFeatures();
         }
 
         @VisibleForTesting // We override it in unit tests

@@ -2655,7 +2655,8 @@ public class ResolverActivity extends Activity implements
 
     private boolean privateSpaceEnabled() {
         return mIsIntentPicker && android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.allowResolverSheetForPrivateSpace();
+                && android.multiuser.Flags.allowResolverSheetForPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     /**

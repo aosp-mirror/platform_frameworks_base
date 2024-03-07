@@ -814,7 +814,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         // storage is locked, instead of when the user is stopped.  This would ensure the flags get
         // reset if CE storage is locked later for a user that allows delayed locking.
         if (android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             UserProperties userProperties = mUserManager.getUserProperties(UserHandle.of(userId));
             if (userProperties != null && userProperties.getAllowStoppingUserWithDelayedLocking()) {
                 return;
