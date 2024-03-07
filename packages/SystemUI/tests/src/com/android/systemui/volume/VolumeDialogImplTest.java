@@ -20,6 +20,7 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
+import static com.android.systemui.Flags.FLAG_HAPTIC_VOLUME_SLIDER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
@@ -46,7 +47,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.os.SystemClock;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -262,6 +266,54 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             assertTrue("View " + resourceName != null ? resourceName : view.getId()
                     + " failed test", condition.test(view));
         }
+    }
+
+    @Test
+    @DisableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
+    public void testVolumeChange_noSliderHaptics_doesNotDeliverOnProgressChangedHaptics() {
+        // Initialize the dialog again with haptic sliders disabled
+        mDialog.init(0, null);
+        final State shellState = createShellState();
+        VolumeDialogController.StreamState musicStreamState =
+                shellState.states.get(AudioSystem.STREAM_MUSIC);
+
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processMessages(1); //Only the SHOW message
+
+        // Change the volume two times
+        musicStreamState.level += 10;
+        mDialog.onStateChangedH(shellState);
+        mAnimatorTestRule.advanceTimeBy(10);
+        musicStreamState.level += 10;
+        mDialog.onStateChangedH(shellState);
+
+        // expected: the type of the progress haptics for the stream should be DISABLED
+        short type = mDialog.progressHapticsForStream(AudioSystem.STREAM_MUSIC);
+        assertEquals(VolumeDialogImpl.PROGRESS_HAPTICS_DISABLED, type);
+    }
+
+    @Test
+    @EnableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
+    public void testVolumeChange_withSliderHaptics_deliversOnProgressChangedHapticsEagerly() {
+       // Initialize the dialog again to create haptic plugins on the rows with the flag enabled
+        mDialog.init(0, null);
+        final State shellState = createShellState();
+        VolumeDialogController.StreamState musicStreamState =
+                shellState.states.get(AudioSystem.STREAM_MUSIC);
+
+        mDialog.show(SHOW_REASON_UNKNOWN);
+        mTestableLooper.processMessages(1); //Only the SHOW message
+
+        // Change the volume two times
+        musicStreamState.level += 10;
+        mDialog.onStateChangedH(shellState);
+        mAnimatorTestRule.advanceTimeBy(10);
+        musicStreamState.level += 10;
+        mDialog.onStateChangedH(shellState);
+
+        // expected: the type of the progress haptics for the stream should be EAGER
+        short type = mDialog.progressHapticsForStream(AudioSystem.STREAM_MUSIC);
+        assertEquals(VolumeDialogImpl.PROGRESS_HAPTICS_EAGER, type);
     }
 
     @Test
