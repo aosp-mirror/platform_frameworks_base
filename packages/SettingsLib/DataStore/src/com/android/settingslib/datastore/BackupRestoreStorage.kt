@@ -22,11 +22,20 @@ import android.app.backup.BackupDataOutput
 import android.app.backup.BackupHelper
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.collection.MutableScatterMap
 import com.google.common.io.ByteStreams
 import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.EOFException
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.FilterInputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.zip.CRC32
+import java.util.zip.CheckedInputStream
+import java.util.zip.CheckedOutputStream
 
 internal const val LOG_TAG = "BackupRestoreStorage"
 
@@ -47,6 +56,20 @@ abstract class BackupRestoreStorage : BackupHelper {
 
     private val entities: List<BackupRestoreEntity> by lazy { createBackupRestoreEntities() }
 
+    /**
+     * Checksum of the data.
+     *
+     * Always call [java.util.zip.Checksum.reset] before using it.
+     */
+    protected val checksum = CRC32()
+
+    /**
+     * Entity states represented by checksum.
+     *
+     * Map key is the entity key, map value is the checksum of backup data.
+     */
+    protected val entityStates = MutableScatterMap<String, Long>()
+
     /** Entities to back up and restore. */
     abstract fun createBackupRestoreEntities(): List<BackupRestoreEntity>
 
@@ -58,7 +81,8 @@ abstract class BackupRestoreStorage : BackupHelper {
         data: BackupDataOutput,
         newState: ParcelFileDescriptor,
     ) {
-        val backupContext = BackupContext(oldState, data, newState)
+        oldState.readEntityStates(entityStates)
+        val backupContext = BackupContext(data)
         if (!enableBackup(backupContext)) {
             Log.i(LOG_TAG, "[$name] Backup disabled")
             return
@@ -67,32 +91,48 @@ abstract class BackupRestoreStorage : BackupHelper {
         for (entity in entities) {
             val key = entity.key
             val outputStream = ByteArrayOutputStream()
+            checksum.reset()
+            val checkedOutputStream = CheckedOutputStream(outputStream, checksum)
             val codec = entity.codec() ?: defaultCodec()
             val result =
                 try {
-                    entity.backup(backupContext, wrapBackupOutputStream(codec, outputStream))
+                    entity.backup(backupContext, wrapBackupOutputStream(codec, checkedOutputStream))
                 } catch (exception: Exception) {
                     Log.e(LOG_TAG, "[$name] Fail to backup entity $key", exception)
                     continue
                 }
             when (result) {
                 EntityBackupResult.UPDATE -> {
-                    val payload = outputStream.toByteArray()
-                    val size = payload.size
-                    data.writeEntityHeader(key, size)
-                    data.writeEntityData(payload, size)
-                    Log.i(LOG_TAG, "[$name] Backup entity $key: $size bytes")
+                    if (updateEntityState(key)) {
+                        val payload = outputStream.toByteArray()
+                        val size = payload.size
+                        data.writeEntityHeader(key, size)
+                        data.writeEntityData(payload, size)
+                        Log.i(LOG_TAG, "[$name] Backup entity $key: $size bytes")
+                    } else {
+                        Log.i(
+                            LOG_TAG,
+                            "[$name] Backup entity $key unchanged: ${outputStream.size()} bytes"
+                        )
+                    }
                 }
                 EntityBackupResult.INTACT -> {
                     Log.i(LOG_TAG, "[$name] Backup entity $key intact")
                 }
                 EntityBackupResult.DELETE -> {
+                    entityStates.remove(key)
                     data.writeEntityHeader(key, -1)
                     Log.i(LOG_TAG, "[$name] Backup entity $key deleted")
                 }
             }
         }
+        newState.writeEntityStates(entityStates)
         Log.i(LOG_TAG, "[$name] Backup end")
+    }
+
+    private fun updateEntityState(key: String): Boolean {
+        val value = checksum.value
+        return entityStates.put(key, value) != value
     }
 
     /** Returns if backup is enabled. */
@@ -118,11 +158,12 @@ abstract class BackupRestoreStorage : BackupHelper {
         Log.i(LOG_TAG, "[$name] Restore $key: ${data.size()} bytes")
         val restoreContext = RestoreContext(key)
         val codec = entity.codec() ?: defaultCodec()
+        val inputStream = LimitedNoCloseInputStream(data)
+        checksum.reset()
+        val checkedInputStream = CheckedInputStream(inputStream, checksum)
         try {
-            entity.restore(
-                restoreContext,
-                wrapRestoreInputStream(codec, LimitedNoCloseInputStream(data))
-            )
+            entity.restore(restoreContext, wrapRestoreInputStream(codec, checkedInputStream))
+            entityStates[key] = checksum.value
         } catch (exception: Exception) {
             Log.e(LOG_TAG, "[$name] Fail to restore entity $key", exception)
         }
@@ -143,7 +184,64 @@ abstract class BackupRestoreStorage : BackupHelper {
         return BackupCodec.fromId(id.toByte()).decode(inputStream)
     }
 
-    override fun writeNewStateDescription(newState: ParcelFileDescriptor) {}
+    final override fun writeNewStateDescription(newState: ParcelFileDescriptor) {
+        newState.writeEntityStates(entityStates)
+        onRestoreFinished()
+    }
+
+    /** Callbacks when restore finished. */
+    open fun onRestoreFinished() {}
+
+    private fun ParcelFileDescriptor?.readEntityStates(state: MutableScatterMap<String, Long>) {
+        state.clear()
+        if (this == null) return
+        // do not close the streams
+        val fileInputStream = FileInputStream(fileDescriptor)
+        val dataInputStream = DataInputStream(fileInputStream)
+        try {
+            val version = dataInputStream.readByte()
+            if (version != STATE_VERSION) {
+                Log.w(
+                    LOG_TAG,
+                    "[$name] Unexpected state version, read:$version, expected:$STATE_VERSION"
+                )
+                return
+            }
+            var count = dataInputStream.readInt()
+            while (count-- > 0) {
+                val key = dataInputStream.readUTF()
+                val checksum = dataInputStream.readLong()
+                state[key] = checksum
+            }
+        } catch (exception: Exception) {
+            if (exception is EOFException) {
+                Log.d(LOG_TAG, "[$name] Hit EOF when read state file")
+            } else {
+                Log.e(LOG_TAG, "[$name] Fail to read state file", exception)
+            }
+            state.clear()
+        }
+    }
+
+    private fun ParcelFileDescriptor.writeEntityStates(state: MutableScatterMap<String, Long>) {
+        // do not close the streams
+        val fileOutputStream = FileOutputStream(fileDescriptor)
+        val dataOutputStream = DataOutputStream(fileOutputStream)
+        try {
+            dataOutputStream.writeByte(STATE_VERSION.toInt())
+            dataOutputStream.writeInt(state.size)
+            state.forEach { key, value ->
+                dataOutputStream.writeUTF(key)
+                dataOutputStream.writeLong(value)
+            }
+        } catch (exception: Exception) {
+            Log.e(LOG_TAG, "[$name] Fail to write state file", exception)
+        }
+    }
+
+    companion object {
+        private const val STATE_VERSION: Byte = 0
+    }
 }
 
 /**
