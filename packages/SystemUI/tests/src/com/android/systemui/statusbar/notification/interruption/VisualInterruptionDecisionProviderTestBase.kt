@@ -53,8 +53,6 @@ import android.provider.Settings.Global.HEADS_UP_ON
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.log.core.LogLevel
@@ -1216,7 +1214,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
 
                     neb.setImportance(importance)
                     val channel =
-                            NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, importance)
+                        NotificationChannel(TEST_CHANNEL_ID, TEST_CHANNEL_NAME, importance)
                     channel.isImportantConversation = isImportantConversation
                     neb.setChannel(channel)
 
