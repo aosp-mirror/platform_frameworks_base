@@ -1571,8 +1571,9 @@ public interface WindowManager extends ViewManager {
     /**
      * Value applicable for the {@link #PROPERTY_COMPAT_ALLOW_SMALL_COVER_SCREEN} property to
      * provide a signal to the system that an application or its specific activities explicitly
-     * opt into being displayed on small foldable device cover screens that measure at least 1.5
-     * inches for the shorter dimension and at least 2.4 inches for the longer dimension.
+     * opt into being displayed on small cover screens on flippable style foldable devices that
+     * measure at least 1.5 inches up to 2.2 inches for the shorter dimension and at least 2.4
+     * inches up to 3.4 inches for the longer dimension
      */
     @CompatSmallScreenPolicy
     @FlaggedApi(Flags.FLAG_COVER_DISPLAY_OPT_IN)
