@@ -315,7 +315,8 @@ public abstract class ViewStructure {
     /**
      * Add to this view's child count.  This increases the current child count by
      * <var>num</var> children beyond what was last set by {@link #setChildCount}
-     * or {@link #addChildCount}.  The index at which the new child starts in the child
+     * or {@link #addChildCount}.  The index at which the new
+     * child starts in the child
      * array is returned.
      *
      * @param num The number of new children to add.
