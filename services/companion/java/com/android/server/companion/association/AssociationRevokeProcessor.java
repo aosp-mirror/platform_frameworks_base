@@ -42,6 +42,7 @@ import com.android.server.companion.CompanionApplicationController;
 import com.android.server.companion.CompanionDeviceManagerService;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +63,7 @@ public class AssociationRevokeProcessor {
     private final @NonNull CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final @NonNull SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private final @NonNull CompanionApplicationController mCompanionAppController;
+    private final @NonNull CompanionTransportManager mTransportManager;
     private final OnPackageVisibilityChangeListener mOnPackageVisibilityChangeListener;
     private final ActivityManager mActivityManager;
 
@@ -97,7 +99,8 @@ public class AssociationRevokeProcessor {
             @NonNull PackageManagerInternal packageManager,
             @NonNull CompanionDevicePresenceMonitor devicePresenceMonitor,
             @NonNull CompanionApplicationController applicationController,
-            @NonNull SystemDataTransferRequestStore systemDataTransferRequestStore) {
+            @NonNull SystemDataTransferRequestStore systemDataTransferRequestStore,
+            @NonNull CompanionTransportManager companionTransportManager) {
         mService = service;
         mContext = service.getContext();
         mActivityManager = mContext.getSystemService(ActivityManager.class);
@@ -108,6 +111,7 @@ public class AssociationRevokeProcessor {
         mDevicePresenceMonitor = devicePresenceMonitor;
         mCompanionAppController = applicationController;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
+        mTransportManager = companionTransportManager;
     }
 
     /**
@@ -119,6 +123,9 @@ public class AssociationRevokeProcessor {
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
         final String deviceProfile = association.getDeviceProfile();
+
+        // Detach transport if exists
+        mTransportManager.detachSystemDataTransport(packageName, userId, associationId);
 
         if (!maybeRemoveRoleHolderForAssociation(association)) {
             // Need to remove the app from list of the role holders, but will have to do it later
