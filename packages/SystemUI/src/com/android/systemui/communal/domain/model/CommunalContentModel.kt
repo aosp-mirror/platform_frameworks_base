@@ -51,6 +51,7 @@ sealed interface CommunalContentModel {
             override val appWidgetId: Int,
             override val providerInfo: AppWidgetProviderInfo,
             val appWidgetHost: CommunalAppWidgetHost,
+            val inQuietMode: Boolean,
         ) : WidgetContent {
             override val key = KEY.widget(appWidgetId)
             // Widget size is always half.
