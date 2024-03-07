@@ -739,6 +739,9 @@ public final class AutofillManager {
     // Indicate whether WebView should always be included in the assist structure
     private boolean mShouldAlwaysIncludeWebviewInAssistStructure;
 
+    // Indicate whether invisibles views should be included in the assist structure
+    private boolean mShouldIncludeInvisibleViewInAssistStructure;
+
     // Controls logic around apps changing some properties of their views when activity loses
     // focus due to autofill showing biometric activity, password manager, or password breach check.
     private boolean mRelayoutFix;
@@ -968,6 +971,9 @@ public final class AutofillManager {
         mShouldAlwaysIncludeWebviewInAssistStructure =
                 AutofillFeatureFlags.shouldAlwaysIncludeWebviewInAssistStructure();
 
+        mShouldIncludeInvisibleViewInAssistStructure =
+                AutofillFeatureFlags.shouldIncludeInvisibleViewInAssistStructure();
+
         mRelayoutFix = Flags.relayout();
         mIsCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
     }
@@ -1052,6 +1058,13 @@ public final class AutofillManager {
      */
     public boolean shouldAlwaysIncludeWebviewInAssistStructure() {
         return mShouldAlwaysIncludeWebviewInAssistStructure;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldIncludeInvisibleViewInAssistStructure() {
+        return mShouldIncludeInvisibleViewInAssistStructure;
     }
 
     /**

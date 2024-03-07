@@ -3732,6 +3732,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return afm.shouldAlwaysIncludeWebviewInAssistStructure();
     }
 
+    private boolean shouldIncludeInvisibleView(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldIncludeInvisibleViewInAssistStructure();
+    }
+
     /** @hide */
     private void populateChildrenForAutofill(ArrayList<View> list, @AutofillFlags int flags) {
         final int childrenCount = mChildrenCount;
@@ -3754,7 +3759,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)
                         && child.getAutofillType() != AUTOFILL_TYPE_NONE)
                     || shouldIncludeAllChildrenViews(afm)
-                    || (Flags.includeInvisibleViewGroupInAssistStructure()
+                    || (shouldIncludeInvisibleView(afm)
                     && child instanceof ViewGroup && child.getVisibility() != View.VISIBLE)) {
                 // If the child is a ViewGroup object and its visibility is not visible, include
                 // it as part of the assist structure. The children of these invisible ViewGroup
