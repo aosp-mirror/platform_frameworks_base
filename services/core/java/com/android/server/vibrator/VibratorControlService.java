@@ -72,19 +72,21 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     private final VibrationParamsRecords mVibrationParamsRecords;
     private final VibratorControllerHolder mVibratorControllerHolder;
     private final VibrationScaler mVibrationScaler;
+    private final VibratorFrameworkStatsLogger mStatsLogger;
     private final Object mLock;
     private final int[] mRequestVibrationParamsForUsages;
 
     @GuardedBy("mLock")
-    private CompletableFuture<Void> mRequestVibrationParamsFuture = null;
-    @GuardedBy("mLock")
-    private IBinder mRequestVibrationParamsToken;
+    @Nullable
+    private VibrationParamRequest mVibrationParamRequest = null;
 
     VibratorControlService(Context context,
             VibratorControllerHolder vibratorControllerHolder, VibrationScaler vibrationScaler,
-            VibrationSettings vibrationSettings, Object lock) {
+            VibrationSettings vibrationSettings, VibratorFrameworkStatsLogger statsLogger,
+            Object lock) {
         mVibratorControllerHolder = vibratorControllerHolder;
         mVibrationScaler = vibrationScaler;
+        mStatsLogger = statsLogger;
         mLock = lock;
         mRequestVibrationParamsForUsages = vibrationSettings.getRequestVibrationParamsForUsages();
 
@@ -180,19 +182,24 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         Objects.requireNonNull(requestToken);
 
         synchronized (mLock) {
-            if (mRequestVibrationParamsToken == null) {
+            if (mVibrationParamRequest == null) {
                 Slog.wtf(TAG,
                         "New vibration params received but no token was cached in the service. "
                                 + "New vibration params ignored.");
+                mStatsLogger.logVibrationParamResponseIgnored();
                 return;
             }
 
-            if (!Objects.equals(requestToken, mRequestVibrationParamsToken)) {
+            if (!Objects.equals(requestToken, mVibrationParamRequest.token)) {
                 Slog.w(TAG,
                         "New vibration params received but the provided token does not match the "
                                 + "cached one. New vibration params ignored.");
+                mStatsLogger.logVibrationParamResponseIgnored();
                 return;
             }
+
+            long latencyMs = SystemClock.uptimeMillis() - mVibrationParamRequest.uptimeMs;
+            mStatsLogger.logVibrationParamRequestLatency(mVibrationParamRequest.uid, latencyMs);
 
             updateAdaptiveHapticsScales(result);
             endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ false);
@@ -222,7 +229,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
      */
     @Nullable
     public CompletableFuture<Void> triggerVibrationParamsRequest(
-            @VibrationAttributes.Usage int usage, int timeoutInMillis) {
+            int uid, @VibrationAttributes.Usage int usage, int timeoutInMillis) {
         synchronized (mLock) {
             IVibratorController vibratorController =
                     mVibratorControllerHolder.getVibratorController();
@@ -241,16 +248,16 @@ final class VibratorControlService extends IVibratorControlService.Stub {
 
             try {
                 endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ true);
-                mRequestVibrationParamsFuture = new CompletableFuture<>();
-                mRequestVibrationParamsToken = new Binder();
+                mVibrationParamRequest = new VibrationParamRequest(uid);
                 vibratorController.requestVibrationParams(vibrationType, timeoutInMillis,
-                        mRequestVibrationParamsToken);
+                        mVibrationParamRequest.token);
+                return mVibrationParamRequest.future;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to request vibration params.", e);
                 endOngoingRequestVibrationParamsLocked(/* wasCancelled= */ true);
             }
 
-            return mRequestVibrationParamsFuture;
+            return null;
         }
     }
 
@@ -276,13 +283,13 @@ final class VibratorControlService extends IVibratorControlService.Stub {
     }
 
     /**
-     * Returns the {@link #mRequestVibrationParamsToken} which is used to validate
+     * Returns the binder token which is used to validate
      * {@link #onRequestVibrationParamsComplete(IBinder, VibrationParam[])} calls.
      */
     @VisibleForTesting
     public IBinder getRequestVibrationParamsToken() {
         synchronized (mLock) {
-            return mRequestVibrationParamsToken;
+            return mVibrationParamRequest == null ? null : mVibrationParamRequest.token;
         }
     }
 
@@ -293,7 +300,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         synchronized (mLock) {
             isVibratorControllerRegistered =
                     mVibratorControllerHolder.getVibratorController() != null;
-            hasPendingVibrationParamsRequest = mRequestVibrationParamsFuture != null;
+            hasPendingVibrationParamsRequest = mVibrationParamRequest != null;
         }
 
         pw.println("VibratorControlService:");
@@ -329,18 +336,10 @@ final class VibratorControlService extends IVibratorControlService.Stub {
      */
     @GuardedBy("mLock")
     private void endOngoingRequestVibrationParamsLocked(boolean wasCancelled) {
-        mRequestVibrationParamsToken = null;
-        if (mRequestVibrationParamsFuture == null) {
-            return;
+        if (mVibrationParamRequest != null) {
+            mVibrationParamRequest.endRequest(wasCancelled);
         }
-
-        if (wasCancelled) {
-            mRequestVibrationParamsFuture.cancel(/* mayInterruptIfRunning= */ true);
-        } else {
-            mRequestVibrationParamsFuture.complete(null);
-        }
-
-        mRequestVibrationParamsFuture = null;
+        mVibrationParamRequest = null;
     }
 
     private static int mapToAdaptiveVibrationType(@VibrationAttributes.Usage int usage) {
@@ -423,6 +422,7 @@ final class VibratorControlService extends IVibratorControlService.Stub {
      * @param scale The scaling factor that should be applied to the vibrations.
      */
     private void updateAdaptiveHapticsScales(int types, float scale) {
+        mStatsLogger.logVibrationParamScale(scale);
         for (int usage : mapFromAdaptiveVibrationTypeToVibrationUsages(types)) {
             updateOrRemoveAdaptiveHapticsScale(usage, scale);
         }
@@ -501,6 +501,27 @@ final class VibratorControlService extends IVibratorControlService.Stub {
         @Override
         synchronized long findGroupKeyProtoFieldId(int usage) {
             return VibratorManagerServiceDumpProto.PREVIOUS_VIBRATION_PARAMS;
+        }
+    }
+
+    /** Represents a request for {@link VibrationParam}. */
+    private static final class VibrationParamRequest {
+        public final CompletableFuture<Void> future = new CompletableFuture<>();
+        public final IBinder token = new Binder();
+        public final int uid;
+        public final long uptimeMs;
+
+        VibrationParamRequest(int uid) {
+            this.uid = uid;
+            uptimeMs = SystemClock.uptimeMillis();
+        }
+
+        public void endRequest(boolean wasCancelled) {
+            if (wasCancelled) {
+                future.cancel(/* mayInterruptIfRunning= */ true);
+            } else {
+                future.complete(null);
+            }
         }
     }
 

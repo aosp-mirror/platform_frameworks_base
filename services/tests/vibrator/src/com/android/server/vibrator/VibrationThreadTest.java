@@ -110,6 +110,7 @@ public class VibrationThreadTest {
     @Mock private VibratorController.OnVibrationCompleteListener mControllerCallbacks;
     @Mock private IBinder mVibrationToken;
     @Mock private VibrationConfig mVibrationConfigMock;
+    @Mock private VibratorFrameworkStatsLogger mStatsLoggerMock;
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
     private VibrationSettings mVibrationSettings;
@@ -255,6 +256,7 @@ public class VibrationThreadTest {
                 USAGE_RINGTONE);
         waitForCompletion();
 
+        verify(mStatsLoggerMock, never()).logVibrationParamRequestTimeout(UID);
         assertEquals(Arrays.asList(expectedOneShot(15)),
                 mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId));
         List<Float> amplitudes = mVibratorProviders.get(VIBRATOR_ID).getAmplitudes();
@@ -274,6 +276,7 @@ public class VibrationThreadTest {
         long vibrationId = startThreadAndDispatcher(effect, neverCompletingFuture, USAGE_RINGTONE);
         waitForCompletion();
 
+        verify(mStatsLoggerMock).logVibrationParamRequestTimeout(UID);
         assertEquals(Arrays.asList(expectedOneShot(15)),
                 mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId));
         assertEquals(expectedAmplitudes(1, 1, 1),
@@ -1679,7 +1682,7 @@ public class VibrationThreadTest {
         mControllers = createVibratorControllers();
         DeviceAdapter deviceAdapter = new DeviceAdapter(mVibrationSettings, mControllers);
         mVibrationConductor = new VibrationStepConductor(vib, mVibrationSettings, deviceAdapter,
-                mVibrationScaler, requestVibrationParamsFuture, mManagerHooks);
+                mVibrationScaler, mStatsLoggerMock, requestVibrationParamsFuture, mManagerHooks);
         assertTrue(mThread.runVibrationOnVibrationThread(mVibrationConductor));
         return mVibrationConductor.getVibration().id;
     }
