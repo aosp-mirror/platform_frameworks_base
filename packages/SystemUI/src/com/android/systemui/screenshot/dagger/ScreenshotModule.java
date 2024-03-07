@@ -86,7 +86,8 @@ public abstract class ScreenshotModule {
             ScreenshotSoundControllerImpl screenshotSoundProviderImpl);
 
     @Provides
-    static ScreenshotViewProxy.Factory providesScreenshotViewProxyFactory() {
-        return new LegacyScreenshotViewProxy.Factory();
+    static ScreenshotViewProxy.Factory providesScreenshotViewProxyFactory(
+            LegacyScreenshotViewProxy.Factory legacyScreenshotViewProxyFactory) {
+        return legacyScreenshotViewProxyFactory;
     }
 }

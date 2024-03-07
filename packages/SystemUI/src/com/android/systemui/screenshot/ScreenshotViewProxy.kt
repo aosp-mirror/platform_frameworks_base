@@ -25,16 +25,12 @@ import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
-import com.android.internal.logging.UiEventLogger
-import com.android.systemui.flags.FeatureFlags
 
 /** Abstraction of the surface between ScreenshotController and ScreenshotView */
 interface ScreenshotViewProxy {
     val view: ViewGroup
     val screenshotPreview: View
 
-    var defaultDisplay: Int
-    var flags: FeatureFlags?
     var packageName: String
     var callbacks: ScreenshotView.ScreenshotViewCallback?
     var screenshot: ScreenshotData?
@@ -73,6 +69,6 @@ interface ScreenshotViewProxy {
     fun prepareEntranceAnimation(runnable: Runnable)
 
     interface Factory {
-        fun getProxy(context: Context, logger: UiEventLogger): ScreenshotViewProxy
+        fun getProxy(context: Context, displayId: Int): ScreenshotViewProxy
     }
 }

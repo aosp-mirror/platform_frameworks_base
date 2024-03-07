@@ -344,7 +344,7 @@ public class ScreenshotController {
         mMessageContainerController = messageContainerController;
         mAssistContentRequester = assistContentRequester;
 
-        mViewProxy = viewProxyFactory.getProxy(mContext, mUiEventLogger);
+        mViewProxy = viewProxyFactory.getProxy(mContext, mDisplayId);
 
         mScreenshotHandler.setOnTimeoutRunnable(() -> {
             if (DEBUG_UI) {
@@ -595,8 +595,6 @@ public class ScreenshotController {
                 setWindowFocusable(false);
             }
         });
-        mViewProxy.setFlags(mFlags);
-        mViewProxy.setDefaultDisplay(mDisplayId);
 
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mViewProxy.getView());
