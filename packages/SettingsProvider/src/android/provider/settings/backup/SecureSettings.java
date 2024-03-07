@@ -269,6 +269,7 @@ public class SecureSettings {
         Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
         Settings.Secure.CAMERA_EXTENSIONS_FALLBACK,
         Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
-        Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS
+        Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
+        Settings.Secure.AUDIO_DEVICE_INVENTORY
     };
 }
