@@ -208,7 +208,7 @@ public final class ProcessList {
 
     // Number of levels we have available for different service connection group importance
     // levels.
-    static final int CACHED_APP_IMPORTANCE_LEVELS = 5;
+    public static final int CACHED_APP_IMPORTANCE_LEVELS = 5;
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
