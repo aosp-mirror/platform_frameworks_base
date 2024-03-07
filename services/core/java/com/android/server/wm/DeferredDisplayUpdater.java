@@ -113,8 +113,10 @@ public class DeferredDisplayUpdater implements DisplayUpdater {
 
         // Apply whole display info immediately as is if either:
         // * it is the first display update
+        // * the display doesn't have visible content
         // * shell transitions are disabled or temporary unavailable
         if (displayInfoDiff == DIFF_EVERYTHING
+                || !mDisplayContent.getLastHasContent()
                 || !mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             ProtoLog.d(WM_DEBUG_WINDOW_TRANSITIONS,
                     "DeferredDisplayUpdater: applying DisplayInfo immediately");
