@@ -121,9 +121,9 @@ public class Event {
 
     public String toString() {
         return "Event{id=" + mId
-            + ", command=" + String.valueOf(mCommand)
-            + ", name=" + String.valueOf(mName)
-            + ", uniq=" + String.valueOf(mUniq)
+            + ", command=" + mCommand
+            + ", name=" + mName
+            + ", uniq=" + mUniq
             + ", descriptor=" + Arrays.toString(mDescriptor)
             + ", vid=" + mVid
             + ", pid=" + mPid
