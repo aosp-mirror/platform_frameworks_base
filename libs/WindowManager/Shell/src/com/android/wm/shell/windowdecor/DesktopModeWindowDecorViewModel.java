@@ -25,6 +25,7 @@ import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
 import static android.view.MotionEvent.ACTION_HOVER_EXIT;
+import static android.view.MotionEvent.ACTION_HOVER_MOVE;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowInsets.Type.statusBars;
@@ -365,7 +366,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
             implements View.OnClickListener, View.OnTouchListener, View.OnLongClickListener,
-            View.OnGenericMotionListener , DragDetector.MotionEventHandler {
+            View.OnGenericMotionListener, DragDetector.MotionEventHandler {
         private static final int CLOSE_MAXIMIZE_MENU_DELAY_MS = 150;
 
         private final int mTaskId;
@@ -558,8 +559,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // Re-hovering over any of the maximize menu views should keep the menu open by
                     // cancelling any attempts to close the menu.
                     mMainHandler.removeCallbacks(mCloseMaximizeWindowRunnable);
+                    if (id != R.id.maximize_window) {
+                        decoration.onMaximizeMenuHoverEnter(id, ev);
+                    }
                 }
                 return true;
+            } else if (ev.getAction() == ACTION_HOVER_MOVE
+                    && MaximizeMenu.Companion.isMaximizeMenuView(id)) {
+                decoration.onMaximizeMenuHoverMove(id, ev);
             } else if (ev.getAction() == ACTION_HOVER_EXIT) {
                 if (!decoration.isMaximizeMenuActive() && id == R.id.maximize_window) {
                     decoration.onMaximizeWindowHoverExit();
@@ -569,6 +576,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // menu view to another.
                     mMainHandler.postDelayed(mCloseMaximizeWindowRunnable,
                             CLOSE_MAXIMIZE_MENU_DELAY_MS);
+                } else if (MaximizeMenu.Companion.isMaximizeMenuView(id)) {
+                    decoration.onMaximizeMenuHoverExit(id, ev);
                 }
                 return true;
             }

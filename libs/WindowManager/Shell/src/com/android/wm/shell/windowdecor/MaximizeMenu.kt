@@ -33,7 +33,11 @@ import android.view.View.OnTouchListener
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.window.TaskConstants
+import androidx.core.content.withStyledAttributes
+import com.android.internal.R.attr.colorAccentPrimary
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.DisplayController
@@ -69,6 +73,12 @@ class MaximizeMenu(
     ).toFloat()
     private val menuWidth = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_width)
     private val menuHeight = loadDimensionPixelSize(R.dimen.desktop_mode_maximize_menu_height)
+
+    private lateinit var snapRightButton: Button
+    private lateinit var snapLeftButton: Button
+    private lateinit var maximizeButton: Button
+    private lateinit var maximizeButtonLayout: FrameLayout
+    private lateinit var snapButtonsLayout: LinearLayout
 
     /** Position the menu relative to the caption's position. */
     fun positionMenu(position: PointF, t: Transaction) {
@@ -150,23 +160,23 @@ class MaximizeMenu(
         maximizeMenuView.setOnGenericMotionListener(onGenericMotionListener)
         maximizeMenuView.setOnTouchListener(onTouchListener)
 
-        val maximizeButton = maximizeMenuView.requireViewById<Button>(
-                R.id.maximize_menu_maximize_button
-        )
+        maximizeButtonLayout = maximizeMenuView.requireViewById(
+                R.id.maximize_menu_maximize_button_layout)
+
+        maximizeButton = maximizeMenuView.requireViewById(R.id.maximize_menu_maximize_button)
         maximizeButton.setOnClickListener(onClickListener)
         maximizeButton.setOnGenericMotionListener(onGenericMotionListener)
 
-        val snapRightButton = maximizeMenuView.requireViewById<Button>(
-                R.id.maximize_menu_snap_right_button
-        )
+        snapRightButton = maximizeMenuView.requireViewById(R.id.maximize_menu_snap_right_button)
         snapRightButton.setOnClickListener(onClickListener)
         snapRightButton.setOnGenericMotionListener(onGenericMotionListener)
 
-        val snapLeftButton = maximizeMenuView.requireViewById<Button>(
-                R.id.maximize_menu_snap_left_button
-        )
+        snapLeftButton = maximizeMenuView.requireViewById(R.id.maximize_menu_snap_left_button)
         snapLeftButton.setOnClickListener(onClickListener)
         snapLeftButton.setOnGenericMotionListener(onGenericMotionListener)
+
+        snapButtonsLayout = maximizeMenuView.requireViewById(R.id.maximize_menu_snap_menu_layout)
+        snapButtonsLayout.setOnGenericMotionListener(onGenericMotionListener)
     }
 
     /**
@@ -190,11 +200,77 @@ class MaximizeMenu(
         return maximizeMenu?.mWindowViewHost?.view?.isLaidOut ?: false
     }
 
+    fun onMaximizeMenuHoverEnter(viewId: Int, ev: MotionEvent) {
+        setSnapButtonsColorOnHover(viewId, ev)
+    }
+
+    fun onMaximizeMenuHoverMove(viewId: Int, ev: MotionEvent) {
+        setSnapButtonsColorOnHover(viewId, ev)
+    }
+
+    fun onMaximizeMenuHoverExit(id: Int, ev: MotionEvent) {
+        val inSnapMenuBounds = ev.x >= 0 && ev.x <= snapButtonsLayout.width &&
+                ev.y >= 0 && ev.y <= snapButtonsLayout.height
+        val colorList = decorWindowContext.getColorStateList(
+                R.color.desktop_mode_maximize_menu_button_color_selector)
+
+        if (id == R.id.maximize_menu_maximize_button) {
+            maximizeButton.background?.setTintList(colorList)
+            maximizeButtonLayout.setBackgroundResource(
+                    R.drawable.desktop_mode_maximize_menu_layout_background)
+        } else if (id == R.id.maximize_menu_snap_menu_layout && !inSnapMenuBounds) {
+            // After exiting the snap menu layout area, checks to see that user is not still
+            // hovering within the snap menu layout bounds which would indicate that the user is
+            // hovering over a snap button within the snap menu layout rather than having exited.
+            snapLeftButton.background?.setTintList(colorList)
+            snapLeftButton.background?.alpha = 255
+            snapRightButton.background?.setTintList(colorList)
+            snapRightButton.background?.alpha = 255
+            snapButtonsLayout.setBackgroundResource(
+                    R.drawable.desktop_mode_maximize_menu_layout_background)
+        }
+    }
+
+    private fun setSnapButtonsColorOnHover(viewId: Int, ev: MotionEvent) {
+        decorWindowContext.withStyledAttributes(null, intArrayOf(colorAccentPrimary), 0, 0) {
+            val materialColor = getColor(0, 0)
+            val snapMenuCenter = snapButtonsLayout.width / 2
+            if (viewId == R.id.maximize_menu_maximize_button) {
+                // Highlight snap maximize window button
+                maximizeButton.background?.setTint(materialColor)
+                maximizeButtonLayout.setBackgroundResource(
+                        R.drawable.desktop_mode_maximize_menu_layout_background_on_hover)
+            } else if (viewId == R.id.maximize_menu_snap_left_button ||
+                    (viewId == R.id.maximize_menu_snap_menu_layout && ev.x <= snapMenuCenter)) {
+                // Highlight snap left button
+                snapRightButton.background?.setTint(materialColor)
+                snapLeftButton.background?.setTint(materialColor)
+                snapButtonsLayout.setBackgroundResource(
+                        R.drawable.desktop_mode_maximize_menu_layout_background_on_hover)
+                snapRightButton.background?.alpha = 102
+                snapLeftButton.background?.alpha = 255
+            } else if (viewId == R.id.maximize_menu_snap_right_button ||
+                    (viewId == R.id.maximize_menu_snap_menu_layout && ev.x > snapMenuCenter)) {
+                // Highlight snap right button
+                snapRightButton.background?.setTint(materialColor)
+                snapLeftButton.background?.setTint(materialColor)
+                snapButtonsLayout.setBackgroundResource(
+                        R.drawable.desktop_mode_maximize_menu_layout_background_on_hover)
+                snapRightButton.background?.alpha = 255
+                snapLeftButton.background?.alpha = 102
+            }
+        }
+    }
+
     companion object {
         fun isMaximizeMenuView(@IdRes viewId: Int): Boolean {
-            return viewId == R.id.maximize_menu || viewId == R.id.maximize_menu_maximize_button ||
+            return viewId == R.id.maximize_menu ||
+                    viewId == R.id.maximize_menu_maximize_button ||
+                    viewId == R.id.maximize_menu_maximize_button_layout ||
                     viewId == R.id.maximize_menu_snap_left_button ||
-                    viewId == R.id.maximize_menu_snap_right_button
+                    viewId == R.id.maximize_menu_snap_right_button ||
+                    viewId == R.id.maximize_menu_snap_menu_layout ||
+                    viewId == R.id.maximize_menu_snap_menu_layout
         }
     }
 }

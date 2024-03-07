@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
   ~ Copyright (C) 2023 The Android Open Source Project
   ~
@@ -17,12 +16,9 @@
 -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/desktop_mode_maximize_menu_button_color_selector"/>
     <corners
-        android:topLeftRadius="@dimen/desktop_mode_maximize_menu_buttons_large_corner_radius"
-        android:topRightRadius="@dimen/desktop_mode_maximize_menu_buttons_small_corner_radius"
-        android:bottomLeftRadius="@dimen/desktop_mode_maximize_menu_buttons_large_corner_radius"
-        android:bottomRightRadius="@dimen/desktop_mode_maximize_menu_buttons_small_corner_radius"/>
-    <stroke android:width="1dp" android:color="@color/desktop_mode_maximize_menu_button_outline_color_selector"/>
+        android:radius="@dimen/desktop_mode_maximize_menu_buttons_outline_radius"/>
+    <stroke android:width="1dp" android:color="?androidprv:attr/materialColorOutlineVariant"/>
 </shape>
