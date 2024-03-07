@@ -100,7 +100,7 @@
             "file_patterns": ["VcnManagementService\\.java"]
         },
         {
-            "name": "FrameworksNetTests",
+            "name": "FrameworksVpnTests",
             "options": [
                 {
                     "exclude-annotation": "com.android.testutils.SkipPresubmit"
@@ -163,9 +163,6 @@
                 }
             ],
             "file_patterns": ["PinnerService\\.java"]
-        },
-        {
-            "name": "FrameworksVpnTests"
         }
     ]
 }
