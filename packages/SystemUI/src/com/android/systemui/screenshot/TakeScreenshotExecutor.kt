@@ -136,7 +136,7 @@ constructor(
     fun onCloseSystemDialogsReceived() {
         screenshotControllers.forEach { (_, screenshotController) ->
             if (!screenshotController.isPendingSharedTransition) {
-                screenshotController.dismissScreenshot(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
+                screenshotController.requestDismissal(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
             }
         }
     }

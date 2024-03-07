@@ -24,6 +24,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.Display
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.ScrollCaptureResponse
 import android.view.View
@@ -34,12 +35,15 @@ import android.window.OnBackInvokedDispatcher
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
+import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
 
 /**
  * Legacy implementation of screenshot view methods. Just proxies the calls down into the original
  * ScreenshotView.
  */
-class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
+class LegacyScreenshotViewProxy(context: Context, private val logger: UiEventLogger) :
+    ScreenshotViewProxy {
     override val view: ScreenshotView =
         LayoutInflater.from(context).inflate(R.layout.screenshot, null) as ScreenshotView
     override val screenshotPreview: View
@@ -52,13 +56,6 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
         set(value) {
             view.setDefaultTimeoutMillis(value)
         }
-    override var onBackInvokedCallback: OnBackInvokedCallback = OnBackInvokedCallback {
-        Log.wtf(TAG, "OnBackInvoked called before being set!")
-    }
-    override var onKeyListener: View.OnKeyListener? = null
-        set(value) {
-            view.setOnKeyListener(value)
-        }
     override var flags: FeatureFlags? = null
         set(value) {
             view.setFlags(value)
@@ -66,10 +63,6 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
     override var packageName: String = ""
         set(value) {
             view.setPackageName(value)
-        }
-    override var logger: UiEventLogger? = null
-        set(value) {
-            view.setUiEventLogger(value)
         }
     override var callbacks: ScreenshotView.ScreenshotViewCallback? = null
         set(value) {
@@ -88,31 +81,9 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
         get() = view.isPendingSharedTransition
 
     init {
-
-        view.addOnAttachStateChangeListener(
-            object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(view: View) {
-                    if (LogConfig.DEBUG_INPUT) {
-                        Log.d(TAG, "Registering Predictive Back callback")
-                    }
-                    view
-                        .findOnBackInvokedDispatcher()
-                        ?.registerOnBackInvokedCallback(
-                            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                            onBackInvokedCallback
-                        )
-                }
-
-                override fun onViewDetachedFromWindow(view: View) {
-                    if (LogConfig.DEBUG_INPUT) {
-                        Log.d(TAG, "Unregistering Predictive Back callback")
-                    }
-                    view
-                        .findOnBackInvokedDispatcher()
-                        ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
-                }
-            }
-        )
+        view.setUiEventLogger(logger)
+        addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
+        setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         if (LogConfig.DEBUG_WINDOW) {
             Log.d(TAG, "adding OnComputeInternalInsetsListener")
         }
@@ -135,7 +106,20 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
     override fun setChipIntents(imageData: ScreenshotController.SavedImageData) =
         view.setChipIntents(imageData)
 
-    override fun animateDismissal() = view.animateDismissal()
+    override fun requestDismissal(event: ScreenshotEvent) {
+        if (DEBUG_DISMISS) {
+            Log.d(TAG, "screenshot dismissal requested")
+        }
+        // If we're already animating out, don't restart the animation
+        if (view.isDismissing) {
+            if (DEBUG_DISMISS) {
+                Log.v(TAG, "Already dismissing, ignoring duplicate command $event")
+            }
+            return
+        }
+        logger.log(event, 0, packageName)
+        view.animateDismissal()
+    }
 
     override fun showScrollChip(packageName: String, onClick: Runnable) =
         view.showScrollChip(packageName, onClick)
@@ -177,9 +161,58 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
         view.post(runnable)
     }
 
+    private fun addPredictiveBackListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
+        val onBackInvokedCallback = OnBackInvokedCallback {
+            if (LogConfig.DEBUG_INPUT) {
+                Log.d(TAG, "Predictive Back callback dispatched")
+            }
+            onDismissRequested.invoke(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
+        }
+        view.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    if (LogConfig.DEBUG_INPUT) {
+                        Log.d(TAG, "Registering Predictive Back callback")
+                    }
+                    view
+                        .findOnBackInvokedDispatcher()
+                        ?.registerOnBackInvokedCallback(
+                            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                            onBackInvokedCallback
+                        )
+                }
+
+                override fun onViewDetachedFromWindow(view: View) {
+                    if (LogConfig.DEBUG_INPUT) {
+                        Log.d(TAG, "Unregistering Predictive Back callback")
+                    }
+                    view
+                        .findOnBackInvokedDispatcher()
+                        ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
+                }
+            }
+        )
+    }
+    private fun setOnKeyListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
+        view.setOnKeyListener(
+            object : View.OnKeyListener {
+                override fun onKey(view: View, keyCode: Int, event: KeyEvent): Boolean {
+                    if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
+                        if (LogConfig.DEBUG_INPUT) {
+                            Log.d(TAG, "onKeyEvent: $keyCode")
+                        }
+                        onDismissRequested.invoke(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
+                        return true
+                    }
+                    return false
+                }
+            }
+        )
+    }
+
     class Factory : ScreenshotViewProxy.Factory {
-        override fun getProxy(context: Context): ScreenshotViewProxy {
-            return LegacyScreenshotViewProxy(context)
+        override fun getProxy(context: Context, logger: UiEventLogger): ScreenshotViewProxy {
+            return LegacyScreenshotViewProxy(context, logger)
         }
     }
 
