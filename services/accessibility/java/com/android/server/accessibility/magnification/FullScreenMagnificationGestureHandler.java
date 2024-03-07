@@ -167,7 +167,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     })
     public @interface OverscrollState {}
 
-    @VisibleForTesting boolean mIsSinglePanningEnabled;
+    @VisibleForTesting final OneFingerPanningSettingsProvider mOneFingerPanningSettingsProvider;
 
     private final FullScreenMagnificationVibrationHelper mFullScreenMagnificationVibrationHelper;
 
@@ -201,7 +201,11 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 displayId,
                 fullScreenMagnificationVibrationHelper,
                 /* magnificationLogger= */ null,
-                ViewConfiguration.get(context));
+                ViewConfiguration.get(context),
+                new OneFingerPanningSettingsProvider(
+                        context,
+                        Flags.enableMagnificationOneFingerPanningGesture()
+                ));
     }
 
     /** Constructor for tests. */
@@ -218,7 +222,9 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             int displayId,
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper,
             MagnificationLogger magnificationLogger,
-            ViewConfiguration viewConfiguration) {
+            ViewConfiguration viewConfiguration,
+            OneFingerPanningSettingsProvider oneFingerPanningSettingsProvider
+    ) {
         super(displayId, detectSingleFingerTripleTap, detectTwoFingerTripleTap,
                 detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
@@ -301,9 +307,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         mPanningScalingState = new PanningScalingState(context);
         mSinglePanningState = new SinglePanningState(context);
         mFullScreenMagnificationVibrationHelper = fullScreenMagnificationVibrationHelper;
-        setSinglePanningEnabled(
-                context.getResources()
-                        .getBoolean(R.bool.config_enable_a11y_magnification_single_panning));
+        mOneFingerPanningSettingsProvider = oneFingerPanningSettingsProvider;
         mOverscrollHandler = new OverscrollHandler();
         mIsWatch = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
 
@@ -315,11 +319,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         }
 
         transitionTo(mDetectingState);
-    }
-
-    @VisibleForTesting
-    void setSinglePanningEnabled(boolean isEnabled) {
-        mIsSinglePanningEnabled = isEnabled;
     }
 
     @Override
@@ -361,6 +360,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             Slog.i(mLogTag, "onDestroy(); delayed = "
                     + MotionEventInfo.toString(mDetectingState.mDelayedEventQueue));
         }
+        mOneFingerPanningSettingsProvider.unregister();
 
         if (mScreenStateReceiver != null) {
             mScreenStateReceiver.unregister();
@@ -524,7 +524,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     && event.getPointerCount() == 2 // includes the pointer currently being released
                     && mPreviousState == mViewportDraggingState) {
                 // if feature flag is enabled, currently only true on watches
-                if (mIsSinglePanningEnabled) {
+                if (mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()) {
                     mOverscrollHandler.setScaleAndCenterToEdgeIfNeeded();
                     mOverscrollHandler.clearEdgeState();
                 }
@@ -532,7 +532,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             } else if (action == ACTION_UP || action == ACTION_CANCEL) {
                 onPanningFinished(event);
                 // if feature flag is enabled, currently only true on watches
-                if (mIsSinglePanningEnabled) {
+                if (mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()) {
                     mOverscrollHandler.setScaleAndCenterToEdgeIfNeeded();
                     mOverscrollHandler.clearEdgeState();
                 }
@@ -611,7 +611,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             onPan(second);
             mFullScreenMagnificationController.offsetMagnifiedRegion(mDisplayId, distanceX,
                     distanceY, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-            if (mIsSinglePanningEnabled) {
+            if (mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()) {
                 mOverscrollHandler.onScrollStateChanged(first, second);
             }
             return /* event consumed: */ true;
@@ -1000,7 +1000,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                                 && event.getPointerCount() == 2) {
                             transitionToViewportDraggingStateAndClear(event);
                         } else if (isActivated() && event.getPointerCount() == 2) {
-                            if (mIsSinglePanningEnabled
+                            if (mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()
                                     && overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
@@ -1008,7 +1008,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                                 //Primary pointer is swiping, so transit to PanningScalingState
                                 transitToPanningScalingStateAndClear();
                             }
-                        } else if (mIsSinglePanningEnabled
+                        } else if (mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()
                                 && isActivated()
                                 && event.getPointerCount() == 1) {
                             if (overscrollState(event, mFirstPointerDownLocation)
@@ -1255,7 +1255,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                         if (isMultiTapTriggered(2 /* taps */) && event.getPointerCount() == 1) {
                             transitionToViewportDraggingStateAndClear(event);
                         } else if (isActivated() && event.getPointerCount() == 2) {
-                            if (mIsSinglePanningEnabled
+                            if (mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()
                                     && overscrollState(event, mFirstPointerDownLocation)
                                     == OVERSCROLL_VERTICAL_EDGE) {
                                 transitionToDelegatingStateAndClear();
@@ -1263,7 +1263,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                                 //Primary pointer is swiping, so transit to PanningScalingState
                                 transitToPanningScalingStateAndClear();
                             }
-                        } else if (mIsSinglePanningEnabled
+                        } else if (mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()
                                 && isActivated()
                                 && event.getPointerCount() == 1) {
                             if (overscrollState(event, mFirstPointerDownLocation)
@@ -1633,7 +1633,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 + ", mPreviousState=" + State.nameOf(mPreviousState)
                 + ", mMagnificationController=" + mFullScreenMagnificationController
                 + ", mDisplayId=" + mDisplayId
-                + ", mIsSinglePanningEnabled=" + mIsSinglePanningEnabled
+                + ", mIsSinglePanningEnabled="
+                + mOneFingerPanningSettingsProvider.isOneFingerPanningEnabled()
                 + ", mOverscrollHandler=" + mOverscrollHandler
                 + '}';
     }

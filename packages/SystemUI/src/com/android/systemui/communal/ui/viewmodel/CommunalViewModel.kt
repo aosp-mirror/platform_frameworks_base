@@ -21,7 +21,6 @@ import com.android.systemui.communal.domain.interactor.CommunalTutorialInteracto
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -47,7 +46,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /** The default view model used for showing the communal hub. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalViewModel
 @Inject
@@ -56,7 +54,6 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     shadeInteractor: ShadeInteractor,
-    deviceEntryInteractor: DeviceEntryInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {
@@ -89,8 +86,6 @@ constructor(
 
     /** Whether touches should be disabled in communal */
     val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
-
-    val deviceUnlocked: Flow<Boolean> = deviceEntryInteractor.isUnlocked
 
     init {
         // Initialize our media host for the UMO. This only needs to happen once and must be done

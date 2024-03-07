@@ -875,8 +875,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mHeadsUpManager.setAnimationStateHandler(mView::setHeadsUpGoingAwayAnimationsAllowed);
         mDynamicPrivacyController.addListener(mDynamicPrivacyControllerListener);
 
-        mScrimController.setScrimBehindChangeRunnable(mView::updateBackgroundDimming);
-
         mLockscreenShadeTransitionController.setStackScroller(this);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
@@ -1740,13 +1738,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public boolean isLongPressInProgress() {
         return mLongPressedView != null;
-    }
-
-    /**
-     * Set the dimmed state for all of the notification views.
-     */
-    public void setDimmed(boolean dimmed, boolean animate) {
-        mView.setDimmed(dimmed, animate);
     }
 
     /**

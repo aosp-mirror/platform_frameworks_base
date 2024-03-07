@@ -64,6 +64,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.graphics.drawable.IconCompat;
 
@@ -91,6 +92,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,8 +109,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 /**
  * Controller for media output dialog
@@ -170,10 +173,13 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         ACTION_BROADCAST_INFO_ICON
     }
 
-    @Inject
-    public MediaOutputController(@NonNull Context context, String packageName,
-            MediaSessionManager mediaSessionManager, LocalBluetoothManager
-            lbm, ActivityStarter starter,
+    @AssistedInject
+    public MediaOutputController(
+            Context context,
+            @Assisted String packageName,
+            MediaSessionManager mediaSessionManager,
+            @Nullable LocalBluetoothManager lbm,
+            ActivityStarter starter,
             CommonNotifCollection notifCollection,
             DialogTransitionAnimator dialogTransitionAnimator,
             NearbyMediaDevicesManager nearbyMediaDevicesManager,
@@ -193,7 +199,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mKeyGuardManager = keyGuardManager;
         mFeatureFlags = featureFlags;
         mUserTracker = userTracker;
-        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, null, lbm);
+        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogTransitionAnimator = dialogTransitionAnimator;
@@ -220,6 +226,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 R.dimen.media_output_dialog_default_margin_end);
         mItemMarginEndSelectable = (int) mContext.getResources().getDimension(
                 R.dimen.media_output_dialog_selectable_margin_end);
+    }
+
+    @AssistedFactory
+    public interface Factory {
+        /** Construct a MediaOutputController */
+        MediaOutputController create(String packageName);
     }
 
     protected void start(@NonNull Callback cb) {

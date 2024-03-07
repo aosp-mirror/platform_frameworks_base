@@ -3386,12 +3386,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
                     } else if (tagName.equals("verifier")) {
                         final String deviceIdentity = parser.getAttributeValue(null, "device");
-                        try {
-                            mVerifierDeviceIdentity = VerifierDeviceIdentity.parse(deviceIdentity);
-                        } catch (IllegalArgumentException e) {
-                            Slog.w(PackageManagerService.TAG, "Discard invalid verifier device id: "
-                                    + e.getMessage());
-                        }
+                        mVerifierDeviceIdentity = VerifierDeviceIdentity.parse(deviceIdentity);
                     } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                         // No longer used.
                     } else if (tagName.equals("keyset-settings")) {
@@ -3419,7 +3414,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 }
 
                 str.close();
-            } catch (IOException | XmlPullParserException | ArrayIndexOutOfBoundsException e) {
+            } catch (IOException | XmlPullParserException | ArrayIndexOutOfBoundsException
+                     | IllegalArgumentException e) {
                 // Remove corrupted file and retry.
                 atomicFile.failRead(str, e);
 

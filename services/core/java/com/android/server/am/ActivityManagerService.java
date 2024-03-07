@@ -4779,36 +4779,47 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // being bound to an application.
                 thread.runIsolatedEntryPoint(
                         app.getIsolatedEntryPoint(), app.getIsolatedEntryPointArgs());
-            } else if (instr2 != null) {
-                thread.bindApplication(processName, appInfo,
-                        app.sdkSandboxClientAppVolumeUuid, app.sdkSandboxClientAppPackage,
-                        instr2.mIsSdkInSandbox,
-                        providerList,
-                        instr2.mClass,
-                        profilerInfo, instr2.mArguments,
-                        instr2.mWatcher,
-                        instr2.mUiAutomationConnection, testMode,
-                        mBinderTransactionTrackingEnabled, enableTrackAllocation,
-                        isRestrictedBackupMode || !normalMode, app.isPersistent(),
-                        new Configuration(app.getWindowProcessController().getConfiguration()),
-                        app.getCompat(), getCommonServicesLocked(app.isolated),
-                        mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), serializedSystemFontMap,
-                        app.getStartElapsedTime(), app.getStartUptime());
             } else {
-                thread.bindApplication(processName, appInfo,
-                        app.sdkSandboxClientAppVolumeUuid, app.sdkSandboxClientAppPackage,
-                        /* isSdkInSandbox= */ false,
-                        providerList, null, profilerInfo, null, null, null, testMode,
-                        mBinderTransactionTrackingEnabled, enableTrackAllocation,
-                        isRestrictedBackupMode || !normalMode, app.isPersistent(),
+                boolean isSdkInSandbox = false;
+                ComponentName instrumentationName = null;
+                Bundle instrumentationArgs = null;
+                IInstrumentationWatcher instrumentationWatcher = null;
+                IUiAutomationConnection instrumentationUiConnection = null;
+                if (instr2 != null) {
+                    isSdkInSandbox = instr2.mIsSdkInSandbox;
+                    instrumentationName = instr2.mClass;
+                    instrumentationArgs = instr2.mArguments;
+                    instrumentationWatcher = instr2.mWatcher;
+                    instrumentationUiConnection = instr2.mUiAutomationConnection;
+                }
+                thread.bindApplication(
+                        processName,
+                        appInfo,
+                        app.sdkSandboxClientAppVolumeUuid,
+                        app.sdkSandboxClientAppPackage,
+                        isSdkInSandbox,
+                        providerList,
+                        instrumentationName,
+                        profilerInfo,
+                        instrumentationArgs,
+                        instrumentationWatcher,
+                        instrumentationUiConnection,
+                        testMode,
+                        mBinderTransactionTrackingEnabled,
+                        enableTrackAllocation,
+                        isRestrictedBackupMode || !normalMode,
+                        app.isPersistent(),
                         new Configuration(app.getWindowProcessController().getConfiguration()),
-                        app.getCompat(), getCommonServicesLocked(app.isolated),
+                        app.getCompat(),
+                        getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), serializedSystemFontMap,
-                        app.getStartElapsedTime(), app.getStartUptime());
+                        buildSerial,
+                        autofillOptions,
+                        contentCaptureOptions,
+                        app.getDisabledCompatChanges(),
+                        serializedSystemFontMap,
+                        app.getStartElapsedTime(),
+                        app.getStartUptime());
             }
 
             Message msg = mHandler.obtainMessage(BIND_APPLICATION_TIMEOUT_SOFT_MSG);
@@ -9363,7 +9374,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 sb.append("Animations-Running: ").append(info.numAnimationsRunning).append("\n");
             }
             if (info.broadcastIntentAction != null) {
-                sb.append("Broadcast-Intent-Action: ").append(info.broadcastIntentAction).append("\n");
+                sb.append("Broadcast-Intent-Action: ")
+                        .append(info.broadcastIntentAction)
+                        .append("\n");
             }
             if (info.durationMillis != -1) {
                 sb.append("Duration-Millis: ").append(info.durationMillis).append("\n");
@@ -9723,82 +9736,126 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If process is null, we are being called from some internal code
         // and may be about to die -- run this synchronously.
         final boolean runSynchronously = process == null;
-        Thread worker = new Thread("Error dump: " + dropboxTag) {
-            @Override
-            public void run() {
-                if (report != null) {
-                    sb.append(report);
-                }
-
-                String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
-                String maxBytesSetting = Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
-                int lines = Build.IS_USER
-                        ? 0
-                        : Settings.Global.getInt(mContext.getContentResolver(), logcatSetting, 0);
-                int dropboxMaxSize = Settings.Global.getInt(
-                        mContext.getContentResolver(), maxBytesSetting, DROPBOX_DEFAULT_MAX_SIZE);
-
-                if (dataFile != null) {
-                    // Attach the stack traces file to the report so collectors can load them
-                    // by file if they have access.
-                    sb.append(DATA_FILE_PATH_HEADER)
-                            .append(dataFile.getAbsolutePath()).append('\n');
-
-                    int maxDataFileSize = dropboxMaxSize
-                            - sb.length()
-                            - lines * RESERVED_BYTES_PER_LOGCAT_LINE
-                            - DATA_FILE_PATH_FOOTER.length();
-
-                    if (maxDataFileSize > 0) {
-                        // Inline dataFile contents if there is room.
-                        try {
-                            sb.append(FileUtils.readTextFile(dataFile, maxDataFileSize,
-                                    "\n\n[[TRUNCATED]]\n"));
-                        } catch (IOException e) {
-                            Slog.e(TAG, "Error reading " + dataFile, e);
+        Thread worker =
+                new Thread("Error dump: " + dropboxTag) {
+                    @Override
+                    public void run() {
+                        if (report != null) {
+                            sb.append(report);
                         }
+
+                        String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
+                        String maxBytesSetting =
+                                Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
+                        int lines =
+                                Build.IS_USER
+                                        ? 0
+                                        : Settings.Global.getInt(
+                                                mContext.getContentResolver(), logcatSetting, 0);
+                        int dropboxMaxSize =
+                                Settings.Global.getInt(
+                                        mContext.getContentResolver(),
+                                        maxBytesSetting,
+                                        DROPBOX_DEFAULT_MAX_SIZE);
+
+                        if (dataFile != null) {
+                            // Attach the stack traces file to the report so collectors can load
+                            // them
+                            // by file if they have access.
+                            sb.append(DATA_FILE_PATH_HEADER)
+                                    .append(dataFile.getAbsolutePath())
+                                    .append('\n');
+
+                            int maxDataFileSize =
+                                    dropboxMaxSize
+                                            - sb.length()
+                                            - lines * RESERVED_BYTES_PER_LOGCAT_LINE
+                                            - DATA_FILE_PATH_FOOTER.length();
+
+                            if (maxDataFileSize > 0) {
+                                // Inline dataFile contents if there is room.
+                                try {
+                                    sb.append(
+                                            FileUtils.readTextFile(
+                                                    dataFile,
+                                                    maxDataFileSize,
+                                                    "\n\n[[TRUNCATED]]\n"));
+                                } catch (IOException e) {
+                                    Slog.e(TAG, "Error reading " + dataFile, e);
+                                }
+                            }
+
+                            // Always append the footer, even there wasn't enough space to inline
+                            // the
+                            // dataFile contents.
+                            sb.append(DATA_FILE_PATH_FOOTER);
+                        }
+
+                        if (crashInfo != null && crashInfo.stackTrace != null) {
+                            sb.append(crashInfo.stackTrace);
+                        }
+
+                        if (lines > 0 && !runSynchronously) {
+                            sb.append("\n");
+
+                            InputStreamReader input = null;
+                            try {
+                                java.lang.Process logcat =
+                                        new ProcessBuilder(
+                                                        // Time out after 10s of inactivity, but
+                                                        // kill logcat with SEGV
+                                                        // so we can investigate why it didn't
+                                                        // finish.
+                                                        "/system/bin/timeout",
+                                                        "-i",
+                                                        "-s",
+                                                        "SEGV",
+                                                        "10s",
+                                                        // Merge several logcat streams, and take
+                                                        // the last N lines.
+                                                        "/system/bin/logcat",
+                                                        "-v",
+                                                        "threadtime",
+                                                        "-b",
+                                                        "events",
+                                                        "-b",
+                                                        "system",
+                                                        "-b",
+                                                        "main",
+                                                        "-b",
+                                                        "crash",
+                                                        "-t",
+                                                        String.valueOf(lines))
+                                                .redirectErrorStream(true)
+                                                .start();
+
+                                try {
+                                    logcat.getOutputStream().close();
+                                } catch (IOException e) {
+                                }
+                                try {
+                                    logcat.getErrorStream().close();
+                                } catch (IOException e) {
+                                }
+                                input = new InputStreamReader(logcat.getInputStream());
+
+                                int num;
+                                char[] buf = new char[8192];
+                                while ((num = input.read(buf)) > 0) sb.append(buf, 0, num);
+                            } catch (IOException e) {
+                                Slog.e(TAG, "Error running logcat", e);
+                            } finally {
+                                if (input != null)
+                                    try {
+                                        input.close();
+                                    } catch (IOException e) {
+                                    }
+                            }
+                        }
+
+                        dbox.addText(dropboxTag, sb.toString());
                     }
-
-                    // Always append the footer, even there wasn't enough space to inline the
-                    // dataFile contents.
-                    sb.append(DATA_FILE_PATH_FOOTER);
-                }
-
-                if (crashInfo != null && crashInfo.stackTrace != null) {
-                    sb.append(crashInfo.stackTrace);
-                }
-
-                if (lines > 0 && !runSynchronously) {
-                    sb.append("\n");
-
-                    InputStreamReader input = null;
-                    try {
-                        java.lang.Process logcat = new ProcessBuilder(
-                                // Time out after 10s of inactivity, but kill logcat with SEGV
-                                // so we can investigate why it didn't finish.
-                                "/system/bin/timeout", "-i", "-s", "SEGV", "10s",
-                                // Merge several logcat streams, and take the last N lines.
-                                "/system/bin/logcat", "-v", "threadtime", "-b", "events", "-b", "system",
-                                "-b", "main", "-b", "crash", "-t", String.valueOf(lines))
-                                        .redirectErrorStream(true).start();
-
-                        try { logcat.getOutputStream().close(); } catch (IOException e) {}
-                        try { logcat.getErrorStream().close(); } catch (IOException e) {}
-                        input = new InputStreamReader(logcat.getInputStream());
-
-                        int num;
-                        char[] buf = new char[8192];
-                        while ((num = input.read(buf)) > 0) sb.append(buf, 0, num);
-                    } catch (IOException e) {
-                        Slog.e(TAG, "Error running logcat", e);
-                    } finally {
-                        if (input != null) try { input.close(); } catch (IOException e) {}
-                    }
-                }
-
-                dbox.addText(dropboxTag, sb.toString());
-            }
-        };
+                };
 
         if (runSynchronously) {
             final int oldMask = StrictMode.allowThreadDiskWritesMask();
@@ -10166,43 +10223,48 @@ public class ActivityManagerService extends IActivityManager.Stub
             mOomAdjuster.dumpCacheOomRankerSettings(pw);
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             dumpAllowedAssociationsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             mPendingIntentController.dumpPendingIntents(pw, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             dumpBroadcastsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             if (dumpAll || dumpPackage != null) {
                 dumpBroadcastStatsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
                 pw.println();
                 if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                    pw.println(
+                            "-------------------------------------------------------------------------------");
                 }
             }
             mCpHelper.dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             dumpPermissions(fd, pw, args, opti, dumpAll, dumpPackage);
             pw.println();
             sdumper = mServices.newServiceDumperLocked(fd, pw, args, opti, dumpAll, dumpPackage);
             if (!dumpClient) {
                 if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                    pw.println(
+                            "-------------------------------------------------------------------------------");
                 }
                 sdumper.dumpLocked();
             }
@@ -10217,7 +10279,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // method with the lock held.
         if (dumpClient) {
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             sdumper.dumpWithClient();
         }
@@ -10230,33 +10293,38 @@ public class ActivityManagerService extends IActivityManager.Stub
             // proxies in the first place.
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             dumpBinderProxies(pw, BINDER_PROXY_HIGH_WATERMARK /* minToDump */);
         }
         synchronized(this) {
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             mAtmInternal.dump(DUMP_RECENTS_CMD, fd, pw, args, opti, dumpAll, dumpClient,
                     dumpPackage, displayIdFilter);
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             mAtmInternal.dump(DUMP_LASTANR_CMD, fd, pw, args, opti, dumpAll, dumpClient,
                     dumpPackage, displayIdFilter);
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             mAtmInternal.dump(DUMP_STARTER_CMD, fd, pw, args, opti, dumpAll, dumpClient,
                     dumpPackage, displayIdFilter);
             if (dumpPackage == null) {
                 pw.println();
                 if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                    pw.println(
+                            "-------------------------------------------------------------------------------");
                 }
                 mAtmInternal.dump(DUMP_CONTAINERS_CMD, fd, pw, args, opti, dumpAll, dumpClient,
                         dumpPackage, displayIdFilter);
@@ -10266,7 +10334,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!dumpNormalPriority) {
                 pw.println();
                 if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                    pw.println(
+                            "-------------------------------------------------------------------------------");
                 }
                 mAtmInternal.dump(DUMP_ACTIVITIES_CMD, fd, pw, args, opti, dumpAll, dumpClient,
                         dumpPackage, displayIdFilter);
@@ -10274,45 +10343,53 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mAssociations.size() > 0) {
                 pw.println();
                 if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                    pw.println(
+                            "-------------------------------------------------------------------------------");
                 }
                 dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             }
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
                 mProcessList.getAppStartInfoTracker().dumpHistoryProcessStartInfo(pw, dumpPackage);
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
                 mProcessList.mAppExitInfoTracker.dumpHistoryProcessExitInfo(pw, dumpPackage);
             }
             if (dumpPackage == null) {
                 pw.println();
                 if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                    pw.println(
+                            "-------------------------------------------------------------------------------");
                 }
                 mOomAdjProfiler.dump(pw);
                 pw.println();
                 if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                    pw.println(
+                            "-------------------------------------------------------------------------------");
                 }
                 dumpLmkLocked(pw);
             }
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             synchronized (mProcLock) {
                 mProcessList.dumpProcessesLSP(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
             }
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             dumpUsers(pw);
 
             pw.println();
             if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+                pw.println(
+                        "-------------------------------------------------------------------------------");
             }
             mComponentAliasResolver.dump(pw);
         }
@@ -10322,7 +10399,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Dump the app restriction controller, it's required not to hold the global lock here.
      */
     private void dumpAppRestrictionController(PrintWriter pw) {
-        pw.println("-------------------------------------------------------------------------------");
+        pw.println(
+                "-------------------------------------------------------------------------------");
         mAppRestrictionController.dump(pw, "");
     }
 
@@ -11462,7 +11540,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void dumpAllowedAssociationsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, String dumpPackage) {
-        pw.println("ACTIVITY MANAGER ALLOWED ASSOCIATION STATE (dumpsys activity allowed-associations)");
+        pw.println(
+                "ACTIVITY MANAGER ALLOWED ASSOCIATION STATE (dumpsys activity"
+                    + " allowed-associations)");
         boolean printed = false;
         if (mAllowedAssociations != null) {
             for (int i = 0; i < mAllowedAssociations.size(); i++) {
@@ -12816,7 +12896,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!opts.isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(ss[INDEX_TOTAL_PSS] - cachedPss
                         + kernelUsed)); pw.print(" (");
-                pw.print(stringifyKBSize(ss[INDEX_TOTAL_PSS] - cachedPss)); pw.print(" used pss + ");
+                pw.print(stringifyKBSize(ss[INDEX_TOTAL_PSS] - cachedPss));
+                pw.print(" used pss + ");
                 pw.print(stringifyKBSize(kernelUsed)); pw.print(" kernel)\n");
                 pw.print(" Lost RAM: "); pw.println(stringifyKBSize(lostRAM));
             } else {
@@ -13686,8 +13767,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         validateServiceInstanceName(instanceName);
 
-        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
-                "*** startService: " + service + " type=" + resolvedType + " fg=" + requireForeground);
+        if (DEBUG_SERVICE)
+            Slog.v(
+                    TAG_SERVICE,
+                    "*** startService: "
+                            + service
+                            + " type="
+                            + resolvedType
+                            + " fg="
+                            + requireForeground);
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
@@ -15448,9 +15536,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,
                     callingPid, callingUid)
                     != PackageManager.PERMISSION_GRANTED) {
-                String msg = "Permission Denial: broadcastIntent() requesting a sticky broadcast from pid="
-                        + callingPid + ", uid=" + callingUid
-                        + " requires " + android.Manifest.permission.BROADCAST_STICKY;
+                String msg =
+                        "Permission Denial: broadcastIntent() requesting a sticky broadcast from"
+                            + " pid="
+                                + callingPid
+                                + ", uid="
+                                + callingUid
+                                + " requires "
+                                + android.Manifest.permission.BROADCAST_STICKY;
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }

@@ -18,6 +18,7 @@ package com.android.internal.protolog;
 
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_OUTPUT_FILE_PATH;
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LEGACY_VIEWER_CONFIG_PATH;
+import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LOG_GROUPS;
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.VIEWER_CONFIG_PATH;
 
 import android.annotation.Nullable;
@@ -27,6 +28,8 @@ import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLogToolInjected;
+
+import java.util.TreeMap;
 
 /**
  * A service for the ProtoLog logging system.
@@ -42,6 +45,9 @@ public class ProtoLogImpl {
 
     @ProtoLogToolInjected(LEGACY_OUTPUT_FILE_PATH)
     private static String sLegacyOutputFilePath;
+
+    @ProtoLogToolInjected(LOG_GROUPS)
+    private static TreeMap<String, IProtoLogGroup> sLogGroups;
 
     /** Used by the ProtoLogTool, do not call directly - use {@code ProtoLog} class instead. */
     public static void d(IProtoLogGroup group, long messageHash, int paramsMask,
@@ -99,11 +105,10 @@ public class ProtoLogImpl {
     public static synchronized IProtoLog getSingleInstance() {
         if (sServiceInstance == null) {
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                sServiceInstance =
-                        new PerfettoProtoLogImpl(sViewerConfigPath);
+                sServiceInstance = new PerfettoProtoLogImpl(sViewerConfigPath, sLogGroups);
             } else {
-                sServiceInstance =
-                        new LegacyProtoLogImpl(sLegacyOutputFilePath, sLegacyViewerConfigPath);
+                sServiceInstance = new LegacyProtoLogImpl(
+                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sLogGroups);
             }
         }
         return sServiceInstance;

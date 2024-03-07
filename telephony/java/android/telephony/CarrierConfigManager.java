@@ -5307,6 +5307,19 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "enable_presence_group_subscribe_bool";
 
         /**
+         * SIP SUBSCRIBE retry duration used when device doesn't receive a response to SIP
+         * SUBSCRIBE request.
+         * If this value is not defined or defined as negative value, the device does not retry
+         * the SIP SUBSCRIBE.
+         * If the value is 0 then device retries immediately upon timeout.
+         * If the value is > 0 then device waits for configured duration and retries after timeout
+         * is detected
+         * @hide
+         */
+        public static final String KEY_SUBSCRIBE_RETRY_DURATION_MILLIS_LONG =
+                KEY_PREFIX + "subscribe_retry_duration_millis_long";
+
+        /**
          * Flag indicating whether or not to use SIP URI when send a presence subscribe.
          * When {@code true}, the device sets the To and Contact header to be SIP URI using
          * the TelephonyManager#getIsimDomain" API.
@@ -5982,6 +5995,7 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, false);
+            defaults.putInt(KEY_SUBSCRIBE_RETRY_DURATION_MILLIS_LONG, -1);
             defaults.putBoolean(KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL, false);
             defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
             defaults.putBoolean(KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL, false);

@@ -195,7 +195,8 @@ public class ImsService extends Service {
                     // whether or not ImsFeature.FEATURE_EMERGENCY_MMTEL feature is set and should
                     // not be set by users of ImsService.
                     CAPABILITY_SIP_DELEGATE_CREATION,
-                    CAPABILITY_TERMINAL_BASED_CALL_WAITING
+                    CAPABILITY_TERMINAL_BASED_CALL_WAITING,
+                    CAPABILITY_SUPPORTS_SIMULTANEOUS_CALLING
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsServiceCapability {}
@@ -206,7 +207,9 @@ public class ImsService extends Service {
      */
     private static final Map<Long, String> CAPABILITIES_LOG_MAP = Map.of(
             CAPABILITY_EMERGENCY_OVER_MMTEL, "EMERGENCY_OVER_MMTEL",
-            CAPABILITY_SIP_DELEGATE_CREATION, "SIP_DELEGATE_CREATION");
+            CAPABILITY_SIP_DELEGATE_CREATION, "SIP_DELEGATE_CREATION",
+            CAPABILITY_TERMINAL_BASED_CALL_WAITING, "TERMINAL_BASED_CALL_WAITING",
+            CAPABILITY_SUPPORTS_SIMULTANEOUS_CALLING, "SIMULTANEOUS_CALLING");
 
     /**
      * The intent that must be defined as an intent-filter in the AndroidManifest of the ImsService.

@@ -341,6 +341,7 @@ public class WallpaperDataParser {
             } else {
                 wallpaper.cropHint.set(totalCropHint);
             }
+            wallpaper.mSampleSize = parser.getAttributeFloat(null, "sampleSize", 1f);
         } else {
             wallpaper.cropHint.set(totalCropHint);
         }
@@ -493,6 +494,7 @@ public class WallpaperDataParser {
             out.attributeInt(null, "totalCropTop", wallpaper.cropHint.top);
             out.attributeInt(null, "totalCropRight", wallpaper.cropHint.right);
             out.attributeInt(null, "totalCropBottom", wallpaper.cropHint.bottom);
+            out.attributeFloat(null, "sampleSize", wallpaper.mSampleSize);
         } else if (!multiCrop()) {
             final DisplayData wpdData =
                     mWallpaperDisplayHelper.getDisplayDataOrCreate(DEFAULT_DISPLAY);

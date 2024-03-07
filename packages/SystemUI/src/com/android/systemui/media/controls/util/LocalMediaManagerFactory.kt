@@ -31,7 +31,8 @@ constructor(
 ) {
     /** Creates a [LocalMediaManager] for the given package. */
     fun create(packageName: String?): LocalMediaManager {
-        return InfoMediaManager.createInstance(context, packageName, null, localBluetoothManager)
-            .run { LocalMediaManager(context, localBluetoothManager, this, packageName) }
+        return InfoMediaManager.createInstance(context, packageName, localBluetoothManager).run {
+            LocalMediaManager(context, localBluetoothManager, this, packageName)
+        }
     }
 }

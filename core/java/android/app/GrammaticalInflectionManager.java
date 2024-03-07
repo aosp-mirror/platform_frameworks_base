@@ -16,8 +16,10 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -127,6 +129,7 @@ public class GrammaticalInflectionManager {
      *
      * @see Configuration#getGrammaticalGender
      */
+    @RequiresPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
     @FlaggedApi(Flags.FLAG_SYSTEM_TERMS_OF_ADDRESS_ENABLED)
     @Configuration.GrammaticalGender
     public int getSystemGrammaticalGender() {

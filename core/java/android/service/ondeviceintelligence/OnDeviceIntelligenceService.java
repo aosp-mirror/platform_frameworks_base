@@ -65,7 +65,7 @@ import java.util.function.LongConsumer;
 
 /**
  * Abstract base class for performing setup for on-device inference and providing file access to
- * the isolated counter part {@link OnDeviceTrustedInferenceService}.
+ * the isolated counter part {@link OnDeviceSandboxedInferenceService}.
  *
  * <p> A service that provides configuration and model files relevant to performing inference on
  * device. The system's default OnDeviceIntelligenceService implementation is configured in
@@ -110,6 +110,8 @@ public abstract class OnDeviceIntelligenceService extends Service {
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
+            // TODO(326052028) : Move the remote method calls to an app handler from the binder
+            //  thread.
             return new IOnDeviceIntelligenceService.Stub() {
                 /** {@inheritDoc} */
                 @Override
@@ -123,38 +125,40 @@ public abstract class OnDeviceIntelligenceService extends Service {
                 }
 
                 @Override
-                public void listFeatures(IListFeaturesCallback listFeaturesCallback) {
+                public void listFeatures(int callerUid,
+                        IListFeaturesCallback listFeaturesCallback) {
                     Objects.requireNonNull(listFeaturesCallback);
-                    OnDeviceIntelligenceService.this.onListFeatures(
+                    OnDeviceIntelligenceService.this.onListFeatures(callerUid,
                             wrapListFeaturesCallback(listFeaturesCallback));
                 }
 
                 @Override
-                public void getFeature(int id, IFeatureCallback featureCallback) {
+                public void getFeature(int callerUid, int id, IFeatureCallback featureCallback) {
                     Objects.requireNonNull(featureCallback);
-                    OnDeviceIntelligenceService.this.onGetFeature(id,
-                            wrapFeatureCallback(featureCallback));
+                    OnDeviceIntelligenceService.this.onGetFeature(callerUid,
+                            id, wrapFeatureCallback(featureCallback));
                 }
 
 
                 @Override
-                public void getFeatureDetails(Feature feature,
+                public void getFeatureDetails(int callerUid, Feature feature,
                         IFeatureDetailsCallback featureDetailsCallback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(featureDetailsCallback);
 
-                    OnDeviceIntelligenceService.this.onGetFeatureDetails(feature,
-                            wrapFeatureDetailsCallback(featureDetailsCallback));
+                    OnDeviceIntelligenceService.this.onGetFeatureDetails(callerUid,
+                            feature, wrapFeatureDetailsCallback(featureDetailsCallback));
                 }
 
                 @Override
-                public void requestFeatureDownload(Feature feature,
+                public void requestFeatureDownload(int callerUid, Feature feature,
                         ICancellationSignal cancellationSignal,
                         IDownloadCallback downloadCallback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(downloadCallback);
 
-                    OnDeviceIntelligenceService.this.onDownloadFeature(feature,
+                    OnDeviceIntelligenceService.this.onDownloadFeature(callerUid,
+                            feature,
                             CancellationSignal.fromTransport(cancellationSignal),
                             wrapDownloadCallback(downloadCallback));
                 }
@@ -188,11 +192,37 @@ public abstract class OnDeviceIntelligenceService extends Service {
                         IRemoteProcessingService remoteProcessingService) {
                     mRemoteProcessingService = remoteProcessingService;
                 }
+
+                @Override
+                public void notifyInferenceServiceConnected() {
+                    OnDeviceIntelligenceService.this.onInferenceServiceConnected();
+                }
+
+                @Override
+                public void notifyInferenceServiceDisconnected() {
+                    OnDeviceIntelligenceService.this.onInferenceServiceDisconnected();
+                }
             };
         }
         Slog.w(TAG, "Incorrect service interface, returning null.");
         return null;
     }
+
+
+    /**
+     * Invoked when a new instance of the remote inference service is created.
+     * This method should be used as a signal to perform any initialization operations, for e.g. by
+     * invoking the {@link #updateProcessingState} method to initialize the remote processing
+     * service.
+     */
+    public abstract void onInferenceServiceConnected();
+
+
+    /**
+     * Invoked when an instance of the remote inference service is disconnected.
+     */
+    public abstract void onInferenceServiceDisconnected();
+
 
     /**
      * Invoked by the {@link OnDeviceIntelligenceService} inorder to send updates to the inference
@@ -391,6 +421,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * Request download for feature that is requested and listen to download progress updates. If
      * the download completes successfully, success callback should be populated.
      *
+     * @param callerUid          UID of the caller that initiated this call chain.
      * @param feature            the feature for which files need to be downlaoded.
      *                           process.
      * @param cancellationSignal signal to attach a listener to, and receive cancellation signals
@@ -398,7 +429,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * @param downloadCallback   callback to populate download updates for clients to listen on..
      */
     public abstract void onDownloadFeature(
-            @NonNull Feature feature,
+            int callerUid, @NonNull Feature feature,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull DownloadCallback downloadCallback);
 
@@ -407,20 +438,22 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * implementation use the {@link Feature#getFeatureParams()} as a hint to communicate what
      * details the client is looking for.
      *
-     * @param feature               the feature for which status needs to be known.
-     * @param featureStatusCallback callback to populate the resulting feature status.
+     * @param callerUid              UID of the caller that initiated this call chain.
+     * @param feature                the feature for which status needs to be known.
+     * @param featureDetailsCallback callback to populate the resulting feature status.
      */
-    public abstract void onGetFeatureDetails(@NonNull Feature feature,
+    public abstract void onGetFeatureDetails(int callerUid, @NonNull Feature feature,
             @NonNull OutcomeReceiver<FeatureDetails,
-                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> featureStatusCallback);
+                    OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> featureDetailsCallback);
 
 
     /**
      * Get feature using the provided identifier to the remote implementation.
      *
+     * @param callerUid       UID of the caller that initiated this call chain.
      * @param featureCallback callback to populate the features list.
      */
-    public abstract void onGetFeature(int featureId,
+    public abstract void onGetFeature(int callerUid, int featureId,
             @NonNull OutcomeReceiver<Feature,
                     OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> featureCallback);
 
@@ -428,9 +461,10 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * List all features which are available in the remote implementation. The implementation might
      * choose to provide only a certain list of features based on the caller.
      *
+     * @param callerUid            UID of the caller that initiated this call chain.
      * @param listFeaturesCallback callback to populate the features list.
      */
-    public abstract void onListFeatures(@NonNull OutcomeReceiver<List<Feature>,
+    public abstract void onListFeatures(int callerUid, @NonNull OutcomeReceiver<List<Feature>,
             OnDeviceIntelligenceManager.OnDeviceIntelligenceManagerException> listFeaturesCallback);
 
     /**

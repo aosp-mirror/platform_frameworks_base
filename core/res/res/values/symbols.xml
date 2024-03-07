@@ -375,7 +375,6 @@
   <java-symbol type="string" name="config_recentsComponentName" />
   <java-symbol type="string" name="config_systemUIServiceComponent" />
   <java-symbol type="string" name="config_controlsPackage" />
-  <java-symbol type="string" name="config_screenRecorderComponent" />
   <java-symbol type="string" name="config_somnambulatorComponent" />
   <java-symbol type="string" name="config_screenshotAppClipsServiceComponent" />
   <java-symbol type="string" name="config_screenshotServiceComponent" />
@@ -3917,7 +3916,7 @@
   <java-symbol type="string" name="config_ambientContextEventArrayExtraKey" />
   <java-symbol type="string" name="config_defaultWearableSensingService" />
   <java-symbol type="string" name="config_defaultOnDeviceIntelligenceService" />
-  <java-symbol type="string" name="config_defaultOnDeviceTrustedInferenceService" />
+  <java-symbol type="string" name="config_defaultOnDeviceSandboxedInferenceService" />
   <java-symbol type="string" name="config_retailDemoPackage" />
   <java-symbol type="string" name="config_retailDemoPackageSignature" />
 
@@ -5374,4 +5373,6 @@
   <java-symbol type="string" name="config_defaultContextualSearchKey" />
   <java-symbol type="string" name="config_defaultContextualSearchEnabled" />
   <java-symbol type="string" name="config_defaultContextualSearchLegacyEnabled" />
+
+  <java-symbol type="string" name="unarchival_session_app_label" />
 </resources>

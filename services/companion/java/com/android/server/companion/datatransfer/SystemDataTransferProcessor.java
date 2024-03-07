@@ -52,8 +52,8 @@ import android.permission.PermissionControllerManager;
 import android.util.Slog;
 
 import com.android.internal.R;
-import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
+import com.android.server.companion.association.AssociationStore;
 import com.android.server.companion.transport.CompanionTransportManager;
 import com.android.server.companion.utils.PackageUtils;
 import com.android.server.companion.utils.PermissionsUtils;

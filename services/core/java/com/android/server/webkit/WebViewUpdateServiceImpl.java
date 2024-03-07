@@ -23,11 +23,14 @@ import android.content.pm.Signature;
 import android.os.AsyncTask;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
+
+import com.android.modules.expresslog.Counter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -357,6 +360,12 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
                 mNumRelroCreationsFinished = 0;
                 mNumRelroCreationsStarted =
                     mSystemInterface.onWebViewProviderChanged(newPackage);
+                Counter.logIncrement("webview.value_on_webview_provider_changed_counter");
+                if (newPackage.packageName.equals(getDefaultWebViewPackage().packageName)) {
+                    Counter.logIncrement(
+                            "webview.value_on_webview_provider_changed_"
+                            + "with_default_package_counter");
+                }
                 // If the relro creations finish before we know the number of started creations
                 // we will have to do any cleanup/notifying here.
                 checkIfRelrosDoneLocked();
@@ -388,9 +397,15 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
 
     @Override
     public WebViewProviderInfo getDefaultWebViewPackage() {
-        throw new IllegalStateException(
-                "getDefaultWebViewPackage shouldn't be called if update_service_v2 flag is"
-                        + " disabled.");
+        for (WebViewProviderInfo provider : getWebViewPackages()) {
+            if (provider.availableByDefault) {
+                return provider;
+            }
+        }
+
+        // This should be unreachable because the config parser enforces that there is at least
+        // one availableByDefault provider.
+        throw new AndroidRuntimeException("No available by default WebView Provider.");
     }
 
     private static class ProviderAndPackageInfo {

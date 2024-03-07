@@ -22,6 +22,24 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onStart
 
+fun BatteryController.isDevicePluggedIn(): Flow<Boolean> {
+    return conflatedCallbackFlow {
+            val batteryCallback =
+                object : BatteryController.BatteryStateChangeCallback {
+                    override fun onBatteryLevelChanged(
+                        level: Int,
+                        pluggedIn: Boolean,
+                        charging: Boolean
+                    ) {
+                        trySend(pluggedIn)
+                    }
+                }
+            addCallback(batteryCallback)
+            awaitClose { removeCallback(batteryCallback) }
+        }
+        .onStart { emit(isPluggedIn) }
+}
+
 fun BatteryController.isBatteryPowerSaveEnabled(): Flow<Boolean> {
     return conflatedCallbackFlow {
             val batteryCallback =
@@ -34,4 +52,36 @@ fun BatteryController.isBatteryPowerSaveEnabled(): Flow<Boolean> {
             awaitClose { removeCallback(batteryCallback) }
         }
         .onStart { emit(isPowerSave) }
+}
+
+fun BatteryController.getBatteryLevel(): Flow<Int> {
+    return conflatedCallbackFlow {
+            val batteryCallback =
+                object : BatteryController.BatteryStateChangeCallback {
+                    override fun onBatteryLevelChanged(
+                        level: Int,
+                        pluggedIn: Boolean,
+                        charging: Boolean
+                    ) {
+                        trySend(level)
+                    }
+                }
+            addCallback(batteryCallback)
+            awaitClose { removeCallback(batteryCallback) }
+        }
+        .onStart { emit(0) }
+}
+
+fun BatteryController.isExtremePowerSaverEnabled(): Flow<Boolean> {
+    return conflatedCallbackFlow {
+            val batteryCallback =
+                object : BatteryController.BatteryStateChangeCallback {
+                    override fun onExtremeBatterySaverChanged(isExtreme: Boolean) {
+                        trySend(isExtreme)
+                    }
+                }
+            addCallback(batteryCallback)
+            awaitClose { removeCallback(batteryCallback) }
+        }
+        .onStart { emit(isExtremeSaverOn) }
 }

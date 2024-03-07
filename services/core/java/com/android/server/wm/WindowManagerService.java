@@ -2109,7 +2109,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         + ", touchableRegion=" + w.mGivenTouchableRegion + " -> " + touchableRegion
                         + ", touchableInsets " + w.mTouchableInsets + " -> " + touchableInsets);
                 if (w != null) {
+                    final boolean wasGivenInsetsPending = w.mGivenInsetsPending;
                     w.mGivenInsetsPending = false;
+                    if ((!wasGivenInsetsPending || !w.hasInsetsSourceProvider())
+                            && w.mTouchableInsets == touchableInsets
+                            && w.mGivenContentInsets.equals(contentInsets)
+                            && w.mGivenVisibleInsets.equals(visibleInsets)
+                            && w.mGivenTouchableRegion.equals(touchableRegion)) {
+                        return;
+                    }
                     w.mGivenContentInsets.set(contentInsets);
                     w.mGivenVisibleInsets.set(visibleInsets);
                     w.mGivenTouchableRegion.set(touchableRegion);
@@ -9211,6 +9219,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (!Flags.embeddedActivityBackNavFlag()) {
             // Skip if flag is not enabled.
+            return false;
+        }
+
+        if (taskFragment.mDimmerSurfaceBoosted) {
+            // Skip if the TaskFragment currently has dimmer surface boosted.
             return false;
         }
 

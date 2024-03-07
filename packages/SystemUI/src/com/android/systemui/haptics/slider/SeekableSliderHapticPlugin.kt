@@ -163,6 +163,6 @@ constructor(
     }
 
     companion object {
-        const val KEY_UP_TIMEOUT = 100L
+        const val KEY_UP_TIMEOUT = 60L
     }
 }

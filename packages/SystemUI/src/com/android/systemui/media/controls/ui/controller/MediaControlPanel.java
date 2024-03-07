@@ -109,7 +109,7 @@ import com.android.systemui.media.controls.util.MediaDataUtils;
 import com.android.systemui.media.controls.util.MediaFlags;
 import com.android.systemui.media.controls.util.MediaUiEventLogger;
 import com.android.systemui.media.controls.util.SmallHash;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.plugins.ActivityStarter;
@@ -223,7 +223,7 @@ public class MediaControlPanel {
     protected int mUid = Process.INVALID_UID;
     private int mSmartspaceMediaItemsCount;
     private MediaCarouselController mMediaCarouselController;
-    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final MediaOutputDialogManager mMediaOutputDialogManager;
     private final FalsingManager mFalsingManager;
     private MetadataAnimationHandler mMetadataAnimationHandler;
     private ColorSchemeTransition mColorSchemeTransition;
@@ -304,7 +304,7 @@ public class MediaControlPanel {
             MediaViewController mediaViewController,
             SeekBarViewModel seekBarViewModel,
             Lazy<MediaDataManager> lazyMediaDataManager,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
+            MediaOutputDialogManager mediaOutputDialogManager,
             MediaCarouselController mediaCarouselController,
             FalsingManager falsingManager,
             SystemClock systemClock,
@@ -324,7 +324,7 @@ public class MediaControlPanel {
         mSeekBarViewModel = seekBarViewModel;
         mMediaViewController = mediaViewController;
         mMediaDataManagerLazy = lazyMediaDataManager;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mMediaOutputDialogManager = mediaOutputDialogManager;
         mMediaCarouselController = mediaCarouselController;
         mFalsingManager = falsingManager;
         mSystemClock = systemClock;
@@ -737,7 +737,7 @@ public class MediaControlPanel {
                                     mPackageName, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
-                            mMediaOutputDialogFactory.create(mPackageName, true,
+                            mMediaOutputDialogManager.createAndShow(mPackageName, true,
                                     mMediaViewHolder.getSeamlessButton());
                         }
                     } else {
@@ -761,7 +761,7 @@ public class MediaControlPanel {
                                 }
                             }
                         } else {
-                            mMediaOutputDialogFactory.create(mPackageName, true,
+                            mMediaOutputDialogManager.createAndShow(mPackageName, true,
                                     mMediaViewHolder.getSeamlessButton());
                         }
                     }

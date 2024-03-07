@@ -1160,12 +1160,10 @@ public final class AutofillManager {
 
         // denylist only applies to not important views
         if (!view.isImportantForAutofill() && isActivityDeniedForAutofill()) {
-            Log.d(TAG, "view is not autofillable - activity denied for autofill");
             return false;
         }
 
         if (isActivityAllowedForAutofill()) {
-            Log.d(TAG, "view is autofillable - activity allowed for autofill");
             return true;
         }
 

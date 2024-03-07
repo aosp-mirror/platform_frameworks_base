@@ -35,7 +35,6 @@ public class AnimationFilter {
     boolean animateZ;
     boolean animateHeight;
     boolean animateTopInset;
-    boolean animateDimmed;
     boolean animateHideSensitive;
     boolean hasDelays;
     boolean hasGoToFullShadeEvent;
@@ -83,11 +82,6 @@ public class AnimationFilter {
         return this;
     }
 
-    public AnimationFilter animateDimmed() {
-        animateDimmed = true;
-        return this;
-    }
-
     public AnimationFilter animateHideSensitive() {
         animateHideSensitive = true;
         return this;
@@ -128,7 +122,6 @@ public class AnimationFilter {
         animateZ |= filter.animateZ;
         animateHeight |= filter.animateHeight;
         animateTopInset |= filter.animateTopInset;
-        animateDimmed |= filter.animateDimmed;
         animateHideSensitive |= filter.animateHideSensitive;
         hasDelays |= filter.hasDelays;
         mAnimatedProperties.addAll(filter.mAnimatedProperties);
@@ -142,7 +135,6 @@ public class AnimationFilter {
         animateZ = false;
         animateHeight = false;
         animateTopInset = false;
-        animateDimmed = false;
         animateHideSensitive = false;
         hasDelays = false;
         hasGoToFullShadeEvent = false;

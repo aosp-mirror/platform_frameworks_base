@@ -43,7 +43,6 @@ constructor(
     private val scrimLogger: ScrimLogger,
     private val powerInteractor: PowerInteractor,
 ) {
-
     init {
         listenForStartedKeyguardTransitionStep()
     }
@@ -52,9 +51,7 @@ constructor(
         scope.launch {
             transitionInteractor.startedKeyguardTransitionStep.collect {
                 scrimLogger.d(TAG, "listenForStartedKeyguardTransitionStep", it)
-                lightRevealScrimRepository.startRevealAmountAnimator(
-                    willBeRevealedInState(it.to),
-                )
+                lightRevealScrimRepository.startRevealAmountAnimator(willBeRevealedInState(it.to))
             }
         }
     }
@@ -89,25 +86,25 @@ constructor(
 
     companion object {
 
-    /**
-     * Whether the light reveal scrim will be fully revealed (revealAmount = 1.0f) in the given
-     * state after the transition is complete. If false, scrim will be fully hidden.
-     */
-    private fun willBeRevealedInState(state: KeyguardState): Boolean {
-        return when (state) {
-            KeyguardState.OFF -> false
-            KeyguardState.DOZING -> false
-            KeyguardState.AOD -> false
-            KeyguardState.DREAMING -> true
-            KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
-            KeyguardState.GLANCEABLE_HUB -> true
-            KeyguardState.ALTERNATE_BOUNCER -> true
-            KeyguardState.PRIMARY_BOUNCER -> true
-            KeyguardState.LOCKSCREEN -> true
-            KeyguardState.GONE -> true
-            KeyguardState.OCCLUDED -> true
+        /**
+         * Whether the light reveal scrim will be fully revealed (revealAmount = 1.0f) in the given
+         * state after the transition is complete. If false, scrim will be fully hidden.
+         */
+        private fun willBeRevealedInState(state: KeyguardState): Boolean {
+            return when (state) {
+                KeyguardState.OFF -> false
+                KeyguardState.DOZING -> false
+                KeyguardState.AOD -> false
+                KeyguardState.DREAMING -> true
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
+                KeyguardState.GLANCEABLE_HUB -> true
+                KeyguardState.ALTERNATE_BOUNCER -> true
+                KeyguardState.PRIMARY_BOUNCER -> true
+                KeyguardState.LOCKSCREEN -> true
+                KeyguardState.GONE -> true
+                KeyguardState.OCCLUDED -> true
+            }
         }
-    }
 
         val TAG = LightRevealScrimInteractor::class.simpleName!!
     }

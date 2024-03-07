@@ -64,22 +64,21 @@ public class InfoMediaManagerIntegTest {
     @RequiresFlagsEnabled(FLAG_USE_MEDIA_ROUTER2_FOR_INFO_MEDIA_MANAGER)
     public void createInstance_withMR2FlagOn_returnsRouterInfoMediaManager() {
         InfoMediaManager manager =
-                InfoMediaManager.createInstance(mContext, mContext.getPackageName(), null, null);
+                InfoMediaManager.createInstance(mContext, mContext.getPackageName(), null);
         assertThat(manager).isInstanceOf(RouterInfoMediaManager.class);
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_USE_MEDIA_ROUTER2_FOR_INFO_MEDIA_MANAGER)
     public void createInstance_withMR2FlagOn_withFakePackage_returnsNoOpInfoMediaManager() {
-        InfoMediaManager manager =
-                InfoMediaManager.createInstance(mContext, FAKE_PACKAGE, null, null);
+        InfoMediaManager manager = InfoMediaManager.createInstance(mContext, FAKE_PACKAGE, null);
         assertThat(manager).isInstanceOf(NoOpInfoMediaManager.class);
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_USE_MEDIA_ROUTER2_FOR_INFO_MEDIA_MANAGER)
     public void createInstance_withMR2FlagOn_withNullPackage_returnsRouterInfoMediaManager() {
-        InfoMediaManager manager = InfoMediaManager.createInstance(mContext, null, null, null);
+        InfoMediaManager manager = InfoMediaManager.createInstance(mContext, null, null);
         assertThat(manager).isInstanceOf(RouterInfoMediaManager.class);
     }
 
@@ -87,7 +86,7 @@ public class InfoMediaManagerIntegTest {
     @RequiresFlagsDisabled(FLAG_USE_MEDIA_ROUTER2_FOR_INFO_MEDIA_MANAGER)
     public void createInstance_withMR2FlagOff_returnsManagerInfoMediaManager() {
         InfoMediaManager manager =
-                InfoMediaManager.createInstance(mContext, mContext.getPackageName(), null, null);
+                InfoMediaManager.createInstance(mContext, mContext.getPackageName(), null);
         assertThat(manager).isInstanceOf(ManagerInfoMediaManager.class);
     }
 }

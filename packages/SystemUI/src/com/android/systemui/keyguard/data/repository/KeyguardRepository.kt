@@ -95,6 +95,7 @@ interface KeyguardRepository {
     val isKeyguardShowing: Flow<Boolean>
 
     /** Is an activity showing over the keyguard? */
+    @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
     val isKeyguardOccluded: Flow<Boolean>
 
     /**

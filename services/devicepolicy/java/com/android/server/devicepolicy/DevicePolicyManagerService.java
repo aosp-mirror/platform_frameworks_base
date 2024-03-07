@@ -23389,7 +23389,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG);
     }
 
-    private boolean isUnicornFlagEnabled() {
+    static boolean isUnicornFlagEnabled() {
         return false;
     }
 

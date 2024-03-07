@@ -210,7 +210,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     mActivityListener.onTopActivityChanged(displayId, topActivity,
                             UserHandle.USER_NULL);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
             }
 
@@ -220,7 +220,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 try {
                     mActivityListener.onTopActivityChanged(displayId, topActivity, userId);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
             }
 
@@ -229,7 +229,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 try {
                     mActivityListener.onDisplayEmpty(displayId);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
                 }
             }
         };
@@ -1213,7 +1213,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mContext.startActivityAsUser(
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK),
                 ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
-                mContext.getUser());
+                UserHandle.SYSTEM);
     }
 
     private void onSecureWindowShown(int displayId, int uid) {

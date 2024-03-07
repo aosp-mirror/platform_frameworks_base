@@ -75,6 +75,11 @@
     <!-- Battery saver notification dismiss action: Do not turn on battery saver. [CHAR LIMIT=NONE]-->
     <string name="battery_saver_dismiss_action">No thanks</string>
 
+    <!-- Secondary label for Battery Saver tile when Battery Saver is enabled. [CHAR LIMIT=20] -->
+    <string name="standard_battery_saver_text">Standard</string>
+    <!-- Secondary label for Battery Saver tile when Extreme Battery Saver is enabled. [CHAR LIMIT=20] -->
+    <string name="extreme_battery_saver_text">Extreme</string>
+
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
 
     <!-- Name of the button that links to the Wifi settings screen. [CHAR LIMIT=NONE] -->

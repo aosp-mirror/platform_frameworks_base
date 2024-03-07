@@ -20,7 +20,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.media.dialog.MediaOutputDialogFactory
+import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
@@ -30,20 +30,22 @@ import javax.inject.Inject
 class MediaOutputActionsInteractor
 @Inject
 constructor(
-    private val mediaOutputDialogFactory: MediaOutputDialogFactory,
+    private val mediaOutputDialogManager: MediaOutputDialogManager,
 ) {
 
     fun onBarClick(session: MediaDeviceSession, expandable: Expandable) {
         when (session) {
             is MediaDeviceSession.Active -> {
-                mediaOutputDialogFactory.createWithController(
+                mediaOutputDialogManager.createAndShowWithController(
                     session.packageName,
                     false,
                     expandable.dialogController()
                 )
             }
             is MediaDeviceSession.Inactive -> {
-                mediaOutputDialogFactory.createDialogForSystemRouting(expandable.dialogController())
+                mediaOutputDialogManager.createAndShowForSystemRouting(
+                    expandable.dialogController()
+                )
             }
             else -> {
                 /* do nothing */
@@ -56,7 +58,7 @@ constructor(
             cuj =
                 DialogCuj(
                     InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                    MediaOutputDialogFactory.INTERACTION_JANK_TAG
+                    MediaOutputDialogManager.INTERACTION_JANK_TAG
                 )
         )
     }

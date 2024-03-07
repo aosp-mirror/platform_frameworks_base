@@ -22,9 +22,9 @@ import static perfetto.protos.PerfettoTrace.InternedString.IID;
 import static perfetto.protos.PerfettoTrace.InternedString.STR;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.BOOLEAN_PARAMS;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.DOUBLE_PARAMS;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STACKTRACE_IID;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.MESSAGE_ID;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.SINT64_PARAMS;
+import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STACKTRACE_IID;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STR_PARAM_IIDS;
 import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.GROUPS;
 import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.Group.ID;
@@ -78,7 +78,6 @@ import perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData;
  * A service for the ProtoLog logging system.
  */
 public class PerfettoProtoLogImpl implements IProtoLog {
-    private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     private static final String LOG_TAG = "ProtoLog";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
@@ -89,8 +88,10 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     );
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
+    private final TreeMap<String, IProtoLogGroup> mLogGroups;
 
-    public PerfettoProtoLogImpl(String viewerConfigFilePath) {
+    public PerfettoProtoLogImpl(String viewerConfigFilePath,
+            TreeMap<String, IProtoLogGroup> logGroups) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
@@ -98,23 +99,28 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
                 return null;
             }
-        });
+        }, logGroups);
     }
 
-    public PerfettoProtoLogImpl(ViewerConfigInputStreamProvider viewerConfigInputStreamProvider) {
+    public PerfettoProtoLogImpl(
+            ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            TreeMap<String, IProtoLogGroup> logGroups
+    ) {
         this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
+                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups);
     }
 
     @VisibleForTesting
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            ProtoLogViewerConfigReader viewerConfigReader
+            ProtoLogViewerConfigReader viewerConfigReader,
+            TreeMap<String, IProtoLogGroup> logGroups
     ) {
         Producer.init(InitArguments.DEFAULTS);
         mDataSource.register(DataSourceParams.DEFAULTS);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
+        this.mLogGroups = logGroups;
     }
 
     /**

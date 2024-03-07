@@ -73,6 +73,14 @@ class PasswordBouncerViewModel(
                 initialValue = isInputEnabled.value && !isTextFieldFocused.value,
             )
 
+    /** The ID of the currently-selected user. */
+    val selectedUserId: StateFlow<Int> =
+        selectedUserInteractor.selectedUser.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = selectedUserInteractor.getSelectedUserId(),
+        )
+
     override fun onHidden() {
         super.onHidden()
         isTextFieldFocused.value = false

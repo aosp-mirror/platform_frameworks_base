@@ -43,6 +43,10 @@ constructor(
             to = KeyguardState.GONE,
         )
 
+    /**
+     * AOD -> GONE should fade out the lockscreen contents. This transition plays both during wake
+     * and unlock, and also during insecure camera launch (which is GONE -> AOD (canceled) -> GONE).
+     */
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
         var startAlpha = 1f
         return transitionAnimation.sharedFlow(

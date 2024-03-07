@@ -95,6 +95,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.domain.interactor.StatusBarKeyguardViewManagerInteractor;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
@@ -351,8 +352,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private Lazy<WindowManagerLockscreenVisibilityInteractor> mWmLockscreenVisibilityInteractor;
     private Lazy<KeyguardSurfaceBehindInteractor> mSurfaceBehindInteractor;
     private Lazy<KeyguardDismissActionInteractor> mKeyguardDismissActionInteractor;
-
     private final JavaAdapter mJavaAdapter;
+    private StatusBarKeyguardViewManagerInteractor mStatusBarKeyguardViewManagerInteractor;
 
     @Inject
     public StatusBarKeyguardViewManager(
@@ -386,7 +387,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             SelectedUserInteractor selectedUserInteractor,
             Lazy<KeyguardSurfaceBehindInteractor> surfaceBehindInteractor,
             JavaAdapter javaAdapter,
-            Lazy<SceneInteractor> sceneInteractorLazy
+            Lazy<SceneInteractor> sceneInteractorLazy,
+            StatusBarKeyguardViewManagerInteractor statusBarKeyguardViewManagerInteractor
     ) {
         mContext = context;
         mViewMediatorCallback = callback;
@@ -421,6 +423,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mSurfaceBehindInteractor = surfaceBehindInteractor;
         mJavaAdapter = javaAdapter;
         mSceneInteractorLazy = sceneInteractorLazy;
+        mStatusBarKeyguardViewManagerInteractor = statusBarKeyguardViewManagerInteractor;
     }
 
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -503,6 +506,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                                     lockscreenVis || animatingSurface
                     ),
                     this::consumeShowStatusBarKeyguardView);
+
+            mJavaAdapter.alwaysCollectFlow(
+                    mStatusBarKeyguardViewManagerInteractor.getKeyguardViewOcclusionState(),
+                    (occlusionState) -> setOccluded(
+                            occlusionState.getOccluded(), occlusionState.getAnimate()));
         }
     }
 
@@ -1452,6 +1460,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mAlternateBouncerInteractor.isVisibleState()) {
             hideAlternateBouncer(false);
             executeAfterKeyguardGoneAction();
+        }
+
+        if (KeyguardWmStateRefactor.isEnabled()) {
+            mKeyguardTransitionInteractor.startDismissKeyguardTransition();
         }
     }
 

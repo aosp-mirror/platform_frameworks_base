@@ -700,6 +700,8 @@ public class ThermalManagerService extends SystemService {
                     return runOverrideStatus();
                 case "reset":
                     return runReset();
+                case "headroom":
+                    return runHeadroom();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -862,6 +864,36 @@ public class ThermalManagerService extends SystemService {
             }
         }
 
+        private int runHeadroom() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final PrintWriter pw = getOutPrintWriter();
+                int forecastSecs;
+                try {
+                    forecastSecs = Integer.parseInt(getNextArgRequired());
+                } catch (RuntimeException ex) {
+                    pw.println("Error: " + ex);
+                    return -1;
+                }
+                if (!mHalReady.get()) {
+                    pw.println("Error: thermal HAL is not ready");
+                    return -1;
+                }
+
+                if (forecastSecs < MIN_FORECAST_SEC || forecastSecs > MAX_FORECAST_SEC) {
+                    pw.println(
+                            "Error: forecast second input should be in range [" + MIN_FORECAST_SEC
+                                    + "," + MAX_FORECAST_SEC + "]");
+                    return -1;
+                }
+                float headroom = mTemperatureWatcher.getForecast(forecastSecs);
+                pw.println("Headroom in " + forecastSecs + " seconds: " + headroom);
+                return 0;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         @Override
         public void onHelp() {
             final PrintWriter pw = getOutPrintWriter();
@@ -877,6 +909,9 @@ public class ThermalManagerService extends SystemService {
             pw.println("    status code is defined in android.os.Temperature.");
             pw.println("  reset");
             pw.println("    unlocks the thermal status of the device.");
+            pw.println("  headroom FORECAST_SECONDS");
+            pw.println("    gets the thermal headroom forecast in specified seconds, from ["
+                    + MIN_FORECAST_SEC + "," + MAX_FORECAST_SEC + "].");
             pw.println();
         }
     }

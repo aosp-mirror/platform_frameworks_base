@@ -75,7 +75,6 @@ constructor(
     powerInteractor: PowerInteractor,
     private val scrimLogger: ScrimLogger,
 ) : LightRevealScrimRepository {
-
     companion object {
         val TAG = LightRevealScrimRepository::class.simpleName!!
     }
@@ -156,7 +155,11 @@ constructor(
     override fun startRevealAmountAnimator(reveal: Boolean) {
         if (reveal == willBeOrIsRevealed) return
         willBeOrIsRevealed = reveal
-        if (reveal) revealAmountAnimator.start() else revealAmountAnimator.reverse()
+        if (reveal && !revealAmountAnimator.isRunning) {
+            revealAmountAnimator.start()
+        } else {
+            revealAmountAnimator.reverse()
+        }
         scrimLogger.d(TAG, "startRevealAmountAnimator, reveal: ", reveal)
     }
 

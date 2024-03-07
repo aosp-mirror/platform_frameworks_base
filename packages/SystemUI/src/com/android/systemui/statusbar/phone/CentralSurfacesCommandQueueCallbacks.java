@@ -315,8 +315,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mMetricsLogger.count("panel_open", 1);
             } else if (!mQsController.getExpanded()
                     && !mShadeViewController.isExpandingOrCollapsing()) {
-                mQsController.flingQs(0 /* velocity */,
-                        ShadeViewController.FLING_EXPAND);
+                mShadeController.animateExpandQs();
                 mMetricsLogger.count("panel_open_qs", 1);
             }
         }

@@ -25,6 +25,7 @@ class CommandOptions(args: Array<String>) {
         const val READ_LOG_CMD = "read-log"
         private val commands = setOf(TRANSFORM_CALLS_CMD, GENERATE_CONFIG_CMD, READ_LOG_CMD)
 
+        // TODO: This is always the same. I don't think it's required
         private const val PROTOLOG_CLASS_PARAM = "--protolog-class"
         private const val PROTOLOGGROUP_CLASS_PARAM = "--loggroups-class"
         private const val PROTOLOGGROUP_JAR_PARAM = "--loggroups-jar"

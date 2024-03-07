@@ -16,7 +16,6 @@
 
 package android.hardware;
 
-import android.hardware.CameraPrivacyAllowlistEntry;
 import android.hardware.ISensorPrivacyListener;
 
 /** @hide */
@@ -48,7 +47,7 @@ interface ISensorPrivacyManager {
     void setToggleSensorPrivacyForProfileGroup(int userId, int source, int sensor, boolean enable);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY)")
-    List<CameraPrivacyAllowlistEntry> getCameraPrivacyAllowlist();
+    List<String> getCameraPrivacyAllowlist();
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY)")
     int getToggleSensorPrivacyState(int toggleType, int sensor);
@@ -61,6 +60,10 @@ interface ISensorPrivacyManager {
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.OBSERVE_SENSOR_PRIVACY)")
     boolean isCameraPrivacyEnabled(String packageName);
+
+    /** @hide */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY)")
+    void setCameraPrivacyAllowlist(in List<String> allowlist);
 
     // =============== End of transactions used on native side as well ============================
 

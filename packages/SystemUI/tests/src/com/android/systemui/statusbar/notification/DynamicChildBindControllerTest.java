@@ -32,9 +32,9 @@ import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -65,7 +66,7 @@ public class DynamicChildBindControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(MediaOutputDialogFactory.class);
+        mDependency.injectMockDependency(MediaOutputDialogManager.class);
         allowTestableLooperAsMainThread();
         when(mBindStage.getStageParams(any())).thenReturn(new RowContentBindParams());
         mDynamicChildBindController =

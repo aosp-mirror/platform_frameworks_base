@@ -289,6 +289,8 @@ public class KeyguardService extends Service {
         };
     }
 
+    private final WindowManagerOcclusionManager mWmOcclusionManager;
+
     @Inject
     public KeyguardService(
             KeyguardViewMediator keyguardViewMediator,
@@ -302,7 +304,8 @@ public class KeyguardService extends Service {
             KeyguardSurfaceBehindParamsApplier keyguardSurfaceBehindAnimator,
             @Application CoroutineScope scope,
             FeatureFlags featureFlags,
-            PowerInteractor powerInteractor) {
+            PowerInteractor powerInteractor,
+            WindowManagerOcclusionManager windowManagerOcclusionManager) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -323,6 +326,8 @@ public class KeyguardService extends Service {
                     keyguardSurfaceBehindAnimator,
                     scope);
         }
+
+        mWmOcclusionManager = windowManagerOcclusionManager;
     }
 
     @Override
@@ -414,7 +419,11 @@ public class KeyguardService extends Service {
 
             Trace.beginSection("KeyguardService.mBinder#setOccluded");
             checkPermission();
-            mKeyguardViewMediator.setOccluded(isOccluded, animate);
+            if (!KeyguardWmStateRefactor.isEnabled()) {
+                mKeyguardViewMediator.setOccluded(isOccluded, animate);
+            } else {
+                mWmOcclusionManager.onKeyguardServiceSetOccluded(isOccluded);
+            }
             Trace.endSection();
         }
 
