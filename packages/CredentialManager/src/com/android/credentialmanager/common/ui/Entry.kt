@@ -259,10 +259,14 @@ fun ActionEntry(
         onClick = onClick,
         shape = Shapes.large,
         label = {
-            Column(modifier = Modifier.wrapContentSize()
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
+            Column(
+                    modifier = Modifier.heightIn(min = 56.dp).wrapContentSize().padding(
+                            start = 16.dp, top = 16.dp, bottom = 16.dp
+                    ),
+                    verticalArrangement = Arrangement.Center,
+            ) {
                 SmallTitleText(entryHeadlineText)
-                if (entrySecondLineText != null && entrySecondLineText.isNotEmpty()) {
+                if (!entrySecondLineText.isNullOrBlank()) {
                     BodySmallText(entrySecondLineText)
                 }
             }
