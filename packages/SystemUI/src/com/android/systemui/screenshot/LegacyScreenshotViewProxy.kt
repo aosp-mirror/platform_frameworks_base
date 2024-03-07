@@ -34,6 +34,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
 import dagger.assisted.Assisted

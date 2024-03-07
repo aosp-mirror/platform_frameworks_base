@@ -433,7 +433,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".screenshot.LongScreenshotActivity"
+        <activity android:name=".screenshot.scroll.LongScreenshotActivity"
                   android:theme="@style/LongScreenshotActivity"
                   android:process=":screenshot"
                   android:exported="false"

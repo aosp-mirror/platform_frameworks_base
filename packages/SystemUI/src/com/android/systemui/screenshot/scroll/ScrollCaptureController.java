@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.scroll;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -30,8 +30,10 @@ import androidx.concurrent.futures.CallbackToFutureAdapter.Completer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.screenshot.ScrollCaptureClient.CaptureResult;
-import com.android.systemui.screenshot.ScrollCaptureClient.Session;
+import com.android.systemui.screenshot.LogConfig;
+import com.android.systemui.screenshot.ScreenshotEvent;
+import com.android.systemui.screenshot.scroll.ScrollCaptureClient.CaptureResult;
+import com.android.systemui.screenshot.scroll.ScrollCaptureClient.Session;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -85,7 +87,7 @@ public class ScrollCaptureController {
             mImageTileSet = imageTileSet;
         }
 
-        /** Returns a bitmap containing the combinded result. */
+        /** Returns a bitmap containing the combined result. */
         public Bitmap toBitmap() {
             return mImageTileSet.toBitmap();
         }
@@ -167,7 +169,7 @@ public class ScrollCaptureController {
      *                 {@link ScrollCaptureResponse#isConnected() connected}.
      * @return a future ImageTile set containing the result
      */
-    ListenableFuture<LongScreenshot> run(ScrollCaptureResponse response) {
+    public ListenableFuture<LongScreenshot> run(ScrollCaptureResponse response) {
         mCancelled = false;
         return CallbackToFutureAdapter.getFuture(completer -> {
             mCaptureCompleter = completer;
