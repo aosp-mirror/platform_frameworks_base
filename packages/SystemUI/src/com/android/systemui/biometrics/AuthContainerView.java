@@ -881,7 +881,7 @@ public class AuthContainerView extends LinearLayout
 
         final Runnable endActionRunnable = () -> {
             setVisibility(View.INVISIBLE);
-            if (Flags.customBiometricPrompt()) {
+            if (Flags.customBiometricPrompt() && constraintBp()) {
                 mPromptSelectorInteractorProvider.get().resetPrompt();
             }
             removeWindowIfAttached();

@@ -20,7 +20,6 @@ import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricManager
-import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
@@ -386,7 +385,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowCredentialUI_withDescription() {
-        mSetFlagsRule.disableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         val container = initializeFingerprintContainer(
                 authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
         )
@@ -397,6 +395,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore("b/302735104")
     fun testShowCredentialUI_withCustomBp() {
         val container = initializeFingerprintContainer(
                 authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,

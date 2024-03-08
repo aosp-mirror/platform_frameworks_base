@@ -22,6 +22,7 @@ import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -166,11 +167,14 @@ object BiometricViewBinder {
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
-            BiometricCustomizedViewBinder.bind(
-                customizedViewContainer,
-                view.requireViewById(R.id.space_above_content),
-                viewModel
-            )
+
+            if (Flags.customBiometricPrompt() && constraintBp()) {
+                BiometricCustomizedViewBinder.bind(
+                    customizedViewContainer,
+                    view.requireViewById(R.id.space_above_content),
+                    viewModel
+                )
+            }
 
             // set button listeners
             negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
