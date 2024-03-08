@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
 
 package com.android.systemui.user.data.repository
 
-import com.android.systemui.qs.footer.data.model.UserSwitcherStatusModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-class FakeUserSwitcherRepository : UserSwitcherRepository {
-    override val isEnabled = MutableStateFlow(false)
-    override val userSwitcherStatus =
-        MutableStateFlow<UserSwitcherStatusModel>(UserSwitcherStatusModel.Disabled)
-}
+val Kosmos.userSwitcherRepository by Fixture { FakeUserSwitcherRepository() }
