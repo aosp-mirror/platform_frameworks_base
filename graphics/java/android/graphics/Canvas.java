@@ -1931,6 +1931,17 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Draws the given region using the given paint.
+     *
+     * @param region The region to be drawn
+     * @param paint The paint used to draw the region
+     */
+    @FlaggedApi(Flags.FLAG_DRAW_REGION)
+    public void drawRegion(@NonNull Region region, @NonNull Paint paint) {
+        super.drawRegion(region, paint);
+    }
+
+    /**
      * Helper for drawPoints() for drawing a single point.
      */
     public void drawPoint(float x, float y, @NonNull Paint paint) {

@@ -76,3 +76,10 @@ flag {
   description: "Automatically animate all changes in HDR headroom"
   bug: "314810174"
 }
+
+flag {
+  name: "draw_region"
+  namespace: "core_graphics"
+  description: "Add canvas#drawRegion API"
+  bug: "318612129"
+}
