@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"چونکہ ہم بغیر پاس ورڈ والے مستقبل کی طرف جا رہے ہیں اس کے باوجود پاس ورڈز پاس کیز کے ساتھ ہی دستیاب ہوں گے۔"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"منتخب کریں کہ آپ کی <xliff:g id="CREATETYPES">%1$s</xliff:g> کو کہاں محفوظ کرنا ہے"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"اپنی معلومات کو محفوظ کرنے اور اگلی بار تیزی سے سائن ان کرنے کے لیے پاس ورڈ مینیجر منتخب کریں"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> میں سائن ان کرنے کیلئے پاس کی تخلیق کریں؟"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> میں سائن ان کرنے کیلئے پاس ورڈ محفوظ کریں؟"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> کے لیے سائن ان کی معلومات محفوظ کریں؟"</string>
     <string name="passkey" msgid="632353688396759522">"پاس کی"</string>
     <string name="password" msgid="6738570945182936667">"پاس ورڈ"</string>

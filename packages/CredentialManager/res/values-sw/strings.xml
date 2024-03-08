@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Tunavyoelekea katika enzi isiyo ya manenosiri, manenosiri yataendelea kupatikana pamoja na funguo za siri."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Chagua ambako unahifadhi <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Chagua kidhibiti cha manenosiri ili uhifadhi taarifa zako na uingie kwenye akaunti kwa urahisi wakati mwingine"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Ungependa kuunda ufunguo wa siri ili uingie katika <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Ungependa kuhifadhi nenosiri ili uingie katika <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Ungependa kuhifadhi maelezo ya kuingia katika akaunti kwa ajili ya <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"ufunguo wa siri"</string>
     <string name="password" msgid="6738570945182936667">"nenosiri"</string>

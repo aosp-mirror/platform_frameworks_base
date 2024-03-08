@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"À medida que avançamos para um futuro sem palavras-passe, as palavras-passe continuam disponíveis juntamente com as chaves de acesso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde guardar as suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gestor de palavras-passe para guardar as suas informações e iniciar sessão mais rapidamente da próxima vez"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Criar a chave de acesso para iniciar sessão na app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Guardar a palavra-passe para iniciar sessão na app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Guardar as informações de início de sessão da app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"chave de acesso"</string>
     <string name="password" msgid="6738570945182936667">"palavra-passe"</string>

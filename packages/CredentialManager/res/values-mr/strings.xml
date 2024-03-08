@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"पासवर्ड न वापरणाऱ्या भविष्यात पुढे जाताना, पासवर्ड तरीही पासकीच्या बरोबरीने उपलब्ध असतील."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तुमची <xliff:g id="CREATETYPES">%1$s</xliff:g> कुठे सेव्ह करायची ते निवडा"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"तुमची माहिती सेव्ह करण्यासाठी आणि पुढच्या वेळी जलद साइन इन करण्याकरिता Password Manager निवडा"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> मध्ये साइन इन करण्यासाठी पासकी तयार करायची आहे का?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> मध्ये साइन इन करण्यासाठी पासवर्ड सेव्ह करायचा आहे का?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> साठी साइन-इन माहिती सेव्ह करायची का?"</string>
     <string name="passkey" msgid="632353688396759522">"पासकी"</string>
     <string name="password" msgid="6738570945182936667">"पासवर्ड"</string>
