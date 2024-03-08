@@ -192,7 +192,7 @@ public class VolumeControlProfileTest {
         mServiceListener.onServiceConnected(BluetoothProfile.VOLUME_CONTROL, mService);
 
         final Executor executor = (command -> new Thread(command).start());
-        final BluetoothVolumeControl.Callback callback = (device, volumeOffset) -> {};
+        final BluetoothVolumeControl.Callback callback = new BluetoothVolumeControl.Callback() {};
         mProfile.registerCallback(executor, callback);
 
         verify(mService).registerCallback(executor, callback);
@@ -200,7 +200,7 @@ public class VolumeControlProfileTest {
 
     @Test
     public void unregisterCallback_verifyIsCalled() {
-        final BluetoothVolumeControl.Callback callback = (device, volumeOffset) -> {};
+        final BluetoothVolumeControl.Callback callback = new BluetoothVolumeControl.Callback() {};
         mServiceListener.onServiceConnected(BluetoothProfile.VOLUME_CONTROL, mService);
 
         mProfile.unregisterCallback(callback);
