@@ -111,4 +111,6 @@ constructor(
     private fun SceneKey.isExpandable(): Boolean {
         return this == Scenes.Shade || this == Scenes.QuickSettings
     }
+
+    override val isPanelExpanded = shadeInteractor.isAnyExpanded.value
 }

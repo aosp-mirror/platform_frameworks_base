@@ -12,16 +12,19 @@ import android.view.Display
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager.fixScale
+import com.android.app.animation.Interpolators
+import com.android.app.tracing.namedRunnable
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.systemui.DejankUtils
-import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -32,9 +35,8 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.Flags.lightRevealMigration
-import com.android.app.tracing.namedRunnable
 import com.android.systemui.util.settings.GlobalSettings
+import dagger.Lazy
 import javax.inject.Inject
 
 /**
@@ -60,14 +62,15 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val context: Context,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val statusBarStateControllerImpl: StatusBarStateControllerImpl,
-    private val keyguardViewMediatorLazy: dagger.Lazy<KeyguardViewMediator>,
+    private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val keyguardStateController: KeyguardStateController,
-    private val dozeParameters: dagger.Lazy<DozeParameters>,
+    private val dozeParameters: Lazy<DozeParameters>,
     private val globalSettings: GlobalSettings,
-    private val notifShadeWindowControllerLazy: dagger.Lazy<NotificationShadeWindowController>,
+    private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val powerManager: PowerManager,
-    private val handler: Handler = Handler()
+    private val panelExpansionInteractorLazy: Lazy<PanelExpansionInteractor>,
+    private val handler: Handler = Handler(),
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
     private lateinit var centralSurfaces: CentralSurfaces
     private lateinit var shadeViewController: ShadeViewController
@@ -346,7 +349,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is expanded.
         if ((!this::centralSurfaces.isInitialized ||
-                shadeViewController.isPanelExpanded) &&
+                    panelExpansionInteractorLazy.get().isPanelExpanded) &&
                 // Status bar might be expanded because we have started
                 // playing the animation already
                 !isAnimationPlaying()
