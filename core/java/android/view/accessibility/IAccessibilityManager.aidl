@@ -142,7 +142,7 @@ interface IAccessibilityManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)")
     void attachAccessibilityOverlayToDisplay(int displayId, in SurfaceControl surfaceControl);
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(allOf={android.Manifest.permission.STATUS_BAR_SERVICE,android.Manifest.permission.MANAGE_ACCESSIBILITY})")
     oneway void notifyQuickSettingsTilesChanged(int userId, in List<ComponentName> tileComponentNames);
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
