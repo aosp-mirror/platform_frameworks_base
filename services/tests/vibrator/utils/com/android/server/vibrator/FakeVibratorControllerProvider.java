@@ -53,6 +53,7 @@ public final class FakeVibratorControllerProvider {
 
     private boolean mIsAvailable = true;
     private boolean mIsInfoLoadSuccessful = true;
+    private long mCompletionCallbackDelay;
     private long mOnLatency;
     private long mOffLatency;
     private int mOffCount;
@@ -206,7 +207,7 @@ public final class FakeVibratorControllerProvider {
 
         private void scheduleListener(long vibrationDuration, long vibrationId) {
             mHandler.postDelayed(() -> listener.onComplete(vibratorId, vibrationId),
-                    vibrationDuration);
+                    vibrationDuration + mCompletionCallbackDelay);
         }
     }
 
@@ -238,6 +239,13 @@ public final class FakeVibratorControllerProvider {
      */
     public void setVibratorInfoLoadSuccessful(boolean successful) {
         mIsInfoLoadSuccessful = successful;
+    }
+
+    /**
+     * Sets the delay this controller should fake for triggering the vibration completed callback.
+     */
+    public void setCompletionCallbackDelay(long millis) {
+        mCompletionCallbackDelay = millis;
     }
 
     /**

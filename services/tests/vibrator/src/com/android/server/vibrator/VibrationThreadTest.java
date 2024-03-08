@@ -87,6 +87,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
@@ -1244,6 +1246,112 @@ public class VibrationThreadTest {
         assertEquals(expectedAmplitudes(1, 2, 3), mVibratorProviders.get(1).getAmplitudes());
         assertEquals(expectedAmplitudes(4, 5), mVibratorProviders.get(2).getAmplitudes());
         assertEquals(expectedAmplitudes(6), mVibratorProviders.get(3).getAmplitudes());
+    }
+
+    @Test
+    public void vibrate_withRampDown_vibrationFinishedAfterDurationAndBeforeRampDown()
+            throws Exception {
+        int expectedDuration = 100;
+        int rampDownDuration = 200;
+
+        when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(rampDownDuration);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        HalVibration vibration = createVibration(
+                CombinedVibration.createParallel(
+                        VibrationEffect.createOneShot(
+                                expectedDuration, VibrationEffect.DEFAULT_AMPLITUDE)));
+        CountDownLatch vibrationCompleteLatch = new CountDownLatch(1);
+        doAnswer(unused -> {
+            vibrationCompleteLatch.countDown();
+            return null;
+        }).when(mManagerHooks).onVibrationCompleted(eq(vibration.id), any());
+
+        startThreadAndDispatcher(vibration);
+        long startTime = SystemClock.elapsedRealtime();
+
+        assertTrue(vibrationCompleteLatch.await(expectedDuration + TEST_TIMEOUT_MILLIS,
+                TimeUnit.MILLISECONDS));
+        long vibrationEndTime = SystemClock.elapsedRealtime();
+
+        waitForCompletion(rampDownDuration + TEST_TIMEOUT_MILLIS);
+        long completionTime = SystemClock.elapsedRealtime();
+
+        verify(mControllerCallbacks).onComplete(VIBRATOR_ID, vibration.id);
+        // Vibration ends after duration, thread completed after ramp down
+        assertThat(vibrationEndTime - startTime).isAtLeast(expectedDuration);
+        assertThat(vibrationEndTime - startTime).isLessThan(expectedDuration + rampDownDuration);
+        assertThat(completionTime - startTime).isAtLeast(expectedDuration + rampDownDuration);
+    }
+
+    @Test
+    public void vibrate_withVibratorCallbackDelayShorterThanTimeout_vibrationFinishedAfterDelay()
+            throws Exception {
+        long expectedDuration = 10;
+        long callbackDelay = VibrationStepConductor.CALLBACKS_EXTRA_TIMEOUT / 2;
+
+        mVibratorProviders.get(VIBRATOR_ID).setCompletionCallbackDelay(callbackDelay);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        HalVibration vibration = createVibration(
+                CombinedVibration.createParallel(
+                        VibrationEffect.createOneShot(
+                                expectedDuration, VibrationEffect.DEFAULT_AMPLITUDE)));
+        CountDownLatch vibrationCompleteLatch = new CountDownLatch(1);
+        doAnswer(unused -> {
+            vibrationCompleteLatch.countDown();
+            return null;
+        }).when(mManagerHooks).onVibrationCompleted(eq(vibration.id), any());
+
+        startThreadAndDispatcher(vibration);
+        long startTime = SystemClock.elapsedRealtime();
+
+        assertTrue(vibrationCompleteLatch.await(callbackDelay + TEST_TIMEOUT_MILLIS,
+                TimeUnit.MILLISECONDS));
+        long vibrationEndTime = SystemClock.elapsedRealtime();
+
+        waitForCompletion(TEST_TIMEOUT_MILLIS);
+
+        verify(mControllerCallbacks).onComplete(VIBRATOR_ID, vibration.id);
+        assertThat(vibrationEndTime - startTime).isAtLeast(expectedDuration + callbackDelay);
+    }
+
+    @LargeTest
+    @Test
+    public void vibrate_withVibratorCallbackDelayLongerThanTimeout_vibrationFinishedAfterTimeout()
+            throws Exception {
+        long expectedDuration = 10;
+        long callbackTimeout = VibrationStepConductor.CALLBACKS_EXTRA_TIMEOUT;
+        long callbackDelay = callbackTimeout * 2;
+
+        mVibratorProviders.get(VIBRATOR_ID).setCompletionCallbackDelay(callbackDelay);
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        HalVibration vibration = createVibration(
+                CombinedVibration.createParallel(
+                        VibrationEffect.createOneShot(
+                                expectedDuration, VibrationEffect.DEFAULT_AMPLITUDE)));
+        CountDownLatch vibrationCompleteLatch = new CountDownLatch(1);
+        doAnswer(unused -> {
+            vibrationCompleteLatch.countDown();
+            return null;
+        }).when(mManagerHooks).onVibrationCompleted(eq(vibration.id), any());
+
+        startThreadAndDispatcher(vibration);
+        long startTime = SystemClock.elapsedRealtime();
+
+        assertTrue(vibrationCompleteLatch.await(callbackTimeout + TEST_TIMEOUT_MILLIS,
+                TimeUnit.MILLISECONDS));
+        long vibrationEndTime = SystemClock.elapsedRealtime();
+
+        waitForCompletion(callbackDelay + TEST_TIMEOUT_MILLIS);
+        long completionTime = SystemClock.elapsedRealtime();
+
+        verify(mControllerCallbacks, never()).onComplete(VIBRATOR_ID, vibration.id);
+        // Vibration ends and thread completes after timeout, before the HAL callback
+        assertThat(vibrationEndTime - startTime).isAtLeast(expectedDuration + callbackTimeout);
+        assertThat(vibrationEndTime - startTime).isLessThan(expectedDuration + callbackDelay);
+        assertThat(completionTime - startTime).isLessThan(expectedDuration + callbackDelay);
     }
 
     @LargeTest
