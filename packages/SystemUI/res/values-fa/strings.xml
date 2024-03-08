@@ -1130,7 +1130,7 @@
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"باز کردن تلفن"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"صفحه‌ها جابه‌جا شود؟"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"برای وضوح بیشتر، از دوربین پشت استفاده کنید"</string>
-    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"برای وضوح بیشتر، تلفن را برگردانید"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"برای وضوح بیشتر، تلفن را بچرخانید"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"دستگاه تاشو درحال باز شدن"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"دستگاه تاشو درحال چرخش به اطراف"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> باتری باقی مانده است"</string>
