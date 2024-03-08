@@ -1480,20 +1480,29 @@ public final class AutofillManager {
         if (infos.size() == 0) {
             throw new IllegalArgumentException("No VirtualViewInfo found");
         }
+        boolean isCredmanRequested = false;
         if (shouldSuppressDialogsForCredman(view)
                 && mIsFillAndSaveDialogDisabledForCredentialManager) {
-            if (sDebug) {
-                Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
-                        + view.getAutofillId().toString());
-            }
             mScreenHasCredmanField = true;
-            return;
+            if (isCredmanRequested(view)) {
+                if (sDebug) {
+                    Log.d(TAG, "Prefetching fill response for credMan: "
+                            + view.getAutofillId().toString());
+                }
+                isCredmanRequested = true;
+            } else {
+                if (sDebug) {
+                    Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
+                            + view.getAutofillId().toString());
+                }
+                return;
+            }
         }
         for (int i = 0; i < infos.size(); i++) {
             final VirtualViewFillInfo info = infos.valueAt(i);
             final int virtualId = infos.keyAt(i);
             notifyViewReadyInner(getAutofillId(view, virtualId),
-                    (info == null) ? null : info.getAutofillHints());
+                    (info == null) ? null : info.getAutofillHints(), isCredmanRequested);
         }
     }
 
@@ -1505,19 +1514,29 @@ public final class AutofillManager {
      * @hide
      */
     public void notifyViewEnteredForFillDialog(View v) {
+        boolean isCredmanRequested = false;
         if (shouldSuppressDialogsForCredman(v)
                 && mIsFillAndSaveDialogDisabledForCredentialManager) {
-            if (sDebug) {
-                Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
-                        + v.getAutofillId());
-            }
             mScreenHasCredmanField = true;
-            return;
+            if (isCredmanRequested(v)) {
+                if (sDebug) {
+                    Log.d(TAG, "Prefetching fill response for credMan: "
+                            + v.getAutofillId().toString());
+                }
+                isCredmanRequested = true;
+            } else {
+                if (sDebug) {
+                    Log.d(TAG, "Ignoring Fill Dialog request since important for credMan:"
+                            + v.getAutofillId().toString());
+                }
+                return;
+            }
         }
-        notifyViewReadyInner(v.getAutofillId(), v.getAutofillHints());
+        notifyViewReadyInner(v.getAutofillId(), v.getAutofillHints(), isCredmanRequested);
     }
 
-    private void notifyViewReadyInner(AutofillId id, @Nullable String[] autofillHints) {
+    private void notifyViewReadyInner(AutofillId id, @Nullable String[] autofillHints,
+            boolean isCredmanRequested) {
         if (sDebug) {
             Log.d(TAG, "notifyViewReadyInner:" + id);
         }
@@ -1592,6 +1611,12 @@ public final class AutofillManager {
             }
             int flags = FLAG_SUPPORTS_FILL_DIALOG;
             flags |= FLAG_VIEW_NOT_FOCUSED;
+            if (isCredmanRequested) {
+                if (sDebug) {
+                    Log.d(TAG, "Pre fill request is triggered for credMan");
+                }
+                flags |= FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
+            }
             synchronized (mLock) {
                 // To match the id of the IME served view, used AutofillId.NO_AUTOFILL_ID on prefill
                 // request, because IME will reset the id of IME served view to 0 when activity
