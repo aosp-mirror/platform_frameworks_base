@@ -152,6 +152,9 @@ public class UsageStatsService extends SystemService implements
     public static final boolean ENABLE_TIME_CHANGE_CORRECTION
             = SystemProperties.getBoolean("persist.debug.time_correction", true);
 
+    private static final boolean USE_DEDICATED_HANDLER_THREAD =
+            SystemProperties.getBoolean("persist.debug.use_dedicated_handler_thread", false);
+
     static final boolean DEBUG = false; // Never submit with true
     static final boolean DEBUG_RESPONSE_STATS = DEBUG || Log.isLoggable(TAG, Log.DEBUG);
     static final boolean COMPRESS_TIME = false;
@@ -404,11 +407,11 @@ public class UsageStatsService extends SystemService implements
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
         getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
-                null, /* scheduler= */ Flags.useDedicatedHandlerThread() ? mHandler : null);
+                null, /* scheduler= */ USE_DEDICATED_HANDLER_THREAD ? mHandler : null);
 
         getContext().registerReceiverAsUser(new UidRemovedReceiver(), UserHandle.ALL,
                 new IntentFilter(ACTION_UID_REMOVED), null,
-                /* scheduler= */ Flags.useDedicatedHandlerThread() ? mHandler : null);
+                /* scheduler= */ USE_DEDICATED_HANDLER_THREAD ? mHandler : null);
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
@@ -497,7 +500,7 @@ public class UsageStatsService extends SystemService implements
     }
 
     private Handler getUsageEventProcessingHandler() {
-        if (Flags.useDedicatedHandlerThread()) {
+        if (USE_DEDICATED_HANDLER_THREAD) {
             return new H(UsageStatsHandlerThread.get().getLooper());
         } else {
             return new H(BackgroundThread.get().getLooper());
