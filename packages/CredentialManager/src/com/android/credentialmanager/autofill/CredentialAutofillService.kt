@@ -295,8 +295,9 @@ class CredentialAutofillService : AutofillService() {
             }
             var dropdownPresentation: RemoteViews? = null
             if (i < maxDatasetDisplayLimit) {
-                dropdownPresentation = RemoteViewsFactory
-                        .createDropdownPresentation(this, icon, primaryEntry)
+                dropdownPresentation = RemoteViewsFactory.createDropdownPresentation(
+                    this, icon, primaryEntry, /*isFirstEntry= */ i == 0,
+                    /*isLastEntry= */ (totalEntryCount - i == 1))
             }
 
             val dataSetBuilder = Dataset.Builder()

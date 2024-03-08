@@ -15,17 +15,16 @@
   ~ limitations under the License.
   -->
 
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi"
-        android:color="@android:color/transparent">
-    <item
-        android:bottom="1dp"
-        android:shape="rectangle"
-        android:top="1dp">
-        <shape>
-            <corners android:bottomLeftRadius="4dp"
-                     android:bottomRightRadius="4dp"/>
-            <solid android:color="@color/sign_in_options_container" />
-        </shape>
-    </item>
-</ripple>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi"
+    android:insetLeft="-2dp"
+    android:insetRight="-2dp"
+    android:insetBottom="-2dp">
+    <shape>
+        <corners android:topLeftRadius="0dp" android:topRightRadius="0dp"
+            android:bottomLeftRadius="4dp" android:bottomRightRadius="4dp"/>
+        <solid android:color="?androidprv:attr/materialColorSurfaceContainer"/>
+        <stroke android:color="?androidprv:attr/materialColorOutlineVariant" android:width="1dp"/>
+    </shape>
+</inset>
