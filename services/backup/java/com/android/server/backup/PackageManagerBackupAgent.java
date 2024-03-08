@@ -31,6 +31,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import java.io.BufferedInputStream;
@@ -62,7 +63,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     // key under which we store global metadata (individual app metadata
     // is stored using the package name as a key)
-    private static final String GLOBAL_METADATA_KEY = "@meta@";
+    @VisibleForTesting static final String GLOBAL_METADATA_KEY = "@meta@";
 
     // key under which we store the identity of the user's chosen default home app
     private static final String DEFAULT_HOME_KEY = "@home@";
@@ -72,19 +73,19 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // ANCESTRAL_RECORD_VERSION=1 (introduced Android P).
     // Should the ANCESTRAL_RECORD_VERSION be bumped up in the future, STATE_FILE_VERSION will also
     // need bumping up, assuming more data needs saving to the state file.
-    private static final String STATE_FILE_HEADER = "=state=";
-    private static final int STATE_FILE_VERSION = 2;
+    @VisibleForTesting static final String STATE_FILE_HEADER = "=state=";
+    @VisibleForTesting static final int STATE_FILE_VERSION = 2;
 
     // key under which we store the saved ancestral-dataset format (starting from Android P)
     // IMPORTANT: this key needs to come first in the restore data stream (to find out
     // whether this version of Android knows how to restore the incoming data set), so it needs
     // to be always the first one in alphabetical order of all the keys
-    private static final String ANCESTRAL_RECORD_KEY = "@ancestral_record@";
+    @VisibleForTesting static final String ANCESTRAL_RECORD_KEY = "@ancestral_record@";
 
     // Current version of the saved ancestral-dataset format
     // Note that this constant was not used until Android P, and started being used
     // to version @pm@ data for forwards-compatibility.
-    private static final int ANCESTRAL_RECORD_VERSION = 1;
+    @VisibleForTesting static final int ANCESTRAL_RECORD_VERSION = 1;
 
     // Undefined version of the saved ancestral-dataset file format means that the restore data
     // is coming from pre-Android P device.
@@ -593,7 +594,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
     }
 
     // Util: write out our new backup state file
-    private void writeStateFile(List<PackageInfo> pkgs, ParcelFileDescriptor stateFile) {
+    @VisibleForTesting
+    static void writeStateFile(List<PackageInfo> pkgs, ParcelFileDescriptor stateFile) {
         FileOutputStream outstream = new FileOutputStream(stateFile.getFileDescriptor());
         BufferedOutputStream outbuf = new BufferedOutputStream(outstream);
         DataOutputStream out = new DataOutputStream(outbuf);
