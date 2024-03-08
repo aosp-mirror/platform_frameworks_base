@@ -272,6 +272,10 @@
     <dimen name="bubble_bar_expanded_view_corner_radius">16dp</dimen>
     <!-- Corner radius for expanded view while it is being dragged -->
     <dimen name="bubble_bar_expanded_view_corner_radius_dragged">28dp</dimen>
+    <!-- Width of the box around bottom center of the screen where drag only leads to dismiss -->
+    <dimen name="bubble_bar_dismiss_zone_width">192dp</dimen>
+    <!-- Height of the box around bottom center of the screen where drag only leads to dismiss -->
+    <dimen name="bubble_bar_dismiss_zone_height">242dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>
