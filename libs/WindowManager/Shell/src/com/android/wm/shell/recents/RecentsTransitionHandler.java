@@ -531,12 +531,18 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         // Put into the "below" layer space.
                         t.setLayer(change.getLeash(), layer);
                         mOpeningTasks.add(new TaskState(change, null /* leash */));
+                    } else {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "  unhandled root taskId=%d", taskInfo.taskId);
                     }
                 } else if (TransitionUtil.isDividerBar(change)) {
                     final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
                             belowLayers - i, info, t, mLeashMap);
                     // Add this as a app and we will separate them on launcher side by window type.
                     apps.add(target);
+                } else {
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                            "  unhandled change taskId=%d", taskInfo.taskId);
                 }
             }
             t.apply();
@@ -545,7 +551,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     mRecentTasksController.getSplitBoundsForTaskId(closingSplitTaskId));
             try {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                        "[%d] RecentsController.start: calling onAnimationStart", mInstanceId);
+                        "[%d] RecentsController.start: calling onAnimationStart with %d apps",
+                        mInstanceId, apps.size());
                 mListener.onAnimationStart(this,
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
