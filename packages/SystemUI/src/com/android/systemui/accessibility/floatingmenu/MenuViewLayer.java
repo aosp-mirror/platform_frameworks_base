@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowInsets.Type.ime;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static androidx.core.view.WindowInsetsCompat.Type;
@@ -48,6 +49,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -64,6 +66,7 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -162,35 +165,45 @@ class MenuViewLayer extends FrameLayout implements
     final Runnable mDismissMenuAction = new Runnable() {
         @Override
         public void run() {
-            mSecureSettings.putStringForUser(
-                    Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
-                    UserHandle.USER_CURRENT);
+            if (android.view.accessibility.Flags.a11yQsShortcut()) {
+                mAccessibilityManager.enableShortcutsForTargets(
+                        /* enable= */ false,
+                        ShortcutConstants.UserShortcutType.SOFTWARE,
+                        new ArraySet<>(mAccessibilityManager.getAccessibilityShortcutTargets(
+                                ACCESSIBILITY_BUTTON)),
+                        mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT)
+                );
+            } else {
+                mSecureSettings.putStringForUser(
+                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
+                        UserHandle.USER_CURRENT);
 
-            final List<ComponentName> hardwareKeyShortcutComponents =
-                    mAccessibilityManager.getAccessibilityShortcutTargets(
-                                    ACCESSIBILITY_SHORTCUT_KEY)
-                            .stream()
-                            .map(ComponentName::unflattenFromString)
-                            .toList();
+                final List<ComponentName> hardwareKeyShortcutComponents =
+                        mAccessibilityManager.getAccessibilityShortcutTargets(
+                                        ACCESSIBILITY_SHORTCUT_KEY)
+                                .stream()
+                                .map(ComponentName::unflattenFromString)
+                                .toList();
 
-            // Should disable the corresponding service when the fragment type is
-            // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
-            final List<AccessibilityServiceInfo> serviceInfoList =
-                    mAccessibilityManager.getEnabledAccessibilityServiceList(
-                            AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-            serviceInfoList.forEach(info -> {
-                if (getAccessibilityServiceFragmentType(info) != INVISIBLE_TOGGLE) {
-                    return;
-                }
+                // Should disable the corresponding service when the fragment type is
+                // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
+                final List<AccessibilityServiceInfo> serviceInfoList =
+                        mAccessibilityManager.getEnabledAccessibilityServiceList(
+                                AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+                serviceInfoList.forEach(info -> {
+                    if (getAccessibilityServiceFragmentType(info) != INVISIBLE_TOGGLE) {
+                        return;
+                    }
 
-                final ComponentName serviceComponentName = info.getComponentName();
-                if (hardwareKeyShortcutComponents.contains(serviceComponentName)) {
-                    return;
-                }
+                    final ComponentName serviceComponentName = info.getComponentName();
+                    if (hardwareKeyShortcutComponents.contains(serviceComponentName)) {
+                        return;
+                    }
 
-                setAccessibilityServiceState(getContext(), serviceComponentName, /* enabled= */
-                        false);
-            });
+                    setAccessibilityServiceState(getContext(), serviceComponentName, /* enabled= */
+                            false);
+                });
+            }
 
             mFloatingMenu.hide();
         }

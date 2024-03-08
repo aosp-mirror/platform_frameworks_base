@@ -48,6 +48,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -67,6 +68,8 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent.EventType;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
@@ -78,6 +81,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -189,11 +194,13 @@ public final class AccessibilityManager {
      * <p>Note: Keep in sync with {@link #SHORTCUT_TYPES}.</p>
      * @hide
      */
+    // TODO(b/323686675): reuse the one defined in ShortcutConstants
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
             // LINT.IfChange(shortcut_type_intdef)
             ACCESSIBILITY_BUTTON,
-            ACCESSIBILITY_SHORTCUT_KEY
+            ACCESSIBILITY_SHORTCUT_KEY,
+            UserShortcutType.QUICK_SETTINGS,
             // LINT.ThenChange(:shortcut_type_array)
     })
     public @interface ShortcutType {}
@@ -207,6 +214,7 @@ public final class AccessibilityManager {
             // LINT.IfChange(shortcut_type_array)
             ACCESSIBILITY_BUTTON,
             ACCESSIBILITY_SHORTCUT_KEY,
+            UserShortcutType.QUICK_SETTINGS,
             // LINT.ThenChange(:shortcut_type_intdef)
     };
 
@@ -1628,6 +1636,74 @@ public final class AccessibilityManager {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error performing accessibility shortcut. ", re);
         }
+    }
+
+    /**
+     * Turns on or off a shortcut type of the accessibility features. The shortcut type is one
+     * of the shortcut defined in the {@link ShortcutConstants.USER_SHORTCUT_TYPES}.
+     *
+     * @throws SecurityException if the app does not hold the
+     *                           {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void enableShortcutsForTargets(boolean enable,
+            @UserShortcutType int shortcutTypes, @NonNull Set<String> targets,
+            @UserIdInt int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.enableShortcutsForTargets(
+                    enable, shortcutTypes, targets.stream().toList(), userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns accessibility feature's component and the provided tile map. This includes the
+     * TileService provided by the AccessibilityService or Accessibility Activity and the tile
+     * component provided by the framework's feature.
+     *
+     * @return a map of a feature's component name, and its provided tile's component name. The
+     * returned map's keys and values are not null. If a feature doesn't provide a tile, it won't
+     * have an entry in this map.
+     * @hide
+     * @see ShortcutConstants.A11Y_FEATURE_TO_FRAMEWORK_TILE
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @NonNull
+    public Map<ComponentName, ComponentName> getA11yFeatureToTileMap(@UserIdInt int userId) {
+        final IAccessibilityManager service;
+        Map<ComponentName, ComponentName> a11yFeatureToTileMap = new ArrayMap<>();
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return a11yFeatureToTileMap;
+            }
+        }
+        try {
+            Bundle a11yFeatureToTile = service.getA11yFeatureToTileMap(userId);
+            for (String key : a11yFeatureToTile.keySet()) {
+                ComponentName feature = ComponentName.unflattenFromString(key);
+                if (feature == null) {
+                    continue;
+                }
+                ComponentName tileService = a11yFeatureToTile.getParcelable(key,
+                        ComponentName.class);
+                if (tileService != null) {
+                    a11yFeatureToTileMap.put(feature, tileService);
+                }
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+        return a11yFeatureToTileMap;
     }
 
     /**
