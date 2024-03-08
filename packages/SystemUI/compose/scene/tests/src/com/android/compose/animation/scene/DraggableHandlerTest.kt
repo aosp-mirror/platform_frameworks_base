@@ -951,4 +951,15 @@ class DraggableHandlerTest {
         assertThat(transition).isNotNull()
         assertThat(transition!!.progress).isEqualTo(-0.1f)
     }
+
+    @Test
+    fun transitionIsImmediatelyUpdatedWhenReleasingFinger() = runGestureTest {
+        // Swipe up from the middle to transition to scene B.
+        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        val dragController = onDragStarted(startedPosition = middle, overSlop = up(0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, isUserInputOngoing = true)
+
+        dragController.onDragStopped(velocity = 0f)
+        assertTransition(isUserInputOngoing = false)
+    }
 }
