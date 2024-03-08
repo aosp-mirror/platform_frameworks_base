@@ -398,11 +398,11 @@ private fun BoxScope.CommunalHubLazyGrid(
                 }
             } else {
                 CommunalContent(
+                    modifier = cardModifier.animateItemPlacement(),
                     model = list[index],
                     viewModel = viewModel,
                     size = size,
                     selected = false,
-                    modifier = cardModifier,
                 )
             }
         }
