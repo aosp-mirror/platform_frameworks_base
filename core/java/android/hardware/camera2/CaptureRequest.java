@@ -309,6 +309,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     private Object mUserTag;
 
+    private boolean mReleaseSurfaces = false;
+
     /**
      * Construct empty request.
      *
@@ -610,6 +612,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader(),
                     Surface.class);
             if (parcelableArray != null) {
+                if (Flags.surfaceLeakFix()) {
+                    mReleaseSurfaces = true;
+                }
                 for (Parcelable p : parcelableArray) {
                     Surface s = (Surface) p;
                     mSurfaceSet.add(s);
@@ -789,6 +794,17 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             mStreamIdxArray = null;
             mSurfaceIdxArray = null;
             mSurfaceConverted = false;
+        }
+    }
+
+    @SuppressWarnings("Finalize")
+    @FlaggedApi(Flags.FLAG_SURFACE_LEAK_FIX)
+    @Override
+    protected void finalize() {
+        if (mReleaseSurfaces) {
+            for (Surface s : mSurfaceSet) {
+                s.release();
+            }
         }
     }
 
