@@ -33,8 +33,10 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
 
 /**
- * Public interface to the global input method manager, used by all client
- * applications.
+ * Public interface to the global input method manager, used by all client applications.
+ *
+ * When adding new methods, make sure the associated user can be inferred from the arguments.
+ * Consider passing the associated userId when not already passing a display id or a window token.
  */
 interface IInputMethodManager {
     void addClient(in IInputMethodClient client, in IRemoteInputConnection inputmethod,
