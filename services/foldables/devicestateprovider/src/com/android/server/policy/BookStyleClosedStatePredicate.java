@@ -177,8 +177,11 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
      */
     private static class PostureEstimator implements SensorEventListener, Dumpable {
 
+        private static final String FLAT_INCLINATION_THRESHOLD_DEGREES_PROPERTY
+                = "persist.foldable_postures.wedge_inclination_threshold_degrees";
 
-        private static final int FLAT_INCLINATION_THRESHOLD_DEGREES = 8;
+        private static final int FLAT_INCLINATION_THRESHOLD_DEGREES = Integer.parseInt(
+                System.getProperty(FLAT_INCLINATION_THRESHOLD_DEGREES_PROPERTY, "25"));
 
         /**
          * Alpha parameter of the accelerometer low pass filter: the lower the value, the less high
