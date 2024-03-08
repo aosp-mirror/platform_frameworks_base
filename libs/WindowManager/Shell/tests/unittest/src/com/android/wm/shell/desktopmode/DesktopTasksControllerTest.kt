@@ -53,6 +53,7 @@ import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.common.split.SplitScreenConstants
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -837,6 +838,22 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task2.token.asBinder()]?.windowingMode)
                 .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    }
+
+    fun enterSplit_freeformTaskIsMovedToSplit() {
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+        val task3 = setUpFreeformTask()
+
+        task1.isFocused = false
+        task2.isFocused = true
+        task3.isFocused = false
+
+        controller.enterSplit(DEFAULT_DISPLAY, false)
+
+        verify(splitScreenController).requestEnterSplitSelect(task2, any(),
+            SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT,
+            task2.configuration.windowConfiguration.bounds)
     }
 
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {

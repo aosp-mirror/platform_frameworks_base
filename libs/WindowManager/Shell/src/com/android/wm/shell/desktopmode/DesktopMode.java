@@ -53,4 +53,7 @@ public interface DesktopMode {
 
     /** Called when requested to go to fullscreen from the current focused desktop app. */
     void moveFocusedTaskToFullscreen(int displayId);
+
+    /** Called when requested to go to split screen from the current focused desktop app. */
+    void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
 }
