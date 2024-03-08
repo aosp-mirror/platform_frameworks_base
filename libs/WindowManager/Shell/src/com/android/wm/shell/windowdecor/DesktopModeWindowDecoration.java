@@ -318,11 +318,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
 
-        if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor
-                && TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
-            // App is requesting to customize the caption bar. Allow input to fall through to the
-            // windows below so that the app can respond to input events on their custom content.
-            relayoutParams.mAllowCaptionInputFallthrough = true;
+        if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor) {
+            // If the app is requesting to customize the caption bar, allow input to fall through
+            // to the windows below so that the app can respond to input events on their custom
+            // content.
+            relayoutParams.mAllowCaptionInputFallthrough =
+                    TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo);
             // Report occluding elements as bounding rects to the insets system so that apps can
             // draw in the empty space in the center:
             //   First, the "app chip" section of the caption bar (+ some extra margins).
