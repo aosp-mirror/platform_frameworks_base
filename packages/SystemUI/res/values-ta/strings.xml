@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"இயக்கு"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"இயக்கு"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"வேண்டாம்"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"நிலையானது"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"மேம்பட்டது"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"திரையைத் தானாகச் சுழற்று"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐப் பயன்படுத்த <xliff:g id="APPLICATION">%1$s</xliff:g>ஐ அனுமதிக்கவா?\nஇந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்யும்."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"இணைப்பு நீக்கும்"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"செயல்படுத்தும்"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"நாளைக்குத் தானாகவே மீண்டும் இயக்கப்படும்"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"விரைவுப் பகிர்தல், Find My Device போன்ற அம்சங்களும் சாதன இருப்பிடமும் புளூடூத்தைப் பயன்படுத்துகின்றன"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> பேட்டரி"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ஆடியோ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ஹெட்செட்"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. ஒலியடக்க, தட்டவும்."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"இரைச்சல் கட்டுப்பாடு"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"ரிங்கர் பயன்முறையை மாற்ற தட்டவும்"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ஒலியடக்கும்"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ஒலி இயக்கும்"</string>
@@ -1223,12 +1236,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"உயர் தெளிவுத்திறனுக்கு, மொபைலை ஃபிளிப் செய்யுங்கள்"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"மடக்கத்தக்க சாதனம் திறக்கப்படுகிறது"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"மடக்கத்தக்க சாதனம் ஃபிளிப் செய்யப்பட்டு திருப்பப்படுகிறது"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"மடக்கப்பட்டது"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"விரிக்கப்பட்டது"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> பேட்டரி மீதமுள்ளது"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"உங்கள் ஸ்டைலஸைச் சார்ஜருடன் இணையுங்கள்"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ஸ்டைலஸின் பேட்டரி குறைவாக உள்ளது"</string>

@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"सुरू करा"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"सुरू करा"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"नाही, नको"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"साधारण"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"एक्स्ट्रीम"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ऑटो-रोटेट स्क्रीन"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_DEVICE">%2$s</xliff:g> अ‍ॅक्सेस करण्याची अनुमती द्यायची का?\nया अ‍ॅपला रेकॉर्ड करण्याची परवानगी दिलेली नाही पण या USB डिव्हाइसद्वारे ऑडिओ कॅप्चर केला जाऊ शकतो."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट करा"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ॲक्टिव्हेट करा"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"उद्या पुन्हा आपोआप सुरू करा"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Quick Share, Find My Device आणि डिव्हाइस स्थान यांसारखी वैशिष्ट्ये ब्लूटूथ वापरतात"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बॅटरी"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ऑडिओ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. व्हायब्रेट सेट करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. म्यूट करण्यासाठी टॅप करा."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"नॉइझ कंट्रोल"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"रिंगर मोड बदलण्यासाठी टॅप करा"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"म्यूट करा"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"म्यूट काढून टाका"</string>
