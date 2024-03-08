@@ -42,7 +42,7 @@ class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepositor
     private val _currentClockId = MutableStateFlow(DEFAULT_CLOCK_ID)
     override val currentClockId: Flow<ClockId> = _currentClockId
 
-    private val _currentClock = MutableStateFlow(null)
+    private val _currentClock: MutableStateFlow<ClockController?> = MutableStateFlow(null)
     override val currentClock = _currentClock
 
     private val _previewClockPair =
@@ -59,6 +59,10 @@ class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepositor
 
     override fun setClockSize(@ClockSize size: Int) {
         _clockSize.value = size
+    }
+
+    fun setCurrentClock(clockController: ClockController) {
+        _currentClock.value = clockController
     }
 }
 

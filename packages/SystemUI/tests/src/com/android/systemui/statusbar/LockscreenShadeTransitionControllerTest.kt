@@ -9,6 +9,7 @@ import com.android.systemui.ExpandHelper
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.TestMocksModule
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dagger.SysUISingleton
@@ -625,6 +626,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             [
                 SysUITestModule::class,
                 UserDomainLayerModule::class,
+                BiometricsDomainLayerModule::class,
             ]
     )
     interface TestComponent {

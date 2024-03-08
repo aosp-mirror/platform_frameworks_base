@@ -24,22 +24,35 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
 class FingerprintPropertyInteractor
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     @Application private val context: Context,
     repository: FingerprintPropertyRepository,
     configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
 ) {
-    val isUdfps: Flow<Boolean> = repository.sensorType.map { it.isUdfps() }
+    val propertiesInitialized: StateFlow<Boolean> = repository.propertiesInitialized
+    val isUdfps: StateFlow<Boolean> =
+        repository.sensorType
+            .map { it.isUdfps() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = repository.sensorType.value.isUdfps(),
+            )
 
     /**
      * Devices with multiple physical displays use unique display ids to determine which sensor is

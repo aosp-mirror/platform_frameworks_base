@@ -19,12 +19,17 @@ package com.android.systemui.biometrics.data.repository
 
 import android.util.Size
 import com.android.systemui.biometrics.shared.model.DisplayRotation
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeDisplayStateRepository : DisplayStateRepository {
+@SysUISingleton
+class FakeDisplayStateRepository @Inject constructor() : DisplayStateRepository {
     private val _isInRearDisplayMode = MutableStateFlow<Boolean>(false)
     override val isInRearDisplayMode: StateFlow<Boolean> = _isInRearDisplayMode.asStateFlow()
 
@@ -50,4 +55,9 @@ class FakeDisplayStateRepository : DisplayStateRepository {
     fun setCurrentDisplaySize(size: Size) {
         _currentDisplaySize.value = size
     }
+}
+
+@Module
+interface FakeDisplayStateRepositoryModule {
+    @Binds fun bindFake(fake: FakeDisplayStateRepository): DisplayStateRepository
 }

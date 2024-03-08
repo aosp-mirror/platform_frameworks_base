@@ -17,6 +17,8 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.applicationContext
+import com.android.systemui.biometrics.domain.interactor.fingerprintPropertyInteractor
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.keyguard.data.repository.keyguardBlueprintRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
@@ -30,5 +32,7 @@ val Kosmos.keyguardBlueprintInteractor by
             context = applicationContext,
             splitShadeStateController = splitShadeStateController,
             clockInteractor = keyguardClockInteractor,
+            configurationInteractor = configurationInteractor,
+            fingerprintPropertyInteractor = fingerprintPropertyInteractor,
         )
     }

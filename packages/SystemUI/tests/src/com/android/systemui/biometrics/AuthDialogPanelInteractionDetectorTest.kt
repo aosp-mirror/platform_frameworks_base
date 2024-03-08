@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
@@ -45,6 +46,7 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
             [
                 SysUITestModule::class,
                 UserDomainLayerModule::class,
+                BiometricsDomainLayerModule::class,
             ]
     )
     interface TestComponent : SysUITestComponent<AuthDialogPanelInteractionDetector> {

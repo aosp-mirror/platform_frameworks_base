@@ -21,9 +21,11 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.applicationCoroutineScope
 
 val Kosmos.fingerprintPropertyInteractor by Fixture {
     FingerprintPropertyInteractor(
+        applicationScope = applicationCoroutineScope,
         context = applicationContext,
         repository = fingerprintPropertyRepository,
         configurationInteractor = configurationInteractor,
