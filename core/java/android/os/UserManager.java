@@ -1024,7 +1024,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from creating a private profile.
      * <p>The default value for an unmanaged user is <code>false</code>.
-     * For users with a device owner set, the default is <code>true</code>.
+     * For users with a device owner set, the default value is <code>true</code> and the
+     * device owner currently cannot change it to <code>false</code>.
+     * On organization-owned managed profile devices, the default value is <code>false</code> but
+     * the profile owner can change it to <code>true</code> via the parent profile to block creating
+     * of private profiles on the personal user.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PROFILES}
@@ -1034,9 +1038,10 @@ public class UserManager {
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#getParentProfileInstance(ComponentName)
      * @see #getUserRestrictions()
-     * @hide
      */
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     public static final String DISALLOW_ADD_PRIVATE_PROFILE = "no_add_private_profile";
 
     /**
