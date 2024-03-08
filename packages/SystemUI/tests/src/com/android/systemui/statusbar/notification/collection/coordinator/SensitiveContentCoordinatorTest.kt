@@ -94,6 +94,26 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onSensitiveStateChanged_invokeInvalidationListener() {
+        coordinator.attach(pipeline)
+        val invalidator =
+            withArgCaptor<Invalidator> { verify(pipeline).addPreRenderInvalidator(capture()) }
+        val onSensitiveStateChangedListener =
+            withArgCaptor<Runnable> {
+                verify(sensitiveNotificationProtectionController)
+                    .registerSensitiveStateListener(capture())
+            }
+
+        val invalidationListener = mock<Pluggable.PluggableListener<Invalidator>>()
+        invalidator.setInvalidationListener(invalidationListener)
+
+        onSensitiveStateChangedListener.run()
+
+        verify(invalidationListener).onPluggableInvalidated(eq(invalidator), any())
+    }
+
+    @Test
     fun onBeforeRenderList_deviceUnlocked_notifDoesNotNeedRedaction() {
         coordinator.attach(pipeline)
         val onBeforeRenderListListener =

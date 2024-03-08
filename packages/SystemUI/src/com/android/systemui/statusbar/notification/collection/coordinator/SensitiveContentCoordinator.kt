@@ -63,9 +63,16 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
         SensitiveContentCoordinator,
         DynamicPrivacyController.Listener,
         OnBeforeRenderListListener {
+    private val onSensitiveStateChanged = Runnable() {
+        invalidateList("onSensitiveStateChanged")
+    }
 
     override fun attach(pipeline: NotifPipeline) {
         dynamicPrivacyController.addListener(this)
+        if (screenshareNotificationHiding()) {
+            sensitiveNotificationProtectionController
+                .registerSensitiveStateListener(onSensitiveStateChanged)
+        }
         pipeline.addOnBeforeRenderListListener(this)
         pipeline.addPreRenderInvalidator(this)
     }
