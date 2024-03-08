@@ -90,7 +90,6 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -108,6 +107,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
+import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -645,7 +645,7 @@ private fun CtaTileInViewModeContent(
 ) {
     val colors = LocalAndroidColorScheme.current
     Card(
-        modifier = modifier.padding(CardOutlineWidth),
+        modifier = modifier,
         colors =
             CardDefaults.cardColors(
                 containerColor = colors.primary,
@@ -716,7 +716,7 @@ private fun CtaTileInEditModeContent(
     }
     val colors = LocalAndroidColorScheme.current
     Card(
-        modifier = modifier.padding(CardOutlineWidth),
+        modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(1.dp, colors.primary),
         shape = RoundedCornerShape(200.dp),
@@ -756,21 +756,17 @@ private fun WidgetContent(
     Box(
         modifier = modifier,
     ) {
-        val paddingInPx =
-            if (selected) with(LocalDensity.current) { CardOutlineWidth.toPx().toInt() } else 0
         AndroidView(
             modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
                 model.appWidgetHost
                     .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
-                    .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
-            },
-            update = { view ->
-                // Remove the extra padding applied to AppWidgetHostView to allow widgets to
-                // occupy the entire box. The added padding is now adjusted to leave only
-                // sufficient space for displaying the outline around the box when the widget
-                // is selected.
-                view.setPadding(paddingInPx)
+                    .apply {
+                        updateAppWidgetSize(Bundle.EMPTY, listOf(size))
+                        // Remove the extra padding applied to AppWidgetHostView to allow widgets to
+                        // occupy the entire box.
+                        setPadding(0)
+                    }
             },
             // For reusing composition in lazy lists.
             onReset = {},
@@ -906,14 +902,14 @@ private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): Padd
     if (!isEditMode || toolbarSize == null) {
         return PaddingValues(start = 48.dp, end = 48.dp, top = Dimensions.GridTopSpacing)
     }
-    val configuration = LocalConfiguration.current
+    val context = LocalContext.current
     val density = LocalDensity.current
-    val screenHeight = configuration.screenHeightDp.dp
+    val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
+    val screenHeight = with(density) { windowMetrics.bounds.height().toDp() }
     val toolbarHeight = with(density) { Dimensions.ToolbarPaddingTop + toolbarSize.height.toDp() }
     val verticalPadding =
-        ((screenHeight - toolbarHeight - Dimensions.GridHeight) / 2).coerceAtLeast(
-            Dimensions.Spacing
-        )
+        ((screenHeight - toolbarHeight - Dimensions.GridHeight + Dimensions.GridTopSpacing) / 2)
+            .coerceAtLeast(Dimensions.Spacing)
     return PaddingValues(
         start = Dimensions.ToolbarPaddingHorizontal,
         end = Dimensions.ToolbarPaddingHorizontal,
