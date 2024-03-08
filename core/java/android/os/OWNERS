@@ -103,3 +103,6 @@ per-file SystemConfigManager.java = file:/PACKAGE_MANAGER_OWNERS
 
 # ProfilingService
 per-file ProfilingServiceManager.java = file:/PERFORMANCE_OWNERS
+
+# Memory
+per-file OomKillRecord.java = file:/MEMORY_OWNERS
