@@ -22,6 +22,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Bundle;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.InferenceParams;
 
 import java.util.function.Consumer;
 
@@ -42,7 +43,7 @@ public interface ProcessingCallback {
      *
      * @param result Response to be passed as a result.
      */
-    void onResult(@NonNull Bundle result);
+    void onResult(@NonNull @InferenceParams Bundle result);
 
     /**
      * Called when the request processing fails. The failure details are indicated by the
@@ -62,7 +63,8 @@ public interface ProcessingCallback {
      *                         service for further processing a request. Bundle passed in here is
      *                         expected to be non-null or EMPTY when there is no response.
      */
-    default void onDataAugmentRequest(@NonNull Bundle processedContent,
+    default void onDataAugmentRequest(
+            @NonNull @InferenceParams Bundle processedContent,
             @NonNull Consumer<Bundle> contentConsumer) {
         contentConsumer.accept(Bundle.EMPTY);
     }

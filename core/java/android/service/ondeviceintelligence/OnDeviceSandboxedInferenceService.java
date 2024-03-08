@@ -35,6 +35,7 @@ import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.InferenceParams;
 import android.app.ondeviceintelligence.ProcessingSignal;
 import android.app.ondeviceintelligence.ProcessingCallback;
 import android.app.ondeviceintelligence.StreamingProcessingCallback;
@@ -197,7 +198,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     @NonNull
     public abstract void onTokenInfoRequest(
             int callerUid, @NonNull Feature feature,
-            @NonNull Bundle request,
+            @NonNull @InferenceParams Bundle request,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull OutcomeReceiver<TokenInfo, OnDeviceIntelligenceException> callback);
 
@@ -223,7 +224,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     @NonNull
     public abstract void onProcessRequestStreaming(
             int callerUid, @NonNull Feature feature,
-            @NonNull Bundle request,
+            @NonNull @InferenceParams Bundle request,
             @OnDeviceIntelligenceManager.RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
@@ -249,7 +250,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     @NonNull
     public abstract void onProcessRequest(
             int callerUid, @NonNull Feature feature,
-            @NonNull Bundle request,
+            @NonNull @InferenceParams Bundle request,
             @OnDeviceIntelligenceManager.RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
@@ -265,7 +266,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      * @param callback        callback to populate the update status and if there are params
      *                        associated with the status.
      */
-    public abstract void onUpdateProcessingState(@NonNull Bundle processingState,
+    public abstract void onUpdateProcessingState(@NonNull @InferenceParams Bundle processingState,
             @NonNull OutcomeReceiver<PersistableBundle,
                     OnDeviceIntelligenceException> callback);
 

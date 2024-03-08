@@ -34,6 +34,7 @@ import android.app.ondeviceintelligence.IFeatureDetailsCallback;
 import android.app.ondeviceintelligence.IListFeaturesCallback;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.InferenceParams;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -227,7 +228,7 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * @param callbackExecutor executor to the run status callback on.
      * @param statusReceiver   receiver to get status of the update state operation.
      */
-    public final void updateProcessingState(@NonNull Bundle processingState,
+    public final void updateProcessingState(@NonNull @InferenceParams Bundle processingState,
             @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull OutcomeReceiver<PersistableBundle, OnDeviceIntelligenceException> statusReceiver) {
         Objects.requireNonNull(callbackExecutor);

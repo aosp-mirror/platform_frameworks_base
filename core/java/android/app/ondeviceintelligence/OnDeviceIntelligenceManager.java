@@ -28,6 +28,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -36,6 +37,7 @@ import android.os.OutcomeReceiver;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.system.OsConstants;
 
 import androidx.annotation.IntDef;
 
@@ -313,7 +315,7 @@ public final class OnDeviceIntelligenceManager {
      * @param callbackExecutor   executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-    public void requestTokenInfo(@NonNull Feature feature, @NonNull Bundle request,
+    public void requestTokenInfo(@NonNull Feature feature, @NonNull @InferenceParams Bundle request,
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull OutcomeReceiver<TokenInfo,
@@ -369,7 +371,7 @@ public final class OnDeviceIntelligenceManager {
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
 
-    public void processRequest(@NonNull Feature feature, @NonNull Bundle request,
+    public void processRequest(@NonNull Feature feature, @NonNull @InferenceParams Bundle request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
@@ -378,7 +380,7 @@ public final class OnDeviceIntelligenceManager {
         try {
             IResponseCallback callback = new IResponseCallback.Stub() {
                 @Override
-                public void onSuccess(Bundle result) {
+                public void onSuccess(@InferenceParams Bundle result) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(() -> processingCallback.onResult(result));
                     });
@@ -394,7 +396,8 @@ public final class OnDeviceIntelligenceManager {
                 }
 
                 @Override
-                public void onDataAugmentRequest(Bundle request, RemoteCallback contentCallback) {
+                public void onDataAugmentRequest(@NonNull @InferenceParams Bundle request,
+                        @NonNull RemoteCallback contentCallback) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> processingCallback.onDataAugmentRequest(request, result -> {
                                 Bundle bundle = new Bundle();
@@ -447,7 +450,7 @@ public final class OnDeviceIntelligenceManager {
      * @param callbackExecutor          executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-    public void processRequestStreaming(@NonNull Feature feature, @NonNull Bundle request,
+    public void processRequestStreaming(@NonNull Feature feature, @NonNull @InferenceParams Bundle request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
@@ -456,7 +459,7 @@ public final class OnDeviceIntelligenceManager {
         try {
             IStreamingResponseCallback callback = new IStreamingResponseCallback.Stub() {
                 @Override
-                public void onNewContent(Bundle result) {
+                public void onNewContent(@InferenceParams Bundle result) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
                                 () -> streamingProcessingCallback.onPartialResult(result));
@@ -464,7 +467,7 @@ public final class OnDeviceIntelligenceManager {
                 }
 
                 @Override
-                public void onSuccess(Bundle result) {
+                public void onSuccess(@InferenceParams Bundle result) {
                     Binder.withCleanCallingIdentity(() -> {
                         callbackExecutor.execute(
                                 () -> streamingProcessingCallback.onResult(result));
@@ -484,7 +487,7 @@ public final class OnDeviceIntelligenceManager {
 
 
                 @Override
-                public void onDataAugmentRequest(@NonNull Bundle content,
+                public void onDataAugmentRequest(@NonNull @InferenceParams Bundle content,
                         @NonNull RemoteCallback contentCallback) {
                     Binder.withCleanCallingIdentity(() -> callbackExecutor.execute(
                             () -> streamingProcessingCallback.onDataAugmentRequest(content,
@@ -544,5 +547,32 @@ public final class OnDeviceIntelligenceManager {
             ElementType.FIELD})
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestType {
+    }
+
+    /**
+     * {@link Bundle}s annotated with this type will be validated that they are in-effect read-only
+     * when passed to inference service via Binder IPC. Following restrictions apply :
+     * <ul>
+     * <li> Any primitive types or their collections can be added as usual.</li>
+     * <li>IBinder objects should *not* be added.</li>
+     * <li>Parcelable data which has no active-objects, should be added as
+     * {@link Bundle#putByteArray}</li>
+     * <li>Parcelables have active-objects, only following types will be allowed</li>
+     * <ul>
+     *  <li>{@link Bitmap} set as {@link Bitmap#setImmutable()}</li>
+     *  <li>{@link android.database.CursorWindow}</li>
+     *  <li>{@link android.os.ParcelFileDescriptor} opened in
+     *  {@link android.os.ParcelFileDescriptor#MODE_READ_ONLY}</li>
+     *  <li>{@link android.os.SharedMemory} set to {@link OsConstants#PROT_READ}</li>
+     * </ul>
+     * </ul>
+     *
+     * In all other scenarios the system-server might throw a
+     * {@link android.os.BadParcelableException} if the Bundle validation fails.
+     *
+     * @hide
+     */
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
+    public @interface InferenceParams {
     }
 }

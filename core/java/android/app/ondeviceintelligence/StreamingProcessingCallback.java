@@ -22,6 +22,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Bundle;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.InferenceParams;
 
 /**
  * Streaming variant of {@link ProcessingCallback} to populate response while processing a given
@@ -36,5 +37,5 @@ public interface StreamingProcessingCallback extends ProcessingCallback {
      * Callback that would be invoked when a part of the response i.e. some response is
      * already processed, and needs to be passed onto the caller.
      */
-    void onPartialResult(@NonNull Bundle partialResult);
+    void onPartialResult(@NonNull @InferenceParams Bundle partialResult);
 }
