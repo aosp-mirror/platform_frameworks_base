@@ -1979,7 +1979,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mNotificationStackScrollLayoutController.resetScrollPosition();
     }
 
-    @Override
     public void collapse(boolean animate, boolean delayed, float speedUpFactor) {
         boolean waiting = false;
         if (animate && !isFullyCollapsed()) {
@@ -1997,7 +1996,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
-    @Override
     public void collapse(boolean delayed, float speedUpFactor) {
         if (!canBeCollapsed()) {
             return;
@@ -4004,7 +4002,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return mExpandedHeight >= getMaxPanelTransitionDistance();
     }
 
-    @Override
     public boolean isShadeFullyExpanded() {
         if (mBarState == SHADE) {
             return isFullyExpanded();
@@ -4035,7 +4032,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return !isFullyCollapsed() && !isTracking() && !isClosing();
     }
 
-    @Override
     public void instantCollapse() {
         abortAnimations();
         setExpandedFraction(0f);

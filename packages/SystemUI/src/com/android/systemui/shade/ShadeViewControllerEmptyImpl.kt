@@ -32,10 +32,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override val isExpandingOrCollapsing: Boolean = false
     override val isExpanded: Boolean = false
     override val isPanelExpanded: Boolean = false
-    override val isShadeFullyExpanded: Boolean = false
-    override fun collapse(delayed: Boolean, speedUpFactor: Float) {}
-    override fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float) {}
-    override fun instantCollapse() {}
     override fun animateCollapseQs(fullyCollapse: Boolean) {}
     override fun canBeCollapsed(): Boolean = false
     override val isCollapsing: Boolean = false
