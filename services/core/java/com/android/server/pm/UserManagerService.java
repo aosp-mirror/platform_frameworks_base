@@ -21,10 +21,15 @@ import static android.content.Intent.ACTION_SCREEN_ON;
 import static android.content.Intent.EXTRA_USER_ID;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
+import static android.content.pm.PackageManager.FEATURE_EMBEDDED;
+import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.os.UserManager.DEV_CREATE_OVERRIDE_PROPERTY;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
+import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 
 import static com.android.internal.app.SetScreenLockDialogActivity.EXTRA_ORIGIN_USER_ID;
 import static com.android.internal.app.SetScreenLockDialogActivity.LAUNCH_REASON_DISABLE_QUIET_MODE;
@@ -1006,9 +1011,17 @@ public class UserManagerService extends IUserManager.Stub {
         emulateSystemUserModeIfNeeded();
     }
 
+    private boolean doesDeviceHardwareSupportPrivateSpace() {
+        return !mPm.hasSystemFeature(FEATURE_EMBEDDED, 0)
+                && !mPm.hasSystemFeature(FEATURE_WATCH, 0)
+                && !mPm.hasSystemFeature(FEATURE_LEANBACK, 0)
+                && !mPm.hasSystemFeature(FEATURE_AUTOMOTIVE, 0);
+    }
+
     private static boolean isAutoLockForPrivateSpaceEnabled() {
         return android.os.Flags.allowPrivateProfile()
-                && Flags.supportAutolockForPrivateSpace();
+                && Flags.supportAutolockForPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     void systemReady() {
@@ -1052,7 +1065,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
         return android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enablePrivateSpaceAutolockOnRestarts();
+                && android.multiuser.Flags.enablePrivateSpaceAutolockOnRestarts()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     /**
@@ -1493,7 +1507,8 @@ public class UserManagerService extends IUserManager.Stub {
     private boolean isProfileHidden(int userId) {
         UserProperties userProperties = getUserPropertiesCopy(userId);
         if (android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enableHidingProfiles()) {
+                && android.multiuser.Flags.enableHidingProfiles()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             return userProperties.getProfileApiVisibility()
                     == UserProperties.PROFILE_API_VISIBILITY_HIDDEN;
         }
@@ -1693,7 +1708,8 @@ public class UserManagerService extends IUserManager.Stub {
                 setQuietModeEnabled(userId, true /* enableQuietMode */, target, callingPackage);
                 return true;
             }
-            if (android.os.Flags.allowPrivateProfile()) {
+            if (android.os.Flags.allowPrivateProfile()
+                    && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
                 final UserProperties userProperties = getUserPropertiesInternal(userId);
                 if (userProperties != null
                         && userProperties.isAuthAlwaysRequiredToDisableQuietMode()) {
@@ -1839,7 +1855,8 @@ public class UserManagerService extends IUserManager.Stub {
         logQuietModeEnabled(userId, enableQuietMode, callingPackage);
 
         // Broadcast generic intents for all profiles
-        if (android.os.Flags.allowPrivateProfile()) {
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             broadcastProfileAvailabilityChanges(profile, parent.getUserHandle(),
                     enableQuietMode, false);
         }
@@ -1852,7 +1869,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private void stopUserForQuietMode(int userId) throws RemoteException {
         if (android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             // Allow delayed locking since some profile types want to be able to unlock again via
             // biometrics.
             ActivityManager.getService()
@@ -2748,6 +2766,18 @@ public class UserManagerService extends IUserManager.Stub {
             // restricted profile can be created if there is no DO set and the admin user has no PO;
             return !mIsDeviceManaged && !mIsUserManaged.get(userId);
         }
+    }
+
+    @Override
+    public boolean canAddPrivateProfile(@UserIdInt int userId) {
+        checkCreateUsersPermission("canHaveRestrictedProfile");
+        UserInfo parentUserInfo = getUserInfo(userId);
+        return isUserTypeEnabled(USER_TYPE_PROFILE_PRIVATE)
+                && canAddMoreProfilesToUser(USER_TYPE_PROFILE_PRIVATE,
+                    userId, /* allowedToRemoveOne */ false)
+                && (parentUserInfo != null && parentUserInfo.isMain())
+                && doesDeviceHardwareSupportPrivateSpace()
+                && !hasUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, userId);
     }
 
     @Override
@@ -5308,7 +5338,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (!isUserTypeEnabled(userTypeDetails)) {
             throwCheckedUserOperationException(
                     "Cannot add a user of disabled type " + userType + ".",
-                    UserManager.USER_OPERATION_ERROR_MAX_USERS);
+                    UserManager.USER_OPERATION_ERROR_DISABLED_USER);
         }
 
         synchronized (mUsersLock) {
@@ -5341,6 +5371,7 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isDemo = UserManager.isUserTypeDemo(userType);
         final boolean isManagedProfile = UserManager.isUserTypeManagedProfile(userType);
         final boolean isCommunalProfile = UserManager.isUserTypeCommunalProfile(userType);
+        final boolean isPrivateProfile = UserManager.isUserTypePrivateProfile(userType);
 
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo;
@@ -5386,6 +5417,12 @@ public class UserManagerService extends IUserManager.Stub {
                             "Cannot add more profiles of type " + userType
                                     + " for user " + parentId,
                             UserManager.USER_OPERATION_ERROR_MAX_USERS);
+                }
+                if (android.multiuser.Flags.blockPrivateSpaceCreation()
+                        && isPrivateProfile && !canAddPrivateProfile(parentId)) {
+                    throwCheckedUserOperationException(
+                            "Cannot add profile of type " + userType + " for user " + parentId,
+                            UserManager.USER_OPERATION_ERROR_PRIVATE_PROFILE);
                 }
                 if (isRestricted && (parentId != UserHandle.USER_SYSTEM)
                         && !isCreationOverrideEnabled()) {

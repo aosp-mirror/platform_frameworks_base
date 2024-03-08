@@ -27,11 +27,15 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
-    }
-  ],
-  "postsubmit":[
+    },
     {
-      "name":"FrameworksVpnTests"
+      "name": "FrameworksVpnTests",
+      "options": [
+        {
+          "exclude-annotation": "com.android.testutils.SkipPresubmit"
+        }
+      ],
+      "file_patterns": ["VpnManagerService\\.java"]
     }
   ]
 }

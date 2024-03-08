@@ -70,6 +70,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData;
@@ -89,6 +91,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
     private final TreeMap<String, IProtoLogGroup> mLogGroups;
+
+    private final ExecutorService mBackgroundLoggingService = Executors.newCachedThreadPool();
 
     public PerfettoProtoLogImpl(String viewerConfigFilePath,
             TreeMap<String, IProtoLogGroup> logGroups) {
@@ -134,7 +138,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
         long tsNanos = SystemClock.elapsedRealtimeNanos();
         try {
-            logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos);
+            mBackgroundLoggingService.submit(() ->
+                    logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos));
             if (group.isLogToLogcat()) {
                 logToLogcat(group.getTag(), level, messageHash, messageString, args);
             }
@@ -462,40 +467,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     /**
-     * Responds to a shell command.
-     */
-    public int onShellCommand(ShellCommand shell) {
-        PrintWriter pw = shell.getOutPrintWriter();
-        String cmd = shell.getNextArg();
-        if (cmd == null) {
-            return unknownCommand(pw);
-        }
-        ArrayList<String> args = new ArrayList<>();
-        String arg;
-        while ((arg = shell.getNextArg()) != null) {
-            args.add(arg);
-        }
-        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
-        String[] groups = args.toArray(new String[args.size()]);
-        switch (cmd) {
-            case "enable-text":
-                return this.startLoggingToLogcat(groups, logger);
-            case "disable-text":
-                return this.stopLoggingToLogcat(groups, logger);
-            default:
-                return unknownCommand(pw);
-        }
-    }
-
-    private int unknownCommand(PrintWriter pw) {
-        pw.println("Unknown command");
-        pw.println("Window manager logging options:");
-        pw.println("  enable-text [group...]: Enable logcat logging for given groups");
-        pw.println("  disable-text [group...]: Disable logcat logging for given groups");
-        return -1;
-    }
-
-    /**
      * Returns {@code true} iff logging to proto is enabled.
      */
     public boolean isProtoEnabled() {
@@ -552,6 +523,49 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             }
         }
         return 0;
+    }
+
+    /**
+     * Responds to a shell command.
+     */
+    public int onShellCommand(ShellCommand shell) {
+        PrintWriter pw = shell.getOutPrintWriter();
+        String cmd = shell.getNextArg();
+        if (cmd == null) {
+            return unknownCommand(pw);
+        }
+        ArrayList<String> args = new ArrayList<>();
+        String arg;
+        while ((arg = shell.getNextArg()) != null) {
+            args.add(arg);
+        }
+        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
+        String[] groups = args.toArray(new String[0]);
+        switch (cmd) {
+            case "start", "stop" -> {
+                pw.println("Command not supported. "
+                        + "Please start and stop ProtoLog tracing with Perfetto.");
+                return -1;
+            }
+            case "enable-text" -> {
+                mViewerConfigReader.loadViewerConfig(logger);
+                return setTextLogging(true, logger, groups);
+            }
+            case "disable-text" -> {
+                return setTextLogging(false, logger, groups);
+            }
+            default -> {
+                return unknownCommand(pw);
+            }
+        }
+    }
+
+    private int unknownCommand(PrintWriter pw) {
+        pw.println("Unknown command");
+        pw.println("Window manager logging options:");
+        pw.println("  enable-text [group...]: Enable logcat logging for given groups");
+        pw.println("  disable-text [group...]: Disable logcat logging for given groups");
+        return -1;
     }
 
     static void logAndPrintln(@Nullable PrintWriter pw, String msg) {

@@ -201,6 +201,7 @@ public class InputMethodManagerServiceTestBase {
         when(mMockUserManagerInternal.isUserRunning(anyInt())).thenReturn(true);
         when(mMockUserManagerInternal.getProfileIds(anyInt(), anyBoolean()))
                 .thenReturn(new int[] {0});
+        when(mMockUserManagerInternal.getUserIds()).thenReturn(new int[] {0});
         when(mMockActivityManagerInternal.isSystemReady()).thenReturn(true);
         when(mMockPackageManagerInternal.getPackageUid(anyString(), anyLong(), anyInt()))
                 .thenReturn(Binder.getCallingUid());

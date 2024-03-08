@@ -697,8 +697,9 @@ public class LauncherApps {
     public List<UserHandle> getProfiles() {
         if (mUserManager.isManagedProfile()
                 || (android.multiuser.Flags.enableLauncherAppsHiddenProfileChecks()
-                        && android.os.Flags.allowPrivateProfile()
-                        && mUserManager.isPrivateProfile())) {
+                    && android.os.Flags.allowPrivateProfile()
+                    && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                    && mUserManager.isPrivateProfile())) {
             // If it's a managed or private profile, only return the current profile.
             final List result = new ArrayList(1);
             result.add(android.os.Process.myUserHandle());

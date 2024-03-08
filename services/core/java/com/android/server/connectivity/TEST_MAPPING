@@ -8,6 +8,19 @@
               }
           ],
           "file_patterns": ["VpnIkeV2Utils\\.java", "VpnProfileStore\\.java"]
+      },
+      {
+          "name":"FrameworksVpnTests",
+          "options": [
+              {
+                "exclude-annotation": "com.android.testutils.SkipPresubmit"
+              }
+          ],
+          "file_patterns":[
+              "Vpn\\.java",
+              "VpnIkeV2Utils\\.java",
+              "VpnProfileStore\\.java"
+          ]
       }
   ],
   "presubmit-large": [
@@ -26,10 +39,5 @@
           ],
         "file_patterns": ["Vpn\\.java", "VpnIkeV2Utils\\.java", "VpnProfileStore\\.java"]
       }
-  ],
-  "postsubmit":[
-    {
-      "name":"FrameworksVpnTests"
-    }
   ]
 }

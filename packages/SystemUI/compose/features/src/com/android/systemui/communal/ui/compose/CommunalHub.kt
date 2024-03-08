@@ -66,6 +66,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -74,6 +75,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -93,6 +95,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -118,6 +121,7 @@ import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.observeTapsWithoutConsuming
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
@@ -149,6 +153,8 @@ fun CommunalHub(
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
+
+    ScrollOnNewSmartspaceEffect(viewModel, gridState)
 
     Box(
         modifier =
@@ -218,6 +224,17 @@ fun CommunalHub(
             widgetConfigurator = widgetConfigurator,
         )
 
+        // TODO(b/326060686): Remove this once keyguard indication area can persist over hub
+        if (viewModel is CommunalViewModel) {
+            val isUnlocked by viewModel.deviceUnlocked.collectAsState(initial = false)
+            LockStateIcon(
+                modifier =
+                    Modifier.align(Alignment.BottomCenter)
+                        .padding(bottom = Dimensions.LockIconBottomPadding),
+                isUnlocked = isUnlocked,
+            )
+        }
+
         if (viewModel.isEditMode && onOpenWidgetPicker != null && onEditDone != null) {
             Toolbar(
                 isDraggingToRemove = isDraggingToRemove,
@@ -263,6 +280,34 @@ fun CommunalHub(
                 .width(Dimensions.Spacing)
                 .pointerInput(Unit) {}
         )
+    }
+}
+
+@Composable
+private fun ScrollOnNewSmartspaceEffect(
+    viewModel: BaseCommunalViewModel,
+    gridState: LazyGridState
+) {
+    val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
+    var smartspaceCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(communalContent) {
+        snapshotFlow { gridState.firstVisibleItemIndex }
+            .collect { index ->
+                val existingSmartspaceCount = smartspaceCount
+                smartspaceCount = communalContent.count { it.isSmartspace() }
+                val firstIndex = communalContent.indexOfFirst { it.isSmartspace() }
+
+                // Scroll to the beginning of the smartspace area whenever the number of
+                // smartspace elements grows
+                if (
+                    existingSmartspaceCount < smartspaceCount &&
+                        !viewModel.isEditMode &&
+                        index > firstIndex
+                ) {
+                    gridState.animateScrollToItem(firstIndex)
+                }
+            }
     }
 }
 
@@ -362,6 +407,26 @@ private fun BoxScope.CommunalHubLazyGrid(
             }
         }
     }
+}
+
+@Composable
+private fun LockStateIcon(
+    isUnlocked: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalAndroidColorScheme.current
+    val resource =
+        if (isUnlocked) {
+            R.drawable.ic_unlocked
+        } else {
+            R.drawable.ic_lock
+        }
+    Icon(
+        painter = painterResource(id = resource),
+        contentDescription = null,
+        tint = colors.onPrimaryContainer,
+        modifier = modifier.size(Dimensions.LockIconSize),
+    )
 }
 
 /**
@@ -923,6 +988,9 @@ object Dimensions {
             horizontal = ToolbarButtonPaddingHorizontal,
         )
     val IconSize = 48.dp
+
+    val LockIconSize = 52.dp
+    val LockIconBottomPadding = 70.dp
 }
 
 private object Colors {

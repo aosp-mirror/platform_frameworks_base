@@ -297,6 +297,10 @@ public class MockingOomAdjusterTests {
         } else {
             updateProcessRecordNodes(Arrays.asList(apps));
             if (apps.length == 1) {
+                final ProcessRecord app = apps[0];
+                if (!sService.mProcessList.getLruProcessesLOSP().contains(app)) {
+                    sService.mProcessList.getLruProcessesLOSP().add(app);
+                }
                 sService.mOomAdjuster.updateOomAdjLocked(apps[0], OOM_ADJ_REASON_NONE);
             } else {
                 setProcessesToLru(apps);
@@ -475,7 +479,16 @@ public class MockingOomAdjusterTests {
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, CACHED_APP_MIN_ADJ,
+        final int expectedAdj;
+        if (sService.mConstants.ENABLE_NEW_OOMADJ) {
+            // A cached empty process can be at best a level higher than the min cached adj.
+            expectedAdj = sFirstCachedAdj;
+        } else {
+            // This is wrong but legacy behavior is going to be removed and not worth fixing.
+            expectedAdj = CACHED_APP_MIN_ADJ;
+        }
+
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj,
                 SCHED_GROUP_BACKGROUND);
     }
 

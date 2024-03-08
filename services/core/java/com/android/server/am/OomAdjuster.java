@@ -587,7 +587,7 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    private void performUpdateOomAdjLSP(@OomAdjReason int oomAdjReason) {
+    protected void performUpdateOomAdjLSP(@OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
         // Clear any pending ones because we are doing a full update now.
         mPendingProcessSet.clear();
@@ -913,7 +913,7 @@ public class OomAdjuster {
     }
 
     @GuardedBy("mService")
-    private void performUpdateOomAdjPendingTargetsLocked(@OomAdjReason int oomAdjReason) {
+    protected void performUpdateOomAdjPendingTargetsLocked(@OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
 
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
@@ -941,7 +941,7 @@ public class OomAdjuster {
      * must have called {@link collectReachableProcessesLocked} on it.
      */
     @GuardedBy({"mService", "mProcLock"})
-    protected void updateOomAdjInnerLSP(@OomAdjReason int oomAdjReason, final ProcessRecord topApp,
+    private void updateOomAdjInnerLSP(@OomAdjReason int oomAdjReason, final ProcessRecord topApp,
             ArrayList<ProcessRecord> processes, ActiveUids uids, boolean potentialCycles,
             boolean startProfiling) {
         final boolean fullUpdate = processes == null;
@@ -1775,12 +1775,11 @@ public class OomAdjuster {
             state.setAdjSeq(mAdjSeq);
             state.setCurrentSchedulingGroup(SCHED_GROUP_BACKGROUND);
             state.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
+            state.setCurRawProcState(PROCESS_STATE_CACHED_EMPTY);
             state.setCurAdj(CACHED_APP_MAX_ADJ);
             state.setCurRawAdj(CACHED_APP_MAX_ADJ);
             state.setCompletedAdjSeq(state.getAdjSeq());
             state.setCurCapability(PROCESS_CAPABILITY_NONE);
-            onProcessStateChanged(app, prevProcState);
-            onProcessOomAdjChanged(app, prevAppAdj);
             return false;
         }
 
@@ -1843,8 +1842,6 @@ public class OomAdjuster {
             state.setCurRawProcState(state.getCurProcState());
             state.setCurAdj(state.getMaxAdj());
             state.setCompletedAdjSeq(state.getAdjSeq());
-            onProcessStateChanged(app, prevProcState);
-            onProcessOomAdjChanged(app, prevAppAdj);
             // if curAdj is less than prevAppAdj, then this process was promoted
             return state.getCurAdj() < prevAppAdj || state.getCurProcState() < prevProcState;
         }
@@ -2561,7 +2558,7 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    protected boolean computeServiceHostOomAdjLSP(ConnectionRecord cr, ProcessRecord app,
+    public boolean computeServiceHostOomAdjLSP(ConnectionRecord cr, ProcessRecord app,
             ProcessRecord client, long now, ProcessRecord topApp, boolean doingAll,
             boolean cycleReEval, boolean computeClients, int oomAdjReason, int cachedAdj,
             boolean couldRecurse, boolean dryRun) {
@@ -2991,7 +2988,11 @@ public class OomAdjuster {
         return updated;
     }
 
-    protected boolean computeProviderHostOomAdjLSP(ContentProviderConnection conn,
+    /**
+     * Computes the impact on {@code app} the provider connections from {@code client} has.
+     */
+    @GuardedBy({"mService", "mProcLock"})
+    public boolean computeProviderHostOomAdjLSP(ContentProviderConnection conn,
             ProcessRecord app, ProcessRecord client, long now, ProcessRecord topApp,
             boolean doingAll, boolean cycleReEval, boolean computeClients, int oomAdjReason,
             int cachedAdj, boolean couldRecurse, boolean dryRun) {
@@ -3572,7 +3573,7 @@ public class OomAdjuster {
         int initialCapability =  PROCESS_CAPABILITY_NONE;
         boolean initialCached = true;
         final ProcessStateRecord state = app.mState;
-        final int prevProcState = state.getCurRawProcState();
+        final int prevProcState = state.getCurProcState();
         final int prevAdj = state.getCurRawAdj();
         // If the process has been marked as foreground, it is starting as the top app (with
         // Zygote#START_AS_TOP_APP_ARG), so boost the thread priority of its default UI thread.

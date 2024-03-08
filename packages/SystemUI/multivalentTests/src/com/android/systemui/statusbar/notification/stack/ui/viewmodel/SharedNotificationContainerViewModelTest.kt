@@ -34,6 +34,7 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -66,7 +67,7 @@ import org.mockito.Mockito.mock
 @RunWith(AndroidJUnit4::class)
 class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     val aodBurnInViewModel = mock(AodBurnInViewModel::class.java)
-    lateinit var translationYFlow: MutableStateFlow<Float>
+    lateinit var movementFlow: MutableStateFlow<BurnInModel>
 
     val kosmos =
         testKosmos().apply {
@@ -95,8 +96,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         overrideResource(R.bool.config_use_split_notification_shade, false)
-        translationYFlow = MutableStateFlow(0f)
-        whenever(aodBurnInViewModel.translationY(any())).thenReturn(translationYFlow)
+        movementFlow = MutableStateFlow(BurnInModel())
+        whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)
         underTest = kosmos.sharedNotificationContainerViewModel
     }
 
@@ -608,7 +609,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             showLockscreen()
             assertThat(translationY).isEqualTo(0)
 
-            translationYFlow.value = 150f
+            movementFlow.value = BurnInModel(translationY = 150)
             assertThat(translationY).isEqualTo(150f)
         }
 

@@ -1417,13 +1417,15 @@ public class AppWidgetManager {
      * @see AppWidgetProviderInfo#WIDGET_CATEGORY_HOME_SCREEN
      * @see AppWidgetProviderInfo#WIDGET_CATEGORY_KEYGUARD
      * @see AppWidgetProviderInfo#WIDGET_CATEGORY_SEARCHBOX
+     *
+     * @return true if the call was successful, false if it was rate-limited.
      */
     @FlaggedApi(Flags.FLAG_GENERATED_PREVIEWS)
-    public void setWidgetPreview(@NonNull ComponentName provider,
+    public boolean setWidgetPreview(@NonNull ComponentName provider,
             @AppWidgetProviderInfo.CategoryFlags int widgetCategories,
             @NonNull RemoteViews preview) {
         try {
-            mService.setWidgetPreview(provider, widgetCategories, preview);
+            return mService.setWidgetPreview(provider, widgetCategories, preview);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

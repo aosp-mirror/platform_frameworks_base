@@ -487,6 +487,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private DisplayOffloadSession mDisplayOffloadSession;
 
+    // Used to scale the brightness in doze mode
+    private float mDozeScaleFactor;
+
     /**
      * Creates the display power controller.
      */
@@ -547,6 +550,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 R.bool.config_skipScreenOnBrightnessRamp);
+        mDozeScaleFactor = context.getResources().getFraction(
+                R.fraction.config_screenAutoBrightnessDozeScaleFactor,
+                1, 1);
 
         Runnable modeChangeCallback = () -> {
             sendUpdatePowerState();
@@ -1042,10 +1048,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         if (defaultModeBrightnessMapper != null) {
-            final float dozeScaleFactor = context.getResources().getFraction(
-                    R.fraction.config_screenAutoBrightnessDozeScaleFactor,
-                    1, 1);
-
             // Ambient Lux - Active Mode Brightness Thresholds
             float[] ambientBrighteningThresholds =
                     mDisplayDeviceConfig.getAmbientBrighteningPercentages();
@@ -1156,7 +1158,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAutomaticBrightnessController = mInjector.getAutomaticBrightnessController(
                     this, handler.getLooper(), mSensorManager, mLightSensor,
                     brightnessMappers, lightSensorWarmUpTimeConfig, PowerManager.BRIGHTNESS_MIN,
-                    PowerManager.BRIGHTNESS_MAX, dozeScaleFactor, lightSensorRate,
+                    PowerManager.BRIGHTNESS_MAX, mDozeScaleFactor, lightSensorRate,
                     initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
                     brighteningLightDebounceIdle, darkeningLightDebounceIdle,
                     autoBrightnessResetAmbientLuxAfterWarmUp, ambientBrightnessThresholds,
@@ -1473,17 +1475,22 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAutomaticBrightnessStrategy.setAutoBrightnessApplied(false);
         }
 
-        // If there's an offload session and auto-brightness is on, we need to set the initial doze
-        // brightness using the doze auto-brightness curve before the offload session starts
-        // controlling the brightness.
-        if (Float.isNaN(brightnessState) && mFlags.areAutoBrightnessModesEnabled()
-                && mFlags.isDisplayOffloadEnabled()
-                && mPowerRequest.policy == POLICY_DOZE
-                && mDisplayOffloadSession != null
-                && mAutomaticBrightnessController != null
-                && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
-            rawBrightnessState = mAutomaticBrightnessController
-                    .getAutomaticScreenBrightnessBasedOnLastObservedLux(mTempBrightnessEvent);
+        // If there's an offload session, we need to set the initial doze brightness before
+        // the offload session starts controlling the brightness.
+        if (Float.isNaN(brightnessState) && mFlags.isDisplayOffloadEnabled()
+                && mPowerRequest.policy == POLICY_DOZE && mDisplayOffloadSession != null) {
+            if (mAutomaticBrightnessController != null
+                    && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
+                // Use the auto-brightness curve and the last observed lux
+                rawBrightnessState = mAutomaticBrightnessController
+                        .getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                                mTempBrightnessEvent);
+            } else {
+                rawBrightnessState = getDozeBrightnessForOffload();
+                mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
+                        | BrightnessEvent.FLAG_DOZE_SCALE);
+            }
+
             if (BrightnessUtils.isValidBrightnessValue(rawBrightnessState)) {
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_INITIAL);
@@ -2444,6 +2451,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
+    public float getDozeBrightnessForOffload() {
+        return mDisplayBrightnessController.getCurrentBrightness() * mDozeScaleFactor;
+    }
+
+    @Override
     public void setBrightness(float brightness) {
         mDisplayBrightnessController.setBrightness(clampScreenBrightness(brightness));
     }
@@ -2596,6 +2608,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);
+        pw.println("  mDozeScaleFactor=" + mDozeScaleFactor);
         mHandler.runWithScissors(() -> dumpLocal(pw), 1000);
     }
 

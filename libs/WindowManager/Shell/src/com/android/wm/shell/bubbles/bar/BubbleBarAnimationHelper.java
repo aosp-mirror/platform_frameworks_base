@@ -477,7 +477,7 @@ public class BubbleBarAnimationHelper {
     private Point getExpandedViewRestPosition(Size size) {
         final int padding = mPositioner.getBubbleBarExpandedViewPadding();
         Point point = new Point();
-        if (mLayerView.isOnLeft()) {
+        if (mPositioner.isBubbleBarOnLeft()) {
             point.x = mPositioner.getInsets().left + padding;
         } else {
             point.x = mPositioner.getAvailableRect().width() - size.getWidth() - padding;

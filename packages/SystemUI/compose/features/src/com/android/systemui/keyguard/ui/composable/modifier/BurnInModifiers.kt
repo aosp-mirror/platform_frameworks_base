@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.onPlaced
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.BurnInScaleViewModel
+import kotlinx.coroutines.flow.map
 
 /**
  * Modifies the composable to account for anti-burn in translation, alpha, and scaling.
@@ -38,9 +39,18 @@ fun Modifier.burnInAware(
     params: BurnInParameters,
     isClock: Boolean = false,
 ): Modifier {
-    val translationX by viewModel.translationX(params).collectAsState(initial = 0f)
-    val translationY by viewModel.translationY(params).collectAsState(initial = 0f)
-    val scaleViewModel by viewModel.scale(params).collectAsState(initial = BurnInScaleViewModel())
+    val burnIn = viewModel.movement(params)
+    val translationX by burnIn.map { it.translationX.toFloat() }.collectAsState(initial = 0f)
+    val translationY by burnIn.map { it.translationY.toFloat() }.collectAsState(initial = 0f)
+    val scaleViewModel by
+        burnIn
+            .map {
+                BurnInScaleViewModel(
+                    scale = it.scale,
+                    scaleClockOnly = it.scaleClockOnly,
+                )
+            }
+            .collectAsState(initial = BurnInScaleViewModel())
 
     return this.graphicsLayer {
         val scale =

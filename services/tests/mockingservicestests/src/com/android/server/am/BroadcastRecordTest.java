@@ -61,8 +61,6 @@ import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.am.BroadcastDispatcher.DeferredBootCompletedBroadcastPerUser;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -744,68 +742,6 @@ public class BroadcastRecordTest {
                 }
                 assertTrue(found);
             }
-        }
-    }
-
-    /**
-     * Test the class {@link BroadcastDispatcher#DeferredBootCompletedBroadcastPerUser}
-     */
-    @Test
-    public void testDeferBootCompletedBroadcast_dispatcher() {
-        testDeferBootCompletedBroadcast_dispatcher_internal(ACTION_LOCKED_BOOT_COMPLETED, false);
-        testDeferBootCompletedBroadcast_dispatcher_internal(ACTION_BOOT_COMPLETED, false);
-        testDeferBootCompletedBroadcast_dispatcher_internal(ACTION_LOCKED_BOOT_COMPLETED, true);
-        testDeferBootCompletedBroadcast_dispatcher_internal(ACTION_BOOT_COMPLETED, true);
-    }
-
-    private void testDeferBootCompletedBroadcast_dispatcher_internal(String action,
-            boolean isAllUidReady) {
-        final List<ResolveInfo> receivers = createReceiverInfos(PACKAGE_LIST, new int[] {USER0});
-        final BroadcastRecord br = createBroadcastRecord(receivers, USER0, new Intent(action));
-        assertEquals(PACKAGE_LIST.length, br.receivers.size());
-
-        SparseArray<BroadcastRecord> deferred = br.splitDeferredBootCompletedBroadcastLocked(
-                mActivityManagerInternal, DEFER_BOOT_COMPLETED_BROADCAST_ALL);
-        // original BroadcastRecord receivers list is empty now.
-        assertTrue(br.receivers.isEmpty());
-        assertEquals(PACKAGE_LIST.length, deferred.size());
-
-        DeferredBootCompletedBroadcastPerUser deferredPerUser =
-                new DeferredBootCompletedBroadcastPerUser(USER0);
-        deferredPerUser.enqueueBootCompletedBroadcasts(action, deferred);
-
-        if (action.equals(ACTION_LOCKED_BOOT_COMPLETED)) {
-            assertEquals(PACKAGE_LIST.length,
-                    deferredPerUser.mDeferredLockedBootCompletedBroadcasts.size());
-            assertTrue(deferredPerUser.mLockedBootCompletedBroadcastReceived);
-            for (int i = 0; i < PACKAGE_LIST.length; i++) {
-                final int uid = UserHandle.getUid(USER0, getAppId(i));
-                if (!isAllUidReady) {
-                    deferredPerUser.updateUidReady(uid);
-                }
-                BroadcastRecord d = deferredPerUser.dequeueDeferredBootCompletedBroadcast(
-                        isAllUidReady);
-                final ResolveInfo info = (ResolveInfo) d.receivers.get(0);
-                assertEquals(PACKAGE_LIST[i], info.activityInfo.applicationInfo.packageName);
-                assertEquals(uid, info.activityInfo.applicationInfo.uid);
-            }
-            assertEquals(0, deferredPerUser.mUidReadyForLockedBootCompletedBroadcast.size());
-        } else if (action.equals(ACTION_BOOT_COMPLETED)) {
-            assertEquals(PACKAGE_LIST.length,
-                    deferredPerUser.mDeferredBootCompletedBroadcasts.size());
-            assertTrue(deferredPerUser.mBootCompletedBroadcastReceived);
-            for (int i = 0; i < PACKAGE_LIST.length; i++) {
-                final int uid = UserHandle.getUid(USER0, getAppId(i));
-                if (!isAllUidReady) {
-                    deferredPerUser.updateUidReady(uid);
-                }
-                BroadcastRecord d = deferredPerUser.dequeueDeferredBootCompletedBroadcast(
-                        isAllUidReady);
-                final ResolveInfo info = (ResolveInfo) d.receivers.get(0);
-                assertEquals(PACKAGE_LIST[i], info.activityInfo.applicationInfo.packageName);
-                assertEquals(uid, info.activityInfo.applicationInfo.uid);
-            }
-            assertEquals(0, deferredPerUser.mUidReadyForBootCompletedBroadcast.size());
         }
     }
 

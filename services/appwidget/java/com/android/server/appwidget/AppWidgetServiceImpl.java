@@ -84,6 +84,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -98,6 +99,7 @@ import android.provider.DeviceConfig;
 import android.service.appwidget.AppWidgetServiceDumpProto;
 import android.service.appwidget.WidgetProto;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
@@ -148,6 +150,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -159,6 +162,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongSupplier;
 
 class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider,
         OnCrossProfileWidgetProvidersChangeListener {
@@ -186,6 +190,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // Every widget update request is associated which an increasing sequence number. This is
     // used to verify which request has successfully been received by the host.
     private static final AtomicLong UPDATE_COUNTER = new AtomicLong();
+
+    // Default reset interval for generated preview API rate limiting.
+    private static final long DEFAULT_GENERATED_PREVIEW_RESET_INTERVAL_MS =
+            Duration.ofHours(1).toMillis();
+    // Default max API calls per reset interval for generated preview API rate limiting.
+    private static final int DEFAULT_GENERATED_PREVIEW_MAX_CALLS_PER_INTERVAL = 2;
+
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -266,6 +277,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     // Mark widget lifecycle broadcasts as 'interactive'
     private Bundle mInteractiveBroadcast;
 
+    private ApiCounter mGeneratedPreviewsApiCounter;
+
     AppWidgetServiceImpl(Context context) {
         mContext = context;
     }
@@ -293,6 +306,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy = new SecurityPolicy();
         mIsCombinedBroadcastEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
             SystemUiDeviceConfigFlags.COMBINED_BROADCAST_ENABLED, true);
+
+        final long generatedPreviewResetInterval = DeviceConfig.getLong(NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS,
+                DEFAULT_GENERATED_PREVIEW_RESET_INTERVAL_MS);
+        final int generatedPreviewMaxCallsPerInterval = DeviceConfig.getInt(NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS,
+                DEFAULT_GENERATED_PREVIEW_MAX_CALLS_PER_INTERVAL);
+        mGeneratedPreviewsApiCounter = new ApiCounter(generatedPreviewResetInterval,
+                generatedPreviewMaxCallsPerInterval);
+        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
+                new HandlerExecutor(mCallbackHandler), this::handleSystemUiDeviceConfigChange);
 
         BroadcastOptions opts = BroadcastOptions.makeBasic();
         opts.setBackgroundActivityStartsAllowed(false);
@@ -2426,7 +2450,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         AppWidgetProviderInfo info = createPartialProviderInfo(providerId, ri, existing);
 
         if (android.os.Flags.allowPrivateProfile()
-                && android.multiuser.Flags.disablePrivateSpaceItemsOnHome()) {
+                && android.multiuser.Flags.disablePrivateSpaceItemsOnHome()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             // Do not add widget providers for profiles with items restricted on home screen.
             if (info != null && mUserManager
                     .getUserProperties(info.getProfile()).areItemsRestrictedOnHomeScreen()) {
@@ -2480,6 +2505,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void deleteProviderLocked(Provider provider) {
         deleteWidgetsLocked(provider, UserHandle.USER_ALL);
         mProviders.remove(provider);
+        mGeneratedPreviewsApiCounter.remove(provider.id);
 
         // no need to send the DISABLE broadcast, since the receiver is gone anyway
         cancelBroadcastsLocked(provider);
@@ -4004,7 +4030,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public void setWidgetPreview(@NonNull ComponentName providerComponent,
+    public boolean setWidgetPreview(@NonNull ComponentName providerComponent,
             @AppWidgetProviderInfo.CategoryFlags int widgetCategories,
             @NonNull RemoteViews preview) {
         final int userId = UserHandle.getCallingUserId();
@@ -4026,8 +4052,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 throw new IllegalArgumentException(
                         providerComponent + " is not a valid AppWidget provider");
             }
-            provider.setGeneratedPreviewLocked(widgetCategories, preview);
-            scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+            if (mGeneratedPreviewsApiCounter.tryApiCall(providerId)) {
+                provider.setGeneratedPreviewLocked(widgetCategories, preview);
+                scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+                return true;
+            }
+            return false;
         }
     }
 
@@ -4065,6 +4095,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if ((widgetCategories & invalid) != 0) {
             throw new IllegalArgumentException(widgetCategories
                     + " is not a valid widget category combination");
+        }
+    }
+
+    private void handleSystemUiDeviceConfigChange(DeviceConfig.Properties properties) {
+        Set<String> changed = properties.getKeyset();
+        synchronized (mLock) {
+            if (changed.contains(
+                    SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS)) {
+                long resetIntervalMs = properties.getLong(
+                        SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_RESET_INTERVAL_MS,
+                        /* defaultValue= */ mGeneratedPreviewsApiCounter.getResetIntervalMs());
+                mGeneratedPreviewsApiCounter.setResetIntervalMs(resetIntervalMs);
+            }
+            if (changed.contains(
+                    SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_CALLS_PER_INTERVAL)) {
+                int maxCallsPerInterval = properties.getInt(
+                        SystemUiDeviceConfigFlags.GENERATED_PREVIEW_API_MAX_CALLS_PER_INTERVAL,
+                        /* defaultValue= */ mGeneratedPreviewsApiCounter.getMaxCallsPerInterval());
+                mGeneratedPreviewsApiCounter.setMaxCallsPerInterval(maxCallsPerInterval);
+            }
         }
     }
 
@@ -4541,11 +4591,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private static final class ProviderId {
+    static final class ProviderId {
         final int uid;
         final ComponentName componentName;
 
-        private ProviderId(int uid, ComponentName componentName) {
+        ProviderId(int uid, ComponentName componentName) {
             this.uid = uid;
             this.componentName = componentName;
         }
@@ -4785,6 +4835,96 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         public RemoteViews getEffectiveViewsLocked() {
             return maskedViews != null ? maskedViews : views;
+        }
+    }
+
+    /**
+     * This class keeps track of API calls and implements rate limiting. One instance of this class
+     * tracks calls from all providers for one API, or a group of APIs that should share the same
+     * rate limit.
+     */
+    static final class ApiCounter {
+
+        private static final class ApiCallRecord {
+            // Number of times the API has been called for this provider.
+            public int apiCallCount = 0;
+            // The last time (from SystemClock.elapsedRealtime) the api call count was reset.
+            public long lastResetTimeMs = 0;
+
+            void reset(long nowMs) {
+                apiCallCount = 0;
+                lastResetTimeMs = nowMs;
+            }
+        }
+
+        private final Map<ProviderId, ApiCallRecord> mCallCount = new ArrayMap<>();
+        // The interval at which the call count is reset.
+        private long mResetIntervalMs;
+        // The max number of API calls per interval.
+        private int mMaxCallsPerInterval;
+        // Returns the current time (monotonic). By default this is SystemClock.elapsedRealtime.
+        private LongSupplier mMonotonicClock;
+
+        ApiCounter(long resetIntervalMs, int maxCallsPerInterval) {
+            this(resetIntervalMs, maxCallsPerInterval, SystemClock::elapsedRealtime);
+        }
+
+        ApiCounter(long resetIntervalMs, int maxCallsPerInterval,
+                LongSupplier monotonicClock) {
+            mResetIntervalMs = resetIntervalMs;
+            mMaxCallsPerInterval = maxCallsPerInterval;
+            mMonotonicClock = monotonicClock;
+        }
+
+        public void setResetIntervalMs(long resetIntervalMs) {
+            mResetIntervalMs = resetIntervalMs;
+        }
+
+        public long getResetIntervalMs() {
+            return mResetIntervalMs;
+        }
+
+        public void setMaxCallsPerInterval(int maxCallsPerInterval) {
+            mMaxCallsPerInterval = maxCallsPerInterval;
+        }
+
+        public int getMaxCallsPerInterval() {
+            return mMaxCallsPerInterval;
+        }
+
+        /**
+         * Returns true if the API call for the provider should be allowed, false if it should be
+         * rate-limited.
+         */
+        public boolean tryApiCall(@NonNull ProviderId provider) {
+            final ApiCallRecord record = getOrCreateRecord(provider);
+            final long now = mMonotonicClock.getAsLong();
+            final long timeSinceLastResetMs = now - record.lastResetTimeMs;
+            // If the last reset was beyond the reset interval, reset now.
+            if (timeSinceLastResetMs > mResetIntervalMs) {
+                record.reset(now);
+            }
+            if (record.apiCallCount < mMaxCallsPerInterval) {
+                record.apiCallCount++;
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Remove the provider's call record from this counter, when the provider is no longer
+         * tracked.
+         */
+        public void remove(@NonNull ProviderId id) {
+            mCallCount.remove(id);
+        }
+
+        @NonNull
+        private ApiCallRecord getOrCreateRecord(@NonNull ProviderId provider) {
+            if (!mCallCount.containsKey(provider)) {
+                mCallCount.put(provider, new ApiCallRecord());
+            }
+            return mCallCount.get(provider);
         }
     }
 

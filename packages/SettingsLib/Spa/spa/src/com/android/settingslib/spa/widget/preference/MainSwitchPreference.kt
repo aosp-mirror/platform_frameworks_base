@@ -47,7 +47,7 @@ fun MainSwitchPreference(model: SwitchPreferenceModel) {
                 onCheckedChange = model.onCheckedChange,
                 paddingStart = 20.dp,
                 paddingEnd = 20.dp,
-                paddingVertical = 18.dp,
+                paddingVertical = 24.dp,
             )
         }
     }
@@ -55,7 +55,7 @@ fun MainSwitchPreference(model: SwitchPreferenceModel) {
 
 @Preview
 @Composable
-fun MainSwitchPreferencePreview() {
+private fun MainSwitchPreferencePreview() {
     SettingsTheme {
         Column {
             MainSwitchPreference(object : SwitchPreferenceModel {

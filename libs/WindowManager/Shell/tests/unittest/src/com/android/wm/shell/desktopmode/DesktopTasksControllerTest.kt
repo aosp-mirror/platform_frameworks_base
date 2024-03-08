@@ -23,6 +23,8 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.content.res.Configuration.SCREENLAYOUT_SIZE_NORMAL
+import android.content.res.Configuration.SCREENLAYOUT_SIZE_XLARGE
 import android.os.Binder
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
@@ -123,7 +125,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Before
     fun setUp() {
-        mockitoSession = mockitoSession().mockStatic(DesktopModeStatus::class.java).startMocking()
+        mockitoSession = mockitoSession().spyStatic(DesktopModeStatus::class.java).startMocking()
         whenever(DesktopModeStatus.isEnabled()).thenReturn(true)
 
         shellInit = Mockito.spy(ShellInit(testExecutor))
@@ -329,6 +331,45 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop_nonExistentTask_doesNothing() {
         controller.moveToDesktop(999)
         verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToDesktop_screenSizeBelowXLarge_doesNothing() {
+        val task = setUpFullscreenTask()
+
+        // Update screen layout to be below minimum size
+        task.configuration.screenLayout = SCREENLAYOUT_SIZE_NORMAL
+
+        controller.moveToDesktop(task)
+        verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToDesktop_screenSizeBelowXLarge_displayRestrictionsOverridden_taskIsMovedToDesktop() {
+        val task = setUpFullscreenTask()
+
+        // Update screen layout to be below minimum size
+        task.configuration.screenLayout = SCREENLAYOUT_SIZE_NORMAL
+
+        // Simulate enforce display restrictions system property overridden to false
+        whenever(DesktopModeStatus.enforceDisplayRestrictions()).thenReturn(false)
+
+        controller.moveToDesktop(task)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    fun moveToDesktop_screenSizeXLarge_taskIsMovedToDesktop() {
+        val task = setUpFullscreenTask()
+
+        controller.moveToDesktop(task)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
     }
 
     @Test
@@ -816,6 +857,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     private fun setUpFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFullscreenTask(displayId)
+        task.configuration.screenLayout = SCREENLAYOUT_SIZE_XLARGE
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         runningTasks.add(task)
         return task
@@ -823,6 +865,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     private fun setUpSplitScreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createSplitScreenTask(displayId)
+        task.configuration.screenLayout = SCREENLAYOUT_SIZE_XLARGE
         whenever(splitScreenController.isTaskInSplitScreen(task.taskId)).thenReturn(true)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         runningTasks.add(task)

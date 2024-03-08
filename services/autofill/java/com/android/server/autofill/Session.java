@@ -3935,6 +3935,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     @Nullable
+    private ViewNode getViewNodeFromContextsLocked(@NonNull AutofillId autofillId) {
+        final int numContexts = mContexts.size();
+        for (int i = numContexts - 1; i >= 0; i--) {
+            final FillContext context = mContexts.get(i);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(),
+                    autofillId);
+            if (node != null) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the latest non-empty value for the given id in the autofill contexts.
+     */
+    @GuardedBy("mLock")
+    @Nullable
     private AutofillValue getValueFromContextsLocked(@NonNull AutofillId autofillId) {
         final int numContexts = mContexts.size();
         for (int i = numContexts - 1; i >= 0; i--) {
@@ -6417,7 +6435,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mClient.onGetCredentialException(id, viewId, exception.getType(),
                             exception.getMessage());
                 } else if (response != null) {
-                    mClient.onGetCredentialResponse(id, viewId, response);
+                    if (viewId.isVirtualInt()) {
+                        ViewNode viewNode = getViewNodeFromContextsLocked(viewId);
+                        if (viewNode != null && viewNode.getCredentialManagerCallback() != null) {
+                            Bundle resultData = new Bundle();
+                            resultData.putParcelable(
+                                    CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
+                                    response);
+                            viewNode.getCredentialManagerCallback().send(SUCCESS_CREDMAN_SELECTOR,
+                                        resultData);
+                        } else {
+                            Slog.w(TAG, "View node not found after GetCredentialResponse");
+                        }
+                    } else {
+                        mClient.onGetCredentialResponse(id, viewId, response);
+                    }
                 } else {
                     Slog.w(TAG, "sendCredentialManagerResponseToApp called with null response"
                             + "and exception");

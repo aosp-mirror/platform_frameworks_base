@@ -212,12 +212,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mContext = context;
         mInjector = injector;
         mHandler = injector.createHandler(Looper.myLooper());
+        mFrameworkStatsLogger = injector.getFrameworkStatsLogger(mHandler);
 
         mVibrationSettings = new VibrationSettings(mContext, mHandler);
         mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
         mVibratorControlService = new VibratorControlService(mContext,
                 injector.createVibratorControllerHolder(), mVibrationScaler, mVibrationSettings,
-                mLock);
+                mFrameworkStatsLogger, mLock);
         mInputDeviceDelegate = new InputDeviceDelegate(mContext, mHandler);
 
         VibrationCompleteListener listener = new VibrationCompleteListener(this);
@@ -235,7 +236,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 recentDumpSizeLimit, dumpSizeLimit, dumpAggregationTimeLimit);
 
         mBatteryStatsService = injector.getBatteryStatsService();
-        mFrameworkStatsLogger = injector.getFrameworkStatsLogger(mHandler);
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
 
@@ -853,9 +853,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private void endVibrationLocked(HalVibration vib, Vibration.EndInfo vibrationEndInfo,
             boolean shouldWriteStats) {
         vib.end(vibrationEndInfo);
-        logVibrationStatus(vib.callerInfo.uid, vib.callerInfo.attrs,
-                vibrationEndInfo.status);
-        mVibratorManagerRecords.record(vib);
+        logAndRecordVibration(vib.getDebugInfo());
         if (shouldWriteStats) {
             mFrameworkStatsLogger.writeVibrationReportedAsync(
                     vib.getStatsInfo(/* completionUptimeMillis= */ SystemClock.uptimeMillis()));
@@ -866,9 +864,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private void endVibrationAndWriteStatsLocked(ExternalVibrationHolder vib,
             Vibration.EndInfo vibrationEndInfo) {
         vib.end(vibrationEndInfo);
-        logVibrationStatus(vib.externalVibration.getUid(),
-                vib.externalVibration.getVibrationAttributes(), vibrationEndInfo.status);
-        mVibratorManagerRecords.record(vib);
+        logAndRecordVibration(vib.getDebugInfo());
         mFrameworkStatsLogger.writeVibrationReportedAsync(
                 vib.getStatsInfo(/* completionUptimeMillis= */ SystemClock.uptimeMillis()));
     }
@@ -882,12 +878,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 vib.callerInfo.attrs.getUsage())) {
             requestVibrationParamsFuture =
                     mVibratorControlService.triggerVibrationParamsRequest(
-                            vib.callerInfo.attrs.getUsage(),
+                            vib.callerInfo.uid, vib.callerInfo.attrs.getUsage(),
                             mVibrationSettings.getRequestVibrationParamsTimeoutMs());
         }
 
         return new VibrationStepConductor(vib, mVibrationSettings, mDeviceAdapter, mVibrationScaler,
-                requestVibrationParamsFuture, mVibrationThreadCallbacks);
+                mFrameworkStatsLogger, requestVibrationParamsFuture, mVibrationThreadCallbacks);
     }
 
     private Vibration.EndInfo startVibrationOnInputDevicesLocked(HalVibration vib) {
@@ -901,6 +897,12 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mInputDeviceDelegate.vibrateIfAvailable(vib.callerInfo, vib.getEffectToPlay());
 
         return new Vibration.EndInfo(Vibration.Status.FORWARDED_TO_INPUT_DEVICES);
+    }
+
+    private void logAndRecordVibration(Vibration.DebugInfo info) {
+        info.logMetrics(mFrameworkStatsLogger);
+        logVibrationStatus(info.mCallerInfo.uid, info.mCallerInfo.attrs, info.mStatus);
+        mVibratorManagerRecords.record(info);
     }
 
     private void logVibrationStatus(int uid, VibrationAttributes attrs,
@@ -1752,15 +1754,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     new VibrationRecords(recentVibrationSizeLimit, /* aggregationTimeLimit= */ 0);
         }
 
-        synchronized void record(HalVibration vib) {
-            record(vib.getDebugInfo());
-        }
-
-        synchronized void record(ExternalVibrationHolder vib) {
-            record(vib.getDebugInfo());
-        }
-
-        private synchronized void record(Vibration.DebugInfo info) {
+        synchronized void record(Vibration.DebugInfo info) {
             GroupedAggregatedLogRecords.AggregatedLogRecord<VibrationRecord> droppedRecord =
                     mRecentVibrations.add(new VibrationRecord(info));
             if (droppedRecord != null) {

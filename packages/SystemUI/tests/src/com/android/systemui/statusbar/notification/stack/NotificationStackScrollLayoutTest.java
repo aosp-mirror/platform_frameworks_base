@@ -38,7 +38,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -73,11 +72,11 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
@@ -97,13 +96,11 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -232,6 +229,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER) // TODO(b/312473478): address disabled test
     public void testUpdateStackHeight_qsExpansionZero() {
         final float expansionFraction = 0.2f;
         final float overExpansion = 50f;
@@ -730,6 +728,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER) // TODO(b/312473478): address lack of QS Header
     public void testInsideQSHeader_noOffset() {
         ViewGroup qsHeader = mock(ViewGroup.class);
         Rect boundsOnScreen = new Rect(0, 0, 1000, 1000);
@@ -746,6 +745,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER) // TODO(b/312473478): address lack of QS Header
     public void testInsideQSHeader_Offset() {
         ViewGroup qsHeader = mock(ViewGroup.class);
         Rect boundsOnScreen = new Rect(100, 100, 1000, 1000);
@@ -765,12 +765,14 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER) // TODO(b/312473478): address disabled test
     public void setFractionToShade_recomputesStackHeight() {
         mStackScroller.setFractionToShade(1f);
         verify(mNotificationStackSizeCalculator).computeHeight(any(), anyInt(), anyFloat());
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER) // TODO(b/312473478): address disabled test
     public void testSetOwnScrollY_shadeNotClosing_scrollYChanges() {
         // Given: shade is not closing, scrollY is 0
         mAmbientState.setScrollY(0);
@@ -869,6 +871,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER) // TODO(b/312473478): address disabled test
     public void testSplitShade_hasTopOverscroll() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
@@ -941,6 +944,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER) // TODO(b/312473478): address disabled test
     public void testSetMaxDisplayedNotifications_notifiesListeners() {
         ExpandableView.OnHeightChangedListener listener =
                 mock(ExpandableView.OnHeightChangedListener.class);
@@ -955,9 +959,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     public void testDispatchTouchEvent_sceneContainerDisabled() {
-        Assume.assumeFalse(SceneContainerFlag.isEnabled());
-
         MotionEvent event = MotionEvent.obtain(
                 SystemClock.uptimeMillis(),
                 SystemClock.uptimeMillis(),
@@ -973,34 +976,60 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void testDispatchTouchEvent_sceneContainerEnabled() {
-        Assume.assumeTrue(SceneContainerFlag.isEnabled());
         mStackScroller.setIsBeingDragged(true);
 
-        MotionEvent moveEvent = MotionEvent.obtain(
-                SystemClock.uptimeMillis(),
-                SystemClock.uptimeMillis(),
+        long downTime = SystemClock.uptimeMillis() - 100;
+        MotionEvent moveEvent1 = MotionEvent.obtain(
+                /* downTime= */ downTime,
+                /* eventTime= */ SystemClock.uptimeMillis(),
                 MotionEvent.ACTION_MOVE,
-                0,
-                0,
+                101,
+                201,
                 0
         );
-        MotionEvent syntheticDownEvent = moveEvent.copy();
+        MotionEvent syntheticDownEvent = moveEvent1.copy();
         syntheticDownEvent.setAction(MotionEvent.ACTION_DOWN);
-        mStackScroller.dispatchTouchEvent(moveEvent);
+        mStackScroller.dispatchTouchEvent(moveEvent1);
 
-        verify(mStackScrollLayoutController).sendTouchToSceneFramework(argThat(
-                new MotionEventMatcher(syntheticDownEvent)));
+        assertThatMotionEvent(captureTouchSentToSceneFramework()).matches(syntheticDownEvent);
+        assertTrue(mStackScroller.getIsBeingDragged());
+        clearInvocations(mStackScrollLayoutController);
 
-        mStackScroller.dispatchTouchEvent(moveEvent);
+        MotionEvent moveEvent2 = MotionEvent.obtain(
+                /* downTime= */ downTime,
+                /* eventTime= */ SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_MOVE,
+                102,
+                202,
+                0
+        );
 
-        verify(mStackScrollLayoutController).sendTouchToSceneFramework(moveEvent);
+        mStackScroller.dispatchTouchEvent(moveEvent2);
+
+        assertThatMotionEvent(captureTouchSentToSceneFramework()).matches(moveEvent2);
+        assertTrue(mStackScroller.getIsBeingDragged());
+        clearInvocations(mStackScrollLayoutController);
+
+        MotionEvent upEvent = MotionEvent.obtain(
+                /* downTime= */ downTime,
+                /* eventTime= */ SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_UP,
+                103,
+                203,
+                0
+        );
+
+        mStackScroller.dispatchTouchEvent(upEvent);
+
+        assertThatMotionEvent(captureTouchSentToSceneFramework()).matches(upEvent);
+        assertFalse(mStackScroller.getIsBeingDragged());
     }
 
     @Test
-    @EnableFlags(FLAG_SCENE_CONTAINER)
-    public void testDispatchTouchEvent_sceneContainerEnabled_actionUp() {
-        Assume.assumeTrue(SceneContainerFlag.isEnabled());
+    @EnableSceneContainer
+    public void testDispatchTouchEvent_sceneContainerEnabled_ignoresInitialActionUp() {
         mStackScroller.setIsBeingDragged(true);
 
         MotionEvent upEvent = MotionEvent.obtain(
@@ -1011,19 +1040,16 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 0,
                 0
         );
-        MotionEvent syntheticDownEvent = upEvent.copy();
-        syntheticDownEvent.setAction(MotionEvent.ACTION_DOWN);
 
         mStackScroller.dispatchTouchEvent(upEvent);
-
-        verify(mStackScrollLayoutController, atLeastOnce()).sendTouchToSceneFramework(argThat(
-                new MotionEventMatcher(syntheticDownEvent)));
-
-        mStackScroller.dispatchTouchEvent(upEvent);
-
-        verify(mStackScrollLayoutController, atLeastOnce()).sendTouchToSceneFramework(argThat(
-                new MotionEventMatcher(upEvent)));
+        verify(mStackScrollLayoutController, never()).sendTouchToSceneFramework(any());
         assertFalse(mStackScroller.getIsBeingDragged());
+    }
+
+    private MotionEvent captureTouchSentToSceneFramework() {
+        ArgumentCaptor<MotionEvent> captor = ArgumentCaptor.forClass(MotionEvent.class);
+        verify(mStackScrollLayoutController).sendTouchToSceneFramework(captor.capture());
+        return captor.getValue();
     }
 
     private void setBarStateForTest(int state) {
@@ -1073,20 +1099,23 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         );
     }
 
-    private static class MotionEventMatcher implements ArgumentMatcher<MotionEvent> {
-        private final MotionEvent mLeftEvent;
+    private MotionEventSubject assertThatMotionEvent(MotionEvent actual) {
+        return new MotionEventSubject(actual);
+    }
 
-        MotionEventMatcher(MotionEvent leftEvent) {
-            mLeftEvent = leftEvent;
+    private static class MotionEventSubject {
+        private final MotionEvent mActual;
+
+        MotionEventSubject(MotionEvent actual) {
+            mActual = actual;
         }
 
-        @Override
-        public boolean matches(MotionEvent right) {
-            return mLeftEvent.getActionMasked() == right.getActionMasked()
-                    && mLeftEvent.getDownTime() == right.getDownTime()
-                    && mLeftEvent.getEventTime() == right.getEventTime()
-                    && mLeftEvent.getX() == right.getX()
-                    && mLeftEvent.getY() == right.getY();
+        public void matches(MotionEvent expected) {
+            assertThat(mActual.getActionMasked()).isEqualTo(expected.getActionMasked());
+            assertThat(mActual.getDownTime()).isEqualTo(expected.getDownTime());
+            assertThat(mActual.getEventTime()).isEqualTo(expected.getEventTime());
+            assertThat(mActual.getX()).isEqualTo(expected.getX());
+            assertThat(mActual.getY()).isEqualTo(expected.getY());
         }
     }
 }

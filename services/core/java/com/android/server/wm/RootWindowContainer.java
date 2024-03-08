@@ -1742,30 +1742,21 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      *
      * @param starting                  The currently starting activity or {@code null} if there is
      *                                  none.
-     * @param displayId                 The id of the display where operation is executed.
+     * @param displayContent            The display where the operation is executed.
      * @param deferResume               Whether to defer resume while updating config.
-     * @return 'true' if starting activity was kept or wasn't provided, 'false' if it was relaunched
-     * because of configuration update.
      */
-    boolean ensureVisibilityAndConfig(ActivityRecord starting, int displayId, boolean deferResume) {
+    void ensureVisibilityAndConfig(@Nullable ActivityRecord starting,
+            @NonNull DisplayContent displayContent, boolean deferResume) {
         // First ensure visibility without updating the config just yet. We need this to know what
         // activities are affecting configuration now.
         // Passing null here for 'starting' param value, so that visibility of actual starting
         // activity will be properly updated.
         ensureActivitiesVisible(null /* starting */, false /* notifyClients */);
 
-        if (displayId == INVALID_DISPLAY) {
-            // The caller didn't provide a valid display id, skip updating config.
-            return true;
-        }
-
         // Force-update the orientation from the WindowManager, since we need the true configuration
         // to send to the client now.
-        final DisplayContent displayContent = getDisplayContent(displayId);
-        Configuration config = null;
-        if (displayContent != null) {
-            config = displayContent.updateOrientation(starting, true /* forceUpdate */);
-        }
+        final Configuration config =
+                displayContent.updateOrientation(starting, true /* forceUpdate */);
         // Visibilities may change so let the starting activity have a chance to report. Can't do it
         // when visibility is changed in each AppWindowToken because it may trigger wrong
         // configuration push because the visibility of some activities may not be updated yet.
@@ -1773,13 +1764,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             starting.reportDescendantOrientationChangeIfNeeded();
         }
 
-        if (displayContent != null) {
-            // Update the configuration of the activities on the display.
-            return displayContent.updateDisplayOverrideConfigurationLocked(config, starting,
-                    deferResume);
-        } else {
-            return true;
-        }
+        // Update the configuration of the activities on the display.
+        displayContent.updateDisplayOverrideConfigurationLocked(config, starting, deferResume);
     }
 
     /**

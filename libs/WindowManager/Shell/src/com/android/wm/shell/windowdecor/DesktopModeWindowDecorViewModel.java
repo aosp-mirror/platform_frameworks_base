@@ -442,12 +442,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDesktopTasksController.requestSplit(decoration.mTaskInfo);
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
-            } else if (id == R.id.select_button) {
-                if (DesktopModeStatus.IS_DISPLAY_CHANGE_ENABLED) {
-                    // TODO(b/278084491): dev option to enable display switching
-                    //  remove when select is implemented
-                    mDesktopTasksController.moveToNextDisplay(mTaskId);
-                }
             } else if (id == R.id.maximize_window) {
                 final RunningTaskInfo taskInfo = decoration.mTaskInfo;
                 decoration.closeHandleMenu();
@@ -1058,8 +1052,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop()
-                && mDisplayController.getDisplayContext(taskInfo.displayId)
-                .getResources().getConfiguration().smallestScreenWidthDp >= 600;
+                && DesktopModeStatus.meetsMinimumDisplayRequirements(taskInfo);
     }
 
     private void createWindowDecoration(

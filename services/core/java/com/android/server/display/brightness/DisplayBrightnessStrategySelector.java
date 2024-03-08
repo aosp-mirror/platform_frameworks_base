@@ -71,7 +71,13 @@ public class DisplayBrightnessStrategySelector {
     @Nullable
     private final OffloadBrightnessStrategy mOffloadBrightnessStrategy;
 
+    // A collective representation of all the strategies that the selector is aware of. This is
+    // non null, but the strategies this is tracking can be null
+    @NonNull
     private final DisplayBrightnessStrategy[] mDisplayBrightnessStrategies;
+
+    @NonNull
+    private final DisplayManagerFlags mDisplayManagerFlags;
 
     // We take note of the old brightness strategy so that we can know when the strategy changes.
     private String mOldBrightnessStrategyName;
@@ -86,6 +92,7 @@ public class DisplayBrightnessStrategySelector {
         if (injector == null) {
             injector = new Injector();
         }
+        mDisplayManagerFlags = flags;
         mDisplayId = displayId;
         mDozeBrightnessStrategy = injector.getDozeBrightnessStrategy();
         mScreenOffBrightnessStrategy = injector.getScreenOffBrightnessStrategy();
@@ -139,6 +146,10 @@ public class DisplayBrightnessStrategySelector {
             displayBrightnessStrategy = mOffloadBrightnessStrategy;
         }
 
+        if (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) {
+            postProcess(constructStrategySelectionNotifyRequest(displayBrightnessStrategy));
+        }
+
         if (!mOldBrightnessStrategyName.equals(displayBrightnessStrategy.getName())) {
             Slog.i(TAG,
                     "Changing the DisplayBrightnessStrategy from " + mOldBrightnessStrategyName
@@ -186,9 +197,23 @@ public class DisplayBrightnessStrategySelector {
                 "  mAllowAutoBrightnessWhileDozingConfig= "
                         + mAllowAutoBrightnessWhileDozingConfig);
         IndentingPrintWriter ipw = new IndentingPrintWriter(writer, " ");
-        for (DisplayBrightnessStrategy displayBrightnessStrategy: mDisplayBrightnessStrategies) {
+        for (DisplayBrightnessStrategy displayBrightnessStrategy : mDisplayBrightnessStrategies) {
             if (displayBrightnessStrategy != null) {
                 displayBrightnessStrategy.dump(ipw);
+            }
+        }
+    }
+
+    private StrategySelectionNotifyRequest constructStrategySelectionNotifyRequest(
+            DisplayBrightnessStrategy selectedDisplayBrightnessStrategy) {
+        return new StrategySelectionNotifyRequest(selectedDisplayBrightnessStrategy);
+    }
+
+    private void postProcess(StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
+        for (DisplayBrightnessStrategy displayBrightnessStrategy : mDisplayBrightnessStrategies) {
+            if (displayBrightnessStrategy != null) {
+                displayBrightnessStrategy.strategySelectionPostProcessor(
+                        strategySelectionNotifyRequest);
             }
         }
     }

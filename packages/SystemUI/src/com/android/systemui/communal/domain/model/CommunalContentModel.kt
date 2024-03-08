@@ -152,4 +152,6 @@ sealed interface CommunalContentModel {
     }
 
     fun isWidgetContent() = this is WidgetContent
+
+    fun isSmartspace() = this is Smartspace
 }

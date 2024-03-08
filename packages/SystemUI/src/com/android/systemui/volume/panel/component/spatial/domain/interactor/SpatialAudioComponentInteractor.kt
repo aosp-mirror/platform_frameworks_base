@@ -71,10 +71,10 @@ constructor(
         combine(
                 currentAudioDeviceAttributes,
                 changes.onStart { emit(Unit) },
-                spatializerInteractor.isHeadTrackingAvailable,
-            ) { attributes, _, isHeadTrackingAvailable ->
+            ) { attributes, _,
+                ->
                 attributes ?: return@combine SpatialAudioAvailabilityModel.Unavailable
-                if (isHeadTrackingAvailable) {
+                if (spatializerInteractor.isHeadTrackingAvailable(attributes)) {
                     return@combine SpatialAudioAvailabilityModel.HeadTracking
                 }
                 if (spatializerInteractor.isSpatialAudioAvailable(attributes)) {

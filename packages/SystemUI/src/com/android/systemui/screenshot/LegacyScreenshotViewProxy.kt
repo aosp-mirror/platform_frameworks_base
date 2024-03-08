@@ -22,12 +22,14 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.Display
 import android.view.LayoutInflater
 import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
+import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.flags.FeatureFlags
@@ -40,7 +42,6 @@ import com.android.systemui.res.R
 class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
     override val view: ScreenshotView =
         LayoutInflater.from(context).inflate(R.layout.screenshot, null) as ScreenshotView
-    override val internalInsetsListener: ViewTreeObserver.OnComputeInternalInsetsListener
     override val screenshotPreview: View
 
     override var defaultDisplay: Int = Display.DEFAULT_DISPLAY
@@ -51,6 +52,9 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
         set(value) {
             view.setDefaultTimeoutMillis(value)
         }
+    override var onBackInvokedCallback: OnBackInvokedCallback = OnBackInvokedCallback {
+        Log.wtf(TAG, "OnBackInvoked called before being set!")
+    }
     override var onKeyListener: View.OnKeyListener? = null
         set(value) {
             view.setOnKeyListener(value)
@@ -84,7 +88,35 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
         get() = view.isPendingSharedTransition
 
     init {
-        internalInsetsListener = view
+
+        view.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(view: View) {
+                    if (LogConfig.DEBUG_INPUT) {
+                        Log.d(TAG, "Registering Predictive Back callback")
+                    }
+                    view
+                        .findOnBackInvokedDispatcher()
+                        ?.registerOnBackInvokedCallback(
+                            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                            onBackInvokedCallback
+                        )
+                }
+
+                override fun onViewDetachedFromWindow(view: View) {
+                    if (LogConfig.DEBUG_INPUT) {
+                        Log.d(TAG, "Unregistering Predictive Back callback")
+                    }
+                    view
+                        .findOnBackInvokedDispatcher()
+                        ?.unregisterOnBackInvokedCallback(onBackInvokedCallback)
+                }
+            }
+        )
+        if (LogConfig.DEBUG_WINDOW) {
+            Log.d(TAG, "adding OnComputeInternalInsetsListener")
+        }
+        view.viewTreeObserver.addOnComputeInternalInsetsListener(view)
         screenshotPreview = view.screenshotPreview
     }
 
@@ -139,12 +171,6 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
 
     override fun announceForAccessibility(string: String) = view.announceForAccessibility(string)
 
-    override fun addOnAttachStateChangeListener(listener: View.OnAttachStateChangeListener) =
-        view.addOnAttachStateChangeListener(listener)
-
-    override fun findOnBackInvokedDispatcher(): OnBackInvokedDispatcher? =
-        view.findOnBackInvokedDispatcher()
-
     override fun getViewTreeObserver(): ViewTreeObserver = view.viewTreeObserver
 
     override fun post(runnable: Runnable) {
@@ -155,5 +181,9 @@ class LegacyScreenshotViewProxy(context: Context) : ScreenshotViewProxy {
         override fun getProxy(context: Context): ScreenshotViewProxy {
             return LegacyScreenshotViewProxy(context)
         }
+    }
+
+    companion object {
+        private const val TAG = "LegacyScreenshotViewProxy"
     }
 }

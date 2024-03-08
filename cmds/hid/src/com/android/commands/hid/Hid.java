@@ -117,8 +117,17 @@ public class Hid {
                     "Tried to send command \"" + e.getCommand() + "\" to an unregistered device!");
         }
         int id = e.getId();
-        Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(), e.getBus(),
-                e.getDescriptor(), e.getReport(), e.getFeatureReports(), e.getOutputs());
+        Device d = new Device(
+                id,
+                e.getName(),
+                e.getUniq(),
+                e.getVendorId(),
+                e.getProductId(),
+                e.getBus(),
+                e.getDescriptor(),
+                e.getReport(),
+                e.getFeatureReports(),
+                e.getOutputs());
         mDevices.append(id, d);
     }
 

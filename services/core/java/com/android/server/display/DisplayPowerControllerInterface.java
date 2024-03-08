@@ -161,6 +161,11 @@ public interface DisplayPowerControllerInterface {
     float getScreenBrightnessSetting();
 
     /**
+     * Gets the brightness value used when the device is in doze
+     */
+    float getDozeBrightnessForOffload();
+
+    /**
      * Sets up the temporary brightness for the associated display
      */
     void setTemporaryBrightness(float brightness);

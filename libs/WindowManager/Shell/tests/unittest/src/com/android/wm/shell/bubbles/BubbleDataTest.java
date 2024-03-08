@@ -49,6 +49,8 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.bubbles.BubbleData.TimeSource;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
+import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
 
 import com.google.common.collect.ImmutableList;
 
@@ -1205,6 +1207,19 @@ public class BubbleDataTest extends ShellTestCase {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertThat(update.removedOverflowBubble).isEqualTo(mBubbleA1);
         assertOverflowChangedTo(ImmutableList.of());
+    }
+
+    @Test
+    public void test_getInitialStateForBubbleBar_includesInitialBubblesAndPosition() {
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        mPositioner.setBubbleBarLocation(BubbleBarLocation.LEFT);
+
+        BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();
+        assertThat(update.currentBubbleList).hasSize(2);
+        assertThat(update.currentBubbleList.get(0).getKey()).isEqualTo(mEntryA2.getKey());
+        assertThat(update.currentBubbleList.get(1).getKey()).isEqualTo(mEntryA1.getKey());
+        assertThat(update.bubbleBarLocation).isEqualTo(BubbleBarLocation.LEFT);
     }
 
     private void verifyUpdateReceived() {

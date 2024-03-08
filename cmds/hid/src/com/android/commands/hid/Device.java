@@ -71,6 +71,7 @@ public class Device {
 
     private static native long nativeOpenDevice(
             String name,
+            String uniq,
             int id,
             int vid,
             int pid,
@@ -89,6 +90,7 @@ public class Device {
     public Device(
             int id,
             String name,
+            String uniq,
             int vid,
             int pid,
             int bus,
@@ -113,8 +115,9 @@ public class Device {
         } else {
             args.arg1 = id + ":" + vid + ":" + pid;
         }
-        args.arg2 = descriptor;
-        args.arg3 = report;
+        args.arg2 = uniq;
+        args.arg3 = descriptor;
+        args.arg4 = report;
         mHandler.obtainMessage(MSG_OPEN_DEVICE, args).sendToTarget();
         mTimeToSend = SystemClock.uptimeMillis();
     }
@@ -167,11 +170,12 @@ public class Device {
                     mPtr =
                             nativeOpenDevice(
                                     (String) args.arg1,
+                                    (String) args.arg2,
                                     args.argi1,
                                     args.argi2,
                                     args.argi3,
                                     args.argi4,
-                                    (byte[]) args.arg2,
+                                    (byte[]) args.arg3,
                                     new DeviceCallback());
                     pauseEvents();
                     break;

@@ -23,6 +23,9 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowInsets
+import android.view.WindowInsets.Type.InsetsType
+import android.view.WindowInsetsAnimation
 import android.view.WindowManager.LayoutParams.MATCH_PARENT
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
@@ -70,15 +73,42 @@ open class SystemUIBottomSheetDialog(
     override fun onStart() {
         super.onStart()
         configurationController?.addCallback(onConfigChanged)
+        window?.decorView?.setWindowInsetsAnimationCallback(insetsAnimationCallback)
     }
 
     override fun onStop() {
         super.onStop()
         configurationController?.removeCallback(onConfigChanged)
+        window?.decorView?.setWindowInsetsAnimationCallback(null)
     }
+
+    /** Called after any insets change. */
+    open fun onInsetsChanged(@InsetsType changedTypes: Int, insets: WindowInsets) {}
 
     /** Can be overridden by subclasses to receive config changed events. */
     open fun onConfigurationChanged() {}
+
+    private val insetsAnimationCallback =
+        object : WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
+
+            private var lastInsets: WindowInsets? = null
+
+            override fun onEnd(animation: WindowInsetsAnimation) {
+                lastInsets?.let { onInsetsChanged(animation.typeMask, it) }
+            }
+
+            override fun onProgress(
+                insets: WindowInsets,
+                animations: MutableList<WindowInsetsAnimation>,
+            ): WindowInsets {
+                lastInsets = insets
+                onInsetsChanged(changedTypes = allAnimationMasks(animations), insets)
+                return insets
+            }
+
+            private fun allAnimationMasks(animations: List<WindowInsetsAnimation>): Int =
+                animations.fold(0) { acc: Int, it -> acc or it.typeMask }
+        }
 
     private val onConfigChanged =
         object : ConfigurationListener {

@@ -316,6 +316,10 @@ public final class UserManagerTest {
                 .that(userTypeDetails).isNotNull();
         final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
 
+        // Only run the test if private profile creation is enabled on the device
+        assumeTrue("Private profile not enabled on the device",
+                mUserManager.canAddPrivateProfile());
+
         // Test that only one private profile  can be created
         final int mainUserId = mainUser.getIdentifier();
         UserInfo userInfo = createProfileForUser("Private profile1",
@@ -1226,6 +1230,20 @@ public final class UserManagerTest {
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, false,
                     mainUserHandle);
+        }
+    }
+
+    @MediumTest
+    @Test
+    public void testPrivateProfileCreationRestrictions() {
+        assumeTrue(mUserManager.canAddPrivateProfile());
+        final int mainUserId = ActivityManager.getCurrentUser();
+        try {
+            UserInfo privateProfileInfo = createProfileForUser("Private",
+                            UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+            assertThat(privateProfileInfo).isNotNull();
+        } catch (Exception e) {
+            fail("Creation of private profile failed due to " + e.getMessage());
         }
     }
 

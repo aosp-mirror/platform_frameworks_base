@@ -70,7 +70,6 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.VibrationAttributes;
@@ -1551,6 +1550,48 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
+    public void vibrate_withAdaptiveHaptics_appliesCorrectAdaptiveScales() throws Exception {
+        // Keep user settings the same as device default so only adaptive scale is applied.
+        setUserSetting(Settings.System.ALARM_VIBRATION_INTENSITY,
+                mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_ALARM));
+        setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_NOTIFICATION));
+        setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
+                mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_TOUCH));
+
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        fakeVibrator.setSupportedPrimitives(VibrationEffect.Composition.PRIMITIVE_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        SparseArray<Float> vibrationScales = new SparseArray<>();
+        vibrationScales.put(ScaleParam.TYPE_ALARM, 0.7f);
+        vibrationScales.put(ScaleParam.TYPE_NOTIFICATION, 0.4f);
+
+        mVibratorControlService.setVibrationParams(
+                VibrationParamGenerator.generateVibrationParams(vibrationScales),
+                mFakeVibratorController);
+
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                .compose();
+        vibrateAndWaitUntilFinished(service, effect, ALARM_ATTRS);
+        vibrateAndWaitUntilFinished(service, effect, NOTIFICATION_ATTRS);
+        vibrateAndWaitUntilFinished(service, effect, HAPTIC_FEEDBACK_ATTRS);
+
+        List<VibrationEffectSegment> segments = fakeVibrator.getAllEffectSegments();
+        assertEquals(3, segments.size());
+        assertEquals(0.7f, ((PrimitiveSegment) segments.get(0)).getScale(), 1e-5);
+        assertEquals(0.4f, ((PrimitiveSegment) segments.get(1)).getScale(), 1e-5);
+        assertEquals(1f, ((PrimitiveSegment) segments.get(2)).getScale(), 1e-5);
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.7f);
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.4f);
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 1f);
+    }
+
+    @Test
     public void vibrate_withPowerModeChange_cancelVibrationIfNotAllowed() throws Exception {
         mockVibrators(1, 2);
         VibratorManagerService service = createSystemReadyService();
@@ -1998,8 +2039,7 @@ public class VibratorManagerServiceTest {
 
     @Test
     @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
-    public void onExternalVibration_withAdaptiveHaptics_returnsCorrectAdaptiveScales()
-            throws RemoteException {
+    public void onExternalVibration_withAdaptiveHaptics_returnsCorrectAdaptiveScales() {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL,
                 IVibrator.CAP_AMPLITUDE_CONTROL);
@@ -2020,6 +2060,7 @@ public class VibratorManagerServiceTest {
         mExternalVibratorService.onExternalVibrationStop(externalVibration);
 
         assertEquals(scale.adaptiveHapticsScale, 0.7f, 0);
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.7f);
 
         externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
                 AUDIO_NOTIFICATION_ATTRS,
@@ -2028,6 +2069,7 @@ public class VibratorManagerServiceTest {
         mExternalVibratorService.onExternalVibrationStop(externalVibration);
 
         assertEquals(scale.adaptiveHapticsScale, 0.4f, 0);
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 0.4f);
 
         AudioAttributes ringtoneAudioAttrs = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
@@ -2036,14 +2078,15 @@ public class VibratorManagerServiceTest {
                 ringtoneAudioAttrs,
                 mock(IExternalVibrationController.class));
         scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        mExternalVibratorService.onExternalVibrationStop(externalVibration);
 
         assertEquals(scale.adaptiveHapticsScale, 1f, 0);
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 1f);
     }
 
     @Test
     @RequiresFlagsDisabled(android.os.vibrator.Flags.FLAG_ADAPTIVE_HAPTICS_ENABLED)
-    public void onExternalVibration_withAdaptiveHapticsFlagDisabled_alwaysReturnScaleNone()
-            throws RemoteException {
+    public void onExternalVibration_withAdaptiveHapticsFlagDisabled_alwaysReturnScaleNone() {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL,
                 IVibrator.CAP_AMPLITUDE_CONTROL);
@@ -2072,8 +2115,10 @@ public class VibratorManagerServiceTest {
                 AUDIO_NOTIFICATION_ATTRS,
                 mock(IExternalVibrationController.class));
         scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        mExternalVibratorService.onExternalVibrationStop(externalVibration);
 
         assertEquals(scale.adaptiveHapticsScale, 1f, 0);
+        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 1f);
     }
 
     @Test

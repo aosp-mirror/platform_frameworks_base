@@ -33,6 +33,8 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
@@ -42,6 +44,8 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.DismissView;
 
 import kotlin.Unit;
@@ -155,12 +159,6 @@ public class BubbleBarLayerView extends FrameLayout
         return mIsExpanded;
     }
 
-    // TODO(b/313661121) - when dragging is implemented, check user setting first
-    /** Whether the expanded view is positioned on the left or right side of the screen. */
-    public boolean isOnLeft() {
-        return getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-    }
-
     /** Shows the expanded view of the provided bubble. */
     public void showExpandedView(BubbleViewProvider b) {
         BubbleBarExpandedView expandedView = b.getBubbleBarExpandedView();
@@ -207,15 +205,23 @@ public class BubbleBarLayerView extends FrameLayout
                 }
             });
 
+            DragListener dragListener = new DragListener() {
+                @Override
+                public void onLocationChanged(@NonNull BubbleBarLocation location) {
+                    mBubbleController.setBubbleBarLocation(location);
+                }
+
+                @Override
+                public void onReleasedInDismiss() {
+                    mBubbleController.dismissBubble(mExpandedBubble.getKey(), DISMISS_USER_GESTURE);
+                }
+            };
             mDragController = new BubbleBarExpandedViewDragController(
                     mExpandedView,
                     mDismissView,
                     mAnimationHelper,
-                    () -> {
-                        mBubbleController.dismissBubble(mExpandedBubble.getKey(),
-                                DISMISS_USER_GESTURE);
-                        return Unit.INSTANCE;
-                    });
+                    mPositioner,
+                    dragListener);
 
             addView(mExpandedView, new LayoutParams(width, height, Gravity.LEFT));
         }
@@ -352,7 +358,7 @@ public class BubbleBarLayerView extends FrameLayout
         lp.width = width;
         lp.height = height;
         mExpandedView.setLayoutParams(lp);
-        if (isOnLeft()) {
+        if (mPositioner.isBubbleBarOnLeft()) {
             mExpandedView.setX(mPositioner.getInsets().left + padding);
         } else {
             mExpandedView.setX(mPositioner.getAvailableRect().width() - width - padding);

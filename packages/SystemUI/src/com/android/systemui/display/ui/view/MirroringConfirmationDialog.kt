@@ -18,6 +18,7 @@ package com.android.systemui.display.ui.view
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.WindowInsets
 import android.widget.TextView
 import androidx.core.view.updatePadding
 import com.android.systemui.res.R
@@ -44,7 +45,10 @@ class MirroringConfirmationDialog(
     private lateinit var mirrorButton: TextView
     private lateinit var dismissButton: TextView
     private lateinit var dualDisplayWarning: TextView
+    private lateinit var bottomSheet: View
     private var enabledPressed = false
+    private val defaultDialogBottomInset =
+        context.resources.getDimensionPixelSize(R.dimen.dialog_bottom_padding)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +67,8 @@ class MirroringConfirmationDialog(
                 visibility = if (showConcurrentDisplayInfo) View.VISIBLE else View.GONE
             }
 
+        bottomSheet = requireViewById(R.id.cd_bottom_sheet)
+
         setOnDismissListener {
             if (!enabledPressed) {
                 onCancelMirroring.onClick(null)
@@ -71,15 +77,17 @@ class MirroringConfirmationDialog(
         setupInsets()
     }
 
-    private fun setupInsets() {
+    private fun setupInsets(navbarInsets: Int = navbarBottomInsetsProvider()) {
         // This avoids overlap between dialog content and navigation bars.
-        requireViewById<View>(R.id.cd_bottom_sheet).apply {
-            val navbarInsets = navbarBottomInsetsProvider()
-            val defaultDialogBottomInset =
-                context.resources.getDimensionPixelSize(R.dimen.dialog_bottom_padding)
-            // we only care about the bottom inset as in all other configuration where navigations
-            // are in other display sides there is no overlap with the dialog.
-            updatePadding(bottom = max(navbarInsets, defaultDialogBottomInset))
+        // we only care about the bottom inset as in all other configuration where navigations
+        // are in other display sides there is no overlap with the dialog.
+        bottomSheet.updatePadding(bottom = max(navbarInsets, defaultDialogBottomInset))
+    }
+
+    override fun onInsetsChanged(changedTypes: Int, insets: WindowInsets) {
+        val navbarType = WindowInsets.Type.navigationBars()
+        if (changedTypes and navbarType != 0) {
+            setupInsets(insets.getInsets(navbarType).bottom)
         }
     }
 

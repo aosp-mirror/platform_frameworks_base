@@ -20,7 +20,9 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Handler
+import android.os.UserHandle
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.qualifiers.LongRunning
 import com.android.systemui.dagger.qualifiers.Main
@@ -30,6 +32,8 @@ import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.screenrecord.RecordingServiceStrings
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
+import com.android.traceur.FileSender
+import com.android.traceur.TraceUtils
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -60,9 +64,89 @@ constructor(
 
     override fun provideRecordingServiceStrings(): RecordingServiceStrings = IrsStrings(resources)
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_START -> {
+                TraceUtils.traceStart(
+                    contentResolver,
+                    DEFAULT_TRACE_TAGS,
+                    DEFAULT_BUFFER_SIZE,
+                    DEFAULT_IS_INCLUDING_WINSCOPE,
+                    DEFAULT_IS_INCLUDING_APP_TRACE,
+                    DEFAULT_IS_LONG_TRACE,
+                    DEFAULT_ATTACH_TO_BUGREPORT,
+                    DEFAULT_MAX_TRACE_SIZE,
+                    DEFAULT_MAX_TRACE_DURATION_IN_MINUTES
+                )
+                if (!intent.getBooleanExtra(EXTRA_SCREEN_RECORD, false)) {
+                    // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
+                    // will circumvent the RecordingService's screen recording start code.
+                    return super.onStartCommand(Intent(ACTION_SHOW_START_NOTIF), flags, startId)
+                }
+            }
+            ACTION_STOP,
+            ACTION_STOP_NOTIF -> {
+                TraceUtils.traceStop(contentResolver)
+            }
+            ACTION_SHARE -> {
+                shareRecording(intent)
+
+                // Unlike all other actions, action_share has different behavior for the screen
+                // recording qs tile than it does for the record issue qs tile. Return sticky to
+                // avoid running any of the base class' code for this action.
+                return START_STICKY
+            }
+            else -> {}
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun shareRecording(intent: Intent) {
+        val files = TraceUtils.traceDump(contentResolver, TRACE_FILE_NAME).get()
+        val traceUris: MutableList<Uri> = FileSender.getUriForFiles(this, files, AUTHORITY)
+
+        if (
+            intent.hasExtra(EXTRA_PATH) && intent.getStringExtra(EXTRA_PATH)?.isNotEmpty() == true
+        ) {
+            traceUris.add(Uri.parse(intent.getStringExtra(EXTRA_PATH)))
+        }
+
+        val sendIntent =
+            FileSender.buildSendIntent(this, traceUris).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        if (mNotificationId != NOTIF_BASE_ID) {
+            val currentUserId = mUserContextTracker.userContext.userId
+            mNotificationManager.cancelAsUser(null, mNotificationId, UserHandle(currentUserId))
+        }
+
+        // TODO: Debug why the notification shade isn't closing upon starting the BetterBug activity
+        mKeyguardDismissUtil.executeWhenUnlocked(
+            {
+                startActivity(sendIntent)
+                false
+            },
+            false,
+            false
+        )
+    }
+
     companion object {
         private const val TAG = "IssueRecordingService"
         private const val CHANNEL_ID = "issue_record"
+        private const val EXTRA_SCREEN_RECORD = "extra_screenRecord"
+        private const val EXTRA_WINSCOPE_TRACING = "extra_winscopeTracing"
+
+        private val DEFAULT_TRACE_TAGS = listOf<String>()
+        private const val DEFAULT_BUFFER_SIZE = 16384
+        private const val DEFAULT_IS_INCLUDING_WINSCOPE = true
+        private const val DEFAULT_IS_LONG_TRACE = false
+        private const val DEFAULT_IS_INCLUDING_APP_TRACE = true
+        private const val DEFAULT_ATTACH_TO_BUGREPORT = true
+        private const val DEFAULT_MAX_TRACE_SIZE = 10240
+        private const val DEFAULT_MAX_TRACE_DURATION_IN_MINUTES = 30
+
+        private val TRACE_FILE_NAME = TraceUtils.getOutputFilename(TraceUtils.RecordingType.TRACE)
+        private const val AUTHORITY = "com.android.systemui.fileprovider"
 
         /**
          * Get an intent to stop the issue recording service.
@@ -71,7 +155,7 @@ constructor(
          * @return
          */
         fun getStopIntent(context: Context): Intent =
-            Intent(context, RecordingService::class.java)
+            Intent(context, IssueRecordingService::class.java)
                 .setAction(ACTION_STOP)
                 .putExtra(Intent.EXTRA_USER_HANDLE, context.userId)
 
@@ -80,8 +164,15 @@ constructor(
          *
          * @param context Context from the requesting activity
          */
-        fun getStartIntent(context: Context): Intent =
-            Intent(context, RecordingService::class.java).setAction(ACTION_START)
+        fun getStartIntent(
+            context: Context,
+            screenRecord: Boolean,
+            winscopeTracing: Boolean
+        ): Intent =
+            Intent(context, IssueRecordingService::class.java)
+                .setAction(ACTION_START)
+                .putExtra(EXTRA_SCREEN_RECORD, screenRecord)
+                .putExtra(EXTRA_WINSCOPE_TRACING, winscopeTracing)
     }
 }
 

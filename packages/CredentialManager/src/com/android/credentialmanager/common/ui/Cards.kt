@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.common.ui
 
+import android.credentials.flags.Flags
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -63,7 +64,7 @@ fun SheetContainerCard(
             modifier = Modifier.padding(
                 start = 24.dp,
                 end = 24.dp,
-                bottom = 18.dp,
+                bottom = if (Flags.selectorUiImprovementsEnabled()) 8.dp else 18.dp,
                 top = if (topAppBar == null) 24.dp else 0.dp
             ).fillMaxWidth().wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,

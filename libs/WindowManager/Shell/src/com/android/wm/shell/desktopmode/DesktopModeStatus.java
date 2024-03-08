@@ -16,6 +16,10 @@
 
 package com.android.wm.shell.desktopmode;
 
+import static android.content.res.Configuration.SCREENLAYOUT_SIZE_XLARGE;
+
+import android.annotation.NonNull;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.os.SystemProperties;
 
 import com.android.window.flags.Flags;
@@ -66,6 +70,9 @@ public class DesktopModeStatus {
     private static final boolean USE_ROUNDED_CORNERS = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_use_rounded_corners", true);
 
+    private static final boolean ENFORCE_DISPLAY_RESTRICTIONS = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_mode_enforce_display_restrictions", true);
+
     /**
      * Return {@code true} if desktop windowing is enabled
      */
@@ -103,5 +110,22 @@ public class DesktopModeStatus {
      */
     public static boolean useRoundedCorners() {
         return USE_ROUNDED_CORNERS;
+    }
+
+    /**
+     * Return whether the display size restrictions should be enforced.
+     */
+    public static boolean enforceDisplayRestrictions() {
+        return ENFORCE_DISPLAY_RESTRICTIONS;
+    }
+
+    /**
+     * Return {@code true} if the display associated with the task is at least of size
+     * {@link android.content.res.Configuration#SCREENLAYOUT_SIZE_XLARGE} or has been overridden to
+     * ignore the size constraint.
+     */
+    public static boolean meetsMinimumDisplayRequirements(@NonNull RunningTaskInfo taskInfo) {
+        return !enforceDisplayRestrictions()
+                || taskInfo.configuration.isLayoutSizeAtLeast(SCREENLAYOUT_SIZE_XLARGE);
     }
 }

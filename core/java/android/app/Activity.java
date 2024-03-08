@@ -1126,8 +1126,8 @@ public class Activity extends ContextThemeWrapper
          * @hide
          */
         @Override
-        public void updateStatusBarAppearance(int appearance) {
-            mTaskDescription.setStatusBarAppearance(appearance);
+        public void updateSystemBarsAppearance(int appearance) {
+            mTaskDescription.setSystemBarsAppearance(appearance);
             setTaskDescription(mTaskDescription);
         }
 
@@ -1254,12 +1254,23 @@ public class Activity extends ContextThemeWrapper
         return mApplication;
     }
 
-    /** Is this activity embedded inside of another activity? */
+    /**
+     * Whether this is a child {@link Activity} of an {@link ActivityGroup}.
+     *
+     * @deprecated {@link ActivityGroup} is deprecated.
+     */
+    @Deprecated
     public final boolean isChild() {
         return mParent != null;
     }
 
-    /** Return the parent activity if this view is an embedded child. */
+    /**
+     * Returns the parent {@link Activity} if this is a child {@link Activity} of an
+     * {@link ActivityGroup}.
+     *
+     * @deprecated {@link ActivityGroup} is deprecated.
+     */
+    @Deprecated
     public final Activity getParent() {
         return mParent;
     }
@@ -5535,6 +5546,15 @@ public class Activity extends ContextThemeWrapper
         }
 
         a.recycle();
+        if (first && mTaskDescription.getSystemBarsAppearance() == 0
+                && mWindow != null && mWindow.getSystemBarAppearance() != 0) {
+            // When the theme is applied for the first time during the activity re-creation process,
+            // the attached window restores the system bars appearance from the old window/activity.
+            // Make sure to restore this appearance in TaskDescription too, to prevent the
+            // #setTaskDescription() call below from incorrectly sending an empty value to the
+            // server.
+            mTaskDescription.setSystemBarsAppearance(mWindow.getSystemBarAppearance());
+        }
         setTaskDescription(mTaskDescription);
     }
 

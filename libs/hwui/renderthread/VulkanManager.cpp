@@ -25,6 +25,7 @@
 #include <android/sync.h>
 #include <gui/TraceUtils.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/ganesh/vk/GrVkBackendSemaphore.h>
 #include <include/gpu/ganesh/vk/GrVkBackendSurface.h>
 #include <include/gpu/ganesh/vk/GrVkDirectContext.h>
 #include <ui/FatVector.h>
@@ -597,15 +598,14 @@ Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
                         close(fence_clone);
                         sync_wait(bufferInfo->dequeue_fence, -1 /* forever */);
                     } else {
-                        GrBackendSemaphore backendSemaphore;
-                        backendSemaphore.initVulkan(semaphore);
+                        GrBackendSemaphore beSemaphore = GrBackendSemaphores::MakeVk(semaphore);
                         // Skia will take ownership of the VkSemaphore and delete it once the wait
                         // has finished. The VkSemaphore also owns the imported fd, so it will
                         // close the fd when it is deleted.
-                        bufferInfo->skSurface->wait(1, &backendSemaphore);
+                        bufferInfo->skSurface->wait(1, &beSemaphore);
                         // The following flush blocks the GPU immediately instead of waiting for
                         // other drawing ops. It seems dequeue_fence is not respected otherwise.
-                        // TODO: remove the flush after finding why backendSemaphore is not working.
+                        // TODO: remove the flush after finding why beSemaphore is not working.
                         skgpu::ganesh::FlushAndSubmit(bufferInfo->skSurface.get());
                     }
                 }
@@ -626,7 +626,7 @@ class SharedSemaphoreInfo : public LightRefBase<SharedSemaphoreInfo> {
     SharedSemaphoreInfo(PFN_vkDestroySemaphore destroyFunction, VkDevice device,
                         VkSemaphore semaphore)
             : mDestroyFunction(destroyFunction), mDevice(device), mSemaphore(semaphore) {
-        mGrBackendSemaphore.initVulkan(semaphore);
+        mGrBackendSemaphore = GrBackendSemaphores::MakeVk(mSemaphore);
     }
 
     ~SharedSemaphoreInfo() { mDestroyFunction(mDevice, mSemaphore, nullptr); }
@@ -798,8 +798,7 @@ status_t VulkanManager::fenceWait(int fence, GrDirectContext* grContext) {
         return UNKNOWN_ERROR;
     }
 
-    GrBackendSemaphore beSemaphore;
-    beSemaphore.initVulkan(semaphore);
+    GrBackendSemaphore beSemaphore = GrBackendSemaphores::MakeVk(semaphore);
 
     // Skia will take ownership of the VkSemaphore and delete it once the wait has finished. The
     // VkSemaphore also owns the imported fd, so it will close the fd when it is deleted.

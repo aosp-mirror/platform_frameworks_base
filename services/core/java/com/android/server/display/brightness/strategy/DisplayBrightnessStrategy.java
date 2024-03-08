@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.hardware.display.DisplayManagerInternal;
 
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
 
@@ -48,4 +49,10 @@ public interface DisplayBrightnessStrategy {
      * @param writer
      */
     void dump(PrintWriter writer);
+
+     /**
+     * Notifies this strategy about the selection of a DisplayBrightnessStrategy
+     */
+    void strategySelectionPostProcessor(
+            StrategySelectionNotifyRequest strategySelectionNotifyRequest);
 }

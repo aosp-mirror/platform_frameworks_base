@@ -24,9 +24,11 @@ import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -47,8 +49,11 @@ import com.android.systemui.util.ui.toAnimatedValueFlow
 import com.android.systemui.util.ui.zip
 import javax.inject.Inject
 import kotlin.math.max
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -57,12 +62,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class KeyguardRootViewModel
 @Inject
 constructor(
+    @Application private val scope: CoroutineScope,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
@@ -102,6 +109,8 @@ constructor(
     private val aodAlphaViewModel: AodAlphaViewModel,
     private val shadeInteractor: ShadeInteractor,
 ) {
+    private var burnInJob: Job? = null
+    private val burnInModel = MutableStateFlow(BurnInModel())
 
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardState
@@ -213,21 +222,33 @@ constructor(
     /** For elements that appear and move during the animation -> AOD */
     val burnInLayerAlpha: Flow<Float> = aodAlphaViewModel.alpha
 
-    fun translationY(params: BurnInParameters): Flow<Float> {
-        return aodBurnInViewModel.translationY(params)
-    }
+    val translationY: Flow<Float> = burnInModel.map { it.translationY.toFloat() }
 
-    fun translationX(params: BurnInParameters): Flow<StateToValue> {
-        return merge(
-            aodBurnInViewModel.translationX(params).map { StateToValue(to = AOD, value = it) },
+    val translationX: Flow<StateToValue> =
+        merge(
+            burnInModel.map { StateToValue(to = AOD, value = it.translationX.toFloat()) },
             lockscreenToGlanceableHubTransitionViewModel.keyguardTranslationX,
             glanceableHubToLockscreenTransitionViewModel.keyguardTranslationX,
         )
+
+    fun updateBurnInParams(params: BurnInParameters) {
+        burnInJob?.cancel()
+
+        burnInJob =
+            scope.launch {
+                aodBurnInViewModel.movement(params).collect {
+                    burnInModel.value = it
+                }
+            }
     }
 
-    fun scale(params: BurnInParameters): Flow<BurnInScaleViewModel> {
-        return aodBurnInViewModel.scale(params)
-    }
+    val scale: Flow<BurnInScaleViewModel> =
+        burnInModel.map {
+            BurnInScaleViewModel(
+                scale = it.scale,
+                scaleClockOnly = it.scaleClockOnly,
+            )
+        }
 
     /** Is the notification icon container visible? */
     val isNotifIconContainerVisible: Flow<AnimatedValue<Boolean>> =

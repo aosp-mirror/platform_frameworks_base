@@ -2082,6 +2082,9 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 } else {
                     row.anim.cancel();
                     row.anim.setIntValues(progress, newProgress);
+                    // The animator can't keep up with the volume changes so haptics need to be
+                    // triggered here. This happens when the volume keys are continuously pressed.
+                    row.deliverOnProgressChangedHaptics(false, newProgress);
                 }
                 row.animTargetProgress = newProgress;
                 row.anim.setDuration(UPDATE_ANIMATION_DURATION);
@@ -2486,10 +2489,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             if (getActiveRow().equals(mRow)
                     && mRow.slider.getVisibility() == VISIBLE
                     && mRow.mHapticPlugin != null) {
-                mRow.mHapticPlugin.onProgressChanged(seekBar, progress, fromUser);
-                if (!fromUser) {
-                    // Consider a change from program as the volume key being continuously pressed
-                    mRow.mHapticPlugin.onKeyDown();
+                if (fromUser || mRow.animTargetProgress == progress) {
+                    // Deliver user-generated slider changes immediately, or when the animation
+                    // completes
+                    mRow.deliverOnProgressChangedHaptics(fromUser, progress);
                 }
             }
             if (D.BUG) Log.d(TAG, AudioSystem.streamToString(mRow.stream)
@@ -2641,6 +2644,14 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         @SuppressLint("ClickableViewAccessibility")
         void removeHaptics() {
             slider.setOnTouchListener(null);
+        }
+
+        void deliverOnProgressChangedHaptics(boolean fromUser, int progress) {
+            mHapticPlugin.onProgressChanged(slider, progress, fromUser);
+            if (!fromUser) {
+                // Consider a change from program as the volume key being continuously pressed
+                mHapticPlugin.onKeyDown();
+            }
         }
     }
 

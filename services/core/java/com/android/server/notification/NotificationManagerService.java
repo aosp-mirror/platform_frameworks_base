@@ -1204,6 +1204,10 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private static boolean privateSpaceFlagsEnabled() {
+        return allowPrivateProfile() && android.multiuser.Flags.enablePrivateSpaceFeatures();
+    }
+
     private final class SavePolicyFileRunnable implements Runnable {
         @Override
         public void run() {
@@ -2142,7 +2146,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean isProfileUnavailable(String action) {
-            return allowPrivateProfile() ?
+            return privateSpaceFlagsEnabled() ?
                     action.equals(Intent.ACTION_PROFILE_UNAVAILABLE) :
                     action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         }
@@ -2744,7 +2748,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        if (allowPrivateProfile()){
+        if (privateSpaceFlagsEnabled()){
             filter.addAction(Intent.ACTION_PROFILE_UNAVAILABLE);
         }
         getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);

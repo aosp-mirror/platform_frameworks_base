@@ -32,6 +32,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 
 /**
  * Keeps track of display size, configuration, and specific bubble sizes. One place for all
@@ -95,6 +96,7 @@ public class BubblePositioner {
     private PointF mRestingStackPosition;
 
     private boolean mShowingInBubbleBar;
+    private BubbleBarLocation mBubbleBarLocation = BubbleBarLocation.DEFAULT;
     private final Rect mBubbleBarBounds = new Rect();
 
     public BubblePositioner(Context context, WindowManager windowManager) {
@@ -797,11 +799,33 @@ public class BubblePositioner {
         mShowingInBubbleBar = showingInBubbleBar;
     }
 
+    public void setBubbleBarLocation(BubbleBarLocation location) {
+        mBubbleBarLocation = location;
+    }
+
+    public BubbleBarLocation getBubbleBarLocation() {
+        return mBubbleBarLocation;
+    }
+
+    /**
+     * @return <code>true</code> when bubble bar is on the left and <code>false</code> when on right
+     */
+    public boolean isBubbleBarOnLeft() {
+        return mBubbleBarLocation.isOnLeft(mDeviceConfig.isRtl());
+    }
+
     /**
      * Sets the position of the bubble bar in display coordinates.
      */
-    public void setBubbleBarPosition(Rect bubbleBarBounds) {
+    public void setBubbleBarBounds(Rect bubbleBarBounds) {
         mBubbleBarBounds.set(bubbleBarBounds);
+    }
+
+    /**
+     * Returns the display coordinates of the bubble bar.
+     */
+    public Rect getBubbleBarBounds() {
+        return mBubbleBarBounds;
     }
 
     /**
@@ -830,12 +854,5 @@ public class BubblePositioner {
      */
     public int getBubbleBarExpandedViewPadding() {
         return mExpandedViewPadding;
-    }
-
-    /**
-     * Returns the display coordinates of the bubble bar.
-     */
-    public Rect getBubbleBarBounds() {
-        return mBubbleBarBounds;
     }
 }

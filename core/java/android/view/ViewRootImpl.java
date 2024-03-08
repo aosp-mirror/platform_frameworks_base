@@ -31,6 +31,12 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_INVALID;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_LARGE;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_REQUESTED;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_SMALL;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -840,8 +846,9 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mInsetsAnimationRunning;
 
     private long mPreviousFrameDrawnTime = -1;
-    // The largest view size percentage to the display size. Used on trace to collect metric.
-    private float mLargestChildPercentage = 0.0f;
+    // The reason the category was changed.
+    private int mFrameRateCategoryChangeReason = 0;
+    private String mFrameRateCategoryView;
 
     /**
      * The resolved pointer icon type requested by this window.
@@ -4846,10 +4853,6 @@ public final class ViewRootImpl implements ViewParent,
         long fps = NANOS_PER_SEC / timeDiff;
         Trace.setCounter(mFpsTraceName, fps);
         mPreviousFrameDrawnTime = expectedDrawnTime;
-
-        long percentage = (long) (mLargestChildPercentage * 100);
-        Trace.setCounter(mLargestViewTraceName, percentage);
-        mLargestChildPercentage = 0.0f;
     }
 
     private void reportDrawFinished(@Nullable Transaction t, int seqId) {
@@ -7571,7 +7574,8 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             // For the variable refresh rate project
-            if (handled && shouldTouchBoost(action, mWindowAttributes.type)) {
+            if (handled && shouldTouchBoost(action & MotionEvent.ACTION_MASK,
+                    mWindowAttributes.type)) {
                 // set the frame rate to the maximum value.
                 mIsTouchBoosting = true;
                 setPreferredFrameRateCategory(mPreferredFrameRateCategory);
@@ -12358,16 +12362,29 @@ public final class ViewRootImpl implements ViewParent,
         // For now, FRAME_RATE_CATEGORY_HIGH_HINT is used for boosting with user interaction.
         // FRAME_RATE_CATEGORY_HIGH is for boosting without user interaction
         // (e.g., Window Initialization).
-        if (mIsFrameRateBoosting || mInsetsAnimationRunning) {
+        if (mIsFrameRateBoosting || mInsetsAnimationRunning
+                || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
+                        && mPreferredFrameRate > 0)) {
             frameRateCategory = FRAME_RATE_CATEGORY_HIGH;
         }
 
         try {
             if (mLastPreferredFrameRateCategory != frameRateCategory) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    String reason = "none";
+                    switch (mFrameRateCategoryChangeReason) {
+                        case FRAME_RATE_CATEGORY_REASON_INTERMITTENT -> reason = "intermittent";
+                        case FRAME_RATE_CATEGORY_REASON_SMALL -> reason = "small";
+                        case FRAME_RATE_CATEGORY_REASON_LARGE -> reason = "large";
+                        case FRAME_RATE_CATEGORY_REASON_REQUESTED -> reason = "requested";
+                        case FRAME_RATE_CATEGORY_REASON_INVALID -> reason = "invalid frame rate";
+                    }
+                    String sourceView = mFrameRateCategoryView == null ? "No View Given"
+                            : mFrameRateCategoryView;
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRateCategory "
-                                + frameRateCategory);
+                                    + frameRateCategory + ", reason " + reason + ", "
+                                    + sourceView);
                 }
                 mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
                         frameRateCategory, false).applyAsyncUnsafe();
@@ -12381,7 +12398,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void setPreferredFrameRate(float preferredFrameRate) {
-        if (!shouldSetFrameRate()) {
+        if (!shouldSetFrameRate() || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
+                && preferredFrameRate > 0)) {
             return;
         }
 
@@ -12397,6 +12415,17 @@ public final class ViewRootImpl implements ViewParent,
                 mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
                     mFrameRateCompatibility).applyAsyncUnsafe();
                 mLastPreferredFrameRate = preferredFrameRate;
+            }
+            if (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE && mIsTouchBoosting) {
+                // We've received a velocity, so we'll let the velocity control the
+                // frame rate unless we receive additional motion events.
+                mIsTouchBoosting = false;
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                    Trace.instant(
+                            Trace.TRACE_TAG_VIEW,
+                            "ViewRootImpl#setFrameRate velocity used, no touch boost on next frame"
+                    );
+                }
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate", e);
@@ -12423,9 +12452,8 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean shouldTouchBoost(int motionEventAction, int windowType) {
-        boolean desiredAction = motionEventAction == MotionEvent.ACTION_DOWN
-                || motionEventAction == MotionEvent.ACTION_MOVE
-                || motionEventAction == MotionEvent.ACTION_UP;
+        // boost for almost all input
+        boolean desiredAction = motionEventAction != MotionEvent.ACTION_OUTSIDE;
         boolean undesiredType = windowType == TYPE_INPUT_METHOD
                 && sToolkitFrameRateTypingReadOnlyFlagValue;
         // use toolkitSetFrameRate flag to gate the change
@@ -12531,6 +12559,22 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Get the value of mLastPreferredFrameRate
+     */
+    @VisibleForTesting
+    public float getLastPreferredFrameRate() {
+        return mLastPreferredFrameRate;
+    }
+
+    /**
+     * Returns whether touch boost is currently enabled.
+     */
+    @VisibleForTesting
+    public boolean getIsTouchBoosting() {
+        return mIsTouchBoosting;
+    }
+
+    /**
      * Get the value of mFrameRateCompatibility
      */
     @VisibleForTesting
@@ -12572,10 +12616,12 @@ public final class ViewRootImpl implements ViewParent,
         mWindowlessBackKeyCallback = callback;
     }
 
-    void recordViewPercentage(float percentage) {
+    void recordCategory(int category, int reason, View view) {
         if (!Trace.isEnabled()) return;
-        // Record the largest view of percentage to the display size.
-        mLargestChildPercentage = Math.max(percentage, mLargestChildPercentage);
+        if (category > mPreferredFrameRateCategory) {
+            mFrameRateCategoryChangeReason = reason;
+            mFrameRateCategoryView = view.getClass().getSimpleName();
+        }
     }
 
     /**

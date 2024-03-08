@@ -319,7 +319,8 @@ public class ApplicationsStateTest {
 
     @Test
     public void testPrivateProfileFilterDisplaysCorrectApps() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
 
         mEntry.showInPersonalTab = true;
         mEntry.mProfileType = UserManager.USER_TYPE_FULL_SYSTEM;
@@ -334,7 +335,8 @@ public class ApplicationsStateTest {
 
     @Test
     public void testPrivateProfileFilterDisplaysCorrectAppsWhenFlagDisabled() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE);
+        mSetFlagsRule.disableFlags(Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
 
         mEntry.showInPersonalTab = false;
         mEntry.mProfileType = UserManager.USER_TYPE_PROFILE_PRIVATE;

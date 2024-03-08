@@ -39,7 +39,6 @@ import com.android.credentialmanager.common.material.rememberModalBottomSheetSta
 import com.android.credentialmanager.ui.theme.EntryShape
 import kotlinx.coroutines.launch
 
-
 /** Draws a modal bottom sheet with the same styles and effects shared by various flows. */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +72,7 @@ fun ModalBottomSheet(
                 dragHandle = null,
                 // Never take over the full screen. We always want to leave some top scrim space
                 // for exiting and viewing the underlying app to help a user gain context.
-                modifier = Modifier.padding(top = 56.dp),
+                modifier = Modifier.padding(top = 72.dp),
         )
     } else {
         val scope = rememberCoroutineScope()

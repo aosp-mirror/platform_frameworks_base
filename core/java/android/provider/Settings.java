@@ -3583,6 +3583,12 @@ public final class Settings {
                                                     + " and user:" + userHandle
                                                     + " with index:" + index);
                                         }
+                                        // Always make sure to close any pre-existing tracker before
+                                        // replacing it, to prevent memory leaks
+                                        var oldTracker = mGenerationTrackers.get(name);
+                                        if (oldTracker != null) {
+                                            oldTracker.destroy();
+                                        }
                                         mGenerationTrackers.put(name, new GenerationTracker(name,
                                                 array, index, generation,
                                                 mGenerationTrackerErrorHandler));
@@ -3804,6 +3810,12 @@ public final class Settings {
                                         + " type:" + mUri.getPath()
                                         + " in package:" + cr.getPackageName()
                                         + " with index:" + index);
+                            }
+                            // Always make sure to close any pre-existing tracker before
+                            // replacing it, to prevent memory leaks
+                            var oldTracker = mGenerationTrackers.get(prefix);
+                            if (oldTracker != null) {
+                                oldTracker.destroy();
                             }
                             mGenerationTrackers.put(prefix,
                                     new GenerationTracker(prefix, array, index, generation,

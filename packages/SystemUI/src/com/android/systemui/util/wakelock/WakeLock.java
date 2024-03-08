@@ -130,7 +130,11 @@ public interface WakeLock {
                 if (logger != null) {
                     logger.logAcquire(inner, why, count);
                 }
-                inner.acquire(maxTimeout);
+                if (maxTimeout == Builder.NO_TIMEOUT) {
+                    inner.acquire();
+                } else {
+                    inner.acquire(maxTimeout);
+                }
             }
 
             /** @see PowerManager.WakeLock#release() */
@@ -169,6 +173,7 @@ public interface WakeLock {
      * An injectable Builder that wraps {@link #createPartial(Context, String, long)}.
      */
     class Builder {
+        public static final long NO_TIMEOUT = -1;
         private final Context mContext;
         private final WakeLockLogger mLogger;
         private String mTag;

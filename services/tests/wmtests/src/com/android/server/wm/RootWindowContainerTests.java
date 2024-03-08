@@ -835,8 +835,6 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 new TestDisplayContent.Builder(mAtm, 1000, 1500)
                         .setSystemDecorations(true).build();
 
-        doReturn(true).when(mRootWindowContainer)
-                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean());
         doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
                 anyBoolean());
 

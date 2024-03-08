@@ -80,11 +80,14 @@
 
     <com.android.wm.shell.windowdecor.MaximizeButtonView
         android:id="@+id/maximize_button_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="44dp"
+        android:layout_height="40dp"
         android:layout_gravity="end"
+        android:layout_marginHorizontal="8dp"
+        android:paddingHorizontal="5dp"
+        android:paddingVertical="3dp"
         android:clickable="true"
-        android:focusable="true" />
+        android:focusable="true"/>
 
     <ImageButton
         android:id="@+id/close_window"

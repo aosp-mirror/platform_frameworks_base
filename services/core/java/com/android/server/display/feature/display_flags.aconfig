@@ -192,3 +192,11 @@ flag {
     bug: "294900859"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "refactor_display_power_controller"
+    namespace: "display_manager"
+    description: "Feature flag for refactoring   the DisplayPowerController and associated components"
+    bug: "294444204"
+    is_fixed_read_only: true
+}

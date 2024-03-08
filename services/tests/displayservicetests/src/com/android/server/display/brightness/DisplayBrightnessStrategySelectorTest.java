@@ -18,8 +18,10 @@ package com.android.server.display.brightness;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
@@ -267,5 +269,34 @@ public final class DisplayBrightnessStrategySelectorTest {
         assertNotEquals(mOffloadBrightnessStrategy,
                 mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
                         Display.STATE_ON));
+    }
+
+    @Test
+    public void selectStrategyCallsPostProcessorForAllStrategies() {
+        when(mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()).thenReturn(true);
+        mDisplayBrightnessStrategySelector = new DisplayBrightnessStrategySelector(mContext,
+                mInjector, DISPLAY_ID, mDisplayManagerFlags);
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = mock(
+                DisplayManagerInternal.DisplayPowerRequest.class);
+        when(mFollowerBrightnessStrategy.getBrightnessToFollow()).thenReturn(0.3f);
+
+        mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest, Display.STATE_ON);
+
+        StrategySelectionNotifyRequest strategySelectionNotifyRequest =
+                new StrategySelectionNotifyRequest(mFollowerBrightnessStrategy);
+        verify(mInvalidBrightnessStrategy).strategySelectionPostProcessor(
+                eq(strategySelectionNotifyRequest));
+        verify(mScreenOffBrightnessModeStrategy).strategySelectionPostProcessor(
+                eq(strategySelectionNotifyRequest));
+        verify(mDozeBrightnessModeStrategy).strategySelectionPostProcessor(
+                eq(strategySelectionNotifyRequest));
+        verify(mFollowerBrightnessStrategy).strategySelectionPostProcessor(
+                eq(strategySelectionNotifyRequest));
+        verify(mBoostBrightnessStrategy).strategySelectionPostProcessor(
+                eq(strategySelectionNotifyRequest));
+        verify(mOverrideBrightnessStrategy).strategySelectionPostProcessor(
+                eq(strategySelectionNotifyRequest));
+        verify(mTemporaryBrightnessStrategy).strategySelectionPostProcessor(
+                eq(strategySelectionNotifyRequest));
     }
 }

@@ -5067,6 +5067,7 @@ public abstract class Context {
      * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
      *
+     * @removed See {@link android.hardware.biometrics.BiometricPrompt}
      * @see #getSystemService(String)
      * @see android.hardware.fingerprint.FingerprintManager
      */
@@ -5081,8 +5082,6 @@ public abstract class Context {
      * @see #getSystemService
      * @see android.hardware.face.FaceManager
      */
-    @FlaggedApi(android.hardware.biometrics.Flags.FLAG_FACE_BACKGROUND_AUTHENTICATION)
-    @SystemApi
     public static final String FACE_SERVICE = "face";
 
     /**

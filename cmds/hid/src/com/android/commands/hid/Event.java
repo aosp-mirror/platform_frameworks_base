@@ -56,6 +56,7 @@ public class Event {
     private int mId;
     private String mCommand;
     private String mName;
+    private String mUniq;
     private byte[] mDescriptor;
     private int mVid;
     private int mPid;
@@ -76,6 +77,10 @@ public class Event {
 
     public String getName() {
         return mName;
+    }
+
+    public String getUniq() {
+        return mUniq;
     }
 
     public byte[] getDescriptor() {
@@ -116,8 +121,9 @@ public class Event {
 
     public String toString() {
         return "Event{id=" + mId
-            + ", command=" + String.valueOf(mCommand)
-            + ", name=" + String.valueOf(mName)
+            + ", command=" + mCommand
+            + ", name=" + mName
+            + ", uniq=" + mUniq
             + ", descriptor=" + Arrays.toString(mDescriptor)
             + ", vid=" + mVid
             + ", pid=" + mPid
@@ -147,6 +153,10 @@ public class Event {
 
         public void setName(String name) {
             mEvent.mName = name;
+        }
+
+        public void setUniq(String uniq) {
+            mEvent.mUniq = uniq;
         }
 
         public void setDescriptor(byte[] descriptor) {
@@ -246,6 +256,9 @@ public class Event {
                                 break;
                             case "name":
                                 eb.setName(mReader.nextString());
+                                break;
+                            case "uniq":
+                                eb.setUniq(mReader.nextString());
                                 break;
                             case "vid":
                                 eb.setVid(readInt());

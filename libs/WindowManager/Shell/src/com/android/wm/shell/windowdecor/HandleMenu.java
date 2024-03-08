@@ -35,7 +35,6 @@ import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -53,6 +52,7 @@ import com.android.wm.shell.R;
  */
 class HandleMenu {
     private static final String TAG = "HandleMenu";
+    private static final boolean SHOULD_SHOW_MORE_ACTIONS_PILL = false;
     private final Context mContext;
     private final WindowDecoration mParentDecor;
     private WindowDecoration.AdditionalWindow mHandleMenuWindow;
@@ -185,11 +185,9 @@ class HandleMenu {
      * Set up interactive elements & height of handle menu's more actions pill
      */
     private void setupMoreActionsPill(View handleMenu) {
-        final Button selectBtn = handleMenu.findViewById(R.id.select_button);
-        selectBtn.setOnClickListener(mOnClickListener);
-        final Button screenshotBtn = handleMenu.findViewById(R.id.screenshot_button);
-        // TODO: Remove once implemented.
-        screenshotBtn.setVisibility(View.GONE);
+        if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
+            handleMenu.findViewById(R.id.more_actions_pill).setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -305,11 +303,14 @@ class HandleMenu {
      * Determines handle menu height based on if windowing pill should be shown.
      */
     private int getHandleMenuHeight(Resources resources) {
-        int menuHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_height);
+        int menuHeight = loadDimensionPixelSize(resources, R.dimen.desktop_mode_handle_menu_height);
         if (!mShouldShowWindowingPill) {
             menuHeight -= loadDimensionPixelSize(resources,
                     R.dimen.desktop_mode_handle_menu_windowing_pill_height);
+        }
+        if (!SHOULD_SHOW_MORE_ACTIONS_PILL) {
+            menuHeight -= loadDimensionPixelSize(resources,
+                    R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
         }
         return menuHeight;
     }

@@ -126,6 +126,13 @@ public class DisplayManagerFlags {
             Flags::sensorBasedBrightnessThrottling
     );
 
+
+    private final FlagState mRefactorDisplayPowerController = new FlagState(
+            Flags.FLAG_REFACTOR_DISPLAY_POWER_CONTROLLER,
+            Flags::refactorDisplayPowerController
+    );
+
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -256,6 +263,10 @@ public class DisplayManagerFlags {
         return mSensorBasedBrightnessThrottling.isEnabled();
     }
 
+    public boolean isRefactorDisplayPowerControllerEnabled() {
+        return mRefactorDisplayPowerController.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -280,6 +291,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mFastHdrTransitions);
         pw.println(" " + mRefreshRateVotingTelemetry);
         pw.println(" " + mSensorBasedBrightnessThrottling);
+        pw.println(" " + mRefactorDisplayPowerController);
     }
 
     private static class FlagState {

@@ -151,7 +151,7 @@ public class ClipboardService extends SystemService {
     private final ContentCaptureManagerInternal mContentCaptureInternal;
     private final AutofillManagerInternal mAutofillInternal;
     private final IBinder mPermissionOwner;
-    private final Consumer<ClipData> mEmulatorClipboardMonitor;
+    private final Consumer<ClipData> mClipboardMonitor;
     private final Handler mWorkerHandler;
 
     @GuardedBy("mLock")
@@ -192,7 +192,7 @@ public class ClipboardService extends SystemService {
         final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (Build.IS_EMULATOR) {
-            mEmulatorClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
+            mClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
                 synchronized (mLock) {
                     Clipboard clipboard = getClipboardLocked(0, DEVICE_ID_DEFAULT);
                     if (clipboard != null) {
@@ -201,8 +201,12 @@ public class ClipboardService extends SystemService {
                     }
                 }
             });
+        } else if (Build.IS_ARC) {
+            mClipboardMonitor = new ArcClipboardMonitor((clip, uid) -> {
+                setPrimaryClipInternal(clip, uid);
+            });
         } else {
-            mEmulatorClipboardMonitor = (clip) -> {};
+            mClipboardMonitor = (clip) -> {};
         }
 
         updateConfig();
@@ -937,7 +941,7 @@ public class ClipboardService extends SystemService {
     private void setPrimaryClipInternalLocked(
             @Nullable ClipData clip, int uid, int deviceId, @Nullable String sourcePackage) {
         if (deviceId == DEVICE_ID_DEFAULT) {
-            mEmulatorClipboardMonitor.accept(clip);
+            mClipboardMonitor.accept(clip);
         }
 
         final int userId = UserHandle.getUserId(uid);

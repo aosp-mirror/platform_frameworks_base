@@ -33,6 +33,7 @@ public class BubbleBarUpdate implements Parcelable {
 
     public static final String BUNDLE_KEY = "update";
 
+    public final boolean initialState;
     public boolean expandedChanged;
     public boolean expanded;
     public boolean shouldShowEducation;
@@ -46,6 +47,8 @@ public class BubbleBarUpdate implements Parcelable {
     public String suppressedBubbleKey;
     @Nullable
     public String unsupressedBubbleKey;
+    @Nullable
+    public BubbleBarLocation bubbleBarLocation;
 
     // This is only populated if bubbles have been removed.
     public List<RemovedBubble> removedBubbles = new ArrayList<>();
@@ -56,10 +59,17 @@ public class BubbleBarUpdate implements Parcelable {
     // This is only populated the first time a listener is connected so it gets the current state.
     public List<BubbleInfo> currentBubbleList = new ArrayList<>();
 
+
     public BubbleBarUpdate() {
+        this(false);
+    }
+
+    private BubbleBarUpdate(boolean initialState) {
+        this.initialState = initialState;
     }
 
     public BubbleBarUpdate(Parcel parcel) {
+        initialState = parcel.readBoolean();
         expandedChanged = parcel.readBoolean();
         expanded = parcel.readBoolean();
         shouldShowEducation = parcel.readBoolean();
@@ -75,6 +85,8 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.readStringList(bubbleKeysInOrder);
         currentBubbleList = parcel.readParcelableList(new ArrayList<>(),
                 BubbleInfo.class.getClassLoader());
+        bubbleBarLocation = parcel.readParcelable(BubbleBarLocation.class.getClassLoader(),
+                BubbleBarLocation.class);
     }
 
     /**
@@ -89,12 +101,15 @@ public class BubbleBarUpdate implements Parcelable {
                 || !bubbleKeysInOrder.isEmpty()
                 || suppressedBubbleKey != null
                 || unsupressedBubbleKey != null
-                || !currentBubbleList.isEmpty();
+                || !currentBubbleList.isEmpty()
+                || bubbleBarLocation != null;
     }
 
     @Override
     public String toString() {
-        return "BubbleBarUpdate{ expandedChanged=" + expandedChanged
+        return "BubbleBarUpdate{"
+                + " initialState=" + initialState
+                + " expandedChanged=" + expandedChanged
                 + " expanded=" + expanded
                 + " selectedBubbleKey=" + selectedBubbleKey
                 + " shouldShowEducation=" + shouldShowEducation
@@ -105,6 +120,7 @@ public class BubbleBarUpdate implements Parcelable {
                 + " removedBubbles=" + removedBubbles
                 + " bubbles=" + bubbleKeysInOrder
                 + " currentBubbleList=" + currentBubbleList
+                + " bubbleBarLocation=" + bubbleBarLocation
                 + " }";
     }
 
@@ -115,6 +131,7 @@ public class BubbleBarUpdate implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeBoolean(initialState);
         parcel.writeBoolean(expandedChanged);
         parcel.writeBoolean(expanded);
         parcel.writeBoolean(shouldShowEducation);
@@ -126,6 +143,16 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.writeParcelableList(removedBubbles, flags);
         parcel.writeStringList(bubbleKeysInOrder);
         parcel.writeParcelableList(currentBubbleList, flags);
+        parcel.writeParcelable(bubbleBarLocation, flags);
+    }
+
+    /**
+     * Create update for initial set of values.
+     * <p>
+     * Used when bubble bar is newly created.
+     */
+    public static BubbleBarUpdate createInitialState() {
+        return new BubbleBarUpdate(true);
     }
 
     @NonNull

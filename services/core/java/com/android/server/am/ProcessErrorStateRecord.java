@@ -718,9 +718,7 @@ class ProcessErrorStateRecord {
                         mService.mContext, mApp.info.packageName, mApp.info.flags);
             }
         }
-        for (BroadcastQueue queue : mService.mBroadcastQueues) {
-            queue.onApplicationProblemLocked(mApp);
-        }
+        mService.getBroadcastQueue().onApplicationProblemLocked(mApp);
     }
 
     @GuardedBy("mService")

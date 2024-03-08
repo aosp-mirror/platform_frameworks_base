@@ -80,11 +80,10 @@ interface IAppWidgetService {
             in Bundle extras, in IntentSender resultIntent);
     boolean isRequestPinAppWidgetSupported();
     oneway void noteAppWidgetTapped(in String callingPackage, in int appWidgetId);
-    void setWidgetPreview(in ComponentName providerComponent, in int widgetCategories,
+    boolean setWidgetPreview(in ComponentName providerComponent, in int widgetCategories,
             in RemoteViews preview);
     @nullable RemoteViews getWidgetPreview(in String callingPackage,
             in ComponentName providerComponent, in int profileId, in int widgetCategory);
     void removeWidgetPreview(in ComponentName providerComponent, in int widgetCategories);
-
 }
 

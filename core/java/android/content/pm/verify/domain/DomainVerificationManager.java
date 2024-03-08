@@ -163,14 +163,31 @@ public final class DomainVerificationManager {
     }
 
     /**
-     * Update the URI relative filter groups for a package. All previously existing groups
-     * will be cleared before the new groups will be applied.
+     * Update the URI relative filter groups for a package. The groups set using this API acts
+     * as an additional filtering layer during intent resolution. It does not replace any
+     * existing groups that have been added to the package's intent filters either using the
+     * {@link android.content.IntentFilter#addUriRelativeFilterGroup(UriRelativeFilterGroup)}
+     * API or defined in the manifest.
+     * <p>
+     * Groups can be indexed to any domain or can be indexed for all subdomains by prefixing the
+     * hostname with a wildcard (i.e. "*.example.com"). Priority will be first given to groups
+     * that are indexed to the specific subdomain of the intent's data URI followed by any groups
+     * indexed to wildcard subdomains. If the subdomain consists of more than one label, priority
+     * will decrease corresponding to the decreasing number of subdomain labels after the wildcard.
+     * For example "a.b.c.d" will match "*.b.c.d" before "*.c.d".
+     * <p>
+     * All previously existing groups set for a domain index using this API will be cleared when
+     * new groups are set.
      *
      * @param packageName The name of the package.
      * @param domainToGroupsMap A map of domains to a list of {@link UriRelativeFilterGroup}s that
      *                         should apply to them. Groups for each domain will replace any groups
-     *                         provided for that domain in a prior call to this method. Groups will
+     *                         provided for that domain in a prior call to this method. To clear
+     *                         existing groups, set the list to null or a empty list. Groups will
      *                         be evaluated in the order they are provided.
+     *
+     * @see UriRelativeFilterGroup
+     * @see android.content.IntentFilter
      * @hide
      */
     @SystemApi

@@ -2833,7 +2833,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     boolean areShortcutsSupportedOnHomeScreen(@UserIdInt int userId) {
-        if (!android.os.Flags.allowPrivateProfile() || !Flags.disablePrivateSpaceItemsOnHome()) {
+        if (!android.os.Flags.allowPrivateProfile() || !Flags.disablePrivateSpaceItemsOnHome()
+                || !android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             return true;
         }
         final long start = getStatStartTime();

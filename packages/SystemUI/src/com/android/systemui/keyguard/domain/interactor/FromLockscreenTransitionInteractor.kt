@@ -357,7 +357,8 @@ constructor(
                 from = KeyguardState.LOCKSCREEN,
                 modeOnCanceledFromStartedStep = { startedStep ->
                     if (
-                        startedStep.to == KeyguardState.AOD && startedStep.from == KeyguardState.AOD
+                        transitionInteractor.asleepKeyguardState.value == KeyguardState.AOD &&
+                            startedStep.from == KeyguardState.AOD
                     ) {
                         TransitionModeOnCanceled.REVERSE
                     } else {

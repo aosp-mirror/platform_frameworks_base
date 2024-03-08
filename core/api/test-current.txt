@@ -1710,15 +1710,6 @@ package android.hardware.display {
 
 }
 
-package android.hardware.fingerprint {
-
-  @Deprecated public class FingerprintManager {
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
-  }
-
-}
-
 package android.hardware.hdmi {
 
   public final class HdmiControlServiceWrapper {
@@ -3930,6 +3921,7 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodInfo implements android.os.Parcelable {
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, @NonNull String);
     ctor @FlaggedApi("android.view.inputmethod.connectionless_handwriting") public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
