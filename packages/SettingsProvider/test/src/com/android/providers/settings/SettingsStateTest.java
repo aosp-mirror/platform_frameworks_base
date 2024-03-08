@@ -740,6 +740,51 @@ public class SettingsStateTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_STAGE_ALL_ACONFIG_FLAGS)
+    public void testSetSettingsLockedStagesAconfigFlags() throws Exception {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+
+        SettingsState settingsState = new SettingsState(
+                InstrumentationRegistry.getContext(), mLock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        String prefix = "test_namespace";
+        String packageName = "com.android.flags";
+        Map<String, String> keyValues =
+                Map.of("test_namespace/com.android.flags.flag3", "true");
+
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage(packageName)
+                        .setName("flag3")
+                        .setNamespace(prefix)
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (mLock) {
+            settingsState.loadAconfigDefaultValues(
+                    flags.toByteArray(), settingsState.getAconfigDefaultValues());
+            List<String> updates =
+                    settingsState.setSettingsLocked("test_namespace/", keyValues, packageName);
+            assertEquals(1, updates.size());
+            assertEquals(updates.get(0), "staged/test_namespace*com.android.flags.flag3");
+
+            SettingsState.Setting s;
+
+            s = settingsState.getSettingLocked("test_namespace/com.android.flags.flag3");
+            assertNull(s.getValue());
+
+            s = settingsState.getSettingLocked("staged/test_namespace*com.android.flags.flag3");
+            assertEquals("true", s.getValue());
+        }
+    }
+
+    @Test
     public void testsetSettingsLockedKeepTrunkDefault() throws Exception {
         final PrintStream os = new PrintStream(new FileOutputStream(mSettingsFile));
         os.print(
