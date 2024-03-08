@@ -18,7 +18,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.scene.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.FakeSceneDataSource
@@ -27,8 +27,8 @@ import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.STATE_OPENING
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.shade.domain.interactor.panelExpansionInteractor
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.panelExpansionInteractor
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.testKosmos

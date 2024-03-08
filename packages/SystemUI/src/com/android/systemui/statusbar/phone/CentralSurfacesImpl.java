@@ -3049,8 +3049,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
                 if (!mUserSetup && mState == StatusBarState.SHADE) {
-                    mShadeSurface.collapse(true /* animate */, false  /* delayed */,
-                            1.0f  /* speedUpFactor */);
+                    mShadeController.animateCollapseShade();
                 }
             }
         }

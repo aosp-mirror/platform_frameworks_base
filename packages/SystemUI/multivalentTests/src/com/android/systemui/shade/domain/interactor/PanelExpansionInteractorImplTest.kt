@@ -16,24 +16,21 @@
 
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.android.systemui.scene.domain.interactor
+package com.android.systemui.shade.domain.interactor
 
-import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
-import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
-import com.android.systemui.shade.data.repository.fakeShadeRepository
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.panelExpansionInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,7 +45,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class PanelExpansionInteractorTest : SysuiTestCase() {
+class PanelExpansionInteractorImplTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -60,9 +57,8 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
             ObservableTransitionState.Idle(Scenes.Lockscreen)
         )
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
-    private val fakeShadeRepository = kosmos.fakeShadeRepository
 
-    private lateinit var underTest: PanelExpansionInteractor
+    private lateinit var underTest: PanelExpansionInteractorImpl
 
     @Before
     fun setUp() {
@@ -73,7 +69,7 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
     @EnableSceneContainer
     fun legacyPanelExpansion_whenIdle_whenLocked() =
         testScope.runTest {
-            underTest = kosmos.panelExpansionInteractor
+            underTest = kosmos.panelExpansionInteractorImpl
             setUnlocked(false)
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
@@ -97,7 +93,7 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
     @EnableSceneContainer
     fun legacyPanelExpansion_whenIdle_whenUnlocked() =
         testScope.runTest {
-            underTest = kosmos.panelExpansionInteractor
+            underTest = kosmos.panelExpansionInteractorImpl
             setUnlocked(true)
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
@@ -116,33 +112,6 @@ class PanelExpansionInteractorTest : SysuiTestCase() {
             changeScene(Scenes.Communal) { assertThat(panelExpansion).isEqualTo(1f) }
             assertThat(panelExpansion).isEqualTo(1f)
         }
-
-    @Test
-    @DisableFlags(FLAG_SCENE_CONTAINER)
-    fun legacyPanelExpansion_whenInLegacyMode() =
-        testScope.runTest {
-            underTest = kosmos.panelExpansionInteractor
-            val leet = 0.1337f
-            fakeShadeRepository.setLegacyShadeExpansion(leet)
-            setUnlocked(false)
-            val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
-
-            changeScene(Scenes.Lockscreen)
-            assertThat(panelExpansion).isEqualTo(leet)
-
-            changeScene(Scenes.Bouncer)
-            assertThat(panelExpansion).isEqualTo(leet)
-
-            changeScene(Scenes.Shade)
-            assertThat(panelExpansion).isEqualTo(leet)
-
-            changeScene(Scenes.QuickSettings)
-            assertThat(panelExpansion).isEqualTo(leet)
-
-            changeScene(Scenes.Communal)
-            assertThat(panelExpansion).isEqualTo(leet)
-        }
-
     private fun TestScope.setUnlocked(isUnlocked: Boolean) {
         val isDeviceUnlocked by collectLastValue(deviceUnlockedInteractor.isDeviceUnlocked)
         deviceEntryRepository.setUnlocked(isUnlocked)
