@@ -6098,7 +6098,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
             new Key<android.util.Range<Float>>("android.efv.paddingZoomFactorRange", new TypeReference<android.util.Range<Float>>() {{ }});
 
