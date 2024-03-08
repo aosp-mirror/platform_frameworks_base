@@ -148,4 +148,7 @@
 
     <!-- Whether pointer pilfer is required to start back animation. -->
     <bool name="config_backAnimationRequiresPointerPilfer">true</bool>
+
+    <!-- Whether desktop mode is supported on the current device  -->
+    <bool name="config_isDesktopModeSupported">false</bool>
 </resources>
