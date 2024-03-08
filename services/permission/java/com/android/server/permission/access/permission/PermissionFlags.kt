@@ -477,9 +477,7 @@ object PermissionFlags {
         if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT)) {
             flags = flags or UPGRADE_EXEMPT
         }
-        // We ignore whether FLAG_PERMISSION_APPLY_RESTRICTION is set here because previously
-        // platform may be relying on the old restorePermissionState() to get it correct later.
-        if (!flags.hasAnyBit(MASK_EXEMPT)) {
+        if (apiFlags.hasBits(PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION)) {
             if (permission.isHardRestricted) {
                 flags = flags or RESTRICTION_REVOKED
             }
