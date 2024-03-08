@@ -2393,4 +2393,6 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"你可以收發訊息，沒有行動/Wi-Fi 網路也無妨"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」應用程式"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
+    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
+    <skip />
 </resources>

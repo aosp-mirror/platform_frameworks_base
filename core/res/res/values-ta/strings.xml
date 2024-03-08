@@ -2393,4 +2393,6 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"மொபைல்/வைஃபை நெட்வொர்க் இல்லாமல் நீங்கள் மெசேஜ்களை அனுப்பலாம் பெறலாம்"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ஆப்ஸைத் திறக்கவும்"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"இது செயல்படும் விதம்"</string>
+    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
+    <skip />
 </resources>
