@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack.ui.viewmodel
+package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.scene.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.shade.data.repository.shadeRepository
 
-val Kosmos.panelExpansionInteractor by Fixture {
-    PanelExpansionInteractor(
+val Kosmos.panelExpansionInteractor by Fixture { panelExpansionInteractorImpl }
+val Kosmos.panelExpansionInteractorImpl by Fixture {
+    PanelExpansionInteractorImpl(
         sceneInteractor = sceneInteractor,
-        shadeRepository = shadeRepository,
     )
 }

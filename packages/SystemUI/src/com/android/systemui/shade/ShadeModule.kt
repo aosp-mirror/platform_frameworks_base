@@ -25,6 +25,8 @@ import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorSceneContainerImpl
@@ -107,6 +109,20 @@ abstract class ShadeModule {
             sceneContainerOn: Provider<ShadeLockscreenInteractorImpl>,
             sceneContainerOff: Provider<NotificationPanelViewController>
         ): ShadeLockscreenInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providePanelExpansionInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<PanelExpansionInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): PanelExpansionInteractor {
             return if (sceneContainerFlags.isEnabled()) {
                 sceneContainerOn.get()
             } else {

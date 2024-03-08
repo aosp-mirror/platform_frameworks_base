@@ -246,6 +246,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.flow.Flow;
 
 @SysUISingleton
 public final class NotificationPanelViewController implements ShadeSurface, Dumpable {
@@ -3995,6 +3996,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     float getExpandedFraction() {
         return mExpandedFraction;
+    }
+
+    @Override
+    public Flow<Float> getLegacyPanelExpansion() {
+        return  mShadeRepository.getLegacyShadeExpansion();
     }
 
     @Override
