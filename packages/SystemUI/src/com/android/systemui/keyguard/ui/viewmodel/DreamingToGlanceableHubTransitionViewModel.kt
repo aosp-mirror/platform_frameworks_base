@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.FromDreamingTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.res.R
@@ -36,7 +37,9 @@ class DreamingToGlanceableHubTransitionViewModel
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
     configurationInteractor: ConfigurationInteractor,
+    private val fromDreamingTransitionInteractor: FromDreamingTransitionInteractor,
 ) {
+    fun startTransition() = fromDreamingTransitionInteractor.startToGlanceableHubTransition()
 
     private val transitionAnimation =
         animationFlow.setup(
@@ -57,6 +60,9 @@ constructor(
                     name = "DREAMING->GLANCEABLE_HUB: overlayTranslationX",
                 )
             }
+
+    // Keep the dream visible while the hub swipes in over the dream.
+    val dreamAlpha: Flow<Float> = transitionAnimation.immediatelyTransitionTo(1f)
 
     val dreamOverlayAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -56,7 +55,6 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         keyguardInteractor = keyguardInteractor,
         keyguardTransitionInteractor = keyguardTransitionInteractor,
         shadeInteractor = shadeInteractor,
-        communalInteractor = communalInteractor,
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         aodToOccludedTransitionViewModel = aodToOccludedTransitionViewModel,

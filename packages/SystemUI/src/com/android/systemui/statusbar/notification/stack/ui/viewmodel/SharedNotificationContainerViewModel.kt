@@ -20,7 +20,6 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.common.shared.model.NotificationContainerBounds
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -37,8 +36,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
-import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
-import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
@@ -97,7 +94,6 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
-    communalInteractor: CommunalInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
@@ -126,22 +122,6 @@ constructor(
 ) : FlowDumperImpl(dumpManager) {
     private val statesForConstrainedNotifications: Set<KeyguardState> =
         setOf(AOD, LOCKSCREEN, DOZING, ALTERNATE_BOUNCER, PRIMARY_BOUNCER)
-
-    private val lockscreenToGlanceableHubRunning =
-        keyguardTransitionInteractor
-            .transition(LOCKSCREEN, GLANCEABLE_HUB)
-            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
-            .distinctUntilChanged()
-            .onStart { emit(false) }
-            .dumpWhileCollecting("lockscreenToGlanceableHubRunning")
-
-    private val glanceableHubToLockscreenRunning =
-        keyguardTransitionInteractor
-            .transition(GLANCEABLE_HUB, LOCKSCREEN)
-            .map { it.transitionState == STARTED || it.transitionState == RUNNING }
-            .distinctUntilChanged()
-            .onStart { emit(false) }
-            .dumpWhileCollecting("glanceableHubToLockscreenRunning")
 
     /**
      * Shade locked is a legacy concept, but necessary to mimic current functionality. Listen for
@@ -218,21 +198,38 @@ constructor(
             )
             .dumpValue("isOnLockscreenWithoutShade")
 
+    /** If the user is visually on the glanceable hub or transitioning to/from it */
+    private val isOnGlanceableHub: Flow<Boolean> =
+        combine(
+                keyguardTransitionInteractor.finishedKeyguardState.map { state ->
+                    state == GLANCEABLE_HUB
+                },
+                keyguardTransitionInteractor
+                    .isInTransitionWhere { from, to ->
+                        from == GLANCEABLE_HUB || to == GLANCEABLE_HUB
+                    }
+                    .onStart { emit(false) }
+            ) { isOnGlanceableHub, transitioningToOrFromHub ->
+                isOnGlanceableHub || transitioningToOrFromHub
+            }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("isOnGlanceableHub")
+
     /** Are we purely on the glanceable hub without the shade/qs? */
     val isOnGlanceableHubWithoutShade: Flow<Boolean> =
         combine(
-                communalInteractor.isIdleOnCommunal,
+                isOnGlanceableHub,
                 // Shade with notifications
                 shadeInteractor.shadeExpansion.map { it > 0f },
                 // Shade without notifications, quick settings only (pull down from very top on
                 // lockscreen)
                 shadeInteractor.qsExpansion.map { it > 0f },
-            ) { isIdleOnCommunal, isShadeVisible, qsExpansion ->
-                isIdleOnCommunal && !(isShadeVisible || qsExpansion)
+            ) { isGlanceableHub, isShadeVisible, qsExpansion ->
+                isGlanceableHub && !(isShadeVisible || qsExpansion)
             }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Eagerly,
                 initialValue = false,
             )
             .dumpWhileCollecting("isOnGlanceableHubWithoutShade")
@@ -431,39 +428,35 @@ constructor(
     }
 
     /**
-     * Returns a flow of the expected alpha while running a LOCKSCREEN<->GLANCEABLE_HUB transition
-     * or idle on the glanceable hub.
+     * Returns a flow of the expected alpha while running a LOCKSCREEN<->GLANCEABLE_HUB or
+     * DREAMING<->GLANCEABLE_HUB transition or idle on the hub.
      *
      * Must return 1.0f when not controlling the alpha since notifications does a min of all the
      * alpha sources.
      */
     val glanceableHubAlpha: Flow<Float> =
-        isOnGlanceableHubWithoutShade
-            .flatMapLatest { isOnGlanceableHubWithoutShade ->
-                combineTransform(
-                    lockscreenToGlanceableHubRunning,
-                    glanceableHubToLockscreenRunning,
-                    merge(
-                        lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
-                        glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
-                    )
-                ) { lockscreenToGlanceableHubRunning, glanceableHubToLockscreenRunning, alpha ->
-                    if (isOnGlanceableHubWithoutShade) {
-                        // Notifications should not be visible on the glanceable hub.
-                        // TODO(b/321075734): implement a way to actually set the notifications to
-                        // gone
-                        //  while on the hub instead of just adjusting alpha
-                        emit(0f)
-                    } else if (
-                        lockscreenToGlanceableHubRunning || glanceableHubToLockscreenRunning
-                    ) {
-                        emit(alpha)
-                    } else {
-                        // Not on the hub and no transitions running, return full visibility so we
-                        // don't
-                        // block the notifications from showing.
-                        emit(1f)
-                    }
+        combineTransform(
+                isOnGlanceableHubWithoutShade,
+                isOnLockscreen,
+                merge(
+                    lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
+                    glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
+                )
+            ) { isOnGlanceableHubWithoutShade, isOnLockscreen, alpha,
+                ->
+                if (isOnGlanceableHubWithoutShade && !isOnLockscreen) {
+                    // Notifications should not be visible on the glanceable hub.
+                    // TODO(b/321075734): implement a way to actually set the notifications to
+                    // gone while on the hub instead of just adjusting alpha
+                    emit(0f)
+                } else if (isOnGlanceableHubWithoutShade) {
+                    // We are transitioning between hub and lockscreen, so set the alpha for the
+                    // transition animation.
+                    emit(alpha)
+                } else {
+                    // Not on the hub and no transitions running, return full visibility so we
+                    // don't block the notifications from showing.
+                    emit(1f)
                 }
             }
             .dumpWhileCollecting("glanceableHubAlpha")
