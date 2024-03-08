@@ -4025,8 +4025,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
         }
-        throw new IllegalArgumentException(
-                providerComponent + " is not a valid AppWidget provider");
+        // Either the provider does not exist or the caller does not have permission to access its
+        // previews.
+        return null;
     }
 
     @Override
