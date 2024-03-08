@@ -102,6 +102,9 @@ interface BaseShadeInteractor {
      * animating.
      */
     val isUserInteractingWithQs: Flow<Boolean>
+
+    /** Whether the current configuration requires the split shade to be shown. */
+    val isSplitShade: StateFlow<Boolean>
 }
 
 fun createAnyExpansionFlow(

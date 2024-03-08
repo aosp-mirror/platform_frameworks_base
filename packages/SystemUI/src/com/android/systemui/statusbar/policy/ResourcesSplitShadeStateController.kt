@@ -26,6 +26,15 @@ import javax.inject.Inject
  * based solely on resources, no extra flag logic.
  */
 class ResourcesSplitShadeStateController @Inject constructor() : SplitShadeStateController {
+
+    @Deprecated(
+        message = "This is deprecated, please use ShadeInteractor#isSplitShade instead",
+        replaceWith =
+            ReplaceWith(
+                "shadeInteractor.isSplitShade",
+                "com.android.systemui.shade.domain.interactor.ShadeInteractor",
+            ),
+    )
     override fun shouldUseSplitNotificationShade(resources: Resources): Boolean {
         return resources.getBoolean(R.bool.config_use_split_notification_shade)
     }
