@@ -659,6 +659,11 @@ public class TvAdView extends ViewGroup {
         }
     }
 
+    /** @hide */
+    public TvAdManager.Session getAdSession() {
+        return mSession;
+    }
+
     private class MySessionCallback extends TvAdManager.SessionCallback {
         final String mServiceId;
 
