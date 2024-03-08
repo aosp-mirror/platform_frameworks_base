@@ -30,6 +30,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
@@ -108,14 +109,15 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
-                footerActionsViewModelFactory,
-                footerActionsController,
+                footerActionsViewModelFactory = footerActionsViewModelFactory,
+                footerActionsController = footerActionsController,
             )
     }
 
     @Test
     fun destinationsNotCustomizing() =
         testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(false)
 
@@ -131,6 +133,38 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     @Test
     fun destinationsCustomizing() =
         testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            val destinations by collectLastValue(underTest.destinationScenes)
+            qsFlexiglassAdapter.setCustomizing(true)
+
+            assertThat(destinations)
+                .isEqualTo(
+                    mapOf(
+                        Back to UserActionResult(Scenes.QuickSettings),
+                    )
+                )
+        }
+
+    @Test
+    fun destinations_whenNotCustomizing_inSplitShade() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            val destinations by collectLastValue(underTest.destinationScenes)
+            qsFlexiglassAdapter.setCustomizing(false)
+
+            assertThat(destinations)
+                .isEqualTo(
+                    mapOf(
+                        Back to UserActionResult(Scenes.Shade),
+                        Swipe(SwipeDirection.Up) to UserActionResult(Scenes.Shade),
+                    )
+                )
+        }
+
+    @Test
+    fun destinations_whenCustomizing_inSplitShade() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, true)
             val destinations by collectLastValue(underTest.destinationScenes)
             qsFlexiglassAdapter.setCustomizing(true)
 

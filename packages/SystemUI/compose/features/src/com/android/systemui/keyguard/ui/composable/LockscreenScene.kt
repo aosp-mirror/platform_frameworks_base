@@ -39,7 +39,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** The lock screen scene shows when the device is locked. */
@@ -54,8 +53,17 @@ constructor(
     override val key = Scenes.Lockscreen
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        combine(viewModel.upDestinationSceneKey, viewModel.leftDestinationSceneKey, ::Pair)
-            .map { (upKey, leftKey) -> destinationScenes(up = upKey, left = leftKey) }
+        combine(
+                viewModel.upDestinationSceneKey,
+                viewModel.leftDestinationSceneKey,
+                viewModel.downFromTopEdgeDestinationSceneKey,
+            ) { upKey, leftKey, downFromTopEdgeKey ->
+                destinationScenes(
+                    up = upKey,
+                    left = leftKey,
+                    downFromTopEdge = downFromTopEdgeKey,
+                )
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -63,6 +71,7 @@ constructor(
                     destinationScenes(
                         up = viewModel.upDestinationSceneKey.value,
                         left = viewModel.leftDestinationSceneKey.value,
+                        downFromTopEdge = viewModel.downFromTopEdgeDestinationSceneKey.value,
                     )
             )
 
@@ -79,12 +88,15 @@ constructor(
     private fun destinationScenes(
         up: SceneKey?,
         left: SceneKey?,
+        downFromTopEdge: SceneKey?,
     ): Map<UserAction, UserActionResult> {
         return buildMap {
             up?.let { this[Swipe(SwipeDirection.Up)] = UserActionResult(up) }
             left?.let { this[Swipe(SwipeDirection.Left)] = UserActionResult(left) }
-            this[Swipe(fromSource = Edge.Top, direction = SwipeDirection.Down)] =
-                UserActionResult(Scenes.QuickSettings)
+            downFromTopEdge?.let {
+                this[Swipe(fromSource = Edge.Top, direction = SwipeDirection.Down)] =
+                    UserActionResult(downFromTopEdge)
+            }
             this[Swipe(direction = SwipeDirection.Down)] = UserActionResult(Scenes.Shade)
         }
     }
