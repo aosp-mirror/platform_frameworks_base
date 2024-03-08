@@ -92,6 +92,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.am.BroadcastProcessQueue.BroadcastConsumer;
 import com.android.server.am.BroadcastProcessQueue.BroadcastPredicate;
+import com.android.server.am.BroadcastProcessQueue.BroadcastRecordConsumer;
 import com.android.server.am.BroadcastRecord.DeliveryState;
 import com.android.server.pm.UserJourneyLogger;
 import com.android.server.pm.UserManagerInternal;
@@ -284,6 +285,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     // when the flag is fused on.
     private static final int MSG_DELIVERY_TIMEOUT_SOFT = 8;
 
+    // TODO: Use the trunk stable flag.
+    private static final boolean DEFER_FROZEN_OUTGOING_BCASTS = false;
+
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
         mLocalHandler.sendEmptyMessage(MSG_UPDATE_RUNNING_LIST);
@@ -332,9 +336,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return true;
             }
             case MSG_PROCESS_FREEZABLE_CHANGED: {
-                synchronized (mService) {
-                    refreshProcessQueueLocked((ProcessRecord) msg.obj);
-                }
+                handleProcessFreezableChanged((ProcessRecord) msg.obj);
                 return true;
             }
             case MSG_UID_STATE_CHANGED: {
@@ -435,7 +437,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         // If app isn't running, and there's nothing in the queue, clean up
-        if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
+        if (queue.isEmpty() && queue.isOutgoingEmpty() && !queue.isActive()
+                && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
     }
@@ -759,6 +762,21 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public void enqueueBroadcastLocked(@NonNull BroadcastRecord r) {
+        // TODO: Apply delivery group policies and FLAG_REPLACE_PENDING to collapse the
+        // outgoing broadcasts.
+        // TODO: Add traces/logs for the enqueueing outgoing broadcasts logic.
+        if (DEFER_FROZEN_OUTGOING_BCASTS && isProcessFreezable(r.callerApp)) {
+            final BroadcastProcessQueue queue = getOrCreateProcessQueue(
+                    r.callerApp.processName, r.callerApp.uid);
+            if (queue.getOutgoingBroadcastCount() >= mConstants.MAX_FROZEN_OUTGOING_BROADCASTS) {
+                // TODO: Kill the process if the outgoing broadcasts count is
+                // beyond a certain limit.
+            }
+            queue.enqueueOutgoingBroadcast(r);
+            mHistory.onBroadcastFrozenLocked(r);
+            mService.mOomAdjuster.mCachedAppOptimizer.freezeAppAsyncImmediateLSP(r.callerApp);
+            return;
+        }
         if (DEBUG_BROADCAST) logv("Enqueuing " + r + " for " + r.receivers.size() + " receivers");
 
         final int cookie = traceBegin("enqueueBroadcast");
@@ -1634,6 +1652,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 "mBroadcastConsumerDeferClear");
     };
 
+    final BroadcastRecordConsumer mBroadcastRecordConsumerEnqueue = this::enqueueBroadcastLocked;
+
     /**
      * Verify that all known {@link #mProcessQueues} are in the state tested by
      * the given {@link Predicate}.
@@ -1930,8 +1950,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @VisibleForTesting
     @GuardedBy("mService")
-    private boolean isProcessFreezable(@Nullable ProcessRecord app) {
+    boolean isProcessFreezable(@Nullable ProcessRecord app) {
         if (app == null) {
             return false;
         }
@@ -1956,16 +1977,25 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         enqueueUpdateRunningList();
     }
 
+    private void handleProcessFreezableChanged(@NonNull ProcessRecord app) {
+        synchronized (mService) {
+            final BroadcastProcessQueue queue = getProcessQueue(app.processName, app.uid);
+            if (queue == null || queue.app == null || queue.app.getPid() != app.getPid()) {
+                return;
+            }
+            if (!isProcessFreezable(app)) {
+                queue.enqueueOutgoingBroadcasts(mBroadcastRecordConsumerEnqueue);
+            }
+            refreshProcessQueueLocked(queue);
+        }
+    }
+
     /**
      * Refresh the process queue corresponding to {@code app} with the latest process state
      * so that runnableAt can be updated.
      */
     @GuardedBy("mService")
-    private void refreshProcessQueueLocked(@NonNull ProcessRecord app) {
-        final BroadcastProcessQueue queue = getProcessQueue(app.processName, app.uid);
-        if (queue == null || queue.app == null || queue.app.getPid() != app.getPid()) {
-            return;
-        }
+    private void refreshProcessQueueLocked(@NonNull BroadcastProcessQueue queue) {
         setQueueProcess(queue, queue.app);
         enqueueUpdateRunningList();
     }
