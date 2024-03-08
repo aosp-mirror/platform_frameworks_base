@@ -155,6 +155,7 @@ android_library {
         "jsr330",
         "lottie",
         "LowLightDreamLib",
+        "TraceurCommon",
         "motion_tool_lib",
         "notification_flags_lib",
         "PlatformComposeCore",
@@ -301,6 +302,7 @@ android_library {
         "androidx.compose.material_material-icons-extended",
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
+        "TraceurCommon",
     ],
     skip_jarjar_repackage: true,
 }
