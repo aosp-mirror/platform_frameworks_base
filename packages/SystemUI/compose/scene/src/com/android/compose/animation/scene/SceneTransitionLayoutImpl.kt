@@ -38,15 +38,8 @@ import androidx.compose.ui.util.fastForEach
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 
-/**
- * The type for the content of movable elements.
- *
- * TODO(b/317972419): Revert back to make this movable content have a single @Composable lambda
- *   parameter.
- */
-internal typealias MovableElementContent =
-    @Composable
-    (MovableElementContentScope, @Composable MovableElementContentScope.() -> Unit) -> Unit
+/** The type for the content of movable elements. */
+internal typealias MovableElementContent = @Composable (@Composable () -> Unit) -> Unit
 
 @Stable
 internal class SceneTransitionLayoutImpl(
