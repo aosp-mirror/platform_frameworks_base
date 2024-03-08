@@ -28,6 +28,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -65,6 +66,17 @@ constructor(
                     name = "GLANCEABLE_HUB->LOCKSCREEN: dreamOverlayTranslationX"
                 )
             }
+
+    // Show UMO until transition finishes.
+    val showUmo: Flow<Boolean> =
+        transitionAnimation
+            .sharedFlow(
+                duration = FROM_GLANCEABLE_HUB_DURATION,
+                onStep = { it },
+                onCancel = { 0f },
+                onFinish = { 1f },
+            )
+            .map { step -> step != 1f }
 
     private companion object {
         val FROM_GLANCEABLE_HUB_DURATION = 1.seconds

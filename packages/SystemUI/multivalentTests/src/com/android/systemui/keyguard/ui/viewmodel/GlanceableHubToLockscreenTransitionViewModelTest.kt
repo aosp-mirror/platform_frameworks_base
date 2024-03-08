@@ -50,7 +50,7 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
     fun lockscreenFadeIn() =
         testScope.runTest {
             val values by collectValues(underTest.keyguardAlpha)
-            assertThat(values).containsExactly(0f)
+            assertThat(values).isEmpty()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
@@ -70,7 +70,7 @@ class GlanceableHubToLockscreenTransitionViewModelTest : SysuiTestCase() {
                 testScope,
             )
 
-            assertThat(values).hasSize(5)
+            assertThat(values).hasSize(4)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
         }
 
