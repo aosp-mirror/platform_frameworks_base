@@ -8,6 +8,7 @@
         { "include-filter": "android.app.cts.ActivityManagerProcessStateTest" },
         { "include-filter": "android.app.cts.ServiceTest" },
         { "include-filter": "android.app.cts.ActivityManagerFgsBgStartTest" },
+        { "include-filter": "android.app.cts.ForceStopTest" },
         {
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },

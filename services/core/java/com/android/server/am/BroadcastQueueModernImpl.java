@@ -32,6 +32,7 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
@@ -984,6 +985,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             queue.setActiveWasStopped(true);
         }
         final int intentFlags = r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND;
+        final boolean firstLaunch = !mService.wasPackageEverLaunched(info.packageName, r.userId);
+        queue.setActiveFirstLaunch(firstLaunch);
+
         final HostingRecord hostingRecord = new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST,
                 component, r.intent.getAction(), r.getHostingRecordTriggerType());
         final boolean isActivityCapable = (r.options != null
@@ -2138,6 +2142,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final long dispatchDelay = r.scheduledTime[index] - r.enqueueTime;
         final long receiveDelay = 0;
         final long finishDelay = r.terminalTime[index] - r.scheduledTime[index];
+        if (DEBUG_PROCESSES) {
+            Slog.d(TAG, "Logging broadcast for "
+                    + (app != null ? app.info.packageName : "<null>")
+                    + ", stopped=" + queue.getActiveWasStopped()
+                    + ", firstLaunch=" + queue.getActiveFirstLaunch());
+        }
         if (queue != null) {
             final int packageState = queue.getActiveWasStopped()
                     ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
@@ -2147,7 +2157,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     app != null ? app.info.packageName : null, r.callerPackage,
                     r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags(),
                     BroadcastRecord.getReceiverPriority(receiver), r.callerProcState,
-                    receiverProcessState);
+                    receiverProcessState, queue.getActiveFirstLaunch(),
+                    0L /* TODO: stoppedDuration */);
+            // Reset the states after logging
+            queue.setActiveFirstLaunch(false);
+            queue.setActiveWasStopped(false);
         }
     }
 
