@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.Flags.lightRevealMigration
 import com.android.app.tracing.namedRunnable
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
@@ -45,7 +46,7 @@ private const val ANIMATE_IN_KEYGUARD_DELAY = 600L
 /**
  * Duration for the light reveal portion of the animation.
  */
-private const val LIGHT_REVEAL_ANIMATION_DURATION = 750L
+private const val LIGHT_REVEAL_ANIMATION_DURATION = 500L
 
 /**
  * Controller for the unlocked screen off animation, which runs when the device is going to sleep
@@ -66,7 +67,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val notifShadeWindowControllerLazy: dagger.Lazy<NotificationShadeWindowController>,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val powerManager: PowerManager,
-    private val handler: Handler = Handler(),
+    private val handler: Handler = Handler()
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
     private lateinit var centralSurfaces: CentralSurfaces
     private lateinit var shadeViewController: ShadeViewController
@@ -95,6 +96,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         duration = LIGHT_REVEAL_ANIMATION_DURATION
         interpolator = Interpolators.LINEAR
         addUpdateListener {
+            if (lightRevealMigration()) return@addUpdateListener
             if (lightRevealScrim.revealEffect !is CircleReveal) {
                 lightRevealScrim.revealAmount = it.animatedValue as Float
             }
@@ -107,6 +109,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         }
         addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationCancel(animation: Animator) {
+                if (lightRevealMigration()) return
                 if (lightRevealScrim.revealEffect !is CircleReveal) {
                     lightRevealScrim.revealAmount = 1f
                 }
@@ -371,7 +374,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
      * AOD UI.
      */
     override fun isAnimationPlaying(): Boolean {
-        return lightRevealAnimationPlaying || aodUiAnimationPlaying
+        return isScreenOffLightRevealAnimationPlaying() || aodUiAnimationPlaying
     }
 
     override fun shouldAnimateInKeyguard(): Boolean =
@@ -395,6 +398,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     /**
      * Whether the light reveal animation is playing. The second part of the screen off animation,
      * where AOD animates in, might still be playing if this returns false.
+     *
+     * Note: This only refers to the specific light reveal animation that is playing during lock
+     * therefore LightRevealScrimInteractor.isAnimating is not the desired response.
      */
     fun isScreenOffLightRevealAnimationPlaying(): Boolean {
         return lightRevealAnimationPlaying
