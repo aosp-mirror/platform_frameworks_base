@@ -182,7 +182,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             CredentialProviderInfo info,
             String hybridService) {
         Slog.i(TAG, "Filtering request options for: " + info.getComponentName());
-        if (android.credentials.flags.Flags.hybridFilterFixEnabled()) {
+        if (android.credentials.flags.Flags.hybridFilterOptFixEnabled()) {
             ComponentName hybridComponentName = ComponentName.unflattenFromString(hybridService);
             if (hybridComponentName != null && hybridComponentName
                     .equals(info.getComponentName())) {
