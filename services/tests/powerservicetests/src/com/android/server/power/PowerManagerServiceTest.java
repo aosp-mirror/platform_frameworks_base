@@ -64,6 +64,7 @@ import android.content.IntentFilter;
 import android.content.PermissionChecker;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -154,6 +155,8 @@ public class PowerManagerServiceTest {
 
     private static final float BRIGHTNESS_FACTOR = 0.7f;
     private static final boolean BATTERY_SAVER_ENABLED = true;
+    private static final DeviceState DEVICE_STATE_1 = new DeviceState(
+            new DeviceState.Configuration.Builder(1 /* identifier */, "" /* name */).build());
 
     @Mock private BatterySaverController mBatterySaverControllerMock;
     @Mock private BatterySaverPolicy mBatterySaverPolicyMock;
@@ -2839,7 +2842,7 @@ public class PowerManagerServiceTest {
 
         // Send a display state change event and advance the clock 10.
         final DeviceStateCallback deviceStateCallback = deviceStateCallbackCaptor.getValue();
-        deviceStateCallback.onStateChanged(1);
+        deviceStateCallback.onDeviceStateChanged(DEVICE_STATE_1);
         final long timeToAdvance = 10;
         advanceTime(timeToAdvance);
 
@@ -2849,7 +2852,7 @@ public class PowerManagerServiceTest {
         assertThat(mService.wasDeviceIdleForInternal(timeToAdvance)).isFalse();
 
         // Send the same state and ensure that does not trigger an update.
-        deviceStateCallback.onStateChanged(1);
+        deviceStateCallback.onDeviceStateChanged(DEVICE_STATE_1);
         advanceTime(timeToAdvance);
         final long newTime = timeToAdvance * 2;
 

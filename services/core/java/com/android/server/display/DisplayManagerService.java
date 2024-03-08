@@ -75,6 +75,7 @@ import android.graphics.Point;
 import android.hardware.OverlayProperties;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerInternal;
 import android.hardware.display.AmbientBrightnessDayStats;
@@ -5034,29 +5035,21 @@ public final class DisplayManagerService extends SystemService {
      * Listens to changes in device state and reports the state to LogicalDisplayMapper.
      */
     class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
-        // Base state corresponds to the physical state of the device
-        private int mBaseState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
         @Override
-        public void onStateChanged(int deviceState) {
-            boolean isDeviceStateOverrideActive = deviceState != mBaseState;
+        public void onDeviceStateChanged(DeviceState deviceState) {
             synchronized (mSyncRoot) {
                 // Notify WindowManager that we are about to handle new device state, this should
                 // be sent before any work related to the device state in DisplayManager, so
                 // WindowManager could do implement that depends on the device state and display
                 // changes (serializes device state update and display change events)
                 Message msg = mHandler.obtainMessage(MSG_RECEIVED_DEVICE_STATE);
-                msg.arg1 = deviceState;
+                msg.arg1 = deviceState.getIdentifier();
                 mHandler.sendMessage(msg);
 
                 mLogicalDisplayMapper
-                        .setDeviceStateLocked(deviceState, isDeviceStateOverrideActive);
+                        .setDeviceStateLocked(deviceState.getIdentifier());
             }
-        }
-
-        @Override
-        public void onBaseStateChanged(int state) {
-            mBaseState = state;
         }
     };
 
