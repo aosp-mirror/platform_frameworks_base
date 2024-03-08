@@ -1223,6 +1223,12 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"高解像度で撮るにはスマートフォンを裏返してください"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"折りたたみ式デバイスが広げられている"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"折りたたみ式デバイスがひっくり返されている"</string>
+    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
+    <skip />
+    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
+    <skip />
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"バッテリー残量 <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"タッチペンを充電器に接続してください"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"タッチペンのバッテリー残量が少なくなっています"</string>
