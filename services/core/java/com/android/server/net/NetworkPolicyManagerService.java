@@ -340,6 +340,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     static final String TAG = NetworkPolicyLogger.TAG;
     private static final boolean LOGD = NetworkPolicyLogger.LOGD;
     private static final boolean LOGV = NetworkPolicyLogger.LOGV;
+    // TODO: b/304347838 - Remove once the feature is in staging.
+    private static final boolean ALWAYS_RESTRICT_BACKGROUND_NETWORK = false;
 
     /**
      * No opportunistic quota could be calculated from user data plan or data settings.
@@ -1068,7 +1070,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
 
                     // The flag is boot-stable.
-                    mBackgroundNetworkRestricted = Flags.networkBlockedForTopSleepingAndAbove();
+                    mBackgroundNetworkRestricted = ALWAYS_RESTRICT_BACKGROUND_NETWORK
+                            && Flags.networkBlockedForTopSleepingAndAbove();
                     if (mBackgroundNetworkRestricted) {
                         // Firewall rules and UidBlockedState will get updated in
                         // updateRulesForGlobalChangeAL below.
