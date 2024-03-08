@@ -15,112 +15,56 @@
  */
 package com.android.credentialmanager.ui.screens.multiple
 
-import android.graphics.drawable.Drawable
-import com.android.credentialmanager.ui.screens.UiState
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
+import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
 import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
-import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.CredentialsScreenChip
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-
+import androidx.activity.result.IntentSenderRequest
 
 /**
  * Screen that shows multiple credentials to select from, grouped by accounts
  *
  * @param credentialSelectorUiState The app bar view model.
- * @param screenIcon The view model corresponding to the home page.
  * @param columnState ScalingLazyColumn configuration to be be applied
  * @param modifier styling for composable
- * @param viewModel ViewModel that updates ui state for this screen
- * @param navController handles navigation events from this screen
+ * @param flowEngine [FlowEngine] that updates ui state for this screen
  */
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MultiCredentialsFlattenScreen(
     credentialSelectorUiState: MultipleEntry,
-    screenIcon: Drawable?,
     columnState: ScalingLazyColumnState,
-    modifier: Modifier = Modifier,
-    viewModel: MultiCredentialsFlattenViewModel = hiltViewModel(),
-    navController: NavHostController = rememberNavController(),
-) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    when (val state = uiState) {
-        UiState.CredentialScreen -> {
-            MultiCredentialsFlattenScreen(
-                state = credentialSelectorUiState,
-                columnState = columnState,
-                screenIcon = screenIcon,
-                onActionEntryClicked = viewModel::onActionEntryClicked,
-                onCredentialClicked = viewModel::onCredentialClicked,
-                modifier = modifier,
-            )
-        }
-
-        is UiState.CredentialSelected -> {
-            val launcher = rememberLauncherForActivityResult(
-                StartBalIntentSenderForResultContract()
-            ) {
-                viewModel.onInfoRetrieved(it.resultCode, null)
-            }
-
-            SideEffect {
-                state.intentSenderRequest?.let {
-                    launcher.launch(it)
-                }
-            }
-        }
-
-        UiState.Cancel -> {
-            navController.popBackStack()
-        }
-    }
-}
-
-@OptIn(ExperimentalHorologistApi::class)
-@Composable
-fun MultiCredentialsFlattenScreen(
-    state: MultipleEntry,
-    columnState: ScalingLazyColumnState,
-    screenIcon: Drawable?,
-    onActionEntryClicked: (entryInfo: ActionEntryInfo) -> Unit,
-    onCredentialClicked: (entryInfo: CredentialEntryInfo) -> Unit,
-    modifier: Modifier,
+    flowEngine: FlowEngine,
 ) {
     ScalingLazyColumn(
         columnState = columnState,
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
     ) {
         item {
             // make this credential specific if all credentials are same
             SignInHeader(
-                icon = screenIcon,
+                icon = null,
                 title = stringResource(R.string.sign_in_options_title),
             )
         }
 
-        state.accounts.forEach { userNameEntries ->
+        credentialSelectorUiState.accounts.forEach { userNameEntries ->
             item {
                 Text(
                     text = userNameEntries.userName,
@@ -133,19 +77,28 @@ fun MultiCredentialsFlattenScreen(
 
             userNameEntries.sortedCredentialEntryList.forEach { credential: CredentialEntryInfo ->
                 item {
+                    val launcher = rememberLauncherForActivityResult(
+                        StartBalIntentSenderForResultContract()
+                    ) {
+                        flowEngine.sendSelectionResult(credential, it.resultCode, it.data)
+                    }
+
                     CredentialsScreenChip(
                         label = credential.userName,
-                        onClick = { onCredentialClicked(credential) },
-                        secondaryLabel = credential.userName,
+                        onClick = {
+                            credential.getIntentSenderRequest()?.let {
+                                launcher.launch(it)
+                            }
+                        },
+                        secondaryLabel = credential.credentialTypeDisplayName,
                         icon = credential.icon,
-                        modifier = modifier,
                     )
                 }
             }
         }
         item {
             Text(
-                text = "Manage Sign-ins",
+                text = stringResource(R.string.provider_list_title),
                 modifier = Modifier
                     .padding(top = 6.dp)
                     .padding(horizontal = 10.dp),
@@ -153,14 +106,24 @@ fun MultiCredentialsFlattenScreen(
             )
         }
 
-        state.actionEntryList.forEach {
+        credentialSelectorUiState.actionEntryList.forEach {actionEntry ->
             item {
+                val launcher = rememberLauncherForActivityResult(
+                    StartBalIntentSenderForResultContract()
+                ) {
+                    flowEngine.sendSelectionResult(actionEntry, it.resultCode, it.data)
+                }
+
                     CredentialsScreenChip(
-                        label = it.title,
-                        onClick = { onActionEntryClicked(it) },
+                        label = actionEntry.title,
+                        onClick = {
+                              launcher.launch(
+                                  IntentSenderRequest.Builder(
+                                      checkNotNull(actionEntry.pendingIntent)).build()
+                              )
+                        },
                         secondaryLabel = null,
-                        icon = it.icon,
-                        modifier = modifier,
+                        icon = actionEntry.icon,
                     )
             }
         }

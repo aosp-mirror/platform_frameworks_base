@@ -29,6 +29,7 @@ import androidx.wear.compose.foundation.rememberSwipeToDismissBoxState
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavHostState
 import com.android.credentialmanager.CredentialSelectorUiState
+import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntryPerAccount
 import com.android.credentialmanager.CredentialSelectorUiState.Get.SingleEntry
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.CredentialSelectorViewModel
@@ -45,6 +46,8 @@ import com.google.android.horologist.compose.navscaffold.scrollable
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.ui.screens.multiple.MultiCredentialsFoldScreen
+import com.android.credentialmanager.ui.screens.multiple.MultiCredentialsFlattenScreen
+
 
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
@@ -78,59 +81,70 @@ fun WearApp(
 
         scrollable(Screen.SinglePasskeyScreen.route) {
             SinglePasskeyScreen(
-                credentialSelectorUiState = viewModel.uiState.value as SingleEntry,
+                entry = (remember { uiState } as SingleEntry).entry,
                 columnState = it.columnState,
+                flowEngine = flowEngine,
             )
         }
 
         scrollable(Screen.SignInWithProviderScreen.route) {
             SignInWithProviderScreen(
-                credentialSelectorUiState = viewModel.uiState.value as SingleEntry,
+                entry = (remember { uiState } as SingleEntry).entry,
                 columnState = it.columnState,
+                flowEngine = flowEngine,
             )
         }
 
         scrollable(Screen.MultipleCredentialsScreenFold.route) {
             MultiCredentialsFoldScreen(
-                credentialSelectorUiState = viewModel.uiState.value as MultipleEntry,
-                screenIcon = null,
+                credentialSelectorUiState = (remember { uiState } as SingleEntryPerAccount),
                 columnState = it.columnState,
+                flowEngine = flowEngine,
+            )
+        }
+
+        scrollable(Screen.MultipleCredentialsScreenFlatten.route) {
+            MultiCredentialsFlattenScreen(
+                credentialSelectorUiState = (remember { uiState } as MultipleEntry),
+                columnState = it.columnState,
+                flowEngine = flowEngine,
             )
         }
     }
-    BackHandler(true) {
-        viewModel.back()
-    }
-    Log.d(TAG, "uiState change, state: $uiState")
-    when (val state = uiState) {
-        CredentialSelectorUiState.Idle -> {
-            if (navController.currentDestination?.route != Screen.Loading.route) {
-                navController.navigateToLoading()
+        BackHandler(true) {
+            viewModel.back()
+        }
+        Log.d(TAG, "uiState change, state: $uiState")
+        when (val state = uiState) {
+            CredentialSelectorUiState.Idle -> {
+                if (navController.currentDestination?.route != Screen.Loading.route) {
+                    navController.navigateToLoading()
+                }
+            }
+
+            is CredentialSelectorUiState.Get -> {
+                handleGetNavigation(
+                    navController = navController,
+                    state = state,
+                    onCloseApp = onCloseApp,
+                    selectEntry = selectEntry
+                )
+            }
+
+            CredentialSelectorUiState.Create -> {
+                // TODO: b/301206624 - Implement create flow
+                onCloseApp()
+            }
+
+            is CredentialSelectorUiState.Cancel -> {
+                onCloseApp()
+            }
+
+            CredentialSelectorUiState.Close -> {
+                onCloseApp()
             }
         }
-        is CredentialSelectorUiState.Get -> {
-            handleGetNavigation(
-                navController = navController,
-                state = state,
-                onCloseApp = onCloseApp,
-                selectEntry = selectEntry
-            )
-        }
-
-        CredentialSelectorUiState.Create -> {
-            // TODO: b/301206624 - Implement create flow
-            onCloseApp()
-        }
-
-        is CredentialSelectorUiState.Cancel -> {
-            onCloseApp()
-        }
-
-        CredentialSelectorUiState.Close -> {
-            onCloseApp()
-        }
     }
-}
 
 private fun handleGetNavigation(
     navController: NavController,
@@ -157,13 +171,12 @@ private fun handleGetNavigation(
             }
         }
 
-        is MultipleEntry -> {
-            navController.navigateToMultipleCredentialsFoldScreen()
-        }
+            is SingleEntryPerAccount -> {
+                navController.navigateToMultipleCredentialsFoldScreen()
+            }
 
-        else -> {
-            // TODO: b/301206470 - Implement other get flows
-            onCloseApp()
+            is MultipleEntry -> {
+                navController.navigateToMultipleCredentialsFlattenScreen()
+            }
         }
     }
-}

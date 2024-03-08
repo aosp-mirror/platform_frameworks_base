@@ -22,119 +22,72 @@ import androidx.compose.foundation.layout.Column
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.android.credentialmanager.CredentialSelectorUiState
+import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.R
 import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
+import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.ui.components.AccountRow
 import com.android.credentialmanager.ui.components.ContinueChip
 import com.android.credentialmanager.ui.components.DismissChip
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.components.SignInOptionsChip
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
-import com.android.credentialmanager.ui.screens.UiState
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
+import com.android.credentialmanager.TAG
+import android.util.Log
 
 /**
  * Screen that shows sign in with provider credential.
  *
- * @param credentialSelectorUiState The app bar view model.
+ * @param entry The password entry
  * @param columnState ScalingLazyColumn configuration to be be applied to SingleAccountScreen
  * @param modifier styling for composable
- * @param viewModel ViewModel that updates ui state for this screen
- * @param navController handles navigation events from this screen
+ * @param flowEngine [FlowEngine] that updates ui state for this screen
  */
-@OptIn(ExperimentalHorologistApi::class)
-@Composable
-fun SinglePasskeyScreen(
-    credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntry,
-    columnState: ScalingLazyColumnState,
-    modifier: Modifier = Modifier,
-    viewModel: SinglePasskeyScreenViewModel = hiltViewModel(),
-    navController: NavHostController = rememberNavController(),
-) {
-    viewModel.initialize(credentialSelectorUiState.entry)
-
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    when (val state = uiState) {
-        UiState.CredentialScreen -> {
-            SinglePasskeyScreen(
-                credentialSelectorUiState.entry,
-                columnState,
-                modifier,
-                viewModel
-            )
-        }
-
-        is UiState.CredentialSelected -> {
-            val launcher = rememberLauncherForActivityResult(
-                StartBalIntentSenderForResultContract()
-            ) {
-                viewModel.onPasskeyInfoRetrieved(it.resultCode, null)
-            }
-
-            SideEffect {
-                state.intentSenderRequest?.let {
-                    launcher.launch(it)
-                }
-            }
-        }
-
-        UiState.Cancel -> {
-            // TODO(b/322797032) add valid navigation path here for going back
-            navController.popBackStack()
-        }
-    }
-}
-
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun SinglePasskeyScreen(
     entry: CredentialEntryInfo,
     columnState: ScalingLazyColumnState,
     modifier: Modifier = Modifier,
-    viewModel: SinglePasskeyScreenViewModel,
+    flowEngine: FlowEngine,
 ) {
+    val launcher = rememberLauncherForActivityResult(
+        StartBalIntentSenderForResultContract()
+    ) {
+        flowEngine.sendSelectionResult(entry, it.resultCode, it.data)
+    }
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
                 icon = entry.icon,
-                title = stringResource(R.string.use_passkey_title),
+                title = stringResource(R.string.use_password_title),
             )
         },
         accountContent = {
-            if (entry.displayName != null) {
-                AccountRow(
+            AccountRow(
                     primaryText = checkNotNull(entry.displayName),
                     secondaryText = entry.userName,
                     modifier = Modifier.padding(top = 10.dp),
                 )
-            } else {
-                AccountRow(
-                    primaryText = entry.userName,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
-            }
         },
         columnState = columnState,
         modifier = modifier.padding(horizontal = 10.dp)
     ) {
         item {
             Column {
-                ContinueChip(viewModel::onContinueClick)
-                SignInOptionsChip(viewModel::onSignInOptionsClick)
-                DismissChip(viewModel::onDismissClick)
+                ContinueChip {
+                    entry.getIntentSenderRequest()?.let {
+                        launcher.launch(it)
+                    } ?: Log.w(TAG, "Cannot parse IntentSenderRequest")
+                }
+                SignInOptionsChip{ flowEngine.openSecondaryScreen() }
+                DismissChip { flowEngine.cancel() }
             }
         }
     }
