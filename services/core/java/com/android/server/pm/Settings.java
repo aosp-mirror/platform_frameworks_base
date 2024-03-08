@@ -2710,7 +2710,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
         } catch (java.io.IOException e) {
             mReadMessages.append("Error reading: " + e.toString());
-            PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
+            PackageManagerService.reportSettingsProblem(Log.ERROR,
+                    "Error reading stopped packages: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager stopped packages",
                     e);
 
