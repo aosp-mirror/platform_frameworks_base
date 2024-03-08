@@ -411,6 +411,10 @@ public class InsetsPolicyTest extends WindowTestsBase {
         app2.mAboveInsetsState.addSource(statusBarSource);
         assertTrue(app2.getInsetsState().peekSource(statusBarId).isVisible());
 
+        // Let app2 be the focused window. Otherwise, the control target could be overwritten by
+        // DisplayPolicy#updateSystemBarAttributes unexpectedly.
+        mDisplayContent.getDisplayPolicy().focusChangedLw(null, app2);
+
         app2.setRequestedVisibleTypes(0, navigationBars() | statusBars());
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(app2);
         waitUntilWindowAnimatorIdle();
