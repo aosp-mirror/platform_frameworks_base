@@ -707,23 +707,36 @@ final class SettingsState {
         // Update/add new keys
         for (String key : keyValues.keySet()) {
             String value = keyValues.get(key);
+
+            // Rename key if it's an aconfig flag.
+            String flagName = key;
+            if (Flags.stageAllAconfigFlags() && isConfigSettingsKey(mKey)) {
+                int slashIndex = flagName.indexOf("/");
+                boolean stageFlag = slashIndex > 0 && slashIndex != flagName.length();
+                boolean isAconfig = trunkFlagMap != null && trunkFlagMap.containsKey(flagName);
+                if (stageFlag && isAconfig) {
+                    String flagWithoutNamespace = flagName.substring(slashIndex + 1);
+                    flagName = "staged/" + namespace + "*" + flagWithoutNamespace;
+                }
+            }
+
             String oldValue = null;
-            Setting state = mSettings.get(key);
+            Setting state = mSettings.get(flagName);
             if (state == null) {
-                state = new Setting(key, value, false, packageName, null);
-                mSettings.put(key, state);
-                changedKeys.add(key); // key was added
+                state = new Setting(flagName, value, false, packageName, null);
+                mSettings.put(flagName, state);
+                changedKeys.add(flagName); // key was added
             } else if (state.value != value) {
                 oldValue = state.value;
                 state.update(value, false, packageName, null, true,
                         /* overrideableByRestore */ false);
-                changedKeys.add(key); // key was updated
+                changedKeys.add(flagName); // key was updated
             } else {
                 // this key/value already exists, no change and no logging necessary
                 continue;
             }
 
-            FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key, value, state.value,
+            FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, flagName, value, state.value,
                     oldValue, /* tag */ null, /* make default */ false,
                     getUserIdFromKey(mKey), FrameworkStatsLog.SETTING_CHANGED__REASON__UPDATED);
             addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, state);
