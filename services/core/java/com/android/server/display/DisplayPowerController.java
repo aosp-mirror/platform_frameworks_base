@@ -1478,7 +1478,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // If there's an offload session, we need to set the initial doze brightness before
         // the offload session starts controlling the brightness.
         if (Float.isNaN(brightnessState) && mFlags.isDisplayOffloadEnabled()
-                && mPowerRequest.policy == POLICY_DOZE && mDisplayOffloadSession != null) {
+                && Display.isDozeState(state) && mDisplayOffloadSession != null) {
             if (mAutomaticBrightnessController != null
                     && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
                 // Use the auto-brightness curve and the last observed lux
@@ -1498,7 +1498,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         // Use default brightness when dozing unless overridden.
-        if (Float.isNaN(brightnessState) && mPowerRequest.policy == POLICY_DOZE) {
+        if (Float.isNaN(brightnessState) && Display.isDozeState(state)) {
             rawBrightnessState = mScreenBrightnessDozeConfig;
             brightnessState = clampScreenBrightness(rawBrightnessState);
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
