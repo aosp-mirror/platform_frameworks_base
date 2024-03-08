@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Tot i que avancem cap a un futur sense contrasenyes, continuaran estant disponibles juntament amb les claus d\'accés."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Tria on vols desar les <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un gestor de contrasenyes per desar la teva informació i iniciar la sessió més ràpidament la pròxima vegada"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Vols crear una clau d\'accés per iniciar la sessió a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vols desar la contrasenya per iniciar la sessió a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vols desar la informació d\'inici de sessió per a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"clau d\'accés"</string>
     <string name="password" msgid="6738570945182936667">"contrasenya"</string>

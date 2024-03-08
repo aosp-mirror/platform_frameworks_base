@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Parolsiz kelajak sari harakatlanar ekanmiz, parollar kalitlar bilan birga ishlatilishda davom etadi."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Bu <xliff:g id="CREATETYPES">%1$s</xliff:g> qayerga saqlanishini tanlang"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Maʼlumotlaringizni saqlash va keyingi safar tez kirish uchun parollar menejerini tanlang"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> ilovasiga kirish uchun kirish kaliti yaratilsinmi?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> ilovasiga kirish uchun parol saqlansinmi?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> uchun kirish maʼlumoti saqlansinmi?"</string>
     <string name="passkey" msgid="632353688396759522">"kalit"</string>
     <string name="password" msgid="6738570945182936667">"parol"</string>

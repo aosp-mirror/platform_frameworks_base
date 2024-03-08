@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"将来的にパスワードレスに移行するにあたり、パスワードもパスキーと並行して引き続きご利用いただけます。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g>の保存先を選択"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"パスワード マネージャーを選択して情報を保存しておくと、次回からすばやくログインできます"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> にログインするためにパスキーを作成しますか？"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> にログインするためにパスワードを保存しますか？"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> のログイン情報を保存しますか？"</string>
     <string name="passkey" msgid="632353688396759522">"パスキー"</string>
     <string name="password" msgid="6738570945182936667">"パスワード"</string>
