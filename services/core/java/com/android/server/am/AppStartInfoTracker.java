@@ -210,11 +210,17 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            mInProgRecords.get(id).setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
-            mInProgRecords.remove(id);
+            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            if (info == null) {
+                mInProgRecords.removeAt(index);
+                return;
+            }
+            info.setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
+            mInProgRecords.removeAt(index);
         }
     }
 
@@ -223,16 +229,24 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            if (app != null) {
-                ApplicationStartInfo info = mInProgRecords.get(id);
-                info.setStartType((int) temperature);
-                addBaseFieldsFromProcessRecord(info, app);
-                mInProgRecords.put(id, addStartInfoLocked(info));
+            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            if (info == null || app == null) {
+                mInProgRecords.removeAt(index);
+                return;
+            }
+            info.setStartType((int) temperature);
+            addBaseFieldsFromProcessRecord(info, app);
+            ApplicationStartInfo newInfo = addStartInfoLocked(info);
+            if (newInfo == null) {
+                // newInfo can be null if records are added before load from storage is
+                // complete. In this case the newly added record will be lost.
+                mInProgRecords.removeAt(index);
             } else {
-                mInProgRecords.remove(id);
+                mInProgRecords.setValueAt(index, newInfo);
             }
         }
     }
@@ -242,12 +256,17 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.get(id);
+            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            if (info == null) {
+                mInProgRecords.removeAt(index);
+                return;
+            }
             info.setStartupState(ApplicationStartInfo.STARTUP_STATE_ERROR);
-            mInProgRecords.remove(id);
+            mInProgRecords.removeAt(index);
         }
     }
 
@@ -257,10 +276,15 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.get(id);
+            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            if (info == null) {
+                mInProgRecords.removeAt(index);
+                return;
+            }
             info.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
             info.setLaunchMode(launchMode);
             checkCompletenessAndCallback(info);
@@ -272,13 +296,18 @@ public final class AppStartInfoTracker {
             if (!mEnabled) {
                 return;
             }
-            if (!mInProgRecords.containsKey(id)) {
+            int index = mInProgRecords.indexOfKey(id);
+            if (index < 0) {
                 return;
             }
-            ApplicationStartInfo info = mInProgRecords.get(id);
+            ApplicationStartInfo info = mInProgRecords.valueAt(index);
+            if (info == null) {
+                mInProgRecords.removeAt(index);
+                return;
+            }
             info.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN,
                     timestampNanos);
-            mInProgRecords.remove(id);
+            mInProgRecords.removeAt(index);
         }
     }
 
