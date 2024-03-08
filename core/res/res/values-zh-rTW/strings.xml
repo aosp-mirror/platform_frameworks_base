@@ -492,8 +492,8 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"允許應用程式存取額外位置資訊提供者指令。這項設定可能會造成應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"僅可在前景中取得精確位置"</string>
     <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"只有在你使用時，這個應用程式才能透過定位服務取得你的精確位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。這麼做可能會增加電池用量。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"僅可在前景中取得概略位置"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"只有在你使用時，這個應用程式才能透過定位服務取得你的概略位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"僅可在前景中取得大概位置"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"只有在你使用時，這個應用程式才能透過定位服務取得你的大概位置。你必須在裝置上開啟定位服務，這個應用程式才能取得位置資訊。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"在背景存取位置資訊"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"這個應用程式隨時都能取得位置資訊 (包括未使用應用程式時)。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"變更音訊設定"</string>
