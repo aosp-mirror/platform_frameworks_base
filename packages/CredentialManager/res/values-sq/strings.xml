@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Teksa shkojmë drejt një të ardhmeje pa fjalëkalime, këto të fundit do të ofrohen ende së bashku me çelësat e kalimit."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Zgjidh se ku t\'i ruash <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Zgjidh një menaxher fjalëkalimesh për të ruajtur informacionet e tua dhe për t\'u identifikuar më shpejt herën tjetër"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Të krijohet një çelës kalimit për t\'u identifikuar në <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Të ruhet fjalëkalimi për t\'u identifikuar në <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Të ruhen informacionet e identifikimit për <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"çelësin e kalimit"</string>
     <string name="password" msgid="6738570945182936667">"fjalëkalimi"</string>

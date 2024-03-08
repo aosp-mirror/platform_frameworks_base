@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"비밀번호 없는 미래로 나아가는 과정에서 비밀번호는 여전히 패스키와 함께 사용될 것입니다."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"<xliff:g id="CREATETYPES">%1$s</xliff:g> 저장 위치 선택"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"정보를 저장해서 다음에 더 빠르게 로그인하려면 비밀번호 관리자를 선택하세요."</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"패스키를 생성하여 <xliff:g id="APPNAME">%1$s</xliff:g>에 로그인하시겠습니까?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"비밀번호를 저장하여 <xliff:g id="APPNAME">%1$s</xliff:g>에 로그인하시겠습니까?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g>의 로그인 정보를 저장하시겠습니까?"</string>
     <string name="passkey" msgid="632353688396759522">"패스키"</string>
     <string name="password" msgid="6738570945182936667">"비밀번호"</string>

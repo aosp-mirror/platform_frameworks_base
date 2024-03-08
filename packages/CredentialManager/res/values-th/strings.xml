@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"ในขณะที่เราก้าวไปสู่อนาคตที่ไม่ต้องใช้รหัสผ่านนั้น รหัสผ่านจะยังคงใช้ได้อยู่ควบคู่ไปกับการเปลี่ยนไปใช้พาสคีย์"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"เลือกว่าต้องการบันทึก<xliff:g id="CREATETYPES">%1$s</xliff:g>ไว้ที่ใด"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"เลือกเครื่องมือจัดการรหัสผ่านเพื่อบันทึกข้อมูลและลงชื่อเข้าใช้เร็วขึ้นในครั้งถัดไป"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"สร้างพาสคีย์เพื่อลงชื่อเข้าใช้ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"บันทึกรหัสผ่านเพื่อลงชื่อเข้าใช้ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"บันทึกข้อมูลการลงชื่อเข้าใช้สำหรับ <xliff:g id="APPNAME">%1$s</xliff:g> ไหม"</string>
     <string name="passkey" msgid="632353688396759522">"พาสคีย์"</string>
     <string name="password" msgid="6738570945182936667">"รหัสผ่าน"</string>
