@@ -790,7 +790,11 @@ public class BackgroundActivityStartController {
     private BalVerdict abortLaunch(BalState state) {
         Slog.wtf(TAG, "Background activity launch blocked! "
                 + state.dump());
-        showBalBlockedToast();
+        if (balShowToastsBlocked()
+                && (state.mResultForCaller.allows() || state.mResultForRealCaller.allows())) {
+            // only show a toast if either caller or real caller could launch if they opted in
+            showToast("BAL blocked. go/debug-bal");
+        }
         return statsLog(BalVerdict.BLOCK, state);
     }
 
@@ -1187,12 +1191,6 @@ public class BackgroundActivityStartController {
         }
 
         return true;
-    }
-
-    private void showBalBlockedToast() {
-        if (balShowToastsBlocked()) {
-            showToast("BAL blocked. go/debug-bal");
-        }
     }
 
     @VisibleForTesting void showToast(String toastText) {
