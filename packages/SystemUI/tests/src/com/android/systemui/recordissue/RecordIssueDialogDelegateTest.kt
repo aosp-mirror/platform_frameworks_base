@@ -37,6 +37,7 @@ import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDi
 import com.android.systemui.model.SysUiState
 import com.android.systemui.qs.tiles.RecordIssueTile
 import com.android.systemui.res.R
+import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -70,11 +71,12 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyResolver: ScreenCaptureDevicePolicyResolver
     @Mock private lateinit var dprLazy: dagger.Lazy<ScreenCaptureDevicePolicyResolver>
     @Mock private lateinit var mediaProjectionMetricsLogger: MediaProjectionMetricsLogger
+    @Mock private lateinit var userContextProvider: UserContextProvider
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var userFileManager: UserFileManager
     @Mock private lateinit var sharedPreferences: SharedPreferences
-    @Mock
-    private lateinit var screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate
+    @Mock private lateinit var screenCaptureDisabledDialogDelegate:
+            ScreenCaptureDisabledDialogDelegate
     @Mock private lateinit var screenCaptureDisabledDialog: SystemUIDialog
 
     @Mock private lateinit var sysuiState: SysUiState
@@ -94,8 +96,9 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(dprLazy.get()).thenReturn(devicePolicyResolver)
         whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
+        whenever(userContextProvider.userContext).thenReturn(mContext)
         whenever(screenCaptureDisabledDialogDelegate.createDialog())
-            .thenReturn(screenCaptureDisabledDialog)
+                .thenReturn(screenCaptureDisabledDialog)
         whenever(
                 userFileManager.getSharedPreferences(
                     eq(RecordIssueTile.TILE_SPEC),
@@ -120,6 +123,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         dialog =
             RecordIssueDialogDelegate(
                     factory,
+                    userContextProvider,
                     userTracker,
                     flags,
                     bgExecutor,

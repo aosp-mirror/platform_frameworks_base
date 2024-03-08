@@ -103,27 +103,14 @@ constructor(
     public override fun handleClick(view: View?) {
         if (isRecording) {
             isRecording = false
-            stopIssueRecordingService()
+            stopScreenRecord()
         } else {
             mUiHandler.post { showPrompt(view) }
         }
         refreshState()
     }
 
-    private fun startIssueRecordingService(screenRecord: Boolean, winscopeTracing: Boolean) =
-        PendingIntent.getForegroundService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStartIntent(
-                    userContextProvider.userContext,
-                    screenRecord,
-                    winscopeTracing
-                ),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
-
-    private fun stopIssueRecordingService() =
+    private fun stopScreenRecord() =
         PendingIntent.getService(
                 userContextProvider.userContext,
                 RecordingService.REQUEST_CODE,
@@ -137,7 +124,6 @@ constructor(
             delegateFactory
                 .create {
                     isRecording = true
-                    startIssueRecordingService(it.screenRecord, it.winscopeTracing)
                     refreshState()
                 }
                 .createDialog()
