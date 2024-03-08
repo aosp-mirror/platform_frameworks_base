@@ -7473,7 +7473,7 @@ public class Activity extends ContextThemeWrapper
      *               intent.
      */
     @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
-    public void onActivityResult(int requestCode, int resultCode, @NonNull Intent data,
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data,
             @NonNull ComponentCaller caller) {
         onActivityResult(requestCode, resultCode, data);
     }
