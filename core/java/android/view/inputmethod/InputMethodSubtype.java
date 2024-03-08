@@ -28,6 +28,7 @@ import android.icu.util.ULocale;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Printer;
 import android.util.Slog;
 
 import com.android.internal.inputmethod.SubtypeLocaleUtils;
@@ -789,6 +790,20 @@ public final class InputMethodSubtype implements Parcelable {
         dest.writeInt(mSubtypeHashCode);
         dest.writeInt(mSubtypeId);
         dest.writeInt(mIsAsciiCapable ? 1 : 0);
+    }
+
+    void dump(@NonNull Printer pw, @NonNull String prefix) {
+        pw.println(prefix + "mSubtypeNameOverride=" + mSubtypeNameOverride
+                + " mPkLanguageTag=" + mPkLanguageTag
+                + " mPkLayoutType=" + mPkLayoutType
+                + " mSubtypeId=" + mSubtypeId
+                + " mSubtypeLocale=" + mSubtypeLocale
+                + " mSubtypeLanguageTag=" + mSubtypeLanguageTag
+                + " mSubtypeMode=" + mSubtypeMode
+                + " mIsAuxiliary=" + mIsAuxiliary
+                + " mOverridesImplicitlyEnabledSubtype=" + mOverridesImplicitlyEnabledSubtype
+                + " mIsAsciiCapable=" + mIsAsciiCapable
+                + " mSubtypeHashCode=" + mSubtypeHashCode);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<InputMethodSubtype> CREATOR

@@ -5023,6 +5023,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             .getSortedInputMethodAndSubtypeList(
                                     showAuxSubtypes, isScreenLocked, true /* forImeMenu */,
                                     mContext, mSettings.getMethodMap(), mSettings.getUserId());
+                    if (imList.isEmpty()) {
+                        Slog.w(TAG, "Show switching menu failed, imList is empty,"
+                                + " showAuxSubtypes: " + showAuxSubtypes
+                                + " isScreenLocked: " + isScreenLocked
+                                + " userId: " + mSettings.getUserId());
+                        return false;
+                    }
+
                     mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
                             lastInputMethodId, lastInputMethodSubtypeId, imList);
                 }
