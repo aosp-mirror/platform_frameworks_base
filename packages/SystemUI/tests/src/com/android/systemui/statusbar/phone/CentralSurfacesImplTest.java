@@ -859,6 +859,29 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testEnteringGlanceableHub_whenDreaming_updatesScrim() {
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // Transition to the glanceable hub.
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
+                CommunalScenes.Communal)));
+        mTestScope.getTestScheduler().runCurrent();
+
+        // ScrimState also transitions.
+        verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB_OVER_DREAM);
+
+        // Transition away from the glanceable hub.
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
+                CommunalScenes.Blank)));
+        mTestScope.getTestScheduler().runCurrent();
+
+        // ScrimState goes back to UNLOCKED.
+        verify(mScrimController).transitionTo(eq(ScrimState.DREAMING));
+    }
+
+    @Test
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 

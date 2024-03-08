@@ -299,9 +299,9 @@ public enum ScrimState {
     },
 
     /**
-     * Device is locked or on dream and user has swiped from the right edge to enter the glanceable
-     * hub UI. From this state, the user can swipe from the left edge to go back to the lock screen
-     * or dream, as well as swipe down for the notifications and up for the bouncer.
+     * Device is on the lockscreen and user has swiped from the right edge to enter the glanceable
+     * hub UI. From this state, the user can swipe from the left edge to go back to the lock screen,
+     * as well as swipe down for the notifications and up for the bouncer.
      */
     GLANCEABLE_HUB {
         @Override
@@ -310,6 +310,25 @@ public enum ScrimState {
             mBehindAlpha = 0;
             mNotifAlpha = 0;
             mFrontAlpha = 0;
+
+            mFrontTint = Color.TRANSPARENT;
+            mBehindTint = mBackgroundColor;
+            mNotifTint = mClipQsScrim ? mBackgroundColor : Color.TRANSPARENT;
+        }
+    },
+
+    /**
+     * Device is dreaming and user has swiped from the right edge to enter the glanceable hub UI.
+     * From this state, the user can swipe from the left edge to go back to the  dream, as well as
+     * swipe down for the notifications and up for the bouncer.
+     *
+     * This is a separate state from {@link #GLANCEABLE_HUB} because the scrims behave differently
+     * when the dream is running.
+     */
+    GLANCEABLE_HUB_OVER_DREAM {
+        @Override
+        public void prepare(ScrimState previousState) {
+            GLANCEABLE_HUB.prepare(previousState);
         }
     };
 
