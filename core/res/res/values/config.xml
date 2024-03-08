@@ -6985,4 +6985,8 @@
 
     <!-- The key containing the branching boolean for legacy Search. -->
     <string name="config_defaultContextualSearchLegacyEnabled" translatable="false" />
+
+    <!-- Whether WM DisplayContent supports high performance transitions
+         (lower-end devices may want to disable) -->
+    <bool name="config_deviceSupportsHighPerfTransitions">true</bool>
 </resources>

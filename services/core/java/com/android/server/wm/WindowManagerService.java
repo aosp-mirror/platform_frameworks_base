@@ -538,7 +538,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mHasPermanentDpad;
     final long mDrawLockTimeoutMillis;
     final boolean mAllowAnimationsInLowPowerMode;
-
+    final boolean mSupportsHighPerfTransitions;
     final boolean mAllowBootMessages;
 
     // Indicates whether the Assistant should show on top of the Dream (respectively, above
@@ -1181,6 +1181,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_allowAnimationsInLowPowerMode);
         mMaxUiWidth = context.getResources().getInteger(
                 com.android.internal.R.integer.config_maxUiWidth);
+        mSupportsHighPerfTransitions = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_deviceSupportsHighPerfTransitions);
         mDisableTransitionAnimation = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_disableTransitionAnimation);
         mPerDisplayFocusEnabled = context.getResources().getBoolean(
@@ -1192,6 +1194,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean isScreenSizeDecoupledFromStatusBarAndCutout = context.getResources()
                 .getBoolean(R.bool.config_decoupleStatusBarAndDisplayCutoutFromScreenSize)
                 && mFlags.mAllowsScreenSizeDecoupledFromStatusBarAndCutout;
+
         if (mFlags.mInsetsDecoupledConfiguration) {
             mDecorTypes = 0;
             mConfigTypes = 0;

@@ -3515,6 +3515,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void enableHighPerfTransition(boolean enable) {
+        if (!mWmService.mSupportsHighPerfTransitions) {
+            return;
+        }
         if (!explicitRefreshRateHints()) {
             if (enable) {
                 getPendingTransaction().setEarlyWakeupStart();
