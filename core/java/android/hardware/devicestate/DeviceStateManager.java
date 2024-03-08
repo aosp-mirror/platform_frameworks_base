@@ -49,7 +49,7 @@ public final class DeviceStateManager {
      *
      * @hide
      */
-    public static final int INVALID_DEVICE_STATE = -1;
+    public static final int INVALID_DEVICE_STATE_IDENTIFIER = -1;
 
     /**
      * The minimum allowed device state identifier.

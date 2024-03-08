@@ -16,7 +16,7 @@
 
 package com.android.server.display;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.DEFAULT_DISPLAY_GROUP;
 import static android.view.Display.FLAG_REAR;
@@ -674,7 +674,7 @@ public class LogicalDisplayMapperTest {
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));
         assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
-                INVALID_DEVICE_STATE,
+                INVALID_DEVICE_STATE_IDENTIFIER,
                 /* isOverrideActive= */false,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));

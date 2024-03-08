@@ -5021,7 +5021,7 @@ public final class DisplayManagerService extends SystemService {
      */
     class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
         // Base state corresponds to the physical state of the device
-        private int mBaseState = DeviceStateManager.INVALID_DEVICE_STATE;
+        private int mBaseState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
         @Override
         public void onStateChanged(int deviceState) {

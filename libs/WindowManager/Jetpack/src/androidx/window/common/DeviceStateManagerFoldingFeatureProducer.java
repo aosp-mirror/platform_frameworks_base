@@ -16,7 +16,7 @@
 
 package androidx.window.common;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_USE_BASE_STATE;
@@ -69,14 +69,14 @@ public final class DeviceStateManagerFoldingFeatureProducer
      * example is activated via public API and can be active in both the "open" and "half folded"
      * device states.
      */
-    private int mCurrentDeviceState = INVALID_DEVICE_STATE;
+    private int mCurrentDeviceState = INVALID_DEVICE_STATE_IDENTIFIER;
 
     /**
      * Base device state received via
      * {@link DeviceStateManager.DeviceStateCallback#onBaseStateChanged(int)}.
      * "Base" in this context means the "physical" state of the device.
      */
-    private int mCurrentBaseDeviceState = INVALID_DEVICE_STATE;
+    private int mCurrentBaseDeviceState = INVALID_DEVICE_STATE_IDENTIFIER;
 
     @NonNull
     private final RawFoldingFeatureProducer mRawFoldSupplier;
@@ -177,7 +177,7 @@ public final class DeviceStateManagerFoldingFeatureProducer
         if (hasListeners()) {
             mRawFoldSupplier.addDataChangedCallback(this::notifyFoldingFeatureChange);
         } else {
-            mCurrentDeviceState = INVALID_DEVICE_STATE;
+            mCurrentDeviceState = INVALID_DEVICE_STATE_IDENTIFIER;
             mRawFoldSupplier.removeDataChangedCallback(this::notifyFoldingFeatureChange);
         }
     }

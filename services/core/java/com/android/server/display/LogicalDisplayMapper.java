@@ -192,9 +192,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final DisplayIdProducer mIdProducer = (isDefault) ->
             isDefault ? DEFAULT_DISPLAY : sNextNonDefaultDisplayId++;
     private Layout mCurrentLayout = null;
-    private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
-    private int mPendingDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
-    private int mDeviceStateToBeAppliedAfterBoot = DeviceStateManager.INVALID_DEVICE_STATE;
+    private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
+    private int mPendingDeviceState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
+    private int mDeviceStateToBeAppliedAfterBoot =
+            DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
     private boolean mBootCompleted = false;
     private boolean mInteractive;
     private final DisplayManagerFlags mFlags;
@@ -460,7 +461,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         // temporarily turned off.
         resetLayoutLocked(mDeviceState, state, /* transitionValue= */ true);
         mPendingDeviceState = state;
-        mDeviceStateToBeAppliedAfterBoot = DeviceStateManager.INVALID_DEVICE_STATE;
+        mDeviceStateToBeAppliedAfterBoot = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
         final boolean wakeDevice = shouldDeviceBeWoken(mPendingDeviceState, mDeviceState,
                 mInteractive, mBootCompleted);
         final boolean sleepDevice = shouldDeviceBePutToSleep(mPendingDeviceState, mDeviceState,
@@ -510,7 +511,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     void onBootCompleted() {
         synchronized (mSyncRoot) {
             mBootCompleted = true;
-            if (mDeviceStateToBeAppliedAfterBoot != DeviceStateManager.INVALID_DEVICE_STATE) {
+            if (mDeviceStateToBeAppliedAfterBoot
+                    != DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER) {
                 setDeviceStateLocked(mDeviceStateToBeAppliedAfterBoot,
                         /* isOverrideActive= */ false);
             }
@@ -568,7 +570,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     @VisibleForTesting
     boolean shouldDeviceBePutToSleep(int pendingState, int currentState, boolean isOverrideActive,
             boolean isInteractive, boolean isBootCompleted) {
-        return currentState != DeviceStateManager.INVALID_DEVICE_STATE
+        return currentState != DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER
                 && mDeviceStatesOnWhichToSleep.get(pendingState)
                 && !mDeviceStatesOnWhichToSleep.get(currentState)
                 && !isOverrideActive
@@ -598,13 +600,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private void transitionToPendingStateLocked() {
         resetLayoutLocked(mDeviceState, mPendingDeviceState, /* transitionValue= */ false);
         mDeviceState = mPendingDeviceState;
-        mPendingDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
+        mPendingDeviceState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
         applyLayoutLocked();
         updateLogicalDisplaysLocked();
     }
 
     private void finishStateTransitionLocked(boolean force) {
-        if (mPendingDeviceState == DeviceStateManager.INVALID_DEVICE_STATE) {
+        if (mPendingDeviceState == DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER) {
             return;
         }
 

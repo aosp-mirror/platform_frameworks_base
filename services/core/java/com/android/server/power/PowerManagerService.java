@@ -7149,7 +7149,7 @@ public final class PowerManagerService extends SystemService
      * Any changes to the device state are treated as user interactions.
      */
     class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
-        private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE;
+        private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
         @Override
         public void onStateChanged(int deviceState) {
