@@ -1686,7 +1686,7 @@ class BackNavigationController {
                 || (wallpaperController.getWallpaperTarget() != null
                 && wallpaperController.wallpaperTransitionReady());
         if (wallpaperReady && mPendingAnimation != null) {
-            startAnimation();
+            mWindowManagerService.mAnimator.addAfterPrepareSurfacesRunnable(this::startAnimation);
         }
     }
 
