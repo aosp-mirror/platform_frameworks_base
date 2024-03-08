@@ -38,8 +38,6 @@ constructor(
         changeToShadeScene()
     }
 
-    override val isExpandingOrCollapsing = shadeInteractor.isUserInteracting.value
-
     override val isExpanded = shadeInteractor.isAnyExpanded.value
 
     override fun startBouncerPreHideAnimation() {
