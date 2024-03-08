@@ -555,10 +555,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private InputMethodSubtype mCurrentSubtype;
 
     /**
-     * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}
+     * Map of window perceptible states indexed by their associated window tokens.
+     *
+     * The value {@code true} indicates that IME has not been mostly hidden via
+     * {@link android.view.InsetsController} for the given window.
      */
-    @MultiUserUnawareField
-    private boolean mCurPerceptible;
+    @GuardedBy("ImfLock.class")
+    private final WeakHashMap<IBinder, Boolean> mFocusedWindowPerceptible = new WeakHashMap<>();
 
     /**
      * Set to true if our ServiceConnection is currently actively bound to
@@ -2835,12 +2838,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " inv: " + (vis & InputMethodService.IME_INVISIBLE)
                     + " displayId: " + mCurTokenDisplayId);
         }
+        final IBinder focusedWindowToken = mImeBindingState != null
+                ? mImeBindingState.mFocusedWindow : null;
+        final Boolean windowPerceptible = focusedWindowToken != null
+                ? mFocusedWindowPerceptible.get(focusedWindowToken) : null;
 
         // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
         // all updateSystemUi happens on system privilege.
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (!mCurPerceptible) {
+            if (windowPerceptible != null && !windowPerceptible) {
                 if ((vis & InputMethodService.IME_VISIBLE) != 0) {
                     vis &= ~InputMethodService.IME_VISIBLE;
                     vis |= InputMethodService.IME_VISIBLE_IMPERCEPTIBLE;
@@ -3305,11 +3312,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         Binder.withCleanCallingIdentity(() -> {
             Objects.requireNonNull(windowToken, "windowToken must not be null");
             synchronized (ImfLock.class) {
+                Boolean windowPerceptible = mFocusedWindowPerceptible.get(windowToken);
                 if (mImeBindingState.mFocusedWindow != windowToken
-                        || mCurPerceptible == perceptible) {
+                        || (windowPerceptible != null && windowPerceptible == perceptible)) {
                     return;
                 }
-                mCurPerceptible = perceptible;
+                mFocusedWindowPerceptible.put(windowToken, windowPerceptible);
                 updateSystemUiLocked();
             }
         });
@@ -3687,7 +3695,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         mImeBindingState = new ImeBindingState(windowToken, softInputMode, cs, editorInfo);
-        mCurPerceptible = true;
+        mFocusedWindowPerceptible.put(windowToken, true);
 
         // We want to start input before showing the IME, but after closing
         // it.  We want to do this after closing it to help the IME disappear
@@ -5548,9 +5556,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void reportImeControl(@Nullable IBinder windowToken) {
             synchronized (ImfLock.class) {
                 if (mImeBindingState.mFocusedWindow != windowToken) {
-                    // mCurPerceptible was set by the focused window, but it is no longer in
-                    // control, so we reset mCurPerceptible.
-                    mCurPerceptible = true;
+                    // A perceptible value was set for the focused window, but it is no longer in
+                    // control, so we reset the perceptible for the window passed as argument.
+                    // TODO(b/314149476): Investigate whether this logic is still relevant, if not
+                    //     then consider removing using concurrent_input_methods feature flag.
+                    mFocusedWindowPerceptible.put(windowToken, true);
                 }
             }
         }
@@ -5850,11 +5860,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 p.println("    curSession=" + c.mCurSession);
             };
             mClientController.forAllClients(clientControllerDump);
-
             p.println("  mCurMethodId=" + getSelectedMethodIdLocked());
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());
-            p.println("  mCurPerceptible=" + mCurPerceptible);
+            p.println("  mFocusedWindowPerceptible=" + mFocusedWindowPerceptible);
             mImeBindingState.dump("  ", p);
             p.println("  mCurId=" + getCurIdLocked() + " mHaveConnection=" + hasConnectionLocked()
                     + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound="
