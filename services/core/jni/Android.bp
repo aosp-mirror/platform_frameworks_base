@@ -40,6 +40,7 @@ cc_library_static {
         "com_android_server_biometrics_SurfaceToNativeHandleConverter.cpp",
         "com_android_server_ConsumerIrService.cpp",
         "com_android_server_companion_virtual_InputController.cpp",
+        "com_android_server_companion_virtual_VirtualDeviceImpl.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
         "com_android_server_display_DisplayControl.cpp",
         "com_android_server_display_SmallAreaDetectionController.cpp",
@@ -214,6 +215,7 @@ cc_defaults {
     static_libs: [
         "android.hardware.broadcastradio@common-utils-1x-lib",
         "libaidlcommonsupport",
+        "libvirtualdevicebuildflags",
     ],
 
     product_variables: {
