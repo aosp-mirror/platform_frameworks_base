@@ -5018,8 +5018,7 @@
   <java-symbol type="bool" name="config_assistLongPressHomeEnabledDefault" />
   <java-symbol type="bool" name="config_assistTouchGestureEnabledDefault" />
 
-  <java-symbol type="bool" name="config_searchPressHoldNavHandleEnabledDefault" />
-  <java-symbol type="bool" name="config_searchLongPressHomeEnabledDefault" />
+  <java-symbol type="bool" name="config_searchAllEntrypointsEnabledDefault" />
 
   <java-symbol type="integer" name="config_hotwordDetectedResultMaxBundleSize" />
 
