@@ -5964,6 +5964,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAmbientState.setUseSplitShade(split);
             updateDismissBehavior();
             updateUseRoundedRectClipping();
+            requestLayout();
         }
     }
 
