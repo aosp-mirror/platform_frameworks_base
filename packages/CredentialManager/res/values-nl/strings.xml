@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"We zijn op weg naar een wachtwoordloze toekomst, maar naast toegangssleutels kun je nog steeds gebruikmaken van wachtwoorden."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Kiezen waar je je <xliff:g id="CREATETYPES">%1$s</xliff:g> wilt opslaan"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecteer een wachtwoordmanager om je informatie op te slaan en de volgende keer sneller in te loggen"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Toegangssleutel maken om in te loggen bij <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Wachtwoord opslaan om in te loggen bij <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Inloggegevens opslaan voor <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"Toegangssleutel"</string>
     <string name="password" msgid="6738570945182936667">"wachtwoord"</string>

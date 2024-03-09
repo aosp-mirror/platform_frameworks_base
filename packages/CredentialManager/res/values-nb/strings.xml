@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Vi går mot en fremtid uten passord, men passord fortsetter å være tilgjengelige ved siden av passnøkler."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Velg hvor du vil lagre <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Velg et verktøy for passordlagring for å lagre informasjonen din og logge på raskere neste gang"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Vil du opprette en passnøkkel for å logge på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vil du lagre passordet for å logge på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vil du lagre påloggingsinformasjon for <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"passnøkkel"</string>
     <string name="password" msgid="6738570945182936667">"passord"</string>

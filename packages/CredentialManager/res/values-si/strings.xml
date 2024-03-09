@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"අපි මුරපද රහිත අනාගතයක් කරා ගමන් කරන විට, මුරයතුරු සමග මුරපද තවමත් පවතී."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"ඔබේ <xliff:g id="CREATETYPES">%1$s</xliff:g> සුරැකිය යුතු ස්ථානය තෝරා ගන්න"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"ඔබේ තතු සුරැකීමට සහ මීළඟ වතාවේ වේගයෙන් පුරනය වීමට මුරපද කළමනාකරුවෙකු තෝරන්න"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> වෙත පුරනය වීමට මුරයතුරක් තනන්න ද?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> වෙත පුරනය වීමට මුරපදය සුරකින්න ද?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> සඳහා පුරනය වීමේ තතු සුරකින්න ද?"</string>
     <string name="passkey" msgid="632353688396759522">"මුරයතුර"</string>
     <string name="password" msgid="6738570945182936667">"මුරපදය"</string>
