@@ -86,6 +86,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
@@ -444,11 +445,6 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
                 AppOpsManager.OP_NONE, options, receivers, callerApp, resultTo,
                 Activity.RESULT_OK, null, resultExtras, ordered, false, false, userId,
                 BackgroundStartPrivileges.NONE, false, null, PROCESS_STATE_UNKNOWN);
-    }
-
-    private void setProcessFreezable(ProcessRecord app, boolean pendingFreeze, boolean frozen) {
-        app.mOptRecord.setPendingFreeze(pendingFreeze);
-        app.mOptRecord.setFrozen(frozen);
     }
 
     private void assertHealth() {
@@ -2337,6 +2333,38 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         // That is, broadcast to receiverBlueApp gets scheduled before the one to receiverGreenApp.
         assertThat(getReceiverScheduledTime(prioritizedRecord, receiverGreen))
                 .isGreaterThan(getReceiverScheduledTime(prioritizedRecord, receiverBlue));
+    }
+
+    @Ignore
+    @Test
+    public void testDeferOutgoingBroadcasts() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        setProcessFreezable(callerApp, true /* pendingFreeze */, false /* frozen */);
+        mQueue.onProcessFreezableChangedLocked(callerApp);
+        waitForIdle();
+
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp, List.of(
+                makeRegisteredReceiver(receiverGreenApp),
+                makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
+                makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+
+        waitForIdle();
+        verifyScheduleRegisteredReceiver(never(), receiverGreenApp, timeTick);
+        verifyScheduleReceiver(never(), receiverBlueApp, timeTick);
+        assertNull(mAms.getProcessRecordLocked(PACKAGE_YELLOW, getUidForPackage(PACKAGE_GREEN)));
+
+        setProcessFreezable(callerApp, false /* pendingFreeze */, false /* frozen */);
+        mQueue.onProcessFreezableChangedLocked(callerApp);
+        waitForIdle();
+
+        verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, timeTick);
+        verifyScheduleReceiver(times(1), receiverBlueApp, timeTick);
+        final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
+                getUidForPackage(PACKAGE_YELLOW));
+        verifyScheduleReceiver(times(1), receiverYellowApp, timeTick);
     }
 
     private long getReceiverScheduledTime(@NonNull BroadcastRecord r, @NonNull Object receiver) {

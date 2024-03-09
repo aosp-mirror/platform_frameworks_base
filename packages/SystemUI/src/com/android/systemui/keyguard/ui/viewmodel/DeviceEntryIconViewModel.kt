@@ -36,6 +36,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -62,6 +63,7 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
 ) {
+    val isUdfpsSupported: StateFlow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
     private val intEvaluator = IntEvaluator()
     private val floatEvaluator = FloatEvaluator()
     private val showingAlternateBouncer: Flow<Boolean> =
@@ -137,7 +139,7 @@ constructor(
         ) { alpha, alphaMultiplier ->
             alpha * alphaMultiplier
         }
-    val useBackgroundProtection: Flow<Boolean> = deviceEntryUdfpsInteractor.isUdfpsSupported
+    val useBackgroundProtection: StateFlow<Boolean> = isUdfpsSupported
     val burnInOffsets: Flow<BurnInOffsets> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfpsEnrolled ->
             if (udfpsEnrolled) {
@@ -211,7 +213,7 @@ constructor(
     val isLongPressEnabled: Flow<Boolean> =
         combine(
             iconType,
-            deviceEntryUdfpsInteractor.isUdfpsSupported,
+            isUdfpsSupported,
         ) { deviceEntryStatus, isUdfps ->
             when (deviceEntryStatus) {
                 DeviceEntryIconView.IconType.LOCK -> isUdfps

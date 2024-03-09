@@ -191,7 +191,14 @@ constructor(
                     // bluetoothAutoOnUpdate is emitted when bluetooth auto on on/off state is
                     // changed.
                     bluetoothAutoOnInteractor.isEnabled
-                        .onEach { dialogDelegate.onBluetoothAutoOnUpdated(dialog, it) }
+                        .onEach {
+                            dialogDelegate.onBluetoothAutoOnUpdated(
+                                dialog,
+                                it,
+                                if (it) R.string.turn_on_bluetooth_auto_info_enabled
+                                else R.string.turn_on_bluetooth_auto_info_disabled
+                            )
+                        }
                         .launchIn(this)
 
                     // bluetoothAutoOnToggle is emitted when user toggles the bluetooth auto on

@@ -62,6 +62,7 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
 import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.draganddrop.DragAndDropController
@@ -388,14 +389,8 @@ class DesktopTasksController(
 
     /** Enter fullscreen by moving the focused freeform task in given `displayId` to fullscreen. */
     fun enterFullscreen(displayId: Int) {
-        if (DesktopModeStatus.isEnabled()) {
-            shellTaskOrganizer
-                    .getRunningTasks(displayId)
-                    .find { taskInfo ->
-                        taskInfo.isFocused && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
-                    }
-                    ?.let { moveToFullscreenWithAnimation(it, it.positionInParent) }
-        }
+        getFocusedFreeformTask(displayId)
+                ?.let { moveToFullscreenWithAnimation(it, it.positionInParent) }
     }
 
     /** Move a desktop app to split screen. */
@@ -876,12 +871,28 @@ class DesktopTasksController(
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
     }
 
+    /** Enter split by using the focused desktop task in given `displayId`. */
+    fun enterSplit(
+        displayId: Int,
+        leftOrTop: Boolean
+    ) {
+        getFocusedFreeformTask(displayId)?.let { requestSplit(it, leftOrTop) }
+    }
+
+    private fun getFocusedFreeformTask(displayId: Int): RunningTaskInfo? {
+        return shellTaskOrganizer.getRunningTasks(displayId)
+                .find { taskInfo -> taskInfo.isFocused &&
+                        taskInfo.windowingMode == WINDOWING_MODE_FREEFORM }
+    }
+
     /**
      * Requests a task be transitioned from desktop to split select. Applies needed windowing
      * changes if this transition is enabled.
      */
+    @JvmOverloads
     fun requestSplit(
-        taskInfo: RunningTaskInfo
+        taskInfo: RunningTaskInfo,
+        leftOrTop: Boolean = false,
     ) {
         val windowingMode = taskInfo.windowingMode
         if (windowingMode == WINDOWING_MODE_FULLSCREEN || windowingMode == WINDOWING_MODE_FREEFORM
@@ -889,7 +900,8 @@ class DesktopTasksController(
             val wct = WindowContainerTransaction()
             addMoveToSplitChanges(wct, taskInfo)
             splitScreenController.requestEnterSplitSelect(taskInfo, wct,
-                SPLIT_POSITION_BOTTOM_OR_RIGHT, taskInfo.configuration.windowConfiguration.bounds)
+                if (leftOrTop) SPLIT_POSITION_TOP_OR_LEFT else SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                taskInfo.configuration.windowConfiguration.bounds)
         }
     }
 
@@ -1138,6 +1150,12 @@ class DesktopTasksController(
         override fun moveFocusedTaskToFullscreen(displayId: Int) {
             mainExecutor.execute {
                 this@DesktopTasksController.enterFullscreen(displayId)
+            }
+        }
+
+        override fun moveFocusedTaskToStageSplit(displayId: Int, leftOrTop: Boolean) {
+            mainExecutor.execute {
+                this@DesktopTasksController.enterSplit(displayId, leftOrTop)
             }
         }
     }

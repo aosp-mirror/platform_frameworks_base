@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -143,8 +144,6 @@ public class NotificationInfoTest extends SysuiTestCase {
                 .thenReturn(packageInfo);
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = TEST_UID;  // non-zero
-        when(mMockPackageManager.getApplicationInfo(eq(TEST_PACKAGE_NAME), anyInt())).thenReturn(
-                applicationInfo);
         final PackageInfo systemPackageInfo = new PackageInfo();
         systemPackageInfo.packageName = TEST_SYSTEM_PACKAGE_NAME;
         when(mMockPackageManager.getPackageInfo(eq(TEST_SYSTEM_PACKAGE_NAME), anyInt()))
@@ -162,8 +161,10 @@ public class NotificationInfoTest extends SysuiTestCase {
         mDefaultNotificationChannel = new NotificationChannel(
                 NotificationChannel.DEFAULT_CHANNEL_ID, TEST_CHANNEL_NAME,
                 IMPORTANCE_LOW);
+        Notification notification = new Notification();
+        notification.extras.putParcelable(EXTRA_BUILDER_APPLICATION_INFO, applicationInfo);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
-                new Notification(), UserHandle.getUserHandleForUid(TEST_UID), null, 0);
+                notification, UserHandle.getUserHandleForUid(TEST_UID), null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
         when(mAssistantFeedbackController.isFeedbackEnabled()).thenReturn(false);
         when(mAssistantFeedbackController.getInlineDescriptionResource(any()))

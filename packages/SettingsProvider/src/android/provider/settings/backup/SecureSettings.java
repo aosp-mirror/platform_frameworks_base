@@ -268,6 +268,7 @@ public class SecureSettings {
         Settings.Secure.EVEN_DIMMER_MIN_NITS,
         Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
         Settings.Secure.CAMERA_EXTENSIONS_FALLBACK,
-        Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED
+        Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
+        Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS
     };
 }

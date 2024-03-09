@@ -51,6 +51,8 @@ import kotlinx.coroutines.withContext
  * There is never more than one instance of the FingerprintProperty at any given time.
  */
 interface FingerprintPropertyRepository {
+    /** Whether the fingerprint properties have been initialized yet. */
+    val propertiesInitialized: StateFlow<Boolean>
 
     /** The id of fingerprint sensor. */
     val sensorId: Flow<Int>
@@ -59,7 +61,7 @@ interface FingerprintPropertyRepository {
     val strength: Flow<SensorStrength>
 
     /** The types of fingerprint sensor (rear, ultrasonic, optical, etc.). */
-    val sensorType: Flow<FingerprintSensorType>
+    val sensorType: StateFlow<FingerprintSensorType>
 
     /** The sensor location relative to each physical display. */
     val sensorLocations: Flow<Map<String, SensorLocationInternal>>
@@ -105,15 +107,30 @@ constructor(
             .stateIn(
                 applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = DEFAULT_PROPS,
+                initialValue = UNINITIALIZED_PROPS,
+            )
+
+    override val propertiesInitialized: StateFlow<Boolean> =
+        props
+            .map { it != UNINITIALIZED_PROPS }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = props.value != UNINITIALIZED_PROPS,
             )
 
     override val sensorId: Flow<Int> = props.map { it.sensorId }
 
     override val strength: Flow<SensorStrength> = props.map { it.sensorStrength.toSensorStrength() }
 
-    override val sensorType: Flow<FingerprintSensorType> =
-        props.map { it.sensorType.toSensorType() }
+    override val sensorType: StateFlow<FingerprintSensorType> =
+        props
+            .map { it.sensorType.toSensorType() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = props.value.sensorType.toSensorType(),
+            )
 
     override val sensorLocations: Flow<Map<String, SensorLocationInternal>> =
         props.map {
@@ -124,6 +141,17 @@ constructor(
 
     companion object {
         private const val TAG = "FingerprintPropertyRepositoryImpl"
+        private val UNINITIALIZED_PROPS =
+            FingerprintSensorPropertiesInternal(
+                -2 /* sensorId */,
+                SensorProperties.STRENGTH_CONVENIENCE,
+                0 /* maxEnrollmentsPerUser */,
+                listOf<ComponentInfoInternal>(),
+                FingerprintSensorProperties.TYPE_UNKNOWN,
+                false /* halControlsIllumination */,
+                true /* resetLockoutRequiresHardwareAuthToken */,
+                listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT)
+            )
         private val DEFAULT_PROPS =
             FingerprintSensorPropertiesInternal(
                 -1 /* sensorId */,

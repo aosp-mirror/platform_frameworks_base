@@ -251,9 +251,14 @@ public class SplashscreenContentDrawer {
         final ActivityInfo activityInfo = windowInfo.targetActivityInfo != null
                 ? windowInfo.targetActivityInfo
                 : taskInfo.topActivityInfo;
+        final boolean isEdgeToEdgeEnforced = PhoneWindow.isEdgeToEdgeEnforced(
+                activityInfo.applicationInfo, false /* local */, a);
+        if (isEdgeToEdgeEnforced) {
+            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
+        }
         params.layoutInDisplayCutoutMode = a.getInt(
                 R.styleable.Window_windowLayoutInDisplayCutoutMode,
-                PhoneWindow.isEdgeToEdgeEnforced(activityInfo.applicationInfo, false /* local */, a)
+                isEdgeToEdgeEnforced
                         ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
                         : params.layoutInDisplayCutoutMode);
         params.windowAnimations = a.getResourceId(R.styleable.Window_windowAnimationStyle, 0);

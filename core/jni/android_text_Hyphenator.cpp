@@ -36,41 +36,43 @@ static std::string buildFileName(const std::string& locale) {
     return SYSTEM_HYPHENATOR_PREFIX + lowerLocale + SYSTEM_HYPHENATOR_SUFFIX;
 }
 
-static const uint8_t* mmapPatternFile(const std::string& locale) {
+static std::pair<const uint8_t*, uint32_t> mmapPatternFile(const std::string& locale) {
     const std::string hyFilePath = buildFileName(locale);
     const int fd = open(hyFilePath.c_str(), O_RDONLY | O_CLOEXEC);
     if (fd == -1) {
-        return nullptr;  // Open failed.
+        return std::make_pair(nullptr, 0); // Open failed.
     }
 
     struct stat st = {};
     if (fstat(fd, &st) == -1) {  // Unlikely to happen.
         close(fd);
-        return nullptr;
+        return std::make_pair(nullptr, 0);
     }
 
     void* ptr = mmap(nullptr, st.st_size, PROT_READ, MAP_SHARED, fd, 0 /* offset */);
     close(fd);
     if (ptr == MAP_FAILED) {
-        return nullptr;
+        return std::make_pair(nullptr, 0);
     }
-    return reinterpret_cast<const uint8_t*>(ptr);
+    return std::make_pair(reinterpret_cast<const uint8_t*>(ptr), st.st_size);
 }
 
 static void addHyphenatorWithoutPatternFile(const std::string& locale, int minPrefix,
         int minSuffix) {
-    minikin::addHyphenator(locale, minikin::Hyphenator::loadBinary(
-            nullptr, minPrefix, minSuffix, locale));
+    minikin::addHyphenator(locale,
+                           minikin::Hyphenator::loadBinary(nullptr, 0, minPrefix, minSuffix,
+                                                           locale));
 }
 
 static void addHyphenator(const std::string& locale, int minPrefix, int minSuffix) {
-    const uint8_t* ptr = mmapPatternFile(locale);
+    auto [ptr, size] = mmapPatternFile(locale);
     if (ptr == nullptr) {
         ALOGE("Unable to find pattern file or unable to map it for %s", locale.c_str());
         return;
     }
-    minikin::addHyphenator(locale, minikin::Hyphenator::loadBinary(
-            ptr, minPrefix, minSuffix, locale));
+    minikin::addHyphenator(locale,
+                           minikin::Hyphenator::loadBinary(ptr, size, minPrefix, minSuffix,
+                                                           locale));
 }
 
 static void addHyphenatorAlias(const std::string& from, const std::string& to) {

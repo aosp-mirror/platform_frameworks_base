@@ -11,6 +11,8 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.collection_collection-ktx",
+        "androidx.core_core-ktx",
         "guava",
     ],
+    kotlincflags: ["-Xjvm-default=all"],
 }

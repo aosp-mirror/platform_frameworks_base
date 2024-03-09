@@ -21,6 +21,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.view.View.SYSTEM_UI_LAYOUT_FLAGS;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -298,6 +299,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     int mStatusBarColor = Color.TRANSPARENT;
     int mNavigationBarColor = Color.TRANSPARENT;
     int mNavigationBarDividerColor = Color.TRANSPARENT;
+    boolean mNavigationBarColorSpecified = false;
     private boolean mForcedStatusBarColor = false;
     private boolean mForcedNavigationBarColor = false;
 
@@ -370,7 +372,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     boolean mDecorFitsSystemWindows = true;
 
-    private boolean mEdgeToEdgeEnforced;
+    boolean mEdgeToEdgeEnforced;
 
     private final ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher;
 
@@ -2578,21 +2580,27 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (!mForcedStatusBarColor && !mEdgeToEdgeEnforced) {
             mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, Color.BLACK);
         }
-        if (!mForcedNavigationBarColor && !mEdgeToEdgeEnforced) {
+        if (!mForcedNavigationBarColor) {
             final int navBarCompatibleColor = context.getColor(R.color.navigation_bar_compatible);
             final int navBarDefaultColor = context.getColor(R.color.navigation_bar_default);
             final int navBarColor = a.getColor(R.styleable.Window_navigationBarColor,
                     navBarDefaultColor);
+            final boolean navigationBarColorSpecified = navBarColor != navBarDefaultColor;
 
             mNavigationBarColor =
-                    navBarColor == navBarDefaultColor
+                    !navigationBarColorSpecified
+                            && !mEdgeToEdgeEnforced
                             && !context.getResources().getBoolean(
                                     R.bool.config_navBarDefaultTransparent)
                     ? navBarCompatibleColor
                     : navBarColor;
 
-            mNavigationBarDividerColor = a.getColor(R.styleable.Window_navigationBarDividerColor,
-                    Color.TRANSPARENT);
+            mNavigationBarColorSpecified |= navigationBarColorSpecified;
+
+            if (!mEdgeToEdgeEnforced) {
+                mNavigationBarDividerColor = a.getColor(
+                        R.styleable.Window_navigationBarDividerColor, Color.TRANSPARENT);
+            }
         }
         if (!targetPreQ) {
             mEnsureStatusBarContrastWhenTransparent = a.getBoolean(
@@ -3942,16 +3950,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setNavigationBarColor(int color) {
-        if (mEdgeToEdgeEnforced) {
-            return;
-        }
         if (mNavigationBarColor == color && mForcedNavigationBarColor) {
             return;
         }
         mNavigationBarColor = color;
         mForcedNavigationBarColor = true;
+        mNavigationBarColorSpecified = true;
         if (mDecor != null) {
+            mDecor.getWindowInsetsController().setSystemBarsAppearance(
+                    0, APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS);
             mDecor.updateColorViews(null, false /* animate */);
+        }
+        if (mEdgeToEdgeEnforced) {
+            return;
         }
         final WindowControllerCallback callback = getWindowControllerCallback();
         if (callback != null) {

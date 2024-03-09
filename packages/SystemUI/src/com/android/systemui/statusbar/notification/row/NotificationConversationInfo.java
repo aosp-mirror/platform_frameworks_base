@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
@@ -353,18 +354,15 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     private void bindPackage() {
-        ApplicationInfo info;
-        try {
-            info = mPm.getApplicationInfo(
-                    mPackageName,
-                    PackageManager.MATCH_UNINSTALLED_PACKAGES
-                            | PackageManager.MATCH_DISABLED_COMPONENTS
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-            if (info != null) {
+        // filled in if missing during notification inflation, which must have happened if
+        // we have a notification to long press on
+        ApplicationInfo info =
+                mSbn.getNotification().extras.getParcelable(EXTRA_BUILDER_APPLICATION_INFO,
+                        ApplicationInfo.class);
+        if (info != null) {
+            try {
                 mAppName = String.valueOf(mPm.getApplicationLabel(info));
-            }
-        } catch (PackageManager.NameNotFoundException e) {
+            } catch (Exception ignored) {}
         }
         ((TextView) findViewById(R.id.pkg_name)).setText(mAppName);
     }

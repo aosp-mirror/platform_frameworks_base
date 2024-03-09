@@ -61,7 +61,9 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.UserHandle;
@@ -70,20 +72,28 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
+import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityWindowAttributes;
+import android.view.accessibility.IAccessibilityManager;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 
 import com.android.compatibility.common.util.TestUtils;
 import com.android.internal.R;
+import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.accessibility.common.ShortcutConstants.FloatingMenuSize;
+import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
+import com.android.internal.accessibility.util.AccessibilityUtils;
+import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
@@ -91,31 +101,38 @@ import com.android.server.accessibility.magnification.FullScreenMagnificationCon
 import com.android.server.accessibility.magnification.MagnificationConnectionManager;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
-import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.util.reflection.FieldReader;
+import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * APCT tests for {@link AccessibilityManagerService}.
  */
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class AccessibilityManagerServiceTest {
     @Rule
     public final A11yTestableContext mTestableContext = new A11yTestableContext(
@@ -140,6 +157,12 @@ public class AccessibilityManagerServiceTest {
             TEST_PENDING_INTENT);
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY + 1;
+    private static final String TARGET_MAGNIFICATION = MAGNIFICATION_CONTROLLER_NAME;
+    private static final ComponentName TARGET_ALWAYS_ON_A11Y_SERVICE =
+            new ComponentName("FakePackage", "AlwaysOnA11yService");
+    private static final String TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS = "TileService";
+    private static final ComponentName TARGET_STANDARD_A11Y_SERVICE =
+            new ComponentName("FakePackage", "StandardA11yService");
 
     static final ComponentName COMPONENT_NAME = new ComponentName(
             "com.android.server.accessibility", "AccessibilityManagerServiceTest");
@@ -163,24 +186,33 @@ public class AccessibilityManagerServiceTest {
     @Mock private MagnificationController mMockMagnificationController;
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private ProxyManager mProxyManager;
+    @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
-    private MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
+    private IAccessibilityManager mA11yManagerServiceOnDevice;
     private AccessibilityServiceConnection mAccessibilityServiceConnection;
     private AccessibilityInputFilter mInputFilter;
     private AccessibilityManagerService mA11yms;
+    private TestableLooper mTestableLooper;
+    private Handler mHandler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mTestableLooper = TestableLooper.get(this);
+        mHandler = new Handler(mTestableLooper.getLooper());
+
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.addService(
                 WindowManagerInternal.class, mMockWindowManagerService);
         LocalServices.addService(
                 ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
         LocalServices.addService(
                 UserManagerInternal.class, mMockUserManagerInternal);
+        LocalServices.addService(
+                StatusBarManagerInternal.class, mStatusBarManagerInternal);
         mInputFilter = Mockito.mock(FakeInputFilter.class);
 
         when(mMockMagnificationController.getMagnificationConnectionManager()).thenReturn(
@@ -218,6 +250,19 @@ public class AccessibilityManagerServiceTest {
         final AccessibilityUserState userState = new AccessibilityUserState(
                 mA11yms.getCurrentUserIdLocked(), mTestableContext, mA11yms);
         mA11yms.mUserStates.put(mA11yms.getCurrentUserIdLocked(), userState);
+        AccessibilityManager am = mTestableContext.getSystemService(AccessibilityManager.class);
+        mA11yManagerServiceOnDevice = (IAccessibilityManager) new FieldReader(am,
+                AccessibilityManager.class.getDeclaredField("mService")).read();
+        FieldSetter.setField(am, AccessibilityManager.class.getDeclaredField("mService"), mA11yms);
+    }
+
+    @After
+    public void cleanUp() throws Exception {
+        mTestableLooper.processAllMessages();
+        AccessibilityManager am = mTestableContext.getSystemService(AccessibilityManager.class);
+        FieldSetter.setField(
+                am, AccessibilityManager.class.getDeclaredField("mService"),
+                mA11yManagerServiceOnDevice);
     }
 
     private void setupAccessibilityServiceConnection(int serviceInfoFlag) {
@@ -297,7 +342,8 @@ public class AccessibilityManagerServiceTest {
                 mA11yms.getCurrentUserIdLocked());
 
         mA11yms.notifySystemActionsChangedLocked(userState);
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        mTestableLooper.processAllMessages();
+
         verify(mMockServiceClient).onSystemActionsChanged();
     }
 
@@ -415,7 +461,7 @@ public class AccessibilityManagerServiceTest {
         );
 
         mA11yms.onMagnificationTransitionEndedLocked(Display.DEFAULT_DISPLAY, true);
-        mHandler.sendAllMessages();
+        mTestableLooper.processAllMessages();
 
         ArgumentCaptor<Display> displayCaptor = ArgumentCaptor.forClass(Display.class);
         verify(mInputFilter, timeout(100)).refreshMagnificationMode(displayCaptor.capture());
@@ -730,7 +776,7 @@ public class AccessibilityManagerServiceTest {
 
         mA11yms.performAccessibilityShortcut(
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
-        mHandler.sendAllMessages();
+        mTestableLooper.processAllMessages();
 
         assertStartActivityWithExpectedComponentName(mTestableContext.getMockContext(),
                 ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
@@ -907,11 +953,14 @@ public class AccessibilityManagerServiceTest {
     public void testIsAccessibilityServiceWarningRequired_notRequiredIfAllowlisted() {
         mockManageAccessibilityGranted(mTestableContext);
         final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(
-                new ComponentName("package_a", "class_a"), true);
+                new ComponentName("package_a", "class_a"),
+                /* isSystemApp= */ true, /* isAlwaysOnService= */ false);
         final AccessibilityServiceInfo info_b = mockAccessibilityServiceInfo(
-                new ComponentName("package_b", "class_b"), false);
+                new ComponentName("package_b", "class_b"),
+                /* isSystemApp= */ false, /* isAlwaysOnService= */ false);
         final AccessibilityServiceInfo info_c = mockAccessibilityServiceInfo(
-                new ComponentName("package_c", "class_c"), true);
+                new ComponentName("package_c", "class_c"),
+                /* isSystemApp= */ true, /* isAlwaysOnService= */ false);
         mTestableContext.getOrCreateTestableResources().addOverride(
                 R.array.config_trustedAccessibilityServices,
                 new String[]{
@@ -926,14 +975,380 @@ public class AccessibilityManagerServiceTest {
         assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_c)).isFalse();
     }
 
+    @Test
+    public void enableShortcutsForTargets_permissionNotGranted_throwsException() {
+        mTestableContext.getTestablePermissions().setPermission(
+                Manifest.permission.MANAGE_ACCESSIBILITY, PackageManager.PERMISSION_DENIED);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.enableShortcutsForTargets(
+                        /* enable= */true,
+                        UserShortcutType.SOFTWARE,
+                        List.of(TARGET_MAGNIFICATION),
+                        mA11yms.getCurrentUserIdLocked()));
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableSoftwareShortcut_shortcutTurnedOn()
+            throws Exception {
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+        String target = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.SOFTWARE,
+                List.of(target),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(ShortcutUtils.isComponentIdExistingInSettings(
+                mTestableContext, UserShortcutType.SOFTWARE, target
+        )).isTrue();
+    }
+
+    @Test
+    public void enableShortcutsForTargets_disableSoftwareShortcut_shortcutTurnedOff()
+            throws Exception {
+        String target = TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString();
+        enableShortcutsForTargets_enableSoftwareShortcut_shortcutTurnedOn();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ false,
+                UserShortcutType.SOFTWARE,
+                List.of(target),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(ShortcutUtils.isComponentIdExistingInSettings(
+                mTestableContext, UserShortcutType.SOFTWARE, target
+        )).isFalse();
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableSoftwareShortcutWithMagnification_menuSizeIncreased() {
+        mockManageAccessibilityGranted(mTestableContext);
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.SOFTWARE,
+                List.of(MAGNIFICATION_CONTROLLER_NAME),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                Settings.Secure.getInt(
+                        mTestableContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
+                        FloatingMenuSize.UNKNOWN))
+                .isEqualTo(FloatingMenuSize.LARGE);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableSoftwareShortcutWithMagnification_userConfigureSmallMenuSize_menuSizeNotChanged() {
+        mockManageAccessibilityGranted(mTestableContext);
+        Settings.Secure.putInt(
+                mTestableContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
+                FloatingMenuSize.SMALL);
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.SOFTWARE,
+                List.of(MAGNIFICATION_CONTROLLER_NAME),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                Settings.Secure.getInt(
+                        mTestableContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
+                        FloatingMenuSize.UNKNOWN))
+                .isEqualTo(FloatingMenuSize.SMALL);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableAlwaysOnServiceSoftwareShortcut_turnsOnAlwaysOnService()
+            throws Exception {
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.SOFTWARE,
+                List.of(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                AccessibilityUtils.getEnabledServicesFromSettings(
+                        mTestableContext,
+                        mA11yms.getCurrentUserIdLocked())
+        ).contains(TARGET_ALWAYS_ON_A11Y_SERVICE);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_disableAlwaysOnServiceSoftwareShortcut_turnsOffAlwaysOnService()
+            throws Exception {
+        enableShortcutsForTargets_enableAlwaysOnServiceSoftwareShortcut_turnsOnAlwaysOnService();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ false,
+                UserShortcutType.SOFTWARE,
+                List.of(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                AccessibilityUtils.getEnabledServicesFromSettings(
+                        mTestableContext,
+                        mA11yms.getCurrentUserIdLocked())
+        ).doesNotContain(TARGET_ALWAYS_ON_A11Y_SERVICE);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableStandardServiceSoftwareShortcut_wontTurnOnService()
+            throws Exception {
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.SOFTWARE,
+                List.of(TARGET_STANDARD_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                AccessibilityUtils.getEnabledServicesFromSettings(
+                        mTestableContext,
+                        mA11yms.getCurrentUserIdLocked())
+        ).doesNotContain(TARGET_STANDARD_A11Y_SERVICE);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_disableStandardServiceSoftwareShortcutWithServiceOn_wontTurnOffService()
+            throws Exception {
+        enableShortcutsForTargets_enableStandardServiceSoftwareShortcut_wontTurnOnService();
+        AccessibilityUtils.setAccessibilityServiceState(
+                mTestableContext, TARGET_STANDARD_A11Y_SERVICE, /* enabled= */ true);
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ false,
+                UserShortcutType.SOFTWARE,
+                List.of(TARGET_STANDARD_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                AccessibilityUtils.getEnabledServicesFromSettings(
+                        mTestableContext,
+                        mA11yms.getCurrentUserIdLocked())
+        ).contains(TARGET_STANDARD_A11Y_SERVICE);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableTripleTapShortcut_settingUpdated() {
+        mockManageAccessibilityGranted(mTestableContext);
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.TRIPLETAP,
+                List.of(TARGET_MAGNIFICATION),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                Settings.Secure.getInt(
+                        mTestableContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+                        AccessibilityUtils.State.OFF)
+        ).isEqualTo(AccessibilityUtils.State.ON);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_disableTripleTapShortcut_settingUpdated() {
+        enableShortcutsForTargets_enableTripleTapShortcut_settingUpdated();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ false,
+                UserShortcutType.TRIPLETAP,
+                List.of(TARGET_MAGNIFICATION),
+                mA11yms.getCurrentUserIdLocked());
+
+        assertThat(
+                Settings.Secure.getInt(
+                        mTestableContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+                        AccessibilityUtils.State.OFF)
+        ).isEqualTo(AccessibilityUtils.State.OFF);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableMultiFingerMultiTapsShortcut_settingUpdated() {
+        mockManageAccessibilityGranted(mTestableContext);
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.TWOFINGER_DOUBLETAP,
+                List.of(TARGET_MAGNIFICATION),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                Settings.Secure.getInt(
+                        mTestableContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
+                        AccessibilityUtils.State.OFF)
+        ).isEqualTo(AccessibilityUtils.State.ON);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_disableMultiFingerMultiTapsShortcut_settingUpdated() {
+        enableShortcutsForTargets_enableMultiFingerMultiTapsShortcut_settingUpdated();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ false,
+                UserShortcutType.TWOFINGER_DOUBLETAP,
+                List.of(TARGET_MAGNIFICATION),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                Settings.Secure.getInt(
+                        mTestableContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
+                        AccessibilityUtils.State.OFF)
+        ).isEqualTo(AccessibilityUtils.State.OFF);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableVolumeKeysShortcut_shortcutSet() {
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.HARDWARE,
+                List.of(TARGET_STANDARD_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                ShortcutUtils.isComponentIdExistingInSettings(
+                        mTestableContext, ShortcutConstants.UserShortcutType.HARDWARE,
+                        TARGET_STANDARD_A11Y_SERVICE.flattenToString())
+        ).isTrue();
+    }
+
+    @Test
+    public void enableShortcutsForTargets_disableVolumeKeysShortcut_shortcutNotSet() {
+        enableShortcutsForTargets_enableVolumeKeysShortcut_shortcutSet();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ false,
+                UserShortcutType.HARDWARE,
+                List.of(TARGET_STANDARD_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                ShortcutUtils.isComponentIdExistingInSettings(
+                        mTestableContext, ShortcutConstants.UserShortcutType.HARDWARE,
+                        TARGET_STANDARD_A11Y_SERVICE.flattenToString())
+        ).isFalse();
+    }
+
+    @Test
+    public void enableShortcutsForTargets_enableQuickSettings_shortcutSet() {
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ true,
+                UserShortcutType.QUICK_SETTINGS,
+                List.of(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                ShortcutUtils.isComponentIdExistingInSettings(
+                        mTestableContext, UserShortcutType.QUICK_SETTINGS,
+                        TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString())
+        ).isTrue();
+        verify(mStatusBarManagerInternal)
+                .addQsTileToFrontOrEnd(
+                        new ComponentName(
+                                TARGET_ALWAYS_ON_A11Y_SERVICE.getPackageName(),
+                                TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS),
+                        /* end= */ true);
+    }
+
+    @Test
+    public void enableShortcutsForTargets_disableQuickSettings_shortcutNotSet() {
+        enableShortcutsForTargets_enableQuickSettings_shortcutSet();
+
+        mA11yms.enableShortcutsForTargets(
+                /* enable= */ false,
+                UserShortcutType.QUICK_SETTINGS,
+                List.of(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString()),
+                mA11yms.getCurrentUserIdLocked());
+        mTestableLooper.processAllMessages();
+
+        assertThat(
+                ShortcutUtils.isComponentIdExistingInSettings(
+                        mTestableContext, UserShortcutType.QUICK_SETTINGS,
+                        TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString())
+        ).isFalse();
+        verify(mStatusBarManagerInternal)
+                .removeQsTile(
+                        new ComponentName(
+                                TARGET_ALWAYS_ON_A11Y_SERVICE.getPackageName(),
+                                TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS));
+    }
+
+    @Test
+    public void getA11yFeatureToTileMap_permissionNotGranted_throwsException() {
+        mTestableContext.getTestablePermissions().setPermission(
+                Manifest.permission.MANAGE_ACCESSIBILITY, PackageManager.PERMISSION_DENIED);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.getA11yFeatureToTileMap(mA11yms.getCurrentUserIdLocked()));
+    }
+
+    @Test
+    public void getA11yFeatureToTileMap() {
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+
+        Bundle bundle = mA11yms.getA11yFeatureToTileMap(mA11yms.getCurrentUserIdLocked());
+
+        // Framework tile size + TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS
+        assertThat(bundle.size())
+                .isEqualTo(ShortcutConstants.A11Y_FEATURE_TO_FRAMEWORK_TILE.size() + 1);
+        assertThat(
+                bundle.getParcelable(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString(),
+                        ComponentName.class)
+        ).isEqualTo(
+                new ComponentName(
+                        TARGET_ALWAYS_ON_A11Y_SERVICE.getPackageName(),
+                        TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS));
+        for (Map.Entry<ComponentName, ComponentName> entry :
+                ShortcutConstants.A11Y_FEATURE_TO_FRAMEWORK_TILE.entrySet()) {
+            assertThat(bundle.getParcelable(entry.getKey().flattenToString(), ComponentName.class))
+                    .isEqualTo(entry.getValue());
+        }
+    }
+
     private static AccessibilityServiceInfo mockAccessibilityServiceInfo(
             ComponentName componentName) {
-        return mockAccessibilityServiceInfo(componentName, false);
+        return mockAccessibilityServiceInfo(
+                componentName, /* isSystemApp= */ false, /* isAlwaysOnService=*/ false);
     }
 
     private static AccessibilityServiceInfo mockAccessibilityServiceInfo(
             ComponentName componentName,
-            boolean isSystemApp) {
+            boolean isSystemApp, boolean isAlwaysOnService) {
         AccessibilityServiceInfo accessibilityServiceInfo =
                 Mockito.spy(new AccessibilityServiceInfo());
         accessibilityServiceInfo.setComponentName(componentName);
@@ -941,7 +1356,15 @@ public class AccessibilityManagerServiceTest {
         when(accessibilityServiceInfo.getResolveInfo()).thenReturn(mockResolveInfo);
         mockResolveInfo.serviceInfo = Mockito.mock(ServiceInfo.class);
         mockResolveInfo.serviceInfo.applicationInfo = Mockito.mock(ApplicationInfo.class);
+        mockResolveInfo.serviceInfo.packageName = componentName.getPackageName();
+        mockResolveInfo.serviceInfo.name = componentName.getClassName();
         when(mockResolveInfo.serviceInfo.applicationInfo.isSystemApp()).thenReturn(isSystemApp);
+        if (isAlwaysOnService) {
+            accessibilityServiceInfo.flags |=
+                    AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+            mockResolveInfo.serviceInfo.applicationInfo.targetSdkVersion =
+                    Build.VERSION_CODES.R;
+        }
         return accessibilityServiceInfo;
     }
 
@@ -972,6 +1395,22 @@ public class AccessibilityManagerServiceTest {
                 any(Bundle.class), any(UserHandle.class));
         assertThat(mIntentArgumentCaptor.getValue().getStringExtra(
                 Intent.EXTRA_COMPONENT_NAME)).isEqualTo(componentName);
+    }
+
+    private void setupShortcutTargetServices() {
+        AccessibilityServiceInfo alwaysOnServiceInfo = mockAccessibilityServiceInfo(
+                TARGET_ALWAYS_ON_A11Y_SERVICE,
+                /* isSystemApp= */ false,
+                /* isAlwaysOnService= */ true);
+        when(alwaysOnServiceInfo.getTileServiceName())
+                .thenReturn(TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS);
+        AccessibilityServiceInfo standardServiceInfo = mockAccessibilityServiceInfo(
+                TARGET_STANDARD_A11Y_SERVICE,
+                /* isSystemApp= */ false,
+                /* isAlwaysOnService= */ false);
+        mA11yms.getCurrentUserState().mInstalledServices.addAll(
+                List.of(alwaysOnServiceInfo, standardServiceInfo));
+        mA11yms.getCurrentUserState().updateTileServiceMapForAccessibilityServiceLocked();
     }
 
     public static class FakeInputFilter extends AccessibilityInputFilter {

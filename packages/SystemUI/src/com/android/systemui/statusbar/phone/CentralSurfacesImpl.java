@@ -2790,6 +2790,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         || mKeyguardStateController.isKeyguardGoingAway()
                         || mKeyguardViewMediator.requestedShowSurfaceBehindKeyguard()
                         || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind());
+        boolean dreaming =
+                mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()
+                        && !unlocking;
 
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
@@ -2834,13 +2837,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // this as otherwise it can remain pending and leave keyguard in a weird state.
             mUnlockScrimCallback.onCancelled();
         } else if (mIsIdleOnCommunal) {
-            mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+            if (dreaming) {
+                mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB_OVER_DREAM);
+            } else {
+                mScrimController.transitionTo(ScrimState.GLANCEABLE_HUB);
+            }
         } else if (mKeyguardStateController.isShowing()
                 && !mKeyguardStateController.isOccluded()
                 && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
-        } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()
-                && !unlocking) {
+        } else if (dreaming) {
             mScrimController.transitionTo(ScrimState.DREAMING);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
@@ -3043,8 +3049,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             if (userSetup != mUserSetup) {
                 mUserSetup = userSetup;
                 if (!mUserSetup && mState == StatusBarState.SHADE) {
-                    mShadeSurface.collapse(true /* animate */, false  /* delayed */,
-                            1.0f  /* speedUpFactor */);
+                    mShadeController.animateCollapseShade();
                 }
             }
         }

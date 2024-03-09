@@ -5379,13 +5379,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mTopHeadsUpRow = topHeadsUpRow;
     }
 
-    /**
-     * @param numHeadsUp the number of active alerting notifications.
-     */
-    public void setNumHeadsUp(long numHeadsUp) {
-        mAmbientState.setHasHeadsUpEntries(numHeadsUp > 0);
-    }
-
     public boolean getIsExpanded() {
         return mIsExpanded;
     }

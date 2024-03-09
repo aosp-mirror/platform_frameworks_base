@@ -26,7 +26,7 @@ import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakeSleepReason.TAP
 import com.android.systemui.res.R
@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 val DEFAULT_REVEAL_EFFECT = LiftReveal
+const val DEFAULT_REVEAL_DURATION = 500L
 
 /**
  * Encapsulates state relevant to the light reveal scrim, the view used to reveal/hide screen
@@ -63,7 +64,9 @@ interface LightRevealScrimRepository {
 
     val revealAmount: Flow<Float>
 
-    fun startRevealAmountAnimator(reveal: Boolean)
+    val isAnimating: Boolean
+
+    fun startRevealAmountAnimator(reveal: Boolean, duration: Long = DEFAULT_REVEAL_DURATION)
 }
 
 @SysUISingleton
@@ -72,7 +75,7 @@ class LightRevealScrimRepositoryImpl
 constructor(
     keyguardRepository: KeyguardRepository,
     val context: Context,
-    powerInteractor: PowerInteractor,
+    powerRepository: PowerRepository,
     private val scrimLogger: ScrimLogger,
 ) : LightRevealScrimRepository {
     companion object {
@@ -125,7 +128,7 @@ constructor(
 
     /** The reveal effect we'll use for the next non-biometric unlock (tap, power button, etc). */
     private val nonBiometricRevealEffect: Flow<LightRevealEffect?> =
-        powerInteractor.detailedWakefulness.flatMapLatest { wakefulnessModel ->
+        powerRepository.wakefulness.flatMapLatest { wakefulnessModel ->
             when {
                 wakefulnessModel.isAwakeOrAsleepFrom(WakeSleepReason.POWER_BUTTON) ->
                     powerButtonRevealEffect
@@ -134,7 +137,7 @@ constructor(
             }
         }
 
-    private val revealAmountAnimator = ValueAnimator.ofFloat(0f, 1f).apply { duration = 500 }
+    private val revealAmountAnimator = ValueAnimator.ofFloat(0f, 1f)
 
     override val revealAmount: Flow<Float> = callbackFlow {
         val updateListener =
@@ -149,18 +152,21 @@ constructor(
         revealAmountAnimator.addUpdateListener(updateListener)
         awaitClose { revealAmountAnimator.removeUpdateListener(updateListener) }
     }
+    override val isAnimating: Boolean
+        get() = revealAmountAnimator.isRunning
 
     private var willBeOrIsRevealed: Boolean? = null
 
-    override fun startRevealAmountAnimator(reveal: Boolean) {
+    override fun startRevealAmountAnimator(reveal: Boolean, duration: Long) {
         if (reveal == willBeOrIsRevealed) return
         willBeOrIsRevealed = reveal
+        revealAmountAnimator.duration = duration
         if (reveal && !revealAmountAnimator.isRunning) {
             revealAmountAnimator.start()
         } else {
             revealAmountAnimator.reverse()
         }
-        scrimLogger.d(TAG, "startRevealAmountAnimator, reveal: ", reveal)
+        scrimLogger.d(TAG, "startRevealAmountAnimator, reveal", reveal)
     }
 
     override val revealEffect =

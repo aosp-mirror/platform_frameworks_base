@@ -101,7 +101,6 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
     }
 
     private void offloadInner(Runnable r) {
-        boolean useThrowingRunnable = r instanceof ThrowingRunnable;
         final long identity = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(() -> {
@@ -110,14 +109,9 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
                 Binder.restoreCallingIdentity(identity);
                 try {
                     try {
-                        if (useThrowingRunnable) {
-                            ((ThrowingRunnable) r).runOrThrow();
-                        } else {
-                            r.run();
-                        }
+                        r.run();
                     } catch (Exception e) {
-                        Slog.e(TAG, "Error in async call", e);
-                        throw ExceptionUtils.propagate(e);
+                        Slog.e(TAG, "Error in async IMMS call", e);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(inner);

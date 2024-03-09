@@ -80,10 +80,6 @@ final class InputMethodMenuController {
 
         final int userId = mService.getCurrentImeUserIdLocked();
 
-        if (imList.isEmpty()) {
-            return;
-        }
-
         hideInputMethodMenuLocked();
 
         if (preferredInputMethodSubtypeId == NOT_A_SUBTYPE_ID) {

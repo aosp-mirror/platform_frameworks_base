@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import android.os.PowerManager.WAKE_REASON_UNKNOWN
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -26,8 +27,9 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.power.data.repository.powerRepository
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.testKosmos
@@ -51,7 +53,7 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
-    private val powerInteractor = kosmos.powerInteractor
+    private val powerRepository = kosmos.powerRepository
     private lateinit var underTest: LightRevealScrimRepositoryImpl
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
@@ -63,7 +65,7 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
             LightRevealScrimRepositoryImpl(
                 kosmos.fakeKeyguardRepository,
                 context,
-                kosmos.powerInteractor,
+                powerRepository,
                 mock()
             )
     }
@@ -73,7 +75,14 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         val values = mutableListOf<LightRevealEffect>()
         val job = launch { underTest.revealEffect.collect { values.add(it) } }
 
-        powerInteractor.setAwakeForTest()
+        powerRepository.updateWakefulness(
+            rawState = WakefulnessState.STARTING_TO_WAKE,
+            lastWakeReason = WakeSleepReason.fromPowerManagerWakeReason(WAKE_REASON_UNKNOWN),
+            powerButtonLaunchGestureTriggered =
+                powerRepository.wakefulness.value.powerButtonLaunchGestureTriggered,
+        )
+        powerRepository.updateWakefulness(rawState = WakefulnessState.AWAKE)
+
         // We should initially emit the default reveal effect.
         runCurrent()
         values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT })
@@ -171,7 +180,7 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val value by collectLastValue(underTest.revealAmount)
             runCurrent()
-            underTest.startRevealAmountAnimator(true)
+            underTest.startRevealAmountAnimator(true, 500L)
             assertEquals(0.0f, value)
             animatorTestRule.advanceTimeBy(500L)
             assertEquals(1.0f, value)
@@ -183,11 +192,11 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val value by collectLastValue(underTest.revealAmount)
             runCurrent()
-            underTest.startRevealAmountAnimator(true)
+            underTest.startRevealAmountAnimator(true, 500L)
             assertEquals(0.0f, value)
             animatorTestRule.advanceTimeBy(250L)
             assertEquals(0.5f, value)
-            underTest.startRevealAmountAnimator(true)
+            underTest.startRevealAmountAnimator(true, 500L)
             animatorTestRule.advanceTimeBy(250L)
             assertEquals(1.0f, value)
         }
@@ -198,9 +207,9 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val lastValue by collectLastValue(underTest.revealAmount)
             runCurrent()
-            underTest.startRevealAmountAnimator(true)
+            underTest.startRevealAmountAnimator(true, 500L)
             animatorTestRule.advanceTimeBy(500L)
-            underTest.startRevealAmountAnimator(false)
+            underTest.startRevealAmountAnimator(false, 500L)
             animatorTestRule.advanceTimeBy(500L)
             assertEquals(0.0f, lastValue)
         }

@@ -16,17 +16,17 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
-import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
+import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 
 /** Encapsulates business logic for device entry under-display fingerprint state changes. */
 @ExperimentalCoroutinesApi
@@ -34,14 +34,13 @@ import kotlinx.coroutines.flow.map
 class DeviceEntryUdfpsInteractor
 @Inject
 constructor(
+    fingerprintPropertyInteractor: FingerprintPropertyInteractor,
     // TODO (b/309655554): create & use interactors for these repositories
-    fingerprintPropertyRepository: FingerprintPropertyRepository,
     fingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     biometricSettingsRepository: BiometricSettingsRepository,
 ) {
     /** Whether the device supports an under display fingerprint sensor. */
-    val isUdfpsSupported: Flow<Boolean> =
-        fingerprintPropertyRepository.sensorType.map { it.isUdfps() }
+    val isUdfpsSupported: StateFlow<Boolean> = fingerprintPropertyInteractor.isUdfps
 
     /** Whether the under-display fingerprint sensor is enrolled and enabled for device entry. */
     val isUdfpsEnrolledAndEnabled: Flow<Boolean> =

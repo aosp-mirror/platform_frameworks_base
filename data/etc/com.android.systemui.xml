@@ -89,5 +89,7 @@
         <permission name="android.permission.READ_SEARCH_INDEXABLES" />
         <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"/>
         <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS" />
+        <permission name="android.permission.CONTROL_UI_TRACING" />
+        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
     </privapp-permissions>
 </permissions>

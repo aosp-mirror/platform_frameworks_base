@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.GlobalSettings
 import junit.framework.Assert.assertFalse
@@ -80,6 +81,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var handler: Handler
 
+    val kosmos = testKosmos()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -87,14 +90,14 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 context,
                 wakefulnessLifecycle,
                 statusBarStateController,
-                dagger.Lazy<KeyguardViewMediator> { keyguardViewMediator },
+                { keyguardViewMediator },
                 keyguardStateController,
-                dagger.Lazy<DozeParameters> { dozeParameters },
+                { dozeParameters },
                 globalSettings,
-                dagger.Lazy<NotificationShadeWindowController> { notifShadeWindowController },
+                { notifShadeWindowController },
                 interactionJankMonitor,
                 powerManager,
-                handler = handler,
+                handler = handler
         )
         controller.initialize(centralSurfaces, shadeViewController, lightRevealScrim)
 

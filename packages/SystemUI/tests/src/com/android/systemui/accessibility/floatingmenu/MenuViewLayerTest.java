@@ -61,6 +61,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.ArraySet;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -71,6 +72,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.Flags;
@@ -220,6 +222,24 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void triggerDismissMenuAction_callsA11yManagerEnableShortcutsForTargets() {
+        final List<String> stubShortcutTargets = new ArrayList<>();
+        stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
+        when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
+                AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(stubShortcutTargets);
+
+        mMenuViewLayer.mDismissMenuAction.run();
+
+        verify(mStubAccessibilityManager).enableShortcutsForTargets(
+                /* enable= */ false,
+                ShortcutConstants.UserShortcutType.SOFTWARE,
+                new ArraySet<>(stubShortcutTargets),
+                mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
+    }
+
+    @Test
+    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void triggerDismissMenuAction_matchA11yButtonTargetsResult() {
         mMenuViewLayer.mDismissMenuAction.run();
         verify(mSecureSettings).putStringForUser(
@@ -228,6 +248,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void triggerDismissMenuAction_matchEnabledA11yServicesResult() {
         setupEnabledAccessibilityServiceList();
 
@@ -239,6 +260,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void triggerDismissMenuAction_hasHardwareKeyShortcut_keepEnabledStatus() {
         setupEnabledAccessibilityServiceList();
         final List<String> stubShortcutTargets = new ArrayList<>();

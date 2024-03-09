@@ -2122,11 +2122,11 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Câmara"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microfone"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sobrepõe-se a outras aplicações no ecrã"</string>
-    <string name="notification_feedback_indicator" msgid="663476517711323016">"Fornecer feedback"</string>
-    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Esta notificação foi promovida para Predefinida. Toque para fornecer feedback."</string>
-    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi despromovida para Silenciosa. Toque para fornecer feedback."</string>
-    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação passou para uma classificação superior. Toque para fornecer feedback."</string>
-    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação passou para uma classificação inferior. Toque para fornecer feedback."</string>
+    <string name="notification_feedback_indicator" msgid="663476517711323016">"Dar feedback"</string>
+    <string name="notification_feedback_indicator_alerted" msgid="6552871804121942099">"Esta notificação foi promovida para Predefinida. Toque para dar feedback."</string>
+    <string name="notification_feedback_indicator_silenced" msgid="3799442124723177262">"Esta notificação foi despromovida para Silenciosa. Toque para dar feedback."</string>
+    <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Esta notificação passou para uma classificação superior. Toque para dar feedback."</string>
+    <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Esta notificação passou para uma classificação inferior. Toque para dar feedback."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notificações melhoradas"</string>
     <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"As ações e as respostas sugeridas são agora fornecidas por notificações melhoradas. As notificações adaptáveis do Android já não são suportadas."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>

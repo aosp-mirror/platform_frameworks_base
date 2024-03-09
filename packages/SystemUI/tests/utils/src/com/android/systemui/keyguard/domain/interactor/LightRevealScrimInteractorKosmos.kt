@@ -29,6 +29,6 @@ val Kosmos.lightRevealScrimInteractor by
             lightRevealScrimRepository,
             applicationCoroutineScope,
             scrimLogger,
-            powerInteractor,
+            { powerInteractor },
         )
     }

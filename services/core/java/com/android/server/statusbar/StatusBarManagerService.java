@@ -820,11 +820,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+        public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.enterStageSplitFromRunningApp(leftOrTop);
+                    bar.moveFocusedTaskToStageSplit(displayId, leftOrTop);
                 } catch (RemoteException ex) { }
             }
         }

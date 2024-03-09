@@ -40,25 +40,6 @@ interface ShadeViewController {
      */
     val isPanelExpanded: Boolean
 
-    /** Returns whether the shade is fully expanded in either QS or QQS. */
-    val isShadeFullyExpanded: Boolean
-
-    /**
-     * Animates the collapse of a shade with the given delay and the default duration divided by
-     * speedUpFactor.
-     */
-    fun collapse(delayed: Boolean, speedUpFactor: Float)
-
-    /** Collapses the shade. */
-    fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float)
-
-    /** Collapses the shade instantly without animation. */
-    fun instantCollapse()
-
-    /** Returns whether the shade can be collapsed. */
-    @Deprecated("Do not use outside of the shade package. Not supported by scenes.")
-    fun canBeCollapsed(): Boolean
-
     /** Returns whether the shade is in the process of collapsing. */
     val isCollapsing: Boolean
 

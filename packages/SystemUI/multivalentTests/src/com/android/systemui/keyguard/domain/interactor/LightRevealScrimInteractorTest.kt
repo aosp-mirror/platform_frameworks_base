@@ -24,7 +24,6 @@ import com.android.systemui.keyguard.data.repository.FakeLightRevealScrimReposit
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.testKosmos
@@ -50,7 +49,6 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeLightRevealScrimRepository = kosmos.fakeLightRevealScrimRepository
 
     private val fakeKeyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val testScope = kosmos.testScope
 
     private val underTest = kosmos.lightRevealScrimInteractor
 

@@ -1247,6 +1247,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
          */
         private boolean mImePackageAppeared = false;
 
+        /**
+         * Remembers package names passed to {@link #onPackageDataCleared(String, int)}.
+         *
+         * <p>This field must be accessed only from callback methods in {@link PackageMonitor},
+         * which should be bound to {@link #getRegisteredHandler()}.</p>
+         */
+        private ArrayList<String> mDataClearedPackages = new ArrayList<>();
+
         @GuardedBy("ImfLock.class")
         void clearKnownImePackageNamesLocked() {
             mKnownImePackageNames.clear();
@@ -1350,36 +1358,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onPackageDataCleared(String packageName, int uid) {
-            final int userId = getChangingUserId();
-            synchronized (ImfLock.class) {
-                final boolean isCurrentUser = (userId == mSettings.getUserId());
-                final AdditionalSubtypeMap additionalSubtypeMap =
-                        AdditionalSubtypeMapRepository.get(userId);
-                final InputMethodSettings settings;
-                if (isCurrentUser) {
-                    settings = mSettings;
-                } else {
-                    settings = queryInputMethodServicesInternal(mContext, userId,
-                            additionalSubtypeMap, DirectBootAwareness.AUTO);
-                }
-
-                // Note that one package may implement multiple IMEs.
-                final ArrayList<String> changedImes = new ArrayList<>();
-                for (InputMethodInfo imi : settings.getMethodList()) {
-                    if (imi.getPackageName().equals(packageName)) {
-                        changedImes.add(imi.getId());
-                    }
-                }
-                final AdditionalSubtypeMap newMap =
-                        additionalSubtypeMap.cloneWithRemoveOrSelf(changedImes);
-                if (newMap != additionalSubtypeMap) {
-                    AdditionalSubtypeMapRepository.putAndSave(userId, newMap,
-                            settings.getMethodMap());
-                }
-                if (!changedImes.isEmpty()) {
-                    mChangedPackages.add(packageName);
-                }
-            }
+            mChangedPackages.add(packageName);
+            mDataClearedPackages.add(packageName);
         }
 
         @Override
@@ -1391,6 +1371,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         private void clearPackageChangeState() {
             // No need to lock them because we access these fields only on getRegisteredHandler().
             mChangedPackages.clear();
+            mDataClearedPackages.clear();
             mImePackageAppeared = false;
         }
 
@@ -1421,7 +1402,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             synchronized (ImfLock.class) {
                 final int userId = getChangingUserId();
                 final boolean isCurrentUser = (userId == mSettings.getUserId());
-                AdditionalSubtypeMap additionalSubtypeMap =
+                final AdditionalSubtypeMap additionalSubtypeMap =
                         AdditionalSubtypeMapRepository.get(userId);
                 final InputMethodSettings settings;
                 if (isCurrentUser) {
@@ -1434,12 +1415,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 InputMethodInfo curIm = null;
                 String curInputMethodId = settings.getSelectedInputMethod();
                 final List<InputMethodInfo> methodList = settings.getMethodList();
+
+                final ArrayList<String> imesToClearAdditionalSubtypes = new ArrayList<>();
                 final int numImes = methodList.size();
                 for (int i = 0; i < numImes; i++) {
                     InputMethodInfo imi = methodList.get(i);
                     final String imiId = imi.getId();
                     if (imiId.equals(curInputMethodId)) {
                         curIm = imi;
+                    }
+                    if (mDataClearedPackages.contains(imi.getPackageName())) {
+                        imesToClearAdditionalSubtypes.add(imiId);
                     }
                     int change = isPackageDisappearing(imi.getPackageName());
                     if (change == PACKAGE_TEMPORARY_CHANGE || change == PACKAGE_PERMANENT_CHANGE) {
@@ -1455,14 +1441,22 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     } else if (change == PACKAGE_UPDATING) {
                         Slog.i(TAG, "Input method reinstalling, clearing additional subtypes: "
                                 + imi.getComponent());
-                        additionalSubtypeMap =
-                                additionalSubtypeMap.cloneWithRemoveOrSelf(imi.getId());
-                        AdditionalSubtypeMapRepository.putAndSave(userId,
-                                additionalSubtypeMap, settings.getMethodMap());
+                        imesToClearAdditionalSubtypes.add(imiId);
                     }
                 }
 
-                if (!isCurrentUser || !shouldRebuildInputMethodListLocked()) {
+                // Clear additional subtypes as a batch operation.
+                final AdditionalSubtypeMap newAdditionalSubtypeMap =
+                        additionalSubtypeMap.cloneWithRemoveOrSelf(imesToClearAdditionalSubtypes);
+                final boolean additionalSubtypeChanged =
+                        (newAdditionalSubtypeMap != additionalSubtypeMap);
+                if (additionalSubtypeChanged) {
+                    AdditionalSubtypeMapRepository.putAndSave(userId, newAdditionalSubtypeMap,
+                            settings.getMethodMap());
+                }
+
+                if (!isCurrentUser
+                        || !(additionalSubtypeChanged || shouldRebuildInputMethodListLocked())) {
                     return;
                 }
 
@@ -1932,7 +1926,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }, "Lazily initialize IMMS#mImeDrawsImeNavBarRes");
 
-                mMyPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
+                mMyPackageMonitor.register(mContext, UserHandle.ALL, mHandler);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
 
                 final IntentFilter broadcastFilterForAllUsers = new IntentFilter();
@@ -5023,6 +5017,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             .getSortedInputMethodAndSubtypeList(
                                     showAuxSubtypes, isScreenLocked, true /* forImeMenu */,
                                     mContext, mSettings.getMethodMap(), mSettings.getUserId());
+                    if (imList.isEmpty()) {
+                        Slog.w(TAG, "Show switching menu failed, imList is empty,"
+                                + " showAuxSubtypes: " + showAuxSubtypes
+                                + " isScreenLocked: " + isScreenLocked
+                                + " userId: " + mSettings.getUserId());
+                        return false;
+                    }
+
                     mMenuController.showInputMethodMenuLocked(showAuxSubtypes, displayId,
                             lastInputMethodId, lastInputMethodSubtypeId, imList);
                 }

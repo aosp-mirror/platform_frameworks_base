@@ -181,12 +181,11 @@
 
             <TextView
                 android:id="@+id/bluetooth_auto_on_toggle_info_text"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:paddingStart="36dp"
                 android:paddingEnd="40dp"
-                android:text="@string/turn_on_bluetooth_auto_info"
                 android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

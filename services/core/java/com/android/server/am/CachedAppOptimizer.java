@@ -1415,7 +1415,7 @@ public final class CachedAppOptimizer {
 
     @GuardedBy({"mAm", "mProcLock"})
     private void freezeAppAsyncLSP(ProcessRecord app, @UptimeMillisLong long delayMillis) {
-        freezeAppAsyncInternalLSP(app, delayMillis, false);
+        freezeAppAsyncInternalLSP(app, delayMillis, false, false);
     }
 
     @GuardedBy({"mAm", "mProcLock"})
@@ -1423,11 +1423,25 @@ public final class CachedAppOptimizer {
         freezeAppAsyncLSP(app, updateEarliestFreezableTime(app, 0));
     }
 
+    // TODO: Update freezeAppAsyncAtEarliestLSP to actually freeze the app at the earliest
+    // and remove this method.
+    @GuardedBy({"mAm", "mProcLock"})
+    void freezeAppAsyncImmediateLSP(ProcessRecord app) {
+        freezeAppAsyncInternalLSP(app, 0, false, true);
+    }
+
+    // TODO: Update this method to be private and have the existing clients call different methods.
+    // This "internal" method should not be directly triggered by clients outside this class.
     @GuardedBy({"mAm", "mProcLock"})
     void freezeAppAsyncInternalLSP(ProcessRecord app, @UptimeMillisLong long delayMillis,
-            boolean force) {
+            boolean force, boolean immediate) {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
+            if (immediate) {
+                mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
+                mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(
+                        SET_FROZEN_PROCESS_MSG, DO_FREEZE, 0, app));
+            }
             // Skip redundant DO_FREEZE message
             return;
         }
@@ -2210,6 +2224,9 @@ public final class CachedAppOptimizer {
                 case SET_FROZEN_PROCESS_MSG: {
                     ProcessRecord proc = (ProcessRecord) msg.obj;
                     synchronized (mAm) {
+                        if (!proc.mOptRecord.isPendingFreeze()) {
+                            return;
+                        }
                         freezeProcess(proc);
                     }
                     if (proc.mOptRecord.isFrozen()) {

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <!-- Since this layer list has just one layer, we can remove it and replace with the inner
+         layer drawable. However this should only be done when the flag
+         com.android.systemui.qs_tile_focus_state has completed all its stages and this drawable
+         fully replaces the previous one to ensure consistency with code sections searching for
+         specific ids in drawable hierarchy -->
+    <item
+        android:id="@id/background">
+        <layer-list>
+            <item
+                android:id="@+id/qs_tile_background_base"
+                android:drawable="@drawable/qs_tile_background_shape" />
+            <item android:id="@+id/qs_tile_background_overlay">
+                <selector>
+                    <item
+                        android:state_hovered="true"
+                        android:drawable="@drawable/qs_tile_background_shape" />
+                </selector>
+            </item>
+            <!-- In the layer below we have negative insets because we need the focus outline
+                 to draw outside the bounds, around the main background. We use 5dp because
+                 the outline stroke is 3dp and the required padding is 2dp.-->
+            <item
+                android:top="-5dp"
+                android:right="-5dp"
+                android:left="-5dp"
+                android:bottom="-5dp">
+                <selector>
+                    <item
+                        android:state_focused="true"
+                        android:drawable="@drawable/qs_tile_focused_background"/>
+                </selector>
+            </item>
+        </layer-list>
+    </item>
+</layer-list>

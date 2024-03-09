@@ -1225,6 +1225,9 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
         com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    MethodParameters:
+      Name                           Flags
+      <no name>                      mandated
 
   private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex(java.lang.String, java.lang.String);
     descriptor: (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
@@ -1257,6 +1260,12 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
+    MethodParameters:
+      Name                           Flags
+      <no name>                      synthetic
+      <no name>                      synthetic
+      <no name>
+      <no name>
 
   public java.lang.String getLongName();
     descriptor: ()Ljava/lang/String;
@@ -1453,6 +1462,9 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
         com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    MethodParameters:
+      Name                           Flags
+      <no name>                      mandated
 
   private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple();
     descriptor: (Ljava/lang/String;I)V
@@ -1474,6 +1486,10 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
         com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    MethodParameters:
+      Name                           Flags
+      <no name>                      synthetic
+      <no name>                      synthetic
 
   private static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] $values();
     descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
@@ -2578,6 +2594,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1 ex
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    MethodParameters:
+      Name                           Flags
+      <no name>                      final mandated
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2745,6 +2764,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3 ex
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    MethodParameters:
+      Name                           Flags
+      <no name>                      final mandated
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2977,6 +2999,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    MethodParameters:
+      Name                           Flags
+      <no name>                      final mandated
 }
 InnerClasses:
   public #x= #x of #x;                   // InnerClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses

@@ -62,7 +62,6 @@ class KeyguardBlueprintRepositoryTest : SysuiTestCase() {
             whenever(defaultLockscreenBlueprint.id).thenReturn(DEFAULT)
             underTest =
                 KeyguardBlueprintRepository(
-                    configurationRepository,
                     setOf(defaultLockscreenBlueprint),
                     fakeExecutorHandler,
                     threadAssert,

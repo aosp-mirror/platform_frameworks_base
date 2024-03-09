@@ -80,6 +80,7 @@ final class CoreSettingsObserver extends ContentObserver {
         sSecureSettingToTypeMap.put(Settings.Secure.MULTI_PRESS_TIMEOUT, int.class);
         sSecureSettingToTypeMap.put(Settings.Secure.KEY_REPEAT_TIMEOUT_MS, int.class);
         sSecureSettingToTypeMap.put(Settings.Secure.KEY_REPEAT_DELAY_MS, int.class);
+        sSecureSettingToTypeMap.put(Settings.Secure.STYLUS_POINTER_ICON_ENABLED, int.class);
         // add other secure settings here...
 
         sSystemSettingToTypeMap.put(Settings.System.TIME_12_24, String.class);

@@ -296,10 +296,20 @@ public class BroadcastConstants {
      * For {@link BroadcastQueueModernImpl}: How frequently we should check for the pending
      * cold start validity.
      */
-    public long PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30 * 1000;
+    public long PENDING_COLD_START_CHECK_INTERVAL_MILLIS =
+            DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS;
     private static final String KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS =
             "pending_cold_start_check_interval_millis";
     private static final long DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30_000;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of outgoing broadcasts from a
+     * freezable process that will be allowed before killing the process.
+     */
+    public long MAX_FROZEN_OUTGOING_BROADCASTS = DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS;
+    private static final String KEY_MAX_FROZEN_OUTGOING_BROADCASTS =
+            "max_frozen_outgoing_broadcasts";
+    private static final int DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS = 32;
 
     // Settings override tracking for this instance
     private String mSettingsKey;
@@ -453,6 +463,9 @@ public class BroadcastConstants {
             PENDING_COLD_START_CHECK_INTERVAL_MILLIS = getDeviceConfigLong(
                     KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
                     DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
+            MAX_FROZEN_OUTGOING_BROADCASTS = getDeviceConfigInt(
+                    KEY_MAX_FROZEN_OUTGOING_BROADCASTS,
+                    DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS);
         }
 
         // TODO: migrate BroadcastRecord to accept a BroadcastConstants
@@ -513,6 +526,8 @@ public class BroadcastConstants {
                     CORE_DEFER_UNTIL_ACTIVE).println();
             pw.print(KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
                     PENDING_COLD_START_CHECK_INTERVAL_MILLIS).println();
+            pw.print(KEY_MAX_FROZEN_OUTGOING_BROADCASTS,
+                    MAX_FROZEN_OUTGOING_BROADCASTS).println();
             pw.decreaseIndent();
             pw.println();
         }

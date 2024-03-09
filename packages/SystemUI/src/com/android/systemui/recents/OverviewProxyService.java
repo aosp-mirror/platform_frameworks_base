@@ -33,6 +33,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DREAMING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
@@ -111,6 +112,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import dagger.Lazy;
@@ -673,9 +675,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
 
             @Override
-            public void enterStageSplitFromRunningApp(boolean leftOrTop) {
+            public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
                 if (mOverviewProxy != null) {
                     try {
+                        if (DesktopModeStatus.isEnabled() && (sysUiState.getFlags()
+                                & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0) {
+                            return;
+                        }
                         mOverviewProxy.enterStageSplitFromRunningApp(leftOrTop);
                     } catch (RemoteException e) {
                         Log.w(TAG_OPS, "Unable to enter stage split from the current running app");

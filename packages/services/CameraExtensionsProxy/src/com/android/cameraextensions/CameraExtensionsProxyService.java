@@ -1566,6 +1566,10 @@ public class CameraExtensionsProxyService extends Service {
         private String mCameraId = null;
         private IBinder mToken;
 
+        OutputSurfaceImplStub mOutputPreviewSurfaceImpl;
+        OutputSurfaceImplStub mOutputImageCaptureSurfaceImpl;
+        OutputSurfaceImplStub mOutputPostviewSurfaceImpl;
+
         public SessionProcessorImplStub(SessionProcessorImpl sessionProcessor) {
             mSessionProcessor = sessionProcessor;
         }
@@ -1574,21 +1578,18 @@ public class CameraExtensionsProxyService extends Service {
         public CameraSessionConfig initSession(IBinder token, String cameraId,
                 Map<String, CameraMetadataNative> charsMapNative, OutputSurface previewSurface,
                 OutputSurface imageCaptureSurface, OutputSurface postviewSurface) {
-            OutputSurfaceImplStub outputPreviewSurfaceImpl =
-                    new OutputSurfaceImplStub(previewSurface);
-            OutputSurfaceImplStub outputImageCaptureSurfaceImpl =
-                    new OutputSurfaceImplStub(imageCaptureSurface);
-            OutputSurfaceImplStub outputPostviewSurfaceImpl =
-                    new OutputSurfaceImplStub(postviewSurface);
+            mOutputPreviewSurfaceImpl = new OutputSurfaceImplStub(previewSurface);
+            mOutputImageCaptureSurfaceImpl = new OutputSurfaceImplStub(imageCaptureSurface);
+            mOutputPostviewSurfaceImpl = new OutputSurfaceImplStub(postviewSurface);
 
             Camera2SessionConfigImpl sessionConfig;
 
             if (LATENCY_IMPROVEMENTS_SUPPORTED) {
                 OutputSurfaceConfigurationImplStub outputSurfaceConfigs =
-                        new OutputSurfaceConfigurationImplStub(outputPreviewSurfaceImpl,
+                        new OutputSurfaceConfigurationImplStub(mOutputPreviewSurfaceImpl,
                         // Image Analysis Output is currently only supported in CameraX
-                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/,
-                        outputPostviewSurfaceImpl);
+                        mOutputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/,
+                        mOutputPostviewSurfaceImpl);
 
                 sessionConfig = mSessionProcessor.initSession(cameraId,
                         getCharacteristicsMap(charsMapNative),
@@ -1596,8 +1597,8 @@ public class CameraExtensionsProxyService extends Service {
             } else {
                 sessionConfig = mSessionProcessor.initSession(cameraId,
                         getCharacteristicsMap(charsMapNative),
-                        getApplicationContext(), outputPreviewSurfaceImpl,
-                        outputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
+                        getApplicationContext(), mOutputPreviewSurfaceImpl,
+                        mOutputImageCaptureSurfaceImpl, null /*imageAnalysisSurfaceConfig*/);
             }
 
             List<Camera2OutputConfigImpl> outputConfigs = sessionConfig.getOutputConfigs();
@@ -1632,6 +1633,18 @@ public class CameraExtensionsProxyService extends Service {
         public void deInitSession(IBinder token) {
             CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mSessionProcessor.deInitSession();
+
+            if (Flags.surfaceLeakFix()) {
+                if (mOutputImageCaptureSurfaceImpl.mSurface != null) {
+                    mOutputImageCaptureSurfaceImpl.mSurface.release();
+                }
+                if (mOutputPreviewSurfaceImpl.mSurface != null) {
+                    mOutputPreviewSurfaceImpl.mSurface.release();
+                }
+                if (mOutputPostviewSurfaceImpl.mSurface != null) {
+                    mOutputPostviewSurfaceImpl.mSurface.release();
+                }
+            }
         }
 
         @Override

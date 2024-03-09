@@ -64,6 +64,7 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+import static android.view.WindowInsetsController.COMPATIBLE_APPEARANCE_FLAGS;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
@@ -2867,7 +2868,7 @@ public final class ViewRootImpl implements ViewParent,
         final int adjust = inOutParams.softInputMode & SOFT_INPUT_MASK_ADJUST;
 
         if ((inOutParams.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
-            inOutParams.insetsFlags.appearance = 0;
+            inOutParams.insetsFlags.appearance &= ~COMPATIBLE_APPEARANCE_FLAGS;
             if ((sysUiVis & SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
                 inOutParams.insetsFlags.appearance |= APPEARANCE_LOW_PROFILE_BARS;
             }

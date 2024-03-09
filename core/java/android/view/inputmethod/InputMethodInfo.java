@@ -900,6 +900,8 @@ public final class InputMethodInfo implements Parcelable {
                 + Integer.toHexString(mIsDefaultResId));
         pw.println(prefix + "Service:");
         mService.dump(pw, prefix + "  ");
+        pw.println(prefix + "InputMethodSubtype array: count=" + mSubtypes.getCount());
+        mSubtypes.dump(pw, prefix + "  ");
     }
 
     @Override
