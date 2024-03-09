@@ -4759,6 +4759,9 @@ final public class MediaCodec {
         }
 
         void setBufferInfo(MediaCodec.BufferInfo info) {
+            // since any of setBufferInfo(s) should translate to getBufferInfos,
+            // mBufferInfos needs to be reset for every setBufferInfo(s)
+            mBufferInfos.clear();
             mPresentationTimeUs = info.presentationTimeUs;
             mFlags = info.flags;
         }
