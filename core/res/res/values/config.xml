@@ -3132,6 +3132,10 @@
     -->
     <bool name="config_enableWifiDisplay">false</bool>
 
+    <!-- Whether the default HDR conversion mode should be passthrough instead of system.
+    -->
+    <bool name="config_enableDefaultHdrConversionPassthrough">false</bool>
+
     <!-- When true, local displays that do not contain any of their own content will automatically
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
