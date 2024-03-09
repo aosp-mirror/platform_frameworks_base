@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.Edge
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -27,9 +33,10 @@ import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the lockscreen scene. */
@@ -44,37 +51,69 @@ constructor(
     val longPress: KeyguardLongPressViewModel,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
-    /** The key of the scene we should switch to when swiping up. */
-    val upDestinationSceneKey: StateFlow<SceneKey> =
-        deviceEntryInteractor.isUnlocked
-            .map { isUnlocked -> upDestinationSceneKey(isUnlocked) }
+    val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
+        combine(
+                deviceEntryInteractor.isUnlocked,
+                communalInteractor.isCommunalAvailable,
+                shadeInteractor.shadeMode,
+            ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
+                destinationScenes(
+                    isDeviceUnlocked = isDeviceUnlocked,
+                    isCommunalAvailable = isCommunalAvailable,
+                    shadeMode = shadeMode,
+                )
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = upDestinationSceneKey(deviceEntryInteractor.isUnlocked.value),
+                initialValue =
+                    destinationScenes(
+                        isDeviceUnlocked = deviceEntryInteractor.isUnlocked.value,
+                        isCommunalAvailable = false,
+                        shadeMode = shadeInteractor.shadeMode.value,
+                    ),
             )
 
-    private fun upDestinationSceneKey(isUnlocked: Boolean): SceneKey {
-        return if (isUnlocked) Scenes.Gone else Scenes.Bouncer
+    private fun destinationScenes(
+        isDeviceUnlocked: Boolean,
+        isCommunalAvailable: Boolean,
+        shadeMode: ShadeMode,
+    ): Map<UserAction, UserActionResult> {
+        val quickSettingsIfSingleShade =
+            if (shadeMode is ShadeMode.Single) {
+                Scenes.QuickSettings
+            } else {
+                Scenes.Shade
+            }
+
+        return mapOf(
+                Swipe.Left to UserActionResult(Scenes.Communal).takeIf { isCommunalAvailable },
+                Swipe.Up to if (isDeviceUnlocked) Scenes.Gone else Scenes.Bouncer,
+
+                // Swiping down from the top edge goes to QS (or shade if in split shade mode).
+                swipeDownFromTop(pointerCount = 1) to quickSettingsIfSingleShade,
+                swipeDownFromTop(pointerCount = 2) to quickSettingsIfSingleShade,
+
+                // Swiping down, not from the edge, always navigates to the shade scene.
+                swipeDown(pointerCount = 1) to Scenes.Shade,
+                swipeDown(pointerCount = 2) to Scenes.Shade,
+            )
+            .filterValues { it != null }
+            .mapValues { checkNotNull(it.value) }
     }
 
-    /** The key of the scene we should switch to when swiping left. */
-    val leftDestinationSceneKey: StateFlow<SceneKey?> =
-        communalInteractor.isCommunalAvailable
-            .map { available -> if (available) Scenes.Communal else null }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = null,
-            )
+    private fun swipeDownFromTop(pointerCount: Int): Swipe {
+        return Swipe(
+            SwipeDirection.Down,
+            fromSource = Edge.Top,
+            pointerCount = pointerCount,
+        )
+    }
 
-    /** The key of the scene we should switch to when swiping down from the top edge. */
-    val downFromTopEdgeDestinationSceneKey: StateFlow<SceneKey?> =
-        shadeInteractor.shadeMode
-            .map { shadeMode -> Scenes.QuickSettings.takeIf { shadeMode is ShadeMode.Single } }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = null,
-            )
+    private fun swipeDown(pointerCount: Int): Swipe {
+        return Swipe(
+            SwipeDirection.Down,
+            pointerCount = pointerCount,
+        )
+    }
 }
