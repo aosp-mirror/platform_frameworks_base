@@ -796,8 +796,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Clave de código derecho"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ícono izquierdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícono derecho"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionado y arrastra para agregar tarjetas"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar las tarjetas"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionada la tarjeta y arrástrala para agregarla"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionada la tarjeta y arrástrala para reorganizarla"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tarjetas"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>
@@ -1223,6 +1223,12 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para obtener una resolución más alta, gira el teléfono"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo plegable siendo desplegado"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo plegable siendo girado"</string>
+    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
+    <skip />
+    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
+    <skip />
+    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
+    <skip />
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de batería restante"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Conecta tu pluma stylus a un cargador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La pluma stylus tiene poca batería"</string>
