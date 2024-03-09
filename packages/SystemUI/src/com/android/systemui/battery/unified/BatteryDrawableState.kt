@@ -97,8 +97,8 @@ sealed interface BatteryColors {
 
         // 18% alpha black
         override val fill = Color.valueOf(0f, 0f, 0f, 0.18f).toArgb()
-        // GM Gray 500
-        override val fillOnly = Color.parseColor("#9AA0A6")
+        // GM Gray 700
+        override val fillOnly = Color.parseColor("#5F6368")
 
         // GM Red 600
         override val errorForeground = Color.parseColor("#D93025")
@@ -117,8 +117,8 @@ sealed interface BatteryColors {
 
         // 22% alpha white
         override val fill = Color.valueOf(1f, 1f, 1f, 0.22f).toArgb()
-        // GM Gray 600
-        override val fillOnly = Color.parseColor("#80868B")
+        // GM Gray 400
+        override val fillOnly = Color.parseColor("#BDC1C6")
 
         // GM Red 600
         override val errorForeground = Color.parseColor("#D93025")
