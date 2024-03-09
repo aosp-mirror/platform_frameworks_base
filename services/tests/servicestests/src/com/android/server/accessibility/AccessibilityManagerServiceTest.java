@@ -67,7 +67,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.UserHandle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -851,26 +850,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_SCAN_PACKAGES_WITHOUT_LOCK)
-    // Test old behavior to validate lock detection for the old (locked access) case.
-    public void testPackageMonitorScanPackages_scansWhileHoldingLock() {
-        setupAccessibilityServiceConnection(0);
-        final AtomicReference<Set<Boolean>> lockState = collectLockStateWhilePackageScanning();
-        when(mMockPackageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt()))
-                .thenReturn(List.of(mMockResolveInfo));
-        when(mMockSecurityPolicy.canRegisterService(any())).thenReturn(true);
-
-        final Intent packageIntent = new Intent(Intent.ACTION_PACKAGE_ADDED);
-        packageIntent.setData(Uri.parse("test://package"));
-        packageIntent.putExtra(Intent.EXTRA_USER_HANDLE, mA11yms.getCurrentUserIdLocked());
-        packageIntent.putExtra(Intent.EXTRA_REPLACING, true);
-        mA11yms.getPackageMonitor().doHandlePackageEvent(packageIntent);
-
-        assertThat(lockState.get()).containsExactly(true);
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SCAN_PACKAGES_WITHOUT_LOCK)
     public void testPackageMonitorScanPackages_scansWithoutHoldingLock() {
         setupAccessibilityServiceConnection(0);
         final AtomicReference<Set<Boolean>> lockState = collectLockStateWhilePackageScanning();
@@ -888,7 +867,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SCAN_PACKAGES_WITHOUT_LOCK)
     public void testSwitchUserScanPackages_scansWithoutHoldingLock() {
         setupAccessibilityServiceConnection(0);
         final AtomicReference<Set<Boolean>> lockState = collectLockStateWhilePackageScanning();
