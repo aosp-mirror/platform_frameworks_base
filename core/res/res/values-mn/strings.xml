@@ -2393,4 +2393,6 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Та мобайл эсвэл Wi-Fi сүлжээгүйгээр мессеж илгээх болон хүлээн авах боломжтой"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Мессежийг нээх"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Энэ хэрхэн ажилладаг вэ?"</string>
+    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
+    <skip />
 </resources>

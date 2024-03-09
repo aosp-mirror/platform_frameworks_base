@@ -1987,9 +1987,9 @@
     <string name="work_mode_off_title" msgid="6367463960165135829">"¿Reanudar apps de trabajo?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Reanudar"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergencia"</string>
-    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Configura bloqueo de pantalla"</string>
-    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Conf. un bloqueo de pantalla"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Para usar esp. privado, configura un bloqueo de pantalla"</string>
+    <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Configurar bloqueo de pantalla"</string>
+    <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Configurar bloqueo de pantalla"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Para usar tu espacio privado, configura un bloqueo de pantalla"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"La app no está disponible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> no está disponible en este momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> no disponible"</string>
@@ -2394,4 +2394,6 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puedes enviar y recibir mensajes incluso si no tienes conexión a una red móvil o Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir Mensajes"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cómo funciona"</string>
+    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
+    <skip />
 </resources>
