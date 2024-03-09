@@ -962,13 +962,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                             + ": " + mLastUpdateSidePaddingDumpString);
         }
 
-        if (viewWidth == 0 || !mSkinnyNotifsInLandscape) {
+        if (viewWidth == 0) {
+            Log.e(TAG, "updateSidePadding: viewWidth is zero");
             mSidePaddings = mMinimumPaddings;
             return;
         }
 
-        // Portrait is easy, just use the dimen for paddings
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mSidePaddings = mMinimumPaddings;
+            return;
+        }
+
+        if (mShouldUseSplitNotificationShade) {
+            if (mSkinnyNotifsInLandscape) {
+                Log.e(TAG, "updateSidePadding: mSkinnyNotifsInLandscape has betrayed us!");
+            }
             mSidePaddings = mMinimumPaddings;
             return;
         }
