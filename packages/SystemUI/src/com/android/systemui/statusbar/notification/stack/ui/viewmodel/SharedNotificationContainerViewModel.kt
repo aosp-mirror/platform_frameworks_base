@@ -376,7 +376,7 @@ constructor(
             }
             .dumpWhileCollecting("alphaWhenGoneAndShadeState")
 
-    fun expansionAlpha(viewState: ViewStateAccessor): Flow<Float> {
+    fun keyguardAlpha(viewState: ViewStateAccessor): Flow<Float> {
         // All transition view models are mututally exclusive, and safe to merge
         val alphaTransitions =
             merge(
@@ -427,7 +427,7 @@ constructor(
                 },
             )
             .distinctUntilChanged()
-            .dumpWhileCollecting("expansionAlpha")
+            .dumpWhileCollecting("keyguardAlpha")
     }
 
     /**

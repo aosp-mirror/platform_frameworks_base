@@ -106,27 +106,26 @@ object SharedNotificationContainerBinder {
         val disposableHandleMainImmediate =
             view.repeatWhenAttached(mainImmediateDispatcher) {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    if (!sceneContainerFlags.flexiNotifsEnabled()) {
-                        launch {
-                            // Only temporarily needed, until flexi notifs go live
-                            viewModel.shadeCollapseFadeIn.collect { fadeIn ->
-                                if (fadeIn) {
-                                    android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
-                                        duration = 250
-                                        addUpdateListener { animation ->
-                                            controller.setMaxAlphaForExpansion(
-                                                animation.getAnimatedFraction()
-                                            )
-                                        }
-                                        addListener(
-                                            object : AnimatorListenerAdapter() {
-                                                override fun onAnimationEnd(animation: Animator) {
-                                                    viewModel.setShadeCollapseFadeInComplete(true)
-                                                }
-                                            }
+                    launch {
+                        // Only temporarily needed, until flexi notifs go live
+                        viewModel.shadeCollapseFadeIn.collect { fadeIn ->
+                            if (fadeIn) {
+                                android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+                                    duration = 250
+                                    addUpdateListener { animation ->
+                                        controller.setMaxAlphaForKeyguard(
+                                            animation.animatedFraction,
+                                            "SharedNotificationContainerVB (collapseFadeIn)"
                                         )
-                                        start()
                                     }
+                                    addListener(
+                                        object : AnimatorListenerAdapter() {
+                                            override fun onAnimationEnd(animation: Animator) {
+                                                viewModel.setShadeCollapseFadeInComplete(true)
+                                            }
+                                        }
+                                    )
+                                    start()
                                 }
                             }
                         }
@@ -164,13 +163,12 @@ object SharedNotificationContainerBinder {
 
                     launch { viewModel.translationX.collect { x -> controller.translationX = x } }
 
-                    if (!sceneContainerFlags.isEnabled()) {
-                        launch {
-                            viewModel.expansionAlpha(viewState).collect {
-                                controller.setMaxAlphaForExpansion(it)
-                            }
+                    launch {
+                        viewModel.keyguardAlpha(viewState).collect {
+                            controller.setMaxAlphaForKeyguard(it, "SharedNotificationContainerVB")
                         }
                     }
+
                     launch {
                         viewModel.glanceableHubAlpha.collect {
                             controller.setMaxAlphaForGlanceableHub(it)
