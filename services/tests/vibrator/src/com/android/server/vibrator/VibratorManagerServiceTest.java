@@ -2108,9 +2108,6 @@ public class VibratorManagerServiceTest {
 
         assertEquals(scale.adaptiveHapticsScale, 1f, 0);
 
-        mVibratorControlService.setVibrationParams(
-                VibrationParamGenerator.generateVibrationParams(vibrationScales),
-                mFakeVibratorController);
         externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
                 AUDIO_NOTIFICATION_ATTRS,
                 mock(IExternalVibrationController.class));
@@ -2118,7 +2115,8 @@ public class VibratorManagerServiceTest {
         mExternalVibratorService.onExternalVibrationStop(externalVibration);
 
         assertEquals(scale.adaptiveHapticsScale, 1f, 0);
-        verify(mVibratorFrameworkStatsLoggerMock).logVibrationAdaptiveHapticScale(UID, 1f);
+        verify(mVibratorFrameworkStatsLoggerMock, times(2))
+                .logVibrationAdaptiveHapticScale(UID, 1f);
     }
 
     @Test
