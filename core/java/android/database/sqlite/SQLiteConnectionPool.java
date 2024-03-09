@@ -1175,7 +1175,7 @@ public final class SQLiteConnectionPool implements Closeable {
                     + ", isLegacyCompatibilityWalEnabled=" + isCompatibilityWalEnabled
                     + ", journalMode=" + TextUtils.emptyIfNull(mConfiguration.resolveJournalMode())
                     + ", syncMode=" + TextUtils.emptyIfNull(mConfiguration.resolveSyncMode()));
-            printer.println("  IsReadOnlyDatabase=" + mConfiguration.isReadOnlyDatabase());
+            printer.println("  IsReadOnlyDatabase: " + mConfiguration.isReadOnlyDatabase());
 
             if (isCompatibilityWalEnabled) {
                 printer.println("  Compatibility WAL enabled: wal_syncmode="

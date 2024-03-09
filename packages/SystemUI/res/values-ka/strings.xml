@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ჩართვა"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"ჩართვა"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"არა, გმადლობთ"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"სტანდარტული"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"უკიდურესი"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ეკრანის ავტოროტაცია"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"მიეცეს <xliff:g id="APPLICATION">%1$s</xliff:g>-ს <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ზე წვდომის უფლება?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"დართავთ <xliff:g id="APPLICATION">%1$s</xliff:g>-ს <xliff:g id="USB_DEVICE">%2$s</xliff:g>-ზე წვდომის ნებას?\nამ აპს არ აქვს მინიჭებული ჩაწერის ნებართვა, მაგრამ შეუძლია ჩაიწეროს აუდიო ამ USB მოწყობილობის მეშვეობით."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"კავშირის გაწყვეტა"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"გააქტიურება"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ხელახლა ავტომატურად ჩართვა ხვალ"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"ფუნქციები, როგორებიცაა „სწრაფი გაზიარება“, „ჩემი მოწყობილობის პოვნა“ და „მოწყობილობის მდებარეობა“ იყენებენ Bluetooth-ს"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ბატარეა"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"აუდიო"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ყურსაცვამი"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. შეეხეთ ვიბრაციაზე დასაყენებლად."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. შეეხეთ დასადუმებლად."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ხმაურის კონტროლი"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"შეეხეთ მრეკავის რეჟიმის შესაცვლელად"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"დადუმება"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"დადუმების მოხსნა"</string>
@@ -1223,12 +1236,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"მაღალი გარჩევადობისთვის ამოაბრუნეთ ტელეფონი"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"დასაკეცი მოწყობილობა იხსნება"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"დასაკეცი მოწყობილობა ტრიალებს"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"დაკეცილი"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"გაშლილი"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"დარჩენილია ბატარეის <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"დააკავშირეთ თქვენი სტილუსი დამტენს"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"სტილუსის ბატარეა დაცლის პირასაა"</string>

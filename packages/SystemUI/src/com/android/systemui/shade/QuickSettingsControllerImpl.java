@@ -76,6 +76,7 @@ import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -964,7 +965,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         // Reset scroll position and apply that position to the expanded height.
         float height = mExpansionHeight;
         setExpansionHeight(height);
-        mNotificationStackScrollLayoutController.checkSnoozeLeavebehind();
+        if (!SceneContainerFlag.isEnabled()) {
+            mNotificationStackScrollLayoutController.checkSnoozeLeavebehind();
+        }
 
         // When expanding QS, let's authenticate the user if possible,
         // this will speed up notification actions.
@@ -1109,7 +1112,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
     /** Called when shade starts expanding. */
     void onExpandingStarted(boolean qsFullyExpanded) {
-        mNotificationStackScrollLayoutController.onExpansionStarted();
+        if (!SceneContainerFlag.isEnabled()) {
+            mNotificationStackScrollLayoutController.onExpansionStarted();
+        }
         mExpandedWhenExpandingStarted = qsFullyExpanded;
         mMediaHierarchyManager.setCollapsingShadeFromQS(mExpandedWhenExpandingStarted
                 /* We also start expanding when flinging closed Qs. Let's exclude that */

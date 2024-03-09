@@ -22,6 +22,7 @@ import android.os.Handler
 import android.os.HandlerExecutor
 import android.os.UserHandle
 import android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE
+import com.android.server.notification.Flags.screenshareNotificationHiding
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
@@ -30,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import com.android.systemui.util.ListenerSet
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
@@ -43,6 +45,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
     @Main private val handler: Handler,
     private val secureSettings: SecureSettings,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
+    private val sensitiveNotifProtectionController: SensitiveNotificationProtectionController,
     private val sectionStyleProvider: SectionStyleProvider,
     private val userTracker: UserTracker,
     private val groupMembershipManager: GroupMembershipManager,
@@ -66,6 +69,11 @@ class NotifUiAdjustmentProvider @Inject constructor(
     fun addDirtyListener(listener: Runnable) {
         if (dirtyListeners.isEmpty()) {
             lockscreenUserManager.addNotificationStateChangedListener(notifStateChangedListener)
+            if (screenshareNotificationHiding()) {
+                sensitiveNotifProtectionController.registerSensitiveStateListener(
+                    onSensitiveStateChangedListener
+                )
+            }
             updateSnoozeEnabled()
             secureSettings.registerContentObserverForUser(
                 SHOW_NOTIFICATION_SNOOZE,
@@ -80,6 +88,11 @@ class NotifUiAdjustmentProvider @Inject constructor(
         dirtyListeners.remove(listener)
         if (dirtyListeners.isEmpty()) {
             lockscreenUserManager.removeNotificationStateChangedListener(notifStateChangedListener)
+            if (screenshareNotificationHiding()) {
+                sensitiveNotifProtectionController.unregisterSensitiveStateListener(
+                    onSensitiveStateChangedListener
+                )
+            }
             secureSettings.unregisterContentObserver(settingsObserver)
         }
     }
@@ -88,6 +101,8 @@ class NotifUiAdjustmentProvider @Inject constructor(
         NotificationLockscreenUserManager.NotificationStateChangedListener {
             dirtyListeners.forEach(Runnable::run)
         }
+
+    private val onSensitiveStateChangedListener = Runnable { dirtyListeners.forEach(Runnable::run) }
 
     private val settingsObserver = object : ContentObserver(handler) {
         override fun onChange(selfChange: Boolean) {
@@ -122,7 +137,10 @@ class NotifUiAdjustmentProvider @Inject constructor(
         isConversation = entry.ranking.isConversation,
         isSnoozeEnabled = isSnoozeSettingsEnabled && !entry.isCanceled,
         isMinimized = isEntryMinimized(entry),
-        needsRedaction = lockscreenUserManager.needsRedaction(entry),
+        needsRedaction =
+            lockscreenUserManager.needsRedaction(entry) ||
+                (screenshareNotificationHiding() &&
+                    sensitiveNotifProtectionController.shouldProtectNotification(entry)),
         isChildInGroup = entry.sbn.isAppOrSystemGroupChild,
         isGroupSummary = entry.sbn.isAppOrSystemGroupSummary,
     )

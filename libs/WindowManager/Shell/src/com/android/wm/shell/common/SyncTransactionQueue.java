@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.common;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL;
+
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.os.RemoteException;
@@ -26,6 +28,7 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 import android.window.WindowOrganizer;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.transition.LegacyTransitions;
 
 import java.util.ArrayList;
@@ -204,6 +207,7 @@ public final class SyncTransactionQueue {
         @Override
         public void onTransactionReady(int id,
                 @NonNull SurfaceControl.Transaction t) {
+            ProtoLog.v(WM_SHELL, "SyncTransactionQueue.onTransactionReady(): syncId=%d", id);
             mMainExecutor.execute(() -> {
                 synchronized (mQueue) {
                     if (mId != id) {
@@ -223,6 +227,8 @@ public final class SyncTransactionQueue {
                             Slog.e(TAG, "Error sending callback to legacy transition: " + mId, e);
                         }
                     } else {
+                        ProtoLog.v(WM_SHELL,
+                                "SyncTransactionQueue.onTransactionReady(): syncId=%d apply", id);
                         t.apply();
                         t.close();
                     }

@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Хоць мы ўжо рухаемся ў бок будучыні без выкарыстання пароляў, яны па-ранейшаму застануцца даступнымі нароўні з ключамі доступу."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Выберыце, куды захаваць <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Выберыце менеджар пароляў, каб захаваць свае даныя і забяспечыць хуткі ўваход у наступныя разы"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Стварыць ключ доступу для ўваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Захаваць пароль для ўваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Захаваць інфармацыю пра спосаб уваходу ў праграму \"<xliff:g id="APPNAME">%1$s</xliff:g>\"?"</string>
     <string name="passkey" msgid="632353688396759522">"ключ доступу"</string>
     <string name="password" msgid="6738570945182936667">"пароль"</string>

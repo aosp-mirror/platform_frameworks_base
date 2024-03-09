@@ -6054,20 +6054,6 @@ public class ActivityManager {
     }
 
     /**
-     * Checks if the "modern" broadcast queue is enabled.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.DUMP)
-    public boolean isModernBroadcastQueueEnabled() {
-        try {
-            return getService().isModernBroadcastQueueEnabled();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Checks if the process represented by the given {@code pid} is frozen.
      *
      * @hide

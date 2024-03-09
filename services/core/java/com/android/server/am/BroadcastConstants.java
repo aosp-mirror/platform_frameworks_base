@@ -128,14 +128,6 @@ public class BroadcastConstants {
     public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
 
     /**
-     * Flag indicating if we should use {@link BroadcastQueueModernImpl} instead
-     * of the default {@link BroadcastQueueImpl}.
-     */
-    public boolean MODERN_QUEUE_ENABLED = DEFAULT_MODERN_QUEUE_ENABLED;
-    private static final String KEY_MODERN_QUEUE_ENABLED = "modern_queue_enabled";
-    private static final boolean DEFAULT_MODERN_QUEUE_ENABLED = true;
-
-    /**
      * For {@link BroadcastQueueModernImpl}: Maximum dispatch parallelism
      * that we'll tolerate for ordinary broadcast dispatch.
      */
@@ -421,8 +413,6 @@ public class BroadcastConstants {
      */
     private void updateDeviceConfigConstants() {
         synchronized (this) {
-            MODERN_QUEUE_ENABLED = getDeviceConfigBoolean(KEY_MODERN_QUEUE_ENABLED,
-                    DEFAULT_MODERN_QUEUE_ENABLED);
             MAX_RUNNING_PROCESS_QUEUES = getDeviceConfigInt(KEY_MAX_RUNNING_PROCESS_QUEUES,
                     DEFAULT_MAX_RUNNING_PROCESS_QUEUES);
             EXTRA_RUNNING_URGENT_PROCESS_QUEUES = getDeviceConfigInt(
@@ -498,7 +488,6 @@ public class BroadcastConstants {
             pw.print(NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT);
             pw.println("):");
             pw.increaseIndent();
-            pw.print(KEY_MODERN_QUEUE_ENABLED, MODERN_QUEUE_ENABLED).println();
             pw.print(KEY_MAX_RUNNING_PROCESS_QUEUES, MAX_RUNNING_PROCESS_QUEUES).println();
             pw.print(KEY_MAX_RUNNING_ACTIVE_BROADCASTS, MAX_RUNNING_ACTIVE_BROADCASTS).println();
             pw.print(KEY_CORE_MAX_RUNNING_BLOCKING_BROADCASTS,

@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"A medida que avanzamos hacia un futuro sin contraseñas, estas seguirán estando disponibles junto a las llaves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Elige dónde guardar tus <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un administrador de contraseñas para guardar tu información y acceder más rápido la próxima vez"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"¿Quieres crear una llave de acceso para acceder a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"¿Quieres guardar la contraseña para acceder a <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"¿Quieres guardar la información de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"llave de acceso"</string>
     <string name="password" msgid="6738570945182936667">"contraseña"</string>

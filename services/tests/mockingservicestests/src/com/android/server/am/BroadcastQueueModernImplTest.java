@@ -42,6 +42,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1478,7 +1479,8 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST),
                 eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
                 anyLong(), anyLong(), anyLong(), anyInt(), nullable(String.class),
-                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt()),
+                anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(),
+                anyBoolean(), anyLong()),
                 times(1));
     }
 

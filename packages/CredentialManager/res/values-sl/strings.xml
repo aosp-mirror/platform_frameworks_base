@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Na poti v prihodnost brez gesel bodo poleg ključev za dostop še vedno v uporabi tudi gesla."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Izbira mesta za shranjevanje <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Izberite upravitelja gesel za shranjevanje podatkov za prijavo, da se boste naslednjič lahko hitreje prijavili."</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Želite ustvariti ključ za dostop za prijavo v aplikacijo <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Želite shraniti geslo za prijavo v aplikacijo <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Želite shraniti podatke za prijavo za aplikacijo <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"ključ za dostop"</string>
     <string name="password" msgid="6738570945182936667">"geslo"</string>

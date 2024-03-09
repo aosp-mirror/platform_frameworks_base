@@ -2327,7 +2327,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Finish the topmost activities in all root tasks that belong to the crashed app.
+     * Finish the topmost activities in all leaf tasks that belong to the crashed app.
      *
      * @param app    The app that crashed.
      * @param reason Reason to perform this action.
@@ -2338,14 +2338,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     Task finishTopCrashedActivities(WindowProcessController app, String reason) {
         Task focusedRootTask = getTopDisplayFocusedRootTask();
         final Task[] finishedTask = new Task[1];
-        forAllRootTasks(rootTask -> {
+        forAllLeafTasks(leafTask -> {
             final boolean recordTopOrVisible = finishedTask[0] == null
-                    && (focusedRootTask == rootTask || rootTask.isVisibleRequested());
-            final Task t = rootTask.finishTopCrashedActivityLocked(app, reason);
+                    && (focusedRootTask == leafTask.getRootTask() || leafTask.isVisibleRequested());
+            final Task t = leafTask.finishTopCrashedActivityLocked(app, reason);
             if (recordTopOrVisible) {
                 finishedTask[0] = t;
             }
-        });
+        }, true);
         return finishedTask[0];
     }
 

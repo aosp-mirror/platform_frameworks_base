@@ -34,6 +34,7 @@ import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_E
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
 import static com.android.server.am.Flags.serviceBindingOomAdjPolicy;
 
@@ -290,7 +291,8 @@ public class ContentProviderHelper {
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                             cpi.packageName, callingPackage,
-                            callingProcessState, callingProcessState);
+                            callingProcessState, callingProcessState,
+                            false, 0L);
                     return holder;
                 }
 
@@ -368,7 +370,7 @@ public class ContentProviderHelper {
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                                 cpi.packageName, callingPackage,
-                                callingProcessState, providerProcessState);
+                                callingProcessState, providerProcessState, false, 0L);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -546,12 +548,16 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
                                     cpi.packageName, callingPackage,
-                                    callingProcessState, proc.mState.getCurProcState());
+                                    callingProcessState, proc.mState.getCurProcState(),
+                                    false, 0L);
                         } else {
-                            final int packageState =
-                                    ((cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
+                            final boolean stopped =
+                                    (cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+                            final int packageState = stopped
                                     ? PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                                     : PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+                            final boolean firstLaunch = !mService.wasPackageEverLaunched(
+                                    cpi.packageName, userId);
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
                                     cpi.processName, cpr.appInfo, false, 0,
@@ -567,12 +573,18 @@ public class ContentProviderHelper {
                                         + ": process is bad");
                                 return null;
                             }
+                            if (DEBUG_PROCESSES) {
+                                Slog.d(TAG, "Logging provider access for " + cpi.packageName
+                                        + ", stopped=" + stopped + ", firstLaunch=" + firstLaunch);
+                            }
                             FrameworkStatsLog.write(
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
                                     packageState, cpi.packageName, callingPackage,
-                                    callingProcessState, ActivityManager.PROCESS_STATE_NONEXISTENT);
+                                    callingProcessState, ActivityManager.PROCESS_STATE_NONEXISTENT,
+                                    firstLaunch,
+                                    0L /* TODO: stoppedDuration */);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);

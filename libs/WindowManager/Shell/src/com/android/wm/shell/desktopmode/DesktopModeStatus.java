@@ -16,13 +16,13 @@
 
 package com.android.wm.shell.desktopmode;
 
-import static android.content.res.Configuration.SCREENLAYOUT_SIZE_XLARGE;
-
 import android.annotation.NonNull;
-import android.app.ActivityManager.RunningTaskInfo;
+import android.content.Context;
 import android.os.SystemProperties;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
+import com.android.wm.shell.R;
 
 /**
  * Constants for desktop mode feature
@@ -70,8 +70,11 @@ public class DesktopModeStatus {
     private static final boolean USE_ROUNDED_CORNERS = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_use_rounded_corners", true);
 
-    private static final boolean ENFORCE_DISPLAY_RESTRICTIONS = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode_enforce_display_restrictions", true);
+    /**
+     * Flag to indicate whether to restrict desktop mode to supported devices.
+     */
+    private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
     /**
      * Return {@code true} if desktop windowing is enabled
@@ -113,19 +116,25 @@ public class DesktopModeStatus {
     }
 
     /**
-     * Return whether the display size restrictions should be enforced.
+     * Return {@code true} if desktop mode should be restricted to supported devices.
      */
-    public static boolean enforceDisplayRestrictions() {
-        return ENFORCE_DISPLAY_RESTRICTIONS;
+    @VisibleForTesting
+    public static boolean enforceDeviceRestrictions() {
+        return ENFORCE_DEVICE_RESTRICTIONS;
     }
 
     /**
-     * Return {@code true} if the display associated with the task is at least of size
-     * {@link android.content.res.Configuration#SCREENLAYOUT_SIZE_XLARGE} or has been overridden to
-     * ignore the size constraint.
+     * Return {@code true} if the current device supports desktop mode.
      */
-    public static boolean meetsMinimumDisplayRequirements(@NonNull RunningTaskInfo taskInfo) {
-        return !enforceDisplayRestrictions()
-                || taskInfo.configuration.isLayoutSizeAtLeast(SCREENLAYOUT_SIZE_XLARGE);
+    @VisibleForTesting
+    public static boolean isDesktopModeSupported(@NonNull Context context) {
+        return context.getResources().getBoolean(R.bool.config_isDesktopModeSupported);
+    }
+
+    /**
+     * Return {@code true} if desktop mode can be entered on the current device.
+     */
+    public static boolean canEnterDesktopMode(@NonNull Context context) {
+        return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
     }
 }

@@ -19,6 +19,15 @@ import android.content.res.Resources
 
 /** Source of truth for split shade state: should or should not use split shade. */
 interface SplitShadeStateController {
+
     /** Returns true if the device should use the split notification shade. */
+    @Deprecated(
+        message = "This is deprecated, please use ShadeInteractor#isSplitShade instead",
+        replaceWith =
+            ReplaceWith(
+                "shadeInteractor.isSplitShade",
+                "com.android.systemui.shade.domain.interactor.ShadeInteractor",
+            ),
+    )
     fun shouldUseSplitNotificationShade(resources: Resources): Boolean
 }

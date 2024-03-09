@@ -99,6 +99,8 @@ constructor(
     override val isUserInteractingWithQs: Flow<Boolean> =
         userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
 
+    override val isSplitShade: StateFlow<Boolean> = repository.isSplitShade
+
     /**
      * Return a flow for whether a user is interacting with an expandable shade component using
      * tracking and expansion flows. NOTE: expansion must be a `StateFlow` to guarantee that

@@ -2345,6 +2345,15 @@ final public class MediaCodec {
             throw new IllegalArgumentException("Can't use crypto and descrambler together!");
         }
 
+        // at the moment no codecs support detachable surface
+        if (android.media.codec.Flags.nullOutputSurface()) {
+            // Detached surface flag is only meaningful if surface is null. Otherwise, it is
+            // ignored.
+            if (surface == null && (flags & CONFIGURE_FLAG_DETACHED_SURFACE) != 0) {
+                throw new IllegalArgumentException("Codec does not support detached surface");
+            }
+        }
+
         String[] keys = null;
         Object[] values = null;
 
@@ -2419,7 +2428,8 @@ final public class MediaCodec {
      *  output.
      *
      *  @throws IllegalStateException if the codec was not
-     *                                configured in surface mode.
+     *            configured in surface mode or if the codec does not support
+     *            detaching the output surface.
      *  @see CONFIGURE_FLAG_DETACHED_SURFACE
      */
     @FlaggedApi(FLAG_NULL_OUTPUT_SURFACE)
@@ -2429,6 +2439,7 @@ final public class MediaCodec {
         }
         // note: we still have a surface in detached mode, so keep mHasSurface
         // we also technically allow calling detachOutputSurface multiple times in a row
+        throw new IllegalStateException("codec does not support detaching output surface");
         // native_detachSurface();
     }
 
@@ -4750,6 +4761,9 @@ final public class MediaCodec {
         }
 
         void setBufferInfo(MediaCodec.BufferInfo info) {
+            // since any of setBufferInfo(s) should translate to getBufferInfos,
+            // mBufferInfos needs to be reset for every setBufferInfo(s)
+            mBufferInfos.clear();
             mPresentationTimeUs = info.presentationTimeUs;
             mFlags = info.flags;
         }

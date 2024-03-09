@@ -226,7 +226,26 @@ public class PipTransition extends PipTransitionController {
 
         // cache the PiP task token and leash
         mPipScheduler.setPipTaskToken(mPipTaskToken);
+        SurfaceControl pipLeash = pipChange.getLeash();
 
+        PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
+        Rect srcRectHint = params.getSourceRectHint();
+        Rect destinationBounds = pipChange.getEndAbsBounds();
+
+        if (PipBoundsAlgorithm.isSourceRectHintValidForEnterPip(srcRectHint, destinationBounds)) {
+            float scale = (float) destinationBounds.width() / srcRectHint.width();
+            startTransaction.setWindowCrop(pipLeash, srcRectHint);
+            startTransaction.setPosition(pipLeash,
+                    destinationBounds.left - srcRectHint.left * scale,
+                    destinationBounds.top - srcRectHint.top * scale);
+
+            // Reset the scale in case we are in the multi-activity case.
+            // TO_FRONT transition already scales down the task in single-activity case, but
+            // in multi-activity case, reparenting yields new reset scales coming from pinned task.
+            startTransaction.setScale(pipLeash, scale, scale);
+        } else {
+            // TODO(b/325481148): handle the case with invalid srcRectHint (using overlay).
+        }
         startTransaction.apply();
         finishCallback.onTransitionFinished(null);
         return true;
@@ -303,6 +322,7 @@ public class PipTransition extends PipTransitionController {
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.movePipActivityToPinnedRootTask(pipTask.token, entryBounds);
+        wct.deferConfigToTransitionEnd(pipTask.token);
         return wct;
     }
 

@@ -63,12 +63,14 @@ object QuickSettings {
 }
 
 private fun SceneScope.stateForQuickSettingsContent(
+    isSplitShade: Boolean,
     squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default
 ): QSSceneAdapter.State {
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
             when (transitionState.currentScene) {
-                Scenes.Shade -> QSSceneAdapter.State.QQS
+                Scenes.Shade -> QSSceneAdapter.State.QQS.takeUnless { isSplitShade }
+                        ?: QSSceneAdapter.State.QS
                 Scenes.QuickSettings -> QSSceneAdapter.State.QS
                 else -> QSSceneAdapter.State.CLOSED
             }
@@ -76,6 +78,7 @@ private fun SceneScope.stateForQuickSettingsContent(
         is TransitionState.Transition ->
             with(transitionState) {
                 when {
+                    isSplitShade -> QSSceneAdapter.State.QS
                     fromScene == Scenes.Shade && toScene == Scenes.QuickSettings ->
                         Expanding(progress)
                     fromScene == Scenes.QuickSettings && toScene == Scenes.Shade ->
@@ -111,10 +114,11 @@ private fun SceneScope.stateForQuickSettingsContent(
 fun SceneScope.QuickSettings(
     qsSceneAdapter: QSSceneAdapter,
     heightProvider: () -> Int,
+    isSplitShade: Boolean,
     modifier: Modifier = Modifier,
     squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default,
 ) {
-    val contentState = stateForQuickSettingsContent(squishiness)
+    val contentState = stateForQuickSettingsContent(isSplitShade, squishiness)
 
     MovableElement(
         key = QuickSettings.Elements.Content,

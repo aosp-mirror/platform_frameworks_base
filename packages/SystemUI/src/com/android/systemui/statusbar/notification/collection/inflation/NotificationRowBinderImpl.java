@@ -254,11 +254,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseLowPriority(isLowPriority);
 
-        // If screenshareNotificationHiding is enabled, both public and private views should be
-        // inflated to avoid any latency associated with reinflating all notification views when
-        // screen share starts and stops
         if (screenshareNotificationHiding()
-                || mNotificationLockscreenUserManager.needsRedaction(entry)) {
+                ? inflaterParams.getNeedsRedaction()
+                : mNotificationLockscreenUserManager.needsRedaction(entry)) {
             params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
         } else {
             params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);

@@ -54,6 +54,7 @@ import com.android.internal.app.ProcessMap;
 import com.android.server.IoThread;
 import com.android.server.ServiceThread;
 import com.android.server.SystemServiceManager;
+import com.android.server.wm.WindowProcessController;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -385,8 +386,10 @@ public final class AppStartInfoTracker {
         start.setPackageName(app.info.packageName);
         if (android.content.pm.Flags.stayStopped()) {
             // TODO: Verify this is created at the right time to have the correct force-stopped
-            // state in the ProcessRecord. Also use the WindowProcessRecord if activity.
-            start.setForceStopped(app.wasForceStopped());
+            // state in the ProcessRecord.
+            final WindowProcessController wpc = app.getWindowProcessController();
+            start.setForceStopped(app.wasForceStopped()
+                    || (wpc != null ? wpc.wasForceStopped() : false));
         }
     }
 

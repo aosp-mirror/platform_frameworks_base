@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ONにする"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"ON にする"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"いいえ"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"標準"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"スーパー"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自動回転画面"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g> へのアクセスを許可しますか？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> に <xliff:g id="USB_DEVICE">%2$s</xliff:g>へのアクセスを許可しますか？\nこのアプリに録音権限は付与されていませんが、アクセスを許可すると、この USB デバイスから音声を収集できるようになります。"</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明日自動的に ON に戻す"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"クイック共有、デバイスを探す、デバイスの位置情報などの機能は Bluetooth を使用します"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"オーディオ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ヘッドセット"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s。タップしてバイブレーションに設定します。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s。タップしてミュートします。"</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ノイズ コントロール"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"タップすると、着信音のモードを変更できます"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ミュート"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ミュートを解除"</string>
@@ -1223,12 +1236,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"高解像度で撮るにはスマートフォンを裏返してください"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"折りたたみ式デバイスが広げられている"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"折りたたみ式デバイスがひっくり返されている"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"折りたたんだ状態"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"広げた状態"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"バッテリー残量 <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"タッチペンを充電器に接続してください"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"タッチペンのバッテリー残量が少なくなっています"</string>

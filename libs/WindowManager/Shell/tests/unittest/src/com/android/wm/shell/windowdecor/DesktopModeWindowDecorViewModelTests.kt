@@ -23,8 +23,6 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.content.Context
-import android.content.res.Configuration.SCREENLAYOUT_SIZE_NORMAL
-import android.content.res.Configuration.SCREENLAYOUT_SIZE_XLARGE
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -47,6 +45,7 @@ import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -367,30 +366,41 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    fun testWindowDecor_screenSizeBelowXLarge_decorNotCreated() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
-        // Update screen layout to be below minimum size
-        task.configuration.screenLayout = SCREENLAYOUT_SIZE_NORMAL
-
-        onTaskOpening(task)
-        verify(mockDesktopModeWindowDecorFactory, never())
-            .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    fun testWindowDecor_screenSizeBelowXLarge_displayRestrictionsOverridden_decorCreated() {
+    fun testWindowDecor_desktopModeUnsupportedOnDevice_decorNotCreated() {
         val mockitoSession: StaticMockitoSession = mockitoSession()
             .strictness(Strictness.LENIENT)
             .spyStatic(DesktopModeStatus::class.java)
             .startMocking()
         try {
-            // Simulate enforce display restrictions system property overridden to false
-            whenever(DesktopModeStatus.enforceDisplayRestrictions()).thenReturn(false)
+            // Simulate default enforce device restrictions system property
+            whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
 
             val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
-            // Update screen layout to be below minimum size
-            task.configuration.screenLayout = SCREENLAYOUT_SIZE_NORMAL
+            // Simulate device that doesn't support desktop mode
+            doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+
+            onTaskOpening(task)
+            verify(mockDesktopModeWindowDecorFactory, never())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    fun testWindowDecor_desktopModeUnsupportedOnDevice_deviceRestrictionsOverridden_decorCreated() {
+        val mockitoSession: StaticMockitoSession = mockitoSession()
+            .strictness(Strictness.LENIENT)
+            .spyStatic(DesktopModeStatus::class.java)
+            .startMocking()
+        try {
+            // Simulate enforce device restrictions system property overridden to false
+            whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(false)
+            // Simulate device that doesn't support desktop mode
+            doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+
+            val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
             setUpMockDecorationsForTasks(task)
 
             onTaskOpening(task)
@@ -403,14 +413,25 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    fun testWindowDecor_screenSizeXLarge_decorCreated() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
-        task.configuration.screenLayout = SCREENLAYOUT_SIZE_XLARGE
-        setUpMockDecorationsForTasks(task)
+    fun testWindowDecor_deviceSupportsDesktopMode_decorCreated() {
+        val mockitoSession: StaticMockitoSession = mockitoSession()
+            .strictness(Strictness.LENIENT)
+            .spyStatic(DesktopModeStatus::class.java)
+            .startMocking()
+        try {
+            // Simulate default enforce device restrictions system property
+            whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
 
-        onTaskOpening(task)
-        verify(mockDesktopModeWindowDecorFactory)
-            .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+            val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+            doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+            setUpMockDecorationsForTasks(task)
+
+            onTaskOpening(task)
+            verify(mockDesktopModeWindowDecorFactory)
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
     }
 
     private fun onTaskOpening(task: RunningTaskInfo, leash: SurfaceControl = SurfaceControl()) {

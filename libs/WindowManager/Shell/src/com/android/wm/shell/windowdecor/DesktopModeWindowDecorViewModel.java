@@ -1052,7 +1052,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop()
-                && DesktopModeStatus.meetsMinimumDisplayRequirements(taskInfo);
+                && DesktopModeStatus.canEnterDesktopMode(mContext);
     }
 
     private void createWindowDecoration(

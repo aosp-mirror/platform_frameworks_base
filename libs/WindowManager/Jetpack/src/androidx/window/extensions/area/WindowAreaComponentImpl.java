@@ -16,7 +16,7 @@
 
 package androidx.window.extensions.area;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
+import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
 import android.app.Activity;
 import android.content.Context;
@@ -79,7 +79,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     private int mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
 
     @GuardedBy("mLock")
-    private int mCurrentDeviceState = INVALID_DEVICE_STATE;
+    private int mCurrentDeviceState = INVALID_DEVICE_STATE_IDENTIFIER;
     @GuardedBy("mLock")
     private int[] mCurrentSupportedDeviceStates;
 
@@ -143,7 +143,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             mRearDisplayStatusListeners.add(consumer);
 
             // If current device state is still invalid, the initial value has not been provided.
-            if (mCurrentDeviceState == INVALID_DEVICE_STATE) {
+            if (mCurrentDeviceState == INVALID_DEVICE_STATE_IDENTIFIER) {
                 return;
             }
             consumer.accept(getCurrentRearDisplayModeStatus());
@@ -308,7 +308,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             mRearDisplayPresentationStatusListeners.add(consumer);
 
             // If current device state is still invalid, the initial value has not been provided
-            if (mCurrentDeviceState == INVALID_DEVICE_STATE) {
+            if (mCurrentDeviceState == INVALID_DEVICE_STATE_IDENTIFIER) {
                 return;
             }
             @WindowAreaStatus int currentStatus = getCurrentRearDisplayPresentationModeStatus();
@@ -467,7 +467,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentRearDisplayModeStatus() {
-        if (mRearDisplayState == INVALID_DEVICE_STATE) {
+        if (mRearDisplayState == INVALID_DEVICE_STATE_IDENTIFIER) {
             return WindowAreaComponent.STATUS_UNSUPPORTED;
         }
 
@@ -495,7 +495,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private void updateRearDisplayStatusListeners(@WindowAreaStatus int windowAreaStatus) {
-        if (mRearDisplayState == INVALID_DEVICE_STATE) {
+        if (mRearDisplayState == INVALID_DEVICE_STATE_IDENTIFIER) {
             return;
         }
         synchronized (mLock) {
@@ -507,7 +507,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentRearDisplayPresentationModeStatus() {
-        if (mConcurrentDisplayState == INVALID_DEVICE_STATE) {
+        if (mConcurrentDisplayState == INVALID_DEVICE_STATE_IDENTIFIER) {
             return WindowAreaComponent.STATUS_UNSUPPORTED;
         }
 
@@ -530,7 +530,7 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @GuardedBy("mLock")
     private void updateRearDisplayPresentationStatusListeners(
             @WindowAreaStatus int windowAreaStatus) {
-        if (mConcurrentDisplayState == INVALID_DEVICE_STATE) {
+        if (mConcurrentDisplayState == INVALID_DEVICE_STATE_IDENTIFIER) {
             return;
         }
         RearDisplayPresentationStatus consumerValue = new RearDisplayPresentationStatus(

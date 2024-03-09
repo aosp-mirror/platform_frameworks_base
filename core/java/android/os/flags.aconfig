@@ -3,6 +3,7 @@ container: "system"
 
 flag {
     name: "android_os_build_vanilla_ice_cream"
+    is_exported: true
     namespace: "build"
     description: "Feature flag for adding the VANILLA_ICE_CREAM constant."
     bug: "264658905"
@@ -10,6 +11,7 @@ flag {
 
 flag {
     name: "state_of_health_public"
+    is_exported: true
     namespace: "system_sw_battery"
     description: "Feature flag for making state_of_health a public api."
     bug: "288842045"
@@ -131,4 +133,11 @@ flag {
      description: "Control framework initialization APIs of telemetry APIs feature."
      is_fixed_read_only: true
      bug: "324241334"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "perfetto_sdk_tracing"
+     description: "Tracing using Perfetto SDK."
+     bug: "303199244"
 }

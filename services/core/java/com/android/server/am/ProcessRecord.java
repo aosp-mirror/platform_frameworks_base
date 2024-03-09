@@ -439,6 +439,7 @@ class ProcessRecord implements WindowProcessListener {
     final ProcessRecordNode[] mLinkedNodes = new ProcessRecordNode[NUM_NODE_TYPE];
 
     /** Whether the app was launched from a stopped state and is being unstopped. */
+    @GuardedBy("mService")
     volatile boolean mWasForceStopped;
 
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
@@ -684,6 +685,11 @@ class ProcessRecord implements WindowProcessListener {
 
     @GuardedBy({"mService", "mProcLock"})
     void setPid(int pid) {
+        // If the pid is changing and not the first time pid is being assigned, clear stopped state
+        // So if the process record is re-used for a different pid, it wouldn't keep the state.
+        if (pid != mPid && mPid != 0) {
+            setWasForceStopped(false);
+        }
         mPid = pid;
         mWindowProcessController.setPid(pid);
         mShortStringName = null;

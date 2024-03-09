@@ -29,7 +29,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
-import android.app.SearchManager;
 import android.app.UidObserver;
 import android.app.pinner.IPinnerService;
 import android.app.pinner.PinnedFileStat;
@@ -53,7 +52,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
@@ -139,7 +137,6 @@ public final class PinnerService extends SystemService {
     private final ActivityManagerInternal mAmInternal;
     private final IActivityManager mAm;
     private final UserManager mUserManager;
-    private SearchManager mSearchManager;
 
     /** The list of the statically pinned files. */
     @GuardedBy("this") private final ArrayMap<String, PinnedFile> mPinnedFiles = new ArrayMap<>();
@@ -283,15 +280,6 @@ public final class PinnerService extends SystemService {
         sendPinAppsMessage(UserHandle.USER_SYSTEM);
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        // SearchManagerService is started after PinnerService, wait for PHASE_SYSTEM_SERVICES_READY
-        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-            sendPinAppsMessage(UserHandle.USER_SYSTEM);
-        }
-    }
-
     /**
      * Repin apps on user switch.
      * <p>
@@ -308,8 +296,9 @@ public final class PinnerService extends SystemService {
 
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
-        int userId = user.getUserIdentifier();
-        if (!mUserManager.isManagedProfile(userId)) {
+        final int userId = user.getUserIdentifier();
+        if (userId != UserHandle.USER_SYSTEM && !mUserManager.isManagedProfile(userId)) {
+            // App pinning for the system should have already been triggered from onStart().
             sendPinAppsMessage(userId);
         }
     }
@@ -532,11 +521,8 @@ public final class PinnerService extends SystemService {
     }
 
     private ApplicationInfo getAssistantInfo(int userHandle) {
-        if (mSearchManager != null) {
-            Intent intent = mSearchManager.getAssistIntent(false);
-            return getApplicationInfoForIntent(intent, userHandle, true);
-        }
-        return null;
+        Intent intent = new Intent(Intent.ACTION_ASSIST);
+        return getApplicationInfoForIntent(intent, userHandle, true);
     }
 
     private ApplicationInfo getApplicationInfoForIntent(Intent intent, int userHandle,

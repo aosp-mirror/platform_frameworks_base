@@ -646,7 +646,7 @@ class UserController implements Handler.Callback {
                 new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
                 AppOpsManager.OP_NONE,
                 getTemporaryAppAllowlistBroadcastOptions(REASON_LOCKED_BOOT_COMPLETED)
-                        .toBundle(), true,
+                        .toBundle(),
                 false, MY_PID, SYSTEM_UID,
                 Binder.getCallingUid(), Binder.getCallingPid(), userId);
     }
@@ -740,7 +740,7 @@ class UserController implements Handler.Callback {
             unlockedIntent.addFlags(
                     Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
             mInjector.broadcastIntent(unlockedIntent, null, null, 0, null,
-                    null, null, AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                    null, null, AppOpsManager.OP_NONE, null, false, MY_PID, SYSTEM_UID,
                     Binder.getCallingUid(), Binder.getCallingPid(), userId);
         }
 
@@ -765,7 +765,7 @@ class UserController implements Handler.Callback {
                                     | Intent.FLAG_RECEIVER_FOREGROUND);
                     mInjector.broadcastIntent(profileUnlockedIntent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                            null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                            null, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                             Binder.getCallingPid(), parent.id);
                 }
             }
@@ -824,7 +824,7 @@ class UserController implements Handler.Callback {
                                 initializeUser.run();
                             }
                         }, 0, null, null, null, AppOpsManager.OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                        null, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                         Binder.getCallingPid(), userId);
             }
         }
@@ -876,7 +876,7 @@ class UserController implements Handler.Callback {
                     new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
                     AppOpsManager.OP_NONE,
                     getTemporaryAppAllowlistBroadcastOptions(REASON_BOOT_COMPLETED).toBundle(),
-                    true, false, MY_PID, SYSTEM_UID, callingUid, callingPid, userId);
+                    false, MY_PID, SYSTEM_UID, callingUid, callingPid, userId);
         });
     }
 
@@ -1124,7 +1124,7 @@ class UserController implements Handler.Callback {
                 mInjector.broadcastIntent(stoppingIntent,
                         null, stoppingReceiver, 0, null, null,
                         new String[]{INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                        null, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                         Binder.getCallingPid(), UserHandle.USER_ALL);
             });
         }
@@ -1187,7 +1187,7 @@ class UserController implements Handler.Callback {
         mInjector.broadcastIntent(shutdownIntent,
                 null, shutdownReceiver, 0, null, null, null,
                 AppOpsManager.OP_NONE,
-                null, true, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                null, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                 Binder.getCallingPid(), userId);
     }
 
@@ -1464,7 +1464,7 @@ class UserController implements Handler.Callback {
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         mInjector.broadcastIntent(intent,
                 null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                null, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                 Binder.getCallingPid(), UserHandle.USER_ALL);
 
         // Send PROFILE_INACCESSIBLE broadcast if a profile was stopped
@@ -2404,7 +2404,7 @@ class UserController implements Handler.Callback {
         mInjector.broadcastIntent(intent, /* resolvedType= */ null, /* resultTo= */ null,
                 /* resultCode= */ 0, /* resultData= */ null, /* resultExtras= */ null,
                 /* requiredPermissions= */ null, AppOpsManager.OP_NONE, /* bOptions= */ null,
-                /* ordered= */ false, /* sticky= */ false, MY_PID, SYSTEM_UID,
+                /* sticky= */ false, MY_PID, SYSTEM_UID,
                 callingUid, callingPid, userId);
     }
 
@@ -2432,7 +2432,7 @@ class UserController implements Handler.Callback {
                     }
                 }, /* resultCode= */ 0, /* resultData= */ null, /* resultExtras= */ null,
                 new String[]{INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE, /* bOptions= */ null,
-                /* ordered= */ true, /* sticky= */ false, MY_PID, SYSTEM_UID,
+                /* sticky= */ false, MY_PID, SYSTEM_UID,
                 callingUid, callingPid, UserHandle.USER_ALL);
     }
 
@@ -2457,7 +2457,7 @@ class UserController implements Handler.Callback {
                     intent.putExtra(Intent.EXTRA_USER, UserHandle.of(profileUserId));
                     mInjector.broadcastIntent(intent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            null, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
                             profileUserId);
                 }
             }
@@ -2476,7 +2476,7 @@ class UserController implements Handler.Callback {
                     intent.putExtra(Intent.EXTRA_USER, UserHandle.of(profileUserId));
                     mInjector.broadcastIntent(intent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            null, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
                             profileUserId);
                 }
                 intent = new Intent(Intent.ACTION_USER_SWITCHED);
@@ -2489,7 +2489,7 @@ class UserController implements Handler.Callback {
                 mInjector.broadcastIntent(intent,
                         null, null, 0, null, null,
                         new String[] {android.Manifest.permission.MANAGE_USERS},
-                        AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID, callingUid,
+                        AppOpsManager.OP_NONE, null, false, MY_PID, SYSTEM_UID, callingUid,
                         callingPid, UserHandle.USER_ALL);
             }
         } finally {
@@ -2513,7 +2513,7 @@ class UserController implements Handler.Callback {
         mInjector.broadcastIntent(intent, /* resolvedType= */ null, /* resultTo= */
                 null, /* resultCode= */ 0, /* resultData= */ null, /* resultExtras= */
                 null, /* requiredPermissions= */ null, AppOpsManager.OP_NONE, /* bOptions= */
-                null, /* ordered= */ false, /* sticky= */ false, MY_PID, SYSTEM_UID,
+                null, /* sticky= */ false, MY_PID, SYSTEM_UID,
                 Binder.getCallingUid(), Binder.getCallingPid(), parentId);
     }
 
@@ -3576,7 +3576,7 @@ class UserController implements Handler.Callback {
         protected int broadcastIntent(Intent intent, String resolvedType,
                 IIntentReceiver resultTo, int resultCode, String resultData,
                 Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
-                boolean ordered, boolean sticky, int callingPid, int callingUid, int realCallingUid,
+                boolean sticky, int callingPid, int callingUid, int realCallingUid,
                 int realCallingPid, @UserIdInt int userId) {
 
             int logUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
@@ -3585,21 +3585,13 @@ class UserController implements Handler.Callback {
             }
             EventLog.writeEvent(EventLogTags.UC_SEND_USER_BROADCAST, logUserId, intent.getAction());
 
-            // When the modern broadcast stack is enabled, deliver all our
-            // broadcasts as unordered, since the modern stack has better
-            // support for sequencing cold-starts, and it supports delivering
-            // resultTo for non-ordered broadcasts
-            if (mService.mEnableModernQueue) {
-                ordered = false;
-            }
-
             TimingsTraceAndSlog t = new TimingsTraceAndSlog();
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
                 t.traceBegin("broadcastIntent-" + userId + "-" + intent.getAction());
                 final int result = mService.broadcastIntentLocked(null, null, null, intent,
                         resolvedType, resultTo, resultCode, resultData, resultExtras,
-                        requiredPermissions, null, null, appOp, bOptions, ordered, sticky,
+                        requiredPermissions, null, null, appOp, bOptions, false, sticky,
                         callingPid, callingUid, realCallingUid, realCallingPid, userId);
                 t.traceEnd();
                 return result;

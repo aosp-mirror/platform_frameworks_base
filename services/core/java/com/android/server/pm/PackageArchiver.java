@@ -557,6 +557,28 @@ public class PackageArchiver {
     }
 
     /**
+     * An extension of {@link BitmapDrawable} which returns the bitmap pixel size as intrinsic size.
+     * This allows the badging to be done based on the actual bitmap size rather than
+     * the scaled bitmap size.
+     */
+    private static class FixedSizeBitmapDrawable extends BitmapDrawable {
+
+        FixedSizeBitmapDrawable(@Nullable final Bitmap bitmap) {
+            super(null, bitmap);
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return getBitmap().getWidth();
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return getBitmap().getWidth();
+        }
+    }
+
+    /**
      * Create an <a
      * href="https://developer.android.com/develop/ui/views/launch/icon_design_adaptive">
      * adaptive icon</a> from an icon.
@@ -569,6 +591,11 @@ public class PackageArchiver {
         }
 
         // see BaseIconFactory#createShapedIconBitmap
+        if (iconDrawable instanceof BitmapDrawable) {
+            var icon = ((BitmapDrawable) iconDrawable).getBitmap();
+            iconDrawable = new FixedSizeBitmapDrawable(icon);
+        }
+
         float inset = getExtraInsetFraction();
         inset = inset / (1 + 2 * inset);
         Drawable d = new AdaptiveIconDrawable(new ColorDrawable(Color.BLACK),

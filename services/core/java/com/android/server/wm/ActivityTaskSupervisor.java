@@ -1598,9 +1598,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     }
 
     private void removePinnedRootTaskInSurfaceTransaction(Task rootTask) {
-        rootTask.mTransitionController.requestTransitionIfNeeded(TRANSIT_TO_BACK, 0 /* flags */,
-                rootTask, rootTask.mDisplayContent, null /* remoteTransition */,
-                null /* displayChange */);
+        final Transition transition = rootTask.mTransitionController.requestTransitionIfNeeded(
+                TRANSIT_TO_BACK, 0 /* flags */, rootTask, rootTask.mDisplayContent);
+        if (transition == null) {
+            rootTask.mTransitionController.collect(rootTask);
+        } else {
+            transition.collect(rootTask);
+        }
+
         /**
          * Workaround: Force-stop all the activities in the root pinned task before we reparent them
          * to the fullscreen root task.  This is to guarantee that when we are removing a root task,
@@ -1683,7 +1688,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
-        task.mTransitionController.requestCloseTransitionIfNeeded(task);
+        final Transition transit = task.mTransitionController.requestCloseTransitionIfNeeded(task);
+        if (transit != null) {
+            transit.collectClose(task);
+        } else if (task.mTransitionController.isCollecting()) {
+            task.mTransitionController.getCollectingTransition().collectClose(task);
+        }
         // Consume the stopping activities immediately so activity manager won't skip killing
         // the process because it is still foreground state, i.e. RESUMED -> PAUSING set from
         // removeActivities -> finishIfPossible.

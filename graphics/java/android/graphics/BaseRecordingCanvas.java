@@ -290,6 +290,11 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
+    public void drawRegion(@NonNull Region region, @NonNull Paint paint) {
+        nDrawRegion(mNativeCanvasWrapper, region.mNativeRegion, paint.getNativeInstance());
+    }
+
+    @Override
     public final void drawPicture(@NonNull Picture picture) {
         picture.endRecording();
         int restoreCount = save();

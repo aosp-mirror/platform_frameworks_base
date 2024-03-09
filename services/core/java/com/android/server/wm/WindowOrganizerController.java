@@ -2018,6 +2018,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         try {
             callback.onTransactionReady(syncId, t);
         } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to notify transaction (" + syncId + ") ready", e);
             // If there's an exception when trying to send the mergedTransaction to the client, we
             // should immediately apply it here so the transactions aren't lost.
             t.apply();

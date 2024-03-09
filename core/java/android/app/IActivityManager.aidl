@@ -898,10 +898,6 @@ interface IActivityManager {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
     void forceDelayBroadcastDelivery(in String targetPackage, long delayedDurationMs);
 
-    /** Checks if the modern broadcast queue is enabled. */
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
-    boolean isModernBroadcastQueueEnabled();
-
     /** Checks if the process represented by the given pid is frozen. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
     boolean isProcessFrozen(int pid);

@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ක්‍රියාත්මක කරන්න"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"ක්‍රියාත්මක කරන්න"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"එපා ස්තුතියි"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"සම්මත"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"අතිශය"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ස්වයංක්‍රීයව-භ්‍රමණය වන තිරය"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> හට <xliff:g id="USB_DEVICE">%2$s</xliff:g> වෙත පිවිසීමට ඉඩ දෙන්නද?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> වෙත ප්‍රවේශ වීමට <xliff:g id="USB_DEVICE">%2$s</xliff:g> හට ඉඩ දෙන්නද?\n මෙම යෙදුමට පටිගත කිරීම් අවසරයක් ලබා දී නොමැති නමුත් මෙම USB උපාංගය හරහා ශ්‍රව්‍ය ග්‍රහණය කර ගත හැකිය."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"විසන්ධි කරන්න"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"සක්‍රිය කරන්න"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"හෙට ස්වයංක්‍රීයව නැවත ක්‍රියාත්මක කරන්න"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"ඉක්මන් බෙදා ගැනීම, මගේ උපාංගය සෙවීම, සහ උපාංග ස්ථානය වැනි විශේෂාංග බ්ලූටූත් භාවිත කරයි"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ශ්‍රව්‍ය"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"හෙඩ්සෙටය"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. කම්පනය කිරීමට සකස් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ඝෝෂාව පාලනය"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"නාදකය වෙනස් කිරීමට තට්ටු කරන්න"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"නිහඬ කරන්න"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"නිශ්ශබ්දතාවය ඉවත් කරන්න"</string>

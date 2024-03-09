@@ -20,10 +20,13 @@ package com.android.systemui.scene
 
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
+import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
 import com.android.internal.R
 import com.android.internal.util.EmergencyAffordanceManager
 import com.android.internal.util.emergencyAffordanceManager
@@ -59,6 +62,8 @@ import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.qs.footerActionsController
+import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
@@ -69,6 +74,7 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
@@ -127,6 +133,7 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@RunWithLooper
 class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
@@ -167,6 +174,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,
+            shadeInteractor = kosmos.shadeInteractor,
         )
     }
 
@@ -250,6 +258,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
                 mediaDataManager = mediaDataManager,
+                shadeInteractor = kosmos.shadeInteractor,
+                footerActionsController = kosmos.footerActionsController,
+                footerActionsViewModelFactory = kosmos.footerActionsViewModelFactory,
             )
 
         kosmos.fakeDeviceEntryRepository.setUnlocked(false)
@@ -337,7 +348,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
-            val upDestinationSceneKey by collectLastValue(shadeSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(shadeSceneViewModel.destinationScenes)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             assertCurrentScene(Scenes.Lockscreen)
 
@@ -345,6 +356,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             emulateUserDrivenTransition(to = Scenes.Shade)
             assertCurrentScene(Scenes.Shade)
 
+            val upDestinationSceneKey = destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Lockscreen)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
@@ -354,7 +366,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenDismissed_goesToGone() =
         testScope.runTest {
-            val upDestinationSceneKey by collectLastValue(shadeSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(shadeSceneViewModel.destinationScenes)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             assertThat(deviceEntryInteractor.canSwipeToEnter.value).isTrue()
             assertCurrentScene(Scenes.Lockscreen)
@@ -367,6 +379,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             emulateUserDrivenTransition(to = Scenes.Shade)
             assertCurrentScene(Scenes.Shade)
 
+            val upDestinationSceneKey = destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,

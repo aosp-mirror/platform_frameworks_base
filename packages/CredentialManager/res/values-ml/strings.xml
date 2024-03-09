@@ -39,10 +39,8 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"നമ്മൾ പാസ്‍വേഡ് രഹിത ഭാവിയിലേക്ക് ചുവടുവെച്ചുകൊണ്ടിരിക്കുകയാണ് എങ്കിലും, പാസ്‌കീകൾക്കൊപ്പം പാസ്‍വേഡുകൾ തുടർന്നും ലഭ്യമായിരിക്കും."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"നിങ്ങളുടെ <xliff:g id="CREATETYPES">%1$s</xliff:g> എവിടെയാണ് സംരക്ഷിക്കേണ്ടതെന്ന് തിരഞ്ഞെടുക്കുക"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"നിങ്ങളുടെ വിവരങ്ങൾ സംരക്ഷിക്കാനും അടുത്ത തവണ വേഗത്തിൽ സൈൻ ഇൻ ചെയ്യാനും ഒരു പാസ്‌വേഡ് മാനേജർ തിരഞ്ഞെടുക്കുക"</string>
-    <!-- no translation found for choose_create_option_passkey_title (7980430650778623135) -->
-    <skip />
-    <!-- no translation found for choose_create_option_password_title (6238446571944651980) -->
-    <skip />
+    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിലേക്ക് സൈൻ ഇൻ ചെയ്യാൻ പാസ്‌കീ സൃഷ്ടിക്കണോ?"</string>
+    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിലേക്ക് സൈൻ ഇൻ ചെയ്യാൻ പാസ്‌വേഡ് സംരക്ഷിക്കണോ?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിനായി സൈൻ ഇൻ വിവരങ്ങൾ സംരക്ഷിക്കണോ?"</string>
     <string name="passkey" msgid="632353688396759522">"പാസ്‌കീ"</string>
     <string name="password" msgid="6738570945182936667">"പാസ്‌വേഡ്"</string>

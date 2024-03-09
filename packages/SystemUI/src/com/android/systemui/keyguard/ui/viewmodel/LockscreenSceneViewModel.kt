@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,7 @@ constructor(
     @Application applicationScope: CoroutineScope,
     deviceEntryInteractor: DeviceEntryInteractor,
     communalInteractor: CommunalInteractor,
+    shadeInteractor: ShadeInteractor,
     val longPress: KeyguardLongPressViewModel,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
@@ -59,6 +61,16 @@ constructor(
     val leftDestinationSceneKey: StateFlow<SceneKey?> =
         communalInteractor.isCommunalAvailable
             .map { available -> if (available) Scenes.Communal else null }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null,
+            )
+
+    /** The key of the scene we should switch to when swiping down from the top edge. */
+    val downFromTopEdgeDestinationSceneKey: StateFlow<SceneKey?> =
+        shadeInteractor.isSplitShade
+            .map { isSplitShade -> Scenes.QuickSettings.takeUnless { isSplitShade } }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),

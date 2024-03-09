@@ -182,6 +182,12 @@ class BroadcastProcessQueue {
     private boolean mActiveWasStopped;
 
     /**
+     * Flag indicating that the currently active broadcast is being dispatched
+     * to a package that was never launched before.
+     */
+    private boolean mActiveFirstLaunch;
+
+    /**
      * Number of consecutive urgent broadcasts that have been dispatched
      * since the last non-urgent dispatch.
      */
@@ -626,12 +632,20 @@ class BroadcastProcessQueue {
         mActiveWasStopped = activeWasStopped;
     }
 
+    public void setActiveFirstLaunch(boolean activeFirstLaunch) {
+        mActiveFirstLaunch = activeFirstLaunch;
+    }
+
     public boolean getActiveViaColdStart() {
         return mActiveViaColdStart;
     }
 
     public boolean getActiveWasStopped() {
         return mActiveWasStopped;
+    }
+
+    public boolean getActiveFirstLaunch() {
+        return mActiveFirstLaunch;
     }
 
     /**

@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +46,7 @@ constructor(
     @Application scope: CoroutineScope,
     sceneInteractor: SceneInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
+    shadeRepository: ShadeRepository,
 ) : BaseShadeInteractor {
     override val shadeExpansion: Flow<Float> = sceneBasedExpansion(sceneInteractor, Scenes.Shade)
 
@@ -105,6 +107,8 @@ constructor(
 
     override val isUserInteractingWithQs: Flow<Boolean> =
         sceneBasedInteracting(sceneInteractor, Scenes.QuickSettings)
+
+    override val isSplitShade: StateFlow<Boolean> = shadeRepository.isSplitShade
 
     /**
      * Returns a flow that uses scene transition progress to and from a scene that is pulled down

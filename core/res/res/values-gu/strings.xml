@@ -2393,4 +2393,6 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"તમે મોબાઇલ અથવા વાઇ-ફાઇ નેટવર્ક વિના મેસેજ મોકલી અને પ્રાપ્ત કરી શકો છો"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ખોલો"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"તેની કામ કરવાની રીત"</string>
+    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
+    <skip />
 </resources>

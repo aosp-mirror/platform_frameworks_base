@@ -432,15 +432,22 @@ class KeyguardController {
         mService.deferWindowLayout();
         try {
             if (isKeyguardLocked(displayId)) {
-                if (occluded) {
-                    mRootWindowContainer.getDefaultDisplay().requestTransitionAndLegacyPrepare(
-                            TRANSIT_KEYGUARD_OCCLUDE,
-                            TRANSIT_FLAG_KEYGUARD_OCCLUDING,
-                            topActivity != null ? topActivity.getRootTask() : null);
+                final int type = occluded ? TRANSIT_KEYGUARD_OCCLUDE : TRANSIT_KEYGUARD_UNOCCLUDE;
+                final int flag = occluded ? TRANSIT_FLAG_KEYGUARD_OCCLUDING
+                        : TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
+                if (tc.isShellTransitionsEnabled()) {
+                    final Task trigger = (occluded && topActivity != null)
+                            ? topActivity.getRootTask() : null;
+                    Transition transition = tc.requestTransitionIfNeeded(type, flag, trigger,
+                            mRootWindowContainer.getDefaultDisplay());
+                    if (trigger != null) {
+                        if (transition == null) {
+                            transition = tc.getCollectingTransition();
+                        }
+                        transition.collect(trigger);
+                    }
                 } else {
-                    mRootWindowContainer.getDefaultDisplay().requestTransitionAndLegacyPrepare(
-                            TRANSIT_KEYGUARD_UNOCCLUDE,
-                            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING);
+                    mRootWindowContainer.getDefaultDisplay().prepareAppTransition(type, flag);
                 }
             } else {
                 if (tc.inTransition()) {

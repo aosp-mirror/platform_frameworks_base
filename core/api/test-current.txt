@@ -1624,8 +1624,6 @@ package android.hardware.camera2.params {
 package android.hardware.devicestate {
 
   @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceState {
-    ctor @Deprecated public DeviceState(@IntRange(from=android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER, to=android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER) int, @NonNull String, int);
-    ctor public DeviceState(@IntRange(from=android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER, to=android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER) int, @NonNull String, @NonNull java.util.Set<java.lang.Integer>);
     field public static final int PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST = 8; // 0x8
   }
 

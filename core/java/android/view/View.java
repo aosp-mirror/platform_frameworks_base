@@ -8622,6 +8622,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected void onFocusChanged(boolean gainFocus, @FocusDirection int direction,
             @Nullable Rect previouslyFocusedRect) {
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "onFocusChanged() entered. gainFocus: "
+                    + gainFocus);
+        }
         if (gainFocus) {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         } else {
@@ -8686,6 +8690,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (canNotifyAutofillEnterExitEvent()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
+                if (DBG) {
+                    Log.d(VIEW_LOG_TAG, this + " afm is not null");
+                }
                 if (enter) {
                     // We have not been laid out yet, hence cannot evaluate
                     // whether this view is visible to the user, we will do
@@ -8697,6 +8704,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // animation beginning. On the time, the view is not visible
                     // to the user. And then as the animation progresses, the view
                     // becomes visible to the user.
+                    if (DBG) {
+                        Log.d(VIEW_LOG_TAG,
+                                "notifyEnterOrExitForAutoFillIfNeeded:"
+                                + " isLaidOut(): " + isLaidOut()
+                                + " isVisibleToUser(): " + isVisibleToUser()
+                                + " isFocused(): " + isFocused());
+                    }
                     if (!isLaidOut() || !isVisibleToUser()) {
                         mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
                     } else if (isVisibleToUser()) {
@@ -10920,15 +10934,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAutofillable() {
-        if (getAutofillType() == AUTOFILL_TYPE_NONE) return false;
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "isAutofillable() entered.");
+        }
+        if (getAutofillType() == AUTOFILL_TYPE_NONE) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "getAutofillType() returns AUTOFILL_TYPE_NONE");
+            }
+            return false;
+        }
 
         final AutofillManager afm = getAutofillManager();
         if (afm == null) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "AutofillManager is null");
+            }
             return false;
         }
 
         // Check whether view is not part of an activity. If it's not, return false.
         if (getAutofillViewId() <= LAST_APP_AUTOFILL_ID) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "getAutofillViewId()<=LAST_APP_AUTOFILL_ID");
+            }
             return false;
         }
 
@@ -10938,11 +10966,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((isImportantForAutofill() && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled())
                 || (!isImportantForAutofill()
                     && afm.isTriggerFillRequestOnUnimportantViewEnabled())) {
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "isImportantForAutofill(): " + isImportantForAutofill()
+                        + "afm.isAutofillable(): " + afm.isAutofillable(this));
+            }
             return afm.isAutofillable(this) ? true : notifyAugmentedAutofillIfNeeded(afm);
         }
 
         // If the previous condition is not met, fall back to the previous way to trigger fill
         // request based on autofill importance instead.
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "isImportantForAutofill(): " + isImportantForAutofill());
+        }
         return isImportantForAutofill() ? true : notifyAugmentedAutofillIfNeeded(afm);
     }
 
@@ -10957,6 +10992,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     public boolean canNotifyAutofillEnterExitEvent() {
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "canNotifyAutofillEnterExitEvent() entered. "
+                    + " isAutofillable(): " + isAutofillable()
+                    + " isAttachedToWindow(): " + isAttachedToWindow());
+        }
         return isAutofillable() && isAttachedToWindow();
     }
 
@@ -33874,7 +33914,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * - otherwise, use the previous category value.
      */
     private void updateInfrequentCount() {
-        long currentTimeMillis = AnimationUtils.currentAnimationTimeMillis();
+        long currentTimeMillis = getDrawingTime();
         long timeIntervalMillis = currentTimeMillis - mLastUpdateTimeMillis;
         mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
         mMinusOneFrameIntervalMillis = timeIntervalMillis;

@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"הפעלה"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"הפעלה"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"לא תודה"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"רגיל"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"משמעותי"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"סיבוב אוטומטי של המסך"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"לתת לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> גישה אל <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏האם לאפשר לאפליקציה <xliff:g id="APPLICATION">%1$s</xliff:g> גישה אל <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nאפליקציה זו לא קיבלה הרשאה להקליט אך יכולה לתעד אודיו באמצעות מכשיר USB זה."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"החיבור יופעל שוב אוטומטית מחר"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"‏תכונות כמו \'שיתוף מהיר\', \'איפה המכשיר שלי\' ומיקום המכשיר משתמשות בחיבור Bluetooth"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"אודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"אוזניות"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. יש להקיש כדי להעביר למצב רטט."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. יש להקיש כדי להשתיק."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת הרעש"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"יש להקיש כדי לשנות את מצב תוכנת הצלצול"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"השתקה"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ביטול ההשתקה"</string>
@@ -1223,12 +1236,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"כדי לצלם תמונה ברזולוציה גבוהה יותר, כדאי להפוך את הטלפון"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"מכשיר מתקפל עובר למצב לא מקופל"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"מכשיר מתקפל עובר למצב מהופך"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"מצב מקופל"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"מצב לא מקופל"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"‏%1$s‏ / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"רמת הטעינה שנותרה בסוללה: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"כדאי לחבר את הסטיילוס למטען"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"הסוללה של הסטיילוס חלשה"</string>
