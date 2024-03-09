@@ -3665,7 +3665,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Prepare to enter PiP mode after {@link TransitionController#requestStartTransition}.
+     * Prepare to enter PiP mode after {@link TransitionController#requestStartDisplayTransition}.
      *
      * @param r activity auto entering pip
      * @return true if the activity is about to auto-enter pip or is already in pip mode.

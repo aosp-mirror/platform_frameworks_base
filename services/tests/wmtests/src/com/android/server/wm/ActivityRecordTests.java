@@ -3683,7 +3683,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_FULLSCREEN, activity.getWindowingMode());
 
         registerTestTransitionPlayer();
-        task.mTransitionController.requestTransitionIfNeeded(TRANSIT_PIP, task);
+        Transition tr = task.mTransitionController.requestStartTransition(
+                task.mTransitionController.createTransition(TRANSIT_PIP), task, null, null);
+        tr.collect(task);
         task.setWindowingMode(WINDOWING_MODE_PINNED);
 
         // Collect activity in the transition if the Task windowing mode is going to change.

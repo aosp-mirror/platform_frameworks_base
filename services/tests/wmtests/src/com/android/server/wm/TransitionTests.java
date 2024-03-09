@@ -1120,8 +1120,7 @@ public class TransitionTests extends WindowTestsBase {
 
         mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
         mDisplayContent.setLastHasContent();
-        mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */,
-                null /* displayChange */);
+        mDisplayContent.requestChangeTransition(1 /* any changes */, null /* displayChange */);
         assertEquals(WindowContainer.SYNC_STATE_NONE, statusBar.mSyncState);
         assertEquals(WindowContainer.SYNC_STATE_NONE, navBar.mSyncState);
         assertEquals(WindowContainer.SYNC_STATE_NONE, screenDecor.mSyncState);
@@ -1191,7 +1190,7 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
         final int anyChanges = 1;
         mDisplayContent.setLastHasContent();
-        mDisplayContent.requestChangeTransitionIfNeeded(anyChanges, null /* displayChange */);
+        mDisplayContent.collectDisplayChange(transition);
         transition.setKnownConfigChanges(mDisplayContent, anyChanges);
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
@@ -1254,7 +1253,7 @@ public class TransitionTests extends WindowTestsBase {
         // so the previous async rotation controller should still exist.
         mDisplayContent.getDisplayRotation().setRotation(mDisplayContent.getRotation() + 1);
         mDisplayContent.setLastHasContent();
-        mDisplayContent.requestChangeTransitionIfNeeded(1 /* changes */, null /* displayChange */);
+        mDisplayContent.requestChangeTransition(1 /* changes */, null /* displayChange */);
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
         assertNotNull(mDisplayContent.getAsyncRotationController());
 
@@ -1300,7 +1299,7 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
         registerTestTransitionPlayer();
         mDisplayContent.setLastHasContent();
-        mDisplayContent.requestChangeTransitionIfNeeded(1 /* changes */, null /* displayChange */);
+        mDisplayContent.requestChangeTransition(1 /* changes */, null /* displayChange */);
         assertNotNull(mDisplayContent.getAsyncRotationController());
         mDisplayContent.setFixedRotationLaunchingAppUnchecked(null);
         assertNull("Clear rotation controller if rotation is not changed",

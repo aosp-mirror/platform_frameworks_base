@@ -3646,7 +3646,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setCurrentUser(@UserIdInt int newUserId) {
         synchronized (mGlobalLock) {
-            mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_OPEN, null);
+            final TransitionController controller = mAtmService.getTransitionController();
+            if (!controller.isCollecting() && controller.isShellTransitionsEnabled()) {
+                controller.requestStartTransition(controller.createTransition(TRANSIT_OPEN),
+                        null /* trigger */, null /* remote */, null /* disp */);
+            }
             mCurrentUserId = newUserId;
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
