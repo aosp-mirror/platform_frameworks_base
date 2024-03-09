@@ -33874,7 +33874,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * - otherwise, use the previous category value.
      */
     private void updateInfrequentCount() {
-        long currentTimeMillis = AnimationUtils.currentAnimationTimeMillis();
+        long currentTimeMillis = getDrawingTime();
         long timeIntervalMillis = currentTimeMillis - mLastUpdateTimeMillis;
         mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
