@@ -1342,7 +1342,7 @@ public class UserControllerTest {
         @Override
         protected int broadcastIntent(Intent intent, String resolvedType,
                 IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
-                String[] requiredPermissions, int appOp, Bundle bOptions, boolean ordered,
+                String[] requiredPermissions, int appOp, Bundle bOptions,
                 boolean sticky, int callingPid, int callingUid, int realCallingUid,
                 int realCallingPid, int userId) {
             Log.i(TAG, "broadcastIntentLocked " + intent);

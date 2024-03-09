@@ -725,12 +725,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     final boolean mUseFifoUiScheduling;
 
-    /**
-     * Flag indicating if we should use {@link BroadcastQueueModernImpl} instead
-     * of the default {@link BroadcastQueueImpl}.
-     */
-    final boolean mEnableModernQueue;
-
     @GuardedBy("this")
     private final SparseArray<IUnsafeIntentStrictModeCallback>
             mStrictModeCallbacks = new SparseArray<>();
@@ -2508,7 +2502,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mInternal = new LocalService();
         mPendingStartActivityUids = new PendingStartActivityUids();
         mUseFifoUiScheduling = false;
-        mEnableModernQueue = false;
         mBroadcastQueue = injector.getBroadcastQueue(this);
         mComponentAliasResolver = new ComponentAliasResolver(this);
     }
@@ -2549,9 +2542,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOomAdjuster = mConstants.ENABLE_NEW_OOMADJ
                 ? new OomAdjusterModernImpl(this, mProcessList, activeUids)
                 : new OomAdjuster(this, mProcessList, activeUids);
-
-        mEnableModernQueue = new BroadcastConstants(
-                Settings.Global.BROADCAST_FG_CONSTANTS).MODERN_QUEUE_ENABLED;
 
         mBroadcastQueue = mInjector.getBroadcastQueue(this);
 
@@ -15025,9 +15015,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " ordered=" + ordered + " userid=" + userId
                         + " options=" + (brOptions == null ? "null" : brOptions.toBundle()));
         if ((resultTo != null) && !ordered) {
-            if (!mEnableModernQueue) {
-                Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
-            }
             if (!UserHandle.isCore(callingUid)) {
                 String msg = "Unauthorized unordered resultTo broadcast "
                              + intent + " sent from uid " + callingUid;
@@ -15628,29 +15615,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         filterNonExportedComponents(intent, callingUid, callingPid, registeredReceivers,
                 mPlatformCompat, callerPackage, resolvedType);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
-        if (!ordered && NR > 0 && !mEnableModernQueue) {
-            // If we are not serializing this broadcast, then send the
-            // registered receivers separately so they don't wait for the
-            // components to be launched. We don't do this split for the modern
-            // queue because delivery to registered receivers isn't blocked
-            // behind manifest receivers.
-            if (isCallerSystem) {
-                checkBroadcastFromSystem(intent, callerApp, callerPackage, callingUid,
-                        isProtectedBroadcast, registeredReceivers);
-            }
-            final BroadcastQueue queue = mBroadcastQueue;
-            BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
-                    callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
-                    requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
-                    registeredReceivers, resultToApp, resultTo, resultCode, resultData,
-                    resultExtras, ordered, sticky, false, userId,
-                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
-                    callerAppProcessState);
-            if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
-            queue.enqueueBroadcastLocked(r);
-            registeredReceivers = null;
-            NR = 0;
-        }
 
         // Merge into one list.
         int ir = 0;
@@ -18302,11 +18266,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isModernQueueEnabled() {
-            return mEnableModernQueue;
-        }
-
-        @Override
         public void enforceBroadcastOptionsPermissions(Bundle options, int callingUid) {
             enforceBroadcastOptionPermissionsInternal(options, callingUid);
         }
@@ -18735,7 +18694,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Binder.restoreCallingIdentity(origId);
                 }
             }
-
         }
 
         @Override
@@ -18745,12 +18703,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int userId, int[] appIdAllowList,
                 @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver,
                 @Nullable Bundle bOptions) {
-            // Sending broadcasts with a finish callback without the need for the broadcasts
-            // delivery to be serialized is only supported by modern queue. So, when modern
-            // queue is disabled, we continue to send broadcasts in a serialized fashion.
-            final boolean serialized = !isModernQueueEnabled();
-            return broadcastIntent(intent, resultTo, requiredPermissions, serialized, userId,
-                    appIdAllowList, filterExtrasForReceiver, bOptions);
+            return broadcastIntent(intent, resultTo, requiredPermissions, false /* serialized */,
+                    userId, appIdAllowList, filterExtrasForReceiver, bOptions);
         }
 
         @Override
@@ -19789,18 +19743,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         Objects.requireNonNull(targetPackage);
         Preconditions.checkArgumentNonnegative(delayedDurationMs);
         enforceCallingPermission(permission.DUMP, "forceDelayBroadcastDelivery()");
-        // Ignore request if modern queue is not enabled
-        if (!mEnableModernQueue) {
-            return;
-        }
 
         mBroadcastQueue.forceDelayBroadcastDelivery(targetPackage, delayedDurationMs);
-    }
-
-    @Override
-    public boolean isModernBroadcastQueueEnabled() {
-        enforceCallingPermission(permission.DUMP, "isModernBroadcastQueueEnabled()");
-        return mEnableModernQueue;
     }
 
     @Override
