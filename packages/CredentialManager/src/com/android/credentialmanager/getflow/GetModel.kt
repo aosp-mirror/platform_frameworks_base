@@ -238,6 +238,7 @@ fun toProviderDisplayInfo(
 /**
  * This generates the res code for the large display title text for the selector. For example, it
  * retrieves the resource for strings like: "Use your saved passkey for *rpName*".
+ * TODO(b/330396140) : Validate approach and add dynamic auth strings
  */
 internal fun generateDisplayTitleTextResCode(
     singleEntryType: CredentialType,
