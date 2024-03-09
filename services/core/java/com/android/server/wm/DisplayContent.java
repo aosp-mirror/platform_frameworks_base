@@ -6835,6 +6835,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mContentRecorder;
     }
 
+    void onMirrorOutputSurfaceOrientationChanged() {
+        if (mContentRecorder != null) {
+            mContentRecorder.onMirrorOutputSurfaceOrientationChanged();
+        }
+    }
+
     /**
      * Pause the recording session.
      */

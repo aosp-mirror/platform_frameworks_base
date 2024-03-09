@@ -158,8 +158,6 @@ abstract class DisplayDevice {
     @Nullable
     public Point getDisplaySurfaceDefaultSizeLocked() {
         DisplayDeviceInfo displayDeviceInfo = getDisplayDeviceInfoLocked();
-        final boolean isRotated = mCurrentOrientation == ROTATION_90
-                || mCurrentOrientation == ROTATION_270;
         var width = displayDeviceInfo.width;
         var height = displayDeviceInfo.height;
         if (mIsAnisotropyCorrectionEnabled && displayDeviceInfo.yDpi > 0
@@ -170,7 +168,7 @@ abstract class DisplayDevice {
                 width = (int) (width * displayDeviceInfo.yDpi / displayDeviceInfo.xDpi  + 0.5);
             }
         }
-        return isRotated ? new Point(height, width) : new Point(width, height);
+        return isRotatedLocked() ? new Point(height, width) : new Point(width, height);
     }
 
     /**
@@ -394,8 +392,7 @@ abstract class DisplayDevice {
             viewport.physicalFrame.setEmpty();
         }
 
-        boolean isRotated = (mCurrentOrientation == Surface.ROTATION_90
-                || mCurrentOrientation == ROTATION_270);
+        final boolean isRotated = isRotatedLocked();
         DisplayDeviceInfo info = getDisplayDeviceInfoLocked();
         viewport.deviceWidth = isRotated ? info.height : info.width;
         viewport.deviceHeight = isRotated ? info.width : info.height;
@@ -423,6 +420,13 @@ abstract class DisplayDevice {
         pw.println("mCurrentLayerStackRect=" + mCurrentLayerStackRect);
         pw.println("mCurrentDisplayRect=" + mCurrentDisplayRect);
         pw.println("mCurrentSurface=" + mCurrentSurface);
+    }
+
+    /**
+     * @return whether the orientation is {@link ROTATION_90} or {@link ROTATION_270}.
+     */
+    boolean isRotatedLocked() {
+        return mCurrentOrientation == ROTATION_90 || mCurrentOrientation == ROTATION_270;
     }
 
     private DisplayDeviceConfig loadDisplayDeviceConfig() {
