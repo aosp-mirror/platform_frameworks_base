@@ -33,10 +33,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
@@ -253,26 +251,6 @@ final class AutofillManagerServiceImpl
     @Override // from PerUserSystemService
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
-        final List<ResolveInfo> resolveInfos =
-                getContext().getPackageManager().queryIntentServicesAsUser(
-                        new Intent(AutofillService.SERVICE_INTERFACE),
-                        PackageManager.GET_META_DATA,
-                        mUserId);
-        boolean currentPackageStillHasAutofillIntentFilter = false;
-        for (ResolveInfo resolveInfo : resolveInfos) {
-            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-            if (serviceInfo.getComponentName().equals(serviceComponent)) {
-                currentPackageStillHasAutofillIntentFilter = true;
-                break;
-            }
-        }
-        if (!currentPackageStillHasAutofillIntentFilter) {
-            Slog.w(TAG,
-                    "Autofill service from '" + serviceComponent.getPackageName() + "' does"
-                            + "not have intent filter " + AutofillService.SERVICE_INTERFACE);
-            throw new SecurityException("Service does not declare intent filter "
-                            + AutofillService.SERVICE_INTERFACE);
-        }
         mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();
     }
