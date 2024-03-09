@@ -12518,13 +12518,11 @@ public class BatteryStatsImpl extends BatteryStats {
         addModemTxPowerToHistory(deltaInfo, elapsedRealtimeMs, uptimeMs);
 
         // Grab a separate lock to acquire the network stats, which may do I/O.
-        NetworkStats delta = null;
+        List<NetworkStatsDelta> delta = null;
         synchronized (mModemNetworkLock) {
             final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = latestStats.subtract(mLastModemNetworkStats != null
-                        ? mLastModemNetworkStats
-                        : new NetworkStats(0, -1));
+                delta = computeDelta(latestStats, mLastModemNetworkStats);
                 mLastModemNetworkStats = latestStats;
             }
         }
@@ -12627,7 +12625,7 @@ public class BatteryStatsImpl extends BatteryStats {
             long totalRxPackets = 0;
             long totalTxPackets = 0;
             if (delta != null) {
-                for (NetworkStats.Entry entry : delta) {
+                for (NetworkStatsDelta entry : delta) {
                     if (entry.getRxPackets() == 0 && entry.getTxPackets() == 0) {
                         continue;
                     }
@@ -12668,7 +12666,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 // Now distribute proportional blame to the apps that did networking.
                 long totalPackets = totalRxPackets + totalTxPackets;
                 if (totalPackets > 0) {
-                    for (NetworkStats.Entry entry : delta) {
+                    for (NetworkStatsDelta entry : delta) {
                         if (entry.getRxPackets() == 0 && entry.getTxPackets() == 0) {
                             continue;
                         }

@@ -279,7 +279,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mDefaultCpuPowerBracketsPerEnergyConsumer =
                 mInjector.getDefaultCpuPowerBracketsPerEnergyConsumer();
 
-        mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.nativeIsSupportedFeature();
+        mIsPerUidTimeInStateSupported = mKernelCpuStatsReader.isSupportedFeature();
         mCpuEnergyConsumerIds =
                 mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.CPU_CLUSTER);
         mLastConsumedEnergyUws = new long[mCpuEnergyConsumerIds.length];
@@ -343,6 +343,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         }
         return stepToBracketMap;
     }
+
 
     private int[] initPowerBracketsByCluster(int defaultBracketCountPerCluster) {
         int[] stepToBracketMap = new int[mCpuScalingPolicies.getScalingStepCount()];
@@ -503,7 +504,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         mCpuPowerStats.uidStats.clear();
         // TODO(b/305120724): additionally retrieve time-in-cluster for each CPU cluster
-        long newTimestampNanos = mKernelCpuStatsReader.nativeReadCpuStats(this::processUidStats,
+        long newTimestampNanos = mKernelCpuStatsReader.readCpuStats(this::processUidStats,
                 mLayout.getScalingStepToPowerBracketMap(), mLastUpdateTimestampNanos,
                 mTempCpuTimeByScalingStep, mTempUidStats);
         for (int step = mLayout.getCpuScalingStepCount() - 1; step >= 0; step--) {
@@ -609,6 +610,17 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
      * Native class that retrieves CPU stats from the kernel.
      */
     public static class KernelCpuStatsReader {
+        protected boolean isSupportedFeature() {
+            return nativeIsSupportedFeature();
+        }
+
+        protected long readCpuStats(KernelCpuStatsCallback callback,
+                int[] scalingStepToPowerBracketMap, long lastUpdateTimestampNanos,
+                long[] outCpuTimeByScalingStep, long[] tempForUidStats) {
+            return nativeReadCpuStats(callback, scalingStepToPowerBracketMap,
+                    lastUpdateTimestampNanos, outCpuTimeByScalingStep, tempForUidStats);
+        }
+
         protected native boolean nativeIsSupportedFeature();
 
         protected native long nativeReadCpuStats(KernelCpuStatsCallback callback,

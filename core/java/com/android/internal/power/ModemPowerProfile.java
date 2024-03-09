@@ -17,7 +17,6 @@
 package com.android.internal.power;
 
 import android.annotation.IntDef;
-import android.content.res.XmlResourceParser;
 import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
@@ -256,7 +255,7 @@ public class ModemPowerProfile {
     /**
      * Generates a ModemPowerProfile object from the <modem /> element of a power_profile.xml
      */
-    public void parseFromXml(XmlResourceParser parser) throws IOException,
+    public void parseFromXml(XmlPullParser parser) throws IOException,
             XmlPullParserException {
         final int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
@@ -286,7 +285,7 @@ public class ModemPowerProfile {
     }
 
     /** Parse the <active /> XML element */
-    private void parseActivePowerConstantsFromXml(XmlResourceParser parser)
+    private void parseActivePowerConstantsFromXml(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         // Parse attributes to get the type of active modem usage the power constants are for.
         final int ratType;
@@ -339,7 +338,7 @@ public class ModemPowerProfile {
         }
     }
 
-    private static int getTypeFromAttribute(XmlResourceParser parser, String attr,
+    private static int getTypeFromAttribute(XmlPullParser parser, String attr,
             SparseArray<String> names) {
         final String value = XmlUtils.readStringAttribute(parser, attr);
         if (value == null) {

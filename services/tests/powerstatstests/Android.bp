@@ -31,6 +31,7 @@ filegroup {
         "src/com/android/server/power/stats/BluetoothPowerCalculatorTest.java",
         "src/com/android/server/power/stats/CameraPowerCalculatorTest.java",
         "src/com/android/server/power/stats/CpuAggregatedPowerStatsProcessorTest.java",
+        "src/com/android/server/power/stats/CpuPowerStatsCollectorTest.java",
         "src/com/android/server/power/stats/CpuPowerCalculatorTest.java",
         "src/com/android/server/power/stats/CustomEnergyConsumerPowerCalculatorTest.java",
         "src/com/android/server/power/stats/EnergyConsumerSnapshotTest.java",
@@ -40,6 +41,7 @@ filegroup {
         "src/com/android/server/power/stats/LongSamplingCounterArrayTest.java",
         "src/com/android/server/power/stats/LongSamplingCounterTest.java",
         "src/com/android/server/power/stats/MemoryPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/MobileRadioPowerCalculatorTest.java",
         "src/com/android/server/power/stats/MobileRadioPowerStatsCollectorTest.java",
         "src/com/android/server/power/stats/MultiStateStatsTest.java",
         "src/com/android/server/power/stats/PowerStatsAggregatorTest.java",
@@ -124,6 +126,9 @@ android_ravenwood_test {
         "src/com/android/server/power/stats/BatteryUsageStatsRule.java",
         "src/com/android/server/power/stats/MockBatteryStatsImpl.java",
         "src/com/android/server/power/stats/MockClock.java",
+    ],
+    java_resources: [
+        "res/xml/power_profile*.xml",
     ],
     auto_gen_config: true,
 }

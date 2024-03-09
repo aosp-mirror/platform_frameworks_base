@@ -24,7 +24,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.annotation.XmlRes;
+import android.content.Context;
+import android.content.res.Resources;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
@@ -35,9 +36,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
-
-import androidx.test.InstrumentationRegistry;
+import android.util.Xml;
 
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
@@ -47,6 +48,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.mockito.stubbing.Answer;
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -153,9 +155,25 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
-    public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {
-        mPowerProfile.forceInitForTesting(InstrumentationRegistry.getContext(), xmlId);
+    public BatteryUsageStatsRule setTestPowerProfile(String resourceName) {
+        mPowerProfile.initForTesting(resolveParser(resourceName));
         return this;
+    }
+
+    public static XmlPullParser resolveParser(String resourceName) {
+        if (RavenwoodRule.isOnRavenwood()) {
+            try {
+                return Xml.resolvePullParser(BatteryUsageStatsRule.class.getClassLoader()
+                        .getResourceAsStream("res/xml/" + resourceName + ".xml"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            Context context = androidx.test.InstrumentationRegistry.getContext();
+            Resources resources = context.getResources();
+            int resId = resources.getIdentifier(resourceName, "xml", context.getPackageName());
+            return resources.getXml(resId);
+        }
     }
 
     public BatteryUsageStatsRule setCpuScalingPolicy(int policy, int[] relatedCpus,

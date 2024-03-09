@@ -26,44 +26,50 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.frameworks.powerstatstests.R;
 import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.IOException;
 import java.util.function.IntSupplier;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class CpuPowerStatsCollectorTest {
+
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private static final int ISOLATED_UID = 99123;
     private static final int UID_1 = 42;
     private static final int UID_2 = 99;
-    private Context mContext;
     private final MockClock mMockClock = new MockClock();
     private final HandlerThread mHandlerThread = new HandlerThread("test");
     private Handler mHandler;
     private PowerStats mCollectedStats;
-    private PowerProfile mPowerProfile;
+    private PowerProfile mPowerProfile = new PowerProfile();
     @Mock
     private PowerStatsUidResolver mUidResolver;
     @Mock
@@ -133,13 +139,11 @@ public class CpuPowerStatsCollectorTest {
     };
 
     @Before
-    public void setup() {
+    public void setup() throws XmlPullParserException, IOException {
         MockitoAnnotations.initMocks(this);
-        mContext = InstrumentationRegistry.getContext();
-
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
-        when(mMockKernelCpuStatsReader.nativeIsSupportedFeature()).thenReturn(true);
+        when(mMockKernelCpuStatsReader.isSupportedFeature()).thenReturn(true);
         when(mUidResolver.mapUid(anyInt())).thenAnswer(invocation -> {
             int uid = invocation.getArgument(0);
             if (uid == ISOLATED_UID) {
@@ -153,8 +157,8 @@ public class CpuPowerStatsCollectorTest {
 
     @Test
     public void powerBrackets_specifiedInPowerProfile() {
-        mPowerProfile = new PowerProfile(mContext);
-        mPowerProfile.forceInitForTesting(mContext, R.xml.power_profile_test_power_brackets);
+        mPowerProfile.initForTesting(
+                BatteryUsageStatsRule.resolveParser("power_profile_test_power_brackets"));
         mCpuScalingPolicies = new CpuScalingPolicies(
                 new SparseArray<>() {{
                     put(0, new int[]{0});
@@ -173,8 +177,7 @@ public class CpuPowerStatsCollectorTest {
 
     @Test
     public void powerBrackets_default_noEnergyConsumers() {
-        mPowerProfile = new PowerProfile(mContext);
-        mPowerProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+        mPowerProfile.initForTesting(BatteryUsageStatsRule.resolveParser("power_profile_test"));
         mockCpuScalingPolicies(2);
 
         CpuPowerStatsCollector collector = createCollector(3, 0);
@@ -193,8 +196,7 @@ public class CpuPowerStatsCollectorTest {
 
     @Test
     public void powerBrackets_moreBracketsThanStates() {
-        mPowerProfile = new PowerProfile(mContext);
-        mPowerProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+        mPowerProfile.initForTesting(BatteryUsageStatsRule.resolveParser("power_profile_test"));
         mockCpuScalingPolicies(2);
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
@@ -205,8 +207,7 @@ public class CpuPowerStatsCollectorTest {
 
     @Test
     public void powerBrackets_energyConsumers() throws Exception {
-        mPowerProfile = new PowerProfile(mContext);
-        mPowerProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+        mPowerProfile.initForTesting(BatteryUsageStatsRule.resolveParser("power_profile_test"));
         mockCpuScalingPolicies(2);
         mockEnergyConsumers();
 
@@ -218,8 +219,7 @@ public class CpuPowerStatsCollectorTest {
 
     @Test
     public void powerStatsDescriptor() throws Exception {
-        mPowerProfile = new PowerProfile(mContext);
-        mPowerProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+        mPowerProfile.initForTesting(BatteryUsageStatsRule.resolveParser("power_profile_test"));
         mockCpuScalingPolicies(2);
         mockEnergyConsumers();
 
@@ -365,7 +365,7 @@ public class CpuPowerStatsCollectorTest {
 
     private void mockKernelCpuStats(long[] deviceStats, SparseArray<long[]> uidToCpuStats,
             long expectedLastUpdateTimestampMs, long newLastUpdateTimestampMs) {
-        when(mMockKernelCpuStatsReader.nativeReadCpuStats(
+        when(mMockKernelCpuStatsReader.readCpuStats(
                 any(CpuPowerStatsCollector.KernelCpuStatsCallback.class),
                 any(int[].class), anyLong(), any(long[].class), any(long[].class)))
                 .thenAnswer(invocation -> {
