@@ -16,11 +16,13 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "ImageReader_JNI"
+#define ATRACE_TAG ATRACE_TAG_CAMERA
 #include "android_media_Utils.h"
 #include <cutils/atomic.h>
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/List.h>
+#include <utils/Trace.h>
 #include <utils/String8.h>
 
 #include <cstdio>
@@ -223,6 +225,7 @@ JNIImageReaderContext::~JNIImageReaderContext() {
 
 void JNIImageReaderContext::onFrameAvailable(const BufferItem& /*item*/)
 {
+    ATRACE_CALL();
     ALOGV("%s: frame available", __FUNCTION__);
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
