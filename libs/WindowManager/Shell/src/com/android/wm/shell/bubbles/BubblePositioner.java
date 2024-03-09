@@ -855,4 +855,24 @@ public class BubblePositioner {
     public int getBubbleBarExpandedViewPadding() {
         return mExpandedViewPadding;
     }
+
+    /**
+     * Get bubble bar expanded view bounds on screen
+     */
+    public void getBubbleBarExpandedViewBounds(boolean onLeft, boolean isOverflowExpanded,
+            Rect out) {
+        final int padding = getBubbleBarExpandedViewPadding();
+        final int width = getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+        final int height = getExpandedViewHeightForBubbleBar(isOverflowExpanded);
+
+        out.set(0, 0, width, height);
+        int left;
+        if (onLeft) {
+            left = getInsets().left + padding;
+        } else {
+            left = getAvailableRect().width() - width - padding;
+        }
+        int top = getExpandedViewBottomForBubbleBar() - height;
+        out.offsetTo(left, top);
+    }
 }
