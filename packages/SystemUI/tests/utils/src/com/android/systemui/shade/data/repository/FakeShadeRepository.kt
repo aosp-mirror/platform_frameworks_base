@@ -23,6 +23,7 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [ShadeRepository] */
 @SysUISingleton
@@ -58,6 +59,9 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead") override val legacyIsQsExpanded = _legacyIsQsExpanded
 
     override val legacyLockscreenShadeTracking = MutableStateFlow(false)
+
+    private val _isSplitShade = MutableStateFlow(false)
+    override val isSplitShade: StateFlow<Boolean> = _isSplitShade.asStateFlow()
 
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
@@ -130,6 +134,10 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Should only be called by NPVC and tests")
     override fun setLegacyShadeExpansion(expandedFraction: Float) {
         _legacyShadeExpansion.value = expandedFraction
+    }
+
+    override fun setSplitShade(isSplitShade: Boolean) {
+        _isSplitShade.value = isSplitShade
     }
 }
 

@@ -61,6 +61,7 @@ import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.footer.ui.compose.FooterActions
+import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
@@ -238,24 +239,21 @@ private fun SceneScope.QuickSettingsScene(
                     QuickSettings(
                         viewModel.qsSceneAdapter,
                         { viewModel.qsSceneAdapter.qsHeight },
+                        isSplitShade = false,
                         modifier = Modifier.sysuiResTag("expanded_qs_scroll_view"),
                     )
                 }
             }
-            AnimatedVisibility(
-                visible = !isCustomizing,
-                modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth()
-            ) {
-                QuickSettingsTheme {
-                    // This view has its own horizontal padding
-                    // TODO(b/321716470) This should use a lifecycle tied to the scene.
-                    FooterActions(
-                        viewModel = footerActionsViewModel,
-                        qsVisibilityLifecycleOwner = lifecycleOwner,
-                        modifier = Modifier.element(QuickSettings.Elements.FooterActions)
-                    )
-                }
-            }
+
+            FooterActionsWithAnimatedVisibility(
+                viewModel = footerActionsViewModel,
+                isCustomizing = isCustomizing,
+                lifecycleOwner = lifecycleOwner,
+                footerActionsModifier = { modifier ->
+                    modifier.element(QuickSettings.Elements.FooterActions)
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
         }
     }
 }

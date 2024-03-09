@@ -18,6 +18,7 @@ package com.android.systemui.shade
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.biometrics.AuthRippleController
+import com.android.systemui.shade.domain.startable.ShadeStartable
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -34,4 +35,9 @@ internal abstract class StartShadeModule {
     @IntoMap
     @ClassKey(AuthRippleController::class)
     abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(ShadeStartable::class)
+    abstract fun provideShadeStartable(startable: ShadeStartable): CoreStartable
 }

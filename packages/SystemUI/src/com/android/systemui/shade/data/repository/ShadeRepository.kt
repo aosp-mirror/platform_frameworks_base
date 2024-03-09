@@ -100,11 +100,16 @@ interface ShadeRepository {
     @Deprecated("Use ShadeInteractor.isQsBypassingShade instead")
     val legacyExpandImmediate: StateFlow<Boolean>
 
+    /** Whether the current configuration requires the split shade to be shown. */
+    val isSplitShade: StateFlow<Boolean>
+
     /** True when QS is taking up the entire screen, i.e. fully expanded on a non-unfolded phone. */
     @Deprecated("Use ShadeInteractor instead") val legacyQsFullscreen: StateFlow<Boolean>
 
     /** NPVC.mClosing as a flow. */
     @Deprecated("Use ShadeAnimationInteractor instead") val legacyIsClosing: StateFlow<Boolean>
+
+    fun setSplitShade(isSplitShade: Boolean)
 
     /** Sets whether a closing animation is happening. */
     @Deprecated("Use ShadeAnimationInteractor instead") fun setLegacyIsClosing(isClosing: Boolean)
@@ -213,6 +218,13 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     private val _legacyQsFullscreen = MutableStateFlow(false)
     @Deprecated("Use ShadeInteractor instead")
     override val legacyQsFullscreen: StateFlow<Boolean> = _legacyQsFullscreen.asStateFlow()
+
+    val _isSplitShade = MutableStateFlow(false)
+    override val isSplitShade: StateFlow<Boolean> = _isSplitShade.asStateFlow()
+
+    override fun setSplitShade(isSplitShade: Boolean) {
+        _isSplitShade.value = isSplitShade
+    }
 
     override fun setLegacyQsFullscreen(legacyQsFullscreen: Boolean) {
         _legacyQsFullscreen.value = legacyQsFullscreen
