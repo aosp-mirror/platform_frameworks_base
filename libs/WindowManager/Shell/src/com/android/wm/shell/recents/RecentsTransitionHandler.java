@@ -418,6 +418,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "[%d] RecentsController.start", mInstanceId);
             if (mListener == null || mTransition == null) {
+                Slog.e(TAG, "Missing listener or transition, hasListener=" + (mListener != null) +
+                        " hasTransition=" + (mTransition != null));
                 cleanUp();
                 return false;
             }
@@ -539,6 +541,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     apps.add(target);
                 }
             }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                    "Applying transaction=%d", t.getId());
             t.apply();
             Bundle b = new Bundle(1 /*capacity*/);
             b.putParcelable(KEY_EXTRA_SPLIT_BOUNDS,

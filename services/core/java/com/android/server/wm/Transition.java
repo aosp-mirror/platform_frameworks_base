@@ -625,7 +625,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             throw new IllegalStateException("Attempting to re-use a transition");
         }
         mState = STATE_COLLECTING;
-        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG,
+        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs,
+                TAG + "-" + transitTypeToString(mType),
                 mParallelCollectType != PARALLEL_TYPE_NONE);
         mSyncEngine.setSyncMethod(mSyncId, TransitionController.SYNC_METHOD);
 
