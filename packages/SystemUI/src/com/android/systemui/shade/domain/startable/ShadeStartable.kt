@@ -22,6 +22,7 @@ import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -41,17 +42,25 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        hydrateSplitShade()
+        hydrateShadeMode()
     }
 
-    private fun hydrateSplitShade() {
+    private fun hydrateShadeMode() {
         applicationScope.launch {
             configurationRepository.onAnyConfigurationChange
                 // Force initial collection.
                 .onStart { emit(Unit) }
                 .map { applicationContext.resources }
                 .map { resources -> controller.shouldUseSplitNotificationShade(resources) }
-                .collect { isSplitShade -> shadeRepository.setSplitShade(isSplitShade) }
+                .collect { isSplitShade ->
+                    shadeRepository.setShadeMode(
+                        if (isSplitShade) {
+                            ShadeMode.Split
+                        } else {
+                            ShadeMode.Single
+                        }
+                    )
+                }
         }
     }
 }

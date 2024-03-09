@@ -73,6 +73,7 @@ import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
@@ -152,27 +153,29 @@ private fun SceneScope.ShadeScene(
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
 ) {
-    val isSplitShade by viewModel.isSplitShade.collectAsState()
-    if (isSplitShade) {
-        SplitShade(
-            viewModel = viewModel,
-            createTintedIconManager = createTintedIconManager,
-            createBatteryMeterViewController = createBatteryMeterViewController,
-            statusBarIconController = statusBarIconController,
-            mediaCarouselController = mediaCarouselController,
-            mediaHost = mediaHost,
-            modifier = modifier,
-        )
-    } else {
-        SingleShade(
-            viewModel = viewModel,
-            createTintedIconManager = createTintedIconManager,
-            createBatteryMeterViewController = createBatteryMeterViewController,
-            statusBarIconController = statusBarIconController,
-            mediaCarouselController = mediaCarouselController,
-            mediaHost = mediaHost,
-            modifier = modifier,
-        )
+    val shadeMode by viewModel.shadeMode.collectAsState()
+    when (shadeMode) {
+        is ShadeMode.Single ->
+            SingleShade(
+                viewModel = viewModel,
+                createTintedIconManager = createTintedIconManager,
+                createBatteryMeterViewController = createBatteryMeterViewController,
+                statusBarIconController = statusBarIconController,
+                mediaCarouselController = mediaCarouselController,
+                mediaHost = mediaHost,
+                modifier = modifier,
+            )
+        is ShadeMode.Split ->
+            SplitShade(
+                viewModel = viewModel,
+                createTintedIconManager = createTintedIconManager,
+                createBatteryMeterViewController = createBatteryMeterViewController,
+                statusBarIconController = statusBarIconController,
+                mediaCarouselController = mediaCarouselController,
+                mediaHost = mediaHost,
+                modifier = modifier,
+            )
+        is ShadeMode.Dual -> error("Dual shade is not yet implemented!")
     }
 }
 

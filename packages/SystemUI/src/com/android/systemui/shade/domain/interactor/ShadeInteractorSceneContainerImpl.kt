@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -108,7 +109,7 @@ constructor(
     override val isUserInteractingWithQs: Flow<Boolean> =
         sceneBasedInteracting(sceneInteractor, Scenes.QuickSettings)
 
-    override val isSplitShade: StateFlow<Boolean> = shadeRepository.isSplitShade
+    override val shadeMode: StateFlow<ShadeMode> = shadeRepository.shadeMode
 
     /**
      * Returns a flow that uses scene transition progress to and from a scene that is pulled down

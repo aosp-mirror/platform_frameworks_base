@@ -24,6 +24,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -42,20 +43,20 @@ class ShadeStartableTest : SysuiTestCase() {
     private val underTest = kosmos.shadeStartable
 
     @Test
-    fun hydrateSplitShade() =
+    fun hydrateShadeMode() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
-            val isSplitShade by collectLastValue(shadeInteractor.isSplitShade)
+            val shadeMode by collectLastValue(shadeInteractor.shadeMode)
 
             underTest.start()
-            assertThat(isSplitShade).isFalse()
+            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
 
             overrideResource(R.bool.config_use_split_notification_shade, true)
             fakeConfigurationRepository.onAnyConfigurationChange()
-            assertThat(isSplitShade).isTrue()
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             fakeConfigurationRepository.onAnyConfigurationChange()
-            assertThat(isSplitShade).isFalse()
+            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
         }
 }

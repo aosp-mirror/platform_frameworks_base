@@ -30,6 +30,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.userRepository
 import com.google.common.truth.Truth
@@ -562,17 +563,17 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isSplitShade() =
+    fun shadeMode() =
         testScope.runTest {
-            val isSplitShade by collectLastValue(underTest.isSplitShade)
+            val shadeMode by collectLastValue(underTest.shadeMode)
 
-            shadeRepository.setSplitShade(true)
-            assertThat(isSplitShade).isTrue()
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
 
-            shadeRepository.setSplitShade(false)
-            assertThat(isSplitShade).isFalse()
+            shadeRepository.setShadeMode(ShadeMode.Single)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
 
-            shadeRepository.setSplitShade(true)
-            assertThat(isSplitShade).isTrue()
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
         }
 }
