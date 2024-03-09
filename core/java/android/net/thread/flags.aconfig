@@ -5,6 +5,7 @@ package: "com.android.net.thread.platform.flags"
 
 flag {
     name: "thread_user_restriction_enabled"
+    is_exported: true
     namespace: "thread_network"
     description: "Controls whether user restriction on thread networks is enabled"
     bug: "307679182"
@@ -12,6 +13,7 @@ flag {
 
 flag {
     name: "thread_enabled_platform"
+    is_exported: true
     namespace: "thread_network"
     description: "Controls whether the Android Thread feature is enabled"
     bug: "301473012"
