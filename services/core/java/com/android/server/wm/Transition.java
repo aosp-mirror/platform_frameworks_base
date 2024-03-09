@@ -503,6 +503,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             mConfigAtEndActivities.add(ar);
             ar.pauseConfigurationDispatch();
+            snapshotStartState(ar);
+            mChanges.get(ar).mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
         });
         snapshotStartState(wc);
         mChanges.get(wc).mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
@@ -2394,9 +2396,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             } else {
                 parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_YES_ANIMATION;
             }
-            final ActivityRecord ar = targetChange.mContainer.asActivityRecord();
-            if ((ar != null && ar.isConfigurationDispatchPaused())
-                    || ((targetChange.mFlags & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) != 0)) {
+            if ((targetChange.mFlags & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) != 0) {
                 parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
             }
         }
@@ -2482,6 +2482,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         targetChange.mEndParent = p;
                     } else {
                         intermediates.add(parentChange);
+                    }
+                    // for config-at-end, we want to promote the flag based on the end-state even
+                    // if the activity was reparented because it operates after the animation. So,
+                    // check that here since the promote code skips reparents.
+                    if ((targetChange.mFlags & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) != 0
+                            && targetChange.mContainer.asActivityRecord() != null
+                            && targetChange.mContainer.getParent() == p) {
+                        parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
                     }
                     foundParentInTargets = true;
                     break;

@@ -70,6 +70,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import static java.lang.Integer.MAX_VALUE;
+
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -2567,6 +2569,37 @@ public class TransitionTests extends WindowTestsBase {
                 task.mRemoteToken.toWindowContainerToken()).hasFlags(FLAG_CONFIG_AT_END));
         player.finish();
         assertFalse(activity.isConfigurationDispatchPaused());
+    }
+
+    @Test
+    public void testConfigAtEndReparent() {
+        final TransitionController controller = mDisplayContent.mTransitionController;
+        Transition transit = createTestTransition(TRANSIT_CHANGE, controller);
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        final Task taskOrig = createTask(mDisplayContent);
+        taskOrig.getConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 200, 300));
+        final Task task = createTask(mDisplayContent);
+        task.getConfiguration().windowConfiguration.setBounds(new Rect(10, 10, 200, 300));
+        final ActivityRecord activity = createActivityRecord(taskOrig);
+        activity.setVisibleRequested(true);
+        activity.setVisible(true);
+
+        controller.moveToCollecting(transit);
+        transit.collect(taskOrig);
+        transit.collect(task);
+        transit.collect(activity);
+        transit.setConfigAtEnd(taskOrig);
+        activity.reparent(task, MAX_VALUE);
+        task.moveToFront("test");
+
+        controller.requestStartTransition(transit, task, null, null);
+        player.start();
+        // config-at-end flag must propagate up to task even when reparented (since config-at-end
+        // only cares about after-end state).
+        assertTrue(player.mLastReady.getChange(
+                task.mRemoteToken.toWindowContainerToken()).hasFlags(FLAG_CONFIG_AT_END));
+        player.finish();
     }
 
     @Test
