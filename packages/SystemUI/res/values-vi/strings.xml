@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Bật"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Bật"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Không, cảm ơn"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"Tiêu chuẩn"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"Siêu tiết kiệm"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Tự động xoay màn hình"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Cho phép <xliff:g id="APPLICATION">%1$s</xliff:g> truy cập vào <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nỨng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ngắt kết nối"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"kích hoạt"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Tự động bật lại vào ngày mai"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Các tính năng như Chia sẻ nhanh, Tìm thiết bị của tôi và dịch vụ vị trí trên thiết bị có sử dụng Bluetooth"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> pin"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Âm thanh"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Tai nghe"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Nhấn để đặt chế độ rung."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Nhấn để tắt tiếng."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Kiểm soát tiếng ồn"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"Nhấn để thay đổi chế độ chuông"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"tắt tiếng"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"bật tiếng"</string>
@@ -1223,12 +1236,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Để có độ phân giải cao hơn, hãy lật điện thoại"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Thiết bị có thể gập lại đang được mở ra"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Thiết bị có thể gập lại đang được lật ngược"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"gập"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"mở"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Còn <xliff:g id="PERCENTAGE">%s</xliff:g> pin"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Hãy kết nối bút cảm ứng với bộ sạc"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bút cảm ứng bị yếu pin"</string>

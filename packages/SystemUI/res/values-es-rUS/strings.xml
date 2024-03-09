@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activar"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Activar"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"No, gracias"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"Estándar"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"Extremo"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Girar la pantalla automáticamente"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"¿Deseas permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"¿Quieres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nLa app no tiene permiso para grabar, pero podría capturar audio mediante este dispositivo USB."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"desconectar"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"activar"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Volver a activar automáticamente mañana"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Las funciones como Quick Share, Encontrar mi dispositivo y la ubicación del dispositivo usan Bluetooth."</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> de batería"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Auriculares"</string>
@@ -582,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Presiona para establecer el modo vibración."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Presiona para silenciar."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Control de ruido"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"Presiona para cambiar el modo de timbre"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"silenciar"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"dejar de silenciar"</string>
@@ -796,8 +809,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Clave de código derecho"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ícono izquierdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícono derecho"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionado y arrastra para agregar tarjetas"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionado y arrastra para reorganizar las tarjetas"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén presionada la tarjeta y arrástrala para agregarla"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén presionada la tarjeta y arrástrala para reorganizarla"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastra aquí para quitar"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necesitas al menos <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> tarjetas"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Editar"</string>

@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktifkan"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Aktifkan"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Lain kali"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"Standar"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"Ekstrem"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Putar layar otomatis"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nAplikasi ini belum diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini."</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"putuskan koneksi"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktifkan"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Otomatis aktifkan lagi besok"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Fitur seperti Quick Share, Temukan Perangkat Saya, dan lokasi perangkat menggunakan Bluetooth"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -429,8 +434,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"Tambahkan widget lainnya"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"Tekan lama untuk menyesuaikan widget"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"Sesuaikan widget"</string>
-    <!-- no translation found for icon_description_for_disabled_widget (4693151565003206943) -->
-    <skip />
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"Ikon aplikasi untuk widget yang dinonaktifkan"</string>
     <string name="edit_widget" msgid="9030848101135393954">"Edit widget"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Hapus"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tambahkan widget"</string>
@@ -583,6 +587,14 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Ketuk untuk menyetel agar bergetar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Ketuk untuk menonaktifkan."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Kontrol Bising"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"Ketuk untuk mengubah mode pendering"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Tanpa suara"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktifkan"</string>
@@ -837,10 +849,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu daya"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> dari <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Layar kunci"</string>
-    <!-- no translation found for finder_active (7907846989716941952) -->
-    <skip />
-    <!-- no translation found for shutdown_progress (5464239146561542178) -->
-    <skip />
+    <string name="finder_active" msgid="7907846989716941952">"Anda dapat menemukan lokasi ponsel ini dengan Temukan Perangkat Saya meskipun ponsel dimatikan"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"Sedang mematikan…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah-langkah perawatan"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah-langkah perawatan"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Cabut perangkat"</string>
@@ -1226,12 +1236,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Untuk resolusi lebih tinggi, balik ponsel"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Perangkat foldable sedang dibentangkan"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Perangkat foldable sedang dibalik"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ditutup"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"dibuka"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Baterai tersisa <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Hubungkan stilus ke pengisi daya"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Baterai stilus lemah"</string>
