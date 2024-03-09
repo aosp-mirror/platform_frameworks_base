@@ -2,6 +2,7 @@ package: "android.hardware.biometrics"
 
 flag {
     name: "last_authentication_time"
+    is_exported: true
     namespace: "wallet_integration"
     description: "Feature flag for adding getLastAuthenticationTime API to BiometricManager"
     bug: "301979982"
@@ -9,6 +10,7 @@ flag {
 
 flag {
   name: "add_key_agreement_crypto_object"
+  is_exported: true
   namespace: "biometrics"
   description: "Feature flag for adding KeyAgreement api to CryptoObject."
   bug: "282058146"

@@ -2,6 +2,7 @@ package: "android.net.vcn"
 
 flag {
     name: "safe_mode_config"
+    is_exported: true
     namespace: "vcn"
     description: "Feature flag for safe mode configurability"
     bug: "276358140"
