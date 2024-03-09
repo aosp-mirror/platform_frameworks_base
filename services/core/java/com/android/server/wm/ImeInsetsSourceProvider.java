@@ -31,6 +31,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Trace;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSource;
 import android.view.InsetsSourceConsumer;
@@ -49,6 +50,8 @@ import java.io.PrintWriter;
  * {@link InsetsSource} to the client that uses it in {@link InsetsSourceConsumer}.
  */
 final class ImeInsetsSourceProvider extends InsetsSourceProvider {
+
+    private static final String TAG = ImeInsetsSourceProvider.class.getSimpleName();
 
     /** The token tracking the current IME request or {@code null} otherwise. */
     @Nullable
@@ -220,12 +223,16 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
      */
     void scheduleShowImePostLayout(InsetsControlTarget imeTarget,
             @NonNull ImeTracker.Token statsToken) {
+        if (mImeRequesterStatsToken != null) {
+            // Cancel the pre-existing stats token, if any.
+            // Log state on pre-existing request cancel.
+            logShowImePostLayoutState();
+            ImeTracker.forLogging().onCancelled(
+                    mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
+        }
+        mImeRequesterStatsToken = statsToken;
         boolean targetChanged = isTargetChangedWithinActivity(imeTarget);
         mImeRequester = imeTarget;
-        // Cancel the pre-existing stats token, if any.
-        ImeTracker.forLogging().onCancelled(
-                mImeRequesterStatsToken, ImeTracker.PHASE_WM_SHOW_IME_RUNNER);
-        mImeRequesterStatsToken = statsToken;
         if (targetChanged) {
             // target changed, check if new target can show IME.
             ProtoLog.d(WM_DEBUG_IME, "IME target changed within ActivityRecord");
@@ -297,12 +304,16 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
      */
     void abortShowImePostLayout() {
         ProtoLog.d(WM_DEBUG_IME, "abortShowImePostLayout");
+        if (mImeRequesterStatsToken != null) {
+            // Log state on abort.
+            logShowImePostLayoutState();
+            ImeTracker.forLogging().onFailed(
+                    mImeRequesterStatsToken, ImeTracker.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT);
+            mImeRequesterStatsToken = null;
+        }
         mImeRequester = null;
         mIsImeLayoutDrawn = false;
         mShowImeRunner = null;
-        ImeTracker.forLogging().onFailed(
-                mImeRequesterStatsToken, ImeTracker.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT);
-        mImeRequesterStatsToken = null;
     }
 
     @VisibleForTesting
@@ -335,6 +346,41 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 || isImeFallbackTarget(mImeRequester)
                 || isImeInputTarget(mImeRequester)
                 || sameAsImeControlTarget();
+    }
+
+    /**
+     * Logs the current state required for scheduleShowImePostLayout's runnable to be triggered.
+     */
+    private void logShowImePostLayoutState() {
+        final var windowState = mWindowContainer != null ? mWindowContainer.asWindowState() : null;
+        final var dcTarget = mDisplayContent.getImeTarget(IME_TARGET_LAYERING);
+        final var controlTarget = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
+        final var sb = new StringBuilder();
+        sb.append("mWindowContainer: ").append(mWindowContainer);
+        sb.append(" windowState: ").append(windowState);
+        if (windowState != null) {
+            sb.append(" windowState.isDrawn(): ").append(windowState.isDrawn());
+            sb.append(" windowState.mGivenInsetsPending: ").append(windowState.mGivenInsetsPending);
+        }
+        sb.append(" mIsImeLayoutDrawn: ").append(mIsImeLayoutDrawn);
+        sb.append(" mShowImeRunner: ").append(mShowImeRunner);
+        sb.append(" mImeRequester: ").append(mImeRequester);
+        sb.append(" dcTarget: ").append(dcTarget);
+        sb.append(" controlTarget: ").append(controlTarget);
+        sb.append(" isReadyToShowIme(): ").append(isReadyToShowIme());
+        if (mImeRequester != null && dcTarget != null && controlTarget != null) {
+            sb.append(" isImeLayeringTarget: ");
+            sb.append(isImeLayeringTarget(mImeRequester, dcTarget));
+            sb.append(" isAboveImeLayeringTarget: ");
+            sb.append(isAboveImeLayeringTarget(mImeRequester, dcTarget));
+            sb.append(" isImeFallbackTarget: ");
+            sb.append(isImeFallbackTarget(mImeRequester));
+            sb.append(" isImeInputTarget: ");
+            sb.append(isImeInputTarget(mImeRequester));
+            sb.append(" sameAsImeControlTarget: ");
+            sb.append(sameAsImeControlTarget());
+        }
+        Slog.d(TAG, sb.toString());
     }
 
     // ---------------------------------------------------------------------------------------
@@ -398,6 +444,10 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             pw.print(prefix);
             pw.print("showImePostLayout pending for mImeRequester=");
             pw.print(mImeRequester);
+            pw.println();
+        } else {
+            pw.print(prefix);
+            pw.print("showImePostLayout not scheduled, mImeRequester=null");
             pw.println();
         }
         pw.println();
