@@ -137,6 +137,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerInternal;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -4353,9 +4354,8 @@ public class ComputerEngine implements Computer {
         if (Process.isSdkSandboxUid(uid)) {
             uid = getBaseSdkSandboxUid();
         }
-        if (Process.isIsolatedUid(uid)
-                && mPermissionManager.getHotwordDetectionServiceProvider() != null
-                && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (isKnownIsolatedComputeApp(uid, callingUserId)) {
             try {
                 uid = getIsolatedOwner(uid);
             } catch (IllegalStateException e) {
@@ -4363,7 +4363,6 @@ public class ComputerEngine implements Computer {
                 Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
             }
         }
-        final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
         if (obj instanceof SharedUserSetting) {
@@ -4399,9 +4398,7 @@ public class ComputerEngine implements Computer {
             if (Process.isSdkSandboxUid(uid)) {
                 uid = getBaseSdkSandboxUid();
             }
-            if (Process.isIsolatedUid(uid)
-                    && mPermissionManager.getHotwordDetectionServiceProvider() != null
-                    && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
+            if (isKnownIsolatedComputeApp(uid, callingUserId)) {
                 try {
                     uid = getIsolatedOwner(uid);
                 } catch (IllegalStateException e) {
@@ -5800,6 +5797,43 @@ public class ComputerEngine implements Computer {
 
     private int getBaseSdkSandboxUid() {
         return getPackage(mService.getSdkSandboxPackageName()).getUid();
+    }
+
+
+    private boolean isKnownIsolatedComputeApp(int uid, int callingUserId) {
+        if (!Process.isIsolatedUid(uid)) {
+            return false;
+        }
+        final boolean isHotword =
+                mPermissionManager.getHotwordDetectionServiceProvider() != null
+                        && uid
+                        == mPermissionManager.getHotwordDetectionServiceProvider().getUid();
+        if (isHotword) {
+            return true;
+        }
+        OnDeviceIntelligenceManagerInternal onDeviceIntelligenceManagerInternal =
+                mInjector.getLocalService(OnDeviceIntelligenceManagerInternal.class);
+        if (onDeviceIntelligenceManagerInternal == null) {
+            return false;
+        }
+
+        String onDeviceIntelligencePackage =
+                onDeviceIntelligenceManagerInternal.getRemoteServicePackageName();
+        if (onDeviceIntelligencePackage == null) {
+            return false;
+        }
+
+        try {
+            if (getIsolatedOwner(uid) == getPackageUid(onDeviceIntelligencePackage, 0,
+                    callingUserId)) {
+                return true;
+            }
+        } catch (IllegalStateException e) {
+            // If the owner uid doesn't exist, just use the current uid
+            Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
+        }
+
+        return false;
     }
 
     @Nullable
