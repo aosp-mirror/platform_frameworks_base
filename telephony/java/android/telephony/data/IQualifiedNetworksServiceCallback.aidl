@@ -26,5 +26,5 @@ oneway interface IQualifiedNetworksServiceCallback
 {
     void onQualifiedNetworkTypesChanged(int apnTypes, in int[] qualifiedNetworkTypes);
     void onNetworkValidationRequested(int networkCapability, IIntegerConsumer callback);
-    void onReconnectQualifedNetworkType(int apnTypes, int qualifiedNetworkType);
+    void onReconnectQualifiedNetworkType(int apnTypes, int qualifiedNetworkType);
 }
