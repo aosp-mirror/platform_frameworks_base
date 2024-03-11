@@ -16,6 +16,7 @@
 package com.android.systemui.shade.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -100,8 +101,7 @@ interface ShadeRepository {
     @Deprecated("Use ShadeInteractor.isQsBypassingShade instead")
     val legacyExpandImmediate: StateFlow<Boolean>
 
-    /** Whether the current configuration requires the split shade to be shown. */
-    val isSplitShade: StateFlow<Boolean>
+    val shadeMode: StateFlow<ShadeMode>
 
     /** True when QS is taking up the entire screen, i.e. fully expanded on a non-unfolded phone. */
     @Deprecated("Use ShadeInteractor instead") val legacyQsFullscreen: StateFlow<Boolean>
@@ -109,7 +109,7 @@ interface ShadeRepository {
     /** NPVC.mClosing as a flow. */
     @Deprecated("Use ShadeAnimationInteractor instead") val legacyIsClosing: StateFlow<Boolean>
 
-    fun setSplitShade(isSplitShade: Boolean)
+    fun setShadeMode(mode: ShadeMode)
 
     /** Sets whether a closing animation is happening. */
     @Deprecated("Use ShadeAnimationInteractor instead") fun setLegacyIsClosing(isClosing: Boolean)
@@ -219,11 +219,11 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override val legacyQsFullscreen: StateFlow<Boolean> = _legacyQsFullscreen.asStateFlow()
 
-    val _isSplitShade = MutableStateFlow(false)
-    override val isSplitShade: StateFlow<Boolean> = _isSplitShade.asStateFlow()
+    val _shadeMode = MutableStateFlow<ShadeMode>(ShadeMode.Single)
+    override val shadeMode: StateFlow<ShadeMode> = _shadeMode.asStateFlow()
 
-    override fun setSplitShade(isSplitShade: Boolean) {
-        _isSplitShade.value = isSplitShade
+    override fun setShadeMode(shadeMode: ShadeMode) {
+        _shadeMode.value = shadeMode
     }
 
     override fun setLegacyQsFullscreen(legacyQsFullscreen: Boolean) {

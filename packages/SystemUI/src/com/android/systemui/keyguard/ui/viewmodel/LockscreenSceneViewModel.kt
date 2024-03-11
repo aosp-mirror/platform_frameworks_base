@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -69,8 +70,8 @@ constructor(
 
     /** The key of the scene we should switch to when swiping down from the top edge. */
     val downFromTopEdgeDestinationSceneKey: StateFlow<SceneKey?> =
-        shadeInteractor.isSplitShade
-            .map { isSplitShade -> Scenes.QuickSettings.takeUnless { isSplitShade } }
+        shadeInteractor.shadeMode
+            .map { shadeMode -> Scenes.QuickSettings.takeIf { shadeMode is ShadeMode.Single } }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
