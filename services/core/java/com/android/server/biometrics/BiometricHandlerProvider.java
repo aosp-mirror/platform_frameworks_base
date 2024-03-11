@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics;
 
+import static android.os.Process.THREAD_PRIORITY_DEFAULT;
+import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -27,9 +30,9 @@ public class BiometricHandlerProvider {
     private static final BiometricHandlerProvider sBiometricHandlerProvider =
             new BiometricHandlerProvider();
 
-    private final Handler mBiometricsCallbackHandler;
-    private final Handler mFingerprintHandler;
-    private final Handler mFaceHandler;
+    private Handler mBiometricsCallbackHandler;
+    private Handler mFingerprintHandler;
+    private Handler mFaceHandler;
 
     /**
      * @return an instance of {@link BiometricHandlerProvider} which contains the three
@@ -39,16 +42,16 @@ public class BiometricHandlerProvider {
         return sBiometricHandlerProvider;
     }
 
-    private BiometricHandlerProvider() {
-        mBiometricsCallbackHandler = getNewHandler("BiometricsCallbackHandler");
-        mFingerprintHandler = getNewHandler("FingerprintHandler");
-        mFaceHandler = getNewHandler("FaceHandler");
-    }
+    private BiometricHandlerProvider() {}
 
     /**
     * @return the handler to process all biometric callback operations
     */
     public synchronized Handler getBiometricCallbackHandler() {
+        if (mBiometricsCallbackHandler == null) {
+            mBiometricsCallbackHandler = getNewHandler("BiometricsCallbackHandler",
+                    THREAD_PRIORITY_DISPLAY);
+        }
         return mBiometricsCallbackHandler;
     }
 
@@ -56,6 +59,9 @@ public class BiometricHandlerProvider {
      * @return the handler to process all face related biometric operations
      */
     public synchronized Handler getFaceHandler() {
+        if (mFaceHandler == null) {
+            mFaceHandler = getNewHandler("FaceHandler", THREAD_PRIORITY_DEFAULT);
+        }
         return mFaceHandler;
     }
 
@@ -63,12 +69,15 @@ public class BiometricHandlerProvider {
      * @return the handler to process all fingerprint related biometric operations
      */
     public synchronized Handler getFingerprintHandler() {
+        if (mFingerprintHandler == null) {
+            mFingerprintHandler = getNewHandler("FingerprintHandler", THREAD_PRIORITY_DEFAULT);
+        }
         return mFingerprintHandler;
     }
 
-    private Handler getNewHandler(String tag) {
+    private Handler getNewHandler(String tag, int priority) {
         if (Flags.deHidl()) {
-            HandlerThread handlerThread = new HandlerThread(tag);
+            HandlerThread handlerThread = new HandlerThread(tag, priority);
             handlerThread.start();
             return new Handler(handlerThread.getLooper());
         }
