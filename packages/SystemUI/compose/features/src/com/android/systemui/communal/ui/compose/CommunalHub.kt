@@ -76,7 +76,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -159,7 +158,9 @@ fun CommunalHub(
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
 
-    ScrollOnNewSmartspaceEffect(viewModel, gridState)
+    if (!viewModel.isEditMode) {
+        ScrollOnUpdatedLiveContentEffect(communalContent, gridState)
+    }
 
     Box(
         modifier =
@@ -331,31 +332,33 @@ private fun onMotionEvent(viewModel: BaseCommunalViewModel) {
     viewModel.signalUserInteraction()
 }
 
+/**
+ * Observes communal content and scrolls to any added or updated live content, e.g. a new media
+ * session is started, or a paused timer is resumed.
+ */
 @Composable
-private fun ScrollOnNewSmartspaceEffect(
-    viewModel: BaseCommunalViewModel,
-    gridState: LazyGridState
+private fun ScrollOnUpdatedLiveContentEffect(
+    communalContent: List<CommunalContentModel>,
+    gridState: LazyGridState,
 ) {
-    val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
-    var smartspaceCount by remember { mutableStateOf(0) }
+    val coroutineScope = rememberCoroutineScope()
+    val liveContentKeys = remember { mutableListOf<String>() }
 
     LaunchedEffect(communalContent) {
-        snapshotFlow { gridState.firstVisibleItemIndex }
-            .collect { index ->
-                val existingSmartspaceCount = smartspaceCount
-                smartspaceCount = communalContent.count { it.isSmartspace() }
-                val firstIndex = communalContent.indexOfFirst { it.isSmartspace() }
+        val prevLiveContentKeys = liveContentKeys.toList()
+        liveContentKeys.clear()
+        liveContentKeys.addAll(communalContent.filter { it.isLiveContent() }.map { it.key })
 
-                // Scroll to the beginning of the smartspace area whenever the number of
-                // smartspace elements grows
-                if (
-                    existingSmartspaceCount < smartspaceCount &&
-                        !viewModel.isEditMode &&
-                        index > firstIndex
-                ) {
-                    gridState.animateScrollToItem(firstIndex)
-                }
-            }
+        // Find the first updated content
+        val indexOfFirstUpdatedContent =
+            liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
+
+        // Scroll if current position is behind the first updated content
+        if (indexOfFirstUpdatedContent in 0..<gridState.firstVisibleItemIndex) {
+            // Launching with a scope to prevent the job from being canceled in the case of a
+            // recomposition during scrolling
+            coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
+        }
     }
 }
 
