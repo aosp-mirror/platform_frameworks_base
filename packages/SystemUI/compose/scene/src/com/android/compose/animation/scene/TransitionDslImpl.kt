@@ -31,6 +31,7 @@ import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
+import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
@@ -114,7 +115,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 }
 
-internal open class OverscrollBuilderImpl : OverscrollBuilder {
+internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
     val transformations = mutableListOf<Transformation>()
     private var range: TransformationRange? = null
     protected var reversed = false
@@ -130,7 +131,7 @@ internal open class OverscrollBuilderImpl : OverscrollBuilder {
         range = null
     }
 
-    private fun transformation(transformation: PropertyTransformation<*>) {
+    protected fun transformation(transformation: PropertyTransformation<*>) {
         val transformation =
             if (range != null) {
                 RangedPropertyTransformation(transformation, range!!)
@@ -185,7 +186,7 @@ internal open class OverscrollBuilderImpl : OverscrollBuilder {
     }
 }
 
-internal class TransitionBuilderImpl : OverscrollBuilderImpl(), TransitionBuilder {
+internal class TransitionBuilderImpl : BaseTransitionBuilderImpl(), TransitionBuilder {
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
     override var swipeSpec: SpringSpec<Float>? = null
     override var distance: UserActionDistance? = null
@@ -224,5 +225,15 @@ internal class TransitionBuilderImpl : OverscrollBuilderImpl(), TransitionBuilde
         val start = startMillis?.let { it.toFloat() / durationMillis }
         val end = endMillis?.let { it.toFloat() / durationMillis }
         fractionRange(start, end, builder)
+    }
+}
+
+internal open class OverscrollBuilderImpl : BaseTransitionBuilderImpl(), OverscrollBuilder {
+    override fun translate(
+        matcher: ElementMatcher,
+        x: OverscrollScope.() -> Float,
+        y: OverscrollScope.() -> Float
+    ) {
+        transformation(OverscrollTranslate(matcher, x, y))
     }
 }
