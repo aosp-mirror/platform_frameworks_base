@@ -867,8 +867,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 if (mTransitionDragActive) {
                     // Do not create an indicator at all if we're not past transition height.
-                    if (ev.getRawY() < mContext.getResources().getDimensionPixelSize(com.android
-                            .wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height)
+                    DisplayLayout layout = mDisplayController
+                            .getDisplayLayout(relevantDecor.mTaskInfo.displayId);
+                    if (ev.getRawY() < 2 * layout.stableInsets().top
                             && mMoveToDesktopAnimator == null) {
                         return;
                     }
