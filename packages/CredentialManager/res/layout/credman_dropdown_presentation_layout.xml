@@ -42,8 +42,8 @@
                     android:id="@+id/text_container"
                     android:layout_width="@dimen/autofill_dropdown_textview_max_width"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/autofill_view_left_padding"
-                    android:paddingRight="@dimen/autofill_view_right_padding"
+                    android:paddingStart="@dimen/autofill_view_left_padding"
+                    android:paddingEnd="@dimen/autofill_view_right_padding"
                     android:paddingTop="@dimen/autofill_view_top_padding"
                     android:paddingBottom="@dimen/autofill_view_bottom_padding"
                     android:orientation="vertical">
@@ -52,8 +52,6 @@
                             android:id="@android:id/text1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentTop="true"
-                            android:layout_toEndOf="@android:id/icon1"
                             android:textColor="?androidprv:attr/materialColorOnSurface"
                             style="@style/autofill.TextTitle"/>
 
@@ -61,8 +59,6 @@
                             android:id="@android:id/text2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_below="@android:id/text1"
-                            android:layout_toEndOf="@android:id/icon1"
                             android:textColor="?androidprv:attr/materialColorOnSurfaceVariant"
                             style="@style/autofill.TextSubtitle"/>
 
