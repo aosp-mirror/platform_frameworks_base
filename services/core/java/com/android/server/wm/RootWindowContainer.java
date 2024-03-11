@@ -1452,8 +1452,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
-        if (!mService.mAmInternal.isThemeOverlayReady(userId)) {
-            Slog.d(TAG, "ThemeHomeDelay: Home launch was deferred.");
+        if (mService.mAmInternal.shouldDelayHomeLaunch(userId)) {
+            Slog.d(TAG, "ThemeHomeDelay: Home launch was deferred with user " + userId);
             return false;
         }
 

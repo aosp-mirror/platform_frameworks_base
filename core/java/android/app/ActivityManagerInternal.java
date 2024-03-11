@@ -1236,9 +1236,12 @@ public abstract class ActivityManagerInternal {
             boolean isRestore, IPackageDataObserver observer, int userId);
 
     /**
-     * Returns current state of {@link com.android.systemui.theme.ThemeOverlayController} color
-     * palette readiness.
+     * Method that checks if system is Headless (don't delay launch) case in which it
+     * should also check if ThemeOverlayController is ready (don't delay) or not (delay).
+     *
+     * @param userId
+     * @return Boolean indicating if Home launch should wait for ThemeOverlayController signal
      * @hide
      */
-    public abstract boolean isThemeOverlayReady(int userId);
+    public abstract boolean shouldDelayHomeLaunch(int userId);
 }
