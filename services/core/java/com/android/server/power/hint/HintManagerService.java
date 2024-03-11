@@ -24,6 +24,7 @@ import android.app.ActivityManagerInternal;
 import android.app.StatsManager;
 import android.app.UidObserver;
 import android.content.Context;
+import android.hardware.power.WorkDuration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IHintManager;
@@ -32,7 +33,6 @@ import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.os.WorkDuration;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -198,8 +198,8 @@ public final class HintManagerService extends SystemService {
 
         private static native void nativeSetMode(long halPtr, int mode, boolean enabled);
 
-        private static native void nativeReportActualWorkDuration(long halPtr,
-                                                                  WorkDuration[] workDurations);
+        private static native void nativeReportActualWorkDuration(
+                long halPtr, WorkDuration[] workDurations);
 
         /** Wrapper for HintManager.nativeInit */
         public void halInit() {
@@ -670,46 +670,46 @@ public final class HintManagerService extends SystemService {
 
         void validateWorkDuration(WorkDuration workDuration) {
             if (DEBUG) {
-                Slogf.d(TAG, "WorkDuration(" + workDuration.getTimestampNanos() + ", "
-                        + workDuration.getWorkPeriodStartTimestampNanos() + ", "
-                        + workDuration.getActualTotalDurationNanos() + ", "
-                        + workDuration.getActualCpuDurationNanos() + ", "
-                        + workDuration.getActualGpuDurationNanos() + ")");
+                Slogf.d(TAG, "WorkDuration("
+                        + workDuration.durationNanos + ", "
+                        + workDuration.workPeriodStartTimestampNanos + ", "
+                        + workDuration.cpuDurationNanos + ", "
+                        + workDuration.gpuDurationNanos + ")");
             }
 
             // Allow work period start timestamp to be zero in system server side because
             // legacy API call will use zero value. It can not be estimated with the timestamp
             // the sample is received because the samples could stack up.
-            if (workDuration.getWorkPeriodStartTimestampNanos() < 0) {
+            if (workDuration.durationNanos <= 0) {
+                throw new IllegalArgumentException(
+                    TextUtils.formatSimple("Actual total duration (%d) should be greater than 0",
+                            workDuration.durationNanos));
+            }
+            if (workDuration.workPeriodStartTimestampNanos < 0) {
                 throw new IllegalArgumentException(
                     TextUtils.formatSimple(
                             "Work period start timestamp (%d) should be greater than 0",
-                            workDuration.getWorkPeriodStartTimestampNanos()));
+                            workDuration.workPeriodStartTimestampNanos));
             }
-            if (workDuration.getActualTotalDurationNanos() <= 0) {
-                throw new IllegalArgumentException(
-                    TextUtils.formatSimple("Actual total duration (%d) should be greater than 0",
-                            workDuration.getActualTotalDurationNanos()));
-            }
-            if (workDuration.getActualCpuDurationNanos() < 0) {
+            if (workDuration.cpuDurationNanos < 0) {
                 throw new IllegalArgumentException(
                     TextUtils.formatSimple(
                         "Actual CPU duration (%d) should be greater than or equal to 0",
-                            workDuration.getActualCpuDurationNanos()));
+                            workDuration.cpuDurationNanos));
             }
-            if (workDuration.getActualGpuDurationNanos() < 0) {
+            if (workDuration.gpuDurationNanos < 0) {
                 throw new IllegalArgumentException(
                     TextUtils.formatSimple(
                         "Actual GPU duration (%d) should greater than or equal to 0",
-                            workDuration.getActualGpuDurationNanos()));
+                            workDuration.gpuDurationNanos));
             }
-            if (workDuration.getActualCpuDurationNanos()
-                    + workDuration.getActualGpuDurationNanos() <= 0) {
+            if (workDuration.cpuDurationNanos
+                    + workDuration.gpuDurationNanos <= 0) {
                 throw new IllegalArgumentException(
                     TextUtils.formatSimple(
                         "The actual CPU duration (%d) and the actual GPU duration (%d)"
-                        + " should not both be 0", workDuration.getActualCpuDurationNanos(),
-                        workDuration.getActualGpuDurationNanos()));
+                        + " should not both be 0", workDuration.cpuDurationNanos,
+                        workDuration.gpuDurationNanos));
             }
         }
 
