@@ -24,11 +24,9 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.ScrollCaptureResponse
 import android.view.View
-import android.view.View.OnKeyListener
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
-import android.window.OnBackInvokedCallback
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.flags.FeatureFlags
 
@@ -39,11 +37,8 @@ interface ScreenshotViewProxy {
 
     var defaultDisplay: Int
     var defaultTimeoutMillis: Long
-    var onBackInvokedCallback: OnBackInvokedCallback
-    var onKeyListener: OnKeyListener?
     var flags: FeatureFlags?
     var packageName: String
-    var logger: UiEventLogger?
     var callbacks: ScreenshotView.ScreenshotViewCallback?
     var screenshot: ScreenshotData?
 
@@ -58,7 +53,7 @@ interface ScreenshotViewProxy {
     fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator
     fun addQuickShareChip(quickShareAction: Notification.Action)
     fun setChipIntents(imageData: ScreenshotController.SavedImageData)
-    fun animateDismissal()
+    fun requestDismissal(event: ScreenshotEvent)
 
     fun showScrollChip(packageName: String, onClick: Runnable)
     fun hideScrollChip()
@@ -82,6 +77,6 @@ interface ScreenshotViewProxy {
     fun post(runnable: Runnable)
 
     interface Factory {
-        fun getProxy(context: Context): ScreenshotViewProxy
+        fun getProxy(context: Context, logger: UiEventLogger): ScreenshotViewProxy
     }
 }
