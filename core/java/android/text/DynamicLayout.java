@@ -31,6 +31,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
+import android.os.Trace;
 import android.text.method.OffsetMapping;
 import android.text.style.ReplacementSpan;
 import android.text.style.UpdateLayout;
@@ -636,207 +637,224 @@ public class DynamicLayout extends Layout {
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public void reflow(CharSequence s, int where, int before, int after) {
-        if (s != mBase)
-            return;
-
-        CharSequence text = mDisplay;
-        int len = text.length();
-
-        // seek back to the start of the paragraph
-
-        int find = TextUtils.lastIndexOf(text, '\n', where - 1);
-        if (find < 0)
-            find = 0;
-        else
-            find = find + 1;
-
-        {
-            int diff = where - find;
-            before += diff;
-            after += diff;
-            where -= diff;
+        if (TRACE_LAYOUT) {
+            Trace.beginSection("DynamicLayout#reflow");
         }
-
-        // seek forward to the end of the paragraph
-
-        int look = TextUtils.indexOf(text, '\n', where + after);
-        if (look < 0)
-            look = len;
-        else
-            look++; // we want the index after the \n
-
-        int change = look - (where + after);
-        before += change;
-        after += change;
-
-        // seek further out to cover anything that is forced to wrap together
-
-        if (text instanceof Spanned) {
-            Spanned sp = (Spanned) text;
-            boolean again;
-
-            do {
-                again = false;
-
-                Object[] force = sp.getSpans(where, where + after,
-                                             WrapTogetherSpan.class);
-
-                for (int i = 0; i < force.length; i++) {
-                    int st = sp.getSpanStart(force[i]);
-                    int en = sp.getSpanEnd(force[i]);
-
-                    if (st < where) {
-                        again = true;
-
-                        int diff = where - st;
-                        before += diff;
-                        after += diff;
-                        where -= diff;
-                    }
-
-                    if (en > where + after) {
-                        again = true;
-
-                        int diff = en - (where + after);
-                        before += diff;
-                        after += diff;
-                    }
-                }
-            } while (again);
-        }
-
-        // find affected region of old layout
-
-        int startline = getLineForOffset(where);
-        int startv = getLineTop(startline);
-
-        int endline = getLineForOffset(where + before);
-        if (where + after == len)
-            endline = getLineCount();
-        int endv = getLineTop(endline);
-        boolean islast = (endline == getLineCount());
-
-        // generate new layout for affected text
-
-        StaticLayout reflowed;
-        StaticLayout.Builder b;
-
-        synchronized (sLock) {
-            reflowed = sStaticLayout;
-            b = sBuilder;
-            sStaticLayout = null;
-            sBuilder = null;
-        }
-
-        if (b == null) {
-            b = StaticLayout.Builder.obtain(text, where, where + after, getPaint(), getWidth());
-        }
-
-        b.setText(text, where, where + after)
-                .setPaint(getPaint())
-                .setWidth(getWidth())
-                .setTextDirection(getTextDirectionHeuristic())
-                .setLineSpacing(getSpacingAdd(), getSpacingMultiplier())
-                .setUseLineSpacingFromFallbacks(mFallbackLineSpacing)
-                .setEllipsizedWidth(mEllipsizedWidth)
-                .setEllipsize(mEllipsizeAt)
-                .setBreakStrategy(mBreakStrategy)
-                .setHyphenationFrequency(mHyphenationFrequency)
-                .setJustificationMode(mJustificationMode)
-                .setLineBreakConfig(mLineBreakConfig)
-                .setAddLastLineLineSpacing(!islast)
-                .setIncludePad(false)
-                .setUseBoundsForWidth(mUseBoundsForWidth)
-                .setShiftDrawingOffsetForStartOverhang(mShiftDrawingOffsetForStartOverhang)
-                .setMinimumFontMetrics(mMinimumFontMetrics)
-                .setCalculateBounds(true);
-
-        reflowed = b.buildPartialStaticLayoutForDynamicLayout(true /* trackpadding */, reflowed);
-        int n = reflowed.getLineCount();
-        // If the new layout has a blank line at the end, but it is not
-        // the very end of the buffer, then we already have a line that
-        // starts there, so disregard the blank line.
-
-        if (where + after != len && reflowed.getLineStart(n - 1) == where + after)
-            n--;
-
-        // remove affected lines from old layout
-        mInts.deleteAt(startline, endline - startline);
-        mObjects.deleteAt(startline, endline - startline);
-
-        // adjust offsets in layout for new height and offsets
-
-        int ht = reflowed.getLineTop(n);
-        int toppad = 0, botpad = 0;
-
-        if (mIncludePad && startline == 0) {
-            toppad = reflowed.getTopPadding();
-            mTopPadding = toppad;
-            ht -= toppad;
-        }
-        if (mIncludePad && islast) {
-            botpad = reflowed.getBottomPadding();
-            mBottomPadding = botpad;
-            ht += botpad;
-        }
-
-        mInts.adjustValuesBelow(startline, START, after - before);
-        mInts.adjustValuesBelow(startline, TOP, startv - endv + ht);
-
-        // insert new layout
-
-        int[] ints;
-
-        if (mEllipsize) {
-            ints = new int[COLUMNS_ELLIPSIZE];
-            ints[ELLIPSIS_START] = ELLIPSIS_UNDEFINED;
-        } else {
-            ints = new int[COLUMNS_NORMAL];
-        }
-
-        Directions[] objects = new Directions[1];
-
-        for (int i = 0; i < n; i++) {
-            final int start = reflowed.getLineStart(i);
-            ints[START] = start;
-            ints[DIR] |= reflowed.getParagraphDirection(i) << DIR_SHIFT;
-            ints[TAB] |= reflowed.getLineContainsTab(i) ? TAB_MASK : 0;
-
-            int top = reflowed.getLineTop(i) + startv;
-            if (i > 0)
-                top -= toppad;
-            ints[TOP] = top;
-
-            int desc = reflowed.getLineDescent(i);
-            if (i == n - 1)
-                desc += botpad;
-
-            ints[DESCENT] = desc;
-            ints[EXTRA] = reflowed.getLineExtra(i);
-            objects[0] = reflowed.getLineDirections(i);
-
-            final int end = (i == n - 1) ? where + after : reflowed.getLineStart(i + 1);
-            ints[HYPHEN] = StaticLayout.packHyphenEdit(
-                    reflowed.getStartHyphenEdit(i), reflowed.getEndHyphenEdit(i));
-            ints[MAY_PROTRUDE_FROM_TOP_OR_BOTTOM] |=
-                    contentMayProtrudeFromLineTopOrBottom(text, start, end) ?
-                            MAY_PROTRUDE_FROM_TOP_OR_BOTTOM_MASK : 0;
-
-            if (mEllipsize) {
-                ints[ELLIPSIS_START] = reflowed.getEllipsisStart(i);
-                ints[ELLIPSIS_COUNT] = reflowed.getEllipsisCount(i);
+        try {
+            if (s != mBase) {
+                return;
             }
 
-            mInts.insertAt(startline + i, ints);
-            mObjects.insertAt(startline + i, objects);
-        }
+            CharSequence text = mDisplay;
+            int len = text.length();
 
-        updateBlocks(startline, endline - 1, n);
+            // seek back to the start of the paragraph
 
-        b.finish();
-        synchronized (sLock) {
-            sStaticLayout = reflowed;
-            sBuilder = b;
+            int find = TextUtils.lastIndexOf(text, '\n', where - 1);
+            if (find < 0) {
+                find = 0;
+            } else {
+                find = find + 1;
+            }
+
+            {
+                int diff = where - find;
+                before += diff;
+                after += diff;
+                where -= diff;
+            }
+
+            // seek forward to the end of the paragraph
+
+            int look = TextUtils.indexOf(text, '\n', where + after);
+            if (look < 0) {
+                look = len;
+            } else {
+                look++; // we want the index after the \n
+            }
+
+            int change = look - (where + after);
+            before += change;
+            after += change;
+
+            // seek further out to cover anything that is forced to wrap together
+
+            if (text instanceof Spanned) {
+                Spanned sp = (Spanned) text;
+                boolean again;
+
+                do {
+                    again = false;
+
+                    Object[] force = sp.getSpans(where, where + after,
+                            WrapTogetherSpan.class);
+
+                    for (int i = 0; i < force.length; i++) {
+                        int st = sp.getSpanStart(force[i]);
+                        int en = sp.getSpanEnd(force[i]);
+
+                        if (st < where) {
+                            again = true;
+
+                            int diff = where - st;
+                            before += diff;
+                            after += diff;
+                            where -= diff;
+                        }
+
+                        if (en > where + after) {
+                            again = true;
+
+                            int diff = en - (where + after);
+                            before += diff;
+                            after += diff;
+                        }
+                    }
+                } while (again);
+            }
+
+            // find affected region of old layout
+
+            int startline = getLineForOffset(where);
+            int startv = getLineTop(startline);
+
+            int endline = getLineForOffset(where + before);
+            if (where + after == len) {
+                endline = getLineCount();
+            }
+            int endv = getLineTop(endline);
+            boolean islast = (endline == getLineCount());
+
+            // generate new layout for affected text
+
+            StaticLayout reflowed;
+            StaticLayout.Builder b;
+
+            synchronized (sLock) {
+                reflowed = sStaticLayout;
+                b = sBuilder;
+                sStaticLayout = null;
+                sBuilder = null;
+            }
+
+            if (b == null) {
+                b = StaticLayout.Builder.obtain(text, where, where + after, getPaint(), getWidth());
+            }
+
+            b.setText(text, where, where + after)
+                    .setPaint(getPaint())
+                    .setWidth(getWidth())
+                    .setTextDirection(getTextDirectionHeuristic())
+                    .setLineSpacing(getSpacingAdd(), getSpacingMultiplier())
+                    .setUseLineSpacingFromFallbacks(mFallbackLineSpacing)
+                    .setEllipsizedWidth(mEllipsizedWidth)
+                    .setEllipsize(mEllipsizeAt)
+                    .setBreakStrategy(mBreakStrategy)
+                    .setHyphenationFrequency(mHyphenationFrequency)
+                    .setJustificationMode(mJustificationMode)
+                    .setLineBreakConfig(mLineBreakConfig)
+                    .setAddLastLineLineSpacing(!islast)
+                    .setIncludePad(false)
+                    .setUseBoundsForWidth(mUseBoundsForWidth)
+                    .setShiftDrawingOffsetForStartOverhang(mShiftDrawingOffsetForStartOverhang)
+                    .setMinimumFontMetrics(mMinimumFontMetrics)
+                    .setCalculateBounds(true);
+
+            reflowed = b.buildPartialStaticLayoutForDynamicLayout(true /* trackpadding */,
+                    reflowed);
+            int n = reflowed.getLineCount();
+            // If the new layout has a blank line at the end, but it is not
+            // the very end of the buffer, then we already have a line that
+            // starts there, so disregard the blank line.
+
+            if (where + after != len && reflowed.getLineStart(n - 1) == where + after) {
+                n--;
+            }
+
+            // remove affected lines from old layout
+            mInts.deleteAt(startline, endline - startline);
+            mObjects.deleteAt(startline, endline - startline);
+
+            // adjust offsets in layout for new height and offsets
+
+            int ht = reflowed.getLineTop(n);
+            int toppad = 0, botpad = 0;
+
+            if (mIncludePad && startline == 0) {
+                toppad = reflowed.getTopPadding();
+                mTopPadding = toppad;
+                ht -= toppad;
+            }
+            if (mIncludePad && islast) {
+                botpad = reflowed.getBottomPadding();
+                mBottomPadding = botpad;
+                ht += botpad;
+            }
+
+            mInts.adjustValuesBelow(startline, START, after - before);
+            mInts.adjustValuesBelow(startline, TOP, startv - endv + ht);
+
+            // insert new layout
+
+            int[] ints;
+
+            if (mEllipsize) {
+                ints = new int[COLUMNS_ELLIPSIZE];
+                ints[ELLIPSIS_START] = ELLIPSIS_UNDEFINED;
+            } else {
+                ints = new int[COLUMNS_NORMAL];
+            }
+
+            Directions[] objects = new Directions[1];
+
+            for (int i = 0; i < n; i++) {
+                final int start = reflowed.getLineStart(i);
+                ints[START] = start;
+                ints[DIR] |= reflowed.getParagraphDirection(i) << DIR_SHIFT;
+                ints[TAB] |= reflowed.getLineContainsTab(i) ? TAB_MASK : 0;
+
+                int top = reflowed.getLineTop(i) + startv;
+                if (i > 0) {
+                    top -= toppad;
+                }
+                ints[TOP] = top;
+
+                int desc = reflowed.getLineDescent(i);
+                if (i == n - 1) {
+                    desc += botpad;
+                }
+
+                ints[DESCENT] = desc;
+                ints[EXTRA] = reflowed.getLineExtra(i);
+                objects[0] = reflowed.getLineDirections(i);
+
+                final int end = (i == n - 1) ? where + after : reflowed.getLineStart(i + 1);
+                ints[HYPHEN] = StaticLayout.packHyphenEdit(
+                        reflowed.getStartHyphenEdit(i), reflowed.getEndHyphenEdit(i));
+                ints[MAY_PROTRUDE_FROM_TOP_OR_BOTTOM] |=
+                        contentMayProtrudeFromLineTopOrBottom(text, start, end)
+                                ? MAY_PROTRUDE_FROM_TOP_OR_BOTTOM_MASK : 0;
+
+                if (mEllipsize) {
+                    ints[ELLIPSIS_START] = reflowed.getEllipsisStart(i);
+                    ints[ELLIPSIS_COUNT] = reflowed.getEllipsisCount(i);
+                }
+
+                mInts.insertAt(startline + i, ints);
+                mObjects.insertAt(startline + i, objects);
+            }
+
+            updateBlocks(startline, endline - 1, n);
+
+            b.finish();
+            synchronized (sLock) {
+                sStaticLayout = reflowed;
+                sBuilder = b;
+            }
+        } finally {
+            if (TRACE_LAYOUT) {
+                Trace.endSection();
+            }
         }
     }
 

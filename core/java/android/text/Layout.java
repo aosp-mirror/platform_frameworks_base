@@ -39,6 +39,7 @@ import android.graphics.RectF;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
+import android.os.Trace;
 import android.text.method.TextKeyListener;
 import android.text.style.AlignmentSpan;
 import android.text.style.LeadingMarginSpan;
@@ -70,6 +71,11 @@ import java.util.Locale;
  * For text that will not change, use a {@link StaticLayout}.
  */
 public abstract class Layout {
+
+    /** @hide */
+    protected static final boolean TRACE_LAYOUT = Build.isDebuggable();
+
+
     /** @hide */
     @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
             LineBreaker.BREAK_STRATEGY_SIMPLE,
@@ -472,40 +478,51 @@ public abstract class Layout {
             @Nullable Path selectionPath,
             @Nullable Paint selectionPaint,
             int cursorOffsetVertical) {
-        float leftShift = 0;
-        if (mUseBoundsForWidth && mShiftDrawingOffsetForStartOverhang) {
-            RectF drawingRect = computeDrawingBoundingBox();
-            if (drawingRect.left < 0) {
-                leftShift = -drawingRect.left;
-                canvas.translate(leftShift, 0);
+        if (TRACE_LAYOUT) {
+            Trace.beginSection("Layout#draw");
+        }
+        try {
+            float leftShift = 0;
+            if (mUseBoundsForWidth && mShiftDrawingOffsetForStartOverhang) {
+                RectF drawingRect = computeDrawingBoundingBox();
+                if (drawingRect.left < 0) {
+                    leftShift = -drawingRect.left;
+                    canvas.translate(leftShift, 0);
+                }
             }
-        }
-        final long lineRange = getLineRangeForDraw(canvas);
-        int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
-        int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
-        if (lastLine < 0) return;
+            final long lineRange = getLineRangeForDraw(canvas);
+            int firstLine = TextUtils.unpackRangeStartFromLong(lineRange);
+            int lastLine = TextUtils.unpackRangeEndFromLong(lineRange);
+            if (lastLine < 0) return;
 
-        if (shouldDrawHighlightsOnTop(canvas)) {
-            drawBackground(canvas, firstLine, lastLine);
-        } else {
-            drawWithoutText(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
-                    cursorOffsetVertical, firstLine, lastLine);
-        }
+            if (shouldDrawHighlightsOnTop(canvas)) {
+                drawBackground(canvas, firstLine, lastLine);
+            } else {
+                drawWithoutText(canvas, highlightPaths, highlightPaints, selectionPath,
+                        selectionPaint,
+                        cursorOffsetVertical, firstLine, lastLine);
+            }
 
-        drawText(canvas, firstLine, lastLine);
+            drawText(canvas, firstLine, lastLine);
 
-        // Since high contrast text draws a solid rectangle background behind the text, it covers up
-        // the highlights and selections. In this case we draw over the top of the text with a
-        // blend mode that ensures the text stays high-contrast.
-        if (shouldDrawHighlightsOnTop(canvas)) {
-            drawHighlights(canvas, highlightPaths, highlightPaints, selectionPath, selectionPaint,
-                    cursorOffsetVertical, firstLine, lastLine);
-        }
+            // Since high contrast text draws a solid rectangle background behind the text, it
+            // covers up the highlights and selections. In this case we draw over the top of the
+            // text with a blend mode that ensures the text stays high-contrast.
+            if (shouldDrawHighlightsOnTop(canvas)) {
+                drawHighlights(canvas, highlightPaths, highlightPaints, selectionPath,
+                        selectionPaint,
+                        cursorOffsetVertical, firstLine, lastLine);
+            }
 
-        if (leftShift != 0) {
-            // Manually translate back to the original position because of b/324498002, using
-            // save/restore disappears the toggle switch drawables.
-            canvas.translate(-leftShift, 0);
+            if (leftShift != 0) {
+                // Manually translate back to the original position because of b/324498002, using
+                // save/restore disappears the toggle switch drawables.
+                canvas.translate(-leftShift, 0);
+            }
+        } finally {
+            if (TRACE_LAYOUT) {
+                Trace.endSection();
+            }
         }
     }
 
