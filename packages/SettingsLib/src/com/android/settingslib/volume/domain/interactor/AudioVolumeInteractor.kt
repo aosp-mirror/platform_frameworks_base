@@ -23,6 +23,7 @@ import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -42,6 +43,9 @@ class AudioVolumeInteractor(
         ) { streamModel: AudioStreamModel, ringerMode: RingerMode, isZenMuted: Boolean ->
             streamModel.copy(volume = processVolume(streamModel, ringerMode, isZenMuted))
         }
+
+    val ringerMode: StateFlow<RingerMode>
+        get() = audioRepository.ringerMode
 
     suspend fun setVolume(audioStream: AudioStream, volume: Int) =
         audioRepository.setVolume(audioStream, volume)
