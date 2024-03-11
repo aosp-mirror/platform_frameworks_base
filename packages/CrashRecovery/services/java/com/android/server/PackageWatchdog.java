@@ -38,15 +38,15 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.BackgroundThread;
-import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
+import android.utils.BackgroundThread;
+import android.utils.LongArrayQueue;
+import android.utils.XmlUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
