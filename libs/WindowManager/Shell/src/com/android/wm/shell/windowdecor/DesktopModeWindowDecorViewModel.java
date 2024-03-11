@@ -795,7 +795,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (relevantDecor == null || relevantDecor.checkTouchEventInCaption(ev)) {
             return;
         }
-
+        relevantDecor.updateHoverAndPressStatus(ev);
         final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             if (!mTransitionDragActive) {
@@ -812,34 +812,42 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      */
     private void handleCaptionThroughStatusBar(MotionEvent ev,
             DesktopModeWindowDecoration relevantDecor) {
+        if (relevantDecor == null) {
+            if (ev.getActionMasked() == ACTION_UP) {
+                mMoveToDesktopAnimator = null;
+                mTransitionDragActive = false;
+            }
+            return;
+        }
         switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_HOVER_EXIT:
+            case MotionEvent.ACTION_HOVER_MOVE:
+            case MotionEvent.ACTION_HOVER_ENTER: {
+                relevantDecor.updateHoverAndPressStatus(ev);
+                break;
+            }
             case MotionEvent.ACTION_DOWN: {
                 // Begin drag through status bar if applicable.
-                if (relevantDecor != null) {
-                    mDragToDesktopAnimationStartBounds.set(
-                            relevantDecor.mTaskInfo.configuration.windowConfiguration.getBounds());
-                    boolean dragFromStatusBarAllowed = false;
-                    if (DesktopModeStatus.isEnabled()) {
-                        // In proto2 any full screen or multi-window task can be dragged to
-                        // freeform.
-                        final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
-                        dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN
-                                || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
-                    }
+                relevantDecor.checkTouchEvent(ev);
+                relevantDecor.updateHoverAndPressStatus(ev);
+                mDragToDesktopAnimationStartBounds.set(
+                        relevantDecor.mTaskInfo.configuration.windowConfiguration.getBounds());
+                boolean dragFromStatusBarAllowed = false;
+                if (DesktopModeStatus.isEnabled()) {
+                    // In proto2 any full screen or multi-window task can be dragged to
+                    // freeform.
+                    final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
+                    dragFromStatusBarAllowed = windowingMode == WINDOWING_MODE_FULLSCREEN
+                            || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
+                }
 
-                    if (dragFromStatusBarAllowed
-                            && relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)) {
-                        mTransitionDragActive = true;
-                    }
+                if (dragFromStatusBarAllowed
+                        && relevantDecor.checkTouchEventInFocusedCaptionHandle(ev)) {
+                    mTransitionDragActive = true;
                 }
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                if (relevantDecor == null) {
-                    mMoveToDesktopAnimator = null;
-                    mTransitionDragActive = false;
-                    return;
-                }
                 if (mTransitionDragActive) {
                     final DesktopModeVisualIndicator.IndicatorType indicatorType =
                             mDesktopTasksController.updateVisualIndicator(relevantDecor.mTaskInfo,
@@ -854,6 +862,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mMoveToDesktopAnimator = null;
                         return;
                     } else if (mMoveToDesktopAnimator != null) {
+                        // Though this isn't a hover event, we need to update handle's hover state
+                        // as it likely will change.
+                        relevantDecor.updateHoverAndPressStatus(ev);
                         mDesktopTasksController.onDragPositioningEndThroughStatusBar(
                                 new PointF(ev.getRawX(), ev.getRawY()),
                                 relevantDecor.mTaskInfo,
@@ -866,7 +877,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mDesktopTasksController.releaseVisualIndicator();
                     }
                 }
-                relevantDecor.checkClickEvent(ev);
+                relevantDecor.checkTouchEvent(ev);
                 break;
             }
 
