@@ -92,7 +92,7 @@ constructor(
             when {
                 useWeatherClockLayout && useSplitShade -> SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
                 useWeatherClockLayout -> WEATHER_CLOCK_BLUEPRINT_ID
-                useSplitShade -> SplitShadeKeyguardBlueprint.ID
+                useSplitShade && !ComposeLockscreen.isEnabled -> SplitShadeKeyguardBlueprint.ID
                 else -> DefaultKeyguardBlueprint.DEFAULT
             }
 

@@ -17,6 +17,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
@@ -76,6 +78,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testAppliesSplitShadeBlueprint() {
         testScope.runTest {
             val blueprint by collectLastValue(underTest.blueprint)
@@ -88,6 +91,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun fingerprintPropertyInitialized_updatesBlueprint() {
         testScope.runTest {
             val blueprint by collectLastValue(underTest.blueprint)
@@ -99,9 +103,9 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun composeLockscreenOff_DoesAppliesSplitShadeWeatherClockBlueprint() {
         testScope.runTest {
-            mSetFlagsRule.disableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
             val blueprint by collectLastValue(underTest.blueprint)
             whenever(clockController.config)
                 .thenReturn(
@@ -121,9 +125,9 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testDoesAppliesSplitShadeWeatherClockBlueprint() {
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
             val blueprint by collectLastValue(underTest.blueprint)
             whenever(clockController.config)
                 .thenReturn(
@@ -143,9 +147,9 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun testAppliesWeatherClockBlueprint() {
         testScope.runTest {
-            mSetFlagsRule.enableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
             val blueprint by collectLastValue(underTest.blueprint)
             whenever(clockController.config)
                 .thenReturn(
@@ -161,6 +165,20 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(blueprint?.id).isEqualTo(WEATHER_CLOCK_BLUEPRINT_ID)
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+    fun testDoesNotApplySplitShadeBlueprint() {
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            val blueprint by collectLastValue(underTest.blueprint)
+            clockRepository.setCurrentClock(clockController)
+            configurationRepository.onConfigurationChange()
+            runCurrent()
+
+            assertThat(blueprint?.id).isEqualTo(DefaultKeyguardBlueprint.DEFAULT)
         }
     }
 }

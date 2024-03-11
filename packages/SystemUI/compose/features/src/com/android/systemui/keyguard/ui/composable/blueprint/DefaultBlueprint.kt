@@ -22,18 +22,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntRect
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
-import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
-import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
-import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
+import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import dagger.Binds
 import dagger.Module
@@ -50,13 +47,11 @@ class DefaultBlueprint
 constructor(
     private val viewModel: LockscreenContentViewModel,
     private val statusBarSection: StatusBarSection,
-    private val clockSection: DefaultClockSection,
-    private val notificationSection: NotificationSection,
     private val lockSection: LockSection,
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
-    private val mediaCarouselSection: MediaCarouselSection,
+    private val topAreaSection: TopAreaSection,
 ) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "default"
@@ -64,7 +59,6 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
-        val resources = LocalContext.current.resources
 
         LockscreenLongPress(
             viewModel = viewModel.longPress,
@@ -77,17 +71,7 @@ constructor(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
-                        with(clockSection) { DefaultClockLayout() }
-                        with(mediaCarouselSection) { MediaCarousel() }
-
-                        if (viewModel.areNotificationsVisible(resources = resources)) {
-                            with(notificationSection) {
-                                Notifications(
-                                    modifier = Modifier.fillMaxWidth().weight(weight = 1f)
-                                )
-                            }
-                        }
-
+                        with(topAreaSection) { DefaultClockLayoutWithNotifications() }
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
                             with(ambientIndicationSectionOptional.get()) {
                                 AmbientIndication(modifier = Modifier.fillMaxWidth())

@@ -26,7 +26,8 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -47,7 +48,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
     fun setup() {
         with(kosmos) {
             fakeFeatureFlagsClassic.set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, true)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
+            shadeRepository.setShadeMode(ShadeMode.Single)
             underTest = lockscreenContentViewModel
         }
     }
@@ -92,10 +93,10 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
     fun areNotificationsVisible_splitShadeTrue_true() =
         with(kosmos) {
             testScope.runTest {
-                overrideResource(R.bool.config_use_split_notification_shade, true)
+                shadeRepository.setShadeMode(ShadeMode.Split)
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
 
-                assertThat(underTest.areNotificationsVisible(context.resources)).isTrue()
+                assertThat(underTest.areNotificationsVisible).isTrue()
             }
         }
     @Test
@@ -103,7 +104,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.SMALL)
-                assertThat(underTest.areNotificationsVisible(context.resources)).isTrue()
+                assertThat(underTest.areNotificationsVisible).isTrue()
             }
         }
 
@@ -112,7 +113,34 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         with(kosmos) {
             testScope.runTest {
                 kosmos.fakeKeyguardClockRepository.setClockSize(KeyguardClockSwitch.LARGE)
-                assertThat(underTest.areNotificationsVisible(context.resources)).isFalse()
+                assertThat(underTest.areNotificationsVisible).isFalse()
+            }
+        }
+
+    @Test
+    fun shouldUseSplitNotificationShade_withConfigTrue_true() =
+        with(kosmos) {
+            testScope.runTest {
+                shadeRepository.setShadeMode(ShadeMode.Split)
+                assertThat(underTest.shouldUseSplitNotificationShade).isTrue()
+            }
+        }
+
+    @Test
+    fun shouldUseSplitNotificationShade_withConfigFalse_false() =
+        with(kosmos) {
+            testScope.runTest {
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                assertThat(underTest.shouldUseSplitNotificationShade).isFalse()
+            }
+        }
+
+    @Test
+    fun sceneKey() =
+        with(kosmos) {
+            testScope.runTest {
+                shadeRepository.setShadeMode(ShadeMode.Single)
+                assertThat(underTest.shouldUseSplitNotificationShade).isFalse()
             }
         }
 }
