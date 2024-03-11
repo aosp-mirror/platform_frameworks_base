@@ -35,6 +35,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Insets;
@@ -136,6 +138,8 @@ public class MenuViewLayerTest extends SysuiTestCase {
     private WindowManager mStubWindowManager;
     @Mock
     private AccessibilityManager mStubAccessibilityManager;
+    @Mock
+    private PackageManager mMockPackageManager;
     private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings();
 
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
@@ -162,13 +166,14 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 new MenuView(mSpyContext, mMenuViewModel, menuViewAppearance, mSecureSettings));
         // Ensure tests don't actually update metrics.
         doNothing().when(mMenuView).incrementTexMetric(any(), anyInt());
-        doNothing().when(mMenuView).gotoEditScreen();
 
         mMenuViewLayer = spy(new MenuViewLayer(mSpyContext, mStubWindowManager,
                 mStubAccessibilityManager, mMenuViewModel, menuViewAppearance, mMenuView,
                 mFloatingMenu, mSecureSettings));
-        mMenuView = (MenuView) mMenuViewLayer.getChildAt(LayerIndex.MENU_VIEW);
         mMenuAnimationController = mMenuView.getMenuAnimationController();
+
+        doNothing().when(mSpyContext).startActivity(any());
+        when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
 
         mLastAccessibilityButtonTargets =
                 Settings.Secure.getStringForUser(mSpyContext.getContentResolver(),
@@ -277,9 +282,31 @@ public class MenuViewLayerTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
-    public void onEditAction_gotoEditScreen_isCalled() {
+    public void onEditAction_startsActivity() {
+        mockActivityQuery(true);
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_edit);
-        verify(mMenuView).gotoEditScreen();
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mSpyContext).startActivity(intentCaptor.capture());
+        assertThat(intentCaptor.getValue().getAction()).isEqualTo(
+                mMenuViewLayer.getIntentForEditScreen().getAction());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
+    public void onEditAction_noResolve_doesNotStart() {
+        mockActivityQuery(false);
+        mMenuViewLayer.dispatchAccessibilityAction(R.id.action_edit);
+        verify(mSpyContext, never()).startActivity(any());
+    }
+
+    @Test
+    public void getIntentForEditScreen_validate() {
+        Intent intent = mMenuViewLayer.getIntentForEditScreen();
+        String[] targets = intent.getBundleExtra(
+                ":settings:show_fragment_args").getStringArray("targets");
+
+        assertThat(intent.getAction()).isEqualTo(Settings.ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS);
+        assertThat(targets).asList().containsExactlyElementsIn(TestUtils.TEST_BUTTON_TARGETS);
     }
 
     @Test
@@ -527,4 +554,15 @@ public class MenuViewLayerTest extends SysuiTestCase {
         magnetListener.onReleasedInTarget(
                 new MagnetizedObject.MagneticTarget(view, 200), mock(MagnetizedObject.class));
     }
+
+    private void mockActivityQuery(boolean successfulQuery) {
+        // Query just needs to return a non-empty set to be successful.
+        ArrayList<ResolveInfo> resolveInfos = new ArrayList<>();
+        if (successfulQuery) {
+            resolveInfos.add(new ResolveInfo());
+        }
+        when(mMockPackageManager.queryIntentActivities(
+                any(), any(PackageManager.ResolveInfoFlags.class))).thenReturn(resolveInfos);
+    }
+
 }
