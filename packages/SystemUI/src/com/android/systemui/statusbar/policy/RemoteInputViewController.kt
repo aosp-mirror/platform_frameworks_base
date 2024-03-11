@@ -32,7 +32,6 @@ import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.NOTIFICATION_INLINE_REPLY_ANIMATION
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -63,8 +62,6 @@ interface RemoteInputViewController {
     var remoteInputs: Array<RemoteInput>?
 
     var revealParams: RevealParams?
-
-    val isFocusAnimationFlagActive: Boolean
 
     /**
      * Sets the smart reply that should be inserted in the remote input, or `null` if the user is
@@ -155,9 +152,6 @@ class RemoteInputViewControllerImpl @Inject constructor(
 
     override val isActive: Boolean get() = view.isActive
 
-    override val isFocusAnimationFlagActive: Boolean
-        get() = mFlags.isEnabled(NOTIFICATION_INLINE_REPLY_ANIMATION)
-
     override fun bind() {
         if (isBound) return
         isBound = true
@@ -168,7 +162,6 @@ class RemoteInputViewControllerImpl @Inject constructor(
             view.setSupportedMimeTypes(it.allowedDataTypes)
         }
         view.setRevealParameters(revealParams)
-        view.setIsFocusAnimationFlagActive(isFocusAnimationFlagActive)
 
         view.addOnEditTextFocusChangedListener(onFocusChangeListener)
         view.addOnSendRemoteInputListener(onSendRemoteInputListener)

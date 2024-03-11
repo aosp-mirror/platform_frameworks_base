@@ -165,8 +165,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // TODO: Ideally we wouldn't need to set these unless a test actually reads them,
         //  and then we would test both configurations, but currently they are all read
         //  in the constructor.
-        mFeatureFlags.setDefault(Flags.SENSITIVE_REVEAL_ANIM);
-        mFeatureFlags.setDefault(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION);
         mFeatureFlags.setDefault(Flags.UNCLEARED_TRANSIENT_HUN_FIX);
 

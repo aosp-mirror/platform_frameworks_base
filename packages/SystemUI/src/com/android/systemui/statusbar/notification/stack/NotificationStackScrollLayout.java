@@ -87,7 +87,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.flags.RefactorFlag;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.res.R;
@@ -197,8 +196,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private Set<Integer> mDebugTextUsedYPositions;
     private final boolean mDebugRemoveAnimation;
-    private final boolean mSensitiveRevealAnimEndabled;
-    private final RefactorFlag mAnimatedInsets;
     private int mContentHeight;
     private float mIntrinsicContentHeight;
     private int mPaddingBetweenElements;
@@ -619,9 +616,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 Flags.LOCKSCREEN_ENABLE_LANDSCAPE);
         mDebugLines = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
-        mSensitiveRevealAnimEndabled = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
-        mAnimatedInsets =
-                new RefactorFlag(mFeatureFlags, Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
         mScreenOffAnimationController =
                 Dependency.get(ScreenOffAnimationController.class);
@@ -656,9 +650,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mGroupMembershipManager = Dependency.get(GroupMembershipManager.class);
         mGroupExpansionManager = Dependency.get(GroupExpansionManager.class);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-        if (mAnimatedInsets.isEnabled()) {
-            setWindowInsetsAnimationCallback(mInsetsCallback);
-        }
+        setWindowInsetsAnimationCallback(mInsetsCallback);
     }
 
     /**
@@ -1734,11 +1726,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         mForcedScroll = v;
-        if (mAnimatedInsets.isEnabled()) {
-            updateForcedScroll();
-        } else {
-            scrollTo(v);
-        }
+        updateForcedScroll();
     }
 
     public boolean scrollTo(View v) {
@@ -1783,30 +1771,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        if (!mAnimatedInsets.isEnabled()) {
-            mBottomInset = insets.getInsets(WindowInsets.Type.ime()).bottom;
-        }
         mWaterfallTopInset = 0;
         final DisplayCutout cutout = insets.getDisplayCutout();
         if (cutout != null) {
             mWaterfallTopInset = cutout.getWaterfallInsets().top;
         }
-        if (mAnimatedInsets.isEnabled() && !mIsInsetAnimationRunning) {
+        if (!mIsInsetAnimationRunning) {
             // update bottom inset e.g. after rotation
             updateBottomInset(insets);
-        }
-        if (!mAnimatedInsets.isEnabled()) {
-            int range = getScrollRange();
-            if (mOwnScrollY > range) {
-                // HACK: We're repeatedly getting staggered insets here while the IME is
-                // animating away. To work around that we'll wait until things have settled.
-                removeCallbacks(mReclamp);
-                postDelayed(mReclamp, 50);
-            } else if (mForcedScroll != null) {
-                // The scroll was requested before we got the actual inset - in case we need
-                // to scroll up some more do so now.
-                scrollTo(mForcedScroll);
-            }
         }
         return insets;
     }
@@ -2576,7 +2548,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         child.setOnHeightChangedListener(null);
-        if (child instanceof ExpandableNotificationRow && mSensitiveRevealAnimEndabled) {
+        if (child instanceof ExpandableNotificationRow) {
             NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
             entry.removeOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
         }
@@ -2872,7 +2844,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void onViewAddedInternal(ExpandableView child) {
         updateHideSensitiveForChild(child);
         child.setOnHeightChangedListener(mOnChildHeightChangedListener);
-        if (child instanceof ExpandableNotificationRow && mSensitiveRevealAnimEndabled) {
+        if (child instanceof ExpandableNotificationRow) {
             NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
             entry.addOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
         }
