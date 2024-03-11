@@ -153,7 +153,8 @@ public class UsageStatsService extends SystemService implements
             = SystemProperties.getBoolean("persist.debug.time_correction", true);
 
     private static final boolean USE_DEDICATED_HANDLER_THREAD =
-            SystemProperties.getBoolean("persist.debug.use_dedicated_handler_thread", false);
+            SystemProperties.getBoolean("persist.debug.use_dedicated_handler_thread",
+            Flags.useDedicatedHandlerThread());
 
     static final boolean DEBUG = false; // Never submit with true
     static final boolean DEBUG_RESPONSE_STATS = DEBUG || Log.isLoggable(TAG, Log.DEBUG);
