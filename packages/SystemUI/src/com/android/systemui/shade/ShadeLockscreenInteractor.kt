@@ -27,9 +27,6 @@ interface ShadeLockscreenInteractor {
      */
     @Deprecated("Use ShadeInteractor instead") fun expandToNotifications()
 
-    /** Returns whether the shade is expanding or collapsing itself or quick settings. */
-    val isExpandingOrCollapsing: Boolean
-
     /**
      * Returns whether the shade height is greater than zero (i.e. partially or fully expanded),
      * there is a HUN, the shade is animating, or the shade is instantly expanding.
