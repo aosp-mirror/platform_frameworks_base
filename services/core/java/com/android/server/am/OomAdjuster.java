@@ -1051,7 +1051,7 @@ public class OomAdjuster {
 
         assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
 
-        postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime);
+        postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime, true);
 
         if (startProfiling) {
             mService.mOomAdjProfiler.oomAdjEnded();
@@ -1073,12 +1073,12 @@ public class OomAdjuster {
 
     @GuardedBy({"mService", "mProcLock"})
     protected void postUpdateOomAdjInnerLSP(@OomAdjReason int oomAdjReason, ActiveUids activeUids,
-            long now, long nowElapsed, long oldTime) {
+            long now, long nowElapsed, long oldTime, boolean doingAll) {
         mNumNonCachedProcs = 0;
         mNumCachedHiddenProcs = 0;
 
         final boolean allChanged = updateAndTrimProcessLSP(now, nowElapsed, oldTime, activeUids,
-                oomAdjReason);
+                oomAdjReason, doingAll);
         mNumServiceProcs = mNewNumServiceProcs;
 
         if (mService.mAlwaysFinishActivities) {
@@ -1288,7 +1288,8 @@ public class OomAdjuster {
 
     @GuardedBy({"mService", "mProcLock"})
     private boolean updateAndTrimProcessLSP(final long now, final long nowElapsed,
-            final long oldTime, final ActiveUids activeUids, @OomAdjReason int oomAdjReason) {
+            final long oldTime, final ActiveUids activeUids, @OomAdjReason int oomAdjReason,
+            boolean doingAll) {
         ArrayList<ProcessRecord> lruList = mProcessList.getLruProcessesLOSP();
         final int numLru = lruList.size();
 
@@ -1321,7 +1322,7 @@ public class OomAdjuster {
             if (!app.isKilledByAm() && app.getThread() != null) {
                 // We don't need to apply the update for the process which didn't get computed
                 if (state.getCompletedAdjSeq() == mAdjSeq) {
-                    applyOomAdjLSP(app, true, now, nowElapsed, oomAdjReason);
+                    applyOomAdjLSP(app, doingAll, now, nowElapsed, oomAdjReason);
                 }
 
                 if (app.isPendingFinishAttach()) {
