@@ -36,6 +36,7 @@ import java.io.OutputStream
 import java.util.zip.CRC32
 import java.util.zip.CheckedInputStream
 import java.util.zip.CheckedOutputStream
+import java.util.zip.Checksum
 
 internal const val LOG_TAG = "BackupRestoreStorage"
 
@@ -54,15 +55,6 @@ abstract class BackupRestoreStorage : BackupHelper {
      */
     abstract val name: String
 
-    private val entities: List<BackupRestoreEntity> by lazy { createBackupRestoreEntities() }
-
-    /**
-     * Checksum of the data.
-     *
-     * Always call [java.util.zip.Checksum.reset] before using it.
-     */
-    protected val checksum = CRC32()
-
     /**
      * Entity states represented by checksum.
      *
@@ -70,13 +62,16 @@ abstract class BackupRestoreStorage : BackupHelper {
      */
     protected val entityStates = MutableScatterMap<String, Long>()
 
+    /** Entities created by [createBackupRestoreEntities]. This field is for restore only. */
+    private var entities: List<BackupRestoreEntity>? = null
+
     /** Entities to back up and restore. */
     abstract fun createBackupRestoreEntities(): List<BackupRestoreEntity>
 
     /** Default codec used to encode/decode the entity data. */
     open fun defaultCodec(): BackupCodec = BackupZipCodec.BEST_COMPRESSION
 
-    override fun performBackup(
+    final override fun performBackup(
         oldState: ParcelFileDescriptor?,
         data: BackupDataOutput,
         newState: ParcelFileDescriptor,
@@ -88,6 +83,9 @@ abstract class BackupRestoreStorage : BackupHelper {
             return
         }
         Log.i(LOG_TAG, "[$name] Backup start")
+        val checksum = createChecksum()
+        // recreate entities for backup to avoid stale states
+        val entities = createBackupRestoreEntities()
         for (entity in entities) {
             val key = entity.key
             val outputStream = ByteArrayOutputStream()
@@ -103,7 +101,8 @@ abstract class BackupRestoreStorage : BackupHelper {
                 }
             when (result) {
                 EntityBackupResult.UPDATE -> {
-                    if (updateEntityState(key)) {
+                    val value = checksum.value
+                    if (entityStates.put(key, value) != value) {
                         val payload = outputStream.toByteArray()
                         val size = payload.size
                         data.writeEntityHeader(key, size)
@@ -126,13 +125,8 @@ abstract class BackupRestoreStorage : BackupHelper {
                 }
             }
         }
-        newState.writeEntityStates(entityStates)
+        newState.writeAndClearEntityStates()
         Log.i(LOG_TAG, "[$name] Backup end")
-    }
-
-    private fun updateEntityState(key: String): Boolean {
-        val value = checksum.value
-        return entityStates.put(key, value) != value
     }
 
     /** Returns if backup is enabled. */
@@ -144,13 +138,14 @@ abstract class BackupRestoreStorage : BackupHelper {
         return codec.encode(outputStream)
     }
 
+    /** This callback is invoked for every backed up entity. */
     override fun restoreEntity(data: BackupDataInputStream) {
         val key = data.key
         if (!enableRestore()) {
             Log.i(LOG_TAG, "[$name] Restore disabled, ignore entity $key")
             return
         }
-        val entity = entities.firstOrNull { it.key == key }
+        val entity = ensureEntities().firstOrNull { it.key == key }
         if (entity == null) {
             Log.w(LOG_TAG, "[$name] Cannot find handler for entity $key")
             return
@@ -159,7 +154,7 @@ abstract class BackupRestoreStorage : BackupHelper {
         val restoreContext = RestoreContext(key)
         val codec = entity.codec() ?: defaultCodec()
         val inputStream = LimitedNoCloseInputStream(data)
-        checksum.reset()
+        val checksum = createChecksum()
         val checkedInputStream = CheckedInputStream(inputStream, checksum)
         try {
             entity.restore(restoreContext, wrapRestoreInputStream(codec, checkedInputStream))
@@ -168,6 +163,9 @@ abstract class BackupRestoreStorage : BackupHelper {
             Log.e(LOG_TAG, "[$name] Fail to restore entity $key", exception)
         }
     }
+
+    private fun ensureEntities(): List<BackupRestoreEntity> =
+        entities ?: createBackupRestoreEntities().also { entities = it }
 
     /** Returns if restore is enabled. */
     open fun enableRestore(): Boolean = true
@@ -185,7 +183,8 @@ abstract class BackupRestoreStorage : BackupHelper {
     }
 
     final override fun writeNewStateDescription(newState: ParcelFileDescriptor) {
-        newState.writeEntityStates(entityStates)
+        entities = null // clear to reduce memory footprint
+        newState.writeAndClearEntityStates()
         onRestoreFinished()
     }
 
@@ -223,24 +222,29 @@ abstract class BackupRestoreStorage : BackupHelper {
         }
     }
 
-    private fun ParcelFileDescriptor.writeEntityStates(state: MutableScatterMap<String, Long>) {
+    private fun ParcelFileDescriptor.writeAndClearEntityStates() {
         // do not close the streams
         val fileOutputStream = FileOutputStream(fileDescriptor)
         val dataOutputStream = DataOutputStream(fileOutputStream)
         try {
             dataOutputStream.writeByte(STATE_VERSION.toInt())
-            dataOutputStream.writeInt(state.size)
-            state.forEach { key, value ->
+            dataOutputStream.writeInt(entityStates.size)
+            entityStates.forEach { key, value ->
                 dataOutputStream.writeUTF(key)
                 dataOutputStream.writeLong(value)
             }
         } catch (exception: Exception) {
             Log.e(LOG_TAG, "[$name] Fail to write state file", exception)
         }
+        entityStates.clear()
+        entityStates.trim() // trim to reduce memory footprint
     }
 
     companion object {
         private const val STATE_VERSION: Byte = 0
+
+        /** Checksum for entity backup data. */
+        fun createChecksum(): Checksum = CRC32()
     }
 }
 
