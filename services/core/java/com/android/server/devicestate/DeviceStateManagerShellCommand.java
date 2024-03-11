@@ -25,7 +25,7 @@ import android.os.Binder;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -177,18 +177,17 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
     }
 
     private int runPrintStates(PrintWriter pw) {
-        List<DeviceState> states = mService.getSupportedStates();
+        DeviceState[] states = mService.getSupportedStates();
         pw.print("Supported states: [\n");
-        for (int i = 0; i < states.size(); i++) {
-            pw.print("  " + states.get(i) + ",\n");
+        for (int i = 0; i < states.length; i++) {
+            pw.print("  " + states[i] + ",\n");
         }
         pw.println("]");
         return 0;
     }
 
     private int runPrintStatesSimple(PrintWriter pw) {
-        pw.print(mService.getSupportedStates()
-                .stream()
+        pw.print(Arrays.stream(mService.getSupportedStates())
                 .map(DeviceState::getIdentifier)
                 .map(Object::toString)
                 .collect(Collectors.joining(",")));
