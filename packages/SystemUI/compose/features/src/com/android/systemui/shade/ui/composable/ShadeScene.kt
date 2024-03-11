@@ -373,7 +373,6 @@ private fun SceneScope.MediaIfVisible(
 ) {
     if (viewModel.isMediaVisible()) {
         val density = LocalDensity.current
-        val layoutWidth = remember { mutableStateOf(0) }
         val mediaHeight = dimensionResource(R.dimen.qs_media_session_height_expanded)
 
         MediaCarousel(
@@ -389,7 +388,7 @@ private fun SceneScope.MediaIfVisible(
                     layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
                 },
             mediaHost = mediaHost,
-            layoutWidth = layoutWidth.value,
+            layoutWidth = 0,
             layoutHeight = with(density) { mediaHeight.toPx() }.toInt(),
             carouselController = mediaCarouselController,
         )
