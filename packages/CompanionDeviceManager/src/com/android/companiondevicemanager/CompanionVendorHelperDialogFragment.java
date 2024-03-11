@@ -26,6 +26,7 @@ import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 
 import android.annotation.Nullable;
 import android.companion.AssociationRequest;
+import android.companion.virtual.flags.Flags;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -129,7 +130,9 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
             case DEVICE_PROFILE_APP_STREAMING:
                 title = getHtmlFromResources(getContext(), R.string.helper_title_app_streaming);
                 summary = getHtmlFromResources(
-                        getContext(), R.string.helper_summary_app_streaming, title, displayName);
+                        getContext(), Flags.interactiveScreenMirror()
+                                ? R.string.helper_summary_app_streaming_with_mirroring
+                                : R.string.helper_summary_app_streaming, title, displayName);
                 break;
 
             case DEVICE_PROFILE_COMPUTER:
