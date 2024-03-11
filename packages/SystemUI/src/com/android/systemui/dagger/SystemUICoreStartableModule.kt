@@ -24,6 +24,7 @@ import com.android.systemui.accessibility.Magnification
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
+import com.android.systemui.communal.CommunalDreamStartable
 import com.android.systemui.communal.CommunalSceneStartable
 import com.android.systemui.communal.log.CommunalLoggerStartable
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostStartable
@@ -325,6 +326,11 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(CommunalSceneStartable::class)
     abstract fun bindCommunalSceneStartable(impl: CommunalSceneStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(CommunalDreamStartable::class)
+    abstract fun bindCommunalDreamStartable(impl: CommunalDreamStartable): CoreStartable
 
     @Binds
     @IntoMap

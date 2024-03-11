@@ -185,6 +185,22 @@ public class DreamManager {
     }
 
     /**
+     * Whether dreaming can start given user settings and the current dock/charge state.
+     *
+     * @hide
+     */
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE)
+    public boolean canStartDreaming(boolean isScreenOn) {
+        try {
+            return mService.canStartDreaming(isScreenOn);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
+    }
+
+    /**
      * Returns whether the device is Dreaming.
      *
      * <p> This is only used for testing the dream service APIs.
