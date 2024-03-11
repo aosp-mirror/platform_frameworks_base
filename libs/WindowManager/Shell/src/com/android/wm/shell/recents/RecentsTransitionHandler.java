@@ -544,7 +544,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     apps.add(target);
                 } else {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                            "  unhandled change taskId=%d", taskInfo.taskId);
+                            "  unhandled change taskId=%d",
+                            taskInfo != null ? taskInfo.taskId : -1);
                 }
             }
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
