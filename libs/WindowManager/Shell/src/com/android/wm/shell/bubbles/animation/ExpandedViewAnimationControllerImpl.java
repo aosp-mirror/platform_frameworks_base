@@ -28,6 +28,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PointF;
 import android.view.HapticFeedbackConstants;
 import android.view.ViewConfiguration;
 
@@ -187,9 +188,11 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
     }
 
     @Override
-    public void animateCollapse(Runnable startStackCollapse, Runnable after) {
-        ProtoLog.d(WM_SHELL_BUBBLES, "expandedView animate collapse swipeVel=%f minFlingVel=%d",
-                mSwipeUpVelocity,  mMinFlingVelocity);
+    public void animateCollapse(Runnable startStackCollapse, Runnable after,
+            PointF collapsePosition) {
+        ProtoLog.d(WM_SHELL_BUBBLES, "expandedView animate collapse swipeVel=%f minFlingVel=%d"
+                        + " collapsePosition=%f,%f", mSwipeUpVelocity, mMinFlingVelocity,
+                collapsePosition.x, collapsePosition.y);
         if (mExpandedView != null) {
             // Mark it as animating immediately to avoid updates to the view before animation starts
             mExpandedView.setAnimating(true);
@@ -271,6 +274,17 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
             });
             mBottomClipAnim.start();
         }
+    }
+
+    @Override
+    public boolean shouldAnimateExpansion() {
+        return false;
+    }
+
+    @Override
+    public void animateExpansion(long startDelayMillis, Runnable after, PointF collapsePosition,
+            PointF bubblePosition) {
+        // TODO - animate
     }
 
     @Override
