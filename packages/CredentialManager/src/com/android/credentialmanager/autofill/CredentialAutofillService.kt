@@ -574,7 +574,7 @@ class CredentialAutofillService : AutofillService() {
     ) {
         viewNode.autofillId?.let {
             val domain = viewNode.webDomain
-            val request = viewNode.credentialManagerRequest
+            val request = viewNode.pendingCredentialRequest
             if (domain != null && request != null) {
                 responseClientState.putBoolean(
                     WEBVIEW_REQUESTED_CREDENTIAL_KEY, true)
@@ -604,8 +604,8 @@ class CredentialAutofillService : AutofillService() {
             sessionId: Int
     ): MutableList<CredentialOption> {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
-        if (Flags.autofillCredmanDevIntegration() && viewNode.credentialManagerRequest != null) {
-            viewNode.credentialManagerRequest
+        if (Flags.autofillCredmanDevIntegration() && viewNode.pendingCredentialRequest != null) {
+            viewNode.pendingCredentialRequest
                     ?.getCredentialOptions()
                     ?.forEach { credentialOption ->
                 credentialOption.candidateQueryData
