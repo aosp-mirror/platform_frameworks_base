@@ -32,11 +32,14 @@ fun Request.Get.toGet(isPrimary: Boolean): CredentialSelectorUiState.Get {
     return if (isPrimary) {
         if (accounts.size == 1) {
             CredentialSelectorUiState.Get.SingleEntry(
-                accounts[0].value.minWith(comparator)
+                entry = accounts[0].value.minWith(comparator)
             )
         } else {
             CredentialSelectorUiState.Get.SingleEntryPerAccount(
-                accounts.map { it.value.minWith(comparator) }.sortedWith(comparator)
+                sortedEntries = accounts.map {
+                    it.value.minWith(comparator)
+                }.sortedWith(comparator),
+                authenticationEntryList = providerInfos.flatMap { it.authenticationEntryList }
             )
         }
     } else {
