@@ -23,6 +23,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
+import static com.android.systemui.concurrency.FakeExecutorKosmosKt.getFakeExecutor;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static junit.framework.Assert.assertNotNull;
@@ -124,12 +125,11 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
 
-    private KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
-    private TestScope mTestScope = mKosmos.getTestScope();
-    private JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
-    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
-    private TestableLooper mTestableLooper;
-    private Handler mHandler;
+    private final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
+    private final TestScope mTestScope = mKosmos.getTestScope();
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
+    private final FakeExecutor mExecutor = mKosmos.getFakeExecutor();
+    private final Handler mHandler = mKosmos.getFakeExecutorHandler();
     private NotificationTestHelper mHelper;
     private NotificationGutsManager mGutsManager;
 
@@ -171,10 +171,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
-        mHandler = Handler.createAsync(mTestableLooper.getLooper());
-        mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
+        mHelper = new NotificationTestHelper(mContext, mDependency);
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mWindowRootViewVisibilityInteractor = new WindowRootViewVisibilityInteractor(
@@ -248,7 +246,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         assertTrue(mGutsManager.openGutsInternal(row, 0, 0, menuItem));
         assertEquals(View.INVISIBLE, guts.getVisibility());
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         verify(guts).openControls(
                 anyInt(),
                 anyInt(),
@@ -261,7 +259,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         verify(guts).closeControls(anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyBoolean());
         verify(row, times(1)).setGutsView(any());
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         verify(mHeadsUpManager).setGutsShown(realRow.getEntry(), false);
     }
 
@@ -352,7 +350,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(entry.getGuts()).thenReturn(guts);
 
         assertTrue(mGutsManager.openGutsInternal(row, 0, 0, menuItem));
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
         verify(guts).openControls(
                 anyInt(),
                 anyInt(),
@@ -365,7 +363,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         row.onDensityOrFontScaleChanged();
         mGutsManager.onDensityOrFontScaleChanged(entry);
 
-        mTestableLooper.processAllMessages();
+        mExecutor.runAllReady();
 
         mGutsManager.closeAndSaveGuts(false, false, false, 0, 0, false);
 
