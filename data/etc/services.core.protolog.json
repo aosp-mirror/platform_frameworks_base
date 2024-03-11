@@ -2665,12 +2665,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/Task.java"
     },
-    "4446998544419008924": {
-      "message": "Moving to RESUMED: %s (starting new instance) callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/Task.java"
-    },
     "4037728373502324767": {
       "message": "resumeNextFocusableActivityWhenRootTaskIsEmpty: %s, go home",
       "level": "DEBUG",
@@ -2764,12 +2758,6 @@
     "-8359248677489986541": {
       "message": "Moving to RESUMED: %s (in existing)",
       "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/TaskFragment.java"
-    },
-    "2088177629189452176": {
-      "message": "Activity config changed during resume: %s, new next: %s",
-      "level": "INFO",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
