@@ -43,10 +43,8 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override val isFullyCollapsed: Boolean = false
     override val isTracking: Boolean = false
     override val isViewEnabled: Boolean = false
-    override fun setOpenCloseListener(openCloseListener: OpenCloseListener) {}
     override fun shouldHideStatusBarIconsWhenExpanded() = false
     override fun blockExpansionForCurrentTouch() {}
-    override fun setTrackingStartedListener(trackingStartedListener: TrackingStartedListener) {}
     override fun disableHeader(state1: Int, state2: Int, animated: Boolean) {}
     override fun startExpandLatencyTracking() {}
     override fun startBouncerPreHideAnimation() {}

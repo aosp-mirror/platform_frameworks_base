@@ -1540,13 +1540,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardBottomArea = keyguardBottomArea;
     }
 
-    @Override
+    /** Sets a listener to be notified when the shade starts opening or finishes closing. */
     public void setOpenCloseListener(OpenCloseListener openCloseListener) {
         SceneContainerFlag.assertInLegacyMode();
         mOpenCloseListener = openCloseListener;
     }
 
-    @Override
+    /** Sets a listener to be notified when touch tracking begins. */
     public void setTrackingStartedListener(TrackingStartedListener trackingStartedListener) {
         mTrackingStartedListener = trackingStartedListener;
     }
