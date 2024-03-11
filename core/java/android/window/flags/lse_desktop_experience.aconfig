@@ -14,3 +14,10 @@ flag {
     description: "Enables desktop windowing"
     bug: "304778354"
 }
+
+flag {
+    name: "enable_desktop_windowing_modals_policy"
+    namespace: "lse_desktop_experience"
+    description: "Enables policy for modals activities"
+    bug: "319492844"
+}
