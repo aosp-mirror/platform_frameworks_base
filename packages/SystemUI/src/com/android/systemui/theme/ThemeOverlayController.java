@@ -20,7 +20,6 @@ import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
 
 import static com.android.systemui.Flags.themeOverlayControllerWakefulnessDeprecation;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
-import static com.android.systemui.shared.Flags.enableHomeDelay;
 import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_HOME;
 import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_LOCK;
 import static com.android.systemui.theme.ThemeOverlayApplier.COLOR_SOURCE_PRESET;
@@ -813,12 +812,11 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             }
         }
 
-        final Runnable onCompleteCallback = !enableHomeDelay()
-                ? () -> {}
-                : () -> {
-                    Log.d(TAG, "ThemeHomeDelay: ThemeOverlayController ready");
-                    mActivityManager.setThemeOverlayReady(currentUser);
-                };
+        final Runnable onCompleteCallback = () -> {
+            Log.d(TAG, "ThemeHomeDelay: ThemeOverlayController ready with user "
+                    + currentUser);
+            mActivityManager.setThemeOverlayReady(currentUser);
+        };
 
         if (colorSchemeIsApplied(managedProfiles)) {
             Log.d(TAG, "Skipping overlay creation. Theme was already: " + mColorScheme);

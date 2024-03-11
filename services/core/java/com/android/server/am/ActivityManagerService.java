@@ -5280,18 +5280,24 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Starts Home if there is no completion signal from ThemeOverlayController
      */
     private void scheduleHomeTimeout() {
-        if (enableHomeDelay() && mHasHomeDelay.compareAndSet(false, true)) {
-            int userId = mUserController.getCurrentUserId();
-            mHandler.postDelayed(() -> {
-                if (!isThemeOverlayReady(userId)) {
-                    Slog.d(TAG,
-                            "ThemeHomeDelay: ThemeOverlayController not responding, launching "
-                                    + "Home after "
-                                    + HOME_LAUNCH_TIMEOUT_MS + "ms");
-                    setThemeOverlayReady(userId);
-                }
-            }, HOME_LAUNCH_TIMEOUT_MS);
+        if (!isHomeLaunchDelayable()) {
+            Slog.d(TAG, "ThemeHomeDelay: Home launch is not delayable, skipping timeout creation");
+            return;
         }
+
+        if (!mHasHomeDelay.compareAndSet(false, true)) return;
+
+        mHandler.postDelayed(() -> {
+            int userId = mUserController.getCurrentUserId();
+            if (!isThemeOverlayReady(userId)) {
+                Slog.d(TAG,
+                        "ThemeHomeDelay: ThemeOverlayController not responding, launching "
+                                + "Home after " + HOME_LAUNCH_TIMEOUT_MS + "ms"
+                                + " with user " + userId);
+                setThemeOverlayReady(userId);
+            }
+        }, HOME_LAUNCH_TIMEOUT_MS);
+
     }
 
     /**
@@ -5299,22 +5305,28 @@ public class ActivityManagerService extends IActivityManager.Stub
      * palette is ready.
      *
      * @param userId The ID of the user where ThemeOverlayController is ready.
-     *
-     * @throws RemoteException
-     *
      * @hide
      */
     @Override
     public void setThemeOverlayReady(@UserIdInt int userId) {
+        if (!isHomeLaunchDelayable()) {
+            Slog.d(TAG, "ThemeHomeDelay: Home launch is not delayable, "
+                    + "ignoring setThemeOverlayReady() call");
+            return;
+        }
+
         enforceCallingPermission(Manifest.permission.SET_THEME_OVERLAY_CONTROLLER_READY,
                 "setThemeOverlayReady");
-
+        Slog.d(TAG, "ThemeHomeDelay: userId " + userId
+                + " notified ThemeOverlayController completeness");
         boolean updateUser;
         synchronized (mThemeOverlayReadyUsers) {
             updateUser = mThemeOverlayReadyUsers.add(userId);
+            Slog.d(TAG, "ThemeHomeDelay: updateUser " + userId + " isUpdatable: " + updateUser);
         }
 
-        if (updateUser && enableHomeDelay()) {
+        if (updateUser) {
+            Slog.d(TAG, "ThemeHomeDelay: updating user " + userId);
             mAtmInternal.startHomeOnAllDisplays(userId, "setThemeOverlayReady");
         }
     }
@@ -5329,6 +5341,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (mThemeOverlayReadyUsers) {
             return mThemeOverlayReadyUsers.contains(userId);
         }
+    }
+
+    /**
+     * Checks if feature flag is enabled and if system is Headless (HSUM), case in which 
+     * home delay should be skipped.
+     *
+     * @hide
+     */
+    public boolean isHomeLaunchDelayable() {
+        return !UserManager.isHeadlessSystemUserMode() && enableHomeDelay();
     }
 
     final void ensureBootCompleted() {
@@ -18130,8 +18152,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Clean up various services by removing the user
             mBatteryStatsService.onUserRemoved(userId);
 
-            synchronized (mThemeOverlayReadyUsers) {
-                mThemeOverlayReadyUsers.remove(userId);
+            if (isHomeLaunchDelayable()) {
+                synchronized (mThemeOverlayReadyUsers) {
+                    mThemeOverlayReadyUsers.remove(userId);
+                }
             }
         }
 
@@ -19484,8 +19508,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean isThemeOverlayReady(int userId) {
-            return ActivityManagerService.this.isThemeOverlayReady(userId);
+        public boolean shouldDelayHomeLaunch(int userId) {
+            if (!isHomeLaunchDelayable()) return false;
+
+            synchronized (mThemeOverlayReadyUsers) {
+                return !ActivityManagerService.this.mThemeOverlayReadyUsers.contains(userId);
+            }
         }
     }
 
