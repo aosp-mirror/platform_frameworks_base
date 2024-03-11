@@ -38,7 +38,7 @@ flag {
     name: "nine_patch_frro"
     namespace: "resource_manager"
     description: "Feature flag for creating an frro from a 9-patch"
-    bug: "309232726"
+    bug: "296324826"
 }
 
 flag {
