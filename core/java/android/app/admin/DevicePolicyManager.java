@@ -17457,24 +17457,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the subscription ids of all subscriptions which was downloaded by the calling
+     * Returns the subscription ids of all subscriptions which were downloaded by the calling
      * admin.
      *
      * <p> This returns only the subscriptions which were downloaded by the calling admin via
      *      {@link android.telephony.euicc.EuiccManager#downloadSubscription}.
-     *      If a susbcription is returned by this method then in it subject to management controls
+     *      If a subscription is returned by this method then in it subject to management controls
      *      and cannot be removed by users.
      *
      * <p> Callable by device owners and profile owners.
      *
-     * @throws SecurityException if the caller is not authorized to call this method
-     * @return ids of all managed subscriptions currently downloaded by an admin on the device
+     * @throws SecurityException if the caller is not authorized to call this method.
+     * @return ids of all managed subscriptions currently downloaded by an admin on the device.
      */
     @FlaggedApi(FLAG_ESIM_MANAGEMENT_ENABLED)
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS)
     @NonNull
-    public Set<Integer> getSubscriptionsIds() {
-        throwIfParentInstance("getSubscriptionsIds");
+    public Set<Integer> getSubscriptionIds() {
+        throwIfParentInstance("getSubscriptionIds");
         if (mService != null) {
             try {
                 return intArrayToSet(mService.getSubscriptionIds(mContext.getPackageName()));
