@@ -26,7 +26,6 @@ import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
 import com.android.systemui.util.kotlin.getOrNull
 import dagger.BindsInstance
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
@@ -34,7 +33,9 @@ import java.util.Optional
 import javax.inject.Named
 import javax.inject.Scope
 
-@Scope @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class SysUIUnfoldScope
+@Scope @MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class SysUIUnfoldScope
 
 /**
  * Creates an injectable [SysUIUnfoldComponent] that provides objects that have been scoped with
@@ -49,7 +50,6 @@ import javax.inject.Scope
  */
 @Module(subcomponents = [SysUIUnfoldComponent::class])
 class SysUIUnfoldModule {
-
     @Provides
     @SysUISingleton
     fun provideSysUIUnfoldComponent(
@@ -57,8 +57,7 @@ class SysUIUnfoldModule {
         rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,
         @Named(UNFOLD_STATUS_BAR) scopedProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
         @UnfoldBg bgProvider: Optional<UnfoldTransitionProgressProvider>,
-        unfoldLatencyTracker: Lazy<UnfoldLatencyTracker>,
-        factory: SysUIUnfoldComponent.Factory
+        factory: SysUIUnfoldComponent.Factory,
     ): Optional<SysUIUnfoldComponent> {
         val p1 = provider.getOrNull()
         val p2 = rotationProvider.getOrNull()
@@ -67,7 +66,7 @@ class SysUIUnfoldModule {
         return if (p1 == null || p2 == null || p3 == null || p4 == null) {
             Optional.empty()
         } else {
-            Optional.of(factory.create(p1, p2, p3, p4, unfoldLatencyTracker.get()))
+            Optional.of(factory.create(p1, p2, p3, p4))
         }
     }
 }
@@ -75,7 +74,6 @@ class SysUIUnfoldModule {
 @SysUIUnfoldScope
 @Subcomponent
 interface SysUIUnfoldComponent {
-
     @Subcomponent.Factory
     interface Factory {
         fun create(
@@ -83,7 +81,6 @@ interface SysUIUnfoldComponent {
             @BindsInstance p2: NaturalRotationUnfoldProgressProvider,
             @BindsInstance p3: ScopedUnfoldTransitionProgressProvider,
             @BindsInstance @UnfoldBg p4: UnfoldTransitionProgressProvider,
-            @BindsInstance p5: UnfoldLatencyTracker,
         ): SysUIUnfoldComponent
     }
 
