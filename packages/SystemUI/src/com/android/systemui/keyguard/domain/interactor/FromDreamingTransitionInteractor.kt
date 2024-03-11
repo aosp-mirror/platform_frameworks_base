@@ -35,6 +35,7 @@ import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -93,6 +94,18 @@ constructor(
                     KeyguardState.DREAMING
             ) {
                 startTransitionTo(KeyguardState.LOCKSCREEN)
+            }
+        }
+    }
+
+    fun startToGlanceableHubTransition() {
+        scope.launch {
+            KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
+            if (
+                transitionInteractor.startedKeyguardState.replayCache.last() ==
+                    KeyguardState.DREAMING
+            ) {
+                startTransitionTo(KeyguardState.GLANCEABLE_HUB)
             }
         }
     }
@@ -205,14 +218,18 @@ constructor(
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
             duration =
-                if (toState == KeyguardState.LOCKSCREEN) TO_LOCKSCREEN_DURATION.inWholeMilliseconds
-                else DEFAULT_DURATION.inWholeMilliseconds
+                when (toState) {
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
         const val TAG = "FromDreamingTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
+        val TO_GLANCEABLE_HUB_DURATION = 1.seconds
         val TO_LOCKSCREEN_DURATION = 1167.milliseconds
     }
 }

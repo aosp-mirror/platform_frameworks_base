@@ -33,7 +33,7 @@ import com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTO
 import com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP
 import com.android.systemui.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
-import com.android.systemui.dreams.ui.viewmodel.DreamOverlayViewModel
+import com.android.systemui.dreams.ui.viewmodel.DreamViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
@@ -53,7 +53,7 @@ constructor(
     private val mStatusBarViewController: DreamOverlayStatusBarViewController,
     private val mOverlayStateController: DreamOverlayStateController,
     @Named(DreamOverlayModule.DREAM_BLUR_RADIUS) private val mDreamBlurRadius: Int,
-    private val dreamOverlayViewModel: DreamOverlayViewModel,
+    private val dreamViewModel: DreamViewModel,
     @Named(DreamOverlayModule.DREAM_IN_BLUR_ANIMATION_DURATION)
     private val mDreamInBlurAnimDurationMs: Long,
     @Named(DreamOverlayModule.DREAM_IN_COMPLICATIONS_ANIMATION_DURATION)
@@ -87,7 +87,7 @@ constructor(
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
-                    dreamOverlayViewModel.dreamOverlayTranslationY.collect { px ->
+                    dreamViewModel.dreamOverlayTranslationY.collect { px ->
                         ComplicationLayoutParams.iteratePositions(
                             { position: Int -> setElementsTranslationYAtPosition(px, position) },
                             POSITION_TOP or POSITION_BOTTOM
@@ -96,7 +96,7 @@ constructor(
                 }
 
                 launch {
-                    dreamOverlayViewModel.dreamOverlayTranslationX.collect { px ->
+                    dreamViewModel.dreamOverlayTranslationX.collect { px ->
                         ComplicationLayoutParams.iteratePositions(
                             { position: Int -> setElementsTranslationXAtPosition(px, position) },
                             POSITION_TOP or POSITION_BOTTOM
@@ -105,7 +105,7 @@ constructor(
                 }
 
                 launch {
-                    dreamOverlayViewModel.dreamOverlayAlpha.collect { alpha ->
+                    dreamViewModel.dreamOverlayAlpha.collect { alpha ->
                         ComplicationLayoutParams.iteratePositions(
                             { position: Int ->
                                 setElementsAlphaAtPosition(
@@ -120,7 +120,7 @@ constructor(
                 }
 
                 launch {
-                    dreamOverlayViewModel.transitionEnded.collect { _ ->
+                    dreamViewModel.transitionEnded.collect { _ ->
                         mOverlayStateController.setExitAnimationsRunning(false)
                     }
                 }
