@@ -437,6 +437,9 @@ public class TvAdView extends ViewGroup {
     /**
      * Prepares the AD service of corresponding {@link TvAdService}.
      *
+     * <p>This should be called before calling {@link #startAdService()}. Otherwise,
+     * {@link #startAdService()} is a no-op.
+     *
      * @param serviceId the AD service ID, which can be found in TvAdServiceInfo#getId().
      */
     public void prepareAdService(@NonNull String serviceId, @NonNull String type) {
@@ -451,6 +454,9 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Starts the AD service.
+     *
+     * <p>This should be called after calling {@link #prepareAdService(String, String)}. Otherwise,
+     * it's a no-op.
      */
     public void startAdService() {
         if (DEBUG) {
@@ -463,6 +469,8 @@ public class TvAdView extends ViewGroup {
 
     /**
      * Stops the AD service.
+     *
+     * <p>It's a no-op if the service is not started.
      */
     public void stopAdService() {
         if (DEBUG) {
