@@ -393,16 +393,12 @@ public class TvAdView extends ViewGroup {
     }
 
     /**
-     * Sets a listener to be invoked when an input event is not handled
-     * by the TV AD service.
+     * Sets a listener to be invoked when an input event is not handled by the TV AD service.
      *
      * @param listener The callback to be invoked when the unhandled input event is received.
      */
-    public void setOnUnhandledInputEventListener(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnUnhandledInputEventListener listener) {
+    public void setOnUnhandledInputEventListener(@NonNull OnUnhandledInputEventListener listener) {
         mOnUnhandledInputEventListener = listener;
-        // TODO: handle CallbackExecutor
     }
 
     /**
