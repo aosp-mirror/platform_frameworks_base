@@ -328,7 +328,14 @@ public enum ScrimState {
     GLANCEABLE_HUB_OVER_DREAM {
         @Override
         public void prepare(ScrimState previousState) {
-            GLANCEABLE_HUB.prepare(previousState);
+            // No scrims should be visible by default in this state.
+            mBehindAlpha = 0;
+            mNotifAlpha = 0;
+            mFrontAlpha = 0;
+
+            mFrontTint = Color.TRANSPARENT;
+            mBehindTint = mBackgroundColor;
+            mNotifTint = mClipQsScrim ? mBackgroundColor : Color.TRANSPARENT;
         }
     };
 
