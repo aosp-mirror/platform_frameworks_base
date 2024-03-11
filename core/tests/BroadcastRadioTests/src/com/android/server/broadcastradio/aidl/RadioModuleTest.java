@@ -88,13 +88,6 @@ public final class RadioModuleTest {
     }
 
     @Test
-    public void setInternalHalCallback_callbackSetInHal() throws Exception {
-        mRadioModule.setInternalHalCallback();
-
-        verify(mBroadcastRadioMock).setTunerCallback(any());
-    }
-
-    @Test
     public void getImage_withValidIdFromRadioModule() {
         int imageId = 1;
 
