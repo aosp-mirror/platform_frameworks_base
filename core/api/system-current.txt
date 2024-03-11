@@ -1306,6 +1306,7 @@ package android.app.admin {
 
   public class DevicePolicyManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public int checkProvisioningPrecondition(@NonNull String, @NonNull String);
+    method @FlaggedApi("android.app.admin.flags.security_log_v2_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING) public void clearAuditLogEventCallback();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method @Nullable public android.content.Intent createProvisioningIntentFromNfcIntent(@NonNull android.content.Intent);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void finalizeWorkProfileProvisioning(@NonNull android.os.UserHandle, @Nullable android.accounts.Account);
@@ -1342,7 +1343,7 @@ package android.app.admin {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public boolean setActiveProfileOwner(@NonNull android.content.ComponentName, String) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS) public void setApplicationExemptions(@NonNull String, @NonNull java.util.Set<java.lang.Integer>) throws android.content.pm.PackageManager.NameNotFoundException;
     method @FlaggedApi("android.app.admin.flags.security_log_v2_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING) public void setAuditLogEnabled(boolean);
-    method @FlaggedApi("android.app.admin.flags.security_log_v2_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING) public void setAuditLogEventCallback(@NonNull java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.util.List<android.app.admin.SecurityLog.SecurityEvent>>);
+    method @FlaggedApi("android.app.admin.flags.security_log_v2_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING) public void setAuditLogEventCallback(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.admin.SecurityLog.SecurityEvent>>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setDeviceProvisioningConfigApplied();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setDpcDownloaded(boolean);
     method @FlaggedApi("android.app.admin.flags.device_policy_size_tracking_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setMaxPolicyStorageLimit(int);
