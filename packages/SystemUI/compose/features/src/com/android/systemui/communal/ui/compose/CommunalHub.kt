@@ -119,7 +119,7 @@ import com.android.systemui.communal.ui.compose.Dimensions.CardOutlineWidth
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
-import com.android.systemui.communal.ui.compose.extensions.observeTapsWithoutConsuming
+import com.android.systemui.communal.ui.compose.extensions.observeTaps
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
@@ -168,7 +168,7 @@ fun CommunalHub(
                 .pointerInput(gridState, contentOffset, contentListState) {
                     // If not in edit mode, don't allow selecting items.
                     if (!viewModel.isEditMode) return@pointerInput
-                    observeTapsWithoutConsuming { offset ->
+                    observeTaps { offset ->
                         val adjustedOffset = offset - contentOffset
                         val index = firstIndexAtOffset(gridState, adjustedOffset)
                         val key = index?.let { keyAtIndexIfEditable(contentListState.list, index) }
@@ -277,12 +277,25 @@ fun CommunalHub(
         if (viewModel is CommunalViewModel && dialogFactory != null) {
             val isEnableWidgetDialogShowing by
                 viewModel.isEnableWidgetDialogShowing.collectAsState(false)
+            val isEnableWorkProfileDialogShowing by
+                viewModel.isEnableWorkProfileDialogShowing.collectAsState(false)
 
             EnableWidgetDialog(
                 isEnableWidgetDialogVisible = isEnableWidgetDialogShowing,
                 dialogFactory = dialogFactory,
+                title = stringResource(id = R.string.dialog_title_to_allow_any_widget),
+                positiveButtonText = stringResource(id = R.string.button_text_to_open_settings),
                 onConfirm = viewModel::onEnableWidgetDialogConfirm,
                 onCancel = viewModel::onEnableWidgetDialogCancel
+            )
+
+            EnableWidgetDialog(
+                isEnableWidgetDialogVisible = isEnableWorkProfileDialogShowing,
+                dialogFactory = dialogFactory,
+                title = stringResource(id = R.string.work_mode_off_title),
+                positiveButtonText = stringResource(id = R.string.work_mode_turn_on),
+                onConfirm = viewModel::onEnableWorkProfileDialogConfirm,
+                onCancel = viewModel::onEnableWorkProfileDialogCancel
             )
         }
 
@@ -769,7 +782,16 @@ private fun WidgetContent(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier,
+        modifier =
+            modifier.thenIf(!viewModel.isEditMode && model.inQuietMode) {
+                Modifier.pointerInput(Unit) {
+                    // consume tap to prevent the child view from triggering interactions with the
+                    // app widget
+                    observeTaps(shouldConsume = true) { _ ->
+                        viewModel.onOpenEnableWorkProfileDialog()
+                    }
+                }
+            }
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
