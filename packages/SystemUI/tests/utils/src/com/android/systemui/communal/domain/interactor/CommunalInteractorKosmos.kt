@@ -29,6 +29,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.log.logcatLogBuffer
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.settings.userTracker
@@ -48,6 +49,7 @@ val Kosmos.communalInteractor by Fixture {
         keyguardInteractor = keyguardInteractor,
         editWidgetsActivityStarter = editWidgetsActivityStarter,
         userTracker = userTracker,
+        activityStarter = activityStarter,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),
         communalSettingsInteractor = communalSettingsInteractor,

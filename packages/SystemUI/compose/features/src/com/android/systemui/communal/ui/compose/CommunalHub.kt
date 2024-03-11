@@ -29,6 +29,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -124,6 +125,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -131,6 +133,7 @@ import kotlinx.coroutines.launch
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    dialogFactory: SystemUIDialogFactory? = null,
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
     onEditDone: (() -> Unit)? = null,
@@ -268,6 +271,18 @@ fun CommunalHub(
                     viewModel.onOpenWidgetEditor(selectedKey.value)
                 },
                 onHide = { isButtonToEditWidgetsShowing = false },
+            )
+        }
+
+        if (viewModel is CommunalViewModel && dialogFactory != null) {
+            val isEnableWidgetDialogShowing by
+                viewModel.isEnableWidgetDialogShowing.collectAsState(false)
+
+            EnableWidgetDialog(
+                isEnableWidgetDialogVisible = isEnableWidgetDialogShowing,
+                dialogFactory = dialogFactory,
+                onConfirm = viewModel::onEnableWidgetDialogConfirm,
+                onCancel = viewModel::onEnableWidgetDialogCancel
             )
         }
 
@@ -616,7 +631,7 @@ private fun CommunalContent(
             WidgetContent(viewModel, model, size, selected, widgetConfigurator, modifier)
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
         is CommunalContentModel.WidgetContent.DisabledWidget ->
-            DisabledWidgetPlaceholder(model, modifier)
+            DisabledWidgetPlaceholder(model, viewModel, modifier)
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.CtaTileInEditMode ->
             CtaTileInEditModeContent(modifier, onOpenWidgetPicker)
@@ -826,6 +841,7 @@ fun WidgetConfigureButton(
 @Composable
 fun DisabledWidgetPlaceholder(
     model: CommunalContentModel.WidgetContent.DisabledWidget,
+    viewModel: BaseCommunalViewModel,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -839,10 +855,17 @@ fun DisabledWidgetPlaceholder(
 
     Column(
         modifier =
-            modifier.background(
-                MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
-            ),
+            modifier
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant,
+                    RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                )
+                .clickable(
+                    enabled = !viewModel.isEditMode,
+                    interactionSource = null,
+                    indication = null,
+                    onClick = viewModel::onOpenEnableWidgetDialog
+                ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

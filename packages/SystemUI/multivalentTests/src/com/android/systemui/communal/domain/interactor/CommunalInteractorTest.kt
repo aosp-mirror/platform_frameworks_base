@@ -19,8 +19,10 @@ package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import android.provider.Settings
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -50,6 +52,8 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
@@ -61,6 +65,8 @@ import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
@@ -73,6 +79,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -103,6 +110,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
     private lateinit var sceneInteractor: SceneInteractor
     private lateinit var userTracker: FakeUserTracker
+    private lateinit var activityStarter: ActivityStarter
 
     private lateinit var underTest: CommunalInteractor
 
@@ -121,6 +129,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
         sceneInteractor = kosmos.sceneInteractor
         userTracker = kosmos.fakeUserTracker
+        activityStarter = kosmos.activityStarter
 
         whenever(mainUser.isMain).thenReturn(true)
         whenever(secondaryUser.isMain).thenReturn(false)
@@ -797,6 +806,16 @@ class CommunalInteractorTest : SysuiTestCase() {
             val widgetKey = CommunalContentModel.KEY.widget(123)
             underTest.showWidgetEditor(preselectedKey = widgetKey)
             verify(editWidgetsActivityStarter).startActivity(widgetKey)
+        }
+
+    @Test
+    fun navigateToCommunalWidgetSettings_startsActivity() =
+        testScope.runTest {
+            underTest.navigateToCommunalWidgetSettings()
+            val intentCaptor = argumentCaptor<Intent>()
+            verify(activityStarter)
+                .postStartActivityDismissingKeyguard(capture(intentCaptor), eq(0))
+            assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_COMMUNAL_SETTING)
         }
 
     @Test

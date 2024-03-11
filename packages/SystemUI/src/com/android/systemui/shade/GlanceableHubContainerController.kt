@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.util.kotlin.collectFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +48,7 @@ class GlanceableHubContainerController
 constructor(
     private val communalInteractor: CommunalInteractor,
     private val communalViewModel: CommunalViewModel,
+    private val dialogFactory: SystemUIDialogFactory,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
@@ -119,7 +121,14 @@ constructor(
     ): View {
         return initView(
             ComposeView(context).apply {
-                setContent { PlatformTheme { CommunalContainer(viewModel = communalViewModel) } }
+                setContent {
+                    PlatformTheme {
+                        CommunalContainer(
+                            viewModel = communalViewModel,
+                            dialogFactory = dialogFactory,
+                        )
+                    }
+                }
             }
         )
     }
