@@ -543,11 +543,13 @@ public final class DeviceState {
                 int identifier = source.readInt();
                 String name = source.readString8();
                 ArraySet<@DeviceStateProperties Integer> systemProperties = new ArraySet<>();
-                for (int i = 0; i < source.readInt(); i++) {
+                int systemPropertySize = source.readInt();
+                for (int i = 0; i < systemPropertySize; i++) {
                     systemProperties.add(source.readInt());
                 }
                 ArraySet<@DeviceStateProperties Integer> physicalProperties = new ArraySet<>();
-                for (int j = 0; j < source.readInt(); j++) {
+                int physicalPropertySize = source.readInt();
+                for (int j = 0; j < physicalPropertySize; j++) {
                     physicalProperties.add(source.readInt());
                 }
                 return new DeviceState.Configuration(identifier, name, systemProperties,
