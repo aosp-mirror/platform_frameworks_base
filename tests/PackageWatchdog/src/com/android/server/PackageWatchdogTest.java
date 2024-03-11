@@ -43,13 +43,13 @@ import android.os.SystemProperties;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
-import android.util.LongArrayQueue;
 import android.util.Xml;
+import android.utils.LongArrayQueue;
+import android.utils.XmlUtils;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
-import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.PackageWatchdog.HealthCheckState;
