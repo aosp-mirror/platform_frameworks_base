@@ -39,6 +39,7 @@ import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -889,6 +890,50 @@ class DraggableHandlerTest {
             isUserInputOngoing = true,
         )
         assertThat(transitionState).isNotSameInstanceAs(firstTransition)
+    }
+
+    @Test
+    fun finish() = runGestureTest {
+        // Start at scene C.
+        navigateToSceneC()
+
+        // Swipe up from the middle to transition to scene B.
+        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        onDragStarted(startedPosition = middle, overSlop = up(0.1f))
+        assertTransition(fromScene = SceneC, toScene = SceneB, isUserInputOngoing = true)
+
+        // The current transition can be intercepted.
+        assertThat(draggableHandler.shouldImmediatelyIntercept(middle)).isTrue()
+
+        // Finish the transition.
+        val transition = transitionState as Transition
+        val job = transition.finish()
+        assertTransition(isUserInputOngoing = false)
+
+        // The current transition can not be intercepted anymore.
+        assertThat(draggableHandler.shouldImmediatelyIntercept(middle)).isFalse()
+
+        // Calling finish() multiple times returns the same Job.
+        assertThat(transition.finish()).isSameInstanceAs(job)
+        assertThat(transition.finish()).isSameInstanceAs(job)
+        assertThat(transition.finish()).isSameInstanceAs(job)
+
+        // We can join the job to wait for the animation to end.
+        assertTransition()
+        job.join()
+        assertIdle(SceneC)
+    }
+
+    @Test
+    fun finish_cancelled() = runGestureTest {
+        // Swipe up from the middle to transition to scene B.
+        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        onDragStarted(startedPosition = middle, overSlop = up(0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneB)
+
+        // Finish the transition and cancel the returned job.
+        (transitionState as Transition).finish().cancelAndJoin()
+        assertIdle(SceneA)
     }
 
     @Test
