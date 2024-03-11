@@ -19,7 +19,6 @@
 package com.android.credentialmanager.ui.screens.single.passkey
 
 import androidx.compose.foundation.layout.Column
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -28,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.R
-import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
-import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.ui.components.AccountRow
 import com.android.credentialmanager.ui.components.ContinueChip
 import com.android.credentialmanager.ui.components.DismissChip
@@ -38,8 +35,6 @@ import com.android.credentialmanager.ui.components.SignInOptionsChip
 import com.android.credentialmanager.ui.screens.single.SingleAccountScreen
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
-import com.android.credentialmanager.TAG
-import android.util.Log
 
 /**
  * Screen that shows sign in with provider credential.
@@ -57,11 +52,6 @@ fun SinglePasskeyScreen(
     modifier: Modifier = Modifier,
     flowEngine: FlowEngine,
 ) {
-    val launcher = rememberLauncherForActivityResult(
-        StartBalIntentSenderForResultContract()
-    ) {
-        flowEngine.sendSelectionResult(entry, it.resultCode, it.data)
-    }
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
@@ -80,12 +70,9 @@ fun SinglePasskeyScreen(
         modifier = modifier.padding(horizontal = 10.dp)
     ) {
         item {
+            val selectEntry = flowEngine.getEntrySelector()
             Column {
-                ContinueChip {
-                    entry.getIntentSenderRequest()?.let {
-                        launcher.launch(it)
-                    } ?: Log.w(TAG, "Cannot parse IntentSenderRequest")
-                }
+                ContinueChip { selectEntry(entry, false) }
                 SignInOptionsChip{ flowEngine.openSecondaryScreen() }
                 DismissChip { flowEngine.cancel() }
             }

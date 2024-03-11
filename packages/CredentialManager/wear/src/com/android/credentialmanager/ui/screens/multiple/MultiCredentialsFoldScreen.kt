@@ -16,7 +16,6 @@
 
 package com.android.credentialmanager.ui.screens.multiple
 
-import androidx.activity.compose.rememberLauncherForActivityResult
 import com.android.credentialmanager.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.CredentialSelectorUiState
 import com.android.credentialmanager.FlowEngine
-import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.DismissChip
 import com.android.credentialmanager.ui.components.CredentialsScreenChip
@@ -37,8 +35,6 @@ import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.ktx.getIntentSenderRequest
-import androidx.activity.result.IntentSenderRequest
 
 /**
  * Screen that shows multiple credentials to select from.
@@ -53,6 +49,7 @@ fun MultiCredentialsFoldScreen(
     columnState: ScalingLazyColumnState,
     flowEngine: FlowEngine,
 ) {
+    val selectEntry = flowEngine.getEntrySelector()
     ScalingLazyColumn(
         columnState = columnState,
         modifier = Modifier.fillMaxSize(),
@@ -77,17 +74,9 @@ fun MultiCredentialsFoldScreen(
 
         credentials.forEach { credential: CredentialEntryInfo ->
                 item {
-                    val launcher = rememberLauncherForActivityResult(
-                        StartBalIntentSenderForResultContract()
-                    ) {
-                        flowEngine.sendSelectionResult(credential, it.resultCode, it.data)
-                    }
-
                     CredentialsScreenChip(
                         label = credential.userName,
-                        onClick = { credential.getIntentSenderRequest()?.let {
-                            launcher.launch(it)
-                        } },
+                        onClick = { selectEntry(credential, false) },
                         secondaryLabel = credential.credentialTypeDisplayName,
                         icon = credential.icon,
                     )
@@ -96,18 +85,8 @@ fun MultiCredentialsFoldScreen(
 
         credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
             item {
-                val launcher = rememberLauncherForActivityResult(
-                    StartBalIntentSenderForResultContract()
-                ) {
-                    flowEngine.sendSelectionResult(authenticationEntryInfo, it.resultCode, it.data)
-                }
-
                 LockedProviderChip(authenticationEntryInfo) {
-                    launcher.launch(
-                        IntentSenderRequest.Builder(
-                            checkNotNull(authenticationEntryInfo.pendingIntent)).build()
-                    )
-                }
+                    selectEntry(authenticationEntryInfo, false) }
             }
         }
         item {

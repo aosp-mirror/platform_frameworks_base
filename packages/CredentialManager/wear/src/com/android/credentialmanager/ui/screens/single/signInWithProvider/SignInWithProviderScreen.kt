@@ -16,9 +16,6 @@
 
 package com.android.credentialmanager.ui.screens.single.signInWithProvider
 
-import android.util.Log
-import com.android.credentialmanager.TAG
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -26,8 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.model.get.CredentialEntryInfo
-import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
-import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.ui.components.AccountRow
 import com.android.credentialmanager.ui.components.ContinueChip
 import com.android.credentialmanager.ui.components.DismissChip
@@ -53,11 +48,6 @@ fun SignInWithProviderScreen(
     modifier: Modifier = Modifier,
     flowEngine: FlowEngine,
 ) {
-    val launcher = rememberLauncherForActivityResult(
-        StartBalIntentSenderForResultContract()
-    ) {
-        flowEngine.sendSelectionResult(entry, it.resultCode, it.data)
-    }
     SingleAccountScreen(
         headerContent = {
             SignInHeader(
@@ -84,12 +74,9 @@ fun SignInWithProviderScreen(
         modifier = modifier.padding(horizontal = 10.dp)
     ) {
         item {
+            val selectEntry = flowEngine.getEntrySelector()
             Column {
-                ContinueChip {
-                    entry.getIntentSenderRequest()?.let {
-                        launcher.launch(it)
-                    } ?: Log.w(TAG, "Cannot parse IntentSenderRequest")
-                }
+                ContinueChip { selectEntry(entry, false) }
                 SignInOptionsChip{ flowEngine.openSecondaryScreen() }
                 DismissChip { flowEngine.cancel() }
             }
