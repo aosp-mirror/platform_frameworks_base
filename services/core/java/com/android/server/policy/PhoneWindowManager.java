@@ -4313,6 +4313,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean allowDuringSetup) {
         if (allowDuringSetup || isUserSetupComplete()) {
             mContext.startActivityAsUser(intent, bundle, handle);
+            dismissKeyboardShortcutsMenu();
         } else {
             Slog.i(TAG, "Not starting activity because user setup is in progress: " + intent);
         }
@@ -4363,6 +4364,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (statusbar != null) {
             statusbar.showRecentApps(triggeredFromAltTab);
         }
+        dismissKeyboardShortcutsMenu();
     }
 
     private void toggleKeyboardShortcutsMenu(int deviceId) {
