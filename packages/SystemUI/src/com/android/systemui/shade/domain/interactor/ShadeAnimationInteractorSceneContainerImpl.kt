@@ -18,21 +18,26 @@ package com.android.systemui.shade.domain.interactor
 
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Implementation of ShadeAnimationInteractor compatible with the scene container framework. */
 @SysUISingleton
 class ShadeAnimationInteractorSceneContainerImpl
 @Inject
 constructor(
+    @Background scope: CoroutineScope,
     shadeAnimationRepository: ShadeAnimationRepository,
     sceneInteractor: SceneInteractor,
 ) : ShadeAnimationInteractor(shadeAnimationRepository) {
@@ -56,4 +61,5 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, false)
 }

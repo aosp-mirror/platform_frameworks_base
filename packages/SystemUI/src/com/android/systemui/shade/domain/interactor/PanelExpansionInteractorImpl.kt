@@ -35,6 +35,8 @@ class PanelExpansionInteractorImpl
 @Inject
 constructor(
     sceneInteractor: SceneInteractor,
+    shadeInteractor: ShadeInteractor,
+    shadeAnimationInteractor: ShadeAnimationInteractor,
 ) : PanelExpansionInteractor {
 
     /**
@@ -93,6 +95,16 @@ constructor(
             }
         }
 
+    @Deprecated(
+        "depends on the state you check, use {@link #isShadeFullyExpanded()},\n" +
+            "{@link #isOnAod()}, {@link #isOnKeyguard()} instead."
+    )
+    override val isFullyExpanded = shadeInteractor.isAnyFullyExpanded.value
+
+    @Deprecated("Use ShadeAnimationInteractor instead")
+    override val isCollapsing =
+        shadeAnimationInteractor.isAnyCloseAnimationRunning.value ||
+            shadeAnimationInteractor.isLaunchingActivity.value
     private fun SceneKey.isExpandable(): Boolean {
         return this == Scenes.Shade || this == Scenes.QuickSettings
     }

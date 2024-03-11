@@ -33,31 +33,33 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     ShadeBackActionInteractor,
     ShadeLockscreenInteractor,
     PanelExpansionInteractor {
-    override fun expandToNotifications() {}
-    override val isExpanded: Boolean = false
+    @Deprecated("Use ShadeInteractor instead") override fun expandToNotifications() {}
+    @Deprecated("Use ShadeInteractor instead") override val isExpanded: Boolean = false
     override val isPanelExpanded: Boolean = false
     override fun animateCollapseQs(fullyCollapse: Boolean) {}
     override fun canBeCollapsed(): Boolean = false
-    override val isCollapsing: Boolean = false
+    @Deprecated("Use ShadeAnimationInteractor instead") override val isCollapsing: Boolean = false
     override val isFullyCollapsed: Boolean = false
     override val isTracking: Boolean = false
     override val isViewEnabled: Boolean = false
     override fun shouldHideStatusBarIconsWhenExpanded() = false
-    override fun blockExpansionForCurrentTouch() {}
+    @Deprecated("Not supported by scenes") override fun blockExpansionForCurrentTouch() {}
     override fun disableHeader(state1: Int, state2: Int, animated: Boolean) {}
     override fun startExpandLatencyTracking() {}
     override fun startBouncerPreHideAnimation() {}
     override fun dozeTimeTick() {}
     override fun resetViews(animate: Boolean) {}
     override val barState: Int = 0
+    @Deprecated("Only supported by very old devices that will not adopt scenes.")
     override fun closeUserSwitcherIfOpen(): Boolean {
         return false
     }
     override fun onBackPressed() {}
+    @Deprecated("According to b/318376223, shade predictive back is not be supported.")
     override fun onBackProgressed(progressFraction: Float) {}
     override fun setAlpha(alpha: Int, animate: Boolean) {}
     override fun setAlphaChangeAnimationEndAction(r: Runnable) {}
-    override fun setPulsing(pulsing: Boolean) {}
+    @Deprecated("Not supported by scenes") override fun setPulsing(pulsing: Boolean) {}
     override fun setQsScrimEnabled(qsScrimEnabled: Boolean) {}
     override fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean) {}
     override fun updateSystemUiStateFlags() {}
@@ -66,14 +68,18 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {}
     override fun transitionToExpandedShade(delay: Long) {}
 
-    override fun resetViewGroupFade() {}
+    @Deprecated("Not supported by scenes") override fun resetViewGroupFade() {}
+    @Deprecated("Not supported by scenes")
     override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {}
-    override fun setOverStretchAmount(amount: Float) {}
+    @Deprecated("Not supported by scenes") override fun setOverStretchAmount(amount: Float) {}
+    @Deprecated("TODO(b/325072511) delete this")
     override fun setKeyguardStatusBarAlpha(alpha: Float) {}
     override fun showAodUi() {}
-    override fun isFullyExpanded(): Boolean {
-        return false
-    }
+    @Deprecated(
+        "depends on the state you check, use {@link #isShadeFullyExpanded()},\n" +
+            "{@link #isOnAod()}, {@link #isOnKeyguard()} instead."
+    )
+    override val isFullyExpanded = false
     override fun handleExternalTouch(event: MotionEvent): Boolean {
         return false
     }
@@ -84,6 +90,7 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
 
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
+    @Deprecated("Use SceneInteractor.currentScene instead.")
     override val legacyPanelExpansion = flowOf(0f)
 }
 

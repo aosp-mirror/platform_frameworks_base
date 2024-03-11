@@ -23,6 +23,8 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 val Kosmos.panelExpansionInteractor by Fixture { panelExpansionInteractorImpl }
 val Kosmos.panelExpansionInteractorImpl by Fixture {
     PanelExpansionInteractorImpl(
-        sceneInteractor = sceneInteractor,
+        sceneInteractor,
+        shadeInteractor,
+        shadeAnimationInteractor,
     )
 }

@@ -50,6 +50,7 @@ import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -296,6 +297,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
                 shadeViewController,
+                mock(PanelExpansionInteractor.class),
                 mock(QuickSettingsController.class),
                 mock(HeadsUpManager.class),
                 notificationShadeWindowView,
