@@ -46,7 +46,6 @@ def check_one_file(filename):
 class TestWithGoldenOutput(unittest.TestCase):
 
     # Test to check the generated jar files to the golden output.
-    @unittest.skip("Disabled until JDK 21 is merged and the golden files updated")
     def test_compare_to_golden(self):
         files = os.listdir(GOLDEN_DIR)
         files.sort()
