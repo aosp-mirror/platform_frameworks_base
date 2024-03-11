@@ -20,6 +20,7 @@ package com.android.compose.animation.scene
 
 import android.util.Log
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.getValue
@@ -573,7 +574,7 @@ private class SwipeTransition(
             // Important: If we are going to return early because distance is equal to 0, we should
             // still make sure we read the offset before returning so that the calling code still
             // subscribes to the offset value.
-            val offset = if (isAnimatingOffset) offsetAnimatable.value else dragOffset
+            val offset = offsetAnimation?.animatable?.value ?: dragOffset
 
             val distance = distance()
             if (distance == DistanceUnspecified) {
@@ -588,20 +589,11 @@ private class SwipeTransition(
     /** The current offset caused by the drag gesture. */
     var dragOffset by mutableFloatStateOf(0f)
 
-    /**
-     * Whether the offset is animated (the user lifted their finger) or if it is driven by gesture.
-     */
-    var isAnimatingOffset by mutableStateOf(false)
+    /** The offset animation that animates the offset once the user lifts their finger. */
+    private var offsetAnimation: OffsetAnimation? by mutableStateOf(null)
 
-    // If we are not animating offset, it means the offset is being driven by the user's finger.
     override val isUserInputOngoing: Boolean
-        get() = !isAnimatingOffset
-
-    /** The animatable used to animate the offset once the user lifted its finger. */
-    val offsetAnimatable = Animatable(0f, OffsetVisibilityThreshold)
-
-    /** Job to check that there is at most one offset animation in progress. */
-    private var offsetAnimationJob: Job? = null
+        get() = offsetAnimation == null
 
     /**
      * The [TransformationSpecImpl] associated to this transition.
@@ -647,25 +639,21 @@ private class SwipeTransition(
         return distance
     }
 
-    /** Ends any previous [offsetAnimationJob] and runs the new [job]. */
-    private fun startOffsetAnimation(job: () -> Job) {
+    /** Ends any previous [offsetAnimation] and runs the new [animation]. */
+    private fun startOffsetAnimation(animation: () -> OffsetAnimation) {
         cancelOffsetAnimation()
-        offsetAnimationJob = job()
+        offsetAnimation = animation()
     }
 
     /** Cancel any ongoing offset animation. */
     // TODO(b/317063114) This should be a suspended function to avoid multiple jobs running at
     // the same time.
     fun cancelOffsetAnimation() {
-        offsetAnimationJob?.cancel()
-        finishOffsetAnimation()
-    }
+        val animation = offsetAnimation ?: return
+        offsetAnimation = null
 
-    fun finishOffsetAnimation() {
-        if (isAnimatingOffset) {
-            isAnimatingOffset = false
-            dragOffset = offsetAnimatable.value
-        }
+        dragOffset = animation.animatable.value
+        animation.job.cancel()
     }
 
     fun animateOffset(
@@ -676,28 +664,29 @@ private class SwipeTransition(
         onAnimationCompleted: () -> Unit,
     ) {
         startOffsetAnimation {
-            coroutineScope.launch {
-                animateOffset(targetOffset, initialVelocity)
-                onAnimationCompleted()
-            }
+            val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
+            val job =
+                coroutineScope.launch {
+                    animatable.animateTo(
+                        targetValue = targetOffset,
+                        animationSpec = swipeSpec,
+                        initialVelocity = initialVelocity,
+                    )
+
+                    onAnimationCompleted()
+                }
+
+            OffsetAnimation(animatable, job)
         }
     }
 
-    private suspend fun animateOffset(targetOffset: Float, initialVelocity: Float) {
-        if (!isAnimatingOffset) {
-            offsetAnimatable.snapTo(dragOffset)
-        }
-        isAnimatingOffset = true
+    private class OffsetAnimation(
+        /** The animatable used to animate the offset. */
+        val animatable: Animatable<Float, AnimationVector1D>,
 
-        val animationSpec = transformationSpec
-        offsetAnimatable.animateTo(
-            targetValue = targetOffset,
-            animationSpec = swipeSpec,
-            initialVelocity = initialVelocity,
-        )
-
-        finishOffsetAnimation()
-    }
+        /** The job in which [animatable] is animated. */
+        val job: Job,
+    )
 
     companion object {
         const val DistanceUnspecified = 0f
