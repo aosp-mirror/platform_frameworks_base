@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAfforda
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -55,6 +56,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -66,6 +68,7 @@ class KeyguardQuickAffordanceInteractor
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
+    private val shadeInteractor: ShadeInteractor,
     private val lockPatternUtils: LockPatternUtils,
     private val keyguardStateController: KeyguardStateController,
     private val userTracker: UserTracker,
@@ -100,9 +103,10 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
+            shadeInteractor.anyExpansion.map { it < 1.0f }.distinctUntilChanged(),
             biometricSettingsRepository.isCurrentUserInLockdown,
-        ) { affordance, isDozing, isKeyguardShowing, isUserInLockdown ->
-            if (!isDozing && isKeyguardShowing && !isUserInLockdown) {
+        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && isQuickSettingsVisible && !isUserInLockdown) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden
