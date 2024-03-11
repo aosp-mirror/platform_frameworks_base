@@ -611,12 +611,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("getWindow", "windowId=" + windowId);
         }
+        int displayId = Display.INVALID_DISPLAY;
+        if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
+            displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowId(
+                    mSystemSupport.getCurrentUserIdLocked(), windowId);
+        }
         synchronized (mLock) {
-            int displayId = Display.INVALID_DISPLAY;
-            if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID) {
-                displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(
-                        mSystemSupport.getCurrentUserIdLocked(), windowId);
-            }
             ensureWindowsAvailableTimedLocked(displayId);
 
             if (!hasRightsToCurrentUserLocked()) {

@@ -1261,15 +1261,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // the computation for performance reasons.
             boolean shouldComputeWindows = false;
             int displayId = event.getDisplayId();
+            final int windowId = event.getWindowId();
+            if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID
+                    && displayId == Display.INVALID_DISPLAY) {
+                displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowId(
+                        resolvedUserId, windowId);
+                event.setDisplayId(displayId);
+            }
             synchronized (mLock) {
-                final int windowId = event.getWindowId();
-                if (windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID
-                        && displayId == Display.INVALID_DISPLAY) {
-                    displayId = mA11yWindowManager.getDisplayIdByUserIdAndWindowIdLocked(
-                            resolvedUserId, windowId);
-                    event.setDisplayId(displayId);
-                }
-
                 if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                         && displayId != Display.INVALID_DISPLAY
                         && mA11yWindowManager.isTrackingWindowsLocked(displayId)) {
