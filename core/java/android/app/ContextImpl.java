@@ -597,12 +597,18 @@ class ContextImpl extends Context {
             if (sp == null) {
                 checkMode(mode);
                 if (getApplicationInfo().targetSdkVersion >= android.os.Build.VERSION_CODES.O) {
-                    if (isCredentialProtectedStorage()
-                            && !getSystemService(UserManager.class)
-                                    .isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
-                        throw new IllegalStateException("SharedPreferences in credential encrypted "
-                                + "storage are not available until after user (id "
-                                + UserHandle.myUserId() + ") is unlocked");
+                    if (isCredentialProtectedStorage()) {
+                        final UserManager um = getSystemService(UserManager.class);
+                        if (um == null) {
+                            throw new IllegalStateException("SharedPreferences cannot be accessed "
+                                    + "if UserManager is not available. "
+                                    + "(e.g. from inside an isolated process)");
+                        }
+                        if (!um.isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
+                            throw new IllegalStateException("SharedPreferences in "
+                                    + "credential encrypted storage are not available until after "
+                                    + "user (id " + UserHandle.myUserId() + ") is unlocked");
+                        }
                     }
                 }
                 sp = new SharedPreferencesImpl(file, mode);
