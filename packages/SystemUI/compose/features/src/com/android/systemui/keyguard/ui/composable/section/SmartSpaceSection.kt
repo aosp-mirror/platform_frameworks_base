@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
@@ -60,7 +59,7 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         Column(
-            modifier = modifier.element(SmartSpaceElementKey).onTopPlacementChanged(onTopChanged),
+            modifier = modifier.onTopPlacementChanged(onTopChanged),
         ) {
             if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) {
                 return
@@ -192,5 +191,3 @@ constructor(
         )
     }
 }
-
-private val SmartSpaceElementKey = ElementKey("SmartSpace")

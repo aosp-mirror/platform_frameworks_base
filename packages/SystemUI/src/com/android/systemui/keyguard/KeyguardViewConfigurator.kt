@@ -42,6 +42,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.LockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
@@ -107,6 +108,7 @@ constructor(
     private val lockscreenContentViewModel: LockscreenContentViewModel,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val keyguardBlueprintViewBinder: KeyguardBlueprintViewBinder,
+    private val clockInteractor: KeyguardClockInteractor,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -220,7 +222,11 @@ constructor(
             blueprints.mapNotNull { it as? ComposableLockscreenSceneBlueprint }.toSet()
         return ComposeView(context).apply {
             setContent {
-                LockscreenContent(viewModel = viewModel, blueprints = sceneBlueprints)
+                LockscreenContent(
+                        viewModel = viewModel,
+                        blueprints = sceneBlueprints,
+                        clockInteractor = clockInteractor
+                    )
                     .Content(modifier = Modifier.fillMaxSize())
             }
         }

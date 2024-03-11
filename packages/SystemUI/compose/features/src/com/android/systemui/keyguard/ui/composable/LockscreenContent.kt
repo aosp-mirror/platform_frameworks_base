@@ -18,13 +18,16 @@ package com.android.systemui.keyguard.ui.composable
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.transitions
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import javax.inject.Inject
@@ -40,6 +43,7 @@ class LockscreenContent
 constructor(
     private val viewModel: LockscreenContentViewModel,
     private val blueprints: Set<@JvmSuppressWildcards ComposableLockscreenSceneBlueprint>,
+    private val clockInteractor: KeyguardClockInteractor,
 ) {
 
     private val sceneKeyByBlueprint: Map<ComposableLockscreenSceneBlueprint, SceneKey> by lazy {
@@ -55,6 +59,12 @@ constructor(
     ) {
         val coroutineScope = rememberCoroutineScope()
         val blueprintId by viewModel.blueprintId(coroutineScope).collectAsState()
+        val view = LocalView.current
+        DisposableEffect(view) {
+            clockInteractor.clockEventController.registerListeners(view)
+
+            onDispose { clockInteractor.clockEventController.unregisterListeners() }
+        }
 
         // Switch smoothly between blueprints, any composable tagged with element() will be
         // transition-animated between any two blueprints, if they both display the same element.
