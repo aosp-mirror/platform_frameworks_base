@@ -16,6 +16,12 @@
 
 package android.hardware.devicestate;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -33,6 +39,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Unit tests for {@link DeviceStateInfo}.
@@ -44,11 +51,25 @@ import java.util.List;
 public final class DeviceStateInfoTest {
 
     private static final DeviceState DEVICE_STATE_0 = new DeviceState(
-            new DeviceState.Configuration.Builder(0, "STATE_0").build());
+            new DeviceState.Configuration.Builder(0, "STATE_0")
+                    .setSystemProperties(
+                            Set.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED))
+                    .build());
     private static final DeviceState DEVICE_STATE_1 = new DeviceState(
-            new DeviceState.Configuration.Builder(1, "STATE_1").build());
+            new DeviceState.Configuration.Builder(1, "STATE_1")
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN))
+                    .build());
     private static final DeviceState DEVICE_STATE_2 = new DeviceState(
-            new DeviceState.Configuration.Builder(2, "STATE_2").build());
+            new DeviceState.Configuration.Builder(2, "STATE_2")
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY))
+                    .build());
 
     @Test
     public void create() {
