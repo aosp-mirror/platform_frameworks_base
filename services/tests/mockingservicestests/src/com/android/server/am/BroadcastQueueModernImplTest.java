@@ -1413,6 +1413,9 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
         final BroadcastRecord userPresentRecord2 = makeBroadcastRecord(userPresent);
 
         mImpl.enqueueBroadcastLocked(userPresentRecord1);
+        // Wait for a few ms before sending another broadcast to allow comparing the
+        // enqueue timestamps of these broadcasts.
+        SystemClock.sleep(5);
         mImpl.enqueueBroadcastLocked(userPresentRecord2);
 
         final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
