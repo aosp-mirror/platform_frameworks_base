@@ -131,7 +131,7 @@ public class DragPositioningCallbackUtility {
         t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left, repositionTaskBounds.top);
     }
 
-    private static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
+    static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
             PointF repositionStartPoint, float x, float y) {
         final float deltaX = x - repositionStartPoint.x;
         final float deltaY = y - repositionStartPoint.y;
@@ -140,49 +140,32 @@ public class DragPositioningCallbackUtility {
     }
 
     /**
-     * Calculates the new position of the top edge of the task and returns true if it is below the
-     * disallowed area.
-     *
-     * @param disallowedAreaForEndBoundsHeight the height of the area that where the task positioner
-     *                                         should not finalize the bounds using WCT#setBounds
-     * @param taskBoundsAtDragStart the bounds of the task on the first drag input event
-     * @param repositionStartPoint initial input coordinate
-     * @param y the y position of the motion event
-     * @return true if the top of the task is below the disallowed area
+     * If task bounds are outside of provided drag area, snap the bounds to be just inside the
+     * drag area.
+     * @param repositionTaskBounds bounds determined by task positioner
+     * @param validDragArea the area that task must be positioned inside
+     * @return whether bounds were modified
      */
-    static boolean isBelowDisallowedArea(int disallowedAreaForEndBoundsHeight,
-            Rect taskBoundsAtDragStart, PointF repositionStartPoint, float y) {
-        final float deltaY = y - repositionStartPoint.y;
-        final float topPosition = taskBoundsAtDragStart.top + deltaY;
-        return topPosition > disallowedAreaForEndBoundsHeight;
-    }
-
-    /**
-     * Updates repositionTaskBounds to the final bounds of the task after the drag is finished. If
-     * the bounds are outside of the valid drag area, the task is shifted back onto the edge of the
-     * valid drag area.
-     */
-    static void onDragEnd(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
-            PointF repositionStartPoint, float x, float y, Rect validDragArea) {
-        updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint,
-                x, y);
-        snapTaskBoundsIfNecessary(repositionTaskBounds, validDragArea);
-    }
-
-    private static void snapTaskBoundsIfNecessary(Rect repositionTaskBounds, Rect validDragArea) {
+    public static boolean snapTaskBoundsIfNecessary(Rect repositionTaskBounds, Rect validDragArea) {
         // If we were never supplied a valid drag area, do not restrict movement.
         // Otherwise, we restrict deltas to keep task position inside the Rect.
-        if (validDragArea.width() == 0) return;
+        if (validDragArea.width() == 0) return false;
+        boolean result = false;
         if (repositionTaskBounds.left < validDragArea.left) {
             repositionTaskBounds.offset(validDragArea.left - repositionTaskBounds.left, 0);
+            result = true;
         } else if (repositionTaskBounds.left > validDragArea.right) {
             repositionTaskBounds.offset(validDragArea.right - repositionTaskBounds.left, 0);
+            result = true;
         }
         if (repositionTaskBounds.top < validDragArea.top) {
             repositionTaskBounds.offset(0, validDragArea.top - repositionTaskBounds.top);
+            result = true;
         } else if (repositionTaskBounds.top > validDragArea.bottom) {
             repositionTaskBounds.offset(0, validDragArea.bottom - repositionTaskBounds.top);
+            result = true;
         }
+        return result;
     }
 
     private static float getMinWidth(DisplayController displayController,

@@ -189,8 +189,9 @@ class DragPositioningCallbackUtilityTest {
             DISPLAY_BOUNDS.right - 100,
             DISPLAY_BOUNDS.bottom - 100)
 
-        DragPositioningCallbackUtility.onDragEnd(repositionTaskBounds, STARTING_BOUNDS,
-            startingPoint, startingPoint.x - 1000, (DISPLAY_BOUNDS.bottom + 1000).toFloat(),
+        DragPositioningCallbackUtility.updateTaskBounds(repositionTaskBounds, STARTING_BOUNDS,
+            startingPoint, startingPoint.x - 1000, (DISPLAY_BOUNDS.bottom + 1000).toFloat())
+        DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(repositionTaskBounds,
             validDragArea)
         assertThat(repositionTaskBounds.left).isEqualTo(validDragArea.left)
         assertThat(repositionTaskBounds.top).isEqualTo(validDragArea.bottom)

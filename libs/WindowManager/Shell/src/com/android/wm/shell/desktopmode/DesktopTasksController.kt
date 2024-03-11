@@ -78,6 +78,7 @@ import com.android.wm.shell.sysui.ShellSharedConstants
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.KtProtoLog
+import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.io.PrintWriter
@@ -959,7 +960,8 @@ class DesktopTasksController(
     }
 
     /**
-     * Perform checks required on drag end. Move to fullscreen if drag ends in status bar area.
+     * Perform checks required on drag end. If indicator indicates a windowing mode change, perform
+     * that change. Otherwise, ensure bounds are up to date.
      *
      * @param taskInfo the task being dragged.
      * @param position position of surface when drag ends.
@@ -970,7 +972,8 @@ class DesktopTasksController(
         taskInfo: RunningTaskInfo,
         position: Point,
         inputCoordinate: PointF,
-        taskBounds: Rect
+        taskBounds: Rect,
+        validDragArea: Rect
     ) {
         if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
             return
@@ -993,9 +996,20 @@ class DesktopTasksController(
                 releaseVisualIndicator()
                 snapToHalfScreen(taskInfo, SnapPosition.RIGHT)
             }
-            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR,
             DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR -> {
+                // If task bounds are outside valid drag area, snap them inward and perform a
+                // transaction to set bounds.
+                if (DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(
+                        taskBounds, validDragArea)) {
+                    val wct = WindowContainerTransaction()
+                    wct.setBounds(taskInfo.token, taskBounds)
+                    transitions.startTransition(TRANSIT_CHANGE, wct, null)
+                }
                 releaseVisualIndicator()
+            }
+            DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR -> {
+                throw IllegalArgumentException("Should not be receiving TO_DESKTOP_INDICATOR for " +
+                        "a freeform task.")
             }
         }
         // A freeform drag-move ended, remove the indicator immediately.

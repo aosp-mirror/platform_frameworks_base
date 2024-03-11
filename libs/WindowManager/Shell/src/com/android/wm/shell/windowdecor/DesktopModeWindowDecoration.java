@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.windowingModeToString;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
@@ -499,6 +500,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Determine valid drag area for this task based on elements in the app chip.
      */
     @Override
+    @NonNull
     Rect calculateValidDragArea() {
         final int appTextWidth = ((DesktopModeAppControlsWindowDecorationViewHolder)
                 mWindowDecorViewHolder).getAppNameTextWidth();

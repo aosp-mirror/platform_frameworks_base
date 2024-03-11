@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
@@ -87,6 +88,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     }
 
     @Override
+    @NonNull
     Rect calculateValidDragArea() {
         final int leftButtonsWidth = loadDimensionPixelSize(mContext.getResources(),
                 R.dimen.caption_left_buttons_width);
