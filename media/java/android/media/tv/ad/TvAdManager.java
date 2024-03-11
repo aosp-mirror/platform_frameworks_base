@@ -61,7 +61,6 @@ import java.util.concurrent.Executor;
 @FlaggedApi(Flags.FLAG_ENABLE_AD_SERVICE_FW)
 @SystemService(Context.TV_AD_SERVICE)
 public final class TvAdManager {
-    // TODO: implement more methods and unhide APIs.
     private static final String TAG = "TvAdManager";
 
     /**

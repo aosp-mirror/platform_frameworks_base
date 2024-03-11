@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
-import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
@@ -64,7 +63,6 @@ import android.util.Pair;
 import android.view.Display;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
-import android.view.KeyEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.ScrollCaptureResponse;
@@ -333,12 +331,7 @@ public class ScreenshotController {
 
         mScreenshotHandler = timeoutHandler;
         mScreenshotHandler.setDefaultTimeoutMillis(SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS);
-        mScreenshotHandler.setOnTimeoutRunnable(() -> {
-            if (DEBUG_UI) {
-                Log.d(TAG, "Corner timeout hit");
-            }
-            dismissScreenshot(SCREENSHOT_INTERACTION_TIMEOUT);
-        });
+
 
         mDisplayId = displayId;
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
@@ -351,7 +344,14 @@ public class ScreenshotController {
         mMessageContainerController = messageContainerController;
         mAssistContentRequester = assistContentRequester;
 
-        mViewProxy = viewProxyFactory.getProxy(mContext);
+        mViewProxy = viewProxyFactory.getProxy(mContext, mUiEventLogger);
+
+        mScreenshotHandler.setOnTimeoutRunnable(() -> {
+            if (DEBUG_UI) {
+                Log.d(TAG, "Corner timeout hit");
+            }
+            mViewProxy.requestDismissal(SCREENSHOT_INTERACTION_TIMEOUT);
+        });
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
@@ -376,7 +376,7 @@ public class ScreenshotController {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (ClipboardOverlayController.COPY_OVERLAY_ACTION.equals(intent.getAction())) {
-                    dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
+                    mViewProxy.requestDismissal(SCREENSHOT_DISMISSED_OTHER);
                 }
             }
         };
@@ -525,22 +525,11 @@ public class ScreenshotController {
     }
 
     /**
-     * Clears current screenshot
+     * Requests the view to dismiss the current screenshot (may be ignored, if screenshot is already
+     * being dismissed)
      */
-    void dismissScreenshot(ScreenshotEvent event) {
-        if (DEBUG_DISMISS) {
-            Log.d(TAG, "dismissScreenshot");
-        }
-        // If we're already animating out, don't restart the animation
-        if (mViewProxy.isDismissing()) {
-            if (DEBUG_DISMISS) {
-                Log.v(TAG, "Already dismissing, ignoring duplicate command");
-            }
-            return;
-        }
-        mUiEventLogger.log(event, 0, mPackageName);
-        mScreenshotHandler.cancelTimeout();
-        mViewProxy.animateDismissal();
+    void requestDismissal(ScreenshotEvent event) {
+        mViewProxy.requestDismissal(event);
     }
 
     boolean isPendingSharedTransition() {
@@ -572,10 +561,6 @@ public class ScreenshotController {
         mScreenshotSoundController.releaseScreenshotSoundAsync();
     }
 
-    private void respondToKeyDismissal() {
-        dismissScreenshot(SCREENSHOT_DISMISSED_OTHER);
-    }
-
     /**
      * Update resources on configuration change. Reinflate for theme/color changes.
      */
@@ -585,13 +570,6 @@ public class ScreenshotController {
         }
 
         mMessageContainerController.setView(mViewProxy.getView());
-        mViewProxy.setLogger(mUiEventLogger);
-        mViewProxy.setOnBackInvokedCallback(() -> {
-            if (DEBUG_INPUT) {
-                Log.d(TAG, "Predictive Back callback dispatched");
-            }
-            respondToKeyDismissal();
-        });
         mViewProxy.setCallbacks(new ScreenshotView.ScreenshotViewCallback() {
             @Override
             public void onUserInteraction() {
@@ -621,17 +599,6 @@ public class ScreenshotController {
         mViewProxy.setFlags(mFlags);
         mViewProxy.setDefaultDisplay(mDisplayId);
         mViewProxy.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
-
-        mViewProxy.setOnKeyListener((v, keyCode, event) -> {
-            if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
-                if (DEBUG_INPUT) {
-                    Log.d(TAG, "onKeyEvent: " + keyCode);
-                }
-                respondToKeyDismissal();
-                return true;
-            }
-            return false;
-        });
 
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mViewProxy.getView());

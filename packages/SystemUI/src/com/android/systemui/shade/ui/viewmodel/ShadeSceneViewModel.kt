@@ -33,6 +33,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -64,12 +65,12 @@ constructor(
         combine(
                 deviceEntryInteractor.isUnlocked,
                 deviceEntryInteractor.canSwipeToEnter,
-                shadeInteractor.isSplitShade,
-            ) { isUnlocked, canSwipeToDismiss, isSplitShade ->
+                shadeInteractor.shadeMode,
+            ) { isUnlocked, canSwipeToDismiss, shadeMode ->
                 destinationScenes(
                     isUnlocked = isUnlocked,
                     canSwipeToDismiss = canSwipeToDismiss,
-                    isSplitShade = isSplitShade,
+                    shadeMode = shadeMode,
                 )
             }
             .stateIn(
@@ -79,7 +80,7 @@ constructor(
                     destinationScenes(
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
-                        isSplitShade = shadeInteractor.isSplitShade.value,
+                        shadeMode = shadeInteractor.shadeMode.value,
                     ),
             )
 
@@ -96,8 +97,7 @@ constructor(
                 initialValue = false
             )
 
-    /** Whether the current configuration requires the split shade to be shown. */
-    val isSplitShade: StateFlow<Boolean> = shadeInteractor.isSplitShade
+    val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
     /** Notifies that some content in the shade was clicked. */
     fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
@@ -119,7 +119,7 @@ constructor(
     private fun destinationScenes(
         isUnlocked: Boolean,
         canSwipeToDismiss: Boolean?,
-        isSplitShade: Boolean,
+        shadeMode: ShadeMode,
     ): Map<UserAction, UserActionResult> {
         val up =
             when {
@@ -128,7 +128,7 @@ constructor(
                 else -> Scenes.Lockscreen
             }
 
-        val down = if (isSplitShade) null else Scenes.QuickSettings
+        val down = Scenes.QuickSettings.takeIf { shadeMode is ShadeMode.Single }
 
         return buildMap {
             this[Swipe(SwipeDirection.Up)] = UserActionResult(up)

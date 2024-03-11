@@ -22,6 +22,7 @@ import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.Flags.FLAG_UPDATE_USER_SWITCHER_BACKGROUND;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -38,6 +39,8 @@ import static org.mockito.Mockito.when;
 
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -226,7 +229,22 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onViewAttached_callbacksRegistered() {
+    @EnableFlags(FLAG_UPDATE_USER_SWITCHER_BACKGROUND)
+    public void onViewAttached_updateUserSwitcherFlagEnabled_callbacksRegistered() {
+        mController.onViewAttached();
+
+        runAllScheduled();
+        verify(mConfigurationController).addCallback(any());
+        verify(mAnimationScheduler).addCallback(any());
+        verify(mUserInfoController).addCallback(any());
+        verify(mCommandQueue).addCallback(any());
+        verify(mStatusBarIconController).addIconGroup(any());
+        verify(mUserManager).isUserSwitcherEnabled(anyBoolean());
+    }
+
+    @Test
+    @DisableFlags(FLAG_UPDATE_USER_SWITCHER_BACKGROUND)
+    public void onViewAttached_updateUserSwitcherFlagDisabled_callbacksRegistered() {
         mController.onViewAttached();
 
         verify(mConfigurationController).addCallback(any());
@@ -238,7 +256,26 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onConfigurationChanged_updatesUserSwitcherVisibility() {
+    @EnableFlags(FLAG_UPDATE_USER_SWITCHER_BACKGROUND)
+    public void
+            onConfigurationChanged_updateUserSwitcherFlagEnabled_updatesUserSwitcherVisibility() {
+        mController.onViewAttached();
+        runAllScheduled();
+        verify(mConfigurationController).addCallback(mConfigurationListenerCaptor.capture());
+        clearInvocations(mUserManager);
+        clearInvocations(mKeyguardStatusBarView);
+
+        mConfigurationListenerCaptor.getValue().onConfigChanged(null);
+
+        runAllScheduled();
+        verify(mUserManager).isUserSwitcherEnabled(anyBoolean());
+        verify(mKeyguardStatusBarView).setUserSwitcherEnabled(anyBoolean());
+    }
+
+    @Test
+    @DisableFlags(FLAG_UPDATE_USER_SWITCHER_BACKGROUND)
+    public void
+            onConfigurationChanged_updateUserSwitcherFlagDisabled_updatesUserSwitcherVisibility() {
         mController.onViewAttached();
         verify(mConfigurationController).addCallback(mConfigurationListenerCaptor.capture());
         clearInvocations(mUserManager);
@@ -250,7 +287,26 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onKeyguardVisibilityChanged_updatesUserSwitcherVisibility() {
+    @EnableFlags(FLAG_UPDATE_USER_SWITCHER_BACKGROUND)
+    public void
+            onKeyguardVisibilityChanged_userSwitcherFlagEnabled_updatesUserSwitcherVisibility() {
+        mController.onViewAttached();
+        runAllScheduled();
+        verify(mKeyguardUpdateMonitor).registerCallback(mKeyguardCallbackCaptor.capture());
+        clearInvocations(mUserManager);
+        clearInvocations(mKeyguardStatusBarView);
+
+        mKeyguardCallbackCaptor.getValue().onKeyguardVisibilityChanged(true);
+
+        runAllScheduled();
+        verify(mUserManager).isUserSwitcherEnabled(anyBoolean());
+        verify(mKeyguardStatusBarView).setUserSwitcherEnabled(anyBoolean());
+    }
+
+    @Test
+    @DisableFlags(FLAG_UPDATE_USER_SWITCHER_BACKGROUND)
+    public void
+            onKeyguardVisibilityChanged_userSwitcherFlagDisabled_updatesUserSwitcherVisibility() {
         mController.onViewAttached();
         verify(mKeyguardUpdateMonitor).registerCallback(mKeyguardCallbackCaptor.capture());
         clearInvocations(mUserManager);
@@ -298,7 +354,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
         verify(mStatusBarIconController).addIconGroup(any());
     }
-    
+
     @Test
     public void setBatteryListening_true_callbackAdded() {
         mController.setBatteryListening(true);
@@ -760,6 +816,11 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(CommandQueue.Callbacks.class);
         verify(mCommandQueue).addCallback(captor.capture());
         return captor.getValue();
+    }
+
+    private void runAllScheduled() {
+        mBackgroundExecutor.runAllReady();
+        mFakeExecutor.runAllReady();
     }
 
     private static class TestShadeViewStateProvider

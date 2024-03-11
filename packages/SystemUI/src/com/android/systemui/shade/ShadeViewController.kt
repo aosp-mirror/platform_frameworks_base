@@ -52,14 +52,8 @@ interface ShadeViewController {
     /** Returns whether the shade's top level view is enabled. */
     val isViewEnabled: Boolean
 
-    /** Sets a listener to be notified when the shade starts opening or finishes closing. */
-    fun setOpenCloseListener(openCloseListener: OpenCloseListener)
-
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean
-
-    /** Sets a listener to be notified when touch tracking begins. */
-    fun setTrackingStartedListener(trackingStartedListener: TrackingStartedListener)
 
     /**
      * Disables the shade header.
@@ -249,18 +243,4 @@ interface ShadeViewStateProvider {
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
     val lockscreenShadeDragProgress: Float
-}
-
-/** Listens for when touch tracking begins. */
-interface TrackingStartedListener {
-    fun onTrackingStarted()
-}
-
-/** Listens for when shade begins opening or finishes closing. */
-interface OpenCloseListener {
-    /** Called when the shade finishes closing. */
-    fun onClosingFinished()
-
-    /** Called when the shade starts opening. */
-    fun onOpenStarted()
 }

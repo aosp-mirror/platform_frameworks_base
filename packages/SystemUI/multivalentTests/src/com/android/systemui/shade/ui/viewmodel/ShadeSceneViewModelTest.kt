@@ -37,10 +37,12 @@ import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.domain.startable.shadeStartable
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -72,6 +74,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
+    private val shadeRepository by lazy { kosmos.shadeRepository }
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
@@ -273,5 +276,20 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.toScene)
                 .isEqualTo(Scenes.QuickSettings)
+        }
+
+    @Test
+    fun shadeMode() =
+        testScope.runTest {
+            val shadeMode by collectLastValue(underTest.shadeMode)
+
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
+
+            shadeRepository.setShadeMode(ShadeMode.Single)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Single)
+
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(shadeMode).isEqualTo(ShadeMode.Split)
         }
 }

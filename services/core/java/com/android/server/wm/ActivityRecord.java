@@ -50,6 +50,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.isFloating;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -75,6 +76,7 @@ import static android.content.pm.ActivityInfo.FLAG_NO_HISTORY;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
 import static android.content.pm.ActivityInfo.FLAG_TURN_SCREEN_ON;
+import static android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -332,6 +334,7 @@ import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
@@ -8481,6 +8484,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // and back which can cause visible issues (see b/184078928).
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
+
+        applySizeOverrideIfNeeded(newParentConfiguration, parentWindowingMode, resolvedConfig);
+
         final boolean isFixedOrientationLetterboxAllowed =
                 parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
@@ -8577,6 +8583,87 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         logAppCompatState();
+    }
+
+    /**
+     * If necessary, override configuration fields related to app bounds.
+     * This will happen when the app is targeting SDK earlier than 35.
+     * The insets and configuration has decoupled since SDK level 35, to make the system
+     * compatible to existing apps, override the configuration with legacy metrics. In legacy
+     * metrics, fields such as appBounds will exclude some of the system bar areas.
+     * The override contains all potentially affected fields in Configuration, including
+     * screenWidthDp, screenHeightDp, smallestScreenWidthDp, and orientation.
+     * All overrides to those fields should be in this method.
+     */
+    private void applySizeOverrideIfNeeded(Configuration newParentConfiguration,
+            int parentWindowingMode, Configuration inOutConfig) {
+        if (mDisplayContent == null) {
+            return;
+        }
+        final Rect fullBounds = newParentConfiguration.windowConfiguration.getAppBounds();
+        int rotation = newParentConfiguration.windowConfiguration.getRotation();
+        if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
+            rotation = mDisplayContent.getRotation();
+        }
+        if (!mWmService.mFlags.mInsetsDecoupledConfiguration
+                || info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
+                || getCompatDisplayInsets() != null
+                || isFloating(parentWindowingMode) || fullBounds == null
+                || fullBounds.isEmpty() || rotation == ROTATION_UNDEFINED) {
+            // If the insets configuration decoupled logic is not enabled for the app, or the app
+            // already has a compat override, or the context doesn't contain enough info to
+            // calculate the override, skip the override.
+            return;
+        }
+
+        // Override starts here.
+        final Rect stableInsets = mDisplayContent.getDisplayPolicy().getDecorInsetsInfo(
+                rotation, fullBounds.width(), fullBounds.height()).mLegacyConfigInsets;
+        // This should be the only place override the configuration for ActivityRecord. Override
+        // the value if not calculated yet.
+        Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+        if (outAppBounds == null || outAppBounds.isEmpty()) {
+            inOutConfig.windowConfiguration.setAppBounds(fullBounds);
+            outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+            outAppBounds.inset(stableInsets);
+        }
+        float density = inOutConfig.densityDpi;
+        if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+            density = newParentConfiguration.densityDpi;
+        }
+        density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+            final int overrideScreenWidthDp = (int) (outAppBounds.width() / density + 0.5f);
+            inOutConfig.screenWidthDp =
+                    Math.min(overrideScreenWidthDp, newParentConfiguration.screenWidthDp);
+        }
+        if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+            final int overrideScreenHeightDp =
+                    (int) (outAppBounds.height() / density + 0.5f);
+            inOutConfig.screenHeightDp =
+                    Math.min(overrideScreenHeightDp, newParentConfiguration.screenHeightDp);
+        }
+        if (inOutConfig.smallestScreenWidthDp
+                == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && parentWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // For the case of PIP transition and multi-window environment, the
+            // smallestScreenWidthDp is handled already. Override only if the app is in
+            // fullscreen.
+            final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+            DisplayInfo info = new DisplayInfo();
+            mDisplayContent.getDisplay().getDisplayInfo(info);
+            mDisplayContent.computeSizeRanges(info, rotated, info.logicalWidth,
+                    info.logicalHeight, mDisplayContent.getDisplayMetrics().density,
+                    inOutConfig, true /* legacyConfig */);
+        }
+
+        // It's possible that screen size will be considered in different orientation with or
+        // without considering the system bar insets. Override orientation as well.
+        if (inOutConfig.orientation == ORIENTATION_UNDEFINED) {
+            inOutConfig.orientation =
+                    (inOutConfig.screenWidthDp <= inOutConfig.screenHeightDp)
+                            ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        }
     }
 
     /**
@@ -8832,6 +8919,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDisplayContent == null) {
             return true;
         }
+        if (mWmService.mFlags.mInsetsDecoupledConfiguration
+                && info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)) {
+            // No insets should be considered any more.
+            return true;
+        }
         // Only need to make changes if activity sets an orientation
         final int requestedOrientation = getRequestedConfigurationOrientation();
         if (requestedOrientation == ORIENTATION_UNDEFINED) {
@@ -8846,7 +8938,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 : mDisplayContent.getDisplayInfo();
         final Task task = getTask();
         task.calculateInsetFrames(mTmpBounds /* outNonDecorBounds */,
-                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di);
+                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di,
+                true /* useLegacyInsetsForStableBounds */);
         final int orientationWithInsets = outStableBounds.height() >= outStableBounds.width()
                 ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         // If orientation does not match the orientation with insets applied, then a

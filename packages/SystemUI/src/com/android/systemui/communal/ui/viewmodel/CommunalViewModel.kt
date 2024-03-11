@@ -87,6 +87,14 @@ constructor(
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
         _isPopupOnDismissCtaShowing.asStateFlow()
 
+    private val _isEnableWidgetDialogShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isEnableWidgetDialogShowing: Flow<Boolean> = _isEnableWidgetDialogShowing.asStateFlow()
+
+    private val _isEnableWorkProfileDialogShowing: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
+    val isEnableWorkProfileDialogShowing: Flow<Boolean> =
+        _isEnableWorkProfileDialogShowing.asStateFlow()
+
     /** Whether touches should be disabled in communal */
     val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
 
@@ -118,6 +126,40 @@ constructor(
     override fun onHidePopupAfterDismissCta() {
         cancelDelayedPopupHiding()
         setPopupOnDismissCtaVisibility(false)
+    }
+
+    override fun onOpenEnableWidgetDialog() {
+        setIsEnableWidgetDialogShowing(true)
+    }
+
+    fun onEnableWidgetDialogConfirm() {
+        communalInteractor.navigateToCommunalWidgetSettings()
+        setIsEnableWidgetDialogShowing(false)
+    }
+
+    fun onEnableWidgetDialogCancel() {
+        setIsEnableWidgetDialogShowing(false)
+    }
+
+    override fun onOpenEnableWorkProfileDialog() {
+        setIsEnableWorkProfileDialogShowing(true)
+    }
+
+    fun onEnableWorkProfileDialogConfirm() {
+        communalInteractor.unpauseWorkProfile()
+        setIsEnableWorkProfileDialogShowing(false)
+    }
+
+    fun onEnableWorkProfileDialogCancel() {
+        setIsEnableWorkProfileDialogShowing(false)
+    }
+
+    private fun setIsEnableWidgetDialogShowing(isVisible: Boolean) {
+        _isEnableWidgetDialogShowing.value = isVisible
+    }
+
+    private fun setIsEnableWorkProfileDialogShowing(isVisible: Boolean) {
+        _isEnableWorkProfileDialogShowing.value = isVisible
     }
 
     private fun setPopupOnDismissCtaVisibility(isVisible: Boolean) {

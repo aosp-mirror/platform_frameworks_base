@@ -62,7 +62,7 @@ internal class BackupRestoreFileArchiver(
             }
         Log.i(LOG_TAG, "[$name] Restore ${data.size()} bytes for $key to $file")
         val inputStream = LimitedNoCloseInputStream(data)
-        checksum.reset()
+        val checksum = createChecksum()
         val checkedInputStream = CheckedInputStream(inputStream, checksum)
         try {
             val codec = BackupCodec.fromId(checkedInputStream.read().toByte())

@@ -93,11 +93,11 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.ui.viewmodel.DreamViewModel;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -220,7 +220,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private boolean mKeyguardGoingAway = false;
 
     private @Mock CoroutineDispatcher mDispatcher;
-    private @Mock DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
+    private @Mock DreamViewModel mDreamViewModel;
     private @Mock SystemPropertiesHelper mSystemPropertiesHelper;
     private @Mock SceneContainerFlags mSceneContainerFlags;
 
@@ -241,9 +241,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
         when(testViewRoot.getView()).thenReturn(mock(View.class));
         when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(testViewRoot);
-        when(mDreamingToLockscreenTransitionViewModel.getDreamOverlayAlpha())
+        when(mDreamViewModel.getDreamAlpha())
                 .thenReturn(mock(Flow.class));
-        when(mDreamingToLockscreenTransitionViewModel.getTransitionEnded())
+        when(mDreamViewModel.getTransitionEnded())
                 .thenReturn(mock(Flow.class));
         when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(mDefaultUserId);
         when(mSelectedUserInteractor.getSelectedUserId(anyBoolean())).thenReturn(mDefaultUserId);
@@ -1259,7 +1259,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mSystemSettings,
                 mSystemClock,
                 mDispatcher,
-                () -> mDreamingToLockscreenTransitionViewModel,
+                () -> mDreamViewModel,
                 mSystemPropertiesHelper,
                 () -> mock(WindowManagerLockscreenVisibilityManager.class),
                 mSelectedUserInteractor,

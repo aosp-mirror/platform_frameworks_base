@@ -40,7 +40,7 @@ public class DataBoostWebServiceFlow {
      *
      * This can be called using the JavaScript below:
      * <script type="text/javascript">
-     *     function getRequestedCapability(duration) {
+     *     function getRequestedCapability() {
      *         DataBoostWebServiceFlow.getRequestedCapability();
      *     }
      * </script>
@@ -54,6 +54,25 @@ public class DataBoostWebServiceFlow {
      * Interface method allowing the carrier website to notify the slice purchase application of
      * a successful premium capability purchase and the duration for which the premium capability is
      * purchased.
+     *
+     * This can be called using the JavaScript below:
+     * <script type="text/javascript">
+     *     function notifyPurchaseSuccessful(duration_ms_long = 0) {
+     *         DataBoostWebServiceFlow.notifyPurchaseSuccessful(duration_ms_long);
+     *     }
+     * </script>
+     *
+     * @param duration The duration for which the premium capability is purchased in milliseconds.
+     *                 NOTE: The duration parameter is not used.
+     */
+    @JavascriptInterface
+    public void notifyPurchaseSuccessful(long duration) {
+        mActivity.onPurchaseSuccessful();
+    }
+
+    /**
+     * Interface method allowing the carrier website to notify the slice purchase application of
+     * a successful premium capability purchase.
      *
      * This can be called using the JavaScript below:
      * <script type="text/javascript">

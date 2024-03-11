@@ -43,6 +43,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.ui.viewmodel.DreamViewModel;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.SystemPropertiesHelper;
@@ -59,7 +60,6 @@ import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionMo
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransitionModule;
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
@@ -160,7 +160,7 @@ public interface KeyguardModule {
             SystemSettings systemSettings,
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
-            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
+            Lazy<DreamViewModel> dreamViewModel,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
@@ -207,7 +207,7 @@ public interface KeyguardModule {
                 systemSettings,
                 systemClock,
                 mainDispatcher,
-                dreamingToLockscreenTransitionViewModel,
+                dreamViewModel,
                 systemPropertiesHelper,
                 wmLockscreenVisibilityManager,
                 selectedUserInteractor,

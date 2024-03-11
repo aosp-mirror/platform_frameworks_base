@@ -133,18 +133,14 @@ private class MovableElementScopeImpl(
         if (shouldComposeMovableElement) {
             val movableContent: MovableElementContent =
                 layoutImpl.movableContents[element]
-                    ?: movableContentOf {
-                            contentScope: MovableElementContentScope,
-                            content: @Composable MovableElementContentScope.() -> Unit ->
-                            contentScope.content()
-                        }
+                    ?: movableContentOf { content: @Composable () -> Unit -> content() }
                         .also { layoutImpl.movableContents[element] = it }
 
             // Important: Don't introduce any parent Box or other layout here, because contentScope
             // delegates its BoxScope implementation to the Box where this content() function is
             // called, so it's important that this movableContent is composed directly under that
             // Box.
-            movableContent(contentScope, content)
+            movableContent { contentScope.content() }
         } else {
             // If we are not composed, we still need to lay out an empty space with the same *target
             // size* as its movable content, i.e. the same *size when idle*. During transitions,

@@ -21,7 +21,6 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTransitionProgress
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
@@ -29,13 +28,10 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.flowOn
 
 class GlanceableHubTransitions
 @Inject
 constructor(
-    @Background private val bgDispatcher: CoroutineDispatcher,
     private val transitionInteractor: KeyguardTransitionInteractor,
     private val transitionRepository: KeyguardTransitionRepository,
     private val communalInteractor: CommunalInteractor,
@@ -64,16 +60,16 @@ constructor(
         communalInteractor
             .transitionProgressToScene(toScene)
             .sample(
-                transitionInteractor.startedKeyguardTransitionStep.flowOn(bgDispatcher),
+                transitionInteractor.startedKeyguardState,
                 ::Pair,
             )
-            .collect { (transitionProgress, lastStartedStep) ->
+            .collect { (transitionProgress, lastStartedState) ->
                 val id = transitionId
                 if (id == null) {
                     // No transition started.
                     if (
                         transitionProgress is CommunalTransitionProgress.Transition &&
-                            lastStartedStep.to == fromState
+                            lastStartedState == fromState
                     ) {
                         transitionId =
                             transitionRepository.startTransition(
@@ -86,7 +82,7 @@ constructor(
                             )
                     }
                 } else {
-                    if (lastStartedStep.to != toState) {
+                    if (lastStartedState != toState) {
                         return@collect
                     }
                     // An existing `id` means a transition is started, and calls to

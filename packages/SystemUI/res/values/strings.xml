@@ -1135,6 +1135,14 @@
     <string name="hub_mode_add_widget_button_text">Add widget</string>
     <!-- Text for the button that exits the hub mode editing mode. [CHAR LIMIT=50] -->
     <string name="hub_mode_editing_exit_button_text">Done</string>
+    <!-- Title for the dialog that redirects users to change allowed widget category in settings. [CHAR LIMIT=NONE] -->
+    <string name="dialog_title_to_allow_any_widget">Allow any widget on lock screen?</string>
+    <!-- Text for the button in the dialog that opens when tapping on disabled widgets. [CHAR LIMIT=NONE] -->
+    <string name="button_text_to_open_settings">Open settings</string>
+    <!-- Title of a dialog. This text is confirming that the user wants to turn on access to their work apps, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=30] -->
+    <string name="work_mode_off_title">Unpause work apps?</string>
+    <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
+    <string name="work_mode_turn_on">Unpause</string>
 
     <!-- Related to user switcher --><skip/>
 

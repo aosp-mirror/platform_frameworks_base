@@ -140,13 +140,13 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.dreams.ui.viewmodel.DreamViewModel;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -1229,9 +1229,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                         if (isDream) {
                             initAlphaForAnimationTargets(wallpapers);
-                            getRemoteSurfaceAlphaApplier().accept(0.0f);
-                            mDreamingToLockscreenTransitionViewModel.get()
-                                    .startTransition();
+                            mDreamViewModel.get().startTransitionFromDream();
                             mUnoccludeFromDreamFinishedCallback = finishedCallback;
                             return;
                         }
@@ -1359,8 +1357,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final UiEventLogger mUiEventLogger;
     private final SessionTracker mSessionTracker;
     private final CoroutineDispatcher mMainDispatcher;
-    private final Lazy<DreamingToLockscreenTransitionViewModel>
-            mDreamingToLockscreenTransitionViewModel;
+    private final Lazy<DreamViewModel> mDreamViewModel;
     private RemoteAnimationTarget mRemoteAnimationTarget;
 
     private final Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
@@ -1409,7 +1406,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             SystemSettings systemSettings,
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
-            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
+            Lazy<DreamViewModel> dreamViewModel,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
@@ -1480,7 +1477,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mUiEventLogger = uiEventLogger;
         mSessionTracker = sessionTracker;
 
-        mDreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel;
+        mDreamViewModel = dreamViewModel;
         mWmLockscreenVisibilityManager = wmLockscreenVisibilityManager;
         mMainDispatcher = mainDispatcher;
 
@@ -1611,9 +1608,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
             ViewRootImpl viewRootImpl = mKeyguardViewControllerLazy.get().getViewRootImpl();
             if (viewRootImpl != null) {
-                DreamingToLockscreenTransitionViewModel viewModel =
-                        mDreamingToLockscreenTransitionViewModel.get();
-                collectFlow(viewRootImpl.getView(), viewModel.getDreamOverlayAlpha(),
+                final DreamViewModel viewModel = mDreamViewModel.get();
+                collectFlow(viewRootImpl.getView(), viewModel.getDreamAlpha(),
                         getRemoteSurfaceAlphaApplier(), mMainDispatcher);
                 collectFlow(viewRootImpl.getView(), viewModel.getTransitionEnded(),
                         getFinishedCallbackConsumer(), mMainDispatcher);

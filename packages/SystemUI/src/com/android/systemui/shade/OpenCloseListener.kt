@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.screens
+package com.android.systemui.shade
 
-import androidx.activity.result.IntentSenderRequest
+/** Listens for when shade begins opening or finishes closing. */
+interface OpenCloseListener {
+    /** Called when the shade finishes closing. */
+    fun onClosingFinished()
 
-sealed class UiState {
-    data object CredentialScreen : UiState()
-
-    data class CredentialSelected(
-        val intentSenderRequest: IntentSenderRequest?
-    ) : UiState()
-
-    data object Cancel : UiState()
+    /** Called when the shade starts opening. */
+    fun onOpenStarted()
 }

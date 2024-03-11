@@ -38,6 +38,6 @@ fun <T : AppRecord> AppListItemModel<T>.AppListTwoTargetSwitchItem(
             override val onCheckedChange = onCheckedChange
         },
         icon = { AppIcon(record.app, SettingsDimension.appIconItemSize) },
-        onClick = onClick,
+        primaryOnClick = onClick,
     )
 }

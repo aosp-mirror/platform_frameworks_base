@@ -820,7 +820,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         computeConnectionsLSP();
 
         assignCachedAdjIfNecessary(mProcessList.getLruProcessesLOSP());
-        postUpdateOomAdjInnerLSP(oomAdjReason, mActiveUids, now, nowElapsed, oldTime);
+        postUpdateOomAdjInnerLSP(oomAdjReason, mActiveUids, now, nowElapsed, oldTime, true);
     }
 
     /**
@@ -908,7 +908,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             }
         }
 
-        postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime);
+        postUpdateOomAdjInnerLSP(oomAdjReason, activeUids, now, nowElapsed, oldTime, false);
     }
 
     /**

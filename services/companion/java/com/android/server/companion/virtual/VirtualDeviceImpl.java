@@ -29,6 +29,7 @@ import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.content.pm.PackageManager.ACTION_REQUEST_PERMISSIONS;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.companion.virtualdevice.flags.Flags.virtualCameraServiceDiscovery;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -110,6 +111,8 @@ import com.android.server.companion.virtual.GenericWindowPolicyController.Runnin
 import com.android.server.companion.virtual.audio.VirtualAudioController;
 import com.android.server.companion.virtual.camera.VirtualCameraController;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+
+import dalvik.annotation.optimization.FastNative;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -265,7 +268,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 runningAppsChangedCallback,
                 params,
                 DisplayManagerGlobal.getInstance(),
-                Flags.virtualCamera()
+                isVirtualCameraEnabled()
                         ? new VirtualCameraController(params.getDevicePolicy(POLICY_TYPE_CAMERA))
                         : null);
     }
@@ -1535,4 +1538,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             return mToken;
         }
     }
+
+    private static boolean isVirtualCameraEnabled() {
+        return Flags.virtualCamera() && virtualCameraServiceDiscovery()
+                && nativeVirtualCameraServiceBuildFlagEnabled();
+    }
+
+    // Returns true if virtual_camera service is enabled in this build.
+    @FastNative
+    private static native boolean nativeVirtualCameraServiceBuildFlagEnabled();
 }

@@ -34,7 +34,8 @@ import com.android.settingslib.spa.framework.theme.divider
 internal fun TwoTargetPreference(
     title: String,
     summary: () -> String,
-    onClick: () -> Unit,
+    primaryEnabled: () -> Boolean = { true },
+    primaryOnClick: (() -> Unit)?,
     icon: @Composable (() -> Unit)? = null,
     widget: @Composable () -> Unit,
 ) {
@@ -50,7 +51,8 @@ internal fun TwoTargetPreference(
                     override val title = title
                     override val summary = summary
                     override val icon = icon
-                    override val onClick = onClick
+                    override val enabled = primaryEnabled
+                    override val onClick = primaryOnClick
                 }
             )
         }

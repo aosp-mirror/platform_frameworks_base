@@ -70,6 +70,10 @@ abstract class BaseCommunalViewModel(
         communalInteractor.addWidget(componentName, user, priority, configurator)
     }
 
+    open fun onOpenEnableWidgetDialog() {}
+
+    open fun onOpenEnableWorkProfileDialog() {}
+
     /** A list of all the communal content to be displayed in the communal hub. */
     abstract val communalContent: Flow<List<CommunalContentModel>>
 

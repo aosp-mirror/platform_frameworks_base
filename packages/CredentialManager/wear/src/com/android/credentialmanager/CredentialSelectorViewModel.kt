@@ -59,8 +59,10 @@ class CredentialSelectorViewModel @Inject constructor(
             isPrimaryScreen,
             shouldClose
         ) { request, isPrimary, shouldClose ->
+            Log.d(TAG, "Request updated: " + request?.toString() +
+                    " isClose: " + shouldClose.toString() +
+                    " isPrimaryScreen: " + isPrimary.toString())
             if (shouldClose) {
-                Log.d(TAG, "Request finished, closing ")
                 return@combine Close
             }
 
@@ -139,7 +141,10 @@ sealed class CredentialSelectorUiState {
     data object Idle : CredentialSelectorUiState()
     sealed class Get : CredentialSelectorUiState() {
         data class SingleEntry(val entry: CredentialEntryInfo) : Get()
-        data class SingleEntryPerAccount(val sortedEntries: List<CredentialEntryInfo>) : Get()
+        data class SingleEntryPerAccount(
+            val sortedEntries: List<CredentialEntryInfo>,
+            val authenticationEntryList: List<AuthenticationEntryInfo>,
+            ) : Get()
         data class MultipleEntry(
             val accounts: List<PerUserNameEntries>,
             val actionEntryList: List<ActionEntryInfo>,

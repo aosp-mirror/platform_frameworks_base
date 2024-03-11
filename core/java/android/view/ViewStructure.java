@@ -361,11 +361,11 @@ public abstract class ViewStructure {
      * {@link android.credentials.CredentialManager} request will be fired when this
      * node is focused.
      * <p> For details on how a request and callback can be set, see
-     * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
+     * {@link ViewStructure#setPendingCredentialRequest(GetCredentialRequest, OutcomeReceiver)}
      */
     @Nullable
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
-    public GetCredentialRequest getCredentialManagerRequest() {
+    public GetCredentialRequest getPendingCredentialRequest() {
         return null;
     }
 
@@ -376,12 +376,12 @@ public abstract class ViewStructure {
      * {@link android.credentials.CredentialManager} request will be fired when this
      * node is focused.
      * <p> For details on how a request and callback can be set, see
-     * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
+     * {@link ViewStructure#setPendingCredentialRequest(GetCredentialRequest, OutcomeReceiver)}
      */
     @Nullable
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public OutcomeReceiver<
-            GetCredentialResponse, GetCredentialException> getCredentialManagerCallback() {
+            GetCredentialResponse, GetCredentialException> getPendingCredentialCallback() {
         return null;
     }
 
@@ -555,12 +555,12 @@ public abstract class ViewStructure {
      * @param callback the callback where the response or exception, is returned
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
-    public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+    public void setPendingCredentialRequest(@NonNull GetCredentialRequest request,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {}
 
     /**
      * Clears the credential request previously set through
-     * {@link ViewStructure#setCredentialManagerRequest(GetCredentialRequest, OutcomeReceiver)}
+     * {@link ViewStructure#setPendingCredentialRequest(GetCredentialRequest, OutcomeReceiver)}
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     public void clearCredentialManagerRequest() {}

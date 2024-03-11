@@ -24,13 +24,15 @@ import com.android.settingslib.spa.widget.ui.SettingsSwitch
 fun TwoTargetSwitchPreference(
     model: SwitchPreferenceModel,
     icon: @Composable (() -> Unit)? = null,
-    onClick: () -> Unit,
+    primaryEnabled: () -> Boolean = { true },
+    primaryOnClick: (() -> Unit)?,
 ) {
     EntryHighlight {
         TwoTargetPreference(
             title = model.title,
             summary = model.summary,
-            onClick = onClick,
+            primaryEnabled = primaryEnabled,
+            primaryOnClick = primaryOnClick,
             icon = icon,
         ) {
             SettingsSwitch(

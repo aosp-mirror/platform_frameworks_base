@@ -25,6 +25,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,17 +41,17 @@ constructor(
     shadeInteractor: ShadeInteractor,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        shadeInteractor.isSplitShade
-            .map { isSplitShade -> destinationScenes(isSplitShade = isSplitShade) }
+        shadeInteractor.shadeMode
+            .map { shadeMode -> destinationScenes(shadeMode = shadeMode) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = destinationScenes(isSplitShade = shadeInteractor.isSplitShade.value)
+                initialValue = destinationScenes(shadeMode = shadeInteractor.shadeMode.value)
             )
 
-    private fun destinationScenes(isSplitShade: Boolean): Map<UserAction, UserActionResult> {
+    private fun destinationScenes(shadeMode: ShadeMode): Map<UserAction, UserActionResult> {
         return buildMap {
-            if (!isSplitShade) {
+            if (shadeMode == ShadeMode.Single) {
                 this[
                     Swipe(
                         pointerCount = 2,

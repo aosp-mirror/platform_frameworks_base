@@ -18,6 +18,7 @@
 package com.android.systemui.shade.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.shared.model.ShadeMode
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
@@ -60,8 +61,8 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
 
     override val legacyLockscreenShadeTracking = MutableStateFlow(false)
 
-    private val _isSplitShade = MutableStateFlow(false)
-    override val isSplitShade: StateFlow<Boolean> = _isSplitShade.asStateFlow()
+    private val _shadeMode = MutableStateFlow<ShadeMode>(ShadeMode.Single)
+    override val shadeMode: StateFlow<ShadeMode> = _shadeMode.asStateFlow()
 
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
@@ -136,8 +137,8 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
         _legacyShadeExpansion.value = expandedFraction
     }
 
-    override fun setSplitShade(isSplitShade: Boolean) {
-        _isSplitShade.value = isSplitShade
+    override fun setShadeMode(shadeMode: ShadeMode) {
+        _shadeMode.value = shadeMode
     }
 }
 

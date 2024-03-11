@@ -28,6 +28,7 @@ import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 
 object Communal {
     object Elements {
@@ -63,6 +64,7 @@ val sceneTransitions = transitions {
 fun CommunalContainer(
     modifier: Modifier = Modifier,
     viewModel: CommunalViewModel,
+    dialogFactory: SystemUIDialogFactory,
 ) {
     val currentScene: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
     val sceneTransitionLayoutState =
@@ -104,7 +106,7 @@ fun CommunalContainer(
             userActions =
                 mapOf(Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank),
         ) {
-            CommunalScene(viewModel, modifier = modifier)
+            CommunalScene(viewModel, dialogFactory, modifier = modifier)
         }
     }
 }
@@ -113,6 +115,7 @@ fun CommunalContainer(
 @Composable
 private fun SceneScope.CommunalScene(
     viewModel: BaseCommunalViewModel,
+    dialogFactory: SystemUIDialogFactory,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -121,5 +124,7 @@ private fun SceneScope.CommunalScene(
                 .fillMaxSize()
                 .background(LocalAndroidColorScheme.current.outlineVariant),
     )
-    Box(modifier.element(Communal.Elements.Content)) { CommunalHub(viewModel = viewModel) }
+    Box(modifier.element(Communal.Elements.Content)) {
+        CommunalHub(viewModel = viewModel, dialogFactory = dialogFactory)
+    }
 }

@@ -36,6 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @SysUISingleton
@@ -67,7 +68,16 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = LARGE
+                initialValue = LARGE,
+            )
+
+    val isLargeClockVisible =
+        clockSize
+            .map { it == LARGE }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
             )
 
     val currentClock = keyguardClockInteractor.currentClock

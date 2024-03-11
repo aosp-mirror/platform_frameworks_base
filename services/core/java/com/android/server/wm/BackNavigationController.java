@@ -60,7 +60,6 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.server.wm.utils.InsetUtils;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
@@ -1436,15 +1435,11 @@ class BackNavigationController {
                     return null;
                 }
                 final WindowState mainWindow = r.findMainWindow();
-                Rect insets;
-                if (mainWindow != null) {
-                    insets = mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
-                            mBounds, WindowInsets.Type.tappableElement(),
-                            false /* ignoreVisibility */).toRect();
-                    InsetUtils.addInsets(insets, mainWindow.mActivityRecord.getLetterboxInsets());
-                } else {
-                    insets = new Rect();
-                }
+                final Rect insets = mainWindow != null
+                        ? mainWindow.getInsetsStateWithVisibilityOverride().calculateInsets(
+                                mBounds, WindowInsets.Type.tappableElement(),
+                                false /* ignoreVisibility */).toRect()
+                        : new Rect();
                 final int mode = mIsOpen ? MODE_OPENING : MODE_CLOSING;
                 mAnimationTarget = new RemoteAnimationTarget(t.mTaskId, mode, mCapturedLeash,
                         !r.fillsParent(), new Rect(),
@@ -1686,7 +1681,7 @@ class BackNavigationController {
                 || (wallpaperController.getWallpaperTarget() != null
                 && wallpaperController.wallpaperTransitionReady());
         if (wallpaperReady && mPendingAnimation != null) {
-            startAnimation();
+            mWindowManagerService.mAnimator.addAfterPrepareSurfacesRunnable(this::startAnimation);
         }
     }
 

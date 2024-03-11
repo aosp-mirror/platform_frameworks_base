@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver
 import android.content.ContentProvider
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.AppComponentFactory
 import com.android.systemui.dagger.ContextComponentHelper
 import com.android.systemui.dagger.SysUIComponent
@@ -90,8 +91,7 @@ abstract class SystemUIAppComponentFactoryBase : AppComponentFactory() {
         return app
     }
 
-    @UsesReflection(
-            KeepTarget(instanceOfClassConstant = SysUIComponent::class, methodName = "inject"))
+    @UsesReflection(KeepTarget(instanceOfClassConstant = SysUIComponent::class, methodName = "inject"))
     override fun instantiateProviderCompat(cl: ClassLoader, className: String): ContentProvider {
         val contentProvider = super.instantiateProviderCompat(cl, className)
         if (contentProvider is ContextInitializer) {
@@ -103,12 +103,11 @@ abstract class SystemUIAppComponentFactoryBase : AppComponentFactory() {
                         .getMethod("inject", contentProvider.javaClass)
                     injectMethod.invoke(rootComponent, contentProvider)
                 } catch (e: NoSuchMethodException) {
-                    throw RuntimeException("No injector for class: " + contentProvider.javaClass, e)
+                    Log.w(TAG, "No injector for class: " + contentProvider.javaClass, e)
                 } catch (e: IllegalAccessException) {
-                    throw RuntimeException("Injector inaccessible for class: " +
-                            contentProvider.javaClass, e)
+                    Log.w(TAG, "No injector for class: " + contentProvider.javaClass, e)
                 } catch (e: InvocationTargetException) {
-                    throw RuntimeException("Error while injecting: " + contentProvider.javaClass, e)
+                    Log.w(TAG, "No injector for class: " + contentProvider.javaClass, e)
                 }
                 initializer
             }

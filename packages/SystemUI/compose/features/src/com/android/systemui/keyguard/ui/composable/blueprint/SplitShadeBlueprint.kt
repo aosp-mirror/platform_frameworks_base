@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.composable.blueprint
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
@@ -35,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.Flags
-import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
@@ -44,7 +41,6 @@ import com.android.systemui.keyguard.ui.composable.section.LockSection
 import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
-import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
 import com.android.systemui.res.R
@@ -65,14 +61,12 @@ constructor(
     private val viewModel: LockscreenContentViewModel,
     private val statusBarSection: StatusBarSection,
     private val clockSection: DefaultClockSection,
-    private val smartSpaceSection: SmartSpaceSection,
     private val notificationSection: NotificationSection,
     private val lockSection: LockSection,
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
     private val mediaCarouselSection: MediaCarouselSection,
-    private val clockInteractor: KeyguardClockInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
 ) : ComposableLockscreenSceneBlueprint {
 
@@ -81,8 +75,6 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
-        val burnIn = rememberBurnIn(clockInteractor)
-        val resources = LocalContext.current.resources
 
         LockscreenLongPress(
             viewModel = viewModel.longPress,
@@ -102,41 +94,7 @@ constructor(
                                 modifier = Modifier.fillMaxHeight().weight(weight = 1f),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                with(clockSection) {
-                                    SmallClock(
-                                        burnInParams = burnIn.parameters,
-                                        onTopChanged = burnIn.onSmallClockTopChanged,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                }
-
-                                with(smartSpaceSection) {
-                                    SmartSpace(
-                                        burnInParams = burnIn.parameters,
-                                        onTopChanged = burnIn.onSmartspaceTopChanged,
-                                        modifier =
-                                            Modifier.fillMaxWidth()
-                                                .padding(
-                                                    top = {
-                                                        viewModel.getSmartSpacePaddingTop(resources)
-                                                    },
-                                                )
-                                                .padding(
-                                                    bottom =
-                                                        dimensionResource(
-                                                            R.dimen
-                                                                .keyguard_status_view_bottom_margin
-                                                        )
-                                                ),
-                                    )
-                                }
-
-                                if (viewModel.isLargeClockVisible) {
-                                    Spacer(modifier = Modifier.weight(weight = 1f))
-                                    with(clockSection) { LargeClock() }
-                                    Spacer(modifier = Modifier.weight(weight = 1f))
-                                }
-
+                                with(clockSection) { DefaultClockLayout() }
                                 with(mediaCarouselSection) { MediaCarousel() }
                             }
                             with(notificationSection) {

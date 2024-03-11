@@ -7057,16 +7057,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Clears the request and callback previously set
-     * through {@link View#setCredentialManagerRequest}.
+     * through {@link View#setPendingCredentialRequest}.
      * Once this API is invoked, there will be no request fired to {@link CredentialManager}
      * on future view focus events.
      *
-     * @see #setCredentialManagerRequest
+     * @see #setPendingCredentialRequest
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
-    public void clearCredentialManagerRequest() {
+    public void clearPendingCredentialRequest() {
         if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
-            Log.v(AUTOFILL_LOG_TAG, "clearCredentialManagerRequest called");
+            Log.v(AUTOFILL_LOG_TAG, "clearPendingCredentialRequest called");
         }
         mViewCredentialHandler = null;
     }
@@ -7096,7 +7096,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                 propagated for the given view
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
-    public void setCredentialManagerRequest(@NonNull GetCredentialRequest request,
+    public void setPendingCredentialRequest(@NonNull GetCredentialRequest request,
             @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
         Preconditions.checkNotNull(request, "request must not be null");
         Preconditions.checkNotNull(callback, "request must not be null");
@@ -9604,7 +9604,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setIsCredential(isCredential());
             }
             if (getViewCredentialHandler() != null) {
-                structure.setCredentialManagerRequest(
+                structure.setPendingCredentialRequest(
                         getViewCredentialHandler().getRequest(),
                         getViewCredentialHandler().getCallback());
             }
@@ -10009,22 +10009,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void onGetCredentialResponse(GetCredentialResponse response) {
-        if (getCredentialManagerCallback() == null) {
+        if (getPendingCredentialCallback() == null) {
             Log.w(AUTOFILL_LOG_TAG, "onGetCredentialResponse called but no callback found");
             return;
         }
-        getCredentialManagerCallback().onResult(response);
+        getPendingCredentialCallback().onResult(response);
     }
 
     /**
      * @hide
      */
     public void onGetCredentialException(String errorType, String errorMsg) {
-        if (getCredentialManagerCallback() == null) {
+        if (getPendingCredentialCallback() == null) {
             Log.w(AUTOFILL_LOG_TAG, "onGetCredentialException called but no callback found");
             return;
         }
-        getCredentialManagerCallback().onError(new GetCredentialException(errorType, errorMsg));
+        getPendingCredentialCallback().onError(new GetCredentialException(errorType, errorMsg));
     }
 
     /**
@@ -10055,13 +10055,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the active {@link android.service.autofill.AutofillService} on
      * the device.
      *
-     * <p>See {@link #setCredentialManagerRequest} for more info.
+     * <p>See {@link #setPendingCredentialRequest} for more info.
      *
      * @return The credential request associated with this View.
      */
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     @Nullable
-    public final GetCredentialRequest getCredentialManagerRequest() {
+    public final GetCredentialRequest getPendingCredentialRequest() {
         if (mViewCredentialHandler == null) {
             return null;
         }
@@ -10071,14 +10071,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Returns the callback that has previously been set up on this view through
-     * the {@link #setCredentialManagerRequest} API.
+     * the {@link #setPendingCredentialRequest} API.
      * If the return value is null, that means no callback, or request, has been set
      * on the view and no {@link CredentialManager} flow will be invoked
      * when this view is focused. Traditioanl autofill flows will still
      * work, and autofillable content will still be returned through the
      * {@link #autofill(AutofillValue)} )} API.
      *
-     * <p>See {@link #setCredentialManagerRequest} for more info.
+     * <p>See {@link #setPendingCredentialRequest} for more info.
      *
      * @return The callback associated with this view that will be invoked on a response from
      * {@link CredentialManager} .
@@ -10086,7 +10086,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @FlaggedApi(FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION)
     @Nullable
     public final OutcomeReceiver<GetCredentialResponse,
-            GetCredentialException> getCredentialManagerCallback() {
+            GetCredentialException> getPendingCredentialCallback() {
         if (mViewCredentialHandler == null) {
             return null;
         }
@@ -11042,7 +11042,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     AccessibilityNodeInfo.getVirtualDescendantId(info.getSourceNodeId())));
         }
         if (getViewCredentialHandler() != null) {
-            structure.setCredentialManagerRequest(
+            structure.setPendingCredentialRequest(
                     getViewCredentialHandler().getRequest(),
                     getViewCredentialHandler().getCallback());
         }

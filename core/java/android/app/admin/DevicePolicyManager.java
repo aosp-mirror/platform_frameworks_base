@@ -14090,9 +14090,7 @@ public class DevicePolicyManager {
         try {
             return mService.isAuditLogEnabled(mContext.getPackageName());
         } catch (RemoteException re) {
-            re.rethrowFromSystemServer();
-            // unreachable
-            return false;
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -14102,8 +14100,8 @@ public class DevicePolicyManager {
      * is enforced by the caller. Disabling the policy clears the callback. Each time a new callback
      * is set, it will first be invoked with all the audit log events available at the time.
      *
-     * @param callback callback to invoke when new audit log events become available or {@code null}
-     *                 to clear the callback.
+     * @param callback The callback to invoke when new audit log events become available.
+     * @param executor The executor through which the callback should be invoked.
      * @hide
      */
     @SystemApi
@@ -14111,11 +14109,10 @@ public class DevicePolicyManager {
     @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
     public void setAuditLogEventCallback(
             @NonNull @CallbackExecutor Executor executor,
-            @Nullable Consumer<List<SecurityEvent>> callback) {
+            @NonNull Consumer<List<SecurityEvent>> callback) {
         throwIfParentInstance("setAuditLogEventCallback");
-        final IAuditLogEventsCallback wrappedCallback = callback == null
-                ? null
-                : new IAuditLogEventsCallback.Stub() {
+        final IAuditLogEventsCallback wrappedCallback =
+                new IAuditLogEventsCallback.Stub() {
                     @Override
                     public void onNewAuditLogEvents(List<SecurityEvent> events) {
                         executor.execute(() -> callback.accept(events));
@@ -14124,7 +14121,25 @@ public class DevicePolicyManager {
         try {
             mService.setAuditLogEventsCallback(mContext.getPackageName(), wrappedCallback);
         } catch (RemoteException re) {
-            re.rethrowFromSystemServer();
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears audit log event callback. If a callback was set previously, it may still get invoked
+     * after this call returns if it was already scheduled.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURITY_LOG_V2_ENABLED)
+    @RequiresPermission(permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING)
+    public void clearAuditLogEventCallback() {
+        throwIfParentInstance("clearAuditLogEventCallback");
+        try {
+            mService.setAuditLogEventsCallback(mContext.getPackageName(), null);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -17442,24 +17457,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the subscription ids of all subscriptions which was downloaded by the calling
+     * Returns the subscription ids of all subscriptions which were downloaded by the calling
      * admin.
      *
      * <p> This returns only the subscriptions which were downloaded by the calling admin via
      *      {@link android.telephony.euicc.EuiccManager#downloadSubscription}.
-     *      If a susbcription is returned by this method then in it subject to management controls
+     *      If a subscription is returned by this method then in it subject to management controls
      *      and cannot be removed by users.
      *
      * <p> Callable by device owners and profile owners.
      *
-     * @throws SecurityException if the caller is not authorized to call this method
-     * @return ids of all managed subscriptions currently downloaded by an admin on the device
+     * @throws SecurityException if the caller is not authorized to call this method.
+     * @return ids of all managed subscriptions currently downloaded by an admin on the device.
      */
     @FlaggedApi(FLAG_ESIM_MANAGEMENT_ENABLED)
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS)
     @NonNull
-    public Set<Integer> getSubscriptionsIds() {
-        throwIfParentInstance("getSubscriptionsIds");
+    public Set<Integer> getSubscriptionIds() {
+        throwIfParentInstance("getSubscriptionIds");
         if (mService != null) {
             try {
                 return intArrayToSet(mService.getSubscriptionIds(mContext.getPackageName()));

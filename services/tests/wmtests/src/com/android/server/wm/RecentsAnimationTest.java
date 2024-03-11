@@ -33,6 +33,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -164,13 +165,12 @@ public class RecentsAnimationTest extends WindowTestsBase {
         ActivityRecord recentsActivity = recentsStack.getTopNonFinishingActivity();
         // The activity is started in background so it should be invisible and will be stopped.
         assertThat(recentsActivity).isNotNull();
-        assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
+        assertThat(recentsActivity.getState()).isEqualTo(STOPPING);
         assertFalse(recentsActivity.isVisibleRequested());
 
         // Assume it is stopped to test next use case.
         recentsActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
                 null /* description */);
-        mSupervisor.mStoppingActivities.remove(recentsActivity);
 
         spyOn(recentsActivity);
         // Start when the recents activity exists. It should ensure the configuration.
@@ -178,7 +178,6 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 null /* recentsAnimationRunner */);
 
         verify(recentsActivity).ensureActivityConfiguration(eq(true) /* ignoreVisibility */);
-        assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
     }
 
     @Test

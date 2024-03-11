@@ -19,8 +19,12 @@ package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import android.os.UserManager
+import android.os.userManager
+import android.provider.Settings
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -50,6 +54,8 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
@@ -61,6 +67,9 @@ import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.fakeUserRepository
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.fakeSettings
@@ -73,6 +82,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -103,6 +114,8 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var editWidgetsActivityStarter: EditWidgetsActivityStarter
     private lateinit var sceneInteractor: SceneInteractor
     private lateinit var userTracker: FakeUserTracker
+    private lateinit var activityStarter: ActivityStarter
+    private lateinit var userManager: UserManager
 
     private lateinit var underTest: CommunalInteractor
 
@@ -121,9 +134,13 @@ class CommunalInteractorTest : SysuiTestCase() {
         communalPrefsRepository = kosmos.fakeCommunalPrefsRepository
         sceneInteractor = kosmos.sceneInteractor
         userTracker = kosmos.fakeUserTracker
+        activityStarter = kosmos.activityStarter
+        userManager = kosmos.userManager
 
         whenever(mainUser.isMain).thenReturn(true)
         whenever(secondaryUser.isMain).thenReturn(false)
+        whenever(userManager.isQuietModeEnabled(any<UserHandle>())).thenReturn(false)
+        whenever(userManager.isManagedProfile(anyInt())).thenReturn(false)
         userRepository.setUserInfos(listOf(mainUser, secondaryUser))
 
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
@@ -800,6 +817,16 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun navigateToCommunalWidgetSettings_startsActivity() =
+        testScope.runTest {
+            underTest.navigateToCommunalWidgetSettings()
+            val intentCaptor = argumentCaptor<Intent>()
+            verify(activityStarter)
+                .postStartActivityDismissingKeyguard(capture(intentCaptor), eq(0))
+            assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_COMMUNAL_SETTING)
+        }
+
+    @Test
     fun filterWidgets_whenUserProfileRemoved() =
         testScope.runTest {
             // Keyguard showing, and tutorial completed.
@@ -829,6 +856,63 @@ class CommunalInteractorTest : SysuiTestCase() {
             widgetContent!!.forEachIndexed { _, model ->
                 assertThat(model.providerInfo.profile?.identifier).isEqualTo(MAIN_USER_INFO.id)
             }
+        }
+
+    @Test
+    fun widgetContent_inQuietMode() =
+        testScope.runTest {
+            // Keyguard showing, and tutorial completed.
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Work profile is set up.
+            val userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(
+                userInfos = userInfos,
+                selectedUserIndex = 0,
+            )
+            runCurrent()
+
+            // Keyguard widgets are allowed.
+            kosmos.fakeSettings.putIntForUser(
+                CommunalSettingsRepositoryImpl.GLANCEABLE_HUB_CONTENT_SETTING,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                mainUser.id
+            )
+            runCurrent()
+
+            // When work profile is paused.
+            whenever(userManager.isQuietModeEnabled(eq(UserHandle.of(USER_INFO_WORK.id))))
+                .thenReturn(true)
+            whenever(userManager.isManagedProfile(eq(USER_INFO_WORK.id))).thenReturn(true)
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+            val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
+            val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+            val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
+            val widgets = listOf(widget1, widget2, widget3)
+            widgetRepository.setCommunalWidgets(widgets)
+
+            // The work profile widget is in quiet mode, while other widgets are not.
+            assertThat(widgetContent).hasSize(3)
+            widgetContent!!.forEach { model ->
+                assertThat(model)
+                    .isInstanceOf(CommunalContentModel.WidgetContent.Widget::class.java)
+            }
+            assertThat(
+                    (widgetContent!![0] as CommunalContentModel.WidgetContent.Widget).inQuietMode
+                )
+                .isTrue()
+            assertThat(
+                    (widgetContent!![1] as CommunalContentModel.WidgetContent.Widget).inQuietMode
+                )
+                .isFalse()
+            assertThat(
+                    (widgetContent!![2] as CommunalContentModel.WidgetContent.Widget).inQuietMode
+                )
+                .isFalse()
         }
 
     @Test
@@ -932,7 +1016,10 @@ class CommunalInteractorTest : SysuiTestCase() {
     private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =
         mock<CommunalWidgetContentModel> {
             whenever(this.appWidgetId).thenReturn(appWidgetId)
-            val providerInfo = mock<AppWidgetProviderInfo>()
+            val providerInfo =
+                mock<AppWidgetProviderInfo>().apply {
+                    widgetCategory = AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
+                }
             whenever(providerInfo.profile).thenReturn(UserHandle(userId))
             whenever(this.providerInfo).thenReturn(providerInfo)
         }

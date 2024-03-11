@@ -22,6 +22,7 @@ import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.Context;
@@ -306,7 +307,7 @@ public class StartingSurfaceDrawer {
         @CallSuper
         protected void removeImmediately() {
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
-            mRecordManager.onRecordRemoved(mTaskId);
+            mRecordManager.onRecordRemoved(this, mTaskId);
         }
     }
 
@@ -327,6 +328,11 @@ public class StartingSurfaceDrawer {
         }
 
         void addRecord(int taskId, StartingWindowRecord record) {
+            final StartingWindowRecord original = mStartingWindowRecords.get(taskId);
+            if (original != null) {
+                mTmpRemovalInfo.taskId = taskId;
+                original.removeIfPossible(mTmpRemovalInfo, true /* immediately */);
+            }
             mStartingWindowRecords.put(taskId, record);
         }
 
@@ -346,8 +352,11 @@ public class StartingSurfaceDrawer {
             removeWindow(mTmpRemovalInfo, true/* immediately */);
         }
 
-        void onRecordRemoved(int taskId) {
-            mStartingWindowRecords.remove(taskId);
+        void onRecordRemoved(@NonNull StartingWindowRecord record, int taskId) {
+            final StartingWindowRecord currentRecord = mStartingWindowRecords.get(taskId);
+            if (currentRecord == record) {
+                mStartingWindowRecords.remove(taskId);
+            }
         }
 
         StartingWindowRecord getRecord(int taskId) {

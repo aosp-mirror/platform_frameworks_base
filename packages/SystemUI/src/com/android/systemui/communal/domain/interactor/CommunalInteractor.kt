@@ -18,9 +18,14 @@ package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.UserHandle
+import android.os.UserManager
+import android.provider.Settings
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalPrefsRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
@@ -45,6 +50,7 @@ import com.android.systemui.log.dagger.CommunalLog
 import com.android.systemui.log.dagger.CommunalTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
@@ -53,6 +59,7 @@ import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
+import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,6 +85,7 @@ class CommunalInteractor
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
+    broadcastDispatcher: BroadcastDispatcher,
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
     private val communalPrefsRepository: CommunalPrefsRepository,
@@ -88,6 +96,8 @@ constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     private val userTracker: UserTracker,
+    private val activityStarter: ActivityStarter,
+    private val userManager: UserManager,
     sceneInteractor: SceneInteractor,
     sceneContainerFlags: SceneContainerFlags,
     @CommunalLog logBuffer: LogBuffer,
@@ -247,6 +257,18 @@ constructor(
         editWidgetsActivityStarter.startActivity(preselectedKey)
     }
 
+    /**
+     * Navigates to communal widget setting after user has unlocked the device. Currently, this
+     * setting resides within the Hub Mode settings screen.
+     */
+    fun navigateToCommunalWidgetSettings() {
+        activityStarter.postStartActivityDismissingKeyguard(
+            Intent(Settings.ACTION_COMMUNAL_SETTING)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            /* delay= */ 0,
+        )
+    }
+
     /** Dismiss the CTA tile from the hub in view mode. */
     suspend fun dismissCtaTile() = communalPrefsRepository.setCtaDismissedForCurrentUser()
 
@@ -272,6 +294,33 @@ constructor(
     fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) =
         widgetRepository.updateWidgetOrder(widgetIdToPriorityMap)
 
+    /** Request to unpause work profile that is currently in quiet mode. */
+    fun unpauseWorkProfile() {
+        userTracker.userProfiles
+            .find { it.isManagedProfile }
+            ?.userHandle
+            ?.let { userHandle ->
+                userManager.requestQuietModeEnabled(/* enableQuietMode */ false, userHandle)
+            }
+    }
+
+    /** Returns true if work profile is in quiet mode (disabled) for user handle. */
+    private fun isQuietModeEnabled(userHandle: UserHandle): Boolean =
+        userManager.isManagedProfile(userHandle.identifier) &&
+            userManager.isQuietModeEnabled(userHandle)
+
+    /** Emits whenever a work profile pause or unpause broadcast is received. */
+    private val updateOnWorkProfileBroadcastReceived: Flow<Unit> =
+        broadcastDispatcher
+            .broadcastFlow(
+                filter =
+                    IntentFilter().apply {
+                        addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+                        addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+                    },
+            )
+            .emitOnStart()
+
     /** All widgets present in db. */
     val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
         isCommunalAvailable.flatMapLatest { available ->
@@ -282,8 +331,9 @@ constructor(
     val widgetContent: Flow<List<WidgetContent>> =
         combine(
             widgetRepository.communalWidgets.map { filterWidgetsByExistingUsers(it) },
-            communalSettingsInteractor.communalWidgetCategories
-        ) { widgets, allowedCategories ->
+            communalSettingsInteractor.communalWidgetCategories,
+            updateOnWorkProfileBroadcastReceived,
+        ) { widgets, allowedCategories, _ ->
             widgets.map { widget ->
                 if (widget.providerInfo.widgetCategory and allowedCategories != 0) {
                     // At least one category this widget specified is allowed, so show it
@@ -291,6 +341,7 @@ constructor(
                         appWidgetId = widget.appWidgetId,
                         providerInfo = widget.providerInfo,
                         appWidgetHost = appWidgetHost,
+                        inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
                     )
                 } else {
                     WidgetContent.DisabledWidget(

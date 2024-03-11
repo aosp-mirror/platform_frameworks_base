@@ -8210,7 +8210,7 @@ public class NotificationManagerService extends SystemService {
                 try {
                     return mTelecomManager.isInManagedCall()
                             || mTelecomManager.isInSelfManagedCall(pkg,
-                            /* hasCrossUserAccess */ true);
+                            UserHandle.ALL);
                 } catch (IllegalStateException ise) {
                     // Telecom is not ready (this is likely early boot), so there are no calls.
                     return false;

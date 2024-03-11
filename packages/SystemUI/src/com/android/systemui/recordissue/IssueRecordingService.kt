@@ -23,6 +23,8 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
+import android.util.Log
+import androidx.core.content.FileProvider
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.qualifiers.LongRunning
 import com.android.systemui.dagger.qualifiers.Main
@@ -34,7 +36,12 @@ import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.traceur.FileSender
 import com.android.traceur.TraceUtils
+import java.io.File
+import java.io.FileOutputStream
+import java.nio.file.Files
 import java.util.concurrent.Executor
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 
 class IssueRecordingService
@@ -102,21 +109,22 @@ constructor(
     }
 
     private fun shareRecording(intent: Intent) {
-        val files = TraceUtils.traceDump(contentResolver, TRACE_FILE_NAME).get()
-        val traceUris: MutableList<Uri> = FileSender.getUriForFiles(this, files, AUTHORITY)
-
-        if (
-            intent.hasExtra(EXTRA_PATH) && intent.getStringExtra(EXTRA_PATH)?.isNotEmpty() == true
-        ) {
-            traceUris.add(Uri.parse(intent.getStringExtra(EXTRA_PATH)))
-        }
-
+        val sharableUri: Uri =
+            zipAndPackageRecordings(
+                TraceUtils.traceDump(contentResolver, TRACE_FILE_NAME).get(),
+                intent.getStringExtra(EXTRA_PATH)
+            )
+                ?: return
         val sendIntent =
-            FileSender.buildSendIntent(this, traceUris).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            FileSender.buildSendIntent(this, listOf(sharableUri))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         if (mNotificationId != NOTIF_BASE_ID) {
-            val currentUserId = mUserContextTracker.userContext.userId
-            mNotificationManager.cancelAsUser(null, mNotificationId, UserHandle(currentUserId))
+            mNotificationManager.cancelAsUser(
+                null,
+                mNotificationId,
+                UserHandle(mUserContextTracker.userContext.userId)
+            )
         }
 
         // TODO: Debug why the notification shade isn't closing upon starting the BetterBug activity
@@ -130,11 +138,39 @@ constructor(
         )
     }
 
+    private fun zipAndPackageRecordings(traceFiles: List<File>, screenRecordingUri: String?): Uri? {
+        try {
+            externalCacheDir?.mkdirs()
+            val outZip: File = File.createTempFile(TEMP_FILE_PREFIX, ZIP_SUFFIX, externalCacheDir)
+            ZipOutputStream(FileOutputStream(outZip)).use { os ->
+                traceFiles.forEach { file ->
+                    os.putNextEntry(ZipEntry(file.name))
+                    Files.copy(file.toPath(), os)
+                    os.closeEntry()
+                }
+                if (screenRecordingUri != null) {
+                    contentResolver.openInputStream(Uri.parse(screenRecordingUri))?.use {
+                        os.putNextEntry(ZipEntry(SCREEN_RECORDING_ZIP_LABEL))
+                        it.transferTo(os)
+                        os.closeEntry()
+                    }
+                }
+            }
+            return FileProvider.getUriForFile(this, AUTHORITY, outZip)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to zip and package Recordings. Cannot share with BetterBug.", e)
+            return null
+        }
+    }
+
     companion object {
         private const val TAG = "IssueRecordingService"
         private const val CHANNEL_ID = "issue_record"
         private const val EXTRA_SCREEN_RECORD = "extra_screenRecord"
         private const val EXTRA_WINSCOPE_TRACING = "extra_winscopeTracing"
+        private const val ZIP_SUFFIX = ".zip"
+        private const val TEMP_FILE_PREFIX = "issue_recording"
+        private const val SCREEN_RECORDING_ZIP_LABEL = "screen-recording.mp4"
 
         private val DEFAULT_TRACE_TAGS = listOf<String>()
         private const val DEFAULT_BUFFER_SIZE = 16384

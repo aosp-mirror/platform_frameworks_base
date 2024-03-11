@@ -57,6 +57,7 @@ import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
@@ -104,6 +105,7 @@ import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.LaunchActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.app.servertransaction.StopActivityItem;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -944,8 +946,10 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 if (andResume) {
                     lifecycleItem = ResumeActivityItem.obtain(r.token, isTransitionForward,
                             r.shouldSendCompatFakeFocus());
-                } else {
+                } else if (r.isVisibleRequested()) {
                     lifecycleItem = PauseActivityItem.obtain(r.token);
+                } else {
+                    lifecycleItem = StopActivityItem.obtain(r.token);
                 }
 
                 // Schedule transaction.
@@ -1013,7 +1017,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // a resume.
             r.setState(RESUMED, "realStartActivityLocked");
             r.completeResumeLocked();
-        } else {
+        } else if (r.isVisibleRequested()) {
             // This activity is not starting in the resumed state... which should look like we asked
             // it to pause+stop (but remain visible), and it has done so and reported back the
             // current icicle and other state.
@@ -1021,6 +1025,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     + "(starting in paused state)", r);
             r.setState(PAUSED, "realStartActivityLocked");
             mRootWindowContainer.executeAppTransitionForAllDisplay();
+        } else {
+            // This activity is starting while invisible, so it should be stopped.
+            r.setState(STOPPING, "realStartActivityLocked");
         }
         // Perform OOM scoring after the activity state is set, so the process can be updated with
         // the latest state.
