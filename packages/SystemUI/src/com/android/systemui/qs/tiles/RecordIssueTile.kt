@@ -44,6 +44,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.IssueRecordingService
+import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingService
@@ -69,6 +70,7 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
+    private val issueRecordingState: IssueRecordingState,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
     QSTileImpl<QSTile.BooleanState>(
@@ -83,7 +85,16 @@ constructor(
         qsLogger
     ) {
 
-    @VisibleForTesting var isRecording: Boolean = false
+    private val onRecordingChangeListener = Runnable { refreshState() }
+
+    override fun handleSetListening(listening: Boolean) {
+        super.handleSetListening(listening)
+        if (listening) {
+            issueRecordingState.addListener(onRecordingChangeListener)
+        } else {
+            issueRecordingState.removeListener(onRecordingChangeListener)
+        }
+    }
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
 
@@ -103,13 +114,11 @@ constructor(
 
     @VisibleForTesting
     public override fun handleClick(view: View?) {
-        if (isRecording) {
-            isRecording = false
+        if (issueRecordingState.isRecording) {
             stopIssueRecordingService()
         } else {
             mUiHandler.post { showPrompt(view) }
         }
-        refreshState()
     }
 
     private fun startIssueRecordingService(screenRecord: Boolean, winscopeTracing: Boolean) =
@@ -138,11 +147,9 @@ constructor(
         val dialog: AlertDialog =
             delegateFactory
                 .create {
-                    isRecording = true
                     startIssueRecordingService(it.screenRecord, it.winscopeTracing)
                     dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
                     panelInteractor.collapsePanels()
-                    refreshState()
                 }
                 .createDialog()
         val dismissAction =
@@ -168,7 +175,7 @@ constructor(
     @VisibleForTesting
     public override fun handleUpdateState(qsTileState: QSTile.BooleanState, arg: Any?) {
         qsTileState.apply {
-            if (isRecording) {
+            if (issueRecordingState.isRecording) {
                 value = true
                 state = Tile.STATE_ACTIVE
                 forceExpandIcon = false
