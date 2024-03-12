@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
+import com.android.systemui.unfold.UnfoldTransitionModule;
 import com.android.systemui.volume.dagger.VolumeModule;
 import com.android.systemui.wallpapers.dagger.WallpaperModule;
 
@@ -99,6 +100,7 @@ import javax.inject.Named;
         RotationLockModule.class,
         SceneContainerFrameworkModule.class,
         StartCentralSurfacesModule.class,
+        UnfoldTransitionModule.Startables.class,
         VolumeModule.class,
         WallpaperModule.class,
         KeyboardShortcutsModule.class
