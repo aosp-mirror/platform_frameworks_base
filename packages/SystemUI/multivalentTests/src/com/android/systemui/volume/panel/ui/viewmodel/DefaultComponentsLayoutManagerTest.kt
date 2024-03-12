@@ -37,7 +37,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         DefaultComponentsLayoutManager(
             BOTTOM_BAR,
             headerComponents = listOf(COMPONENT_1),
-            footerComponents = listOf(COMPONENT_2),
+            footerComponents = listOf(COMPONENT_5, COMPONENT_2),
         )
 
     @Test
@@ -48,10 +48,18 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         val component2 = ComponentState(COMPONENT_2, kosmos.mockVolumePanelUiComponent, false)
         val component3 = ComponentState(COMPONENT_3, kosmos.mockVolumePanelUiComponent, false)
         val component4 = ComponentState(COMPONENT_4, kosmos.mockVolumePanelUiComponent, false)
+        val component5 = ComponentState(COMPONENT_5, kosmos.mockVolumePanelUiComponent, false)
         val layout =
             underTest.layout(
                 VolumePanelState(0, false, false),
-                setOf(bottomBarComponentState, component1, component2, component3, component4)
+                setOf(
+                    bottomBarComponentState,
+                    component1,
+                    component2,
+                    component3,
+                    component4,
+                    component5,
+                )
             )
 
         Truth.assertThat(layout.bottomBarComponent).isEqualTo(bottomBarComponentState)
@@ -59,7 +67,7 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
             .containsExactlyElementsIn(listOf(component1))
             .inOrder()
         Truth.assertThat(layout.footerComponents)
-            .containsExactlyElementsIn(listOf(component2))
+            .containsExactlyElementsIn(listOf(component5, component2))
             .inOrder()
         Truth.assertThat(layout.contentComponents)
             .containsExactlyElementsIn(listOf(component3, component4))
@@ -85,5 +93,6 @@ class DefaultComponentsLayoutManagerTest : SysuiTestCase() {
         const val COMPONENT_2: VolumePanelComponentKey = "test_component:2"
         const val COMPONENT_3: VolumePanelComponentKey = "test_component:3"
         const val COMPONENT_4: VolumePanelComponentKey = "test_component:4"
+        const val COMPONENT_5: VolumePanelComponentKey = "test_component:5"
     }
 }
