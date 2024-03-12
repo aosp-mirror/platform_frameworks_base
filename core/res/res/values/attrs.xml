@@ -4484,6 +4484,21 @@
         <attr name="autoTransact" format="boolean"/>
     </declare-styleable>
 
+    <!-- Specify one or more <code>polling-loop-pattern-filter</code> elements inside a
+         <code>host-apdu-service</code> to indicate polling loop frames that
+         your service can handle. -->
+    <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
+    <declare-styleable name="PollingLoopPatternFilter">
+        <!-- The patter to match polling loop frames to, must to be compatible with
+         {@link java.util.regex.Pattern#compile(String)} and only contain hexadecimal numbers and
+         `.`, `?` and `*` operators. This attribute is mandatory. -->
+        <attr name="name" />
+        <!-- Whether or not the system should automatically start a transaction when this polling
+         loop filter matches. If not set, default value is false. -->
+        <!-- @FlaggedApi("android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP") -->
+        <attr name="autoTransact" format="boolean"/>
+    </declare-styleable>
+
     <!-- Use <code>host-nfcf-service</code> as the root tag of the XML resource that
          describes an {@link android.nfc.cardemulation.HostNfcFService} service, which
          is referenced from its {@link android.nfc.cardemulation.HostNfcFService#SERVICE_META_DATA}

@@ -45,6 +45,7 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -61,6 +62,7 @@ import java.util.regex.Pattern;
  */
 public final class CardEmulation {
     private static final Pattern AID_PATTERN = Pattern.compile("[0-9A-Fa-f]{10,32}\\*?\\#?");
+    private static final Pattern PLPF_PATTERN = Pattern.compile("[0-9A-Fa-f,\\?,\\*\\.]*");
 
     static final String TAG = "CardEmulation";
 
@@ -379,9 +381,9 @@ public final class CardEmulation {
      * auto-transact or not.  The PLF can be sequence of an
      * even number of at least 2 hexadecimal numbers (0-9, A-F or a-f), representing a series of
      * bytes. When non-standard polling loop frame matches this sequence exactly, it may be
-     * delivered to {@link HostApduService#processPollingFrames(List)}. If auto-transact is set to
-     * true, then observe mode will also be disabled.  if this service is currently preferred or
-     * there are no other services registered for this filter.
+     * delivered to {@link HostApduService#processPollingFrames(List)}.  If auto-transact
+     * is set to true and this service is currently preferred or there are no other services
+     * registered for this filter then observe mode will also be disabled.
      * @param service The HostApduService to register the filter for
      * @param pollingLoopFilter The filter to register
      * @param autoTransact true to have the NFC stack automatically disable observe mode and allow
@@ -408,6 +410,128 @@ public final class CardEmulation {
                 return sService.registerPollingLoopFilterForService(
                         mContext.getUser().getIdentifier(), service,
                         pollingLoopFilter, autoTransact);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Unregister a polling loop filter (PLF) for a HostApduService. If the PLF had previously been
+     * registered via {@link #registerPollingLoopFilterForService(ComponentName, String, boolean)}
+     * for this service it will be removed.
+     * @param service The HostApduService to unregister the filter for
+     * @param pollingLoopFilter The filter to unregister
+     * @return true if the filter was removed, false otherwise
+     * @throws IllegalArgumentException if the passed in string doesn't parse to at least one byte
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public boolean removePollingLoopFilterForService(@NonNull ComponentName service,
+            @NonNull String pollingLoopFilter) {
+        pollingLoopFilter = validatePollingLoopFilter(pollingLoopFilter);
+
+        try {
+            return sService.removePollingLoopFilterForService(mContext.getUser().getIdentifier(),
+                    service, pollingLoopFilter);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.removePollingLoopFilterForService(
+                        mContext.getUser().getIdentifier(), service,
+                        pollingLoopFilter);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+
+    /**
+     * Register a polling loop pattern filter (PLPF) for a HostApduService and indicate whether it
+     * should auto-transact or not. The pattern may include the characters 0-9 and A-F as well as
+     * the regular expression operators `.`, `?` and `*`. When the beginning of anon-standard
+     * polling loop frame matches this sequence exactly, it may be delivered to
+     * {@link HostApduService#processPollingFrames(List)}. If auto-transact is set to true and this
+     * service is currently preferred or there are no other services registered for this filter
+     * then observe mode will also be disabled.
+     * @param service The HostApduService to register the filter for
+     * @param pollingLoopPatternFilter The pattern filter to register, must to be compatible with
+     *         {@link java.util.regex.Pattern#compile(String)} and only contain hexadecimal numbers
+     *         and `.`, `?` and `*` operators
+     * @param autoTransact true to have the NFC stack automatically disable observe mode and allow
+     *         transactions to proceed when this filter matches, false otherwise
+     * @return true if the filter was registered, false otherwise
+     * @throws IllegalArgumentException if the filter containst elements other than hexadecimal
+     *         numbers and `.`, `?` and `*` operators
+     * @throws java.util.regex.PatternSyntaxException if the regex syntax is invalid
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public boolean registerPollingLoopPatternFilterForService(@NonNull ComponentName service,
+            @NonNull String pollingLoopPatternFilter, boolean autoTransact) {
+        pollingLoopPatternFilter = validatePollingLoopPatternFilter(pollingLoopPatternFilter);
+
+        try {
+            return sService.registerPollingLoopPatternFilterForService(
+                    mContext.getUser().getIdentifier(),
+                    service, pollingLoopPatternFilter, autoTransact);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.registerPollingLoopPatternFilterForService(
+                        mContext.getUser().getIdentifier(), service,
+                        pollingLoopPatternFilter, autoTransact);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Unregister a polling loop pattern filter (PLPF) for a HostApduService. If the PLF had
+     * previously been registered via
+     * {@link #registerPollingLoopFilterForService(ComponentName, String, boolean)} for this
+     * service it will be removed.
+     * @param service The HostApduService to unregister the filter for
+     * @param pollingLoopPatternFilter The filter to unregister, must to be compatible with
+     *         {@link java.util.regex.Pattern#compile(String)} and only contain hexadecimal numbers
+     *         and`.`, `?` and `*` operators
+     * @return true if the filter was removed, false otherwise
+     * @throws IllegalArgumentException if the filter containst elements other than hexadecimal
+     *         numbers and `.`, `?` and `*` operators
+     * @throws java.util.regex.PatternSyntaxException if the regex syntax is invalid
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public boolean removePollingLoopPatternFilterForService(@NonNull ComponentName service,
+            @NonNull String pollingLoopPatternFilter) {
+        pollingLoopPatternFilter = validatePollingLoopPatternFilter(pollingLoopPatternFilter);
+
+        try {
+            return sService.removePollingLoopPatternFilterForService(
+                    mContext.getUser().getIdentifier(), service, pollingLoopPatternFilter);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.removePollingLoopPatternFilterForService(
+                        mContext.getUser().getIdentifier(), service,
+                        pollingLoopPatternFilter);
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 return false;
@@ -1024,6 +1148,23 @@ public final class CardEmulation {
                 "Polling loop filter must contain at least one byte.");
         }
         return HexFormat.of().withUpperCase().formatHex(plfBytes);
+    }
+
+    /**
+     * Tests the validity of the polling loop pattern filter.
+     * @param pollingLoopPatternFilter The polling loop filter to test.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public static @NonNull String validatePollingLoopPatternFilter(
+        @NonNull String pollingLoopPatternFilter) {
+        // Verify hex characters
+        if (!PLPF_PATTERN.matcher(pollingLoopPatternFilter).matches()) {
+            throw new IllegalArgumentException(
+                "Polling loop pattern filters may only contain hexadecimal numbers, ?s and *s");
+        }
+        return Pattern.compile(pollingLoopPatternFilter.toUpperCase(Locale.ROOT)).toString();
     }
 
     /**
