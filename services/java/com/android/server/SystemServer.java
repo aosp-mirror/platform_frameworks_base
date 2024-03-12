@@ -2166,16 +2166,14 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)) {
-                t.traceBegin("StartVcnManagementService");
-                try {
-                    vcnManagement = VcnManagementService.create(context);
-                    ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
-                } catch (Throwable e) {
-                    reportWtf("starting VCN Management Service", e);
-                }
-                t.traceEnd();
+            t.traceBegin("StartVcnManagementService");
+            try {
+                vcnManagement = VcnManagementService.create(context);
+                ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
+            } catch (Throwable e) {
+                reportWtf("starting VCN Management Service", e);
             }
+            t.traceEnd();
 
             t.traceBegin("StartSystemUpdateManagerService");
             try {
