@@ -82,6 +82,7 @@ public class SystemUIApplication extends Application implements
 
     public SystemUIApplication() {
         super();
+        Trace.registerWithPerfetto();
         Log.v(TAG, "SystemUIApplication constructed.");
         // SysUI may be building without protolog preprocessing in some cases
         ProtoLog.REQUIRE_PROTOLOGTOOL = false;
