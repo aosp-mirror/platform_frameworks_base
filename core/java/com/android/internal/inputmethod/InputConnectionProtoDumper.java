@@ -44,6 +44,7 @@ import android.view.inputmethod.SurroundingText;
  */
 public final class InputConnectionProtoDumper {
     static final String TAG = "InputConnectionProtoDumper";
+    public static final boolean DUMP_TEXT = false;
 
     private InputConnectionProtoDumper() {}
 
@@ -66,6 +67,11 @@ public final class InputConnectionProtoDumper {
         final long token = proto.start(GET_TEXT_AFTER_CURSOR);
         proto.write(GetTextAfterCursor.LENGTH, length);
         proto.write(GetTextAfterCursor.FLAGS, flags);
+        if (result == null) {
+            proto.write(GetTextAfterCursor.RESULT, "null result");
+        } else if (DUMP_TEXT) {
+            proto.write(GetTextAfterCursor.RESULT, result.toString());
+        }
         proto.end(token);
         return proto.getBytes();
     }
@@ -89,6 +95,11 @@ public final class InputConnectionProtoDumper {
         final long token = proto.start(GET_TEXT_BEFORE_CURSOR);
         proto.write(GetTextBeforeCursor.LENGTH, length);
         proto.write(GetTextBeforeCursor.FLAGS, flags);
+        if (result == null) {
+            proto.write(GetTextBeforeCursor.RESULT, "null result");
+        } else if (DUMP_TEXT) {
+            proto.write(GetTextBeforeCursor.RESULT, result.toString());
+        }
         proto.end(token);
         return proto.getBytes();
     }
@@ -111,6 +122,11 @@ public final class InputConnectionProtoDumper {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_SELECTED_TEXT);
         proto.write(GetSelectedText.FLAGS, flags);
+        if (result == null) {
+            proto.write(GetSelectedText.RESULT, "null result");
+        } else if (DUMP_TEXT) {
+            proto.write(GetSelectedText.RESULT, result.toString());
+        }
         proto.end(token);
         return proto.getBytes();
     }
@@ -139,8 +155,13 @@ public final class InputConnectionProtoDumper {
         proto.write(GetSurroundingText.BEFORE_LENGTH, beforeLength);
         proto.write(GetSurroundingText.AFTER_LENGTH, afterLength);
         proto.write(GetSurroundingText.FLAGS, flags);
-        if (result != null) {
+        if (result == null) {
             final long token_result = proto.start(GetSurroundingText.RESULT);
+            proto.write(GetSurroundingText.SurroundingText.TEXT, "null result");
+            proto.end(token_result);
+        } else if (DUMP_TEXT) {
+            final long token_result = proto.start(GetSurroundingText.RESULT);
+            proto.write(GetSurroundingText.SurroundingText.TEXT, result.getText().toString());
             proto.write(GetSurroundingText.SurroundingText.SELECTION_START,
                     result.getSelectionStart());
             proto.write(GetSurroundingText.SurroundingText.SELECTION_END,
@@ -167,7 +188,9 @@ public final class InputConnectionProtoDumper {
         ProtoOutputStream proto = new ProtoOutputStream();
         final long token = proto.start(GET_CURSOR_CAPS_MODE);
         proto.write(GetCursorCapsMode.REQ_MODES, reqModes);
-        proto.write(GetCursorCapsMode.RESULT, result);
+        if (DUMP_TEXT) {
+            proto.write(GetCursorCapsMode.RESULT, result);
+        }
         proto.end(token);
         return proto.getBytes();
     }
@@ -200,6 +223,11 @@ public final class InputConnectionProtoDumper {
         proto.write(GetExtractedText.ExtractedTextRequest.HINT_MAX_CHARS, request.hintMaxChars);
         proto.end(token_request);
         proto.write(GetExtractedText.FLAGS, flags);
+        if (result == null) {
+            proto.write(GetExtractedText.RESULT, "null result");
+        } else if (DUMP_TEXT) {
+            proto.write(GetExtractedText.RESULT, result.text.toString());
+        }
         proto.end(token);
         return proto.getBytes();
     }
