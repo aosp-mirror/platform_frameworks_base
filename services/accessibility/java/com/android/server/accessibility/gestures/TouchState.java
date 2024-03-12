@@ -525,8 +525,9 @@ public class TouchState {
             mReceivedPointersDown |= pointerFlag;
             mReceivedPointers[pointerId].set(
                     event.getX(pointerIndex), event.getY(pointerIndex), event.getEventTime());
-
-            mPrimaryPointerId = pointerId;
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                mPrimaryPointerId = pointerId;
+            }
         }
 
         /**
