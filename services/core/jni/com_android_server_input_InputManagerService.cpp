@@ -502,7 +502,7 @@ void NativeInputManager::dump(std::string& dump) {
                 toString(mLocked.pointerGesturesEnabled));
         dump += StringPrintf(INDENT "Show Touches: %s\n", toString(mLocked.showTouches));
         dump += StringPrintf(INDENT "Pointer Capture: %s, seq=%" PRIu32 "\n",
-                             mLocked.pointerCaptureRequest.enable ? "Enabled" : "Disabled",
+                             mLocked.pointerCaptureRequest.isEnable() ? "Enabled" : "Disabled",
                              mLocked.pointerCaptureRequest.seq);
         if (auto pc = mLocked.legacyPointerController.lock(); pc) {
             dump += pc->dump();
@@ -1717,7 +1717,7 @@ void NativeInputManager::setPointerCapture(const PointerCaptureRequest& request)
             return;
         }
 
-        ALOGV("%s pointer capture.", request.enable ? "Enabling" : "Disabling");
+        ALOGV("%s pointer capture.", request.isEnable() ? "Enabling" : "Disabling");
         mLocked.pointerCaptureRequest = request;
     } // release lock
 
