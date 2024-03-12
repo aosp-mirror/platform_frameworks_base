@@ -57,6 +57,8 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
+import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -509,6 +511,7 @@ public abstract class WMShellModule {
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             DragToDesktopTransitionHandler dragToDesktopTransitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            DesktopModeLoggerTransitionObserver desktopModeLoggerTransitionObserver,
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
             MultiInstanceHelper multiInstanceHelper,
@@ -518,7 +521,8 @@ public abstract class WMShellModule {
                 displayController, shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer,
                 dragAndDropController, transitions, enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler, toggleResizeDesktopTaskTransitionHandler,
-                dragToDesktopTransitionHandler, desktopModeTaskRepository, launchAdjacentController,
+                dragToDesktopTransitionHandler, desktopModeTaskRepository,
+                desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor);
     }
 
@@ -560,6 +564,22 @@ public abstract class WMShellModule {
     @DynamicOverride
     static DesktopModeTaskRepository provideDesktopModeTaskRepository() {
         return new DesktopModeTaskRepository();
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopModeLoggerTransitionObserver provideDesktopModeLoggerTransitionObserver(
+            ShellInit shellInit,
+            Transitions transitions,
+            DesktopModeEventLogger desktopModeEventLogger) {
+        return new DesktopModeLoggerTransitionObserver(
+                shellInit, transitions, desktopModeEventLogger);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopModeEventLogger provideDesktopModeEventLogger() {
+        return new DesktopModeEventLogger();
     }
 
     //
