@@ -401,7 +401,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
                     Pair("Enter PIN", "PIN is required after lockdown"),
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
-                    Pair("Enter PIN", "Update will install when device not in use"),
+                    Pair("Enter PIN", "PIN required for additional security"),
                 LockPatternUtils.StrongAuthTracker
                     .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
                     Pair(
@@ -439,7 +439,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
                     Pair("Enter PIN", "PIN is required after lockdown"),
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
-                    Pair("Enter PIN", "Update will install when device not in use"),
+                    Pair("Enter PIN", "PIN required for additional security"),
                 LockPatternUtils.StrongAuthTracker
                     .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
                     Pair(
@@ -481,7 +481,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
                     Pair("Enter PIN", "PIN is required after lockdown"),
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
-                    Pair("Enter PIN", "Update will install when device not in use"),
+                    Pair("Enter PIN", "PIN required for additional security"),
                 LockPatternUtils.StrongAuthTracker
                     .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
                     Pair(

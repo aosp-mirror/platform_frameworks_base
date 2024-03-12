@@ -38,6 +38,10 @@ fun transition(
         override val isUserInputOngoing: Boolean = isUserInputOngoing
         override val isUpOrLeft: Boolean = isUpOrLeft
         override val orientation: Orientation = orientation
+        override val overscrollScope: OverscrollScope =
+            object : OverscrollScope {
+                override val absoluteDistance = 0f
+            }
 
         override fun finish(): Job {
             error("finish() is not supported in test transitions")

@@ -113,6 +113,28 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun zenMuted_cantChange() {
+        with(kosmos) {
+            testScope.runTest {
+                notificationsSoundPolicyRepository.updateNotificationPolicy()
+                notificationsSoundPolicyRepository.updateZenMode(
+                    ZenMode(Settings.Global.ZEN_MODE_NO_INTERRUPTIONS)
+                )
+
+                val canChangeVolume by
+                    collectLastValue(
+                        underTest.canChangeVolume(AudioStream(AudioManager.STREAM_NOTIFICATION))
+                    )
+
+                underTest.setMuted(AudioStream(AudioManager.STREAM_RING), true)
+                runCurrent()
+
+                assertThat(canChangeVolume).isFalse()
+            }
+        }
+    }
+
+    @Test
     fun streamIsMuted_getStream_volumeZero() {
         with(kosmos) {
             testScope.runTest {

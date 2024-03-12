@@ -61,7 +61,6 @@ public abstract class AdvancedExtender {
     private CameraUsageTracker mCameraUsageTracker;
     private static final String TAG = "AdvancedExtender";
 
-
     /**
      * Initialize a camera extension advanced extender instance.
      *
@@ -263,6 +262,13 @@ public abstract class AdvancedExtender {
      *
      * <p>For example, an extension may limit the zoom ratio range. In this case, an OEM can return
      * a new zoom ratio range for the key {@link CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE}.
+     *
+     * <p> Currently, the only synthetic keys supported for override are
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES} and
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES}. To enable them, an OEM
+     * should override the respective native keys
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP} and
+     *  {@link CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP}.
      */
     @FlaggedApi(Flags.FLAG_CAMERA_EXTENSIONS_CHARACTERISTICS_GET)
     @NonNull

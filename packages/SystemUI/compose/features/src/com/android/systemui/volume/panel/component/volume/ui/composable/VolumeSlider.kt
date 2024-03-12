@@ -22,6 +22,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformSlider
 import com.android.compose.PlatformSliderColors
 import com.android.systemui.common.ui.compose.Icon
@@ -54,7 +56,7 @@ fun VolumeSlider(
             if (isDragging) {
                 Text(text = value.toInt().toString())
             } else {
-                state.icon?.let { Icon(icon = it) }
+                state.icon?.let { Icon(modifier = Modifier.size(24.dp), icon = it) }
             }
         },
         colors = sliderColors,

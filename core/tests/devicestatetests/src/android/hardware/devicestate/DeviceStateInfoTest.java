@@ -16,19 +16,30 @@
 
 package android.hardware.devicestate;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Unit tests for {@link DeviceStateInfo}.
@@ -38,11 +49,34 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 @SmallTest
 public final class DeviceStateInfoTest {
+
+    private static final DeviceState DEVICE_STATE_0 = new DeviceState(
+            new DeviceState.Configuration.Builder(0, "STATE_0")
+                    .setSystemProperties(
+                            Set.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED))
+                    .build());
+    private static final DeviceState DEVICE_STATE_1 = new DeviceState(
+            new DeviceState.Configuration.Builder(1, "STATE_1")
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY))
+                    .setPhysicalProperties(
+                            Set.of(PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN))
+                    .build());
+    private static final DeviceState DEVICE_STATE_2 = new DeviceState(
+            new DeviceState.Configuration.Builder(2, "STATE_2")
+                    .setSystemProperties(
+                            Set.of(PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY))
+                    .build());
+
     @Test
     public void create() {
-        final int[] supportedStates = new int[] { 0, 1, 2 };
-        final int baseState = 0;
-        final int currentState = 2;
+        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
+                DEVICE_STATE_2);
+        final DeviceState baseState = DEVICE_STATE_0;
+        final DeviceState currentState = DEVICE_STATE_2;
 
         final DeviceStateInfo info = new DeviceStateInfo(supportedStates, baseState, currentState);
         assertNotNull(info.supportedStates);
@@ -53,27 +87,30 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void equals() {
-        final int[] supportedStates = new int[] { 0, 1, 2 };
-        final int baseState = 0;
-        final int currentState = 2;
+        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
+                DEVICE_STATE_2);
+        final DeviceState baseState = DEVICE_STATE_0;
+        final DeviceState currentState = DEVICE_STATE_2;
 
         final DeviceStateInfo info = new DeviceStateInfo(supportedStates, baseState, currentState);
-        assertTrue(info.equals(info));
+        Assert.assertEquals(info, info);
 
         final DeviceStateInfo sameInfo = new DeviceStateInfo(supportedStates, baseState,
                 currentState);
-        assertTrue(info.equals(sameInfo));
+        Assert.assertEquals(info, sameInfo);
 
-        final DeviceStateInfo differentInfo = new DeviceStateInfo(new int[]{ 0, 2}, baseState,
+        final DeviceStateInfo differentInfo = new DeviceStateInfo(
+                List.of(DEVICE_STATE_0, DEVICE_STATE_2), baseState,
                 currentState);
-        assertFalse(info.equals(differentInfo));
+        assertNotEquals(info, differentInfo);
     }
 
     @Test
     public void diff_sameObject() {
-        final int[] supportedStates = new int[] { 0, 1, 2 };
-        final int baseState = 0;
-        final int currentState = 2;
+        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
+                DEVICE_STATE_2);
+        final DeviceState baseState = DEVICE_STATE_0;
+        final DeviceState currentState = DEVICE_STATE_2;
 
         final DeviceStateInfo info = new DeviceStateInfo(supportedStates, baseState, currentState);
         assertEquals(0, info.diff(info));
@@ -81,8 +118,10 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void diff_differentSupportedStates() {
-        final DeviceStateInfo info = new DeviceStateInfo(new int[] { 1 }, 0, 0);
-        final DeviceStateInfo otherInfo = new DeviceStateInfo(new int[] { 2 }, 0, 0);
+        final DeviceStateInfo info = new DeviceStateInfo(List.of(DEVICE_STATE_1), DEVICE_STATE_0,
+                DEVICE_STATE_0);
+        final DeviceStateInfo otherInfo = new DeviceStateInfo(List.of(DEVICE_STATE_2),
+                DEVICE_STATE_0, DEVICE_STATE_0);
         final int diff = info.diff(otherInfo);
         assertTrue((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0);
         assertFalse((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0);
@@ -91,8 +130,10 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void diff_differentNonOverrideState() {
-        final DeviceStateInfo info = new DeviceStateInfo(new int[] { 1 }, 1, 0);
-        final DeviceStateInfo otherInfo = new DeviceStateInfo(new int[] { 1 }, 2, 0);
+        final DeviceStateInfo info = new DeviceStateInfo(List.of(DEVICE_STATE_1), DEVICE_STATE_1,
+                DEVICE_STATE_0);
+        final DeviceStateInfo otherInfo = new DeviceStateInfo(List.of(DEVICE_STATE_1),
+                DEVICE_STATE_2, DEVICE_STATE_0);
         final int diff = info.diff(otherInfo);
         assertFalse((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0);
         assertTrue((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0);
@@ -101,8 +142,10 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void diff_differentState() {
-        final DeviceStateInfo info = new DeviceStateInfo(new int[] { 1 }, 0, 1);
-        final DeviceStateInfo otherInfo = new DeviceStateInfo(new int[] { 1 }, 0, 2);
+        final DeviceStateInfo info = new DeviceStateInfo(List.of(DEVICE_STATE_1), DEVICE_STATE_0,
+                DEVICE_STATE_1);
+        final DeviceStateInfo otherInfo = new DeviceStateInfo(List.of(DEVICE_STATE_1),
+                DEVICE_STATE_0, DEVICE_STATE_2);
         final int diff = info.diff(otherInfo);
         assertFalse((diff & DeviceStateInfo.CHANGED_SUPPORTED_STATES) > 0);
         assertFalse((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0);
@@ -111,9 +154,10 @@ public final class DeviceStateInfoTest {
 
     @Test
     public void writeToParcel() {
-        final int[] supportedStates = new int[] { 0, 1, 2 };
-        final int nonOverrideState = 0;
-        final int state = 2;
+        final List<DeviceState> supportedStates = List.of(DEVICE_STATE_0, DEVICE_STATE_1,
+                DEVICE_STATE_2);
+        final DeviceState nonOverrideState = DEVICE_STATE_0;
+        final DeviceState state = DEVICE_STATE_2;
         final DeviceStateInfo originalInfo =
                 new DeviceStateInfo(supportedStates, nonOverrideState, state);
 

@@ -22,9 +22,9 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.Orientation
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.Transformation
 import com.android.compose.animation.scene.transformation.TransformationRange
-import com.android.compose.animation.scene.transformation.Translate
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -228,12 +228,14 @@ class TransitionDslTest {
     @Test
     fun overscrollSpec() {
         val transitions = transitions {
-            overscroll(TestScenes.SceneA, Orientation.Vertical) { translate(TestElements.Bar) }
+            overscroll(TestScenes.SceneA, Orientation.Vertical) {
+                translate(TestElements.Bar, x = { 1f }, y = { 2f })
+            }
         }
 
         val overscrollSpec = transitions.overscrollSpecs.single()
         val transformation = overscrollSpec.transformationSpec.transformations.single()
-        assertThat(transformation).isInstanceOf(Translate::class.java)
+        assertThat(transformation).isInstanceOf(OverscrollTranslate::class.java)
     }
 
     companion object {

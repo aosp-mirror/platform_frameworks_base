@@ -113,6 +113,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
@@ -283,6 +284,11 @@ public class AccountManagerService
 
     private static AtomicReference<AccountManagerService> sThis = new AtomicReference<>();
     private static final Account[] EMPTY_ACCOUNT_ARRAY = new Account[]{};
+
+    private static Histogram sResponseLatency = new Histogram(
+            "app.value_high_authenticator_response_latency",
+            new Histogram.ScaledRangeOptions(20, 10000, 10000, 1.5f)
+    );
 
     /**
      * This should only be called by system code. One should only call this after the service
@@ -4937,6 +4943,9 @@ public class AccountManagerService
         protected boolean mCanStartAccountManagerActivity = false;
         protected final UserAccounts mAccounts;
 
+        private int mAuthenticatorUid;
+        private long mBindingStartTime;
+
         public Session(UserAccounts accounts, IAccountManagerResponse response, String accountType,
                 boolean expectActivityLaunch, boolean stripAuthTokenFromResult, String accountName,
                 boolean authDetailsRequired) {
@@ -4974,6 +4983,10 @@ public class AccountManagerService
         }
 
         IAccountManagerResponse getResponseAndClose() {
+            if (mAuthenticatorUid != 0 && mBindingStartTime > 0) {
+                sResponseLatency.logSampleWithUid(mAuthenticatorUid,
+                        SystemClock.uptimeMillis() - mBindingStartTime);
+            }
             if (mResponse == null) {
                 close();
                 return null;
@@ -5353,7 +5366,8 @@ public class AccountManagerService
                 mContext.unbindService(this);
                 return false;
             }
-
+            mAuthenticatorUid = authenticatorInfo.uid;
+            mBindingStartTime = SystemClock.uptimeMillis();
             return true;
         }
     }

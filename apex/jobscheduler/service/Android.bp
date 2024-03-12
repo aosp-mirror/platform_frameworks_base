@@ -20,6 +20,7 @@ java_library {
     ],
 
     libs: [
+        "androidx.annotation_annotation",
         "app-compat-annotations",
         "error_prone_annotations",
         "framework",

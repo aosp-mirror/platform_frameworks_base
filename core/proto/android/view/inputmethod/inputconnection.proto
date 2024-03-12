@@ -16,8 +16,6 @@
 
 syntax = "proto2";
 
-import "frameworks/base/core/proto/android/privacy.proto";
-
 package android.view.inputmethod;
 
 option java_multiple_files = true;
@@ -26,8 +24,8 @@ option java_multiple_files = true;
  * Represents a {@link android.view.inputmethod.InputConnection} object.
  */
 message InputConnectionProto {
-  optional string editable_text = 1 [(.android.privacy).dest = DEST_LOCAL];
-  optional string selected_text = 2 [(.android.privacy).dest = DEST_LOCAL];
+  reserved 1; // string editable_text
+  reserved 2; // string selected_text
   optional int32 selected_text_start = 3;
   optional int32 selected_text_end = 4;
   optional int32 cursor_caps_mode = 5;
@@ -50,18 +48,18 @@ message InputConnectionCallProto {
   message GetTextBeforeCursor {
     optional int32 length = 1;
     optional int32 flags = 2;
-    optional string result = 3 [(.android.privacy).dest = DEST_LOCAL];
+    reserved 3; // string result
   }
 
   message GetTextAfterCursor {
     optional int32 length = 1;
     optional int32 flags = 2;
-    optional string result = 3 [(.android.privacy).dest = DEST_LOCAL];
+    reserved 3; // string result = 3
   }
 
   message GetSelectedText {
     optional int32 flags = 1;
-    optional string result = 2 [(.android.privacy).dest = DEST_LOCAL];
+    reserved 2; // string result = 2
   }
 
   message GetSurroundingText {
@@ -71,7 +69,7 @@ message InputConnectionCallProto {
     optional SurroundingText result = 4;
 
     message SurroundingText {
-      optional string text = 1 [(.android.privacy).dest = DEST_LOCAL];
+      reserved 1; // string text = 1
       optional int32 selection_start = 2;
       optional int32 selection_end = 3;
       optional int32 offset = 4;
@@ -86,7 +84,7 @@ message InputConnectionCallProto {
   message GetExtractedText {
     optional ExtractedTextRequest request = 1;
     optional int32 flags = 2;
-    optional string result = 3 [(.android.privacy).dest = DEST_LOCAL];
+    reserved 3; // string result = 3
 
     message ExtractedTextRequest {
       optional int32 token = 1;

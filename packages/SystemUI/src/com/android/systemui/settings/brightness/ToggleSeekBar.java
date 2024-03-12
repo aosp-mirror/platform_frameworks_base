@@ -17,20 +17,15 @@
 package com.android.systemui.settings.brightness;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.SeekBar;
 
-import com.android.settingslib.RestrictedLockUtils;
-import com.android.systemui.Dependency;
-import com.android.systemui.plugins.ActivityStarter;
-
 public class ToggleSeekBar extends SeekBar {
     private String mAccessibilityLabel;
 
-    private RestrictedLockUtils.EnforcedAdmin mEnforcedAdmin = null;
+    private AdminBlocker mAdminBlocker;
 
     public ToggleSeekBar(Context context) {
         super(context);
@@ -46,10 +41,7 @@ public class ToggleSeekBar extends SeekBar {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mEnforcedAdmin != null) {
-            Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
-                    mContext, mEnforcedAdmin);
-            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(intent, 0);
+        if (mAdminBlocker != null && mAdminBlocker.block()) {
             return true;
         }
         if (!isEnabled()) {
@@ -71,7 +63,12 @@ public class ToggleSeekBar extends SeekBar {
         }
     }
 
-    public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
-        mEnforcedAdmin = admin;
+    void setAdminBlocker(AdminBlocker blocker) {
+        mAdminBlocker = blocker;
+        setEnabled(blocker == null);
+    }
+
+    interface AdminBlocker {
+        boolean block();
     }
 }

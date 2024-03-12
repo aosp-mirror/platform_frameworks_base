@@ -532,6 +532,18 @@ class DeviceEntryFaceAuthInteractorTest : SysuiTestCase() {
             assertThat(faceAuthRepository.runningAuthRequest.value).isNull()
         }
 
+    @Test
+    fun lockedOut_providesSameValueFromRepository() =
+        testScope.runTest {
+            assertThat(underTest.lockedOut).isSameInstanceAs(faceAuthRepository.isLockedOut)
+        }
+
+    @Test
+    fun authenticated_providesSameValueFromRepository() =
+        testScope.runTest {
+            assertThat(underTest.authenticated).isSameInstanceAs(faceAuthRepository.isAuthenticated)
+        }
+
     companion object {
         private const val primaryUserId = 1
         private val primaryUser = UserInfo(primaryUserId, "test user", UserInfo.FLAG_PRIMARY)

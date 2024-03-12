@@ -78,6 +78,7 @@ class FakePromptRepository : PromptRepository {
         val hasCredentialViewShown = kind.value !is PromptKind.Biometric
         val showBpForCredential =
             Flags.customBiometricPrompt() &&
+                com.android.systemui.Flags.constraintBp() &&
                 !Utils.isBiometricAllowed(promptInfo) &&
                 Utils.isDeviceCredentialAllowed(promptInfo) &&
                 promptInfo.contentView != null

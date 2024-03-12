@@ -25,6 +25,9 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.ArraySet;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,8 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A state of the device defined by the {@link DeviceStateProvider} and managed by the
- * {@link DeviceStateManagerService}.
+ * A state of the device managed by {@link DeviceStateManager}.
  * <p>
  * Device state is an abstract concept that allows mapping the current state of the device to the
  * state of the system. This is useful for variable-state devices, like foldable or rollable
@@ -298,13 +300,14 @@ public final class DeviceState {
     public @interface SystemDeviceStateProperties {}
 
     @NonNull
-    private DeviceState.Configuration mDeviceStateConfiguration;
+    private final DeviceState.Configuration mDeviceStateConfiguration;
 
     @DeviceStateFlags
     private final int mFlags;
 
     /** @hide */
     public DeviceState(@NonNull DeviceState.Configuration deviceStateConfiguration) {
+        Objects.requireNonNull(deviceStateConfiguration, "Device StateConfiguration is null");
         mDeviceStateConfiguration = deviceStateConfiguration;
         mFlags = 0;
     }
@@ -408,8 +411,7 @@ public final class DeviceState {
      */
     public boolean hasProperties(@NonNull @DeviceStateProperties int... properties) {
         for (int i = 0; i < properties.length; i++) {
-            if (!mDeviceStateConfiguration.mSystemProperties.contains(properties[i])
-                    || !mDeviceStateConfiguration.mPhysicalProperties.contains(properties[i])) {
+            if (!hasProperty(properties[i])) {
                 return false;
             }
         }
@@ -436,7 +438,7 @@ public final class DeviceState {
      * @see DeviceStateManager
      * @hide
      */
-    public static class Configuration {
+    public static final class Configuration implements Parcelable {
         /** Unique identifier for the device state. */
         @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to = MAXIMUM_DEVICE_STATE_IDENTIFIER)
         private final int mIdentifier;
@@ -445,21 +447,23 @@ public final class DeviceState {
         @NonNull
         private final String mName;
 
-        /** {@link Set} of system properties that apply to this state. */
+        /** {@link ArraySet} of system properties that apply to this state. */
         @NonNull
-        private final Set<@SystemDeviceStateProperties Integer> mSystemProperties;
+        private final ArraySet<@SystemDeviceStateProperties Integer> mSystemProperties;
 
-        /** {@link Set} of physical device properties that apply to this state. */
+        /** {@link ArraySet} of physical device properties that apply to this state. */
         @NonNull
-        private final Set<@PhysicalDeviceStateProperties Integer> mPhysicalProperties;
+        private final ArraySet<@PhysicalDeviceStateProperties Integer> mPhysicalProperties;
 
         private Configuration(int identifier, @NonNull String name,
                 @NonNull Set<@SystemDeviceStateProperties Integer> systemProperties,
                 @NonNull Set<@PhysicalDeviceStateProperties Integer> physicalProperties) {
             mIdentifier = identifier;
             mName = name;
-            mSystemProperties = systemProperties;
-            mPhysicalProperties = physicalProperties;
+            mSystemProperties = new ArraySet<@SystemDeviceStateProperties Integer>(
+                    systemProperties);
+            mPhysicalProperties = new ArraySet<@PhysicalDeviceStateProperties Integer>(
+                    physicalProperties);
         }
 
         /** Returns the unique identifier for the device state. */
@@ -510,6 +514,53 @@ public final class DeviceState {
         public int hashCode() {
             return Objects.hash(mIdentifier, mName, mSystemProperties, mPhysicalProperties);
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mIdentifier);
+            dest.writeString8(mName);
+
+            dest.writeInt(mSystemProperties.size());
+            for (int i = 0; i < mSystemProperties.size(); i++) {
+                dest.writeInt(mSystemProperties.valueAt(i));
+            }
+
+            dest.writeInt(mPhysicalProperties.size());
+            for (int i = 0; i < mPhysicalProperties.size(); i++) {
+                dest.writeInt(mPhysicalProperties.valueAt(i));
+            }
+        }
+
+        @NonNull
+        public static final Creator<DeviceState.Configuration> CREATOR = new Creator<>() {
+            @Override
+            public DeviceState.Configuration createFromParcel(Parcel source) {
+                int identifier = source.readInt();
+                String name = source.readString8();
+                ArraySet<@DeviceStateProperties Integer> systemProperties = new ArraySet<>();
+                int systemPropertySize = source.readInt();
+                for (int i = 0; i < systemPropertySize; i++) {
+                    systemProperties.add(source.readInt());
+                }
+                ArraySet<@DeviceStateProperties Integer> physicalProperties = new ArraySet<>();
+                int physicalPropertySize = source.readInt();
+                for (int j = 0; j < physicalPropertySize; j++) {
+                    physicalProperties.add(source.readInt());
+                }
+                return new DeviceState.Configuration(identifier, name, systemProperties,
+                        physicalProperties);
+            }
+
+            @Override
+            public DeviceState.Configuration[] newArray(int size) {
+                return new DeviceState.Configuration[size];
+            }
+        };
 
         /** @hide */
         public static class Builder {

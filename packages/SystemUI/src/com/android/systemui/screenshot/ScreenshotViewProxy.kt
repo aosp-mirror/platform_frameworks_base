@@ -21,23 +21,16 @@ import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
 import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.view.WindowInsets
-import com.android.internal.logging.UiEventLogger
-import com.android.systemui.flags.FeatureFlags
 
 /** Abstraction of the surface between ScreenshotController and ScreenshotView */
 interface ScreenshotViewProxy {
     val view: ViewGroup
     val screenshotPreview: View
 
-    var defaultDisplay: Int
-    var defaultTimeoutMillis: Long
-    var flags: FeatureFlags?
     var packageName: String
     var callbacks: ScreenshotView.ScreenshotViewCallback?
     var screenshot: ScreenshotData?
@@ -49,7 +42,6 @@ interface ScreenshotViewProxy {
     fun reset()
     fun updateInsets(insets: WindowInsets)
     fun updateOrientation(insets: WindowInsets)
-    fun badgeScreenshot(userBadgedIcon: Drawable)
     fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator
     fun addQuickShareChip(quickShareAction: Notification.Action)
     fun setChipIntents(imageData: ScreenshotController.SavedImageData)
@@ -61,7 +53,8 @@ interface ScreenshotViewProxy {
         response: ScrollCaptureResponse,
         screenBitmap: Bitmap,
         newScreenshot: Bitmap,
-        screenshotTakenInPortrait: Boolean
+        screenshotTakenInPortrait: Boolean,
+        onTransitionPrepared: Runnable,
     )
     fun startLongScreenshotTransition(
         transitionDestination: Rect,
@@ -73,10 +66,9 @@ interface ScreenshotViewProxy {
     fun stopInputListening()
     fun requestFocus()
     fun announceForAccessibility(string: String)
-    fun getViewTreeObserver(): ViewTreeObserver
-    fun post(runnable: Runnable)
+    fun prepareEntranceAnimation(runnable: Runnable)
 
     interface Factory {
-        fun getProxy(context: Context, logger: UiEventLogger): ScreenshotViewProxy
+        fun getProxy(context: Context, displayId: Int): ScreenshotViewProxy
     }
 }

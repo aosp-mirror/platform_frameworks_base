@@ -11,7 +11,7 @@ flag {
     name: "location_bypass"
     namespace: "location"
     description: "Enable location bypass appops behavior"
-    bug: "301150056"
+    bug: "329151785"
 }
 
 flag {

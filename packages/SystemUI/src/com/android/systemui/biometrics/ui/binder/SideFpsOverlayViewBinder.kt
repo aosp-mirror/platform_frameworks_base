@@ -141,6 +141,9 @@ constructor(
     /** Hide the side fingerprint sensor indicator */
     private fun hide() {
         if (overlayView != null) {
+            val lottie = overlayView!!.requireViewById<LottieAnimationView>(R.id.sidefps_animation)
+            lottie.pauseAnimation()
+            lottie.removeAllLottieOnCompositionLoadedListener()
             windowManager.get().removeView(overlayView)
             overlayView = null
         }

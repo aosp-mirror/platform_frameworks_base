@@ -157,8 +157,7 @@ class PinBouncerViewModel(
         if (authenticationMethod == AuthenticationMethodModel.Sim) {
             viewModelScope.launch {
                 isSimUnlockingDialogVisible.value = true
-                val msg = simBouncerInteractor.verifySim(getInput())
-                interactor.setMessage(msg)
+                simBouncerInteractor.verifySim(getInput())
                 isSimUnlockingDialogVisible.value = false
                 clearInput()
             }

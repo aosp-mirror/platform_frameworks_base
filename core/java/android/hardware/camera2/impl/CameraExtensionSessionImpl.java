@@ -58,11 +58,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.Size;
 import android.view.Surface;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -183,7 +186,14 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         HashMap<Integer, List<Size>> supportedCaptureSizes = new HashMap<>();
-        for (int format : CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
+        IntArray supportedCaptureOutputFormats =
+                new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
+        supportedCaptureOutputFormats.addAll(
+                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
+        if (Flags.extension10Bit()) {
+            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
+        }
+        for (int format : supportedCaptureOutputFormats.toArray()) {
             List<Size> supportedSizes = extensionChars.getExtensionSupportedSizes(
                     config.getExtension(), format);
             if (supportedSizes != null) {
@@ -207,7 +217,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             Size burstCaptureSurfaceSize =
                     new Size(burstCaptureSurfaceInfo.mWidth, burstCaptureSurfaceInfo.mHeight);
             HashMap<Integer, List<Size>> supportedPostviewSizes = new HashMap<>();
-            for (int format : CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
+            for (int format : supportedCaptureOutputFormats.toArray()) {
                 List<Size> supportedSizesPostview = extensionChars.getPostviewSupportedSizes(
                         config.getExtension(), burstCaptureSurfaceSize, format);
                 if (supportedSizesPostview != null) {

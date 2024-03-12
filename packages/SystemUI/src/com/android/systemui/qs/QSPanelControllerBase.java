@@ -39,6 +39,7 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.animation.DisappearParameters;
@@ -86,6 +87,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     private final QSHost.Callback mQSHostCallback = this::setTiles;
 
     private SplitShadeStateController mSplitShadeStateController;
+
+    private final VibratorHelper mVibratorHelper;
 
     @VisibleForTesting
     protected final QSPanel.OnConfigurationChangedListener mOnConfigurationChangedListener =
@@ -144,7 +147,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             UiEventLogger uiEventLogger,
             QSLogger qsLogger,
             DumpManager dumpManager,
-            SplitShadeStateController splitShadeStateController
+            SplitShadeStateController splitShadeStateController,
+            VibratorHelper vibratorHelper
     ) {
         super(view);
         mHost = host;
@@ -158,6 +162,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mSplitShadeStateController = splitShadeStateController;
         mShouldUseSplitNotificationShade =
                 mSplitShadeStateController.shouldUseSplitNotificationShade(getResources());
+        mVibratorHelper = vibratorHelper;
     }
 
     @Override
@@ -300,7 +305,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     private void addTile(final QSTile tile, boolean collapsedView) {
-        final QSTileViewImpl tileView = new QSTileViewImpl(getContext(), collapsedView);
+        final QSTileViewImpl tileView = new QSTileViewImpl(
+                getContext(), collapsedView, mVibratorHelper);
         final TileRecord r = new TileRecord(tile, tileView);
         // TODO(b/250618218): Remove the QSLogger in QSTileViewImpl once we know the root cause of
         // b/250618218.

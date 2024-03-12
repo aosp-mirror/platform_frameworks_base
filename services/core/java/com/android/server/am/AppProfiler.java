@@ -711,7 +711,7 @@ public class AppProfiler {
                 }
             }
             if (profile != null) {
-                long startTime = SystemClock.currentThreadTimeMillis();
+                long startTime = SystemClock.uptimeMillis();
                 // skip background PSS calculation under the following situations:
                 //  - app is capturing camera imagery
                 //  - app is frozen and we have already collected PSS once.
@@ -721,7 +721,7 @@ public class AppProfiler {
                         || mService.isCameraActiveForUid(profile.mApp.uid)
                         || mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED;
                 long pss = skipPSSCollection ? 0 : Debug.getPss(pid, tmp, null);
-                long endTime = SystemClock.currentThreadTimeMillis();
+                long endTime = SystemClock.uptimeMillis();
                 synchronized (mProfilerLock) {
                     if (pss != 0 && profile.getThread() != null
                             && profile.getSetProcState() == procState
@@ -852,7 +852,7 @@ public class AppProfiler {
                 }
             }
             if (profile != null) {
-                long startTime = SystemClock.currentThreadTimeMillis();
+                long startTime = SystemClock.uptimeMillis();
                 // skip background RSS calculation under the following situations:
                 //  - app is capturing camera imagery
                 //  - app is frozen and we have already collected RSS once.
@@ -862,7 +862,7 @@ public class AppProfiler {
                         || mService.isCameraActiveForUid(profile.mApp.uid)
                         || mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED;
                 long rss = skipRSSCollection ? 0 : Debug.getRss(pid, null);
-                long endTime = SystemClock.currentThreadTimeMillis();
+                long endTime = SystemClock.uptimeMillis();
                 synchronized (mProfilerLock) {
                     if (rss != 0 && profile.getThread() != null
                             && profile.getSetProcState() == procState

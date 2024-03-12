@@ -259,6 +259,12 @@ class ProcessRecord implements WindowProcessListener {
     private long[] mDisabledCompatChanges;
 
     /**
+     * Set of compat changes for the process that are intended to be logged to logcat.
+     */
+    @GuardedBy("mService")
+    private long[] mLoggableCompatChanges;
+
+    /**
      * Who is watching for the death.
      */
     @GuardedBy("mService")
@@ -935,8 +941,18 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy("mService")
+    long[] getLoggableCompatChanges() {
+        return mLoggableCompatChanges;
+    }
+
+    @GuardedBy("mService")
     void setDisabledCompatChanges(long[] disabledCompatChanges) {
         mDisabledCompatChanges = disabledCompatChanges;
+    }
+
+    @GuardedBy("mService")
+    void setLoggableCompatChanges(long[] loggableCompatChanges) {
+        mLoggableCompatChanges = loggableCompatChanges;
     }
 
     @GuardedBy("mService")

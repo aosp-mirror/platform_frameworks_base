@@ -16,6 +16,8 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
@@ -23,14 +25,20 @@ import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationS
 import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class DeviceEntryFingerprintAuthInteractor
 @Inject
 constructor(
     repository: DeviceEntryFingerprintAuthRepository,
+    biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
+    fingerprintPropertyRepository: FingerprintPropertyRepository,
 ) {
     /** Whether fingerprint authentication is currently running or not */
     val isRunning: Flow<Boolean> = repository.isRunning
@@ -47,4 +55,21 @@ constructor(
         repository.authenticationStatus.filterIsInstance<ErrorFingerprintAuthenticationStatus>()
     val fingerprintHelp: Flow<HelpFingerprintAuthenticationStatus> =
         repository.authenticationStatus.filterIsInstance<HelpFingerprintAuthenticationStatus>()
+
+    /**
+     * Whether fingerprint authentication is currently allowed for the user. This is true if the
+     * user has fingerprint auth enabled, enrolled, it is not disabled by any security timeouts by
+     * [com.android.systemui.keyguard.shared.model.AuthenticationFlags] and not locked out due to
+     * too many incorrect attempts.
+     */
+    val isFingerprintAuthCurrentlyAllowed: Flow<Boolean> =
+        combine(isLockedOut, biometricSettingsInteractor.fingerprintAuthCurrentlyAllowed, ::Pair)
+            .map { (lockedOut, currentlyAllowed) -> !lockedOut && currentlyAllowed }
+
+    /**
+     * Whether the fingerprint sensor is present under the display as opposed to being on the power
+     * button or behind/rear of the phone.
+     */
+    val isSensorUnderDisplay =
+        fingerprintPropertyRepository.sensorType.map(FingerprintSensorType::isUdfps)
 }

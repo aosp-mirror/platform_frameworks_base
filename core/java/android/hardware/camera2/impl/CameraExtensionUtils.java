@@ -29,9 +29,12 @@ import android.hardware.camera2.utils.SurfaceUtils;
 import android.media.Image;
 import android.media.ImageWriter;
 import android.os.Handler;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.util.HashMap;
 import java.util.List;
@@ -130,9 +133,16 @@ public final class CameraExtensionUtils {
     public static Surface getBurstCaptureSurface(
             @NonNull List<OutputConfiguration> outputConfigs,
             @NonNull HashMap<Integer, List<Size>> supportedCaptureSizes) {
+        IntArray supportedCaptureOutputFormats =
+                new IntArray(CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS.length);
+        supportedCaptureOutputFormats.addAll(
+                CameraExtensionUtils.SUPPORTED_CAPTURE_OUTPUT_FORMATS);
+        if (Flags.extension10Bit()) {
+            supportedCaptureOutputFormats.add(ImageFormat.YCBCR_P010);
+        }
         for (OutputConfiguration config : outputConfigs) {
             SurfaceInfo surfaceInfo = querySurface(config.getSurface());
-            for (int supportedFormat : SUPPORTED_CAPTURE_OUTPUT_FORMATS) {
+            for (int supportedFormat : supportedCaptureOutputFormats.toArray()) {
                 if (surfaceInfo.mFormat == supportedFormat) {
                     Size captureSize = new Size(surfaceInfo.mWidth, surfaceInfo.mHeight);
                     if (supportedCaptureSizes.containsKey(supportedFormat)) {

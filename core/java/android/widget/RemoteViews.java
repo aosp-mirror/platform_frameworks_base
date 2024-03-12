@@ -5127,7 +5127,10 @@ public class RemoteViews implements Parcelable, Filter {
      * @param viewId The id of the {@link AdapterView}
      * @param intent The intent of the service which will be
      *            providing data to the RemoteViewsAdapter
+     * @deprecated use
+     * {@link #setRemoteAdapter(int, android.widget.RemoteViews.RemoteCollectionItems)} instead
      */
+    @Deprecated
     public void setRemoteAdapter(@IdRes int viewId, Intent intent) {
         if (remoteAdapterConversion()) {
             addAction(new SetRemoteCollectionItemListAdapterAction(viewId, intent));

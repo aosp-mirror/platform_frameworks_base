@@ -7531,6 +7531,9 @@ public class Notification implements Parcelable
         /**
          * Calls {@link android.app.Notification.Builder#build()} on the Builder this Style is
          * attached to.
+         * <p>
+         * Note: Calling build() multiple times returns the same Notification instance,
+         * so reusing a builder to create multiple Notifications is discouraged.
          *
          * @return the fully constructed Notification.
          */

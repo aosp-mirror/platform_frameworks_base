@@ -189,10 +189,13 @@ public final class DeviceAdminInfo implements Parcelable {
     @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER = 2;
 
+    /**
+     * @hide
+     */
     @IntDef({HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED, HEADLESS_DEVICE_OWNER_MODE_AFFILIATED,
             HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER})
     @Retention(RetentionPolicy.SOURCE)
-    private @interface HeadlessDeviceOwnerMode {}
+    public @interface HeadlessDeviceOwnerMode {}
 
     /** @hide */
     public static class PolicyInfo {

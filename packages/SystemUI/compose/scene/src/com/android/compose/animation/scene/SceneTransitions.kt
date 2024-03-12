@@ -30,6 +30,7 @@ import com.android.compose.animation.scene.transformation.AnchoredTranslate
 import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
+import com.android.compose.animation.scene.transformation.OverscrollTranslate
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
@@ -124,7 +125,7 @@ internal constructor(
         overscrollSpecs.fastForEach { spec ->
             if (spec.orientation == orientation && filter(spec)) {
                 if (match != null) {
-                    error("Found multiple transition specs for transition $scene")
+                    error("Found multiple overscroll specs for overscroll $scene")
                 }
                 match = spec
             }
@@ -297,6 +298,7 @@ internal class TransformationSpecImpl(
         ) {
             when (current) {
                 is Translate,
+                is OverscrollTranslate,
                 is EdgeTranslate,
                 is AnchoredTranslate -> {
                     throwIfNotNull(offset, element, name = "offset")

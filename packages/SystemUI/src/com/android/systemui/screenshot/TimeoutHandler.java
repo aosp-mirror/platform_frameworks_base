@@ -40,7 +40,7 @@ public class TimeoutHandler extends Handler {
     private final Context mContext;
 
     private Runnable mOnTimeout;
-    private int mDefaultTimeout = DEFAULT_TIMEOUT_MILLIS;
+    int mDefaultTimeout = DEFAULT_TIMEOUT_MILLIS;
 
     @Inject
     public TimeoutHandler(Context context) {

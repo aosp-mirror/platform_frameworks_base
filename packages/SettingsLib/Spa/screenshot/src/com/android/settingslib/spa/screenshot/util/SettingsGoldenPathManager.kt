@@ -17,28 +17,25 @@
 package com.android.settingslib.spa.screenshot.util
 
 import androidx.test.platform.app.InstrumentationRegistry
-import platform.test.screenshot.GoldenImagePathManager
+import platform.test.screenshot.GoldenPathManager
 import platform.test.screenshot.PathConfig
 
-/** A [GoldenImagePathManager] that should be used for all Settings screenshot tests. */
-class SettingsGoldenImagePathManager(
-    pathConfig: PathConfig,
-    assetsPathRelativeToBuildRoot: String
-) :
-    GoldenImagePathManager(
+/** A [GoldenPathManager] that should be used for all Settings screenshot tests. */
+class SettingsGoldenPathManager(pathConfig: PathConfig, assetsPathRelativeToBuildRoot: String) :
+    GoldenPathManager(
         appContext = InstrumentationRegistry.getInstrumentation().context,
         assetsPathRelativeToBuildRoot = assetsPathRelativeToBuildRoot,
         deviceLocalPath =
-        InstrumentationRegistry.getInstrumentation()
-            .targetContext
-            .filesDir
-            .absolutePath
-            .toString() + "/settings_screenshots",
+            InstrumentationRegistry.getInstrumentation()
+                .targetContext
+                .filesDir
+                .absolutePath
+                .toString() + "/settings_screenshots",
         pathConfig = pathConfig,
     ) {
     override fun toString(): String {
         // This string is appended to all actual/expected screenshots on the device, so make sure
         // it is a static value.
-        return "SettingsGoldenImagePathManager"
+        return "SettingsGoldenPathManager"
     }
 }

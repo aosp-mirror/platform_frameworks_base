@@ -95,11 +95,12 @@ public class WearableSensingManager {
     /**
      * The value of the status code that indicates one or more of the requested events are not
      * supported.
+     *
+     * @deprecated WearableSensingManager does not deal with events. Use {@link
+     * STATUS_UNSUPPORTED_OPERATION} instead for operations not supported by the implementation of
+     * {@link WearableSensingService}.
      */
-    // TODO(b/324635656): Deprecate this status code. Update Javadoc:
-    // @deprecated WearableSensingManager does not deal with events. Use {@link
-    // STATUS_UNSUPPORTED_OPERATION} instead for operations not supported by the implementation of
-    // {@link WearableSensingService}.
+    @Deprecated
     public static final int STATUS_UNSUPPORTED = 2;
 
     /**
@@ -121,7 +122,6 @@ public class WearableSensingManager {
      * The value of the status code that indicates the method called is not supported by the
      * implementation of {@link WearableSensingService}.
      */
-
     @FlaggedApi(Flags.FLAG_ENABLE_UNSUPPORTED_OPERATION_STATUS_CODE)
     public static final int STATUS_UNSUPPORTED_OPERATION = 6;
 

@@ -16,6 +16,7 @@
 package com.android.systemui.deviceentry.data
 
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepositoryModule
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepositoryModule
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepositoryModule
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepositoryModule
 import com.android.systemui.display.data.repository.FakeDisplayRepositoryModule
@@ -35,6 +36,7 @@ import dagger.Module
             FakeDisplayRepositoryModule::class,
             FakeDisplayStateRepositoryModule::class,
             FakeFingerprintPropertyRepositoryModule::class,
+            FakeFacePropertyRepositoryModule::class,
             FakeTrustRepositoryModule::class,
         ]
 )

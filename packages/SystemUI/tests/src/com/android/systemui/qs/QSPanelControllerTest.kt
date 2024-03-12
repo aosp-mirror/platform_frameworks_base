@@ -19,6 +19,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.tuner.TunerService
@@ -61,6 +62,7 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var configuration: Configuration
     @Mock private lateinit var pagedTileLayout: PagedTileLayout
+    @Mock private lateinit var vibratorHelper: VibratorHelper
 
     private val sceneContainerFlags = FakeSceneContainerFlags()
 
@@ -101,6 +103,7 @@ class QSPanelControllerTest : SysuiTestCase() {
             statusBarKeyguardViewManager,
             ResourcesSplitShadeStateController(),
             sceneContainerFlags,
+            vibratorHelper,
         )
     }
 

@@ -192,66 +192,6 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];
             return null;
         }).when(mBroadcastRadioMock).setTunerCallback(any());
-        mRadioModule.setInternalHalCallback();
-
-        doAnswer(invocation -> {
-            android.hardware.broadcastradio.ProgramSelector halSel =
-                    (android.hardware.broadcastradio.ProgramSelector) invocation.getArguments()[0];
-            mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(halSel, SIGNAL_QUALITY);
-            if (halSel.primaryId.type != IdentifierType.AMFM_FREQUENCY_KHZ) {
-                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
-            }
-            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
-            return Result.OK;
-        }).when(mBroadcastRadioMock).tune(any());
-
-        doAnswer(invocation -> {
-            if ((boolean) invocation.getArguments()[0]) {
-                mHalCurrentInfo.selector.primaryId.value += AM_FM_FREQUENCY_SPACING;
-            } else {
-                mHalCurrentInfo.selector.primaryId.value -= AM_FM_FREQUENCY_SPACING;
-            }
-            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
-            return Result.OK;
-        }).when(mBroadcastRadioMock).step(anyBoolean());
-
-        doAnswer(invocation -> {
-            if (mHalCurrentInfo == null) {
-                android.hardware.broadcastradio.ProgramSelector placeHolderSelector =
-                        AidlTestUtils.makeHalFmSelector(/* freq= */ 97300);
-
-                mHalTunerCallback.onTuneFailed(Result.TIMEOUT, placeHolderSelector);
-                return Result.OK;
-            }
-            mHalCurrentInfo.selector.primaryId.value = getSeekFrequency(
-                    mHalCurrentInfo.selector.primaryId.value,
-                    !(boolean) invocation.getArguments()[0]);
-            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
-            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
-            return Result.OK;
-        }).when(mBroadcastRadioMock).seek(anyBoolean(), anyBoolean());
-
-        doReturn(null).when(mBroadcastRadioMock).getImage(anyInt());
-
-        doAnswer(invocation -> {
-            int configFlag = (int) invocation.getArguments()[0];
-            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
-                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
-            }
-            return mHalConfigMap.getOrDefault(configFlag, false);
-        }).when(mBroadcastRadioMock).isConfigFlagSet(anyInt());
-
-        doAnswer(invocation -> {
-            int configFlag = (int) invocation.getArguments()[0];
-            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
-                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
-            }
-            mHalConfigMap.put(configFlag, (boolean) invocation.getArguments()[1]);
-            return null;
-        }).when(mBroadcastRadioMock).setConfigFlag(anyInt(), anyBoolean());
     }
 
     @After
@@ -330,6 +270,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         expect.withMessage("Close state of broadcast radio service session")
                 .that(mTunerSessions[0].isClosed()).isTrue();
+        verify(mBroadcastRadioMock).unsetTunerCallback();
     }
 
     @Test
@@ -351,6 +292,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                         .that(mTunerSessions[index].isClosed()).isFalse();
             }
         }
+        verify(mBroadcastRadioMock, never()).unsetTunerCallback();
     }
 
     @Test
@@ -378,6 +320,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             expect.withMessage("Close state of broadcast radio service session of index %s", index)
                     .that(mTunerSessions[index].isClosed()).isTrue();
         }
+        verify(mBroadcastRadioMock).unsetTunerCallback();
     }
 
     @Test
@@ -1295,6 +1238,71 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             mAidlTunerCallbackMocks[index] = mock(android.hardware.radio.ITunerCallback.class);
             mTunerSessions[index] = mRadioModule.openSession(mAidlTunerCallbackMocks[index]);
         }
+        setupMockedHalTunerSession();
+    }
+
+    private void setupMockedHalTunerSession() throws Exception {
+        expect.withMessage("Registered HAL tuner callback").that(mHalTunerCallback)
+                .isNotNull();
+
+        doAnswer(invocation -> {
+            android.hardware.broadcastradio.ProgramSelector halSel =
+                    (android.hardware.broadcastradio.ProgramSelector) invocation.getArguments()[0];
+            mHalCurrentInfo = AidlTestUtils.makeHalProgramInfo(halSel, SIGNAL_QUALITY);
+            if (halSel.primaryId.type != IdentifierType.AMFM_FREQUENCY_KHZ) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
+            return Result.OK;
+        }).when(mBroadcastRadioMock).tune(any());
+
+        doAnswer(invocation -> {
+            if ((boolean) invocation.getArguments()[0]) {
+                mHalCurrentInfo.selector.primaryId.value += AM_FM_FREQUENCY_SPACING;
+            } else {
+                mHalCurrentInfo.selector.primaryId.value -= AM_FM_FREQUENCY_SPACING;
+            }
+            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
+            return Result.OK;
+        }).when(mBroadcastRadioMock).step(anyBoolean());
+
+        doAnswer(invocation -> {
+            if (mHalCurrentInfo == null) {
+                android.hardware.broadcastradio.ProgramSelector placeHolderSelector =
+                        AidlTestUtils.makeHalFmSelector(/* freq= */ 97300);
+
+                mHalTunerCallback.onTuneFailed(Result.TIMEOUT, placeHolderSelector);
+                return Result.OK;
+            }
+            mHalCurrentInfo.selector.primaryId.value = getSeekFrequency(
+                    mHalCurrentInfo.selector.primaryId.value,
+                    !(boolean) invocation.getArguments()[0]);
+            mHalCurrentInfo.logicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalCurrentInfo.physicallyTunedTo = mHalCurrentInfo.selector.primaryId;
+            mHalTunerCallback.onCurrentProgramInfoChanged(mHalCurrentInfo);
+            return Result.OK;
+        }).when(mBroadcastRadioMock).seek(anyBoolean(), anyBoolean());
+
+        doReturn(null).when(mBroadcastRadioMock).getImage(anyInt());
+
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            return mHalConfigMap.getOrDefault(configFlag, false);
+        }).when(mBroadcastRadioMock).isConfigFlagSet(anyInt());
+
+        doAnswer(invocation -> {
+            int configFlag = (int) invocation.getArguments()[0];
+            if (configFlag == UNSUPPORTED_CONFIG_FLAG) {
+                throw new ServiceSpecificException(Result.NOT_SUPPORTED);
+            }
+            mHalConfigMap.put(configFlag, (boolean) invocation.getArguments()[1]);
+            return null;
+        }).when(mBroadcastRadioMock).setConfigFlag(anyInt(), anyBoolean());
     }
 
     private long getSeekFrequency(long currentFrequency, boolean seekDown) {

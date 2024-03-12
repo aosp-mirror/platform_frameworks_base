@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.util.apk.ApkSignatureSchemeV4Verifier.APK_SIGNATURE_SCHEME_DEFAULT;
 
+import android.annotation.NonNull;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningDetails.SignatureSchemeVersion;
@@ -33,9 +34,12 @@ import android.content.pm.parsing.result.ParseResult;
 import android.os.Build;
 import android.os.Trace;
 import android.os.incremental.V4Signature;
+import android.util.ArrayMap;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
@@ -63,7 +67,13 @@ import java.util.zip.ZipEntry;
  */
 public class ApkSignatureVerifier {
 
+    private static final String LOG_TAG = "ApkSignatureVerifier";
+
     private static final AtomicReference<byte[]> sBuffer = new AtomicReference<>();
+
+    @GuardedBy("sOverrideSigningDetails")
+    private static final ArrayMap<SigningDetails, SigningDetails> sOverrideSigningDetails =
+            new ArrayMap<>();
 
     /**
      * Verifies the provided APK and returns the certificates associated with each signer.
@@ -95,7 +105,54 @@ public class ApkSignatureVerifier {
         if (result.isError()) {
             return input.error(result);
         }
-        return input.success(result.getResult().signingDetails);
+        SigningDetails signingDetails = result.getResult().signingDetails;
+        if (Build.isDebuggable()) {
+            SigningDetails overrideSigningDetails;
+            synchronized (sOverrideSigningDetails) {
+                overrideSigningDetails = sOverrideSigningDetails.get(signingDetails);
+            }
+            if (overrideSigningDetails != null) {
+                Slog.i(LOG_TAG, "Applying override signing details for APK " + apkPath);
+                signingDetails = overrideSigningDetails;
+            }
+        }
+        return input.success(signingDetails);
+    }
+
+    /**
+     * Add a pair of signing details so that packages signed with {@code oldSigningDetails} will
+     * behave as if they are signed by the {@code newSigningDetails}.
+     *
+     * @param oldSigningDetails the original signing detail of the package
+     * @param newSigningDetails the new signing detail that will replace the original one
+     */
+    public static void addOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails,
+            @NonNull SigningDetails newSigningDetails) {
+        synchronized (sOverrideSigningDetails) {
+            sOverrideSigningDetails.put(oldSigningDetails, newSigningDetails);
+        }
+    }
+
+    /**
+     * Remove a pair of signing details previously added via {@link #addOverrideSigningDetails} by
+     * the old signing details.
+     *
+     * @param oldSigningDetails the original signing detail of the package
+     * @throws SecurityException if the build is not debuggable
+     */
+    public static void removeOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails) {
+        synchronized (sOverrideSigningDetails) {
+            sOverrideSigningDetails.remove(oldSigningDetails);
+        }
+    }
+
+    /**
+     * Clear all pairs of signing details previously added via {@link #addOverrideSigningDetails}.
+     */
+    public static void clearOverrideSigningDetails() {
+        synchronized (sOverrideSigningDetails) {
+            sOverrideSigningDetails.clear();
+        }
     }
 
     /**

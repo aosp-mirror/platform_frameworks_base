@@ -109,5 +109,5 @@ flag {
     name: "enable_null_session_in_media_browser_service"
     namespace: "media_solutions"
     description: "Enables apps owning a MediaBrowserService to disconnect all connected browsers."
-    bug: "263520343"
+    bug: "185136506"
 }

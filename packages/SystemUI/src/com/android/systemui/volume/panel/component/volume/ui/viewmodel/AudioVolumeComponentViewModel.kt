@@ -18,6 +18,8 @@ package com.android.systemui.volume.panel.component.volume.ui.viewmodel
 
 import android.media.AudioManager
 import com.android.settingslib.volume.shared.model.AudioStream
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.model.isPlaying
 import com.android.systemui.volume.panel.component.volume.domain.interactor.CastVolumeInteractor
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.AudioStreamSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.CastVolumeSliderViewModel
@@ -28,12 +30,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.launch
 
 /**
  * Controls the behaviour of the whole audio
@@ -46,6 +53,7 @@ class AudioVolumeComponentViewModel
 constructor(
     @VolumePanelScope private val scope: CoroutineScope,
     castVolumeInteractor: CastVolumeInteractor,
+    mediaOutputInteractor: MediaOutputInteractor,
     private val streamSliderViewModelFactory: AudioStreamSliderViewModel.Factory,
     private val castVolumeSliderViewModelFactory: CastVolumeSliderViewModel.Factory,
 ) {
@@ -90,4 +98,17 @@ constructor(
                 remoteSessionsViewModels + streamViewModels
             }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    private val mutableIsExpanded = MutableSharedFlow<Boolean>()
+
+    val isExpanded: StateFlow<Boolean> =
+        merge(
+                mutableIsExpanded.onStart { emit(false) },
+                mediaOutputInteractor.mediaDeviceSession.map { !it.isPlaying() },
+            )
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
+    fun onExpandedChanged(isExpanded: Boolean) {
+        scope.launch { mutableIsExpanded.emit(isExpanded) }
+    }
 }

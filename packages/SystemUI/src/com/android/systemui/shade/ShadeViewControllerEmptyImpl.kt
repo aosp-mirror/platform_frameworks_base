@@ -34,7 +34,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     ShadeLockscreenInteractor,
     PanelExpansionInteractor {
     override fun expandToNotifications() {}
-    override val isExpandingOrCollapsing: Boolean = false
     override val isExpanded: Boolean = false
     override val isPanelExpanded: Boolean = false
     override fun animateCollapseQs(fullyCollapse: Boolean) {}

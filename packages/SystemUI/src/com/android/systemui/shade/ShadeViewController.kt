@@ -31,9 +31,6 @@ import java.util.function.Consumer
  * @see NotificationPanelViewController
  */
 interface ShadeViewController {
-    /** Returns whether the shade is expanding or collapsing itself or quick settings. */
-    val isExpandingOrCollapsing: Boolean
-
     /**
      * Returns whether the shade height is greater than zero or the shade is expecting a synthesized
      * down event.

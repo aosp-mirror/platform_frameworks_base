@@ -115,10 +115,10 @@ flag {
 }
 
 flag {
-    name: "notifications_background_media_icons"
+    name: "notifications_background_icons"
     namespace: "systemui"
-    description: "Updates icons for media notifications in the background."
-    bug: "315143160"
+    description: "Moves part of the notification icon updates to the background."
+    bug: "315143361"
     metadata {
         purpose: PURPOSE_BUGFIX
     }
@@ -616,4 +616,15 @@ flag {
     namespace: "systemui"
     description: "enables new focus outline for qs tiles when focused on with physical keyboard"
     bug: "312899524"
+}
+
+flag {
+   name: "edgeback_gesture_handler_get_running_tasks_background"
+    namespace: "systemui"
+    description: "Decide whether to get the running tasks from activity manager in EdgebackGestureHandler"
+        " class on the background thread."
+    bug: "325041960"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

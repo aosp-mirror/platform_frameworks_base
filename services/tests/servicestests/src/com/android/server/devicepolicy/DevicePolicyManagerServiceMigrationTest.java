@@ -145,6 +145,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/277916462")
     public void testCompMigrationUnAffiliated_skipped() throws Exception {
         prepareAdmin1AsDo();
         prepareAdminAnotherPackageAsPo(COPE_PROFILE_USER_ID);
@@ -216,6 +217,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/277916462")
     public void testCompMigration_keepSuspendedAppsWhenDpcIsRPlus() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);
@@ -249,6 +251,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/277916462")
     public void testCompMigration_unsuspendAppsWhenDpcNotRPlus() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.Q);

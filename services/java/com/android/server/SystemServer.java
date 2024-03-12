@@ -1134,7 +1134,7 @@ public final class SystemServer implements Dumpable {
         ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE, platformCompat);
         ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
                 new PlatformCompatNative(platformCompat));
-        AppCompatCallbacks.install(new long[0]);
+        AppCompatCallbacks.install(new long[0], new long[0]);
         t.traceEnd();
 
         // FileIntegrityService responds to requests from apps and the system. It needs to run after
@@ -2166,14 +2166,16 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-            t.traceBegin("StartVcnManagementService");
-            try {
-                vcnManagement = VcnManagementService.create(context);
-                ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
-            } catch (Throwable e) {
-                reportWtf("starting VCN Management Service", e);
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)) {
+                t.traceBegin("StartVcnManagementService");
+                try {
+                    vcnManagement = VcnManagementService.create(context);
+                    ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
+                } catch (Throwable e) {
+                    reportWtf("starting VCN Management Service", e);
+                }
+                t.traceEnd();
             }
-            t.traceEnd();
 
             t.traceBegin("StartSystemUpdateManagerService");
             try {

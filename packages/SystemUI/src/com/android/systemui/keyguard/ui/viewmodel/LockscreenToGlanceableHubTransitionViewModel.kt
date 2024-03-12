@@ -81,6 +81,8 @@ constructor(
 
     val notificationAlpha: Flow<Float> = keyguardAlpha
 
+    val shortcutsAlpha: Flow<Float> = keyguardAlpha
+
     val notificationTranslationX: Flow<Float> =
         keyguardTranslationX.map { it.value }.filterNotNull()
 }

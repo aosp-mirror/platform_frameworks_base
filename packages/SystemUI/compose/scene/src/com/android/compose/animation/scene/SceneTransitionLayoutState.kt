@@ -236,19 +236,28 @@ sealed interface TransitionState {
 
     interface HasOverscrollProperties {
         /**
-         * The position of the [TransitionState.Transition.toScene].
+         * The position of the [Transition.toScene].
          *
          * Used to understand the direction of the overscroll.
          */
         val isUpOrLeft: Boolean
 
         /**
-         * The relative orientation between [TransitionState.Transition.fromScene] and
-         * [TransitionState.Transition.toScene].
+         * The relative orientation between [Transition.fromScene] and [Transition.toScene].
          *
          * Used to understand the orientation of the overscroll.
          */
         val orientation: Orientation
+
+        /**
+         * Scope which can be used in the Overscroll DSL to define a transformation based on the
+         * distance between [Transition.fromScene] and [Transition.toScene].
+         */
+        val overscrollScope: OverscrollScope
+
+        companion object {
+            const val DistanceUnspecified = 0f
+        }
     }
 }
 

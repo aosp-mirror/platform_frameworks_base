@@ -24,6 +24,7 @@ import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputActionsInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
+import com.android.systemui.volume.panel.component.mediaoutput.domain.model.isPlaying
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import javax.inject.Inject
@@ -109,9 +110,6 @@ constructor(
                 SharingStarted.Eagerly,
                 null,
             )
-
-    private fun MediaDeviceSession.isPlaying(): Boolean =
-        this is MediaDeviceSession.Active && playbackState?.isActive == true
 
     fun onBarClick(expandable: Expandable) {
         actionsInteractor.onBarClick(mediaDeviceSession.value, expandable)

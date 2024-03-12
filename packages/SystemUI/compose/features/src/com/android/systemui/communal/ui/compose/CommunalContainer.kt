@@ -24,7 +24,6 @@ import com.android.compose.animation.scene.transitions
 import com.android.compose.animation.scene.updateSceneTransitionLayoutState
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.res.R
@@ -84,7 +83,7 @@ fun CommunalContainer(
 
     SceneTransitionLayout(
         state = sceneTransitionLayoutState,
-        modifier = modifier.fillMaxSize().allowGestures(allowed = touchesAllowed),
+        modifier = modifier.fillMaxSize(),
         swipeSourceDetector =
             FixedSizeEdgeDetector(
                 dimensionResource(id = R.dimen.communal_gesture_initiation_width)
@@ -93,9 +92,14 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Blank,
             userActions =
-                mapOf(
-                    Swipe(SwipeDirection.Left, fromSource = Edge.Right) to CommunalScenes.Communal
-                )
+                if (touchesAllowed) {
+                    mapOf(
+                        Swipe(SwipeDirection.Left, fromSource = Edge.Right) to
+                            CommunalScenes.Communal
+                    )
+                } else {
+                    emptyMap()
+                }
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
             Box(modifier = Modifier.fillMaxSize())
@@ -104,7 +108,13 @@ fun CommunalContainer(
         scene(
             CommunalScenes.Communal,
             userActions =
-                mapOf(Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank),
+                if (touchesAllowed) {
+                    mapOf(
+                        Swipe(SwipeDirection.Right, fromSource = Edge.Left) to CommunalScenes.Blank
+                    )
+                } else {
+                    emptyMap()
+                },
         ) {
             CommunalScene(viewModel, dialogFactory, modifier = modifier)
         }

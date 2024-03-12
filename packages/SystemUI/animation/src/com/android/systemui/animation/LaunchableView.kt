@@ -38,6 +38,9 @@ interface LaunchableView {
      * @param block whether we should block/postpone all calls to `setVisibility`.
      */
     fun setShouldBlockVisibilityChanges(block: Boolean)
+
+    /** Perform an action when the activity launch animation ends */
+    fun onActivityLaunchAnimationEnd() {}
 }
 
 /** A delegate that can be used by views to make the implementation of [LaunchableView] easier. */

@@ -1259,12 +1259,14 @@ public class BubbleController implements ConfigurationChangeListener,
      * Expands and selects a bubble based on the provided {@link BubbleEntry}. If no bubble
      * exists for this entry, and it is able to bubble, a new bubble will be created.
      *
-     * This is the method to use when opening a bubble via a notification or in a state where
+     * <p>This is the method to use when opening a bubble via a notification or in a state where
      * the device might not be unlocked.
      *
      * @param entry the entry to use for the bubble.
      */
     public void expandStackAndSelectBubble(BubbleEntry entry) {
+        ProtoLog.d(WM_SHELL_BUBBLES, "opening bubble from notification key=%s mIsStatusBarShade=%b",
+                entry.getKey(), mIsStatusBarShade);
         if (mIsStatusBarShade) {
             mNotifEntryToExpandOnShadeUnlock = null;
 

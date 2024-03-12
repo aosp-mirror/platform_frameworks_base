@@ -102,6 +102,7 @@ class DesktopTasksController(
         ToggleResizeDesktopTaskTransitionHandler,
         private val dragToDesktopTransitionHandler: DragToDesktopTransitionHandler,
         private val desktopModeTaskRepository: DesktopModeTaskRepository,
+        private val desktopModeLoggerTransitionObserver: DesktopModeLoggerTransitionObserver,
         private val launchAdjacentController: LaunchAdjacentController,
         private val recentsTransitionHandler: RecentsTransitionHandler,
         private val multiInstanceHelper: MultiInstanceHelper,

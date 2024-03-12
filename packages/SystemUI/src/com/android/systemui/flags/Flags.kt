@@ -76,23 +76,6 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
             releasedFlag("notification_memory_logging_enabled")
 
-    // TODO(b/260335638): Tracking Bug
-    @JvmField
-    val NOTIFICATION_INLINE_REPLY_ANIMATION = releasedFlag("notification_inline_reply_animation")
-
-    // TODO(b/288326013): Tracking Bug
-    @JvmField
-    val NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION =
-        unreleasedFlag("notification_async_hybrid_view_inflation", teamfood = false)
-
-    @JvmField
-    val ANIMATED_NOTIFICATION_SHADE_INSETS =
-        releasedFlag("animated_notification_shade_insets")
-
-    // TODO(b/268005230): Tracking Bug
-    @JvmField
-    val SENSITIVE_REVEAL_ANIM = releasedFlag("sensitive_reveal_anim")
-
     // TODO(b/280783617): Tracking Bug
     @Keep
     @JvmField
