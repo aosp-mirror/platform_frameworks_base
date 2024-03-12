@@ -605,6 +605,8 @@ private class SwipeTransition(
 
     override val isInitiatedByUserInput = true
 
+    override var bouncingScene: SceneKey? = null
+
     /** The current offset caused by the drag gesture. */
     var dragOffset by mutableFloatStateOf(0f)
 
@@ -694,14 +696,31 @@ private class SwipeTransition(
     ): OffsetAnimation {
         return startOffsetAnimation {
             val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
+            val isTargetGreater = targetOffset > animatable.value
             val job =
                 coroutineScope
                     .launch {
-                        animatable.animateTo(
-                            targetValue = targetOffset,
-                            animationSpec = swipeSpec,
-                            initialVelocity = initialVelocity,
-                        )
+                        try {
+                            animatable.animateTo(
+                                targetValue = targetOffset,
+                                animationSpec = swipeSpec,
+                                initialVelocity = initialVelocity,
+                            ) {
+                                if (bouncingScene == null) {
+                                    val isBouncing =
+                                        if (isTargetGreater) {
+                                            value > targetOffset
+                                        } else {
+                                            value < targetOffset
+                                        }
+                                    if (isBouncing) {
+                                        bouncingScene = targetScene
+                                    }
+                                }
+                            }
+                        } finally {
+                            bouncingScene = null
+                        }
                     }
                     // Make sure that we settle to target scene at the end of the animation or if
                     // the animation is cancelled.
