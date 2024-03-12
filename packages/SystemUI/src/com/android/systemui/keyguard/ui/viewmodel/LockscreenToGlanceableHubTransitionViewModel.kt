@@ -71,7 +71,8 @@ constructor(
                     duration = FromLockscreenTransitionInteractor.TO_GLANCEABLE_HUB_DURATION,
                     onStep = { value -> value * translatePx },
                     // Move notifications back to their original position since they can be
-                    // accessed from the shade.
+                    // accessed from the shade, and also keyguard elements in case the animation
+                    // is cancelled.
                     onFinish = { 0f },
                     onCancel = { 0f },
                     interpolator = EMPHASIZED,
