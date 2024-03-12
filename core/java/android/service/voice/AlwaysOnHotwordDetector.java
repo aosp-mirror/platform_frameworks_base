@@ -819,19 +819,15 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         /**
          * Called when the keyphrase is spoken.
          *
-         * <p>This implicitly stops listening for the keyphrase once it's detected. Clients should
-         * start a recognition again once they are done handling this detection.
+         * <p>If {@code eventPayload.isRecognitionStopped()} returns true, this implicitly stops
+         * listening for the keyphrase once it's detected. Clients should start a recognition again
+         * once they are done handling this detection.
          *
          * @param eventPayload Payload data for the detection event. This may contain the trigger
          *     audio, if requested when calling {@link
-         *     AlwaysOnHotwordDetector#startRecognition(int)}.
+         *     AlwaysOnHotwordDetector#startRecognition(int)} or if the audio comes from the {@link
+         *     android.service.wearable.WearableSensingService}.
          */
-        // TODO(b/324635656): Update Javadoc for 24Q3 release:
-        // 1. Prepend to the first paragraph:
-        //     If {@code eventPayload.isRecognitionStopped()} returns true, this...
-        // 2. Append to the description for @param eventPayload:
-        //     ...or if the audio comes from {@link
-        //     android.service.wearable.WearableSensingService}.
         public abstract void onDetected(@NonNull EventPayload eventPayload);
 
         /**
