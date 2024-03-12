@@ -954,7 +954,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             for (int i = 0; i < mFingerprintSensors.size(); i++) {
                 final Sensor sensor = mFingerprintSensors.valueAt(i);
                 final int sensorId = mFingerprintSensors.keyAt(i);
-                PerformanceTracker.getInstanceForSensorId(sensorId).incrementHALDeathCount();
+                final PerformanceTracker performanceTracker = PerformanceTracker.getInstanceForSensorId(
+                        sensorId);
+                if (performanceTracker != null) {
+                    performanceTracker.incrementHALDeathCount();
+                } else {
+                    Slog.w(getTag(), "Performance tracker is null. Not counting HAL death.");
+                }
                 sensor.onBinderDied();
             }
         });
