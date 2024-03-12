@@ -142,7 +142,7 @@ public final class CameraExtensionCharacteristics {
     /**
      * An extension that aims to lock and stabilize a given region or object of interest.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EXTENSION_EYES_FREE_VIDEOGRAPHY = 5;
 
     /**
@@ -559,7 +559,7 @@ public final class CameraExtensionCharacteristics {
             public ExtensionConnectionManager() {
                 IntArray extensionList = new IntArray(EXTENSION_LIST.length);
                 extensionList.addAll(EXTENSION_LIST);
-                if (Flags.concertMode()) {
+                if (Flags.concertModeApi()) {
                     extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
                 }
 
@@ -762,7 +762,7 @@ public final class CameraExtensionCharacteristics {
 
         IntArray extensionList = new IntArray(EXTENSION_LIST.length);
         extensionList.addAll(EXTENSION_LIST);
-        if (Flags.concertMode()) {
+        if (Flags.concertModeApi()) {
             extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
         }
 
@@ -1544,7 +1544,7 @@ public final class CameraExtensionCharacteristics {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
             CameraCharacteristics.EFV_PADDING_ZOOM_FACTOR_RANGE;
 }
