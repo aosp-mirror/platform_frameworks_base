@@ -1208,7 +1208,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!mSystemReady) {
                 return;
             }
-            buildInputMethodListLocked(true);
+            mSettings = queryInputMethodServicesInternal(mContext, mSettings.getUserId(),
+                    AdditionalSubtypeMapRepository.get(mSettings.getUserId()),
+                    DirectBootAwareness.AUTO);
+            postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */);
             // If the locale is changed, needs to reset the default ime
             resetDefaultImeLocked(mContext);
             updateFromSettingsLocked(true);
@@ -1455,12 +1458,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             settings.getMethodMap());
                 }
 
-                if (!isCurrentUser
-                        || !(additionalSubtypeChanged || shouldRebuildInputMethodListLocked())) {
+                if (!isCurrentUser) {
                     return;
                 }
 
-                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                if (!(additionalSubtypeChanged || shouldRebuildInputMethodListLocked())) {
+                    return;
+                }
+                mSettings = queryInputMethodServicesInternal(mContext, userId,
+                        newAdditionalSubtypeMap, DirectBootAwareness.AUTO);
+                postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
 
                 boolean changed = false;
 
@@ -1619,12 +1626,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (userId != currentUserId) {
                 return;
             }
-            mSettings = InputMethodSettings.createEmptyMap(userId);
-            if (mSystemReady) {
-                // We need to rebuild IMEs.
-                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
-                updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
+            if (!mSystemReady) {
+                return;
             }
+            mSettings = queryInputMethodServicesInternal(mContext, userId,
+                    AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO);
+            // We need to rebuild IMEs.
+            postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
+            updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
         }
     }
 
@@ -1856,7 +1865,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // The mSystemReady flag is set during boot phase,
         // and user switch would not happen at that time.
         resetCurrentMethodAndClientLocked(UnbindReason.SWITCH_USER);
-        buildInputMethodListLocked(initialUserSwitch);
+
+        mSettings = queryInputMethodServicesInternal(mContext, newUserId,
+                AdditionalSubtypeMapRepository.get(newUserId), DirectBootAwareness.AUTO);
+        postInputMethodSettingUpdatedLocked(initialUserSwitch /* resetDefaultEnabledIme */);
         if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
             // This is the first time of the user switch and
             // set the current ime to the proper one.
@@ -1937,7 +1949,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                 final String defaultImiId = mSettings.getSelectedInputMethod();
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
-                buildInputMethodListLocked(!imeSelectedOnBoot /* resetDefaultEnabledIme */);
+                mSettings = queryInputMethodServicesInternal(mContext, currentUserId,
+                        AdditionalSubtypeMapRepository.get(mSettings.getUserId()),
+                        DirectBootAwareness.AUTO);
+                postInputMethodSettingUpdatedLocked(
+                        !imeSelectedOnBoot /* resetDefaultEnabledIme */);
                 updateFromSettingsLocked(true);
                 InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
                         getPackageManagerForUser(mContext, currentUserId),
@@ -4382,7 +4398,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (isCurrentUser) {
                     final long ident = Binder.clearCallingIdentity();
                     try {
-                        buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                        mSettings = queryInputMethodServicesInternal(mContext,
+                                mSettings.getUserId(),
+                                AdditionalSubtypeMapRepository.get(mSettings.getUserId()),
+                                DirectBootAwareness.AUTO);
+                        postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
@@ -5310,7 +5330,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
+    void postInputMethodSettingUpdatedLocked(boolean resetDefaultEnabledIme) {
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
                     + " \n ------ caller=" + Debug.getCallers(10));
@@ -5321,10 +5341,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         mMethodMapUpdateCount++;
         mMyPackageMonitor.clearKnownImePackageNamesLocked();
-
-        mSettings = queryInputMethodServicesInternal(mContext, mSettings.getUserId(),
-                AdditionalSubtypeMapRepository.get(mSettings.getUserId()),
-                DirectBootAwareness.AUTO);
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
