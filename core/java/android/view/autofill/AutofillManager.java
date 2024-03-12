@@ -974,7 +974,7 @@ public final class AutofillManager {
         mShouldIncludeInvisibleViewInAssistStructure =
                 AutofillFeatureFlags.shouldIncludeInvisibleViewInAssistStructure();
 
-        mRelayoutFix = Flags.relayout();
+        mRelayoutFix = AutofillFeatureFlags.shouldIgnoreRelayoutWhenAuthPending();
         mIsCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
     }
 
