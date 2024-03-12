@@ -5006,7 +5006,7 @@ package android.hardware.devicestate {
   }
 
   public static interface DeviceStateManager.DeviceStateCallback {
-    method public default void onDeviceStateChanged(@NonNull android.hardware.devicestate.DeviceState);
+    method public void onDeviceStateChanged(@NonNull android.hardware.devicestate.DeviceState);
     method public default void onSupportedStatesChanged(@NonNull java.util.List<android.hardware.devicestate.DeviceState>);
   }
 

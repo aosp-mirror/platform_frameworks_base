@@ -52,78 +52,6 @@ import java.util.Set;
 @FlaggedApi(android.hardware.devicestate.feature.flags.Flags.FLAG_DEVICE_STATE_PROPERTY_API)
 public final class DeviceState {
     /**
-     * Flag that indicates override requests should be cancelled when this device state becomes the
-     * base device state.
-     * @hide
-     * @deprecated use {@link #PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS}
-     */
-    @Deprecated
-    public static final int FLAG_CANCEL_OVERRIDE_REQUESTS = 1 << 0;
-
-    /**
-     * Flag that indicates this device state is inaccessible for applications to be placed in. This
-     * could be a device-state where the {@link Display#DEFAULT_DISPLAY} is not enabled.
-     * @hide
-     * @deprecated use {@link #PROPERTY_APP_INACCESSIBLE}
-     */
-    @Deprecated
-    public static final int FLAG_APP_INACCESSIBLE = 1 << 1;
-
-    /**
-     * Some device states can be both entered through a physical configuration as well as emulation
-     * through {@link DeviceStateManager#requestState}, while some states can only be entered
-     * through emulation and have no physical configuration to match.
-     *
-     * This flag indicates that the corresponding state can only be entered through emulation.
-     * @hide
-     * @deprecated use {@link #PROPERTY_EMULATED_ONLY}
-     */
-    @Deprecated
-    public static final int FLAG_EMULATED_ONLY = 1 << 2;
-
-    /**
-     * This flag indicates that the corresponding state should be automatically canceled when the
-     * requesting app is no longer on top. The app is considered not on top when (1) the top
-     * activity in the system is from a different app, (2) the device is in sleep mode, or
-     * (3) the keyguard shows up.
-     * @hide
-     * @deprecated use {@link #PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP}
-     */
-    @Deprecated
-    public static final int FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP = 1 << 3;
-
-    /**
-     * This flag indicates that the corresponding state should be disabled when the device is
-     * overheating and reaching the critical status.
-     * @hide
-     * @deprecated use {@link #PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL}
-     */
-    @Deprecated
-    public static final int FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL = 1 << 4;
-
-    /**
-     * This flag indicates that the corresponding state should be disabled when power save mode
-     * is enabled.
-     * @hide
-     * @deprecated use {@link #PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE}
-     */
-    @Deprecated
-    public static final int FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE = 1 << 5;
-
-    /** @hide */
-    @IntDef(prefix = {"FLAG_"}, flag = true, value = {
-            FLAG_CANCEL_OVERRIDE_REQUESTS,
-            FLAG_APP_INACCESSIBLE,
-            FLAG_EMULATED_ONLY,
-            FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
-            FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
-            FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE
-    })
-    @Deprecated
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DeviceStateFlags {}
-
-    /**
      * Property that indicates that a fold-in style foldable device is currently in a fully closed
      * configuration.
      */
@@ -302,42 +230,11 @@ public final class DeviceState {
     @NonNull
     private final DeviceState.Configuration mDeviceStateConfiguration;
 
-    @DeviceStateFlags
-    private final int mFlags;
-
     /** @hide */
+    @TestApi
     public DeviceState(@NonNull DeviceState.Configuration deviceStateConfiguration) {
         Objects.requireNonNull(deviceStateConfiguration, "Device StateConfiguration is null");
         mDeviceStateConfiguration = deviceStateConfiguration;
-        mFlags = 0;
-    }
-
-    /** @hide */
-    public DeviceState(
-            @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
-                    MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
-            @NonNull String name,
-            @NonNull Set<@DeviceStateProperties Integer> properties) {
-        mDeviceStateConfiguration = new DeviceState.Configuration(identifier, name, properties,
-                Collections.emptySet());
-        mFlags = 0;
-    }
-
-    /**
-     * @deprecated Deprecated in favor of {@link #DeviceState(int, String, Set)}
-     * @hide
-     */
-    // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-    @Deprecated
-    public DeviceState(
-            @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
-                    MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
-            @NonNull String name,
-            @DeviceStateFlags int flags) {
-
-        mDeviceStateConfiguration = new DeviceState.Configuration(identifier, name,
-                Collections.emptySet(), Collections.emptySet());
-        mFlags = flags;
     }
 
     /** Returns the unique identifier for the device state. */
@@ -350,17 +247,6 @@ public final class DeviceState {
     @NonNull
     public String getName() {
         return mDeviceStateConfiguration.getName();
-    }
-
-    /**
-     * @hide
-     * @deprecated in favor of {@link #hasProperty(int)} method
-     */
-    // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-    @Deprecated
-    @DeviceStateFlags
-    public int getFlags() {
-        return mFlags;
     }
 
     @Override
@@ -386,16 +272,6 @@ public final class DeviceState {
     @Override
     public int hashCode() {
         return Objects.hash(mDeviceStateConfiguration);
-    }
-
-    /** Checks if a specific flag is set
-     * @hide
-     * @deprecated in favor of {@link #hasProperty(int)}
-     */
-    // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-    @Deprecated
-    public boolean hasFlag(int flagToCheckFor) {
-        return (mFlags & flagToCheckFor) == flagToCheckFor;
     }
 
     /**
@@ -438,6 +314,7 @@ public final class DeviceState {
      * @see DeviceStateManager
      * @hide
      */
+    @TestApi
     public static final class Configuration implements Parcelable {
         /** Unique identifier for the device state. */
         @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to = MAXIMUM_DEVICE_STATE_IDENTIFIER)
@@ -563,29 +440,35 @@ public final class DeviceState {
         };
 
         /** @hide */
-        public static class Builder {
+        @TestApi
+        public static final class Builder {
             private final int mIdentifier;
+            @NonNull
             private final String mName;
+            @NonNull
             private Set<@SystemDeviceStateProperties Integer> mSystemProperties =
                     Collections.emptySet();
+            @NonNull
             private Set<@PhysicalDeviceStateProperties Integer> mPhysicalProperties =
                     Collections.emptySet();
 
-            public Builder(int identifier, String name) {
+            public Builder(int identifier, @NonNull String name) {
                 mIdentifier = identifier;
                 mName = name;
             }
 
             /** Sets the system properties for this {@link DeviceState.Configuration.Builder} */
+            @NonNull
             public Builder setSystemProperties(
-                    Set<@SystemDeviceStateProperties Integer> systemProperties) {
+                    @NonNull Set<@SystemDeviceStateProperties Integer> systemProperties) {
                 mSystemProperties = systemProperties;
                 return this;
             }
 
             /** Sets the system properties for this {@link DeviceState.Configuration.Builder} */
+            @NonNull
             public Builder setPhysicalProperties(
-                    Set<@PhysicalDeviceStateProperties Integer> physicalProperties) {
+                    @NonNull Set<@PhysicalDeviceStateProperties Integer> physicalProperties) {
                 mPhysicalProperties = physicalProperties;
                 return this;
             }
@@ -594,6 +477,7 @@ public final class DeviceState {
              * Returns a new {@link DeviceState.Configuration} whose values match the values set on
              * the builder.
              */
+            @NonNull
             public DeviceState.Configuration build() {
                 return new DeviceState.Configuration(mIdentifier, mName, mSystemProperties,
                         mPhysicalProperties);

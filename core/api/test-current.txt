@@ -1625,23 +1625,35 @@ package android.hardware.camera2.params {
 package android.hardware.devicestate {
 
   @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceState {
+    ctor public DeviceState(@NonNull android.hardware.devicestate.DeviceState.Configuration);
     field public static final int PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST = 8; // 0x8
+  }
+
+  public static final class DeviceState.Configuration implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getIdentifier();
+    method @NonNull public String getName();
+    method @NonNull public java.util.Set<java.lang.Integer> getPhysicalProperties();
+    method @NonNull public java.util.Set<java.lang.Integer> getSystemProperties();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.devicestate.DeviceState.Configuration> CREATOR;
+  }
+
+  public static final class DeviceState.Configuration.Builder {
+    ctor public DeviceState.Configuration.Builder(int, @NonNull String);
+    method @NonNull public android.hardware.devicestate.DeviceState.Configuration build();
+    method @NonNull public android.hardware.devicestate.DeviceState.Configuration.Builder setPhysicalProperties(@NonNull java.util.Set<java.lang.Integer>);
+    method @NonNull public android.hardware.devicestate.DeviceState.Configuration.Builder setSystemProperties(@NonNull java.util.Set<java.lang.Integer>);
   }
 
   @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceStateManager {
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void cancelBaseStateOverride();
     method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void cancelStateRequest();
-    method @Deprecated @NonNull public int[] getSupportedStates();
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void requestBaseStateOverride(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
     method @RequiresPermission(value=android.Manifest.permission.CONTROL_DEVICE_STATE, conditional=true) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
+    field public static final int INVALID_DEVICE_STATE_IDENTIFIER = -1; // 0xffffffff
     field public static final int MAXIMUM_DEVICE_STATE_IDENTIFIER = 10000; // 0x2710
     field public static final int MINIMUM_DEVICE_STATE_IDENTIFIER = 0; // 0x0
-  }
-
-  public static interface DeviceStateManager.DeviceStateCallback {
-    method @Deprecated public default void onBaseStateChanged(int);
-    method @Deprecated public void onStateChanged(int);
-    method @Deprecated public default void onSupportedStatesChanged(@NonNull int[]);
   }
 
   public final class DeviceStateRequest {
