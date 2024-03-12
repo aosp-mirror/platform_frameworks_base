@@ -30,18 +30,8 @@ class VolumeSliderInteractorTest : SysuiTestCase() {
     private val underTest = VolumeSliderInteractor()
 
     @Test
-    fun translateValueToVolume() {
-        assertThat(underTest.translateValueToVolume(30f, volumeRange)).isEqualTo(3)
-    }
-
-    @Test
-    fun processVolumeToValue_muted_zero() {
-        assertThat(underTest.processVolumeToValue(3, volumeRange, true)).isEqualTo(0)
-    }
-
-    @Test
     fun processVolumeToValue_returnsTranslatedVolume() {
-        assertThat(underTest.processVolumeToValue(2, volumeRange, false)).isEqualTo(20f)
+        assertThat(underTest.processVolumeToValue(2, volumeRange)).isEqualTo(20f)
     }
 
     private companion object {

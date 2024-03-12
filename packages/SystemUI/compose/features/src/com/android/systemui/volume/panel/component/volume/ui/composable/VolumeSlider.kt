@@ -33,6 +33,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformSlider
 import com.android.compose.PlatformSliderColors
@@ -50,7 +56,31 @@ fun VolumeSlider(
     val value by
         animateFloatAsState(targetValue = state.value, label = "VolumeSliderValueAnimation")
     PlatformSlider(
-        modifier = modifier,
+        modifier =
+            modifier.clearAndSetSemantics {
+                if (!state.isEnabled) disabled()
+                contentDescription = state.label
+
+                // provide a not animated value to the a11y because it fails to announce the settled
+                // value when it changes rapidly.
+                progressBarRangeInfo = ProgressBarRangeInfo(state.value, state.valueRange)
+                setProgress { targetValue ->
+                    val targetDirection =
+                        when {
+                            targetValue > value -> 1
+                            targetValue < value -> -1
+                            else -> 0
+                        }
+
+                    val newValue =
+                        (value + targetDirection * state.a11yStep).coerceIn(
+                            state.valueRange.start,
+                            state.valueRange.endInclusive
+                        )
+                    onValueChange(newValue)
+                    true
+                }
+            },
         value = value,
         valueRange = state.valueRange,
         onValueChange = onValueChange,

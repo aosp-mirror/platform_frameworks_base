@@ -45,6 +45,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformSliderColors
 import com.android.systemui.res.R
@@ -83,12 +88,19 @@ fun ColumnVolumeSliders(
                 sliderColors = sliderColors,
             )
 
+            val expandButtonStateDescription =
+                if (isExpanded) stringResource(R.string.volume_panel_expanded_sliders)
+                else stringResource(R.string.volume_panel_collapsed_sliders)
             if (isExpandable) {
                 ExpandButton(
+                    modifier =
+                        Modifier.semantics {
+                            role = Role.Switch
+                            stateDescription = expandButtonStateDescription
+                        },
                     isExpanded = isExpanded,
                     onExpandedChanged = onExpandedChanged,
-                    sliderColors,
-                    Modifier,
+                    sliderColors = sliderColors,
                 )
             }
         }

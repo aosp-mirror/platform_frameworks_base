@@ -28,6 +28,7 @@ import com.android.systemui.volume.panel.component.volume.domain.interactor.Volu
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -85,12 +86,7 @@ constructor(
         val audioViewModel = state as? State
         audioViewModel ?: return
         coroutineScope.launch {
-            val volume =
-                volumeSliderInteractor.translateValueToVolume(
-                    newValue,
-                    audioViewModel.audioStreamModel.volumeRange
-                )
-            audioVolumeInteractor.setVolume(audioStream, volume)
+            audioVolumeInteractor.setVolume(audioStream, newValue.roundToInt())
         }
     }
 
@@ -107,13 +103,18 @@ constructor(
         ringerMode: RingerMode,
     ): State {
         return State(
-            value = volumeSliderInteractor.processVolumeToValue(volume, volumeRange, isMuted),
-            valueRange = volumeSliderInteractor.displayValueRange,
+            value = volume.toFloat(),
+            valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
+            valueText =
+                SliderViewModel.formatValue(
+                    volumeSliderInteractor.processVolumeToValue(volume, volumeRange)
+                ),
             icon = getIcon(ringerMode),
             label = labelsByStream[audioStream]?.let(context::getString)
                     ?: error("No label for the stream: $audioStream"),
             disabledMessage = disabledTextByStream[audioStream]?.let(context::getString),
             isEnabled = isEnabled,
+            a11yStep = volumeRange.step,
             audioStreamModel = this,
         )
     }
@@ -155,8 +156,10 @@ constructor(
         override val valueRange: ClosedFloatingPointRange<Float>,
         override val icon: Icon,
         override val label: String,
+        override val valueText: String,
         override val disabledMessage: String?,
         override val isEnabled: Boolean,
+        override val a11yStep: Int,
         val audioStreamModel: AudioStreamModel,
     ) : SliderState
 
@@ -164,8 +167,10 @@ constructor(
         override val value: Float = 0f
         override val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
         override val icon: Icon? = null
+        override val valueText: String = ""
         override val label: String = ""
         override val disabledMessage: String? = null
+        override val a11yStep: Int = 0
         override val isEnabled: Boolean = true
     }
 
