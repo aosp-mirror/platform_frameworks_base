@@ -26,22 +26,9 @@ import java.util.concurrent.ConcurrentHashMap
 
 /** Manager of [BackupRestoreStorage]. */
 class BackupRestoreStorageManager private constructor(private val application: Application) {
-    private val storages = ConcurrentHashMap<String, BackupRestoreStorage>()
+    private val storageWrappers = ConcurrentHashMap<String, StorageWrapper>()
 
     private val executor = MoreExecutors.directExecutor()
-
-    private val observer = Observer { reason -> notifyBackupManager(null, reason) }
-
-    private val keyedObserver =
-        KeyedObserver<Any?> { key, reason -> notifyBackupManager(key, reason) }
-
-    private fun notifyBackupManager(key: Any?, reason: Int) {
-        // prefer not triggering backup immediately after restore
-        if (reason == ChangeReason.RESTORE) return
-        // TODO: log storage name
-        Log.d(LOG_TAG, "Notify BackupManager data changed for change: key=$key")
-        BackupManager.dataChanged(application.packageName)
-    }
 
     /**
      * Adds all the registered [BackupRestoreStorage] as the helpers of given [BackupAgentHelper].
@@ -52,7 +39,8 @@ class BackupRestoreStorageManager private constructor(private val application: A
      */
     fun addBackupAgentHelpers(backupAgentHelper: BackupAgentHelper) {
         val fileStorages = mutableListOf<BackupRestoreFileStorage>()
-        for ((keyPrefix, storage) in storages) {
+        for ((keyPrefix, storageWrapper) in storageWrappers) {
+            val storage = storageWrapper.storage
             if (storage is BackupRestoreFileStorage) {
                 fileStorages.add(storage)
             } else {
@@ -70,15 +58,8 @@ class BackupRestoreStorageManager private constructor(private val application: A
      * The observers of the storages will be notified.
      */
     fun onRestoreFinished() {
-        for (storage in storages.values) {
-            storage.notifyRestoreFinished()
-        }
-    }
-
-    private fun BackupRestoreStorage.notifyRestoreFinished() {
-        when (this) {
-            is KeyedObservable<*> -> notifyChange(ChangeReason.RESTORE)
-            is Observable -> notifyChange(ChangeReason.RESTORE)
+        for (storageWrapper in storageWrappers.values) {
+            storageWrapper.notifyRestoreFinished()
         }
     }
 
@@ -99,50 +80,82 @@ class BackupRestoreStorageManager private constructor(private val application: A
     fun add(storage: BackupRestoreStorage) {
         if (storage is BackupRestoreFileStorage) storage.checkFilePaths()
         val name = storage.name
-        val oldStorage = storages.put(name, storage)
+        val oldStorage = storageWrappers.put(name, StorageWrapper(storage))?.storage
         if (oldStorage != null) {
             throw IllegalStateException(
                 "Storage name '$name' conflicts:\n\told: $oldStorage\n\tnew: $storage"
             )
         }
-        storage.addObserver()
-    }
-
-    private fun BackupRestoreStorage.addObserver() {
-        when (this) {
-            is KeyedObservable<*> -> addObserver(keyedObserver, executor)
-            is Observable -> addObserver(observer, executor)
-            else ->
-                throw IllegalArgumentException(
-                    "$this does not implement either KeyedObservable or Observable"
-                )
-        }
     }
 
     /** Removes all the storages. */
     fun removeAll() {
-        for ((name, _) in storages) remove(name)
+        for ((name, _) in storageWrappers) remove(name)
     }
 
     /** Removes storage with given name. */
     fun remove(name: String): BackupRestoreStorage? {
-        val storage = storages.remove(name)
-        storage?.removeObserver()
-        return storage
-    }
-
-    private fun BackupRestoreStorage.removeObserver() {
-        when (this) {
-            is KeyedObservable<*> -> removeObserver(keyedObserver)
-            is Observable -> removeObserver(observer)
-        }
+        val storageWrapper = storageWrappers.remove(name)
+        storageWrapper?.removeObserver()
+        return storageWrapper?.storage
     }
 
     /** Returns storage with given name. */
-    fun get(name: String): BackupRestoreStorage? = storages[name]
+    fun get(name: String): BackupRestoreStorage? = storageWrappers[name]?.storage
 
     /** Returns storage with given name, exception is raised if not found. */
-    fun getOrThrow(name: String): BackupRestoreStorage = storages[name]!!
+    fun getOrThrow(name: String): BackupRestoreStorage = storageWrappers[name]!!.storage
+
+    private inner class StorageWrapper(val storage: BackupRestoreStorage) :
+        Observer, KeyedObserver<Any?> {
+        init {
+            when (storage) {
+                is KeyedObservable<*> -> storage.addObserver(this, executor)
+                is Observable -> storage.addObserver(this, executor)
+                else ->
+                    throw IllegalArgumentException(
+                        "$this does not implement either KeyedObservable or Observable"
+                    )
+            }
+        }
+
+        override fun onChanged(reason: Int) = onKeyChanged(null, reason)
+
+        override fun onKeyChanged(key: Any?, reason: Int) {
+            notifyBackupManager(key, reason)
+        }
+
+        private fun notifyBackupManager(key: Any?, reason: Int) {
+            val name = storage.name
+            // prefer not triggering backup immediately after restore
+            if (reason == ChangeReason.RESTORE) {
+                Log.d(
+                    LOG_TAG,
+                    "Notify BackupManager dataChanged ignored for restore: storage=$name key=$key"
+                )
+                return
+            }
+            Log.d(
+                LOG_TAG,
+                "Notify BackupManager dataChanged: storage=$name key=$key reason=$reason"
+            )
+            BackupManager.dataChanged(application.packageName)
+        }
+
+        fun removeObserver() {
+            when (storage) {
+                is KeyedObservable<*> -> storage.removeObserver(this)
+                is Observable -> storage.removeObserver(this)
+            }
+        }
+
+        fun notifyRestoreFinished() {
+            when (storage) {
+                is KeyedObservable<*> -> storage.notifyChange(ChangeReason.RESTORE)
+                is Observable -> storage.notifyChange(ChangeReason.RESTORE)
+            }
+        }
+    }
 
     companion object {
         @Volatile private var instance: BackupRestoreStorageManager? = null
