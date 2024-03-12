@@ -20,7 +20,6 @@ import static androidx.dynamicanimation.animation.DynamicAnimation.TRANSLATION_X
 import static androidx.dynamicanimation.animation.FloatPropertyCompat.createFloatPropertyCompat;
 
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
-import static com.android.systemui.flags.Flags.SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX;
 import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 
 import android.animation.Animator;
@@ -481,16 +480,11 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
                 mDismissPendingMap.remove(animView);
                 boolean wasRemoved = false;
-                if (animView instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
-                    if (mFeatureFlags.isEnabled(SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX)) {
-                        // If the view is already removed from its parent and added as Transient,
-                        // we need to clean the transient view upon animation end
-                        wasRemoved = row.getTransientContainer() != null
-                            || row.getParent() == null || row.isRemoved();
-                    } else {
-                        wasRemoved = row.isRemoved();
-                    }
+                if (animView instanceof ExpandableNotificationRow row) {
+                    // If the view is already removed from its parent and added as Transient,
+                    // we need to clean the transient view upon animation end
+                    wasRemoved = row.getTransientContainer() != null
+                        || row.getParent() == null || row.isRemoved();
                 }
                 if (!mCancelled || wasRemoved) {
                     mCallback.onChildDismissed(animView);

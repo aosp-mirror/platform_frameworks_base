@@ -24,7 +24,6 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
 import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
-import static com.android.systemui.flags.Flags.UNCLEARED_TRANSIENT_HUN_FIX;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
 import static com.android.systemui.util.DumpUtilsKt.println;
@@ -2816,23 +2815,15 @@ public class NotificationStackScrollLayout
             mAddedHeadsUpChildren.remove(child);
             return false;
         }
-        if (mFeatureFlags.isEnabled(UNCLEARED_TRANSIENT_HUN_FIX)) {
-            // Skip adding animation for clicked heads up notifications when the
-            // Shade is closed, because the animation event is generated in
-            // generateHeadsUpAnimationEvents. Only report that an animation was
-            // actually generated (thus requesting the transient view be added)
-            // if a removal animation is in progress.
-            if (!isExpanded() && isClickedHeadsUp(child)) {
-                // An animation is already running, add it transiently
-                mClearTransientViewsWhenFinished.add(child);
-                return child.inRemovalAnimation();
-            }
-        } else {
-            if (isClickedHeadsUp(child)) {
-                // An animation is already running, add it transiently
-                mClearTransientViewsWhenFinished.add(child);
-                return true;
-            }
+        // Skip adding animation for clicked heads up notifications when the
+        // Shade is closed, because the animation event is generated in
+        // generateHeadsUpAnimationEvents. Only report that an animation was
+        // actually generated (thus requesting the transient view be added)
+        // if a removal animation is in progress.
+        if (!isExpanded() && isClickedHeadsUp(child)) {
+            // An animation is already running, add it transiently
+            mClearTransientViewsWhenFinished.add(child);
+            return child.inRemovalAnimation();
         }
         if (mDebugRemoveAnimation) {
             Log.d(TAG, "generateRemove " + key
