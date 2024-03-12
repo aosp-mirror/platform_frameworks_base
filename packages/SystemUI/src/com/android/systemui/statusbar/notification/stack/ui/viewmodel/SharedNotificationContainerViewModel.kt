@@ -350,6 +350,9 @@ constructor(
                     if (shadeExpansion > 0f || qsExpansion > 0f) {
                         if (configurationBasedDimensions.useSplitShade) {
                             emit(1f)
+                        } else if (qsExpansion == 1f) {
+                            // Ensure HUNs will be visible in QS shade (at least while unlocked)
+                            emit(1f)
                         } else {
                             // Fade as QS shade expands
                             emit(1f - qsExpansion)
