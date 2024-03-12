@@ -224,8 +224,7 @@ class MenuView extends FrameLayout implements
         }
 
         // We can skip animating if FAB is not visible
-        if (Flags.floatingMenuImeDisplacementAnimation()
-                && animateMovement && getVisibility() == VISIBLE) {
+        if (animateMovement && getVisibility() == VISIBLE) {
             mMenuAnimationController.moveToPosition(position, /* animateMovement = */ true);
             // onArrivalAtPosition() is called at the end of the animation.
         } else {
@@ -331,7 +330,7 @@ class MenuView extends FrameLayout implements
             mMoveToTuckedListener.onMoveToTuckedChanged(isMoveToTucked);
         }
 
-        if (Flags.floatingMenuOverlapsNavBarsFlag() && !Flags.floatingMenuAnimatedTuck()) {
+        if (!Flags.floatingMenuAnimatedTuck()) {
             if (isMoveToTucked) {
                 final float halfWidth = getMenuWidth() / 2.0f;
                 final boolean isOnLeftSide = mMenuAnimationController.isOnLeftSide();

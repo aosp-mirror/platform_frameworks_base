@@ -443,21 +443,18 @@ class MenuViewLayer extends FrameLayout implements
     }
 
     public void onMoveToTuckedChanged(boolean moveToTuck) {
-        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
-            if (moveToTuck) {
-                final Rect bounds = mMenuViewAppearance.getWindowAvailableBounds();
-                final int[] location = getLocationOnScreen();
-                bounds.offset(
-                        location[0],
-                        location[1]
-                );
+        if (moveToTuck) {
+            final Rect bounds = mMenuViewAppearance.getWindowAvailableBounds();
+            final int[] location = getLocationOnScreen();
+            bounds.offset(
+                    location[0],
+                    location[1]
+            );
 
-                setClipBounds(bounds);
-            }
-            // Instead of clearing clip bounds when moveToTuck is false,
-            // wait until the spring animation finishes.
+            setClipBounds(bounds);
         }
-        // Function is a no-operation if flag is disabled.
+        // Instead of clearing clip bounds when moveToTuck is false,
+        // wait until the spring animation finishes.
     }
 
     private void onSpringAnimationsEndAction() {
@@ -475,9 +472,7 @@ class MenuViewLayer extends FrameLayout implements
                 setClipBounds(null);
             }
         }
-        if (Flags.floatingMenuImeDisplacementAnimation()) {
-            mMenuView.onArrivalAtPosition(false);
-        }
+        mMenuView.onArrivalAtPosition(false);
     }
 
     void dispatchAccessibilityAction(int id) {

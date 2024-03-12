@@ -308,20 +308,6 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
-    public void showingImeInsetsChange_overlapOnIme_menuShownAboveIme_old() {
-        mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 100));
-        final PointF beforePosition = mMenuView.getMenuPosition();
-
-        dispatchShowingImeInsets();
-
-        final float menuBottom = mMenuView.getTranslationY() + mMenuView.getMenuHeight();
-        assertThat(mMenuView.getTranslationX()).isEqualTo(beforePosition.x);
-        assertThat(menuBottom).isLessThan(beforePosition.y);
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
     public void showingImeInsetsChange_overlapOnIme_menuShownAboveIme() {
         mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 100));
         final PointF beforePosition = mMenuView.getMenuPosition();
@@ -337,19 +323,6 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
-    public void hidingImeInsetsChange_overlapOnIme_menuBackToOriginalPosition_old() {
-        mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 200));
-        final PointF beforePosition = mMenuView.getMenuPosition();
-
-        dispatchHidingImeInsets();
-
-        assertThat(mMenuView.getTranslationX()).isEqualTo(beforePosition.x);
-        assertThat(mMenuView.getTranslationY()).isEqualTo(beforePosition.y);
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_FLOATING_MENU_IME_DISPLACEMENT_ANIMATION)
     public void hidingImeInsetsChange_overlapOnIme_menuBackToOriginalPosition() {
         mMenuAnimationController.moveAndPersistPosition(new PointF(0, IME_TOP + 200));
         final PointF beforePosition = mMenuView.getMenuPosition();
