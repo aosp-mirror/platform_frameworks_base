@@ -671,12 +671,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             if (hasImeSurface) {
                 if (topActivity.isVisibleRequested() && dc.mInputMethodWindow != null
                         && dc.isFixedRotationLaunchingApp(topActivity)) {
-                    removalInfo.deferRemoveForImeMode = DEFER_MODE_ROTATION;
+                    removalInfo.deferRemoveMode = DEFER_MODE_ROTATION;
                 } else {
-                    removalInfo.deferRemoveForImeMode = DEFER_MODE_NORMAL;
+                    removalInfo.deferRemoveMode = DEFER_MODE_NORMAL;
                 }
-            } else {
-                removalInfo.deferRemoveForImeMode = DEFER_MODE_NONE;
             }
 
             final WindowState mainWindow =
@@ -745,6 +743,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         removalInfo.taskId = taskId;
         removalInfo.windowlessSurface = true;
         removalInfo.removeImmediately = immediately;
+        removalInfo.deferRemoveMode = DEFER_MODE_NONE;
         try {
             lastOrganizer.removeStartingWindow(removalInfo);
         } catch (RemoteException e) {
