@@ -4076,6 +4076,13 @@ public final class ActivityThread extends ClientTransactionHandler
                     ActivityManager.getService().waitForNetworkStateUpdate(mNetworkBlockSeq);
                     mNetworkBlockSeq = INVALID_PROC_STATE_SEQ;
                 } catch (RemoteException ignored) {}
+                if (Flags.clearDnsCacheOnNetworkRulesUpdate()) {
+                    // InetAddress will cache UnknownHostException failures. If the rules got
+                    // updated and the app has network access now, we need to clear the negative
+                    // cache to ensure valid dns queries can work immediately.
+                    // TODO: b/329133769 - Clear only the negative cache once it is available.
+                    InetAddress.clearDnsCache();
+                }
             }
         }
     }
