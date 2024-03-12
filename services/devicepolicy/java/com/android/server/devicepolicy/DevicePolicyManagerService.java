@@ -3395,7 +3395,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (shouldMigrateV1ToDevicePolicyEngine()) {
                         migrateV1PoliciesToDevicePolicyEngine();
                     }
+                    maybeMigratePoliciesPostUpgradeToDevicePolicyEngineLocked();
                     migratePoliciesToPolicyEngineLocked();
+
                 }
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 break;
@@ -23749,7 +23751,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!canForceMigration && !shouldMigrateV1ToDevicePolicyEngine()) {
                 return false;
             }
-            return migrateV1PoliciesToDevicePolicyEngine();
+            boolean migrated = migrateV1PoliciesToDevicePolicyEngine();
+            migrated &= migratePoliciesPostUpgradeToDevicePolicyEngineLocked();
+            return migrated;
         });
     }
 
@@ -23778,6 +23782,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     /**
      * Migrates the initial set of policies to use policy engine.
+     * [b/318497672] Migrate policies that weren't migrated properly in the initial migration on
+     * update from Android T to Android U
+     */
+    private void maybeMigratePoliciesPostUpgradeToDevicePolicyEngineLocked() {
+        if (!mOwners.isMigratedToPolicyEngine() || mOwners.isMigratedPostUpdate()) {
+            return;
+        }
+        migratePoliciesPostUpgradeToDevicePolicyEngineLocked();
+        mOwners.markPostUpgradeMigration();
+    }
+
+    private boolean migratePoliciesPostUpgradeToDevicePolicyEngineLocked() {
+        try {
+            migrateScreenCapturePolicyLocked();
+            migrateLockTaskPolicyLocked();
+            return true;
+        } catch (Exception e) {
+            Slogf.e(LOG_TAG, e, "Error occurred during post upgrade migration to the device "
+                    + "policy engine.");
+            return false;
+        }
+    }
+
+    /**
      * @return {@code true} if policies were migrated successfully, {@code false} otherwise.
      */
     private boolean migrateV1PoliciesToDevicePolicyEngine() {
@@ -23790,7 +23818,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         migrateAutoTimezonePolicy();
                         migratePermissionGrantStatePolicies();
                     }
-                    migrateScreenCapturePolicyLocked();
                     migratePermittedInputMethodsPolicyLocked();
                     migrateAccountManagementDisabledPolicyLocked();
                     migrateUserControlDisabledPackagesLocked();
@@ -23871,14 +23898,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void migrateScreenCapturePolicyLocked() {
         Binder.withCleanCallingIdentity(() -> {
-            if (mPolicyCache.getScreenCaptureDisallowedUser() == UserHandle.USER_NULL) {
-                return;
-            }
             ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
             if (admin != null
                     && ((isDeviceOwner(admin) && admin.disableScreenCapture)
                     || (admin.getParentActiveAdmin() != null
                     && admin.getParentActiveAdmin().disableScreenCapture))) {
+
                 EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
                         admin.info.getComponent(),
                         admin.getUserHandle().getIdentifier(),
@@ -23905,6 +23930,48 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         });
+    }
+
+    private void migrateLockTaskPolicyLocked() {
+        Binder.withCleanCallingIdentity(() -> {
+            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+            if (deviceOwner != null) {
+                int doUserId = deviceOwner.getUserHandle().getIdentifier();
+                DevicePolicyData policies = getUserData(doUserId);
+                List<String> packages = policies.mLockTaskPackages;
+                int features = policies.mLockTaskFeatures;
+                // TODO: find out about persistent preferred activities
+                if (!packages.isEmpty()) {
+                    setLockTaskPolicyInPolicyEngine(deviceOwner, doUserId, packages, features);
+                }
+            }
+
+            for (int userId : mUserManagerInternal.getUserIds()) {
+                ActiveAdmin profileOwner = getProfileOwnerLocked(userId);
+                if (profileOwner != null && canDPCManagedUserUseLockTaskLocked(userId)) {
+                    DevicePolicyData policies = getUserData(userId);
+                    List<String> packages = policies.mLockTaskPackages;
+                    int features = policies.mLockTaskFeatures;
+                    if (!packages.isEmpty()) {
+                        setLockTaskPolicyInPolicyEngine(profileOwner, userId, packages, features);
+                    }
+                }
+            }
+        });
+    }
+
+    private void setLockTaskPolicyInPolicyEngine(
+            ActiveAdmin admin, int userId, List<String> packages, int features) {
+        EnforcingAdmin enforcingAdmin =
+                EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        admin.info.getComponent(),
+                        userId,
+                        admin);
+        mDevicePolicyEngine.setLocalPolicy(
+                PolicyDefinition.LOCK_TASK,
+                enforcingAdmin,
+                new LockTaskPolicy(new HashSet<>(packages), features),
+                userId);
     }
 
     private void migratePermittedInputMethodsPolicyLocked() {
