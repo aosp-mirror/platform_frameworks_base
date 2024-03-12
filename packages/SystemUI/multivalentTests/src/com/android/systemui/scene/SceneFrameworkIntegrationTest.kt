@@ -26,7 +26,6 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.internal.R
 import com.android.internal.util.EmergencyAffordanceManager
 import com.android.internal.util.emergencyAffordanceManager
@@ -317,8 +316,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun swipeUpOnLockscreen_enterCorrectPin_unlocksDevice() =
         testScope.runTest {
-            val upDestinationSceneKey by
-                collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(lockscreenSceneViewModel.destinationScenes)
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
@@ -337,8 +336,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
-            val upDestinationSceneKey by
-                collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(lockscreenSceneViewModel.destinationScenes)
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
@@ -356,7 +355,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             emulateUserDrivenTransition(to = Scenes.Shade)
             assertCurrentScene(Scenes.Shade)
 
-            val upDestinationSceneKey = destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Lockscreen)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
@@ -379,7 +378,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             emulateUserDrivenTransition(to = Scenes.Shade)
             assertCurrentScene(Scenes.Shade)
 
-            val upDestinationSceneKey = destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
@@ -447,8 +446,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun swipeUpOnLockscreenWhileUnlocked_dismissesLockscreen() =
         testScope.runTest {
             unlockDevice()
-            val upDestinationSceneKey by
-                collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(lockscreenSceneViewModel.destinationScenes)
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
         }
 
@@ -469,8 +468,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun dismissingIme_whileOnPasswordBouncer_navigatesToLockscreen() =
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
-            val upDestinationSceneKey by
-                collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(lockscreenSceneViewModel.destinationScenes)
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
@@ -487,8 +486,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun bouncerActionButtonClick_opensEmergencyServicesDialer() =
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
-            val upDestinationSceneKey by
-                collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(lockscreenSceneViewModel.destinationScenes)
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
@@ -507,8 +506,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             setAuthMethod(AuthenticationMethodModel.Password)
             startPhoneCall()
-            val upDestinationSceneKey by
-                collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
+            val destinationScenes by collectLastValue(lockscreenSceneViewModel.destinationScenes)
+            val upDestinationSceneKey = destinationScenes?.get(Swipe.Up)?.toScene
             assertThat(upDestinationSceneKey).isEqualTo(Scenes.Bouncer)
             emulateUserDrivenTransition(to = upDestinationSceneKey)
 
