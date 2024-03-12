@@ -115,10 +115,10 @@ flag {
 }
 
 flag {
-    name: "notifications_background_media_icons"
+    name: "notifications_background_icons"
     namespace: "systemui"
-    description: "Updates icons for media notifications in the background."
-    bug: "315143160"
+    description: "Moves part of the notification icon updates to the background."
+    bug: "315143361"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

@@ -28,14 +28,24 @@ import android.view.View
 import android.widget.ImageView
 import com.android.app.tracing.traceSection
 import com.android.internal.statusbar.StatusBarIcon
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Inflates and updates icons associated with notifications
@@ -53,9 +63,18 @@ class IconManager
 constructor(
     private val notifCollection: CommonNotifCollection,
     private val launcherApps: LauncherApps,
-    private val iconBuilder: IconBuilder
+    private val iconBuilder: IconBuilder,
+    @Application private val applicationCoroutineScope: CoroutineScope,
+    @Background private val bgCoroutineContext: CoroutineContext,
+    @Main private val mainCoroutineContext: CoroutineContext,
 ) : ConversationIconManager {
     private var unimportantConversationKeys: Set<String> = emptySet()
+    /**
+     * A map of running jobs for fetching the person avatar from launcher. The key is the
+     * notification entry key.
+     */
+    private var launcherPeopleAvatarIconJobs: ConcurrentHashMap<String, Job> =
+        ConcurrentHashMap<String, Job>()
 
     fun attach() {
         notifCollection.addCollectionListener(entryListener)
@@ -136,13 +155,23 @@ constructor(
      * @throws InflationException Exception if required icons are not valid or specified
      */
     @Throws(InflationException::class)
-    fun updateIcons(entry: NotificationEntry) =
+    fun updateIcons(entry: NotificationEntry, usingCache: Boolean = false) =
         traceSection("IconManager.updateIcons") {
             if (!entry.icons.areIconsAvailable) {
                 return@traceSection
             }
-            entry.icons.smallIconDescriptor = null
-            entry.icons.peopleAvatarDescriptor = null
+
+            if (usingCache && !Flags.notificationsBackgroundIcons()) {
+                Log.wtf(
+                    TAG,
+                    "Updating using the cache is not supported when the " +
+                        "notifications_background_conversation_icons flag is off"
+                )
+            }
+            if (!usingCache || !Flags.notificationsBackgroundIcons()) {
+                entry.icons.smallIconDescriptor = null
+                entry.icons.peopleAvatarDescriptor = null
+            }
 
             val (normalIconDescriptor, sensitiveIconDescriptor) = getIconDescriptors(entry)
             val notificationContentDescription =
@@ -188,7 +217,7 @@ constructor(
     @Throws(InflationException::class)
     private fun getIconDescriptor(entry: NotificationEntry, redact: Boolean): StatusBarIcon {
         val n = entry.sbn.notification
-        val showPeopleAvatar = isImportantConversation(entry) && !redact
+        val showPeopleAvatar = !redact && isImportantConversation(entry)
 
         val peopleAvatarDescriptor = entry.icons.peopleAvatarDescriptor
         val smallIconDescriptor = entry.icons.smallIconDescriptor
@@ -208,26 +237,18 @@ constructor(
             })
                 ?: throw InflationException("No icon in notification from " + entry.sbn.packageName)
 
-        val ic =
-            StatusBarIcon(
-                entry.sbn.user,
-                entry.sbn.packageName,
-                icon,
-                n.iconLevel,
-                n.number,
-                iconBuilder.getIconContentDescription(n)
-            )
+        val sbi = icon.toStatusBarIcon(entry)
 
         // Cache if important conversation.
         if (isImportantConversation(entry)) {
             if (showPeopleAvatar) {
-                entry.icons.peopleAvatarDescriptor = ic
+                entry.icons.peopleAvatarDescriptor = sbi
             } else {
-                entry.icons.smallIconDescriptor = ic
+                entry.icons.smallIconDescriptor = sbi
             }
         }
 
-        return ic
+        return sbi
     }
 
     @Throws(InflationException::class)
@@ -243,16 +264,69 @@ constructor(
         }
     }
 
-    @Throws(InflationException::class)
-    private fun createPeopleAvatar(entry: NotificationEntry): Icon? {
-        var ic: Icon? = null
+    private fun Icon.toStatusBarIcon(entry: NotificationEntry): StatusBarIcon {
+        val n = entry.sbn.notification
+        return StatusBarIcon(
+            entry.sbn.user,
+            entry.sbn.packageName,
+            /* icon = */ this,
+            n.iconLevel,
+            n.number,
+            iconBuilder.getIconContentDescription(n)
+        )
+    }
 
-        val shortcut = entry.ranking.conversationShortcutInfo
-        if (shortcut != null) {
-            ic = launcherApps.getShortcutIcon(shortcut)
+    private suspend fun getLauncherShortcutIconForPeopleAvatar(entry: NotificationEntry) =
+        withContext(bgCoroutineContext) {
+            var icon: Icon? = null
+            val shortcut = entry.ranking.conversationShortcutInfo
+            if (shortcut != null) {
+                try {
+                    icon = launcherApps.getShortcutIcon(shortcut)
+                } catch (e: Exception) {
+                    Log.e(
+                        TAG,
+                        "Error calling LauncherApps#getShortcutIcon for notification $entry: $e"
+                    )
+                }
+            }
+
+            // Once we have the icon, updating it should happen on the main thread.
+            if (icon != null) {
+                withContext(mainCoroutineContext) {
+                    val iconDescriptor = icon.toStatusBarIcon(entry)
+
+                    // Cache the value
+                    entry.icons.peopleAvatarDescriptor = iconDescriptor
+
+                    // Update the icons using the cached value
+                    updateIcons(entry = entry, usingCache = true)
+                }
+            }
         }
 
-        // Fall back to extract from message
+    @Throws(InflationException::class)
+    private fun createPeopleAvatar(entry: NotificationEntry): Icon {
+        var ic: Icon? = null
+
+        if (Flags.notificationsBackgroundIcons()) {
+            // Ideally we want to get the icon from launcher, but this is a binder transaction that
+            // may take longer so let's kick it off on a background thread and use a placeholder in
+            // the meantime.
+            // Cancel the previous job if necessary.
+            launcherPeopleAvatarIconJobs[entry.key]?.cancel()
+            launcherPeopleAvatarIconJobs[entry.key] =
+                applicationCoroutineScope
+                    .launch { getLauncherShortcutIconForPeopleAvatar(entry) }
+                    .apply { invokeOnCompletion { launcherPeopleAvatarIconJobs.remove(entry.key) } }
+        } else {
+            val shortcut = entry.ranking.conversationShortcutInfo
+            if (shortcut != null) {
+                ic = launcherApps.getShortcutIcon(shortcut)
+            }
+        }
+
+        // Try to extract from message
         if (ic == null) {
             val extras: Bundle = entry.sbn.notification.extras
             val messages =
