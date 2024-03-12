@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
@@ -79,7 +80,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                     Trace.beginSection(
                             "SensitiveContentProtectionManagerService.onProjectionStart");
                     try {
-                        onProjectionStart(info);
+                        onProjectionStart(info.getPackageName());
                     } finally {
                         Trace.endSection();
                     }
@@ -122,14 +123,6 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             publishBinderService(Context.SENSITIVE_CONTENT_PROTECTION_SERVICE,
                     new SensitiveContentProtectionManagerServiceBinder());
         }
-    }
-
-    // These packages are exempted from screen share protection.
-    private ArraySet<String> getExemptedPackages() {
-        final ArraySet<String> exemptedPackages =
-                SystemConfig.getInstance().getBugreportWhitelistedPackages();
-        // TODO(b/323361046) - Add sys ui recorder package.
-        return exemptedPackages;
     }
 
     @VisibleForTesting
@@ -179,9 +172,22 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
         }
     }
 
-    private void onProjectionStart(MediaProjectionInfo info) {
-        if (mExemptedPackages != null && mExemptedPackages.contains(info.getPackageName())) {
-            Log.w(TAG, info.getPackageName() + " is exempted from screen share protection.");
+    private boolean canRecordSensitiveContent(@NonNull String packageName) {
+        return getContext().getPackageManager()
+                .checkPermission(android.Manifest.permission.RECORD_SENSITIVE_CONTENT,
+                        packageName) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    // These packages are exempted from screen share protection.
+    private ArraySet<String> getExemptedPackages() {
+        return SystemConfig.getInstance().getBugreportWhitelistedPackages();
+    }
+
+    private void onProjectionStart(String packageName) {
+        // exempt on device screen recorder as well.
+        if ((mExemptedPackages != null && mExemptedPackages.contains(packageName))
+                || canRecordSensitiveContent(packageName)) {
+            Log.w(TAG, packageName + " is exempted from screen share protection.");
             return;
         }
         // TODO(b/324447419): move GlobalSettings lookup to background thread
