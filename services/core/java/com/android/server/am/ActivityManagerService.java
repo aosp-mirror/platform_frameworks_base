@@ -9011,7 +9011,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             // cleaning up the old proxies.
                             VMRuntime.getRuntime().requestConcurrentGC();
                         }
-                    }, BackgroundThread.getHandler());
+                    }, mHandler);
             t.traceEnd(); // setBinderProxies
 
             t.traceEnd(); // ActivityManagerStartApps
