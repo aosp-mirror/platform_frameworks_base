@@ -29,8 +29,6 @@ import java.io.PrintWriter
 import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 
 /**
  * A logger that logs changes in table format.
@@ -91,8 +89,6 @@ class TableLogBuffer(
             throw IllegalArgumentException("maxSize must be > 0")
         }
     }
-    // For local logcat, send messages across this channel so the background job can process them
-    private val logMessageChannel = Channel<TableChange>(capacity = 10)
 
     private val buffer = RingBuffer(maxSize) { TableChange() }
 
@@ -118,16 +114,6 @@ class TableLogBuffer(
             isInitial = false,
             tableLogBuffer = this,
         )
-
-    /** Start this log buffer logging in the background */
-    internal fun init() {
-        coroutineScope.launch(bgDispatcher) {
-            while (!logMessageChannel.isClosedForReceive) {
-                val log = logMessageChannel.receive()
-                echoToDesiredEndpoints(log)
-            }
-        }
-    }
 
     /**
      * Log the differences between [prevVal] and [newVal].
@@ -213,7 +199,7 @@ class TableLogBuffer(
         Trace.beginSection("TableLogBuffer#logChange(string)")
         val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
-        tryAddMessage(change)
+        echoToDesiredEndpoints(change)
         Trace.endSection()
     }
 
@@ -227,7 +213,7 @@ class TableLogBuffer(
         Trace.beginSection("TableLogBuffer#logChange(boolean)")
         val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
-        tryAddMessage(change)
+        echoToDesiredEndpoints(change)
         Trace.endSection()
     }
 
@@ -241,12 +227,8 @@ class TableLogBuffer(
         Trace.beginSection("TableLogBuffer#logChange(int)")
         val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
-        tryAddMessage(change)
+        echoToDesiredEndpoints(change)
         Trace.endSection()
-    }
-
-    private fun tryAddMessage(change: TableChange) {
-        logMessageChannel.trySend(change)
     }
 
     // TODO(b/259454430): Add additional change types here.

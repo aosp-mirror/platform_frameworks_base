@@ -46,8 +46,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bluetooth.BluetoothLogger;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.bluetooth.BluetoothRepository;
 import com.android.systemui.statusbar.policy.bluetooth.FakeBluetoothRepository;
@@ -75,9 +73,9 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     private DumpManager mMockDumpManager;
     private BluetoothControllerImpl mBluetoothControllerImpl;
     private BluetoothAdapter mMockAdapter;
-    private final FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
-
     private List<CachedBluetoothDevice> mDevices;
+
+    private FakeExecutor mBackgroundExecutor;
 
     @Before
     public void setup() throws Exception {
@@ -95,43 +93,24 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         when(mMockBluetoothManager.getProfileManager())
                 .thenReturn(mock(LocalBluetoothProfileManager.class));
         mMockDumpManager = mock(DumpManager.class);
+        mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
 
         BluetoothRepository bluetoothRepository =
                 new FakeBluetoothRepository(mMockBluetoothManager);
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, true);
 
         mBluetoothControllerImpl = new BluetoothControllerImpl(
                 mContext,
-                mFakeFeatureFlags,
                 mUserTracker,
                 mMockDumpManager,
                 mock(BluetoothLogger.class),
                 bluetoothRepository,
+                mBackgroundExecutor,
                 mTestableLooper.getLooper(),
                 mMockBluetoothManager,
                 mMockAdapter);
     }
-
     @Test
-    public void testNoConnectionWithDevices_repoFlagOff() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, false);
-
-        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-        when(device.isConnected()).thenReturn(true);
-        when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
-        mDevices.add(device);
-        when(mMockLocalAdapter.getConnectionState())
-                .thenReturn(BluetoothAdapter.STATE_DISCONNECTED);
-
-        mBluetoothControllerImpl.onConnectionStateChanged(null,
-                BluetoothAdapter.STATE_DISCONNECTED);
-        assertTrue(mBluetoothControllerImpl.isBluetoothConnected());
-    }
-
-    @Test
-    public void testNoConnectionWithDevices_repoFlagOn() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, true);
-
+    public void testNoConnectionWithDevices() {
         CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
         when(device.isConnected()).thenReturn(true);
         when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
@@ -147,9 +126,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnServiceConnected_updatesConnectionState_repoFlagOff() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, false);
-
+    public void testOnServiceConnected_updatesConnectionState() {
         when(mMockLocalAdapter.getConnectionState()).thenReturn(BluetoothAdapter.STATE_CONNECTING);
 
         mBluetoothControllerImpl.onServiceConnected();
@@ -159,41 +136,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnServiceConnected_updatesConnectionState_repoFlagOn() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, true);
-
-        when(mMockLocalAdapter.getConnectionState()).thenReturn(BluetoothAdapter.STATE_CONNECTING);
-
-        mBluetoothControllerImpl.onServiceConnected();
-
-        assertTrue(mBluetoothControllerImpl.isBluetoothConnecting());
-        assertFalse(mBluetoothControllerImpl.isBluetoothConnected());
-    }
-
-    @Test
-    public void getConnectedDevices_onlyReturnsConnected_repoFlagOff() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, false);
-
-        CachedBluetoothDevice device1Disconnected = mock(CachedBluetoothDevice.class);
-        when(device1Disconnected.isConnected()).thenReturn(false);
-        mDevices.add(device1Disconnected);
-
-        CachedBluetoothDevice device2Connected = mock(CachedBluetoothDevice.class);
-        when(device2Connected.isConnected()).thenReturn(true);
-        mDevices.add(device2Connected);
-
-        mBluetoothControllerImpl.onDeviceAdded(device1Disconnected);
-        mBluetoothControllerImpl.onDeviceAdded(device2Connected);
-
-        assertThat(mBluetoothControllerImpl.getConnectedDevices()).hasSize(1);
-        assertThat(mBluetoothControllerImpl.getConnectedDevices().get(0))
-                .isEqualTo(device2Connected);
-    }
-
-    @Test
-    public void getConnectedDevices_onlyReturnsConnected_repoFlagOn() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, true);
-
+    public void getConnectedDevices_onlyReturnsConnected() {
         CachedBluetoothDevice device1Disconnected = mock(CachedBluetoothDevice.class);
         when(device1Disconnected.isConnected()).thenReturn(false);
         mDevices.add(device1Disconnected);
@@ -235,31 +178,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnACLConnectionStateChange_updatesBluetoothStateOnConnection_repoFlagOff() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, false);
-
-        BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
-        mBluetoothControllerImpl.addCallback(callback);
-
-        assertFalse(mBluetoothControllerImpl.isBluetoothConnected());
-        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-        mDevices.add(device);
-        when(device.isConnected()).thenReturn(true);
-        when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
-        reset(callback);
-        mBluetoothControllerImpl.onAclConnectionStateChanged(device,
-                BluetoothProfile.STATE_CONNECTED);
-
-        mTestableLooper.processAllMessages();
-
-        assertTrue(mBluetoothControllerImpl.isBluetoothConnected());
-        verify(callback, atLeastOnce()).onBluetoothStateChange(anyBoolean());
-    }
-
-    @Test
-    public void testOnACLConnectionStateChange_updatesBluetoothStateOnConnection_repoFlagOn() {
-        mFakeFeatureFlags.set(Flags.NEW_BLUETOOTH_REPOSITORY, true);
-
+    public void testOnACLConnectionStateChange_updatesBluetoothStateOnConnection() {
         BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
         mBluetoothControllerImpl.addCallback(callback);
 
@@ -290,6 +209,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mBluetoothControllerImpl.onAclConnectionStateChanged(device,
                 BluetoothProfile.STATE_CONNECTED);
         mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.HEADSET);
+        mBackgroundExecutor.runAllReady();
 
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioActive());
         assertTrue(mBluetoothControllerImpl.isBluetoothAudioProfileOnly());
@@ -375,6 +295,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.LE_AUDIO, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -385,6 +306,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.HEADSET, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -395,6 +317,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.A2DP, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -405,6 +328,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 BluetoothProfile.HEARING_AID, /* isConnected= */ true, /* isActive= */ false);
 
         mBluetoothControllerImpl.onDeviceAdded(device);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
@@ -422,6 +346,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mBluetoothControllerImpl.onDeviceAdded(device2);
         mBluetoothControllerImpl.onDeviceAdded(device3);
 
+        mBackgroundExecutor.runAllReady();
+
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isTrue();
     }
 
@@ -434,6 +360,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
         mBluetoothControllerImpl.onDeviceAdded(device1);
         mBluetoothControllerImpl.onDeviceAdded(device2);
+        mBackgroundExecutor.runAllReady();
 
         assertThat(mBluetoothControllerImpl.isBluetoothAudioProfileOnly()).isFalse();
     }

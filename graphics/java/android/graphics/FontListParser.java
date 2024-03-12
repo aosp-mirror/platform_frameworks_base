@@ -16,6 +16,10 @@
 
 package android.graphics;
 
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE;
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL;
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY;
+import static android.graphics.fonts.FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT;
 import static android.text.FontConfig.NamedFamilyList;
 
 import android.annotation.NonNull;
@@ -28,6 +32,7 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.text.FontConfig;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -231,7 +236,9 @@ public class FontListParser {
             }
         }
 
-        return new FontConfig(families, filtered, resultNamedFamilies, lastModifiedDate,
+        return new FontConfig(families, filtered, resultNamedFamilies,
+                customization.getLocaleFamilyCustomizations(),
+                lastModifiedDate,
                 configVersion);
     }
 
@@ -256,6 +263,7 @@ public class FontListParser {
         final String lang = parser.getAttributeValue("", "lang");
         final String variant = parser.getAttributeValue(null, "variant");
         final String ignore = parser.getAttributeValue(null, "ignore");
+        final String varFamilyTypeStr = parser.getAttributeValue(null, "varFamilyType");
         final List<FontConfig.Font> fonts = new ArrayList<>();
         while (keepReading(parser)) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
@@ -278,12 +286,45 @@ public class FontListParser {
                 intVariant = FontConfig.FontFamily.VARIANT_ELEGANT;
             }
         }
+        int varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
+        if (varFamilyTypeStr != null) {
+            varFamilyType = Integer.parseInt(varFamilyTypeStr);
+            if (varFamilyType <= -1 || varFamilyType > 3) {
+                Log.e(TAG, "Error: unexpected varFamilyType value: " + varFamilyTypeStr);
+                varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
+            }
+
+            // validation but don't read font content for performance reasons.
+            switch (varFamilyType) {
+                case VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ONLY:
+                    if (fonts.size() != 1) {
+                        Log.e(TAG, "Error: Single font support wght axis, but two or more fonts are"
+                                + " included in the font family.");
+                        varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
+                    }
+                    break;
+                case VARIABLE_FONT_FAMILY_TYPE_SINGLE_FONT_WGHT_ITAL:
+                    if (fonts.size() != 1) {
+                        Log.e(TAG, "Error: Single font support both ital and wght axes, but two or"
+                                + " more fonts are included in the font family.");
+                        varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
+                    }
+                    break;
+                case VARIABLE_FONT_FAMILY_TYPE_TWO_FONTS_WGHT:
+                    if (fonts.size() != 2) {
+                        Log.e(TAG, "Error: two fonts that support wght axis, but one or three or"
+                                + " more fonts are included in the font family.");
+                        varFamilyType = VARIABLE_FONT_FAMILY_TYPE_NONE;
+                    }
+            }
+        }
 
         boolean skip = (ignore != null && (ignore.equals("true") || ignore.equals("1")));
         if (skip || fonts.isEmpty()) {
             return null;
         }
-        return new FontConfig.FontFamily(fonts, LocaleList.forLanguageTags(lang), intVariant);
+        return new FontConfig.FontFamily(fonts, LocaleList.forLanguageTags(lang), intVariant,
+                varFamilyType);
     }
 
     private static void throwIfAttributeExists(String attrName, XmlPullParser parser) {

@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • धीरे चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बैटरी को नुकसान से बचाने के लिए, चार्जिंग को ऑप्टिमाइज़ किया गया"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जर ऐक्सेसरी से जुड़ी समस्या"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"लॉक खोलने के लिए मेन्यू दबाएं."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक किया हुआ है"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"कोई सिम नहीं है"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"कोई सिम जोड़ें."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"सिम मौजूद नहीं है या उसे ऐक्सेस नहीं किया जा सकता. कोई सिम जोड़ें."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"सिम को हमेशा के लिए बंद कर दिया गया है."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"आपका सिम हमेशा के लिए बंद कर दिया गया है.\n दूसरा सिम पाने के लिए, वायरलेस सेवा देने वाली कंपनी से संपर्क करें."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"सिम लॉक है."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"सिम में PUK लॉक लगा है."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"सिम अनलॉक हो रहा है…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"लॉकडाउन के बाद, पिन डालना ज़रूरी है"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"लॉकडाउन के बाद, पासवर्ड डालना ज़रूरी है"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"लॉकडाउन के बाद, पैटर्न ड्रॉ करना ज़रूरी है"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"इनऐक्टिव रहने के दौरान, अपडेट इंस्टॉल किया जाएगा"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"अपडेट तब इंस्टॉल किया जाएगा, जब डिवाइस का इस्तेमाल न किया जा रहा हो"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"अतिरिक्त सुरक्षा ज़रूरी है. कुछ समय से पिन नहीं डाला गया."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"अतिरिक्त सुरक्षा ज़रूरी है. कुछ समय से पासवर्ड नहीं डाला गया."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"अतिरिक्त सुरक्षा ज़रूरी है. कुछ समय से पैटर्न ड्रॉ नहीं किया गया."</string>
@@ -98,7 +94,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"सिम अनलॉक हो रहा है…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"कोई ऐसा पिन लिखें, जिसमें 4 से 8 अंक हों."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK कोड 8 या ज़्यादा संख्या वाला होना चाहिए."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"आप अपना पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"<xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत पिन डाला जा चुका है. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"आप अपना पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से लिख चुके हैं. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंड में फिर से कोशिश करें."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"गलत SIM पिन कोड, अपने डिवाइस को अनलॉक करने के लिए अब आपको अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करना होगा."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"एनालॉग"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"जारी रखने के लिए डिवाइस अनलॉक करें"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"अपडेट को बाद में इंस्टॉल करने के लिए पिन डालें"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"अपडेट को बाद में इंस्टॉल करने के लिए पासवर्ड डालें"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"अपडेट को बाद में इंस्टॉल करने के लिए पैटर्न ड्रॉ करें"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"डिवाइस अपडेट किया गया. जारी रखने के लिए पिन डालें."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"डिवाइस अपडेट किया गया. जारी रखने के लिए पासवर्ड डालें."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"डिवाइस अपडेट किया गया. जारी रखने के लिए पैटर्न ड्रॉ करें."</string>
 </resources>

@@ -32,9 +32,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.util.ArrayUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -59,7 +58,6 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private int mExpandAnimationWidth = -1;
     private int mExpandAnimationHeight = -1;
     private int mDrawableAlpha = 255;
-    private boolean mIsPressedAllowed;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -153,9 +151,17 @@ public class NotificationBackgroundView extends View implements Dumpable {
 
     public void setTint(int tintColor) {
         if (tintColor != 0) {
-            mBackground.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
+            ColorStateList stateList = new ColorStateList(new int[][]{
+                    new int[]{com.android.internal.R.attr.state_pressed},
+                    new int[]{com.android.internal.R.attr.state_hovered},
+                    new int[]{}},
+
+                    new int[]{tintColor, 0, tintColor}
+            );
+            mBackground.setTintMode(PorterDuff.Mode.SRC_ATOP);
+            mBackground.setTintList(stateList);
         } else {
-            mBackground.clearColorFilter();
+            mBackground.setTintList(null);
         }
         mTintColor = tintColor;
         invalidate();
@@ -210,10 +216,6 @@ public class NotificationBackgroundView extends View implements Dumpable {
 
     public void setState(int[] drawableState) {
         if (mBackground != null && mBackground.isStateful()) {
-            if (!mIsPressedAllowed) {
-                drawableState = ArrayUtils.removeInt(drawableState,
-                        com.android.internal.R.attr.state_pressed);
-            }
             mBackground.setState(drawableState);
         }
     }
@@ -267,9 +269,12 @@ public class NotificationBackgroundView extends View implements Dumpable {
             return;
         }
         if (mBackground instanceof LayerDrawable) {
-            GradientDrawable gradientDrawable =
-                    (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
-            gradientDrawable.setCornerRadii(mCornerRadii);
+            int numberOfLayers = ((LayerDrawable) mBackground).getNumberOfLayers();
+            for (int i = 0; i < numberOfLayers; i++) {
+                GradientDrawable gradientDrawable =
+                        (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(i);
+                gradientDrawable.setCornerRadii(mCornerRadii);
+            }
         }
     }
 
@@ -293,10 +298,6 @@ public class NotificationBackgroundView extends View implements Dumpable {
             setDrawableAlpha(mDrawableAlpha);
         }
         invalidate();
-    }
-
-    public void setPressedAllowed(boolean allowed) {
-        mIsPressedAllowed = allowed;
     }
 
     @Override

@@ -17,12 +17,18 @@
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_OTHER_DEVICE_CONNECTION
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.connectivity.WifiIcons
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
@@ -72,6 +78,13 @@ class InternetTileViewModelTest : SysuiTestCase() {
     private val mobileConnectionRepository =
         FakeMobileConnectionRepository(SUB_1_ID, tableLogBuffer)
 
+    private val flags =
+        FakeFeatureFlagsClassic().also {
+            it.set(Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS, true)
+        }
+
+    private val internet = context.getString(R.string.quick_settings_internet_label)
+
     @Before
     fun setUp() {
         mobileConnectionRepository.apply {
@@ -96,6 +109,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
                 userSetupRepo,
                 testScope.backgroundScope,
                 context,
+                flags,
             )
 
         underTest =
@@ -139,19 +153,137 @@ class InternetTileViewModelTest : SysuiTestCase() {
                     level = 4,
                     ssid = "test ssid",
                 )
+            val wifiIcon =
+                WifiIcon.fromModel(model = networkModel, context = context, showHotspotInfo = false)
+                    as WifiIcon.Visible
 
             connectivityRepository.setWifiConnected()
             wifiRepository.setIsWifiDefault(true)
             wifiRepository.setWifiNetwork(networkModel)
 
-            // Type is [Visible] since that is the only model that stores a resId
-            val expectedIcon: WifiIcon.Visible =
-                WifiIcon.fromModel(networkModel, context) as WifiIcon.Visible
-
             assertThat(latest?.secondaryTitle).isEqualTo("test ssid")
             assertThat(latest?.secondaryLabel).isNull()
-            assertThat(latest?.icon).isEqualTo(ResourceIcon.get(expectedIcon.icon.res))
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(WifiIcons.WIFI_NO_INTERNET_ICONS[4]))
             assertThat(latest?.iconId).isNull()
+            assertThat(latest?.contentDescription.loadContentDescription(context))
+                .isEqualTo("$internet,test ssid")
+            val expectedSd = wifiIcon.contentDescription
+            assertThat(latest?.stateDescription).isEqualTo(expectedSd)
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotNone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            val networkModel =
+                WifiNetworkModel.Active(
+                    networkId = 1,
+                    level = 4,
+                    ssid = "test ssid",
+                    hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
+                )
+
+            connectivityRepository.setWifiConnected()
+            wifiRepository.setIsWifiDefault(true)
+            wifiRepository.setWifiNetwork(networkModel)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(WifiIcons.WIFI_NO_INTERNET_ICONS[4]))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .doesNotContain(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotTablet() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.TABLET)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_tablet))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotLaptop() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.LAPTOP)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_laptop))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotWatch() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.WATCH)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_watch))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotAuto() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.AUTO)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_auto))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotPhone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.PHONE)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotUnknown() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.UNKNOWN)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotInvalid() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.INVALID)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -186,6 +318,11 @@ class InternetTileViewModelTest : SysuiTestCase() {
                 .isEqualTo(context.getString(R.string.quick_settings_networks_available))
             assertThat(latest?.icon).isNull()
             assertThat(latest?.iconId).isEqualTo(R.drawable.ic_qs_no_internet_available)
+            assertThat(latest?.stateDescription).isNull()
+            val expectedCd =
+                "$internet,${context.getString(R.string.quick_settings_networks_available)}"
+            assertThat(latest?.contentDescription.loadContentDescription(context))
+                .isEqualTo(expectedCd)
         }
 
     @Test
@@ -201,10 +338,14 @@ class InternetTileViewModelTest : SysuiTestCase() {
                 networkName.value = NetworkNameModel.Default("test network")
             }
 
-            assertThat(latest?.secondaryTitle).contains("test network")
+            assertThat(latest?.secondaryTitle.toString()).contains("test network")
             assertThat(latest?.secondaryLabel).isNull()
             assertThat(latest?.icon).isInstanceOf(SignalIcon::class.java)
             assertThat(latest?.iconId).isNull()
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(latest?.secondaryTitle.toString())
+            assertThat(latest?.contentDescription.loadContentDescription(context))
+                .isEqualTo(internet)
         }
 
     @Test
@@ -215,11 +356,14 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             connectivityRepository.setEthernetConnected(default = true, validated = true)
 
-            assertThat(latest?.secondaryLabel).isNull()
-            assertThat(latest?.secondaryTitle)
-                .isEqualTo(ethernetIcon!!.contentDescription.toString())
+            assertThat(latest?.secondaryLabel.loadText(context))
+                .isEqualTo(ethernetIcon!!.contentDescription.loadContentDescription(context))
+            assertThat(latest?.secondaryTitle).isNull()
             assertThat(latest?.iconId).isEqualTo(R.drawable.stat_sys_ethernet_fully)
             assertThat(latest?.icon).isNull()
+            assertThat(latest?.stateDescription).isNull()
+            assertThat(latest?.contentDescription.loadContentDescription(context))
+                .isEqualTo(latest?.secondaryLabel.loadText(context))
         }
 
     @Test
@@ -230,12 +374,29 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             connectivityRepository.setEthernetConnected(default = true, validated = false)
 
-            assertThat(latest?.secondaryLabel).isNull()
-            assertThat(latest?.secondaryTitle)
-                .isEqualTo(ethernetIcon!!.contentDescription.toString())
+            assertThat(latest?.secondaryLabel.loadText(context))
+                .isEqualTo(ethernetIcon!!.contentDescription.loadContentDescription(context))
+            assertThat(latest?.secondaryTitle).isNull()
             assertThat(latest?.iconId).isEqualTo(R.drawable.stat_sys_ethernet)
             assertThat(latest?.icon).isNull()
+            assertThat(latest?.stateDescription).isNull()
+            assertThat(latest?.contentDescription.loadContentDescription(context))
+                .isEqualTo(latest?.secondaryLabel.loadText(context))
         }
+
+    private fun setWifiNetworkWithHotspot(hotspot: WifiNetworkModel.HotspotDeviceType) {
+        val networkModel =
+            WifiNetworkModel.Active(
+                networkId = 1,
+                level = 4,
+                ssid = "test ssid",
+                hotspotDeviceType = hotspot,
+            )
+
+        connectivityRepository.setWifiConnected()
+        wifiRepository.setIsWifiDefault(true)
+        wifiRepository.setWifiNetwork(networkModel)
+    }
 
     companion object {
         const val SUB_1_ID = 1

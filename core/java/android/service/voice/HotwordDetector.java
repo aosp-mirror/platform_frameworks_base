@@ -19,6 +19,7 @@ package android.service.voice;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -27,6 +28,7 @@ import android.media.AudioFormat;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.SharedMemory;
+import android.service.voice.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -242,6 +244,19 @@ public interface HotwordDetector {
          *         {@link HotwordDetectionService}.
          */
         void onRejected(@NonNull HotwordRejectedResult result);
+
+        /**
+         * Called by the {@link HotwordDetectionService} to egress training data to the
+         * {@link HotwordDetector}. This data can be used for improving and analyzing hotword
+         * detection models.
+         *
+         * @param data Training data to be egressed provided by the
+         *               {@link HotwordDetectionService}.
+         */
+        @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+        default void onTrainingData(@NonNull HotwordTrainingData data) {
+            return;
+        }
 
         /**
          * Called when the {@link HotwordDetectionService} or {@link VisualQueryDetectionService} is

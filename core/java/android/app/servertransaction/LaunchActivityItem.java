@@ -18,6 +18,8 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityClient;
@@ -39,9 +41,11 @@ import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.Trace;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,6 +55,7 @@ import java.util.Objects;
  */
 public class LaunchActivityItem extends ClientTransactionItem {
 
+    private IBinder mActivityToken;
     @UnsupportedAppUsage
     private Intent mIntent;
     private int mIdent;
@@ -80,7 +85,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private IActivityClientController mActivityClientController;
 
     @Override
-    public void preExecute(ClientTransactionHandler client, IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
         CompatibilityInfo.applyOverrideScaleIfNeeded(mCurConfig);
@@ -92,10 +97,10 @@ public class LaunchActivityItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-        ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
+        ActivityClientRecord r = new ActivityClientRecord(mActivityToken, mIntent, mIdent, mInfo,
                 mOverrideConfig, mReferrer, mVoiceInteractor, mState, mPersistentState,
                 mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
                 client, mAssistToken, mShareableActivityToken, mLaunchedFromBubble,
@@ -105,51 +110,67 @@ public class LaunchActivityItem extends ClientTransactionItem {
     }
 
     @Override
-    public void postExecute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
+    public void postExecute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
         client.countLaunchingActivities(-1);
     }
-
 
     // ObjectPoolItem implementation
 
     private LaunchActivityItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static LaunchActivityItem obtain(Intent intent, int ident, ActivityInfo info,
-            Configuration curConfig, Configuration overrideConfig, int deviceId,
-            String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
-            PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
-            boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken,
-            IActivityClientController activityClientController, IBinder shareableActivityToken,
-            boolean launchedFromBubble, IBinder taskFragmentToken) {
+    @NonNull
+    public static LaunchActivityItem obtain(@NonNull IBinder activityToken, @NonNull Intent intent,
+            int ident, @NonNull ActivityInfo info, @NonNull Configuration curConfig,
+            @NonNull Configuration overrideConfig, int deviceId, @Nullable String referrer,
+            @Nullable IVoiceInteractor voiceInteractor, int procState, @Nullable Bundle state,
+            @Nullable PersistableBundle persistentState, @Nullable List<ResultInfo> pendingResults,
+            @Nullable List<ReferrerIntent> pendingNewIntents,
+            @Nullable ActivityOptions activityOptions,
+            boolean isForward, @Nullable ProfilerInfo profilerInfo, @NonNull IBinder assistToken,
+            @Nullable IActivityClientController activityClientController,
+            @NonNull IBinder shareableActivityToken, boolean launchedFromBubble,
+            @Nullable IBinder taskFragmentToken) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
         }
-        setValues(instance, intent, ident, info, curConfig, overrideConfig, deviceId, referrer,
-                voiceInteractor, procState, state, persistentState, pendingResults,
-                pendingNewIntents, activityOptions, isForward, profilerInfo, assistToken,
-                activityClientController, shareableActivityToken,
+        setValues(instance, activityToken, new Intent(intent), ident,  new ActivityInfo(info),
+                new Configuration(curConfig), new Configuration(overrideConfig), deviceId,
+                referrer, voiceInteractor, procState,
+                state != null ? new Bundle(state) : null,
+                persistentState != null ? new PersistableBundle(persistentState) : null,
+                pendingResults != null ? new ArrayList<>(pendingResults) : null,
+                pendingNewIntents != null ? new ArrayList<>(pendingNewIntents) : null,
+                activityOptions, isForward,
+                profilerInfo != null ? new ProfilerInfo(profilerInfo) : null,
+                assistToken, activityClientController, shareableActivityToken,
                 launchedFromBubble, taskFragmentToken);
 
         return instance;
     }
 
+    @VisibleForTesting(visibility = PACKAGE)
+    @NonNull
+    @Override
+    public IBinder getActivityToken() {
+        return mActivityToken;
+    }
+
     @Override
     public void recycle() {
-        setValues(this, null, 0, null, null, null, 0, null, null, 0, null, null, null, null,
+        setValues(this, null, null, 0, null, null, null, 0, null, null, 0, null, null, null, null,
                 null, false, null, null, null, null, false, null);
         ObjectPool.recycle(this);
     }
-
 
     // Parcelable implementation
 
     /** Write from Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeStrongBinder(mActivityToken);
         dest.writeTypedObject(mIntent, flags);
         dest.writeInt(mIdent);
         dest.writeTypedObject(mInfo, flags);
@@ -174,8 +195,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
     }
 
     /** Read from Parcel. */
-    private LaunchActivityItem(Parcel in) {
-        setValues(this, in.readTypedObject(Intent.CREATOR), in.readInt(),
+    private LaunchActivityItem(@NonNull Parcel in) {
+        setValues(this, in.readStrongBinder(), in.readTypedObject(Intent.CREATOR), in.readInt(),
                 in.readTypedObject(ActivityInfo.CREATOR), in.readTypedObject(Configuration.CREATOR),
                 in.readTypedObject(Configuration.CREATOR), in.readInt(), in.readString(),
                 IVoiceInteractor.Stub.asInterface(in.readStrongBinder()), in.readInt(),
@@ -192,9 +213,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readStrongBinder());
     }
 
-    public static final @NonNull Creator<LaunchActivityItem> CREATOR =
-            new Creator<LaunchActivityItem>() {
-        public LaunchActivityItem createFromParcel(Parcel in) {
+    public static final @NonNull Creator<LaunchActivityItem> CREATOR = new Creator<>() {
+        public LaunchActivityItem createFromParcel(@NonNull Parcel in) {
             return new LaunchActivityItem(in);
         }
 
@@ -214,7 +234,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
         final LaunchActivityItem other = (LaunchActivityItem) o;
         final boolean intentsEqual = (mIntent == null && other.mIntent == null)
                 || (mIntent != null && mIntent.filterEquals(other.mIntent));
-        return intentsEqual && mIdent == other.mIdent
+        return intentsEqual
+                && Objects.equals(mActivityToken, other.mActivityToken) && mIdent == other.mIdent
                 && activityInfoEqual(other.mInfo) && Objects.equals(mCurConfig, other.mCurConfig)
                 && Objects.equals(mOverrideConfig, other.mOverrideConfig)
                 && mDeviceId == other.mDeviceId
@@ -234,6 +255,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public int hashCode() {
         int result = 17;
+        result = 31 * result + Objects.hashCode(mActivityToken);
         result = 31 * result + mIntent.filterHashCode();
         result = 31 * result + mIdent;
         result = 31 * result + Objects.hashCode(mCurConfig);
@@ -254,7 +276,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         return result;
     }
 
-    private boolean activityInfoEqual(ActivityInfo other) {
+    private boolean activityInfoEqual(@Nullable ActivityInfo other) {
         if (mInfo == null) {
             return other == null;
         }
@@ -270,36 +292,51 @@ public class LaunchActivityItem extends ClientTransactionItem {
      * unparceling if a customized class loader is not set to the bundle. So the hash code is
      * simply determined by the bundle is empty or not.
      */
-    private static int getRoughBundleHashCode(BaseBundle bundle) {
+    private static int getRoughBundleHashCode(@Nullable BaseBundle bundle) {
         return (bundle == null || bundle.isDefinitelyEmpty()) ? 0 : 1;
     }
 
     /** Compares the bundles without unparceling them (avoid BadParcelableException). */
-    private static boolean areBundlesEqualRoughly(BaseBundle a, BaseBundle b) {
+    private static boolean areBundlesEqualRoughly(@Nullable BaseBundle a, @Nullable BaseBundle b) {
         return getRoughBundleHashCode(a) == getRoughBundleHashCode(b);
     }
 
     @Override
     public String toString() {
-        return "LaunchActivityItem{intent=" + mIntent + ",ident=" + mIdent + ",info=" + mInfo
-                + ",curConfig=" + mCurConfig + ",overrideConfig=" + mOverrideConfig
-                + ",deviceId=" + mDeviceId + ",referrer=" + mReferrer + ",procState=" + mProcState
-                + ",state=" + mState + ",persistentState=" + mPersistentState
-                + ",pendingResults=" + mPendingResults + ",pendingNewIntents=" + mPendingNewIntents
-                + ",options=" + mActivityOptions + ",profilerInfo=" + mProfilerInfo
-                + ",assistToken=" + mAssistToken + ",shareableActivityToken="
-                + mShareableActivityToken + "}";
+        return "LaunchActivityItem{activityToken=" + mActivityToken
+                + ",intent=" + mIntent
+                + ",ident=" + mIdent
+                + ",info=" + mInfo
+                + ",curConfig=" + mCurConfig
+                + ",overrideConfig=" + mOverrideConfig
+                + ",deviceId=" + mDeviceId
+                + ",referrer=" + mReferrer
+                + ",procState=" + mProcState
+                + ",state=" + mState
+                + ",persistentState=" + mPersistentState
+                + ",pendingResults=" + mPendingResults
+                + ",pendingNewIntents=" + mPendingNewIntents
+                + ",options=" + mActivityOptions
+                + ",profilerInfo=" + mProfilerInfo
+                + ",assistToken=" + mAssistToken
+                + ",shareableActivityToken=" + mShareableActivityToken + "}";
     }
 
     // Using the same method to set and clear values to make sure we don't forget anything
-    private static void setValues(LaunchActivityItem instance, Intent intent, int ident,
-            ActivityInfo info, Configuration curConfig, Configuration overrideConfig, int deviceId,
-            String referrer, IVoiceInteractor voiceInteractor,
-            int procState, Bundle state, PersistableBundle persistentState,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            ActivityOptions activityOptions, boolean isForward, ProfilerInfo profilerInfo,
-            IBinder assistToken, IActivityClientController activityClientController,
-            IBinder shareableActivityToken, boolean launchedFromBubble, IBinder taskFragmentToken) {
+    private static void setValues(@Nullable LaunchActivityItem instance,
+            @Nullable IBinder activityToken, @Nullable Intent intent, int ident,
+            @Nullable ActivityInfo info, @Nullable Configuration curConfig,
+            @Nullable Configuration overrideConfig, int deviceId,
+            @Nullable String referrer, @Nullable IVoiceInteractor voiceInteractor,
+            int procState, @Nullable Bundle state, @Nullable PersistableBundle persistentState,
+            @Nullable List<ResultInfo> pendingResults,
+            @Nullable List<ReferrerIntent> pendingNewIntents,
+            @Nullable ActivityOptions activityOptions, boolean isForward,
+            @Nullable ProfilerInfo profilerInfo, @Nullable IBinder assistToken,
+            @Nullable IActivityClientController activityClientController,
+            @Nullable IBinder shareableActivityToken, boolean launchedFromBubble,
+            @Nullable IBinder taskFragmentToken) {
+        instance.mActivityToken = activityToken;
         instance.mIntent = intent;
         instance.mIdent = ident;
         instance.mInfo = info;

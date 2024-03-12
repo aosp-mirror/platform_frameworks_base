@@ -21,6 +21,7 @@ import static android.content.pm.SharedLibraryInfo.TYPE_SDK_PACKAGE;
 import static android.content.pm.SharedLibraryInfo.TYPE_STATIC;
 import static android.content.pm.SharedLibraryInfo.VERSION_UNDEFINED;
 
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FULL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
@@ -49,13 +50,13 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import org.hamcrest.BaseMatcher;
@@ -365,6 +366,46 @@ public class ScanTests {
     }
 
     @Test
+    public void scanFirstBoot_apexDontDeriveAbis() throws Exception {
+        final PackageSetting pkgSetting =
+                createBasicPackageSettingBuilder(DUMMY_PACKAGE_NAME)
+                        .setPkgFlags(ApplicationInfo.FLAG_SYSTEM).build();
+
+        final String codePath = "/data/apex/" + DUMMY_PACKAGE_NAME + ".apex";
+
+        // Create the ParsedPackage for the apex
+        final ParsedPackage basicPackage =
+                ((ParsedPackage) new PackageImpl(DUMMY_PACKAGE_NAME, codePath, codePath,
+                        mock(TypedArray.class), false, null)
+                        .setVolumeUuid(UUID_ONE.toString())
+                        .hideAsParsed())
+                        .setVersionCodeMajor(1)
+                        .setVersionCode(2345)
+                        .setSystem(true);
+
+        when(mMockInjector.getAbiHelper()).thenReturn(new PackageAbiHelperImpl());
+
+        // prepare the scan request with the scanflag (SCAN_FIRST_BOOT_OR_UPGRADE | SCAN_AS_APEX)
+        final ScanResult scanResult = executeScan(new ScanRequestBuilder(basicPackage)
+                .setPkgSetting(pkgSetting)
+                .addScanFlag(SCAN_FIRST_BOOT_OR_UPGRADE | SCAN_AS_APEX)
+                .build());
+
+        final PackageSetting resultSetting = scanResult.mPkgSetting;
+        final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
+                resultSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, resultSetting);
+        assertThat(applicationInfo.primaryCpuAbi, nullValue());
+        assertThat(applicationInfo.primaryCpuAbi, nullValue());
+        assertThat(applicationInfo.secondaryCpuAbi, nullValue());
+
+        assertThat(applicationInfo.nativeLibraryRootDir, nullValue());
+        assertThat(pkgSetting.getLegacyNativeLibraryPath(), nullValue());
+        assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(false));
+        assertThat(applicationInfo.nativeLibraryDir, nullValue());
+        assertThat(applicationInfo.secondaryNativeLibraryDir, nullValue());
+    }
+
+    @Test
     public void scanFirstBoot_derivesAbis() throws Exception {
         final PackageSetting pkgSetting =
                 createBasicPackageSettingBuilder(DUMMY_PACKAGE_NAME).build();
@@ -554,12 +595,12 @@ public class ScanTests {
         // TODO(b/135203078): Make this use PackageImpl.forParsing and separate the steps
         return (ParsingPackage) ((ParsedPackage) new PackageImpl(packageName,
                 "/data/tmp/randompath/base.apk", createCodePath(packageName),
-                mock(TypedArray.class), false)
+                mock(TypedArray.class), false, null)
                 .setVolumeUuid(UUID_ONE.toString())
                 .addUsesStaticLibrary("some.static.library", 234L, new String[]{"testCert1"})
                 .addUsesStaticLibrary("some.other.static.library", 456L, new String[]{"testCert2"})
-                .addUsesSdkLibrary("some.sdk.library", 123L, new String[]{"testCert3"})
-                .addUsesSdkLibrary("some.other.sdk.library", 789L, new String[]{"testCert4"})
+                .addUsesSdkLibrary("some.sdk.library", 123L, new String[]{"testCert3"}, false)
+                .addUsesSdkLibrary("some.other.sdk.library", 789L, new String[]{"testCert4"}, true)
                 .hideAsParsed())
                 .setNativeLibraryRootDir("/data/tmp/randompath/base.apk:/lib")
                 .setVersionCodeMajor(1)
@@ -587,6 +628,7 @@ public class ScanTests {
         assertThat(pkgSetting.getUsesSdkLibraries(),
                 arrayContaining("some.sdk.library", "some.other.sdk.library"));
         assertThat(pkgSetting.getUsesSdkLibrariesVersionsMajor(), is(new long[]{123L, 789L}));
+        assertThat(pkgSetting.getUsesSdkLibrariesOptional(), is(new boolean[]{false, true}));
         assertThat(pkgSetting.getPkg(), is(scanResult.mRequest.mParsedPackage));
         assertThat(pkgSetting.getPath(), is(new File(createCodePath(packageName))));
         assertThat(pkgSetting.getVersionCode(),

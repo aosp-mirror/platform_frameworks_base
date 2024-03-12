@@ -25,7 +25,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shade.ShadeExpansionStateManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.launch
+import com.android.app.tracing.TraceUtils.Companion.launch
 import kotlinx.coroutines.withContext
 
 /** Provides state from the main SystemUI process on behalf of the Screenshot process. */
@@ -47,7 +47,9 @@ constructor(
             }
 
             override fun dismissKeyguard(callback: IOnDoneCallback) {
-                lifecycleScope.launch { executeAfterDismissing(callback) }
+                lifecycleScope.launch("IScreenshotProxy#dismissKeyguard") {
+                    executeAfterDismissing(callback)
+                }
             }
         }
 

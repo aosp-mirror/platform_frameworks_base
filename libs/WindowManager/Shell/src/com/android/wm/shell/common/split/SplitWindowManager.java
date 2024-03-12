@@ -62,6 +62,10 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     // Used to "pass" a transaction to WWM.remove so that view removal can be synchronized.
     private SurfaceControl.Transaction mSyncTransaction = null;
 
+    // For saving/restoring state
+    private boolean mLastDividerInteractive = true;
+    private boolean mLastDividerHandleHidden;
+
     public interface ParentContainerCallbacks {
         void attachToParentSurface(SurfaceControl.Builder b);
         void onLeashReady(SurfaceControl leash);
@@ -107,7 +111,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     }
 
     /** Inflates {@link DividerView} on to the root surface. */
-    void init(SplitLayout splitLayout, InsetsState insetsState) {
+    void init(SplitLayout splitLayout, InsetsState insetsState, boolean isRestoring) {
         if (mDividerView != null || mViewHost != null) {
             throw new UnsupportedOperationException(
                     "Try to inflate divider view again without release first");
@@ -130,6 +134,10 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         lp.accessibilityTitle = mContext.getResources().getString(R.string.accessibility_divider);
         mViewHost.setView(mDividerView, lp);
         mDividerView.setup(splitLayout, this, mViewHost, insetsState);
+        if (isRestoring) {
+            mDividerView.setInteractive(mLastDividerInteractive, mLastDividerHandleHidden,
+                    "restore_setup");
+        }
     }
 
     /**
@@ -138,6 +146,8 @@ public final class SplitWindowManager extends WindowlessWindowManager {
      */
     void release(@Nullable SurfaceControl.Transaction t) {
         if (mDividerView != null) {
+            mLastDividerInteractive = mDividerView.isInteractive();
+            mLastDividerHandleHidden = mDividerView.isHandleHidden();
             mDividerView = null;
         }
 

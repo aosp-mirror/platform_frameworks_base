@@ -23,7 +23,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.RouteListingPreference;
 
 import com.android.settingslib.R;
@@ -40,15 +39,21 @@ public class BluetoothMediaDevice extends MediaDevice {
     private CachedBluetoothDevice mCachedDevice;
     private final AudioManager mAudioManager;
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
-            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
-        this(context, device, routerManager, info, packageName, null);
+    BluetoothMediaDevice(
+            Context context,
+            CachedBluetoothDevice device,
+            MediaRoute2Info info,
+            String packageName) {
+        this(context, device, info, packageName, null);
     }
 
-    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
-            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName,
+    BluetoothMediaDevice(
+            Context context,
+            CachedBluetoothDevice device,
+            MediaRoute2Info info,
+            String packageName,
             RouteListingPreference.Item item) {
-        super(context, routerManager, info, packageName, item);
+        super(context, info, packageName, item);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
@@ -64,6 +69,13 @@ public class BluetoothMediaDevice extends MediaDevice {
         return isConnected() || mCachedDevice.isBusy()
                 ? mCachedDevice.getConnectionSummary()
                 : mContext.getString(R.string.bluetooth_disconnected);
+    }
+
+    @Override
+    public CharSequence getSummaryForTv(int lowBatteryColorRes) {
+        return isConnected() || mCachedDevice.isBusy()
+                ? mCachedDevice.getTvConnectionSummary(lowBatteryColorRes)
+                : mContext.getString(R.string.bluetooth_saved_device);
     }
 
     @Override

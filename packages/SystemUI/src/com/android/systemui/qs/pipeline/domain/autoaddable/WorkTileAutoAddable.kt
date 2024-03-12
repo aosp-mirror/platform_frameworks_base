@@ -17,8 +17,10 @@
 package com.android.systemui.qs.pipeline.domain.autoaddable
 
 import android.content.pm.UserInfo
+import android.os.UserHandle
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.pipeline.data.restoreprocessors.WorkTileRestoreProcessor
 import com.android.systemui.qs.pipeline.domain.model.AutoAddSignal
 import com.android.systemui.qs.pipeline.domain.model.AutoAddTracking
 import com.android.systemui.qs.pipeline.domain.model.AutoAddable
@@ -28,6 +30,8 @@ import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.merge
 
 /**
  * [AutoAddable] for [WorkModeTile.TILE_SPEC].
@@ -36,17 +40,37 @@ import kotlinx.coroutines.flow.Flow
  * signal to remove it if there is not.
  */
 @SysUISingleton
-class WorkTileAutoAddable @Inject constructor(private val userTracker: UserTracker) : AutoAddable {
+class WorkTileAutoAddable
+@Inject
+constructor(
+    private val userTracker: UserTracker,
+    private val workTileRestoreProcessor: WorkTileRestoreProcessor,
+) : AutoAddable {
 
     private val spec = TileSpec.create(WorkModeTile.TILE_SPEC)
 
     override fun autoAddSignal(userId: Int): Flow<AutoAddSignal> {
-        return conflatedCallbackFlow {
+        val removeTrackingDueToRestore: Flow<AutoAddSignal> =
+            workTileRestoreProcessor.removeTrackingForUser(UserHandle.of(userId)).mapNotNull {
+                val profiles = userTracker.userProfiles
+                if (profiles.any { it.id == userId } && !profiles.any { it.isManagedProfile }) {
+                    // Only remove auto-added if there are no managed profiles for this user
+                    AutoAddSignal.RemoveTracking(spec)
+                } else {
+                    null
+                }
+            }
+        val signalsFromCallback = conflatedCallbackFlow {
             fun maybeSend(profiles: List<UserInfo>) {
                 if (profiles.any { it.id == userId }) {
                     // We are looking at the profiles of the correct user.
                     if (profiles.any { it.isManagedProfile }) {
-                        trySend(AutoAddSignal.Add(spec))
+                        trySend(
+                            AutoAddSignal.Add(
+                                spec,
+                                workTileRestoreProcessor.pollLastPosition(userId),
+                            )
+                        )
                     } else {
                         trySend(AutoAddSignal.Remove(spec))
                     }
@@ -65,6 +89,7 @@ class WorkTileAutoAddable @Inject constructor(private val userTracker: UserTrack
 
             awaitClose { userTracker.removeCallback(callback) }
         }
+        return merge(removeTrackingDueToRestore, signalsFromCallback)
     }
 
     override val autoAddTracking = AutoAddTracking.Always

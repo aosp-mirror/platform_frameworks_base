@@ -26,6 +26,7 @@ import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
@@ -582,6 +583,7 @@ public class DisplayRotationTests {
 
         enableOrientationSensor();
 
+        clearInvocations(sMockWm);
         mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_90));
         assertTrue(waitForUiHandler());
 
@@ -626,6 +628,7 @@ public class DisplayRotationTests {
         when(mDisplayRotationImmersiveAppCompatPolicyMock.isRotationLockEnforced(
                 Surface.ROTATION_90)).thenReturn(false);
 
+        clearInvocations(sMockWm);
         // And then ActivityRecord.setRequestedOrientation calls onSetRequestedOrientation.
         mTarget.onSetRequestedOrientation();
 
@@ -863,6 +866,7 @@ public class DisplayRotationTests {
         assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
 
+        clearInvocations(sMockWm);
         // ... until half-fold
         mTarget.foldStateChanged(DeviceStateController.DeviceState.HALF_FOLDED);
         assertTrue(waitForUiHandler());
@@ -898,6 +902,7 @@ public class DisplayRotationTests {
         assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
 
+        clearInvocations(sMockWm);
         // ... half-fold -> still no rotation
         mTarget.foldStateChanged(DeviceStateController.DeviceState.HALF_FOLDED);
         assertTrue(waitForUiHandler());
@@ -1156,6 +1161,22 @@ public class DisplayRotationTests {
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
     }
 
+    @Test
+    public void testReturnsUserRotation_FixedToUserRotationIfNoAutoRotation_AutoRotationNotSupport()
+            throws Exception {
+        mBuilder.setSupportAutoRotation(false).build();
+        configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
+        mTarget.setFixedToUserRotation(FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION);
+
+        freezeRotation(Surface.ROTATION_180);
+
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, mTarget.getUserRotationMode());
+        assertEquals(Surface.ROTATION_180, mTarget.getUserRotation());
+
+        assertEquals(Surface.ROTATION_180, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
+    }
+
     // ========================
     // Non-rotation API Tests
     // ========================
@@ -1177,12 +1198,21 @@ public class DisplayRotationTests {
     }
 
     @Test
-    public void testIsFixedToUserRotation_displayContentOrientationFixed() throws Exception {
+    public void testIsFixedToUserRotation_displayShouldNotRotateWithContent() throws Exception {
         mBuilder.build();
-        when(mMockDisplayContent.isDisplayOrientationFixed()).thenReturn(true);
+        when(mMockDisplayContent.shouldRotateWithContent()).thenReturn(false);
 
         assertFalse("Display rotation should respect app requested orientation if"
-                + " the display has fixed orientation.", mTarget.isFixedToUserRotation());
+                + " the display does not rotate with content.", mTarget.isFixedToUserRotation());
+    }
+
+    @Test
+    public void testIsFixedToUserRotation_FixedToUserRotationIfNoAutoRotation() throws Exception {
+        mBuilder.build();
+        mTarget.setFixedToUserRotation(FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION);
+
+        assertFalse("Display rotation should respect app requested orientation if"
+                + " fixed to user rotation if no auto rotation.", mTarget.isFixedToUserRotation());
     }
 
     private void moveTimeForward(long timeMillis) {
@@ -1235,7 +1265,7 @@ public class DisplayRotationTests {
     }
 
     private void freezeRotation(int rotation) {
-        mTarget.freezeRotation(rotation);
+        mTarget.freezeRotation(rotation, /* caller= */ "DisplayRotationTests");
 
         if (mTarget.isDefaultDisplay) {
             mAccelerometerRotationObserver.onChange(false);
@@ -1244,7 +1274,7 @@ public class DisplayRotationTests {
     }
 
     private void thawRotation() {
-        mTarget.thawRotation();
+        mTarget.thawRotation(/* caller= */ "DisplayRotationTests");
 
         if (mTarget.isDefaultDisplay) {
             mAccelerometerRotationObserver.onChange(false);
@@ -1427,6 +1457,7 @@ public class DisplayRotationTests {
                     .thenReturn(mock(TaskDisplayArea.class));
             when(mMockDisplayContent.getWindowConfiguration())
                     .thenReturn(new WindowConfiguration());
+            when(mMockDisplayContent.shouldRotateWithContent()).thenReturn(true);
 
             Field field = DisplayContent.class
                     .getDeclaredField("mFixedRotationTransitionListener");

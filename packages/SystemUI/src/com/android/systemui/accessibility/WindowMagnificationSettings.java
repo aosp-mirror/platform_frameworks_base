@@ -59,8 +59,8 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.R;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.lang.annotation.Retention;
@@ -101,7 +101,9 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private Button mEditButton;
     private ImageButton mFullScreenButton;
     private int mLastSelectedButtonIndex = MagnificationSize.NONE;
+
     private boolean mAllowDiagonalScrolling = false;
+
     /**
      * Amount by which magnification scale changes compared to seekbar in settings.
      * magnitude = 10 means, for every 1 scale increase, 10 progress increase in seekbar.
@@ -141,7 +143,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSecureSettings = secureSettings;
 
         mAllowDiagonalScrolling = mSecureSettings.getIntForUser(
-                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
+                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 1,
                 UserHandle.USER_CURRENT) == 1;
 
         mParams = createLayoutParams(context);
@@ -368,7 +370,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private void showSettingPanel(boolean resetPosition) {
         if (!mIsVisible) {
             updateUIControlsIfNeeded();
-            setScaleSeekbar(mScale);
+            setScaleSeekbar(getMagnificationScale());
             if (resetPosition) {
                 mDraggableWindowBounds.set(getDraggableWindowBounds());
                 mParams.x = mDraggableWindowBounds.right;
@@ -420,6 +422,11 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 UserHandle.USER_CURRENT);
     }
 
+    @VisibleForTesting
+    boolean isDiagonalScrollingEnabled() {
+        return mAllowDiagonalScrolling;
+    }
+
     /**
      * Only called from outside to notify the controlling magnifier scale changed
      *
@@ -431,6 +438,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         if (isSettingPanelShowing()) {
             setScaleSeekbar(scale);
         }
+    }
+
+    private float getMagnificationScale() {
+        return mScale;
     }
 
     private void updateUIControlsIfNeeded() {
@@ -628,7 +639,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     private void toggleDiagonalScrolling() {
         boolean enabled = mSecureSettings.getIntForUser(
-                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
+                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 1,
                 UserHandle.USER_CURRENT) == 1;
         setDiagonalScrolling(!enabled);
     }
@@ -660,17 +671,17 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     private Rect getDraggableWindowBounds() {
-        final int layoutMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.magnification_switch_button_margin);
         final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
         final Insets windowInsets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(
                 WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        // re-measure the settings panel view so that we can get the correct view size to inset
+        int unspecificSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        mSettingView.measure(unspecificSpec, unspecificSpec);
+
         final Rect boundRect = new Rect(windowMetrics.getBounds());
         boundRect.offsetTo(0, 0);
-        boundRect.inset(0, 0, mParams.width, mParams.height);
+        boundRect.inset(0, 0, mSettingView.getMeasuredWidth(), mSettingView.getMeasuredHeight());
         boundRect.inset(windowInsets);
-        boundRect.inset(layoutMargin, layoutMargin);
-
         return boundRect;
     }
 

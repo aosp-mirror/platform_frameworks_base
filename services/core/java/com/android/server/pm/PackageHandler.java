@@ -60,14 +60,10 @@ import java.io.IOException;
  */
 final class PackageHandler extends Handler {
     private final PackageManagerService mPm;
-    private final InstallPackageHelper mInstallPackageHelper;
-    private final RemovePackageHelper mRemovePackageHelper;
 
     PackageHandler(Looper looper, PackageManagerService pm) {
         super(looper);
         mPm = pm;
-        mInstallPackageHelper = new InstallPackageHelper(mPm);
-        mRemovePackageHelper = new RemovePackageHelper(mPm);
     }
 
     @Override
@@ -82,7 +78,7 @@ final class PackageHandler extends Handler {
     void doHandleMessage(Message msg) {
         switch (msg.what) {
             case SEND_PENDING_BROADCAST: {
-                mInstallPackageHelper.sendPendingBroadcasts();
+                mPm.sendPendingBroadcasts();
                 break;
             }
             case POST_INSTALL: {
@@ -93,9 +89,10 @@ final class PackageHandler extends Handler {
                 mPm.mRunningInstalls.delete(msg.arg1);
 
                 request.closeFreezer();
+                request.onInstallCompleted();
                 request.runPostInstallRunnable();
                 if (!request.isInstallExistingForUser()) {
-                    mInstallPackageHelper.handlePackagePostInstall(request, didRestore);
+                    mPm.handlePackagePostInstall(request, didRestore);
                 } else if (DEBUG_INSTALL) {
                     // No post-install when we run restore from installExistingPackageForUser
                     Slog.i(TAG, "Nothing to do for post-install token " + msg.arg1);
@@ -106,7 +103,7 @@ final class PackageHandler extends Handler {
             case DEFERRED_NO_KILL_POST_DELETE: {
                 InstallArgs args = (InstallArgs) msg.obj;
                 if (args != null) {
-                    mRemovePackageHelper.cleanUpResources(args.mCodeFile, args.mInstructionSets);
+                    mPm.cleanUpResources(args.mCodeFile, args.mInstructionSets);
                 }
             } break;
             case DEFERRED_NO_KILL_INSTALL_OBSERVER:

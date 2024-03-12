@@ -65,10 +65,10 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -336,10 +336,11 @@ public class NotificationConversationInfo extends LinearLayout implements
         Drawable person =  mIconFactory.getBaseIconDrawable(mShortcutInfo);
         if (person == null) {
             person = mContext.getDrawable(R.drawable.ic_person).mutate();
-            TypedArray ta = mContext.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
-            int colorAccent = ta.getColor(0, 0);
+            TypedArray ta = mContext.obtainStyledAttributes(
+                    new int[]{com.android.internal.R.attr.materialColorPrimary});
+            int colorPrimary = ta.getColor(0, 0);
             ta.recycle();
-            person.setTint(colorAccent);
+            person.setTint(colorPrimary);
         }
         ImageView image = findViewById(R.id.conversation_icon);
         image.setImageDrawable(person);

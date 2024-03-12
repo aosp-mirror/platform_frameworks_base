@@ -86,7 +86,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.shared.system.InputChannelCompat;

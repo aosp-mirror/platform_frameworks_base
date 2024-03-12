@@ -1,0 +1,25 @@
+package: "com.android.window.flags"
+
+flag {
+  name: "allows_screen_size_decoupled_from_status_bar_and_cutout"
+  namespace: "large_screen_experiences_app_compat"
+  description: "When necessary, configuration decoupled from status bar and display cutout"
+  bug: "291870756"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "movable_cutout_configuration"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Make it possible to move cutout across edges through device config"
+  bug: "302387383"
+  is_fixed_read_only: true
+}
+
+flag {
+  name: "density_390_api"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the API DisplayMetrics.DENSITY_390 is available"
+  bug: "297550533"
+  is_fixed_read_only: true
+}

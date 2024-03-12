@@ -24,9 +24,11 @@
     <string name="installing" msgid="4921993079741206516">"Εγκατάσταση…"</string>
     <string name="installing_app" msgid="1165095864863849422">"Εγκατάσταση <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"Η εφαρμογή εγκαταστάθηκε."</string>
-    <string name="install_confirm_question" msgid="7663733664476363311">"Θέλετε να εγκαταστήσετε αυτήν την εφαρμογή;"</string>
-    <string name="install_confirm_question_update" msgid="3348888852318388584">"Θέλετε να ενημερώσετε αυτήν την εφαρμογή;"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Να ενημερωθεί αυτή η εφαρμογή από <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>;\n\nΗ συγκεκριμένη εφαρμογή λαμβάνει συνήθως ενημερώσεις από <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Αν κάνετε την ενημέρωση από διαφορετική πηγή, μπορεί να λαμβάνετε μελλοντικές ενημερώσεις από οποιαδήποτε πηγή στο τηλέφωνό σας. Η λειτουργικότητα της εφαρμογής μπορεί να αλλάξει."</string>
+    <string name="install_confirm_question" msgid="7663733664476363311">"Θέλετε να εγκαταστήσετε αυτή την εφαρμογή;"</string>
+    <string name="install_confirm_question_update" msgid="3348888852318388584">"Θέλετε να ενημερώσετε αυτή την εφαρμογή;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Ενημερώστε αυτή την εφαρμογή από &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Η συγκεκριμένη εφαρμογή λαμβάνει συνήθως ενημερώσεις από &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Αν κάνετε την ενημέρωση από διαφορετική πηγή, μπορεί να λαμβάνετε μελλοντικές ενημερώσεις από οποιαδήποτε πηγή στο tablet σας. Η λειτουργικότητα της εφαρμογής μπορεί να αλλάξει.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Ενημερώστε αυτή την εφαρμογή από &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Η συγκεκριμένη εφαρμογή λαμβάνει συνήθως ενημερώσεις από &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Αν κάνετε την ενημέρωση από διαφορετική πηγή, μπορεί να λαμβάνετε μελλοντικές ενημερώσεις από οποιαδήποτε πηγή στην τηλεόρασή σας. Η λειτουργικότητα της εφαρμογής μπορεί να αλλάξει.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Ενημερώστε αυτή την εφαρμογή από &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Η συγκεκριμένη εφαρμογή λαμβάνει συνήθως ενημερώσεις από &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Αν κάνετε την ενημέρωση από διαφορετική πηγή, μπορεί να λαμβάνετε μελλοντικές ενημερώσεις από οποιαδήποτε πηγή στο τηλέφωνό σας. Η λειτουργικότητα της εφαρμογής μπορεί να αλλάξει.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Η εφαρμογή δεν εγκαταστάθηκε."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Η εγκατάσταση του πακέτου αποκλείστηκε."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Η εφαρμογή δεν εγκαταστάθηκε, επειδή το πακέτο είναι σε διένεξη με κάποιο υπάρχον πακέτο."</string>
@@ -55,15 +57,16 @@
     <string name="uninstall_application_title" msgid="4045420072401428123">"Απεγκατάσταση εφαρμογής"</string>
     <string name="uninstall_update_title" msgid="824411791011583031">"Απεγκατάσταση ενημέρωσης"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"Η δραστηριότητα <xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> αποτελεί τμήμα της ακόλουθης εφαρμογής:"</string>
-    <string name="uninstall_application_text" msgid="3816830743706143980">"Θέλετε να απεγκαταστήσετε αυτήν την εφαρμογή;"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Θέλετε να απεγκαταστήσετε αυτήν την εφαρμογή για "<b>"όλους"</b>" τους χρήστες; Η εφαρμογή και τα δεδομένα της θα καταργηθούν από "<b>"όλους"</b>" τους χρήστες στη συσκευή."</string>
-    <string name="uninstall_application_text_user" msgid="498072714173920526">"Θέλετε να απεγκαταστήσετε αυτήν την εφαρμογή για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>;"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Θέλετε να απεγκαταστήσετε αυτή την εφαρμογή;"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Θέλετε να απεγκαταστήσετε αυτή την εφαρμογή για "<b>"όλους"</b>" τους χρήστες; Η εφαρμογή και τα δεδομένα της θα καταργηθούν από "<b>"όλους"</b>" τους χρήστες στη συσκευή."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Θέλετε να απεγκαταστήσετε αυτή την εφαρμογή για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>;"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Θέλετε να καταργήσετε την εγκατάσταση αυτής της εφαρμογής από το προφίλ εργασίας σας;"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Να αντικατασταθεί αυτή η εφαρμογή με την εργοστασιακή έκδοση; Όλα τα δεδομένα θα καταργηθούν."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Να αντικατασταθεί αυτή η εφαρμογή με την εργοστασιακή έκδοση; Όλα τα δεδομένα θα καταργηθούν. Αυτό επηρεάζει όλους τους χρήστες της συσκευής, συμπεριλαμβανομένων και των κατόχων προφίλ εργασίας."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Διατήρηση <xliff:g id="SIZE">%1$s</xliff:g> δεδομένων εφαρμογών."</string>
-    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Θέλετε να διαγράψετε αυτήν την εφαρμογή;"</string>
-    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Θέλετε να απεγκαταστήσετε αυτήν την εφαρμογή; Θα διαγραφεί επίσης το διπλότυπο της εφαρμογής <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Θέλετε να διαγράψετε αυτή την εφαρμογή;"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Θέλετε να απεγκαταστήσετε αυτή την εφαρμογή; Θα διαγραφεί επίσης το διπλότυπο της εφαρμογής <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Θέλετε να απεγκαταστήσετε αυτή την εφαρμογή από τον ιδιωτικό χώρο;"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Απεγκαταστάσεις σε εξέλιξη"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Αποτυχημένες απεγκαταστάσεις"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Απεγκατάσταση…"</string>
@@ -87,10 +90,10 @@
     <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Οι ενέργειες εγκατάστασης/απεγκατάστασης δεν υποστηρίζονται στο Wear."</string>
     <string name="message_staging" msgid="8032722385658438567">"Σταδιακή διάθεση εφαρμογής…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Άγνωστη"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στο tablet σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στην τηλεόρασή σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
-    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στο ρολόι σας. Αυτό μπορείτε να το αλλάξετε από την ενότητα Ρυθμίσεις."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτήν την πηγή στο τηλέφωνό σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτή την πηγή στο tablet σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτή την πηγή στην τηλεόρασή σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτή την πηγή στο ρολόι σας. Αυτό μπορείτε να το αλλάξετε από την ενότητα Ρυθμίσεις."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Για λόγους ασφαλείας, δεν επιτρέπεται προς το παρόν η εγκατάσταση άγνωστων εφαρμογών από αυτή την πηγή στο τηλέφωνό σας. Μπορείτε να αλλάξετε την επιλογή από τις Ρυθμίσεις."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Το τηλέφωνό σας και τα προσωπικά δεδομένα σας είναι πιο ευάλωτα σε επιθέσεις από άγνωστες εφαρμογές. Με την εγκατάσταση αυτής της εφαρμογής, συμφωνείτε ότι είστε υπεύθυνοι για τυχόν βλάβη που μπορεί να προκληθεί στο τηλέφωνο ή απώλεια δεδομένων που μπορεί να προκύψει από τη χρήση τους."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Το tablet σας και τα προσωπικά δεδομένα σας είναι πιο ευάλωτα σε επιθέσεις από άγνωστες εφαρμογές. Με την εγκατάσταση αυτής της εφαρμογής, συμφωνείτε ότι είστε υπεύθυνοι για τυχόν βλάβη που μπορεί να προκληθεί στο tablet ή απώλεια δεδομένων που μπορεί να προκύψει από τη χρήση τους."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Η τηλεόρασή σας και τα προσωπικά δεδομένα σας είναι πιο ευάλωτα σε επιθέσεις από άγνωστες εφαρμογές. Με την εγκατάσταση αυτής της εφαρμογής, συμφωνείτε ότι είστε υπεύθυνοι για τυχόν βλάβη που μπορεί να προκληθεί στην τηλεόρασή ή απώλεια δεδομένων που μπορεί να προκύψει από τη χρήση τους."</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Ειδοποίηση εγκατάστασης εφαρμογής"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Εγκαταστάθηκε επιτυχώς"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Η εφαρμογή \"<xliff:g id="APPNAME">%1$s</xliff:g>\" εγκαταστάθηκε επιτυχώς"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Επαναφορά <xliff:g id="APPNAME">%1$s</xliff:g> από <xliff:g id="INSTALLERNAME">%1$s</xliff:g>;"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Η λήψη της εφαρμογής θα ξεκινήσει στο παρασκήνιο"</string>
+    <string name="restore" msgid="8460854736328970444">"Επαναφορά"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Είστε εκτός σύνδεσης"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Θα γίνει αυτόματη επαναφορά αυτής της εφαρμογής όταν είστε συνδεδεμένοι στο διαδίκτυο"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Κάτι πήγε στραβά"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Παρουσιάστηκε κάποιο πρόβλημα κατά την επαναφορά αυτής της εφαρμογής"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Δεν επαρκεί ο αποθηκευτικός χώρος"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Για να επαναφέρετε αυτή την εφαρμογή, μπορείτε να ελευθερώσετε χώρο στη συσκευή. Απαιτούμενος αποθηκευτικός χώρος: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Απαιτούμενη ενέργεια"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Ακολουθήστε τα επόμενα βήματα για να επαναφέρετε αυτή την εφαρμογή"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Το <xliff:g id="INSTALLERNAME">%1$s</xliff:g> είναι απενεργοποιημένο"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"Το <xliff:g id="INSTALLERNAME">%1$s</xliff:g> έχει απεγκατασταθεί"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Για να επαναφέρετε αυτή την εφαρμογή, πρέπει να εγκαταστήσετε το <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Συνέχεια"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Διαγραφή αποθηκευτικού χώρου"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Ρυθμίσεις"</string>
+    <string name="close" msgid="5214897374055647996">"Κλείσιμο"</string>
 </resources>

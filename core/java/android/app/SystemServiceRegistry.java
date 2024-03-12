@@ -137,6 +137,8 @@ import android.media.projection.MediaProjectionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.media.tv.ad.ITvAdManager;
+import android.media.tv.ad.TvAdManager;
 import android.media.tv.interactive.ITvInteractiveAppManager;
 import android.media.tv.interactive.TvInteractiveAppManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
@@ -172,7 +174,9 @@ import android.os.IBinder;
 import android.os.IDumpstate;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
+import android.os.IPowerStatsService;
 import android.os.IRecoverySystem;
+import android.os.ISecurityStateManager;
 import android.os.ISystemUpdateManager;
 import android.os.IThermalService;
 import android.os.IUserManager;
@@ -181,6 +185,7 @@ import android.os.PerformanceHintManager;
 import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
+import android.os.SecurityStateManager;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StatsFrameworkInitializer;
@@ -243,6 +248,7 @@ import android.view.translation.ITranslationManager;
 import android.view.translation.TranslationManager;
 import android.view.translation.UiTranslationManager;
 
+import com.android.internal.R;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
@@ -626,6 +632,17 @@ public final class SystemServiceRegistry {
                         ctx.mMainThread.getHandler());
             }});
 
+        registerService(Context.SECURITY_STATE_SERVICE, SecurityStateManager.class,
+                new CachedServiceFetcher<SecurityStateManager>() {
+                    @Override
+                    public SecurityStateManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SECURITY_STATE_SERVICE);
+                        ISecurityStateManager service = ISecurityStateManager.Stub.asInterface(b);
+                        return new SecurityStateManager(service);
+                    }});
+
         registerService(Context.SENSOR_SERVICE, SensorManager.class,
                 new CachedServiceFetcher<SensorManager>() {
             @Override
@@ -867,10 +884,10 @@ public final class SystemServiceRegistry {
             @Override
             public VirtualDeviceManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
-                if (!ctx.getPackageManager().hasSystemFeature(
-                        PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
+                if (!ctx.getResources().getBoolean(R.bool.config_enableVirtualDeviceManager)) {
                     return null;
                 }
+
                 IVirtualDeviceManager service = IVirtualDeviceManager.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(Context.VIRTUAL_DEVICE_SERVICE));
                 return new VirtualDeviceManager(service, ctx.getOuterContext());
@@ -957,6 +974,18 @@ public final class SystemServiceRegistry {
                         ITvInteractiveAppManager.Stub.asInterface(iBinder);
                 return new TvInteractiveAppManager(service, ctx.getUserId());
             }});
+
+        registerService(Context.TV_AD_SERVICE, TvAdManager.class,
+                new CachedServiceFetcher<TvAdManager>() {
+                    @Override
+                    public TvAdManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder =
+                                ServiceManager.getServiceOrThrow(Context.TV_AD_SERVICE);
+                        ITvAdManager service =
+                                ITvAdManager.Stub.asInterface(iBinder);
+                        return new TvAdManager(service, ctx.getUserId());
+                    }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
                 new CachedServiceFetcher<TvInputManager>() {
@@ -1107,8 +1136,10 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<SystemHealthManager>() {
             @Override
             public SystemHealthManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME);
-                return new SystemHealthManager(IBatteryStats.Stub.asInterface(b));
+                IBinder batteryStats = ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME);
+                IBinder powerStats = ServiceManager.getService(Context.POWER_STATS_SERVICE);
+                return new SystemHealthManager(IBatteryStats.Stub.asInterface(batteryStats),
+                        IPowerStatsService.Stub.asInterface(powerStats));
             }});
 
         registerService(Context.CONTEXTHUB_SERVICE, ContextHubManager.class,
@@ -1648,6 +1679,12 @@ public final class SystemServiceRegistry {
                 case Context.VIRTUALIZATION_SERVICE:
                 case Context.VIRTUAL_DEVICE_SERVICE:
                     return null;
+                case Context.SEARCH_SERVICE:
+                    // Wear device does not support SEARCH_SERVICE so we do not print WTF here
+                    PackageManager manager = ctx.getPackageManager();
+                    if (manager != null && manager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+                        return null;
+                    }
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);
             return null;

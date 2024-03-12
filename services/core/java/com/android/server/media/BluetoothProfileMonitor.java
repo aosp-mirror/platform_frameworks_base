@@ -47,21 +47,10 @@ import java.util.Objects;
     @Nullable
     private BluetoothLeAudio mLeAudioProfile;
 
-    @Nullable
-    private OnProfileChangedListener mOnProfileChangedListener;
-
     BluetoothProfileMonitor(@NonNull Context context,
             @NonNull BluetoothAdapter bluetoothAdapter) {
-        Objects.requireNonNull(context);
-        Objects.requireNonNull(bluetoothAdapter);
-
-        mContext = context;
-        mBluetoothAdapter = bluetoothAdapter;
-    }
-
-    /* package */ synchronized void setOnProfileChangedListener(
-            @NonNull OnProfileChangedListener listener) {
-        mOnProfileChangedListener = listener;
+        mContext = Objects.requireNonNull(context);
+        mBluetoothAdapter = Objects.requireNonNull(bluetoothAdapter);
     }
 
     /* package */ void start() {
@@ -115,15 +104,9 @@ import java.util.Objects;
         }
     }
 
-    /* package */ interface OnProfileChangedListener {
-        void onProfileChange(int profile);
-    }
-
     private final class ProfileListener implements BluetoothProfile.ServiceListener {
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            OnProfileChangedListener listener;
-
             synchronized (BluetoothProfileMonitor.this) {
                 switch (profile) {
                     case BluetoothProfile.A2DP:
@@ -135,22 +118,12 @@ import java.util.Objects;
                     case BluetoothProfile.LE_AUDIO:
                         mLeAudioProfile = (BluetoothLeAudio) proxy;
                         break;
-                    default:
-                        return;
                 }
-
-                listener = mOnProfileChangedListener;
-            }
-
-            if (listener != null) {
-                listener.onProfileChange(profile);
             }
         }
 
         @Override
         public void onServiceDisconnected(int profile) {
-            OnProfileChangedListener listener;
-
             synchronized (BluetoothProfileMonitor.this) {
                 switch (profile) {
                     case BluetoothProfile.A2DP:
@@ -162,17 +135,8 @@ import java.util.Objects;
                     case BluetoothProfile.LE_AUDIO:
                         mLeAudioProfile = null;
                         break;
-                    default:
-                        return;
                 }
-
-                listener = mOnProfileChangedListener;
-            }
-
-            if (listener != null) {
-                listener.onProfileChange(profile);
             }
         }
     }
-
 }

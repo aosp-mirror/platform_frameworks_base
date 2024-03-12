@@ -94,7 +94,7 @@
         android:name="keyboard_layout_swiss_german"
         android:label="@string/keyboard_layout_swiss_german_label"
         android:keyboardLayout="@raw/keyboard_layout_swiss_german"
-        android:keyboardLocale="de-Latn-CH"
+        android:keyboardLocale="de-Latn-CH|gsw-Latn-CH"
         android:keyboardLayoutType="qwertz" />
 
     <keyboard-layout
@@ -221,13 +221,6 @@
         android:keyboardLayout="@raw/keyboard_layout_croatian_and_slovenian"
         android:keyboardLocale="sl-Latn"
         android:keyboardLayoutType="qwertz" />
-
-    <keyboard-layout
-        android:name="keyboard_layout_turkish"
-        android:label="@string/keyboard_layout_turkish"
-        android:keyboardLayout="@raw/keyboard_layout_turkish"
-        android:keyboardLocale="tr-Latn"
-        android:keyboardLayoutType="qwerty" />
 
     <keyboard-layout
         android:name="keyboard_layout_turkish"

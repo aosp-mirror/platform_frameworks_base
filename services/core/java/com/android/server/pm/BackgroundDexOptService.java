@@ -89,7 +89,7 @@ public final class BackgroundDexOptService {
 
     private static final long CANCELLATION_WAIT_CHECK_INTERVAL_MS = 200;
 
-    private static ComponentName sDexoptServiceName =
+    private static final ComponentName sDexoptServiceName =
             new ComponentName("android", BackgroundDexOptJobService.class.getName());
 
     // Possible return codes of individual optimization steps.
@@ -179,7 +179,7 @@ public final class BackgroundDexOptService {
 
     private final long mDowngradeUnusedAppsThresholdInMillis;
 
-    private List<PackagesUpdatedListener> mPackagesUpdatedListeners = new ArrayList<>();
+    private final List<PackagesUpdatedListener> mPackagesUpdatedListeners = new ArrayList<>();
 
     private int mThermalStatusCutoff = THERMAL_CUTOFF_DEFAULT;
 

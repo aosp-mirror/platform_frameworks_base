@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"दिखाएं"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"मुमकिन है कि ऐप्लिकेशन, स्प्लिट स्क्रीन मोड में काम न करे"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"यह ऐप्लिकेशन, स्प्लिट स्क्रीन मोड पर काम नहीं करता"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"इस ऐप्लिकेशन को सिर्फ़ एक विंडो में खोला जा सकता है."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"इस ऐप्लिकेशन को सिर्फ़ एक विंडो में खोला जा सकता है"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"स्प्लिट स्क्रीन डिवाइडर मोड"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"सबसे ऊपर दाईं ओर ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"बाईं ओर सबसे नीचे ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"सबसे नीचे दाईं ओर ले जाएं"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> को बड़ा करें"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> को छोटा करें"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> की सेटिंग"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"बबल खारिज करें"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"बातचीत को बबल न करें"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ठीक है"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"हाल ही के कोई बबल्स नहीं हैं"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"बबल्स का इस्तेमाल करके चैट करें"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"नई बातचीत, आपकी स्क्रीन पर सबसे नीचे आइकॉन के तौर पर दिखती हैं. किसी आइकॉन को बड़ा करने के लिए उस पर टैप करें या खारिज करने के लिए उसे खींचें और छोड़ें."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"जब चाहें, बबल्स की सुविधा को कंट्रोल करें"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"किसी ऐप्लिकेशन और बातचीत के लिए बबल की सुविधा को मैनेज करने के लिए यहां टैप करें"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"मैनेज करें"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल खारिज किया गया."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"टैप करके ऐप्लिकेशन को रीस्टार्ट करें और बेहतर व्यू पाएं."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"बेहतर व्यू पाने के लिए, टैप करके ऐप्लिकेशन को रीस्टार्ट करें"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"सेटिंग में जाकर इस ऐप्लिकेशन का आसपेक्ट रेशियो (लंबाई-चौड़ाई का अनुपात) बदलें"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"आसपेक्ट रेशियो (लंबाई-चौड़ाई का अनुपात) बदलें"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्या कैमरे से जुड़ी कोई समस्या है?\nफिर से फ़िट करने के लिए टैप करें"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"क्या समस्या ठीक नहीं हुई?\nपहले जैसा करने के लिए टैप करें"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्या कैमरे से जुड़ी कोई समस्या नहीं है? खारिज करने के लिए टैप करें."</string>
@@ -89,7 +97,7 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ठीक है"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ज़्यादा जानकारी के लिए बड़ा करें."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"बेहतर व्यू पाने के लिए ऐप्लिकेशन को रीस्टार्ट करना है?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"स्क्रीन पर ऐप्लिकेशन का बेहतर व्यू पाने के लिए उसे रीस्टार्ट करें. हालांकि, आपने जो बदलाव सेव नहीं किए हैं या अब तक जो काम किए हैं उनका डेटा, ऐप्लिकेशन रीस्टार्ट करने पर मिट सकता है"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"स्क्रीन पर ऐप्लिकेशन का बेहतर व्यू पाने के लिए उसे रीस्टार्ट करें. हालांकि, इससे अब तक किया गया काम और सेव न किए गए बदलाव मिट सकते हैं"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"रद्द करें"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"रीस्टार्ट करें"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"फिर से न दिखाएं"</string>

@@ -22,7 +22,7 @@ import android.content.res.TypedArray
 import android.testing.AndroidTestingRunner
 import android.util.AttributeSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.shared.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.shadow.DoubleShadowTextClock
 import com.android.systemui.util.mockito.whenever

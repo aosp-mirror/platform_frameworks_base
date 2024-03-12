@@ -67,6 +67,7 @@ interface IMediaProjectionManager {
      * Returns {@code true} if the given {@link IMediaProjection} corresponds to the current
      * projection, or {@code false} otherwise.
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     boolean isCurrentProjection(IMediaProjection projection);
@@ -83,6 +84,7 @@ interface IMediaProjectionManager {
      *
      * <p>Returns immediately but waits to start recording until user has reviewed their consent.
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void requestConsentForInvalidProjection(in IMediaProjection projection);
@@ -91,18 +93,22 @@ interface IMediaProjectionManager {
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     MediaProjectionInfo getActiveProjectionInfo();
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void stopActiveProjection();
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentResized(int width, int height);
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
     void addCallback(IMediaProjectionWatcherCallback callback);
@@ -123,6 +129,7 @@ interface IMediaProjectionManager {
      * @param projection      the non-null projection the session describes
      * @throws SecurityException If the provided projection is not current.
      */
+  @EnforcePermission("MANAGE_MEDIA_PROJECTION")
   @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     boolean setContentRecordingSession(in ContentRecordingSession incomingSession,
@@ -149,4 +156,65 @@ interface IMediaProjectionManager {
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void setUserReviewGrantedConsentResult(ReviewGrantedConsentResult consentResult,
             in @nullable IMediaProjection projection);
+
+    /**
+     * Notifies system server that the permission request was initiated.
+     *
+     * <p>Only used for emitting atoms.
+     *
+     * @param hostUid               The uid of the process requesting consent to capture, may be an app or
+     *                              SystemUI.
+     * @param sessionCreationSource Only set if the state is MEDIA_PROJECTION_STATE_INITIATED.
+     *                              Indicates the entry point for requesting the permission. Must be
+     *                              a valid state defined
+     *                              in the SessionCreationSource enum.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    oneway void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource);
+
+    /**
+     * Notifies system server that the permission request was displayed.
+     *
+     * <p>Only used for emitting atoms.
+     *
+     * @param hostUid The uid of the process requesting consent to capture, may be an app or
+     *                SystemUI.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    oneway void notifyPermissionRequestDisplayed(int hostUid);
+
+    /**
+     * Notifies system server that the permission request was cancelled.
+     *
+     * <p>Only used for emitting atoms.
+     *
+     * @param hostUid The uid of the process requesting consent to capture, may be an app or
+     *                SystemUI.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    oneway void notifyPermissionRequestCancelled(int hostUid);
+
+    /**
+     * Notifies system server that the app selector was displayed.
+     *
+     * <p>Only used for emitting atoms.
+     *
+     * @param hostUid The uid of the process requesting consent to capture, may be an app or
+     *                SystemUI.
+     */
+    @EnforcePermission("android.Manifest.permission.MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    oneway void notifyAppSelectorDisplayed(int hostUid);
+
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    void notifyWindowingModeChanged(int contentToRecord, int targetUid, int windowingMode);
 }

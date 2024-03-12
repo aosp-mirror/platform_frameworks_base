@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.ui.binder
 import android.app.IActivityTaskManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -35,7 +34,6 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
@@ -67,6 +65,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
         underTest.setLockscreenShown(true)
         underTest.setAodVisible(true)
 
+        verify(activityTaskManagerService).setLockScreenShown(true, false)
         verify(activityTaskManagerService).setLockScreenShown(true, true)
         verifyNoMoreInteractions(activityTaskManagerService)
     }
@@ -76,6 +75,7 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
         underTest.setLockscreenShown(true)
         underTest.setAodVisible(true)
 
+        verify(activityTaskManagerService).setLockScreenShown(true, false)
         verify(activityTaskManagerService).setLockScreenShown(true, true)
         verifyNoMoreInteractions(activityTaskManagerService)
 
@@ -95,6 +95,14 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
 
         underTest.setSurfaceBehindVisibility(true)
 
+        verifyNoMoreInteractions(activityTaskManagerService)
+    }
+
+    @Test
+    fun testAodVisible_noLockscreenShownCallYet_defaultsToShowLockscreen() {
+        underTest.setAodVisible(false)
+
+        verify(activityTaskManagerService).setLockScreenShown(true, false)
         verifyNoMoreInteractions(activityTaskManagerService)
     }
 }

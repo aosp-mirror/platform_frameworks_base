@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+class GrDirectContext;
 class SkData;
 
 namespace android {

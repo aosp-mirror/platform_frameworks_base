@@ -21,6 +21,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.Trace;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -69,6 +70,7 @@ public class NotificationSettingsController implements Dumpable {
         mContentObserver = new ContentObserver(mBackgroundHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
+                Trace.traceBegin(Trace.TRACE_TAG_APP, TAG + ".ContentObserver.onChange");
                 super.onChange(selfChange, uri);
                 synchronized (mListeners) {
                     if (mListeners.containsKey(uri)) {
@@ -79,12 +81,15 @@ public class NotificationSettingsController implements Dumpable {
                         }
                     }
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_APP);
             }
         };
 
         mCurrentUserTrackerCallback = new UserTracker.Callback() {
             @Override
             public void onUserChanged(int newUser, Context userContext) {
+                Trace.traceBegin(Trace.TRACE_TAG_APP, TAG + ".UserTracker.Callback.onUserChanged");
+
                 synchronized (mListeners) {
                     if (mListeners.size() > 0) {
                         mSecureSettings.unregisterContentObserver(mContentObserver);
@@ -94,6 +99,7 @@ public class NotificationSettingsController implements Dumpable {
                         }
                     }
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_APP);
             }
         };
         mUserTracker.addCallback(
@@ -113,6 +119,7 @@ public class NotificationSettingsController implements Dumpable {
         if (uri == null || listener == null) {
             return;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_APP, TAG + ".addCallback");
         synchronized (mListeners) {
             ArrayList<Listener> currentListeners = mListeners.get(uri);
             if (currentListeners == null) {
@@ -123,8 +130,10 @@ public class NotificationSettingsController implements Dumpable {
             }
             mListeners.put(uri, currentListeners);
             if (currentListeners.size() == 1) {
-                mSecureSettings.registerContentObserverForUser(
-                        uri, false, mContentObserver, mUserTracker.getUserId());
+                mBackgroundHandler.post(() -> {
+                    mSecureSettings.registerContentObserverForUser(
+                            uri, false, mContentObserver, mUserTracker.getUserId());
+                });
             }
         }
         mBackgroundHandler.post(() -> {
@@ -132,10 +141,12 @@ public class NotificationSettingsController implements Dumpable {
             String value = getCurrentSettingValue(uri, userId);
             mMainHandler.post(() -> listener.onSettingChanged(uri, userId, value));
         });
-
+        Trace.traceEnd(Trace.TRACE_TAG_APP);
     }
 
     public void removeCallback(Uri uri, Listener listener) {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, TAG + ".removeCallback");
+
         synchronized (mListeners) {
             ArrayList<Listener> currentListeners = mListeners.get(uri);
 
@@ -147,13 +158,18 @@ public class NotificationSettingsController implements Dumpable {
             }
 
             if (mListeners.size() == 0) {
-                mSecureSettings.unregisterContentObserver(mContentObserver);
+                mBackgroundHandler.post(() -> {
+                    mSecureSettings.unregisterContentObserver(mContentObserver);
+                });
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_APP);
     }
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, TAG + ".dump");
+
         synchronized (mListeners) {
             pw.println("Settings Uri Listener List:");
             for (Uri uri : mListeners.keySet()) {
@@ -163,6 +179,7 @@ public class NotificationSettingsController implements Dumpable {
                 }
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_APP);
     }
 
     private String getCurrentSettingValue(Uri uri, int userId) {

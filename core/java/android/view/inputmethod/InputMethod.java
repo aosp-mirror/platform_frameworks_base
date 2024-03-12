@@ -293,7 +293,11 @@ public interface InputMethod {
      * Flag for {@link #showSoftInput}: this show has been forced to
      * happen by the user.  If set, the input method should remain visible
      * until deliberated dismissed by the user in its UI.
+     *
+     * @deprecated {@link InputMethodManager#SHOW_FORCED} is deprecated and
+     * should no longer be used by apps. IMEs likewise should no longer react to this flag.
      */
+    @Deprecated
     public static final int SHOW_FORCED = 0x00002;
 
     /**

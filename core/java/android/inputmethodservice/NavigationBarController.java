@@ -77,6 +77,10 @@ final class NavigationBarController {
         default void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         }
 
+        default boolean isShown() {
+            return false;
+        }
+
         default String toDebugString() {
             return "No-op implementation";
         }
@@ -115,6 +119,13 @@ final class NavigationBarController {
 
     void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         mImpl.onNavButtonFlagsChanged(navButtonFlags);
+    }
+
+    /**
+     * Returns whether the IME navigation bar is currently shown.
+     */
+    boolean isShown() {
+        return mImpl.isShown();
     }
 
     String toDebugString() {
@@ -558,6 +569,12 @@ final class NavigationBarController {
                     ? mService.getResources().getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_frame_height)
                     : 0;
+        }
+
+        @Override
+        public boolean isShown() {
+            return mNavigationBarFrame != null
+                    && mNavigationBarFrame.getVisibility() == View.VISIBLE;
         }
 
         @Override

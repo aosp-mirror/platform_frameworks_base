@@ -16,7 +16,7 @@
 # Key Layout file for Google Reference RCU Remote.
 #
 
-key 116   TV_POWER      WAKE
+key 116   POWER         WAKE
 key 217   ASSIST        WAKE
 
 key 103   DPAD_UP
@@ -43,15 +43,15 @@ key 9     8
 key 10    9
 key 11    0
 
+key usage 0x00070037    PERIOD
+
 # custom keys
 key usage 0x000c01BB    TV_INPUT
-key usage 0x000c0186    MACRO_1
 
 key usage 0x000c0185    TV_TELETEXT
 key usage 0x000c0061    CAPTIONS
 
 key usage 0x000c01BD    INFO
-key usage 0x000c0037    PERIOD
 
 key usage 0x000c0069    PROG_RED
 key usage 0x000c006A    PROG_GREEN

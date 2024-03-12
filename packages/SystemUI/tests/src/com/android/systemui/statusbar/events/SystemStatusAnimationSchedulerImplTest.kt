@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.events
 
+import android.graphics.Insets
 import android.graphics.Rect
 import android.os.Process
 import android.testing.AndroidTestingRunner
@@ -26,13 +27,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.statusbar.BatteryStatusChip
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import junit.framework.Assert.assertEquals
@@ -74,7 +75,6 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     private lateinit var systemClock: FakeSystemClock
     private lateinit var chipAnimationController: SystemEventChipAnimationController
     private lateinit var systemStatusAnimationScheduler: SystemStatusAnimationScheduler
-    private val fakeFeatureFlags = FakeFeatureFlags()
 
     @get:Rule val animatorTestRule = AnimatorTestRule()
 
@@ -82,28 +82,29 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        fakeFeatureFlags.set(Flags.PLUG_IN_STATUS_BAR_CHIP, true)
-
         systemClock = FakeSystemClock()
         chipAnimationController =
             SystemEventChipAnimationController(
                 mContext,
                 statusBarWindowController,
-                statusBarContentInsetProvider,
-                fakeFeatureFlags
+                statusBarContentInsetProvider
             )
 
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
         whenever(statusBarContentInsetProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(android.util.Pair(10, 10))
+            .thenReturn(
+                Insets.of(/* left = */ 10, /* top = */ 10, /* right = */ 10, /* bottom = */ 0)
+            )
         whenever(statusBarContentInsetProvider.getStatusBarContentAreaForCurrentRotation())
-            .thenReturn(Rect(10, 0, 990, 100))
+            .thenReturn(
+                Rect(/* left = */ 10, /* top = */ 10, /* right = */ 990, /* bottom = */ 100)
+            )
 
         // StatusBarWindowController is mocked. The addViewToWindow function needs to be mocked to
         // ensure that the chip view is added to a parent view
         whenever(statusBarWindowController.addViewToWindow(any(), any())).then {
             val statusbarFake = FrameLayout(mContext)
-            statusbarFake.layout(0, 0, 1000, 100)
+            statusbarFake.layout(/* l = */ 0, /* t = */ 0, /* r = */ 1000, /* b = */ 100)
             statusbarFake.addView(
                 it.arguments[0] as View,
                 it.arguments[1] as FrameLayout.LayoutParams
@@ -370,6 +371,63 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testAccessibilityAnnouncement_announced() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+        val accessibilityDesc = "Some desc"
+        val mockView = mock<View>()
+        val mockAnimatableView =
+            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+
+        scheduleFakeEventWithView(
+            accessibilityDesc,
+            mockAnimatableView,
+            shouldAnnounceAccessibilityEvent = true
+        )
+        fastForwardAnimationToState(ANIMATING_OUT)
+
+        verify(mockView).announceForAccessibility(eq(accessibilityDesc))
+    }
+
+    @Test
+    fun testAccessibilityAnnouncement_nullDesc_noAnnouncement() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+        val accessibilityDesc = null
+        val mockView = mock<View>()
+        val mockAnimatableView =
+            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+
+        scheduleFakeEventWithView(
+            accessibilityDesc,
+            mockAnimatableView,
+            shouldAnnounceAccessibilityEvent = true
+        )
+        fastForwardAnimationToState(ANIMATING_OUT)
+
+        verify(mockView, never()).announceForAccessibility(any())
+    }
+
+    @Test
+    fun testAccessibilityAnnouncement_notNeeded_noAnnouncement() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+        val accessibilityDesc = "something"
+        val mockView = mock<View>()
+        val mockAnimatableView =
+            mock<BackgroundAnimatableView> { whenever(view).thenReturn(mockView) }
+
+        scheduleFakeEventWithView(
+            accessibilityDesc,
+            mockAnimatableView,
+            shouldAnnounceAccessibilityEvent = false
+        )
+        fastForwardAnimationToState(ANIMATING_OUT)
+
+        verify(mockView, never()).announceForAccessibility(any())
+    }
+
+    @Test
     fun testPrivacyDot_isRemovedDuringChipAnimation() = runTest {
         // Instantiate class under test with TestScope from runTest
         initializeSystemStatusAnimationScheduler(testScope = this)
@@ -570,6 +628,20 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         val fakePrivacyStatusEvent = FakePrivacyStatusEvent(viewCreator = { privacyChip })
         systemStatusAnimationScheduler.onStatusEvent(fakePrivacyStatusEvent)
         return privacyChip
+    }
+
+    private fun scheduleFakeEventWithView(
+        desc: String?,
+        view: BackgroundAnimatableView,
+        shouldAnnounceAccessibilityEvent: Boolean
+    ) {
+        val fakeEvent =
+            FakeStatusEvent(
+                viewCreator = { view },
+                contentDescription = desc,
+                shouldAnnounceAccessibilityEvent = shouldAnnounceAccessibilityEvent
+            )
+        systemStatusAnimationScheduler.onStatusEvent(fakeEvent)
     }
 
     private fun createAndScheduleFakeBatteryEvent(): BatteryStatusChip {

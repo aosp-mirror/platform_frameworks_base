@@ -18,6 +18,7 @@ package android.telephony.ims;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,9 +32,10 @@ import android.os.Bundle;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
-import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -42,7 +44,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * Manages IMS Service registration state for associated {@link ImsFeature}s.
+ * Manages IMS Service registration state for associated {@code ImsFeature}s.
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public interface RegistrationManager {
@@ -78,9 +80,11 @@ public interface RegistrationManager {
     /** @hide */
     @IntDef(prefix = {"SUGGESTED_ACTION_"},
             value = {
-            SUGGESTED_ACTION_NONE,
-            SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
-            SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT
+                SUGGESTED_ACTION_NONE,
+                SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK,
+                SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT,
+                SUGGESTED_ACTION_TRIGGER_RAT_BLOCK,
+                SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SuggestedAction {}
@@ -109,6 +113,27 @@ public interface RegistrationManager {
      */
     @SystemApi
     public static final int SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT = 2;
+
+    /**
+     * Indicates that the IMS registration on current RAT failed multiple times.
+     * The radio shall block the current RAT and search for other available RATs in the
+     * background. If no other RAT is available that meets the carrier requirements, the
+     * radio may remain on the current RAT for internet service. The radio clears all
+     * RATs marked as unavailable if the IMS service is registered to the carrier network.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ADD_RAT_RELATED_SUGGESTED_ACTION_TO_IMS_REGISTRATION)
+    int SUGGESTED_ACTION_TRIGGER_RAT_BLOCK = 3;
+
+    /**
+     * Indicates that the radio clears all RATs marked as unavailable and tries to find
+     * an available RAT that meets the carrier requirements.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ADD_RAT_RELATED_SUGGESTED_ACTION_TO_IMS_REGISTRATION)
+    int SUGGESTED_ACTION_TRIGGER_CLEAR_RAT_BLOCK = 4;
 
     /**@hide*/
     // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
@@ -394,7 +419,7 @@ public interface RegistrationManager {
      * @param c The {@link RegistrationCallback} to be added.
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
      * @throws ImsException if the subscription associated with this callback is valid, but
-     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the {@code ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
      */

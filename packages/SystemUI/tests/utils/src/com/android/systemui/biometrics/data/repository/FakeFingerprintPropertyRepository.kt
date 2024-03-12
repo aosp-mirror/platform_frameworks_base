@@ -19,10 +19,15 @@ package com.android.systemui.biometrics.data.repository
 import android.hardware.biometrics.SensorLocationInternal
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
+@SysUISingleton
+class FakeFingerprintPropertyRepository @Inject constructor() : FingerprintPropertyRepository {
 
     private val _sensorId: MutableStateFlow<Int> = MutableStateFlow(-1)
     override val sensorId = _sensorId.asStateFlow()
@@ -50,4 +55,29 @@ class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
         _sensorType.value = sensorType
         _sensorLocations.value = sensorLocations
     }
+
+    /** setProperties as if the device supports UDFPS_OPTICAL. */
+    fun supportsUdfps() {
+        setProperties(
+            sensorId = 0,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.UDFPS_OPTICAL,
+            sensorLocations = emptyMap(),
+        )
+    }
+
+    /** setProperties as if the device supports the rear fingerprint sensor. */
+    fun supportsRearFps() {
+        setProperties(
+            sensorId = 0,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.REAR,
+            sensorLocations = emptyMap(),
+        )
+    }
+}
+
+@Module
+interface FakeFingerprintPropertyRepositoryModule {
+    @Binds fun bindFake(fake: FakeFingerprintPropertyRepository): FingerprintPropertyRepository
 }

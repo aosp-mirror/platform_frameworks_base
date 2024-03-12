@@ -1,20 +1,18 @@
 {
   "presubmit": [
-    {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.timezonedetector."
-        }
-      ]
-    },
-    {
+   {
       "name": "CtsTimeTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "FrameworksTimeServicesTests"
+    },
+    {
+      "name": "CtsLocationTimeZoneManagerHostTest"
     }
   ]
 }

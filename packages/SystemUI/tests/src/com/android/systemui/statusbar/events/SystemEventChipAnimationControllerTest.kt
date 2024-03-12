@@ -17,17 +17,16 @@
 package com.android.systemui.statusbar.events
 
 import android.content.Context
+import android.graphics.Insets
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.util.Pair
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
@@ -80,7 +79,14 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
         }
 
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(Pair(insets, insets))
+            .thenReturn(
+                Insets.of(
+                    /* left= */ insets,
+                    /* top= */ insets,
+                    /* right= */ insets,
+                    /* bottom= */ 0
+                )
+            )
         whenever(insetsProvider.getStatusBarContentAreaForCurrentRotation())
             .thenReturn(portraitArea)
 
@@ -88,8 +94,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
             SystemEventChipAnimationController(
                 context = mContext,
                 statusBarWindowController = sbWindowController,
-                contentInsetsProvider = insetsProvider,
-                featureFlags = FakeFeatureFlags(),
+                contentInsetsProvider = insetsProvider
             )
     }
 
@@ -107,18 +112,18 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
         controller.prepareChipAnimation(viewCreator)
         val chipRect = controller.chipBounds
 
-        // SB area = 10, 0, 990, 100
+        // SB area = 10, 10, 990, 100
         // chip size = 0, 0, 100, 50
-        assertThat(chipRect).isEqualTo(Rect(890, 25, 990, 75))
+        assertThat(chipRect).isEqualTo(Rect(890, 30, 990, 80))
     }
 
     @Test
     fun prepareChipAnimation_rotation_repositionsChip() {
         controller.prepareChipAnimation(viewCreator)
 
-        // Chip has been prepared, and is located at (890, 25, 990, 75)
+        // Chip has been prepared, and is located at (890, 30, 990, 75)
         // Rotation should put it into its landscape location:
-        // SB area = 10, 0, 1990, 80
+        // SB area = 10, 10, 1990, 80
         // chip size = 0, 0, 100, 50
 
         whenever(insetsProvider.getStatusBarContentAreaForCurrentRotation())
@@ -126,7 +131,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
         getInsetsListener().onStatusBarContentInsetsChanged()
 
         val chipRect = controller.chipBounds
-        assertThat(chipRect).isEqualTo(Rect(1890, 15, 1990, 65))
+        assertThat(chipRect).isEqualTo(Rect(1890, 20, 1990, 70))
     }
 
     /** regression test for (b/289378932) */
@@ -164,7 +169,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
 
         // THEN it still aligns the chip to the content area provided by the insets provider
         val chipRect = controller.chipBounds
-        assertThat(chipRect).isEqualTo(Rect(890, 25, 990, 75))
+        assertThat(chipRect).isEqualTo(Rect(890, 30, 990, 80))
     }
 
     private class TestView(context: Context) : View(context), BackgroundAnimatableView {
@@ -187,9 +192,9 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
     }
 
     companion object {
-        private val portraitArea = Rect(10, 0, 990, 100)
-        private val landscapeArea = Rect(10, 0, 1990, 80)
-        private val fullScreenSb = Rect(10, 0, 990, 2000)
+        private val portraitArea = Rect(10, 10, 990, 100)
+        private val landscapeArea = Rect(10, 10, 1990, 80)
+        private val fullScreenSb = Rect(10, 10, 990, 2000)
 
         // 10px insets on both sides
         private const val insets = 10

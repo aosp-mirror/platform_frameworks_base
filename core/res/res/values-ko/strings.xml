@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"배터리를 소모하는 앱"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"확대"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"접근성 사용"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"디스플레이"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 배터리 사용 중"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"앱 <xliff:g id="NUMBER">%1$d</xliff:g>개에서 배터리 사용 중"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"탭하여 배터리 및 데이터 사용량 확인"</string>
@@ -298,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 시스템"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"개인 프로필로 전환"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"직장 프로필로 전환"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"개인 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱으로 전환"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"직장 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱으로 전환"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"연락처"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"연락처에 액세스"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"위치"</string>
@@ -499,11 +502,13 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"이 권한이 있는 시스템 앱은 언제든지 시스템 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다. 또한 앱에 android.permission.CAMERA 권한이 필요합니다."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"애플리케이션 또는 서비스에서 카메라 기기 열림 또는 닫힘에 대한 콜백을 수신하도록 허용"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"이 앱은 애플리케이션이 카메라 기기를 열거나 닫을 때 콜백을 수신할 수 있습니다."</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"애플리케이션 또는 서비스에서 헤드리스 시스템 사용자로 카메라에 액세스하도록 허용"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"이 앱에서 헤드리스 시스템 사용자로 카메라에 액세스할 수 있습니다."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"앱이 진동 상태에 액세스하도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"전화번호 자동 연결"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"앱이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 앱이 비상 전화를 걸도록 하는 권한은 주어지지 않습니다. 악성 앱이 사용자의 확인 없이 전화를 걸어 요금이 부과될 수 있습니다."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"사용자의 조작 없이도 앱에서 전화번호로 전화를 걸 수 있도록 허용합니다. 이 권한을 사용하면 예상치 못한 요금이나 통화가 발생할 수 있습니다. 앱에서 비상 전화를 걸 수는 없습니다. 악성 앱에서 내 확인 없이 전화를 걸거나 수신 전화가 자동으로 다른 번호로 착신 전환되도록 이동통신사 코드를 입력하여 요금이 부과될 수 있습니다."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS 통화 서비스에 접근"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"앱이 IMS 서비스를 사용하여 자동으로 전화를 걸 수 있도록 허용합니다."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"휴대전화 상태 및 ID 읽기"</string>
@@ -588,6 +593,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"보안 요소 트랜잭션 이벤트"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"앱이 보안 요소에서 발생하는 트랜잭션에 관한 정보를 받도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"화면 잠금 복잡도 요청"</string>
@@ -618,26 +625,28 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"생체 인식 하드웨어를 사용할 수 없음"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"인증이 취소되었습니다."</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"인식할 수 없음"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"얼굴을 인식할 수 없습니다."</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"인증이 취소되었습니다."</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN, 패턴, 비밀번호가 설정되지 않음"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서를 세게 누르세요"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서를 세게 누르세요"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"전원 누름이 감지되었습니다."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락을 조금씩 이동하세요"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락의 위치를 조금씩 바꾸세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"지문을 인식할 수 없습니다."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
@@ -663,36 +672,36 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"문제가 발생했습니다. 다시 시도해 보세요."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"지문 아이콘"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"기기 잠금 해제"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"다른 잠금 해제 방법 사용"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"손가락에 물기가 있는 등 지문이 인식되지 않을 때는 얼굴 인식 잠금 해제를 사용하세요."</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"주변이 어두운 경우 등 얼굴이 인식되지 않을 때는 지문 잠금 해제를 사용해 보세요."</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"얼굴 인식 잠금 해제"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"얼굴 인식 잠금 해제 문제"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"탭하여 얼굴 모델을 삭제한 후 다시 얼굴을 추가하세요"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"얼굴 인식 잠금 해제 설정"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"휴대전화의 화면을 응시하여 잠금 해제할 수 있습니다."</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"얼굴 인식 잠금 해제를 사용하려면 설정 &gt; 개인 정보 보호에서 "<b>"카메라 액세스"</b>"를 사용 설정하세요."</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"다른 잠금 해제 방법 설정"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"지문을 추가하려면 탭하세요."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"지문 잠금 해제"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"지문 센서를 사용할 수 없음"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"수리업체에 방문하세요."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"조명이 부족합니다."</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"조명이 부족합니다"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"휴대전화를 얼굴에서 더 멀리 떨어뜨려 주세요."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"휴대전화를 얼굴에 더 가까이 가져와 주세요."</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"휴대전화를 위로 이동하세요"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"휴대전화를 아래로 이동하세요"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"휴대전화를 왼쪽으로 이동하세요"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"휴대전화를 오른쪽으로 이동하세요"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"휴대전화를 위쪽으로 움직이세요"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"휴대전화를 아래쪽으로 움직이세요"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"휴대전화를 왼쪽으로 움직이세요"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"휴대전화를 오른쪽으로 움직이세요"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"기기에서 더 똑바로 바라보세요."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"얼굴이 보이지 않습니다. 눈높이에 맞춰 휴대전화를 들어 주세요."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"얼굴이 보이지 않습니다. 눈높이에 맞춰 휴대전화를 들어 주세요"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"너무 많이 움직였습니다. 휴대전화를 흔들리지 않게 잡으세요."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"얼굴을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"얼굴의 위치를 조금 변경해 주세요."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더 정면에서 바라보세요."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더 정면에서 바라보세요."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더 정면에서 바라보세요."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"검은색 바를 포함한 화면 상단을 청소하세요."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -700,7 +709,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"선글라스가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"마스크가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"마스크가 감지되었습니다. 얼굴 전체가 보여야 합니다"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"얼굴을 확인할 수 없습니다. 하드웨어를 사용할 수 없습니다."</string>
@@ -709,8 +718,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"얼굴 인식 작업이 취소되었습니다."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"사용자가 얼굴 인식 잠금 해제를 취소했습니다."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"시도 횟수가 너무 많습니다. 얼굴 인식 잠금 해제를 사용할 수 없습니다."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"시도 횟수가 너무 많습니다. 화면 잠금을 대신 사용하세요."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"얼굴을 확인할 수 없습니다. 다시 시도하세요."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"얼굴 인식 잠금 해제를 설정하지 않았습니다."</string>
@@ -805,7 +813,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 태블릿에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 Android TV 기기를 잠그거나 Android TV 기기의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"화면 잠금 해제 시 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 인포테인먼트 시스템을 잠그거나 인포테인먼트 시스템의 데이터를 모두 삭제합니다."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 이 사용자의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 Android TV 기기를 잠그거나 사용자 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"화면 잠금 해제 시 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 인포테인먼트 시스템을 잠그거나 이 프로필의 데이터를 모두 삭제합니다."</string>
@@ -1368,7 +1376,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"연결된 기기를 충전합니다. 옵션을 더 보려면 탭하세요."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"아날로그 오디오 액세서리가 감지됨"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"연결된 기기가 이 휴대전화와 호환되지 않습니다. 자세히 알아보려면 탭하세요."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB 디버깅 연결됨."</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB 디버깅을 사용 중지하려면 탭하세요."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"무선 디버깅 연결됨"</string>
@@ -1392,7 +1400,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"거부"</string>
     <string name="select_input_method" msgid="3971267998568587025">"입력 방법 선택"</string>
     <string name="show_ime" msgid="6406112007347443383">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>
-    <string name="hardware" msgid="1800597768237606953">"가상 키보드 표시"</string>
+    <string name="hardware" msgid="3611039921284836033">"터치 키보드 사용"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> 설정"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"실제 키보드 설정"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"탭하여 언어와 레이아웃을 선택하세요."</string>
@@ -1681,10 +1689,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"삭제"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"경고:\n1주일 동안 헤드폰을 통해 안전하게 들을 수 있는 큰 소리 신호량을 초과했습니다.\n\n이 한도를 초과하면 청력이 영구적으로 손상됩니다."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"경고:\n1주일 동안 헤드폰을 통해 안전하게 들을 수 있는 큰 소리 신호량을 5배 초과했습니다.\n\n청력을 보호하기 위해 볼륨을 낮췄습니다."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"지금과 같은 수준으로 오랫동안 미디어를 청취할 경우 청력 손상이 발생할 수 있습니다.\n\n지금과 같은 수준으로 장기적으로 계속 들으면 청력이 손상될 수 있습니다."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"경고:\n현재 안전하지 않은 수준으로 크게 콘텐츠를 재생하여 듣고 있습니다.\n\n지금과 같은 수준으로 계속해서 들으면 청력이 영구적으로 손상됩니다."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"계속해서 높은 볼륨으로 들으시겠습니까?\n\n헤드폰 볼륨이 권장 시간보다 오래 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"큰 소리가 감지됨\n\n헤드폰 볼륨이 권장 수준보다 높으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"접근성 기능 바로가기를 사용 설정하시겠습니까?"</string>
@@ -1704,6 +1710,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"앱 또는 하드웨어 센서와의 상호작용을 추적할 수 있으며 나를 대신해 앱과 상호작용할 수 있습니다."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"허용"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"거부"</string>
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"제거"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"앱에서 권한 요청을 가려서 응답을 확인할 수 없습니다."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"기능을 사용하려면 탭하세요"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"접근성 버튼으로 사용할 기능 선택"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"볼륨 키 단축키로 사용할 기능 선택"</string>
@@ -1716,7 +1724,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"색상 보정"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"한 손 모드"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"더 어둡게"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"보청기"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"청각 보조 기기"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"볼륨 키를 길게 눌렀습니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"볼륨 키에서 손을 뗍니다. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>을 켜려면 볼륨 키 2개를 3초 동안 길게 누르세요."</string>
@@ -1851,7 +1859,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"확인"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"카메라 미리보기 화면이 잘 보이도록 회전하세요."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"카메라 미리보기 화면이 잘 보이도록 화면 분할을 종료하세요."</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"화면이 더 잘 보이도록 <xliff:g id="NAME">%s</xliff:g>을(를) 전체 화면에서 여세요."</string>
     <string name="done_label" msgid="7283767013231718521">"완료"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"시간 원형 슬라이더"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"분 원형 슬라이더"</string>
@@ -1864,6 +1872,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> 복사"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"비공개 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"고정 해제 시 잠금 해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"고정 해제 이전에 비밀번호 요청"</string>
@@ -1897,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"주말"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"캘린더 일정"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"수면 시간"</string>
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"사용"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"사용 중지"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>(이)가 일부 소리를 음소거함"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"사용 중인 기기 내부에 문제가 발생했습니다. 자세한 내용은 제조업체에 문의하세요."</string>
@@ -1957,7 +1968,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"권한이 필요함"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"권한 요청 거부됨"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"카메라를 사용할 수 없음"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"휴대전화에서 진행하기"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"마이크를 사용할 수 없음"</string>
@@ -1968,6 +1979,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 Android TV 기기에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 태블릿에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"현재 <xliff:g id="DEVICE">%1$s</xliff:g>에서 액세스할 수 없습니다. 대신 스마트폰에서 시도해 보세요."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"앱에서 추가 보안을 요청합니다. 그러나 스트리밍 세션에서는 권한을 부여할 수 없습니다. Android TV 기기에서 먼저 권한을 부여하세요."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"앱에서 추가 보안을 요청합니다. 그러나 스트리밍 세션에서는 권한을 부여할 수 없습니다. 태블릿에서 먼저 권한을 부여하세요."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"앱에서 추가 보안을 요청합니다. 그러나 스트리밍 세션에서는 권한을 부여할 수 없습니다. 휴대전화에서 먼저 권한을 부여하세요."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"앱에서 추가 보안을 요청합니다. 대신 Android TV 기기에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"앱에서 추가 보안을 요청합니다. 대신 태블릿에서 시도해 보세요."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"앱에서 추가 보안을 요청합니다. 대신 휴대전화에서 시도해 보세요."</string>
@@ -1976,6 +1990,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"<xliff:g id="DEVICE">%1$s</xliff:g>에서는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"이 앱은 Android 이전 버전에 맞게 설계되었습니다. 정상 동작하지 않을 수 있으며 최신 보안 및 개인 정보 보호 기능을 포함하지 않습니다. 업데이트를 확인하거나 앱 개발자에게 문의하세요."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"업데이트 확인"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"이 앱은 Android 최신 버전과 호환되지 않습니다. 업데이트를 확인하거나 앱 개발자에게 문의하세요."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"새 메시지 있음"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"SMS 앱을 열고 확인"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"일부 기능이 제한될 수 있음"</string>
@@ -2024,7 +2039,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"에서 업데이트하시겠습니까?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"에서 <xliff:g id="TYPE">%1$s</xliff:g>을(를) 업데이트하시겠습니까?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"에서 <xliff:g id="TYPE_0">%1$s</xliff:g> 및 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) 업데이트하시겠습니까?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"에서 <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> 및 <xliff:g id="TYPE_2">%3$s</xliff:g> 업데이트"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"에서 <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g> 항목을 업데이트하시겠습니까?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"저장"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"사용 안함"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"나중에"</string>
@@ -2159,16 +2174,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"이 콘텐츠는 직장 앱으로 열 수 없습니다."</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"이 콘텐츠는 개인 앱을 통해 공유할 수 없습니다."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"이 콘텐츠는 개인 앱으로 열 수 없습니다."</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용 설정"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"직장 앱이 일시중지됨"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"일시중지 해제"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"직장 앱 없음"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"개인 앱 없음"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"직장 <xliff:g id="APP">%s</xliff:g> 앱을 여시겠습니까?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"개인 <xliff:g id="APP">%s</xliff:g> 앱에서 여시겠습니까?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"직장 <xliff:g id="APP">%s</xliff:g> 앱에서 여시겠습니까?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"직장 앱을 사용한 통화인가요?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"직장 앱으로 전환할까요?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"귀하의 조직에서 직장 앱을 사용한 통화만 허용합니다."</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"귀하의 조직에서 직장 앱을 사용한 메시지 전송만 허용합니다."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"개인 브라우저 사용"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"직장 브라우저 사용"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"통화"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"전환"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 네트워크 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 네트워크 하위 집합 잠금 해제 PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 회사 잠금 해제 PIN"</string>
@@ -2305,6 +2325,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 휴대전화 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"스트리밍 중에는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"스트리밍 중에는 PIP 모드를 볼 수 없습니다."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
     <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"시계 관리를 위한 호환 시계 프로필 권한"</string>
@@ -2317,20 +2338,32 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"호환 앱이 백그라운드에서 포그라운드 서비스를 시작할 수 있게 허용합니다."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"마이크 사용 가능"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"마이크가 차단됨"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"듀얼 스크린"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"듀얼 스크린 켜짐"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"디스플레이에 미러링할 수 없음"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"다른 케이블을 사용하여 다시 시도해 보세요."</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"기기의 온도가 너무 높아서 온도가 내려갈 때까지 화면에 미러링할 수 없습니다."</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"디스플레이를 지원하지 않는 케이블일 수 있음"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"사용 중인 USB-C 케이블이 디스플레이에 제대로 연결되지 않을 수 있습니다."</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen 켜짐"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서 두 화면을 모두 사용하여 콘텐츠를 표시합니다."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"기기 온도가 너무 높음"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"휴대전화 온도가 너무 높아지고 있으므로 듀얼 스크린을 사용할 수 없습니다."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"휴대전화 온도가 너무 높아지고 있으므로 Dual Screen을 사용할 수 없습니다."</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen을 사용할 수 없음"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"절전 모드가 사용 설정되어 있어 Dual Screen을 사용할 수 없습니다. 설정에서 이 기능을 사용 중지할 수 있습니다."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"설정으로 이동"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"사용 중지"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>에 설정 완료됨"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g> 및 <xliff:g id="LAYOUT_2">%2$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>(으)로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g> 및 <xliff:g id="LAYOUT_2">%2$s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"키보드 레이아웃이 <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>로 설정됩니다. 변경하려면 탭하세요."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"실제 키보드에 구성됨"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"키보드를 보려면 탭하세요."</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"비공개"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"복사"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"직장"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"직장 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"직장 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"테스트"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"공동"</string>
 </resources>

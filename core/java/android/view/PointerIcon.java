@@ -146,7 +146,14 @@ public final class PointerIcon implements Parcelable {
     // conflicts with any system types that may be defined in the future.
     private static final int TYPE_OEM_FIRST = 10000;
 
-    /** The default pointer icon. */
+    /**
+     * The default pointer icon.
+     * @deprecated This is the same as using {@link #TYPE_ARROW}. Use {@link #TYPE_ARROW} to
+     *     explicitly show an arrow, or use a {@code null} {@link PointerIcon} with
+     *     {@link View#setPointerIcon(PointerIcon)} or
+     *     {@link View#onResolvePointerIcon(MotionEvent, int)} instead to show
+     *     the default pointer icon.
+     */
     public static final int TYPE_DEFAULT = TYPE_ARROW;
 
     private static final PointerIcon gNullIcon = new PointerIcon(TYPE_NULL);
@@ -216,6 +223,9 @@ public final class PointerIcon implements Parcelable {
      * @throws IllegalArgumentException if context is null.
      */
     public static @NonNull PointerIcon getSystemIcon(@NonNull Context context, int type) {
+        // TODO(b/293587049): Pointer Icon Refactor: There is no need to load the system
+        // icon resource into memory outside of system server. Remove the need to load
+        // resources when getting a system icon.
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");
         }

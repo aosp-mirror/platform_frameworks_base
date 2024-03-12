@@ -263,9 +263,11 @@ internal class ExpandableControllerImpl(
             override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
                 delegate.onLaunchAnimationStart(isExpandingFullyAbove)
                 overlay.value = composeViewRoot.rootView.overlay as ViewGroupOverlay
+                cujType?.let { InteractionJankMonitor.getInstance().begin(composeViewRoot, it) }
             }
 
             override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+                cujType?.let { InteractionJankMonitor.getInstance().end(it) }
                 delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
                 overlay.value = null
             }
@@ -313,16 +315,16 @@ internal class ExpandableControllerImpl(
                 }
             }
 
-            override fun shouldAnimateExit(): Boolean = isComposed.value
+            override fun shouldAnimateExit(): Boolean =
+                isComposed.value && composeViewRoot.isAttachedToWindow && composeViewRoot.isShown
 
             override fun onExitAnimationCancelled() {
                 isDialogShowing.value = false
             }
 
             override fun jankConfigurationBuilder(): InteractionJankMonitor.Configuration.Builder? {
-                // TODO(b/252723237): Add support for jank monitoring when animating from a
-                // Composable.
-                return null
+                val type = cuj?.cujType ?: return null
+                return InteractionJankMonitor.Configuration.Builder.withView(type, composeViewRoot)
             }
         }
     }

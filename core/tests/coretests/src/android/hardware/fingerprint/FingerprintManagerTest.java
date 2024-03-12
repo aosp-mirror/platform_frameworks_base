@@ -74,6 +74,8 @@ public class FingerprintManagerTest {
     private FingerprintManager.AuthenticationCallback mAuthCallback;
     @Mock
     private FingerprintManager.EnrollmentCallback mEnrollCallback;
+    @Mock
+    private FingerprintManager.FingerprintDetectionCallback mFingerprintDetectionCallback;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mCaptor;
@@ -165,5 +167,22 @@ public class FingerprintManagerTest {
         verify(mEnrollCallback).onEnrollmentError(eq(FINGERPRINT_ERROR_UNABLE_TO_PROCESS),
                 anyString());
         verify(mService, never()).enroll(any(), any(), anyInt(), any(), anyString(), anyInt());
+    }
+
+    @Test
+    public void detectClient_onError() throws RemoteException {
+        ArgumentCaptor<IFingerprintServiceReceiver> argumentCaptor =
+                ArgumentCaptor.forClass(IFingerprintServiceReceiver.class);
+
+        mFingerprintManager.detectFingerprint(new CancellationSignal(),
+                mFingerprintDetectionCallback,
+                new FingerprintAuthenticateOptions.Builder().build());
+
+        verify(mService).detectFingerprint(any(), argumentCaptor.capture(), any());
+
+        argumentCaptor.getValue().onError(5 /* error */, 0 /* vendorCode */);
+        mLooper.dispatchAll();
+
+        verify(mFingerprintDetectionCallback).onDetectionError(anyInt());
     }
 }

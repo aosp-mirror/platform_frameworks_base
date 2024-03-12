@@ -53,6 +53,7 @@ import android.view.ActionMode;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.HapticScrollFeedbackProvider;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -79,6 +80,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
+import android.view.flags.Flags;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -915,6 +917,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     sDeviceConfigChangeListener);
         }
     }
+
+    private DifferentialMotionFlingHelper mDifferentialMotionFlingHelper;
+
+    private HapticScrollFeedbackProvider mHapticScrollFeedbackProvider;
 
     public AbsListView(Context context) {
         super(context);
@@ -4488,15 +4494,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean onGenericMotionEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_SCROLL:
-                final float axisValue;
+                final int axis;
                 if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    axis = MotionEvent.AXIS_VSCROLL;
                 } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                    axis = MotionEvent.AXIS_SCROLL;
                 } else {
-                    axisValue = 0;
+                    axis = -1;
                 }
 
+                final float axisValue = (axis == -1) ? 0 : event.getAxisValue(axis);
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
                     // If we're moving down, we want the top item. If we're moving up, bottom item.
@@ -4511,6 +4518,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final int overscrollMode = getOverScrollMode();
 
                     if (!trackMotionScroll(delta, delta)) {
+                        if (Flags.scrollFeedbackApi()) {
+                            initHapticScrollFeedbackProviderIfNotExists();
+                            mHapticScrollFeedbackProvider.onScrollProgress(
+                                    event.getDeviceId(), event.getSource(), axis, delta);
+                        }
+                        initDifferentialFlingHelperIfNotExists();
+                        mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
                         return true;
                     } else if (!event.isFromSource(InputDevice.SOURCE_MOUSE) && motionView != null
                             && (overscrollMode == OVER_SCROLL_ALWAYS
@@ -4519,7 +4533,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         int motionViewRealTop = motionView.getTop();
                         float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
                                 / ((float) getHeight());
-                        if (delta > 0) {
+                        boolean hitTopLimit = delta > 0;
+                        if (Flags.scrollFeedbackApi()) {
+                            initHapticScrollFeedbackProviderIfNotExists();
+                            mHapticScrollFeedbackProvider.onScrollLimit(
+                                    event.getDeviceId(), event.getSource(), axis,
+                                    /* isStart= */ hitTopLimit);
+                        }
+                        if (hitTopLimit) {
                             mEdgeGlowTop.onPullDistance(overscroll, 0.5f);
                             mEdgeGlowTop.onRelease();
                         } else {
@@ -4674,6 +4695,20 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private void initVelocityTrackerIfNotExists() {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
+        }
+    }
+
+    private void initDifferentialFlingHelperIfNotExists() {
+        if (mDifferentialMotionFlingHelper == null) {
+            mDifferentialMotionFlingHelper =
+                    new DifferentialMotionFlingHelper(
+                            mContext, new DifferentialFlingTarget());
+        }
+    }
+
+    private void initHapticScrollFeedbackProviderIfNotExists() {
+        if (mHapticScrollFeedbackProvider == null) {
+            mHapticScrollFeedbackProvider = new HapticScrollFeedbackProvider(this);
         }
     }
 
@@ -8195,6 +8230,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             default:
                 break;
             }
+        }
+    }
+
+    private class DifferentialFlingTarget
+            implements DifferentialMotionFlingHelper.DifferentialMotionFlingTarget {
+        @Override
+        public boolean startDifferentialMotionFling(float velocity) {
+            stopDifferentialMotionFling();
+            fling((int) velocity);
+            return true;
+        }
+
+        @Override
+        public void stopDifferentialMotionFling() {
+            if (mFlingRunnable != null) {
+                mFlingRunnable.endFling();
+            }
+        }
+
+        @Override
+        public float getScaledScrollFactor() {
+            return -mVerticalScrollFactor;
         }
     }
 }

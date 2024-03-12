@@ -30,27 +30,27 @@ please see styles_device_defaults.xml.
  -->
 <resources>
     <style name="Animation.Material.Activity" parent="Animation.Activity">
-        <item name="activityOpenEnterAnimation">@anim/slide_in_enter_micro</item>
-        <item name="activityOpenRemoteViewsEnterAnimation">@anim/slide_in_enter_micro</item>
-        <item name="activityOpenExitAnimation">@anim/slide_in_exit_micro</item>
+        <item name="activityOpenEnterAnimation">@anim/rounded_window_enter</item>
+        <item name="activityOpenRemoteViewsEnterAnimation">@anim/rounded_window_enter</item>
+        <item name="activityOpenExitAnimation">@null</item>
         <item name="activityCloseEnterAnimation">@null</item>
-        <item name="activityCloseExitAnimation">@anim/slide_out_micro</item>
-        <item name="taskOpenEnterAnimation">@anim/slide_in_enter_micro</item>
-        <item name="taskOpenExitAnimation">@anim/slide_in_exit_micro</item>
+        <item name="activityCloseExitAnimation">@anim/rounded_window_exit</item>
+        <item name="taskOpenEnterAnimation">@anim/rounded_window_enter</item>
+        <item name="taskOpenExitAnimation">@null</item>
         <item name="taskCloseEnterAnimation">@null</item>
-        <item name="taskCloseExitAnimation">@anim/slide_out_micro</item>
-        <item name="taskToFrontEnterAnimation">@null</item>
-        <item name="taskToFrontExitAnimation">@anim/slide_out_micro</item>
+        <item name="taskCloseExitAnimation">@anim/rounded_window_exit</item>
+        <item name="taskToFrontEnterAnimation">@anim/rounded_window_enter</item>
+        <item name="taskToFrontExitAnimation">@null</item>
         <item name="taskToBackEnterAnimation">@null</item>
-        <item name="taskToBackExitAnimation">@anim/slide_out_micro</item>
+        <item name="taskToBackExitAnimation">@anim/rounded_window_exit</item>
         <item name="wallpaperOpenEnterAnimation">@null</item>
-        <item name="wallpaperOpenExitAnimation">@anim/slide_out_micro</item>
-        <item name="wallpaperCloseEnterAnimation">@anim/slide_in_enter_micro</item>
-        <item name="wallpaperCloseExitAnimation">@anim/slide_in_exit_micro</item>
+        <item name="wallpaperOpenExitAnimation">@anim/rounded_window_exit</item>
+        <item name="wallpaperCloseEnterAnimation">@anim/rounded_window_enter</item>
+        <item name="wallpaperCloseExitAnimation">@null</item>
         <item name="wallpaperIntraOpenEnterAnimation">@null</item>
-        <item name="wallpaperIntraOpenExitAnimation">@anim/slide_out_micro</item>
-        <item name="wallpaperIntraCloseEnterAnimation">@anim/slide_in_enter_micro</item>
-        <item name="wallpaperIntraCloseExitAnimation">@anim/slide_in_exit_micro</item>
+        <item name="wallpaperIntraOpenExitAnimation">@anim/rounded_window_exit</item>
+        <item name="wallpaperIntraCloseEnterAnimation">@anim/rounded_window_enter</item>
+        <item name="wallpaperIntraCloseExitAnimation">@null</item>
     </style>
 
     <style name="PreferenceFragment.Material" parent="BasePreferenceFragment">
@@ -100,11 +100,23 @@ please see styles_device_defaults.xml.
 
     <style name="ProgressDialogMessage">
         <item name="android:textAlignment">center</item>
-        <item name="textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
+        <item name="android:fontFamily">google-sans-text</item>
+        <item name="android:letterSpacing">@dimen/message_progress_dialog_letter_spacing</item>
+        <item name="textColor">?attr/textColorPrimary</item>
         <item name="textSize">@dimen/message_progress_dialog_text_size</item>
         <item name="paddingBottom">@dimen/message_progress_dialog_bottom_padding</item>
         <item name="paddingEnd">@dimen/message_progress_dialog_end_padding</item>
         <item name="paddingStart">@dimen/message_progress_dialog_start_padding</item>
         <item name="paddingTop">@dimen/message_progress_dialog_top_padding</item>
+    </style>
+
+    <!-- Material progress part (indeterminate/horizontal) for Wear -->
+    <style name="Widget.Material.ProgressBar.Horizontal" parent="Widget.ProgressBar.Horizontal">
+        <item name="progressDrawable">@drawable/progress_horizontal_material</item>
+        <item name="indeterminateDrawable">
+            @drawable/progress_indeterminate_horizontal_material
+        </item>
+        <item name="minHeight">@dimen/progress_bar_height</item>
+        <item name="maxHeight">@dimen/progress_bar_height</item>
     </style>
 </resources>

@@ -23,9 +23,9 @@ import android.widget.ImageView
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
@@ -165,7 +165,7 @@ object WifiViewBinder {
                 visibilityState.value = state
             }
 
-            override fun onIconTintChanged(newTint: Int) {
+            override fun onIconTintChanged(newTint: Int, contrastTint: Int /* unused */) {
                 iconTint.value = newTint
             }
 

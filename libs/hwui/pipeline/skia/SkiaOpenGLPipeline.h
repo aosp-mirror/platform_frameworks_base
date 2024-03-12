@@ -45,8 +45,9 @@ public:
             const renderthread::HardwareBufferRenderParams& bufferParams,
             std::mutex& profilerLock) override;
     GrSurfaceOrigin getSurfaceOrigin() override { return kBottomLeft_GrSurfaceOrigin; }
-    bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
-                     FrameInfo* currentFrameInfo, bool* requireSwap) override;
+    bool swapBuffers(const renderthread::Frame& frame, IRenderPipeline::DrawResult& drawResult,
+                     const SkRect& screenDirty, FrameInfo* currentFrameInfo,
+                     bool* requireSwap) override;
     DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(ANativeWindow* surface, renderthread::SwapBehavior swapBehavior) override;
     [[nodiscard]] android::base::unique_fd flush() override;

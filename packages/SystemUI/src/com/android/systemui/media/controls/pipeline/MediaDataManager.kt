@@ -56,11 +56,11 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
+import com.android.app.tracing.traceSection
 import com.android.internal.annotations.Keep
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
-import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -83,6 +83,7 @@ import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationMediaManager.isConnectingState
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
@@ -90,8 +91,8 @@ import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.ThreadFactory
 import com.android.systemui.util.time.SystemClock
-import com.android.systemui.util.traceSection
 import java.io.IOException
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -187,7 +188,7 @@ class MediaDataManager(
     private val tunerService: TunerService,
     private val mediaFlags: MediaFlags,
     private val logger: MediaUiEventLogger,
-    private val smartspaceManager: SmartspaceManager,
+    private val smartspaceManager: SmartspaceManager?,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
@@ -245,7 +246,7 @@ class MediaDataManager(
     @Inject
     constructor(
         context: Context,
-        @Background backgroundExecutor: Executor,
+        threadFactory: ThreadFactory,
         @Main uiExecutor: Executor,
         @Main foregroundExecutor: DelayableExecutor,
         mediaControllerFactory: MediaControllerFactory,
@@ -263,11 +264,13 @@ class MediaDataManager(
         tunerService: TunerService,
         mediaFlags: MediaFlags,
         logger: MediaUiEventLogger,
-        smartspaceManager: SmartspaceManager,
+        smartspaceManager: SmartspaceManager?,
         keyguardUpdateMonitor: KeyguardUpdateMonitor,
     ) : this(
         context,
-        backgroundExecutor,
+        // Loading bitmap for UMO background can take longer time, so it cannot run on the default
+        // background thread. Use a custom thread for media.
+        threadFactory.buildExecutorOnNewThread(TAG),
         uiExecutor,
         foregroundExecutor,
         mediaControllerFactory,
@@ -350,7 +353,7 @@ class MediaDataManager(
         // Register for Smartspace data updates.
         smartspaceMediaDataProvider.registerListener(this)
         smartspaceSession =
-            smartspaceManager.createSmartspaceSession(
+            smartspaceManager?.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build()
             )
         smartspaceSession?.let {
@@ -1429,8 +1432,6 @@ class MediaDataManager(
     }
 
     private fun onSessionDestroyed(key: String) {
-        if (!mediaFlags.isRetainingPlayersEnabled()) return
-
         if (DEBUG) Log.d(TAG, "session destroyed for $key")
         val entry = mediaEntries.remove(key) ?: return
         // Clear token since the session is no longer valid
@@ -1474,7 +1475,7 @@ class MediaDataManager(
             if (DEBUG) Log.d(TAG, "Removing still-active player $key")
             notifyMediaDataRemoved(key)
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
-        } else {
+        } else if (mediaFlags.isRetainingPlayersEnabled() || isAbleToResume(removed)) {
             // Convert to resume
             if (DEBUG) {
                 Log.d(
@@ -1484,6 +1485,11 @@ class MediaDataManager(
                 )
             }
             convertToResumePlayer(key, removed)
+        } else {
+            // Retaining players flag is off and app doesn't support resume: remove player.
+            if (DEBUG) Log.d(TAG, "Removing player $key")
+            notifyMediaDataRemoved(key)
+            logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
         }
     }
 

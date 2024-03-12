@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.LooperMode;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
@@ -167,10 +168,10 @@ public class LicenseHtmlGeneratorFromXmlTest {
     private static final String EXPECTED_NEW_HTML_STRING = HTML_HEAD_STRING + HTML_NEW_BODY_STRING;
 
     private static final String EXPECTED_OLD_HTML_STRING_WITH_CUSTOM_HEADING =
-            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n" + HTML_OLD_BODY_STRING;
+            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n<br/>\n" + HTML_OLD_BODY_STRING;
 
     private static final String EXPECTED_NEW_HTML_STRING_WITH_CUSTOM_HEADING =
-            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n" + HTML_NEW_BODY_STRING;
+            HTML_HEAD_STRING + HTML_CUSTOM_HEADING + "\n<br/>\n" + HTML_NEW_BODY_STRING;
 
     @Test
     public void testParseValidXmlStream() throws XmlPullParserException, IOException {
@@ -269,6 +270,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     public void testGenerateHtmlWithCustomHeading() throws Exception {
         List<File> xmlFiles = new ArrayList<>();
         Map<String, Map<String, Set<String>>> fileNameToLibraryToContentIdMap = new HashMap<>();
@@ -292,6 +294,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     public void testGenerateNewHtmlWithCustomHeading() throws Exception {
         List<File> xmlFiles = new ArrayList<>();
         Map<String, Map<String, Set<String>>> fileNameToLibraryToContentIdMap = new HashMap<>();

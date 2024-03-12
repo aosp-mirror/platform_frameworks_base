@@ -39,7 +39,7 @@ import android.view.ViewGroup
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -52,7 +52,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.WeatherData
+import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
@@ -61,7 +61,9 @@ import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.util.asIndenting
 import com.android.systemui.util.concurrency.Execution
+import com.android.systemui.util.printCollection
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
@@ -78,7 +80,7 @@ class LockscreenSmartspaceController
 constructor(
         private val context: Context,
         private val featureFlags: FeatureFlags,
-        private val smartspaceManager: SmartspaceManager,
+        private val smartspaceManager: SmartspaceManager?,
         private val activityStarter: ActivityStarter,
         private val falsingManager: FalsingManager,
         private val systemClock: SystemClock,
@@ -267,8 +269,7 @@ constructor(
     fun isDateWeatherDecoupled(): Boolean {
         execution.assertIsMainThread()
 
-        return featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED) &&
-                datePlugin != null && weatherPlugin != null
+        return datePlugin != null && weatherPlugin != null
     }
 
     fun isWeatherEnabled(): Boolean {
@@ -395,6 +396,7 @@ constructor(
     }
 
     private fun connectSession() {
+        if (smartspaceManager == null) return
         if (datePlugin == null && weatherPlugin == null && plugin == null) return
         if (session != null || smartspaceViews.isEmpty()) {
             return
@@ -498,8 +500,8 @@ constructor(
     }
 
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
-        if (isDateWeatherDecoupled()) {
-            return t.featureType != SmartspaceTarget.FEATURE_WEATHER
+        if (isDateWeatherDecoupled() && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
+            return false
         }
         if (!showNotifications) {
             return t.featureType == SmartspaceTarget.FEATURE_WEATHER
@@ -586,10 +588,9 @@ constructor(
         return null
     }
 
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("Region Samplers: ${regionSamplers.size}")
-        regionSamplers.map { (_, sampler) ->
-            sampler.dump(pw)
+    override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
+        printCollection("Region Samplers", regionSamplers.values) {
+            it.dump(this)
         }
     }
 }

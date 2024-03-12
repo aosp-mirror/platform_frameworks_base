@@ -39,7 +39,7 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.wm.shell.TransitionInfoBuilder;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -185,6 +185,25 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
                 mFinishTransaction);
         verify(mStartTransaction).apply();
         verifyNoMoreInteractions(mFinishTransaction);
+    }
+
+    @Test
+    public void testShouldAnimate_containsAnimationOptions() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CLOSE, 0)
+                .addChange(createEmbeddedChange(EMBEDDED_RIGHT_BOUNDS, TASK_BOUNDS, TASK_BOUNDS))
+                .build();
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeCustomAnimOptions("packageName", 0 /* enterResId */, 0 /* exitResId */,
+                        0 /* backgroundColor */, false /* overrideTaskTransition */));
+        assertTrue(mController.shouldAnimate(info));
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions
+                .makeSceneTransitionAnimOptions());
+        assertFalse(mController.shouldAnimate(info));
+
+        info.setAnimationOptions(TransitionInfo.AnimationOptions.makeCrossProfileAnimOptions());
+        assertFalse(mController.shouldAnimate(info));
     }
 
     @UiThreadTest

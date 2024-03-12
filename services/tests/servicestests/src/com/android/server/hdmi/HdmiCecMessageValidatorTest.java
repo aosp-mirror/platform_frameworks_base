@@ -18,9 +18,6 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
-import static com.android.server.hdmi.Constants.ADDR_RECORDER_1;
-import static com.android.server.hdmi.Constants.ADDR_RECORDER_2;
-import static com.android.server.hdmi.Constants.ADDR_RECORDER_3;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_DESTINATION;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_PARAMETER;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_PARAMETER_LONG;
@@ -43,9 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 /** Tests for {@link com.android.server.hdmi.HdmiCecMessageValidator} class. */
 @SmallTest
@@ -651,13 +646,9 @@ public class HdmiCecMessageValidatorTest {
 
     @Test
     public void isValid_activeSource() {
-        // Only source devices should broadcast <Active Source> messages.
-        List<Integer> nonSourceDevicesAddresses = Arrays.asList(ADDR_RECORDER_1, ADDR_RECORDER_2,
-                ADDR_AUDIO_SYSTEM, ADDR_RECORDER_3);
-
         for (int i = 0; i < ADDR_BROADCAST; ++i) {
             String message = Integer.toHexString(i) + "F:82:10:00";
-            if (nonSourceDevicesAddresses.contains(i)) {
+            if (i == ADDR_AUDIO_SYSTEM) {
                 assertMessageValidity(message).isEqualTo(ERROR_SOURCE);
             } else {
                 assertMessageValidity(message).isEqualTo(OK);

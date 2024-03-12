@@ -22,7 +22,6 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
-import android.annotation.ColorInt;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
@@ -31,17 +30,22 @@ import android.view.ViewDebug;
 import android.view.WindowInsetsController.Appearance;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.statusbar.data.model.StatusBarAppearance;
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -52,7 +56,8 @@ import javax.inject.Inject;
  * Controls how light status bar flag applies to the icons.
  */
 @SysUISingleton
-public class LightBarController implements BatteryController.BatteryStateChangeCallback, Dumpable {
+public class LightBarController implements
+        BatteryController.BatteryStateChangeCallback, Dumpable, CoreStartable {
 
     private static final String TAG = "LightBarController";
     private static final boolean DEBUG_NAVBAR = Compile.IS_DEBUG;
@@ -60,18 +65,19 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
+    private final JavaAdapter mJavaAdapter;
     private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
+    private final StatusBarModeRepositoryStore mStatusBarModeRepository;
     private BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
     private @Appearance int mAppearance;
     private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
     private int mStatusBarMode;
+    private BoundsPair mStatusBarBounds = new BoundsPair(new Rect(), new Rect());
     private int mNavigationBarMode;
     private int mNavigationMode;
-    private final int mDarkIconColor;
-    private final int mLightIconColor;
 
     /**
      * Whether the navigation bar should be light factoring in already how much alpha the scrim has.
@@ -116,18 +122,18 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     @Inject
     public LightBarController(
             Context ctx,
+            JavaAdapter javaAdapter,
             DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController,
             NavigationModeController navModeController,
+            StatusBarModeRepositoryStore statusBarModeRepository,
             DumpManager dumpManager,
             DisplayTracker displayTracker) {
-        mDarkIconColor = ctx.getColor(
-                com.android.settingslib.R.color.dark_mode_icon_color_single_tone);
-        mLightIconColor = ctx.getColor(
-                com.android.settingslib.R.color.light_mode_icon_color_single_tone);
+        mJavaAdapter = javaAdapter;
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
         mBatteryController.addCallback(this);
+        mStatusBarModeRepository = statusBarModeRepository;
         mNavigationMode = navModeController.addListener((mode) -> {
             mNavigationMode = mode;
         });
@@ -137,14 +143,11 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         }
     }
 
-    @ColorInt
-    int getLightAppearanceIconColor() {
-        return mDarkIconColor;
-    }
-
-    @ColorInt
-    int getDarkAppearanceIconColor() {
-        return mLightIconColor;
+    @Override
+    public void start() {
+        mJavaAdapter.alwaysCollectFlow(
+                mStatusBarModeRepository.getDefaultDisplay().getStatusBarAppearance(),
+                this::onStatusBarAppearanceChanged);
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
@@ -157,24 +160,46 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         mBiometricUnlockController = biometricUnlockController;
     }
 
-    void onStatusBarAppearanceChanged(AppearanceRegion[] appearanceRegions, boolean sbModeChanged,
-            int statusBarMode, boolean navbarColorManagedByIme) {
+    private void onStatusBarAppearanceChanged(@Nullable StatusBarAppearance params) {
+        if (params == null) {
+            return;
+        }
+        int newStatusBarMode = params.getMode().toTransitionModeInt();
+        boolean sbModeChanged = mStatusBarMode != newStatusBarMode;
+        mStatusBarMode = newStatusBarMode;
+
+        boolean sbBoundsChanged = !mStatusBarBounds.equals(params.getBounds());
+        mStatusBarBounds = params.getBounds();
+
+        onStatusBarAppearanceChanged(
+                params.getAppearanceRegions().toArray(new AppearanceRegion[0]),
+                sbModeChanged,
+                sbBoundsChanged,
+                params.getNavbarColorManagedByIme());
+    }
+
+    private void onStatusBarAppearanceChanged(
+            AppearanceRegion[] appearanceRegions,
+            boolean sbModeChanged,
+            boolean sbBoundsChanged,
+            boolean navbarColorManagedByIme) {
         final int numStacks = appearanceRegions.length;
         boolean stackAppearancesChanged = mAppearanceRegions.length != numStacks;
         for (int i = 0; i < numStacks && !stackAppearancesChanged; i++) {
             stackAppearancesChanged |= !appearanceRegions[i].equals(mAppearanceRegions[i]);
         }
-        if (stackAppearancesChanged || sbModeChanged || mIsCustomizingForBackNav) {
+
+        if (stackAppearancesChanged
+                || sbModeChanged
+                // Be sure to re-draw when the status bar bounds have changed because the status bar
+                // icons may have moved to be part of a different appearance region. See b/301605450
+                || sbBoundsChanged
+                || mIsCustomizingForBackNav) {
             mAppearanceRegions = appearanceRegions;
-            onStatusBarModeChanged(statusBarMode);
+            updateStatus(mAppearanceRegions);
             mIsCustomizingForBackNav = false;
         }
         mNavbarColorManagedByIme = navbarColorManagedByIme;
-    }
-
-    void onStatusBarModeChanged(int newBarMode) {
-        mStatusBarMode = newBarMode;
-        updateStatus(mAppearanceRegions);
     }
 
     public void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
@@ -224,7 +249,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     }
 
     private void reevaluate() {
-        onStatusBarAppearanceChanged(mAppearanceRegions, true /* sbModeChange */, mStatusBarMode,
+        onStatusBarAppearanceChanged(
+                mAppearanceRegions,
+                /* sbModeChanged= */ true,
+                /* sbBoundsChanged= */ true,
                 mNavbarColorManagedByIme);
         onNavigationBarAppearanceChanged(mAppearance, true /* nbModeChanged */,
                 mNavigationBarMode, mNavbarColorManagedByIme);
@@ -444,31 +472,43 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
      * Injectable factory for creating a {@link LightBarController}.
      */
     public static class Factory {
+        private final JavaAdapter mJavaAdapter;
         private final DarkIconDispatcher mDarkIconDispatcher;
         private final BatteryController mBatteryController;
         private final NavigationModeController mNavModeController;
+        private final StatusBarModeRepositoryStore mStatusBarModeRepository;
         private final DumpManager mDumpManager;
         private final DisplayTracker mDisplayTracker;
 
         @Inject
         public Factory(
+                JavaAdapter javaAdapter,
                 DarkIconDispatcher darkIconDispatcher,
                 BatteryController batteryController,
                 NavigationModeController navModeController,
+                StatusBarModeRepositoryStore statusBarModeRepository,
                 DumpManager dumpManager,
                 DisplayTracker displayTracker) {
-
+            mJavaAdapter = javaAdapter;
             mDarkIconDispatcher = darkIconDispatcher;
             mBatteryController = batteryController;
             mNavModeController = navModeController;
+            mStatusBarModeRepository = statusBarModeRepository;
             mDumpManager = dumpManager;
             mDisplayTracker = displayTracker;
         }
 
         /** Create an {@link LightBarController} */
         public LightBarController create(Context context) {
-            return new LightBarController(context, mDarkIconDispatcher, mBatteryController,
-                    mNavModeController, mDumpManager, mDisplayTracker);
+            return new LightBarController(
+                    context,
+                    mJavaAdapter,
+                    mDarkIconDispatcher,
+                    mBatteryController,
+                    mNavModeController,
+                    mStatusBarModeRepository,
+                    mDumpManager,
+                    mDisplayTracker);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ fun UserProfilePager(content: @Composable (userGroup: UserGroup) -> Unit) {
         val enterpriseRepository = EnterpriseRepository(context)
         userGroups.map { userGroup ->
             enterpriseRepository.getProfileTitle(
-                isManagedProfile = userGroup.userInfos.first().isManagedProfile,
+                userGroup.userInfos.first(),
             )
         }
     }
@@ -57,16 +57,25 @@ fun UserProfilePager(content: @Composable (userGroup: UserGroup) -> Unit) {
 
 private fun UserManager.getUserGroups(): List<UserGroup> {
     val userGroupList = mutableListOf<UserGroup>()
-    val profileToShowInSettingsList = getProfiles(UserHandle.myUserId())
-        .map { userInfo -> userInfo to getUserProperties(userInfo.userHandle).showInSettings }
+    val showInSettingsMap = getProfiles(UserHandle.myUserId()).groupBy { showInSettings(it) }
 
-    profileToShowInSettingsList.filter { it.second == UserProperties.SHOW_IN_SETTINGS_WITH_PARENT }
-        .takeIf { it.isNotEmpty() }
-        ?.map { it.first }
-        ?.let { userInfos -> userGroupList += UserGroup(userInfos) }
+    showInSettingsMap[UserProperties.SHOW_IN_SETTINGS_WITH_PARENT]?.let {
+        userGroupList += UserGroup(it)
+    }
 
-    profileToShowInSettingsList.filter { it.second == UserProperties.SHOW_IN_LAUNCHER_SEPARATE }
-        .forEach { userGroupList += UserGroup(userInfos = listOf(it.first)) }
+    showInSettingsMap[UserProperties.SHOW_IN_SETTINGS_SEPARATE]?.forEach {
+        userGroupList += UserGroup(listOf(it))
+    }
 
     return userGroupList
+}
+
+private fun UserManager.showInSettings(userInfo: UserInfo): Int {
+    val userProperties = getUserProperties(userInfo.userHandle)
+    return if (userInfo.isQuietModeEnabled && userProperties.showInQuietMode
+            == UserProperties.SHOW_IN_QUIET_MODE_HIDDEN) {
+        UserProperties.SHOW_IN_SETTINGS_NO
+    } else {
+        userProperties.showInSettings
+    }
 }

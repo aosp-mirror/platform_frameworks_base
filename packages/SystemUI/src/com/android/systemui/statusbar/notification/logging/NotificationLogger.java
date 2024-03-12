@@ -33,10 +33,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
@@ -48,6 +49,7 @@ import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -62,7 +64,7 @@ import javax.inject.Inject;
  * Handles notification logging, in particular, logging which notifications are visible and which
  * are not.
  */
-public class NotificationLogger implements StateListener {
+public class NotificationLogger implements StateListener, CoreStartable {
     static final String TAG = "NotificationLogger";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
 
@@ -81,6 +83,8 @@ public class NotificationLogger implements StateListener {
     private final NotifPipeline mNotifPipeline;
     private final NotificationPanelLogger mNotificationPanelLogger;
     private final ExpansionStateLogger mExpansionStateLogger;
+    private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
+    private final JavaAdapter mJavaAdapter;
 
     protected Handler mHandler = new Handler();
     protected IStatusBarService mBarService;
@@ -88,10 +92,7 @@ public class NotificationLogger implements StateListener {
     private NotificationListContainer mListContainer;
     private final Object mDozingLock = new Object();
     @GuardedBy("mDozingLock")
-    private Boolean mDozing = null;  // Use null to indicate state is not yet known
-    @GuardedBy("mDozingLock")
     private Boolean mLockscreen = null;  // Use null to indicate state is not yet known
-    private Boolean mPanelExpanded = null;  // Use null to indicate state is not yet known
     private boolean mLogging = false;
 
     // Tracks notifications currently visible in mNotificationStackScroller and
@@ -202,7 +203,8 @@ public class NotificationLogger implements StateListener {
             NotificationVisibilityProvider visibilityProvider,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
-            ShadeExpansionStateManager shadeExpansionStateManager,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
+            JavaAdapter javaAdapter,
             ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
         mNotificationListener = notificationListener;
@@ -214,9 +216,10 @@ public class NotificationLogger implements StateListener {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mExpansionStateLogger = expansionStateLogger;
         mNotificationPanelLogger = notificationPanelLogger;
+        mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
+        mJavaAdapter = javaAdapter;
         // Not expected to be destroyed, don't need to unsubscribe
         statusBarStateController.addCallback(this);
-        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         registerNewPipelineListener();
     }
@@ -237,6 +240,22 @@ public class NotificationLogger implements StateListener {
 
     public void setUpWithContainer(NotificationListContainer listContainer) {
         mListContainer = listContainer;
+    }
+
+    @Override
+    public void start() {
+        mJavaAdapter.alwaysCollectFlow(
+                mWindowRootViewVisibilityInteractor.isLockscreenOrShadeVisibleAndInteractive(),
+                this::onLockscreenOrShadeVisibleAndInteractiveChanged);
+    }
+
+    private void onLockscreenOrShadeVisibleAndInteractiveChanged(boolean visible) {
+        if (visible) {
+            startNotificationLogging();
+        } else {
+            // Ensure we stop notification logging when the device isn't interactive.
+            stopNotificationLogging();
+        }
     }
 
     public void stopNotificationLogging() {
@@ -263,21 +282,19 @@ public class NotificationLogger implements StateListener {
             if (DEBUG) {
                 Log.i(TAG, "startNotificationLogging");
             }
+            boolean lockscreen;
+            synchronized (mDozingLock) {
+                lockscreen = mLockscreen != null && mLockscreen;
+            }
+            mNotificationPanelLogger.logPanelShown(lockscreen, getVisibleNotifications());
             mListContainer.setChildLocationsChangedListener(this::onChildLocationsChanged);
-            // Some transitions like mVisibleToUser=false -> mVisibleToUser=true don't
-            // cause the scroller to emit child location events. Hence generate
-            // one ourselves to guarantee that we're reporting visible
+            // Sometimes, the transition from lockscreenOrShadeVisible=false ->
+            // lockscreenOrShadeVisible=true doesn't cause the scroller to emit child location
+            // events. Hence generate one ourselves to guarantee that we're reporting visible
             // notifications.
             // (Note that in cases where the scroller does emit events, this
             // additional event doesn't break anything.)
             onChildLocationsChanged();
-        }
-    }
-
-    private void setDozing(boolean dozing) {
-        synchronized (mDozingLock) {
-            mDozing = dozing;
-            maybeUpdateLoggingStatus();
         }
     }
 
@@ -362,59 +379,12 @@ public class NotificationLogger implements StateListener {
         }
     }
 
-    @Override
-    public void onDozingChanged(boolean isDozing) {
-        if (DEBUG) {
-            Log.i(TAG, "onDozingChanged: new=" + isDozing);
-        }
-        setDozing(isDozing);
-    }
-
-    @GuardedBy("mDozingLock")
-    private void maybeUpdateLoggingStatus() {
-        if (mPanelExpanded == null || mDozing == null) {
-            if (DEBUG) {
-                Log.i(TAG, "Panel status unclear: panelExpandedKnown="
-                        + (mPanelExpanded == null) + " dozingKnown=" + (mDozing == null));
-            }
-            return;
-        }
-        // Once we know panelExpanded and Dozing, turn logging on & off when appropriate
-        boolean lockscreen = mLockscreen == null ? false : mLockscreen;
-        if (mPanelExpanded && !mDozing) {
-            mNotificationPanelLogger.logPanelShown(lockscreen, getVisibleNotifications());
-            if (DEBUG) {
-                Log.i(TAG, "Notification panel shown, lockscreen=" + lockscreen);
-            }
-            startNotificationLogging();
-        } else {
-            if (DEBUG) {
-                Log.i(TAG, "Notification panel hidden, lockscreen=" + lockscreen);
-            }
-            stopNotificationLogging();
-        }
-    }
-
     /**
      * Called when the notification is expanded / collapsed.
      */
     public void onExpansionChanged(String key, boolean isUserAction, boolean isExpanded) {
         NotificationVisibility.NotificationLocation location = mVisibilityProvider.getLocation(key);
         mExpansionStateLogger.onExpansionChanged(key, isUserAction, isExpanded, location);
-    }
-
-    @VisibleForTesting
-    void onShadeExpansionFullyChanged(Boolean isExpanded) {
-        // mPanelExpanded is initialized as null
-        if (mPanelExpanded == null || !mPanelExpanded.equals(isExpanded)) {
-            if (DEBUG) {
-                Log.i(TAG, "onPanelExpandedChanged: new=" + isExpanded);
-            }
-            mPanelExpanded = isExpanded;
-            synchronized (mDozingLock) {
-                maybeUpdateLoggingStatus();
-            }
-        }
     }
 
     @VisibleForTesting

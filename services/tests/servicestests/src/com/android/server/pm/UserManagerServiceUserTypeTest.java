@@ -89,9 +89,15 @@ public class UserManagerServiceUserTypeTest {
                 .setCrossProfileIntentResolutionStrategy(1)
                 .setMediaSharedWithParent(true)
                 .setCredentialShareableWithParent(false)
+                .setAuthAlwaysRequiredToDisableQuietMode(true)
+                .setAllowStoppingUserWithDelayedLocking(true)
                 .setShowInSettings(900)
+                .setShowInSharingSurfaces(20)
+                .setShowInQuietMode(30)
                 .setInheritDevicePolicy(340)
-                .setDeleteAppWithParent(true);
+                .setDeleteAppWithParent(true)
+                .setAlwaysVisible(true)
+                .setCrossProfileContentSharingStrategy(1);
 
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
@@ -104,8 +110,9 @@ public class UserManagerServiceUserTypeTest {
                 .setIconBadge(28)
                 .setBadgePlain(29)
                 .setBadgeNoBackground(30)
-                .setLabel(31)
                 .setMaxAllowedPerParent(32)
+                .setStatusBarIcon(33)
+                .setLabels(34, 35, 36)
                 .setDefaultRestrictions(restrictions)
                 .setDefaultSystemSettings(systemSettings)
                 .setDefaultSecureSettings(secureSettings)
@@ -120,8 +127,11 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(28, type.getIconBadge());
         assertEquals(29, type.getBadgePlain());
         assertEquals(30, type.getBadgeNoBackground());
-        assertEquals(31, type.getLabel());
         assertEquals(32, type.getMaxAllowedPerParent());
+        assertEquals(33, type.getStatusBarIcon());
+        assertEquals(34, type.getLabel(0));
+        assertEquals(35, type.getLabel(1));
+        assertEquals(36, type.getLabel(2));
 
         assertTrue(UserRestrictionsUtils.areEqual(restrictions, type.getDefaultRestrictions()));
         assertNotSame(restrictions, type.getDefaultRestrictions());
@@ -156,10 +166,20 @@ public class UserManagerServiceUserTypeTest {
                 .getCrossProfileIntentResolutionStrategy());
         assertTrue(type.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(type.getDefaultUserPropertiesReference().isCredentialShareableWithParent());
+        assertTrue(type.getDefaultUserPropertiesReference()
+                .isAuthAlwaysRequiredToDisableQuietMode());
+        assertTrue(type.getDefaultUserPropertiesReference()
+                .getAllowStoppingUserWithDelayedLocking());
         assertEquals(900, type.getDefaultUserPropertiesReference().getShowInSettings());
+        assertEquals(20, type.getDefaultUserPropertiesReference().getShowInSharingSurfaces());
+        assertEquals(30,
+                type.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertEquals(340, type.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
         assertTrue(type.getDefaultUserPropertiesReference().getDeleteAppWithParent());
+        assertTrue(type.getDefaultUserPropertiesReference().getAlwaysVisible());
+        assertEquals(1, type.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -191,9 +211,10 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(Resources.ID_NULL, type.getIconBadge());
         assertEquals(Resources.ID_NULL, type.getBadgePlain());
         assertEquals(Resources.ID_NULL, type.getBadgeNoBackground());
+        assertEquals(Resources.ID_NULL, type.getStatusBarIcon());
         assertEquals(Resources.ID_NULL, type.getBadgeLabel(0));
         assertEquals(Resources.ID_NULL, type.getBadgeColor(0));
-        assertEquals(Resources.ID_NULL, type.getLabel());
+        assertEquals(Resources.ID_NULL, type.getLabel(0));
         assertTrue(type.getDefaultRestrictions().isEmpty());
         assertTrue(type.getDefaultSystemSettings().isEmpty());
         assertTrue(type.getDefaultSecureSettings().isEmpty());
@@ -210,6 +231,13 @@ public class UserManagerServiceUserTypeTest {
                 props.getCrossProfileIntentResolutionStrategy());
         assertFalse(props.isMediaSharedWithParent());
         assertFalse(props.isCredentialShareableWithParent());
+        assertFalse(props.getDeleteAppWithParent());
+        assertFalse(props.getAlwaysVisible());
+        assertEquals(UserProperties.SHOW_IN_LAUNCHER_SEPARATE, props.getShowInSharingSurfaces());
+        assertEquals(UserProperties.SHOW_IN_QUIET_MODE_PAUSED,
+                props.getShowInQuietMode());
+        assertEquals(UserProperties.CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
+                props.getCrossProfileContentSharingStrategy());
 
         assertFalse(type.hasBadge());
     }
@@ -296,9 +324,15 @@ public class UserManagerServiceUserTypeTest {
                 .setCrossProfileIntentResolutionStrategy(1)
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
+                .setAuthAlwaysRequiredToDisableQuietMode(false)
+                .setAllowStoppingUserWithDelayedLocking(false)
                 .setShowInSettings(20)
                 .setInheritDevicePolicy(21)
-                .setDeleteAppWithParent(true);
+                .setShowInSharingSurfaces(22)
+                .setShowInQuietMode(24)
+                .setDeleteAppWithParent(true)
+                .setAlwaysVisible(false)
+                .setCrossProfileContentSharingStrategy(1);
 
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
@@ -335,10 +369,20 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference()
+                .isAuthAlwaysRequiredToDisableQuietMode());
+        assertFalse(aospType.getDefaultUserPropertiesReference()
+                .getAllowStoppingUserWithDelayedLocking());
         assertEquals(20, aospType.getDefaultUserPropertiesReference().getShowInSettings());
         assertEquals(21, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
+        assertEquals(22, aospType.getDefaultUserPropertiesReference().getShowInSharingSurfaces());
+        assertEquals(24,
+                aospType.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertTrue(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
+        assertEquals(1, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -348,6 +392,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(Resources.ID_NULL, aospType.getBadgePlain()); // No resId for 'garbage'
         assertEquals(com.android.internal.R.drawable.ic_corp_badge_no_background,
                 aospType.getBadgeNoBackground());
+        assertEquals(com.android.internal.R.drawable.ic_test_badge_experiment,
+                aospType.getStatusBarIcon());
         assertEquals(com.android.internal.R.string.managed_profile_label_badge,
                 aospType.getBadgeLabel(0));
         assertEquals(com.android.internal.R.string.managed_profile_label_badge_2,
@@ -378,11 +424,21 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference().isMediaSharedWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .isCredentialShareableWithParent());
+        assertTrue(aospType.getDefaultUserPropertiesReference()
+                .isAuthAlwaysRequiredToDisableQuietMode());
+        assertTrue(aospType.getDefaultUserPropertiesReference()
+                .getAllowStoppingUserWithDelayedLocking());
         assertEquals(23, aospType.getDefaultUserPropertiesReference().getShowInSettings());
+        assertEquals(22,
+                aospType.getDefaultUserPropertiesReference().getShowInSharingSurfaces());
+        assertEquals(24,
+                aospType.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertEquals(450, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
-        assertFalse(aospType.getDefaultUserPropertiesReference()
-                .getDeleteAppWithParent());
+        assertFalse(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
+        assertTrue(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
+        assertEquals(0, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

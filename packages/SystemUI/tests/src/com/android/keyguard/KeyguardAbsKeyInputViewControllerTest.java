@@ -37,12 +37,13 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.res.R;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +82,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     private EmergencyButtonController mEmergencyButtonController;
 
     private FakeFeatureFlags mFeatureFlags;
+    @Mock
+    private SelectedUserInteractor mSelectedUserInteractor;
     private KeyguardAbsKeyInputViewController mKeyguardAbsKeyInputViewController;
 
     @Before
@@ -105,7 +108,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         return new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
-                mEmergencyButtonController, mFeatureFlags) {
+                mEmergencyButtonController, mFeatureFlags, mSelectedUserInteractor) {
             @Override
             void resetState() {
             }

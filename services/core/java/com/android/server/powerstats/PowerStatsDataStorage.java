@@ -299,7 +299,7 @@ public class PowerStatsDataStorage {
                         }
                     } catch (NumberFormatException nfe) {
                         Slog.e(TAG,
-                                "Failed to extract start time from file : " + fileName, nfe);
+                            "Failed to extract start time from file : " + fileName, nfe);
                     }
                 }
             }

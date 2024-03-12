@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -33,6 +34,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -52,7 +55,8 @@ import java.util.Set;
  * capture.</p>
  *
  * <p>CaptureRequests can be created by using a {@link Builder} instance,
- * obtained by calling {@link CameraDevice#createCaptureRequest}</p>
+ * obtained by calling {@link CameraDevice#createCaptureRequest} or {@link
+ * CameraManager#createCaptureRequest}</p>
  *
  * <p>CaptureRequests are given to {@link CameraCaptureSession#capture} or
  * {@link CameraCaptureSession#setRepeatingRequest} to capture images from a camera.</p>
@@ -79,6 +83,7 @@ import java.util.Set;
  * @see CameraCaptureSession#setRepeatingBurst
  * @see CameraDevice#createCaptureRequest
  * @see CameraDevice#createReprocessCaptureRequest
+ * @see CameraManager#createCaptureRequest
  */
 public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         implements Parcelable {
@@ -790,8 +795,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * A builder for capture requests.
      *
      * <p>To obtain a builder instance, use the
-     * {@link CameraDevice#createCaptureRequest} method, which initializes the
-     * request fields to one of the templates defined in {@link CameraDevice}.
+     * {@link CameraDevice#createCaptureRequest} or {@link CameraManager#createCaptureRequest}
+     * method, which initializes the request fields to one of the templates defined in
+     * {@link CameraDevice}.
      *
      * @see CameraDevice#createCaptureRequest
      * @see CameraDevice#TEMPLATE_PREVIEW
@@ -799,6 +805,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CameraDevice#TEMPLATE_STILL_CAPTURE
      * @see CameraDevice#TEMPLATE_VIDEO_SNAPSHOT
      * @see CameraDevice#TEMPLATE_MANUAL
+     * @see CameraManager#createCaptureRequest
      */
     public final static class Builder {
 
@@ -1477,7 +1484,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>To start a CaptureSession with a target FPS range different from the
      * capture request template's default value, the application
      * is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the target fps range before creating the capture session. The aeTargetFpsRange is
      * typically a session parameter. Specifying it at session creation time helps avoid
      * session reconfiguration delays in cases like 60fps or high speed recording.</p>
@@ -2154,7 +2161,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * OFF if the recording output is not stabilized, or if there are no output
      * Surface types that can be stabilized.</p>
      * <p>The application is strongly recommended to call
-     * {@link SessionConfiguration#setSessionParameters }
+     * {@link android.hardware.camera2.params.SessionConfiguration#setSessionParameters }
      * with the desired video stabilization mode before creating the capture session.
      * Video stabilization mode is a session parameter on many devices. Specifying
      * it at session creation time helps avoid reconfiguration delay caused by difference
@@ -2655,6 +2662,46 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @NonNull
     public static final Key<Integer> FLASH_MODE =
             new Key<Integer>("android.flash.mode", int.class);
+
+    /**
+     * <p>Flash strength level to be used when manual flash control is active.</p>
+     * <p>Flash strength level to use in capture mode i.e. when the applications control
+     * flash with either SINGLE or TORCH mode.</p>
+     * <p>Use android.flash.info.singleStrengthMaxLevel and
+     * android.flash.info.torchStrengthMaxLevel to check whether the device supports
+     * flash strength control or not.
+     * If the values of android.flash.info.singleStrengthMaxLevel and
+     * android.flash.info.torchStrengthMaxLevel are greater than 1,
+     * then the device supports manual flash strength control.</p>
+     * <p>If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> TORCH the value must be &gt;= 1
+     * and &lt;= android.flash.info.torchStrengthMaxLevel.
+     * If the application doesn't set the key and
+     * android.flash.info.torchStrengthMaxLevel &gt; 1,
+     * then the flash will be fired at the default level set by HAL in
+     * android.flash.info.torchStrengthDefaultLevel.
+     * If the {@link CaptureRequest#FLASH_MODE android.flash.mode} <code>==</code> SINGLE, then the value must be &gt;= 1
+     * and &lt;= android.flash.info.singleStrengthMaxLevel.
+     * If the application does not set this key and
+     * android.flash.info.singleStrengthMaxLevel &gt; 1,
+     * then the flash will be fired at the default level set by HAL
+     * in android.flash.info.singleStrengthDefaultLevel.
+     * If {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is set to any of ON_AUTO_FLASH, ON_ALWAYS_FLASH,
+     * ON_AUTO_FLASH_REDEYE, ON_EXTERNAL_FLASH values, then the strengthLevel will be ignored.</p>
+     * <p><b>Range of valid values:</b><br>
+     * <code>[1-android.flash.info.torchStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * set to TORCH;
+     * <code>[1-android.flash.info.singleStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
+     * set to SINGLE</p>
+     * <p>This key is available on all devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#FLASH_MODE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
+    public static final Key<Integer> FLASH_STRENGTH_LEVEL =
+            new Key<Integer>("android.flash.strengthLevel", int.class);
 
     /**
      * <p>Operational mode for hot pixel correction.</p>
@@ -3359,8 +3406,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Long>("android.sensor.exposureTime", long.class);
 
     /**
-     * <p>Duration from start of frame exposure to
-     * start of next frame exposure.</p>
+     * <p>Duration from start of frame readout to
+     * start of next frame readout.</p>
      * <p>The maximum frame rate that can be supported by a camera subsystem is
      * a function of many factors:</p>
      * <ul>
@@ -3421,6 +3468,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>For more details about stalling, see {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }.</p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
      * OFF; otherwise the auto-exposure algorithm will override this value.</p>
+     * <p><em>Note:</em> Prior to Android 13, this field was described as measuring the duration from
+     * start of frame exposure to start of next frame exposure, which doesn't reflect the
+     * definition from sensor manufacturer. A mobile sensor defines the frame duration as
+     * intervals between sensor readouts.</p>
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * See {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}, {@link android.hardware.camera2.params.StreamConfigurationMap }.

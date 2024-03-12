@@ -84,7 +84,6 @@ import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -103,6 +102,7 @@ import com.android.systemui.keyguard.util.IndicationHelper;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -309,7 +309,7 @@ public class KeyguardIndicationController {
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral;
         mCoExFaceAcquisitionMsgIdsToShow = new HashSet<>();
         int[] msgIds = context.getResources().getIntArray(
-                com.android.systemui.R.array.config_face_help_msgs_when_fingerprint_enrolled);
+                com.android.systemui.res.R.array.config_face_help_msgs_when_fingerprint_enrolled);
         for (int msgId : msgIds) {
             mCoExFaceAcquisitionMsgIdsToShow.add(msgId);
         }
@@ -704,7 +704,7 @@ public class KeyguardIndicationController {
                             .setTextColor(Utils.getColorAttr(
                                     mContext, com.android.internal.R.attr.textColorOnAccent))
                             .setBackground(mContext.getDrawable(
-                                    com.android.systemui.R.drawable.logout_button_background))
+                                    com.android.systemui.res.R.drawable.logout_button_background))
                             .setClickListener((view) -> {
                                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) {
                                     return;
@@ -1033,7 +1033,7 @@ public class KeyguardIndicationController {
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
             if (mAlternateBouncerInteractor.isVisibleState()) {
                 return; // udfps affordance is highlighted, no need to show action to unlock
-            } else if (mKeyguardUpdateMonitor.isFaceEnrolled()
+            } else if (mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()
                     && !mKeyguardUpdateMonitor.getIsFaceAuthenticated()) {
                 String message;
                 if (mAccessibilityManager.isEnabled()
@@ -1215,7 +1215,7 @@ public class KeyguardIndicationController {
                             mContext.getString(R.string.keyguard_suggest_fingerprint)
                     );
                 } else if (fpAuthFailed
-                        && mKeyguardUpdateMonitor.getUserUnlockedWithFace(getCurrentUser())) {
+                        && mKeyguardUpdateMonitor.isCurrentUserUnlockedWithFace()) {
                     // face had already previously unlocked the device, so instead of showing a
                     // fingerprint error, tell them they have already unlocked with face auth
                     // and how to enter their device
@@ -1256,8 +1256,6 @@ public class KeyguardIndicationController {
             if (biometricSourceType == FACE) {
                 mFaceAcquiredMessageDeferral.reset();
             }
-            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
-            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override
@@ -1278,8 +1276,6 @@ public class KeyguardIndicationController {
             } else if (biometricSourceType == FINGERPRINT) {
                 onFingerprintAuthError(msgId, errString);
             }
-            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
-            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         private void onFaceAuthError(int msgId, String errString) {
@@ -1351,8 +1347,6 @@ public class KeyguardIndicationController {
                     showActionToUnlock();
                 }
             }
-            mBouncerMessageInteractor.setFaceAcquisitionMessage(null);
-            mBouncerMessageInteractor.setFingerprintAcquisitionMessage(null);
         }
 
         @Override
@@ -1463,7 +1457,7 @@ public class KeyguardIndicationController {
     }
 
     private boolean canUnlockWithFingerprint() {
-        return mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+        return mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(
                 getCurrentUser()) && mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed();
     }
 

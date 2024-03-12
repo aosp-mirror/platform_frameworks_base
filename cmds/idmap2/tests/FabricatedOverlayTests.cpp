@@ -59,7 +59,7 @@ TEST(FabricatedOverlayTests, SetResourceValue) {
               Res_value::TYPE_STRING,
               "foobar",
               "en-rUS-normal-xxhdpi-v21")
-          .SetResourceValue("com.example.target:drawable/dr1", fd, "port-xxhdpi-v7")
+          .SetResourceValue("com.example.target:drawable/dr1", fd, 0, 8341, "port-xxhdpi-v7", false)
           .setFrroPath("/foo/bar/biz.frro")
           .Build();
   ASSERT_TRUE(overlay);

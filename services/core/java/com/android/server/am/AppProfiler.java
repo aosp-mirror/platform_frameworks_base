@@ -28,7 +28,9 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MOD
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RSS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PSS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RSS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.DUMP_MEM_OOM_ADJ;
@@ -64,6 +66,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -125,6 +128,7 @@ public class AppProfiler {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
 
     static final String TAG_PSS = TAG + POSTFIX_PSS;
+    static final String TAG_RSS = TAG + POSTFIX_RSS;
 
     static final String TAG_OOM_ADJ = ActivityManagerService.TAG_OOM_ADJ;
 
@@ -183,10 +187,10 @@ public class AppProfiler {
     private volatile long mPssDeferralTime = 0;
 
     /**
-     * Processes we want to collect PSS data from.
+     * Processes we want to collect PSS or RSS data from.
      */
     @GuardedBy("mProfilerLock")
-    private final ArrayList<ProcessProfileRecord> mPendingPssProfiles = new ArrayList<>();
+    private final ArrayList<ProcessProfileRecord> mPendingPssOrRssProfiles = new ArrayList<>();
 
     /**
      * Depth of overlapping activity-start PSS deferral notes
@@ -200,18 +204,18 @@ public class AppProfiler {
     private long mLastFullPssTime = SystemClock.uptimeMillis();
 
     /**
-     * If set, the next time we collect PSS data we should do a full collection
-     * with data from native processes and the kernel.
+     * If set, the next time we collect PSS or RSS data we should do a full collection with data
+     * from native processes and the kernel.
      */
     @GuardedBy("mProfilerLock")
-    private boolean mFullPssPending = false;
+    private boolean mFullPssOrRssPending = false;
 
     /**
-     * If true, we are running under a test environment so will sample PSS from processes
-     * much more rapidly to try to collect better data when the tests are rapidly
-     * running through apps.
+     * If true, we are running under a test environment so will sample PSS or RSS from processes
+     * much more rapidly to try to collect better data when the tests are rapidly running through
+     * apps.
      */
-    private volatile boolean mTestPssMode = false;
+    private volatile boolean mTestPssOrRssMode = false;
 
     private final LowMemDetector mLowMemDetector;
 
@@ -598,7 +602,11 @@ public class AppProfiler {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case COLLECT_PSS_BG_MSG:
-                    collectPssInBackground();
+                    if (!Flags.removeAppProfilerPssCollection()) {
+                        collectPssInBackground();
+                    } else {
+                        collectRssInBackground();
+                    }
                     break;
                 case DEFER_PSS_MSG:
                     deferPssForActivityStart();
@@ -619,8 +627,8 @@ public class AppProfiler {
         long start = SystemClock.uptimeMillis();
         MemInfoReader memInfo = null;
         synchronized (mProfilerLock) {
-            if (mFullPssPending) {
-                mFullPssPending = false;
+            if (mFullPssOrRssPending) {
+                mFullPssOrRssPending = false;
                 memInfo = new MemInfoReader();
             }
         }
@@ -633,16 +641,20 @@ public class AppProfiler {
                     return st.vsize > 0 && st.uid < FIRST_APPLICATION_UID;
                 });
             }
-            final int numOfStats = stats.size();
-            for (int j = 0; j < numOfStats; j++) {
-                synchronized (mService.mPidsSelfLocked) {
-                    if (mService.mPidsSelfLocked.indexOfKey(stats.get(j).pid) >= 0) {
-                        // This is one of our own processes; skip it.
-                        continue;
+
+            if (!mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED) {
+                final int numOfStats = stats.size();
+                for (int j = 0; j < numOfStats; j++) {
+                    synchronized (mService.mPidsSelfLocked) {
+                        if (mService.mPidsSelfLocked.indexOfKey(stats.get(j).pid) >= 0) {
+                            // This is one of our own processes; skip it.
+                            continue;
+                        }
                     }
+                    nativeTotalPss += Debug.getPss(stats.get(j).pid, null, null);
                 }
-                nativeTotalPss += Debug.getPss(stats.get(j).pid, null, null);
             }
+
             memInfo.readMemInfo();
             synchronized (mService.mProcessStats.mLock) {
                 if (DEBUG_PSS) {
@@ -669,16 +681,16 @@ public class AppProfiler {
             int pid = -1;
             long lastPssTime;
             synchronized (mProfilerLock) {
-                if (mPendingPssProfiles.size() <= 0) {
-                    if (mTestPssMode || DEBUG_PSS) {
+                if (mPendingPssOrRssProfiles.size() <= 0) {
+                    if (mTestPssOrRssMode || DEBUG_PSS) {
                         Slog.d(TAG_PSS,
                                 "Collected pss of " + num + " processes in "
                                 + (SystemClock.uptimeMillis() - start) + "ms");
                     }
-                    mPendingPssProfiles.clear();
+                    mPendingPssOrRssProfiles.clear();
                     return;
                 }
-                profile = mPendingPssProfiles.remove(0);
+                profile = mPendingPssOrRssProfiles.remove(0);
                 procState = profile.getPssProcState();
                 statType = profile.getPssStatType();
                 lastPssTime = profile.getLastPssTime();
@@ -706,7 +718,8 @@ public class AppProfiler {
                 final boolean skipPSSCollection =
                         (profile.mApp.mOptRecord != null
                          && profile.mApp.mOptRecord.skipPSSCollectionBecauseFrozen())
-                        || mService.isCameraActiveForUid(profile.mApp.uid);
+                        || mService.isCameraActiveForUid(profile.mApp.uid)
+                        || mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED;
                 long pss = skipPSSCollection ? 0 : Debug.getPss(pid, tmp, null);
                 long endTime = SystemClock.currentThreadTimeMillis();
                 synchronized (mProfilerLock) {
@@ -735,13 +748,149 @@ public class AppProfiler {
         } while (true);
     }
 
+    // This method is analogous to collectPssInBackground() and is intended to be used as a
+    // replacement if Flags.removeAppProfilerPssCollection() is enabled. References to PSS in
+    // methods outside of AppProfiler have generally been kept where a new RSS equivalent is not
+    // technically necessary. These can be updated once the flag is completely rolled out.
+    private void collectRssInBackground() {
+        long start = SystemClock.uptimeMillis();
+        MemInfoReader memInfo = null;
+        synchronized (mProfilerLock) {
+            if (mFullPssOrRssPending) {
+                mFullPssOrRssPending = false;
+                memInfo = new MemInfoReader();
+            }
+        }
+        if (memInfo != null) {
+            updateCpuStatsNow();
+            long nativeTotalRss = 0;
+            final List<ProcessCpuTracker.Stats> stats;
+            synchronized (mProcessCpuTracker) {
+                stats = mProcessCpuTracker.getStats(st -> {
+                    return st.vsize > 0 && st.uid < FIRST_APPLICATION_UID;
+                });
+            }
+
+            // We assume that if PSS collection isn't needed or desired, RSS collection can be
+            // disabled as well.
+            if (!mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED) {
+                final int numOfStats = stats.size();
+                for (int j = 0; j < numOfStats; j++) {
+                    synchronized (mService.mPidsSelfLocked) {
+                        if (mService.mPidsSelfLocked.indexOfKey(stats.get(j).pid) >= 0) {
+                            // This is one of our own processes; skip it.
+                            continue;
+                        }
+                    }
+                    nativeTotalRss += Debug.getRss(stats.get(j).pid, null);
+                }
+            }
+
+            memInfo.readMemInfo();
+            synchronized (mService.mProcessStats.mLock) {
+                // We assume that an enabled DEBUG_PSS can apply to RSS as well, since only one of
+                // either collectPssInBackground() or collectRssInBackground() will be used.
+                if (DEBUG_RSS) {
+                    Slog.d(TAG_RSS, "Collected native and kernel memory in "
+                            + (SystemClock.uptimeMillis() - start) + "ms");
+                }
+                final long cachedKb = memInfo.getCachedSizeKb();
+                final long freeKb = memInfo.getFreeSizeKb();
+                final long zramKb = memInfo.getZramTotalSizeKb();
+                final long kernelKb = memInfo.getKernelUsedSizeKb();
+                // The last value needs to be updated in log tags to refer to RSS; this will be
+                // updated once the flag is fully rolled out.
+                EventLogTags.writeAmMeminfo(cachedKb * 1024, freeKb * 1024, zramKb * 1024,
+                        kernelKb * 1024, nativeTotalRss * 1024);
+                mService.mProcessStats.addSysMemUsageLocked(cachedKb, freeKb, zramKb, kernelKb,
+                        nativeTotalRss);
+            }
+        }
+
+        // This loop differs from its original form in collectPssInBackground(), as it does not
+        // collect USS or SwapPss (since those are reported in smaps, not status).
+        int num = 0;
+        do {
+            ProcessProfileRecord profile;
+            int procState;
+            int statType;
+            int pid = -1;
+            long lastRssTime;
+            synchronized (mProfilerLock) {
+                if (mPendingPssOrRssProfiles.size() <= 0) {
+                    if (mTestPssOrRssMode || DEBUG_RSS) {
+                        Slog.d(TAG_RSS,
+                                "Collected rss of " + num + " processes in "
+                                + (SystemClock.uptimeMillis() - start) + "ms");
+                    }
+                    mPendingPssOrRssProfiles.clear();
+                    return;
+                }
+                profile = mPendingPssOrRssProfiles.remove(0);
+                procState = profile.getPssProcState();
+                statType = profile.getPssStatType();
+                lastRssTime = profile.getLastPssTime();
+                long now = SystemClock.uptimeMillis();
+                if (profile.getThread() != null && procState == profile.getSetProcState()
+                        && (lastRssTime + ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE) < now) {
+                    pid = profile.getPid();
+                } else {
+                    profile.abortNextPssTime();
+                    if (DEBUG_RSS) {
+                        Slog.d(TAG_RSS, "Skipped rss collection of " + pid
+                                + ": still need "
+                                + (lastRssTime + ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE - now)
+                                + "ms until safe");
+                    }
+                    profile = null;
+                    pid = 0;
+                }
+            }
+            if (profile != null) {
+                long startTime = SystemClock.currentThreadTimeMillis();
+                // skip background RSS calculation under the following situations:
+                //  - app is capturing camera imagery
+                //  - app is frozen and we have already collected RSS once.
+                final boolean skipRSSCollection =
+                        (profile.mApp.mOptRecord != null
+                         && profile.mApp.mOptRecord.skipPSSCollectionBecauseFrozen())
+                        || mService.isCameraActiveForUid(profile.mApp.uid)
+                        || mService.mConstants.APP_PROFILER_PSS_PROFILING_DISABLED;
+                long rss = skipRSSCollection ? 0 : Debug.getRss(pid, null);
+                long endTime = SystemClock.currentThreadTimeMillis();
+                synchronized (mProfilerLock) {
+                    if (rss != 0 && profile.getThread() != null
+                            && profile.getSetProcState() == procState
+                            && profile.getPid() == pid && profile.getLastPssTime() == lastRssTime) {
+                        num++;
+                        profile.commitNextPssTime();
+                        recordRssSampleLPf(profile, procState, rss, statType, endTime - startTime,
+                                SystemClock.uptimeMillis());
+                    } else {
+                        profile.abortNextPssTime();
+                        if (DEBUG_RSS) {
+                            Slog.d(TAG_RSS, "Skipped rss collection of " + pid
+                                    + ": " + (profile.getThread() == null ? "NO_THREAD " : "")
+                                    + (skipRSSCollection ? "SKIP_RSS_COLLECTION " : "")
+                                    + (profile.getPid() != pid ? "PID_CHANGED " : "")
+                                    + " initState=" + procState + " curState="
+                                    + profile.getSetProcState() + " "
+                                    + (profile.getLastPssTime() != lastRssTime
+                                    ? "TIME_CHANGED" : ""));
+                        }
+                    }
+                }
+            }
+        } while (true);
+    }
+
     @GuardedBy("mProfilerLock")
     void updateNextPssTimeLPf(int procState, ProcessProfileRecord profile, long now,
             boolean forceUpdate) {
         if (!forceUpdate) {
             if (now <= profile.getNextPssTime() && now <= Math.max(profile.getLastPssTime()
                     + ProcessList.PSS_MAX_INTERVAL, profile.getLastStateTime()
-                    + ProcessList.minTimeFromStateChange(mTestPssMode))) {
+                    + ProcessList.minTimeFromStateChange(mTestPssOrRssMode))) {
                 // update is not due, ignore it.
                 return;
             }
@@ -750,7 +899,7 @@ public class AppProfiler {
             }
         }
         profile.setNextPssTime(profile.computeNextPssTime(procState,
-                mTestPssMode, mService.mAtmInternal.isSleeping(), now));
+                mTestPssOrRssMode, mService.mAtmInternal.isSleeping(), now));
     }
 
     /**
@@ -771,8 +920,8 @@ public class AppProfiler {
                     + " lastPss=" + profile.getLastPss()
                     + " state=" + ProcessList.makeProcStateString(procState));
         }
-        if (profile.getInitialIdlePss() == 0) {
-            profile.setInitialIdlePss(pss);
+        if (profile.getInitialIdlePssOrRss() == 0) {
+            profile.setInitialIdlePssOrRss(pss);
         }
         profile.setLastPss(pss);
         profile.setLastSwapPss(swapPss);
@@ -795,6 +944,72 @@ public class AppProfiler {
             }
         }
         if (check != null) {
+            if ((pss * 1024) >= check && profile.getThread() != null
+                    && mMemWatchDumpProcName == null) {
+                if (Build.IS_DEBUGGABLE || proc.isDebuggable()) {
+                    Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check + "; reporting");
+                    startHeapDumpLPf(profile, false);
+                } else {
+                    Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check
+                            + ", but debugging not enabled");
+                }
+            }
+        }
+    }
+
+    /**
+     * Record new RSS sample for a process.
+     *
+     * This method is analogous to recordPssSampleLPf() and is intended to be used as a replacement
+     * if Flags.removeAppProfilerPssCollection() is enabled. Functionally, this differs in that PSS,
+     * SwapPss, and USS are no longer collected and reported.
+     *
+     * This method will also poll PSS if the app has requested that a heap dump be taken if its PSS
+     * reaches some threshold set with ActivityManager.setWatchHeapLimit().
+     */
+    @GuardedBy("mProfilerLock")
+    private void recordRssSampleLPf(ProcessProfileRecord profile, int procState, long rss,
+            int statType, long rssDuration, long now) {
+        final ProcessRecord proc = profile.mApp;
+        // TODO(b/296454553): writeAmPss needs to be renamed to writeAmRss, and the zeroed out
+        // fields need to be removed. This will be updated once the flag is fully rolled out to
+        // avoid churn in the .logtags file, which has a mapping of IDs to tags (and is also
+        // technically deprecated).
+        EventLogTags.writeAmPss(
+                profile.getPid(), proc.uid, proc.processName, /* pss = */ 0, /* uss = */ 0,
+                /* swapPss = */ 0, rss * 1024, statType, procState, rssDuration);
+        profile.setLastPssTime(now);
+        // The PSS here is emitted in logs, so we can zero it out instead of subbing in RSS.
+        profile.addPss(/* pss = */ 0, /* uss = */ 0, rss, true, statType, rssDuration);
+        if (DEBUG_RSS) {
+            Slog.d(TAG_RSS,
+                    "rss of " + proc.toShortString() + ": " + rss
+                    + " lastRss=" + profile.getLastRss()
+                    + " state=" + ProcessList.makeProcStateString(procState));
+        }
+        if (profile.getInitialIdlePssOrRss() == 0) {
+            profile.setInitialIdlePssOrRss(rss);
+        }
+        profile.setLastRss(rss);
+        if (procState >= ActivityManager.PROCESS_STATE_HOME) {
+            profile.setLastCachedRss(rss);
+        }
+
+        final SparseArray<Pair<Long, String>> watchUids =
+                mMemWatchProcesses.getMap().get(proc.processName);
+        Long check = null;
+        if (watchUids != null) {
+            Pair<Long, String> val = watchUids.get(proc.uid);
+            if (val == null) {
+                val = watchUids.get(0);
+            }
+            if (val != null) {
+                check = val.first;
+            }
+        }
+
+        if (check != null) {
+            long pss = Debug.getPss(profile.getPid(), null, null);
             if ((pss * 1024) >= check && profile.getThread() != null
                     && mMemWatchDumpProcName == null) {
                 if (Build.IS_DEBUGGABLE || proc.isDebuggable()) {
@@ -979,10 +1194,10 @@ public class AppProfiler {
      */
     @GuardedBy("mProfilerLock")
     private boolean requestPssLPf(ProcessProfileRecord profile, int procState) {
-        if (mPendingPssProfiles.contains(profile)) {
+        if (mPendingPssOrRssProfiles.contains(profile)) {
             return false;
         }
-        if (mPendingPssProfiles.size() == 0) {
+        if (mPendingPssOrRssProfiles.size() == 0) {
             final long deferral = (mPssDeferralTime > 0 && mActivityStartingNesting.get() > 0)
                     ? mPssDeferralTime : 0;
             if (DEBUG_PSS && deferral > 0) {
@@ -994,7 +1209,7 @@ public class AppProfiler {
         if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting pss of: " + profile.mApp);
         profile.setPssProcState(procState);
         profile.setPssStatType(ProcessStats.ADD_PSS_INTERNAL_SINGLE);
-        mPendingPssProfiles.add(profile);
+        mPendingPssOrRssProfiles.add(profile);
         return true;
     }
 
@@ -1004,7 +1219,7 @@ public class AppProfiler {
      */
     @GuardedBy("mProfilerLock")
     private void deferPssIfNeededLPf() {
-        if (mPendingPssProfiles.size() > 0) {
+        if (mPendingPssOrRssProfiles.size() > 0) {
             mBgHandler.removeMessages(BgHandler.COLLECT_PSS_BG_MSG);
             mBgHandler.sendEmptyMessageDelayed(BgHandler.COLLECT_PSS_BG_MSG, mPssDeferralTime);
         }
@@ -1058,12 +1273,12 @@ public class AppProfiler {
                 Slog.d(TAG_PSS, "Requesting pss of all procs!  memLowered=" + memLowered);
             }
             mLastFullPssTime = now;
-            mFullPssPending = true;
-            for (int i = mPendingPssProfiles.size() - 1; i >= 0; i--) {
-                mPendingPssProfiles.get(i).abortNextPssTime();
+            mFullPssOrRssPending = true;
+            for (int i = mPendingPssOrRssProfiles.size() - 1; i >= 0; i--) {
+                mPendingPssOrRssProfiles.get(i).abortNextPssTime();
             }
-            mPendingPssProfiles.ensureCapacity(mService.mProcessList.getLruSizeLOSP());
-            mPendingPssProfiles.clear();
+            mPendingPssOrRssProfiles.ensureCapacity(mService.mProcessList.getLruSizeLOSP());
+            mPendingPssOrRssProfiles.clear();
             mService.mProcessList.forEachLruProcessesLOSP(false, app -> {
                 final ProcessProfileRecord profile = app.mProfile;
                 if (profile.getThread() == null
@@ -1078,7 +1293,7 @@ public class AppProfiler {
                     profile.setPssStatType(always ? ProcessStats.ADD_PSS_INTERNAL_ALL_POLL
                             : ProcessStats.ADD_PSS_INTERNAL_ALL_MEM);
                     updateNextPssTimeLPf(profile.getSetProcState(), profile, now, true);
-                    mPendingPssProfiles.add(profile);
+                    mPendingPssOrRssProfiles.add(profile);
                 }
             });
             if (!mBgHandler.hasMessages(BgHandler.COLLECT_PSS_BG_MSG)) {
@@ -1089,7 +1304,7 @@ public class AppProfiler {
 
     void setTestPssMode(boolean enabled) {
         synchronized (mProcLock) {
-            mTestPssMode = enabled;
+            mTestPssOrRssMode = enabled;
             if (enabled) {
                 // Whenever we enable the mode, we want to take a snapshot all of current
                 // process mem use.
@@ -1099,7 +1314,7 @@ public class AppProfiler {
     }
 
     boolean getTestPssMode() {
-        return mTestPssMode;
+        return mTestPssOrRssMode;
     }
 
     @GuardedBy("mService")
@@ -1200,6 +1415,8 @@ public class AppProfiler {
             trackerMemFactor = mService.mProcessStats.getMemFactorLocked();
         }
 
+        mLastMemoryLevel = memFactor;
+        mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         if (mService.mConstants.USE_MODERN_TRIM) {
             // Modern trim is not sent based on lowmem state
             // Dispatch UI_HIDDEN to processes that need it
@@ -1230,8 +1447,6 @@ public class AppProfiler {
             return false;
         }
 
-        mLastMemoryLevel = memFactor;
-        mLastNumProcesses = mService.mProcessList.getLruSizeLOSP();
         if (memFactor != ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
                 mLowRamStartTime = now;
@@ -2341,7 +2556,7 @@ public class AppProfiler {
         synchronized (mProfilerLock) {
             final ProcessProfileRecord profile = app.mProfile;
             mProcessesToGc.remove(app);
-            mPendingPssProfiles.remove(profile);
+            mPendingPssOrRssProfiles.remove(profile);
             profile.abortNextPssTime();
         }
     }

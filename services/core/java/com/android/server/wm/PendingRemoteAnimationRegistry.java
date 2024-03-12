@@ -30,7 +30,7 @@ import android.view.RemoteAnimationAdapter;
  */
 class PendingRemoteAnimationRegistry {
 
-    private static final long TIMEOUT_MS = 3000;
+    static final long TIMEOUT_MS = 3000;
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final Handler mHandler;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.android.build.api.dsl.CommonExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidBasePlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -24,11 +25,16 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
 }
 
+val androidTop: String = File(rootDir, "../../../../..").canonicalPath
+
 allprojects {
-    extra["jetpackComposeVersion"] = "1.6.0-alpha01"
+    extra["androidTop"] = androidTop
+    extra["jetpackComposeVersion"] = "1.6.0-beta02"
 }
 
 subprojects {
+    layout.buildDirectory.set(file("$androidTop/out/gradle-spa/$name"))
+
     plugins.withType<AndroidBasePlugin> {
         configure<BaseExtension> {
             compileSdkVersion(34)
@@ -37,20 +43,21 @@ subprojects {
                 minSdk = 21
                 targetSdk = 34
             }
+        }
 
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
+        configure<JavaPluginExtension> {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get()))
             }
         }
     }
 
     afterEvaluate {
         plugins.withType<AndroidBasePlugin> {
-            configure<BaseExtension> {
+            the(CommonExtension::class).apply {
                 if (buildFeatures.compose == true) {
                     composeOptions {
-                        kotlinCompilerExtensionVersion = "1.4.4"
+                        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
                     }
                 }
             }
@@ -59,7 +66,7 @@ subprojects {
 
     tasks.withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = libs.versions.jvm.get()
             freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }

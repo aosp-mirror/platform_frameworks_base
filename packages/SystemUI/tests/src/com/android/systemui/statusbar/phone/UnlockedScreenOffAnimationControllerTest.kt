@@ -83,7 +83,6 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
         controller = UnlockedScreenOffAnimationController(
                 context,
                 wakefulnessLifecycle,
@@ -95,7 +94,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 dagger.Lazy<NotificationShadeWindowController> { notifShadeWindowController },
                 interactionJankMonitor,
                 powerManager,
-                handler = handler
+                handler = handler,
         )
         controller.initialize(centralSurfaces, shadeViewController, lightRevealScrim)
 

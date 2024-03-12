@@ -24,9 +24,12 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.IUriGrantsManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -44,9 +47,12 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.RequiresPermission;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -56,6 +62,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -110,6 +118,7 @@ public final class Icon implements Parcelable {
      */
     @IntDef({TYPE_BITMAP, TYPE_RESOURCE, TYPE_DATA, TYPE_URI, TYPE_ADAPTIVE_BITMAP,
             TYPE_URI_ADAPTIVE_BITMAP})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface IconType {
     }
 
@@ -525,6 +534,46 @@ public final class Icon implements Parcelable {
                                     userId),
                             e);
                 }
+            }
+        }
+        return loadDrawable(context);
+    }
+
+    /**
+     * Load a drawable, but in the case of URI types, it will check if the passed uid has a grant
+     * to load the resource. The check will be performed using the permissions of the passed uid,
+     * and not those of the caller.
+     * <p>
+     * This should be called for {@link Icon} objects that come from a not trusted source and may
+     * contain a URI.
+     *
+     * After the check, if passed, {@link #loadDrawable} will be called. If failed, this will
+     * return {@code null}.
+     *
+     * @see #loadDrawable
+     *
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    public Drawable loadDrawableCheckingUriGrant(
+            Context context,
+            IUriGrantsManager iugm,
+            int callingUid,
+            String packageName
+    ) {
+        if (getType() == TYPE_URI || getType() == TYPE_URI_ADAPTIVE_BITMAP) {
+            try {
+                iugm.checkGrantUriPermission_ignoreNonSystem(
+                        callingUid,
+                        packageName,
+                        ContentProvider.getUriWithoutUserId(getUri()),
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        ContentProvider.getUserIdFromUri(getUri())
+                );
+            } catch (SecurityException | RemoteException e) {
+                Log.e(TAG, "Failed to get URI permission for: " + getUri(), e);
+                return null;
             }
         }
         return loadDrawable(context);

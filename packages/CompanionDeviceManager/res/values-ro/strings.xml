@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Manager de dispozitiv Companion"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"Permiți ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să acceseze dispozitivul &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Permiți ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să acceseze dispozitivul &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ceas"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Alege un profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g> pe care să îl gestioneze &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="898569637110705523">"Această aplicație este necesară pentru a gestiona <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> va putea să sincronizeze informații, cum ar fi numele unui apelant, să interacționeze cu notificările tale și să îți acceseze permisiunile pentru Telefon, SMS, Agendă, Calendar, Jurnale de apeluri și Dispozitive din apropiere."</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"Aplicația va putea să sincronizeze informații, cum ar fi numele unui apelant, și să acceseze aceste permisiuni pe <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Alege un dispozitiv pe care să îl gestioneze &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Alege un <xliff:g id="PROFILE_NAME">%1$s</xliff:g> de configurat"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Aplicația va putea să sincronizeze informații, cum ar fi numele unui apelant, și să acceseze aceste permisiuni pe <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Permiți ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să gestioneze &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"ochelari"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"Această aplicație este necesară pentru a gestiona <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> va putea să interacționeze cu notificările tale și să-ți acceseze permisiunile pentru Telefon, SMS, Agendă, Microfon și Dispozitive din apropiere."</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"Aplicația va putea să acceseze următoarele permisiuni pe <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"dispozitiv"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Aplicația va putea să acceseze următoarele permisiuni pe <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Permite ca &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; să acceseze aceste informații de pe telefon"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Servicii pe mai multe dispozitive"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> solicită permisiunea pentru <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> de a reda în stream aplicații între dispozitivele tale"</string>
@@ -38,15 +37,16 @@
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Permiți ca &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; să realizeze această acțiune?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> solicită permisiunea pentru <xliff:g id="DEVICE_NAME">%2$s</xliff:g> de a reda în stream conținut din aplicații și alte funcții de sistem pe dispozitivele din apropiere"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"dispozitiv"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"Aplicația va putea să sincronizeze informații, cum ar fi numele unui apelant, între telefonul tău și <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Aplicația va putea să sincronizeze informații, cum ar fi numele unui apelant, între telefonul tău și dispozitivul ales"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Permite"</string>
     <string name="consent_no" msgid="2640796915611404382">"Nu permite"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Anulează"</string>
     <string name="consent_back" msgid="2560683030046918882">"Înapoi"</string>
+    <string name="permission_expand" msgid="893185038020887411">"Extinde <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"Restrânge <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Acorzi aplicațiilor de pe &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; aceleași permisiuni ca pe &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Aici pot fi incluse accesul la &lt;strong&gt;microfon&lt;/strong&gt;, la &lt;strong&gt;camera foto&lt;/strong&gt;, la &lt;strong&gt;locație&lt;/strong&gt; și alte permisiuni de accesare a informațiilor sensibile de pe &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Poți modifica oricând aceste permisiuni din Setările de pe &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Pictograma aplicației"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Butonul Mai multe informații"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Mai multe informații"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefon"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Agendă"</string>
@@ -58,7 +58,7 @@
     <string name="permission_notification" msgid="693762568127741203">"Notificări"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Aplicații"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Poate să facă și să gestioneze apeluri telefonice"</string>
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Poate să dea și să gestioneze apeluri telefonice"</string>
     <string name="permission_call_logs_summary" msgid="6186103394658755022">"Poate să citească și să scrie în jurnalul de apeluri telefonice"</string>
     <string name="permission_sms_summary" msgid="3508442683678912017">"Poate să trimită și să vadă mesaje SMS"</string>
     <string name="permission_contacts_summary" msgid="675861979475628708">"Poate accesa agenda"</string>

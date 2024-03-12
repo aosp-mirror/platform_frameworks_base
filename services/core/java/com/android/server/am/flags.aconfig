@@ -1,0 +1,30 @@
+package: "com.android.server.am"
+
+flag {
+    name: "oomadjuster_correctness_rewrite"
+    namespace: "backstage_power"
+    description: "Utilize new OomAdjuster implementation"
+    bug: "298055811"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "fgs_abuse_detection"
+    namespace: "backstage_power"
+    description: "Detect abusive FGS behavior for certain types (camera, mic, media, location)."
+    bug: "295545575"
+}
+
+flag {
+    name: "fgs_boot_completed"
+    namespace: "backstage_power"
+    description: "Disable BOOT_COMPLETED broadcast FGS start for certain types"
+    bug: "296558535"
+}
+
+flag {
+    name: "bfgs_managed_network_access"
+    namespace: "backstage_power"
+    description: "Restrict network access for certain applications in BFGS process state"
+    bug: "304347838"
+}

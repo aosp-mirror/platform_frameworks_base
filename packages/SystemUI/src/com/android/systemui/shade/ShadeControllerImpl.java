@@ -24,12 +24,14 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.DejankUtils;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.ShadeTouchLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -59,6 +61,7 @@ public final class ShadeControllerImpl implements ShadeController {
     private final CommandQueue mCommandQueue;
     private final Executor mMainExecutor;
     private final LogBuffer mTouchLog;
+    private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarStateController mStatusBarStateController;
@@ -73,6 +76,7 @@ public final class ShadeControllerImpl implements ShadeController {
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
     private boolean mExpandedVisible;
+    private boolean mLockscreenOrShadeVisible;
 
     private NotificationPresenter mPresenter;
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
@@ -83,6 +87,7 @@ public final class ShadeControllerImpl implements ShadeController {
             CommandQueue commandQueue,
             @Main Executor mainExecutor,
             @ShadeTouchLog LogBuffer touchLog,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -97,6 +102,7 @@ public final class ShadeControllerImpl implements ShadeController {
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
         mTouchLog = touchLog;
+        mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mShadeViewControllerLazy = shadeViewControllerLazy;
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
@@ -107,6 +113,11 @@ public final class ShadeControllerImpl implements ShadeController {
         mDisplayId = windowManager.getDefaultDisplay().getDisplayId();
         mKeyguardStateController = keyguardStateController;
         mAssistManagerLazy = assistManagerLazy;
+    }
+
+    @Override
+    public boolean isShadeEnabled() {
+        return true;
     }
 
     @Override
@@ -390,7 +401,19 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     private void notifyVisibilityChanged(boolean visible) {
-        mShadeVisibilityListener.visibilityChanged(visible);
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(visible);
+        if (mLockscreenOrShadeVisible != visible) {
+            mLockscreenOrShadeVisible = visible;
+            if (visible) {
+                // It would be best if this could be done as a side effect of listening to the
+                // [WindowRootViewVisibilityInteractor.isLockscreenOrShadeVisible] flow inside
+                // NotificationShadeWindowViewController. However, there's no guarantee that the
+                // flow will emit in the same frame as when the visibility changed, and we want the
+                // DejankUtils to be notified immediately, so we do it immediately here.
+                DejankUtils.notifyRendererOfExpensiveFrame(
+                        getNotificationShadeWindowView(), "onShadeVisibilityChanged");
+            }
+        }
     }
 
     private void notifyExpandedVisibleChanged(boolean expandedVisible) {

@@ -90,13 +90,17 @@ class TestFile : public io::IFile {
     return {};
   }
 
-  std::unique_ptr<io::InputStream> OpenInputStream() override {
+  std::unique_ptr<android::InputStream> OpenInputStream() override {
     return OpenAsData();
   }
 
   const android::Source& GetSource() const override {
     return source_;
   }
+
+  bool GetModificationTime(struct tm* buf) const override {
+    return false;
+  };
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TestFile);

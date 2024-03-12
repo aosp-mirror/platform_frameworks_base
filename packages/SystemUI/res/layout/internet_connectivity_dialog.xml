@@ -403,7 +403,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_gravity="start|center_vertical"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
                     <Button
                         android:id="@+id/apm_button"
                         android:layout_width="wrap_content"
@@ -414,6 +414,18 @@
                         style="@style/Widget.Dialog.Button.BorderButton"
                         android:clickable="true"
                         android:focusable="true"/>
+
+                    <Button
+                        android:id="@+id/share_wifi_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/share_wifi_button_text"
+                        style="?android:attr/buttonBarNeutralButtonStyle"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone"/>
                 </LinearLayout>
 
                 <LinearLayout

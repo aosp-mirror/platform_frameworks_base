@@ -53,10 +53,13 @@ import android.util.Slog;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.Flags;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.internal.accessibility.util.ShortcutUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
@@ -66,6 +69,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class to help manage the accessibility shortcut key
@@ -128,7 +132,7 @@ public class AccessibilityShortcutController {
             DialogStatus.SHOWN,
     })
     /** Denotes the user shortcut type. */
-    private @interface DialogStatus {
+    @interface DialogStatus {
         int NOT_SHOWN = 0;
         int SHOWN  = 1;
     }
@@ -333,17 +337,54 @@ public class AccessibilityShortcutController {
         // Avoid non-a11y users accidentally turning shortcut on without reading this carefully.
         // Put "don't turn on" as the primary action.
         final AlertDialog alertDialog = mFrameworkObjectProvider.getAlertDialogBuilder(
-                // Use SystemUI context so we pick up any theme set in a vendor overlay
-                mFrameworkObjectProvider.getSystemUiContext())
+                        // Use SystemUI context so we pick up any theme set in a vendor overlay
+                        mFrameworkObjectProvider.getSystemUiContext())
                 .setTitle(getShortcutWarningTitle(targets))
                 .setMessage(getShortcutWarningMessage(targets))
                 .setCancelable(false)
-                .setNegativeButton(R.string.accessibility_shortcut_on, null)
+                .setNegativeButton(R.string.accessibility_shortcut_on,
+                        (DialogInterface d, int which) -> {
+                            String targetServices = Settings.Secure.getStringForUser(
+                                    mContext.getContentResolver(),
+                                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
+                            String defaultService = mContext.getString(
+                                    R.string.config_defaultAccessibilityService);
+                            // If the targetServices is null, means the user enables a
+                            // shortcut for the default service by triggering the volume keys
+                            // shortcut in the SUW instead of intentionally configuring the
+                            // shortcut on UI.
+                            if (targetServices == null && !TextUtils.isEmpty(defaultService)) {
+                                // The defaultService in the string resource could be a shorten
+                                // form like com.google.android.marvin.talkback/.TalkBackService.
+                                // Converts it to the componentName for consistency before saving
+                                // to the Settings.
+                                final ComponentName configDefaultService =
+                                        ComponentName.unflattenFromString(defaultService);
+                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                                        configDefaultService.flattenToString(),
+                                        userId);
+                            }
+                        })
                 .setPositiveButton(R.string.accessibility_shortcut_off,
                         (DialogInterface d, int which) -> {
-                            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                                    Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
-                                    userId);
+                            if (Flags.updateAlwaysOnA11yService()) {
+                                Set<String> targetServices =
+                                        ShortcutUtils.getShortcutTargetsFromSettings(
+                                                mContext,
+                                                ShortcutConstants.UserShortcutType.HARDWARE,
+                                                userId);
+
+                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
+                                        userId);
+                                ShortcutUtils.updateInvisibleToggleAccessibilityServiceEnableState(
+                                        mContext, targetServices, userId);
+                            } else {
+                                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "",
+                                        userId);
+                            }
 
                             // If canceled, treat as if the dialog has never been shown
                             Settings.Secure.putIntForUser(mContext.getContentResolver(),

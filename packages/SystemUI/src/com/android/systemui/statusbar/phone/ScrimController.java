@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.GONE;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import static java.lang.Float.isNaN;
@@ -51,7 +54,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dagger.SysUISingleton;
@@ -62,7 +64,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.ScrimAlpha;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
+import com.android.systemui.res.R;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
@@ -273,6 +277,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private CoroutineDispatcher mMainDispatcher;
     private boolean mIsBouncerToGoneTransitionRunning = false;
     private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
+    private AlternateBouncerToGoneTransitionViewModel mAlternateBouncerToGoneTransitionViewModel;
     private final Consumer<ScrimAlpha> mScrimAlphaConsumer =
             (ScrimAlpha alphas) -> {
                 mInFrontAlpha = alphas.getFrontAlpha();
@@ -285,7 +290,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mScrimBehind.setViewAlpha(mBehindAlpha);
             };
 
-    Consumer<TransitionStep> mPrimaryBouncerToGoneTransition;
+    Consumer<TransitionStep> mBouncerToGoneTransition;
 
     @Inject
     public ScrimController(
@@ -304,6 +309,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
+            AlternateBouncerToGoneTransitionViewModel alternateBouncerToGoneTransitionViewModel,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             WallpaperRepository wallpaperRepository,
             @Main CoroutineDispatcher mainDispatcher,
@@ -349,6 +355,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         });
         mColors = new GradientColors();
         mPrimaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel;
+        mAlternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mWallpaperRepository = wallpaperRepository;
         mMainDispatcher = mainDispatcher;
@@ -389,9 +396,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             states[i].setDefaultScrimAlpha(mDefaultScrimAlpha);
         }
 
-        mScrimBehind.setDefaultFocusHighlightEnabled(false);
-        mNotificationsScrim.setDefaultFocusHighlightEnabled(false);
-        mScrimInFront.setDefaultFocusHighlightEnabled(false);
         mTransparentScrimBackground = notificationsScrim.getResources()
                 .getBoolean(R.bool.notification_scrim_transparent);
         updateScrims();
@@ -405,7 +409,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         // Directly control transition to UNLOCKED scrim state from PRIMARY_BOUNCER, and make sure
         // to report back that keyguard has faded away. This fixes cases where the scrim state was
         // rapidly switching on unlock, due to shifts in state in CentralSurfacesImpl
-        mPrimaryBouncerToGoneTransition =
+        mBouncerToGoneTransition =
                 (TransitionStep step) -> {
                     TransitionState state = step.getTransitionState();
 
@@ -425,9 +429,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     }
                 };
 
-        collectFlow(behindScrim, mKeyguardTransitionInteractor.getPrimaryBouncerToGoneTransition(),
-                mPrimaryBouncerToGoneTransition, mMainDispatcher);
+        // PRIMARY_BOUNCER->GONE
+        collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(PRIMARY_BOUNCER, GONE),
+                mBouncerToGoneTransition, mMainDispatcher);
         collectFlow(behindScrim, mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha(),
+                mScrimAlphaConsumer, mMainDispatcher);
+
+        // ALTERNATE_BOUNCER->GONE
+        collectFlow(behindScrim, mKeyguardTransitionInteractor.transition(ALTERNATE_BOUNCER, GONE),
+                mBouncerToGoneTransition, mMainDispatcher);
+        collectFlow(behindScrim, mAlternateBouncerToGoneTransitionViewModel.getScrimAlpha(),
                 mScrimAlphaConsumer, mMainDispatcher);
     }
 
@@ -494,12 +505,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mAnimationDuration = state.getAnimationDuration();
 
         applyState();
-
-        // Scrim might acquire focus when user is navigating with a D-pad or a keyboard.
-        // We need to disable focus otherwise AOD would end up with a gray overlay.
-        mScrimInFront.setFocusable(!state.isLowPowerState());
-        mScrimBehind.setFocusable(!state.isLowPowerState());
-        mNotificationsScrim.setFocusable(!state.isLowPowerState());
 
         mScrimInFront.setBlendWithMainColor(state.shouldBlendWithMainColor());
 
@@ -1480,7 +1485,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
         // TODO: remove this. This is necessary because of an order-of-operations limitation.
-        // The fix is to move more of these class into @CentralSurfacesScope
+        // The fix is to move more of these class into @SysUISingleton.
         if (mScrimBehind == null) {
             mScrimBehindChangeRunnable = changeRunnable;
         } else {
@@ -1491,8 +1496,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private void updateThemeColors() {
         if (mScrimBehind == null) return;
         int background = Utils.getColorAttr(mScrimBehind.getContext(),
-                android.R.attr.colorBackgroundFloating).getDefaultColor();
-        int accent = Utils.getColorAccent(mScrimBehind.getContext()).getDefaultColor();
+                com.android.internal.R.attr.materialColorSurfaceDim).getDefaultColor();
+        int accent = Utils.getColorAttr(mScrimBehind.getContext(),
+                com.android.internal.R.attr.materialColorPrimary).getDefaultColor();
         mColors.setMainColor(background);
         mColors.setSecondaryColor(accent);
         final boolean isBackgroundLight = !ContrastColorUtil.isColorDark(background);

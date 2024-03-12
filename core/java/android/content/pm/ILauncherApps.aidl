@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.LocusId;
+import android.content.pm.LauncherUserInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.LauncherActivityInfoInternal;
@@ -61,6 +62,10 @@ interface ILauncherApps {
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
     PendingIntent getActivityLaunchIntent(String callingPackage, in ComponentName component,
+            in UserHandle user);
+    LauncherUserInfo getLauncherUserInfo(in UserHandle user);
+    List<String> getPreInstalledSystemPackages(in UserHandle user);
+    IntentSender getAppMarketActivityIntent(String callingPackage, String packageName,
             in UserHandle user);
     void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,

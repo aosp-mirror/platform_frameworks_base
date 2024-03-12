@@ -576,7 +576,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     }
 
     void onDialogAnimatedIn(boolean startFingerprintNow) {
-        if (mState != STATE_AUTH_STARTED) {
+        if (mState != STATE_AUTH_STARTED && mState != STATE_ERROR_PENDING_SYSUI) {
             Slog.e(TAG, "onDialogAnimatedIn, unexpected state: " + mState);
             return;
         }

@@ -96,7 +96,7 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     @Test
     public void testTaskRemovedFromRecents() {
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
-        mPersister.onTaskRemovedFromRecents(1, mTestUserId);
+        mPersister.removeSnapshot(1, mTestUserId);
         mSnapshotPersistQueue.waitForQueueEmpty();
         assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.proto").exists());
         assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.jpg").exists());
@@ -132,6 +132,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(3, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(4, mTestUserId, createSnapshot());
+        // Verify there should only keep the latest request when received a duplicated id.
+        mPersister.persistSnapshot(4, mTestUserId, createSnapshot());
+        // Expected 3: One remove obsolete request, two persist request.
+        assertEquals(3, mSnapshotPersistQueue.peekQueueSize());
         mSnapshotPersistQueue.setPaused(false);
         mSnapshotPersistQueue.waitForQueueEmpty();
 

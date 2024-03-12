@@ -71,7 +71,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITIO
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WallpaperAnimationAdapter.shouldStartWallpaperAnimation;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -82,7 +81,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
-import android.util.Slog;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
@@ -1179,16 +1177,7 @@ public class AppTransitionController {
             }
             app.updateReportedVisibilityLocked();
             app.waitingToShow = false;
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    ">>> OPEN TRANSACTION handleAppTransitionReady()");
-            mService.openSurfaceTransaction();
-            try {
-                app.showAllWindowsLocked();
-            } finally {
-                mService.closeSurfaceTransaction("handleAppTransitionReady");
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                        "<<< CLOSE TRANSACTION handleAppTransitionReady()");
-            }
+            app.showAllWindowsLocked();
 
             if (mDisplayContent.mAppTransition.isNextAppTransitionThumbnailUp()) {
                 app.attachThumbnailAnimation();

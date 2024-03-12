@@ -1,0 +1,58 @@
+package: "android.multiuser"
+
+flag {
+    name: "save_global_and_guest_restrictions_on_system_user_xml"
+    namespace: "multiuser"
+    description: "Save guest and device policy global restrictions on the SYSTEM user's XML file."
+    bug: "301067944"
+}
+
+flag {
+    name: "save_global_and_guest_restrictions_on_system_user_xml_read_only"
+    namespace: "multiuser"
+    description: "Save guest and device policy global restrictions on the SYSTEM user's XML file. (Read only flag)"
+    bug: "301067944"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "bind_wallpaper_service_on_its_own_thread_during_a_user_switch"
+    namespace: "multiuser"
+    description: "Bind wallpaper service on its own thread instead of system_server's main handler during a user switch."
+    bug: "302100344"
+}
+
+flag {
+    name: "support_communal_profile"
+    namespace: "multiuser"
+    description: "Framework support for communal profile."
+    bug: "285426179"
+}
+
+flag {
+    name: "support_communal_profile_nextgen"
+    namespace: "multiuser"
+    description: "Further framework support for communal profile, beyond the basics, for later releases."
+    bug: "285426179"
+}
+
+flag {
+    name: "use_all_cpus_during_user_switch"
+    namespace: "multiuser"
+    description: "Allow using all cpu cores during a user switch."
+    bug: "308105403"
+}
+
+flag {
+    name: "enable_biometrics_to_unlock_private_space"
+    namespace: "profile_experiences"
+    description: "Add support to unlock the private space using biometrics"
+    bug: "312184187"
+}
+
+flag {
+    name: "support_autolock_for_private_space"
+    namespace: "profile_experiences"
+    description: "Add support to lock private space automatically after a time period"
+    bug: "303201022"
+}

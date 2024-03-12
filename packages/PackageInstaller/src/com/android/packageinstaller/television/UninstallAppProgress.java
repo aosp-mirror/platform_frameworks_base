@@ -37,14 +37,11 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
-
-import com.android.packageinstaller.EventResultPersister;
 import com.android.packageinstaller.PackageUtil;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.UninstallEventReceiver;
-
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
 import java.lang.ref.WeakReference;
 import java.util.List;
 

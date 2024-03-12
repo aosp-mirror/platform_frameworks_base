@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -49,6 +50,8 @@ public final class UserProperties implements Parcelable {
     private static final String ATTR_SHOW_IN_LAUNCHER = "showInLauncher";
     private static final String ATTR_START_WITH_PARENT = "startWithParent";
     private static final String ATTR_SHOW_IN_SETTINGS = "showInSettings";
+    private static final String ATTR_SHOW_IN_QUIET_MODE = "showInQuietMode";
+    private static final String ATTR_SHOW_IN_SHARING_SURFACES = "showInSharingSurfaces";
     private static final String ATTR_INHERIT_DEVICE_POLICY = "inheritDevicePolicy";
     private static final String ATTR_USE_PARENTS_CONTACTS = "useParentsContacts";
     private static final String ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA =
@@ -61,7 +64,15 @@ public final class UserProperties implements Parcelable {
             "mediaSharedWithParent";
     private static final String ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT =
             "credentialShareableWithParent";
+    private static final String ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE =
+            "authAlwaysRequiredToDisableQuietMode";
     private static final String ATTR_DELETE_APP_WITH_PARENT = "deleteAppWithParent";
+    private static final String ATTR_ALWAYS_VISIBLE = "alwaysVisible";
+    private static final String ATTR_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING =
+            "allowStoppingUserWithDelayedLocking";
+
+    private static final String ATTR_CROSS_PROFILE_CONTENT_SHARING_STRATEGY =
+            "crossProfileContentSharingStrategy";
 
     /** Index values of each property (to indicate whether they are present in this object). */
     @IntDef(prefix = "INDEX_", value = {
@@ -76,6 +87,12 @@ public final class UserProperties implements Parcelable {
             INDEX_MEDIA_SHARED_WITH_PARENT,
             INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT,
             INDEX_DELETE_APP_WITH_PARENT,
+            INDEX_ALWAYS_VISIBLE,
+            INDEX_SHOW_IN_QUIET_MODE,
+            INDEX_SHOW_IN_SHARING_SURFACES,
+            INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
+            INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY,
+            INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -91,6 +108,12 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_MEDIA_SHARED_WITH_PARENT = 8;
     private static final int INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT = 9;
     private static final int INDEX_DELETE_APP_WITH_PARENT = 10;
+    private static final int INDEX_ALWAYS_VISIBLE = 11;
+    private static final int INDEX_SHOW_IN_QUIET_MODE = 12;
+    private static final int INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE = 13;
+    private static final int INDEX_SHOW_IN_SHARING_SURFACES = 14;
+    private static final int INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY = 15;
+    private static final int INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING = 16;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -276,6 +299,120 @@ public final class UserProperties implements Parcelable {
      */
     public static final int CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING = 1;
 
+    /**
+     * Possible values for the profile visibility when in quiet mode. This affects the profile data
+     * and apps surfacing in Settings, sharing surfaces, and file picker surfaces. It signifies
+     * whether the profile data and apps will be shown or not.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SHOW_IN_QUIET_MODE_",
+            value = {
+                    SHOW_IN_QUIET_MODE_PAUSED,
+                    SHOW_IN_QUIET_MODE_HIDDEN,
+                    SHOW_IN_QUIET_MODE_DEFAULT,
+            }
+    )
+    public @interface ShowInQuietMode {
+    }
+
+    /**
+     * Indicates that the profile should still be visible in quiet mode but should be shown as
+     * paused (e.g. by greying out its icons).
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_QUIET_MODE_PAUSED = 0;
+    /**
+     * Indicates that the profile should not be visible when the profile is in quiet mode.
+     * For example, the profile should not be shown in tabbed views in Settings, files sharing
+     * surfaces etc when in quiet mode.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_QUIET_MODE_HIDDEN = 1;
+    /**
+     * Indicates that quiet mode should not have any effect on the profile visibility. If the
+     * profile is meant to be visible, it will remain visible and vice versa.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_QUIET_MODE_DEFAULT = 2;
+
+    /**
+     * Possible values for the profile apps visibility in sharing surfaces. This indicates the
+     * profile data and apps should be shown in separate tabs or mixed with its parent user's data
+     * and apps in sharing surfaces and file picker surfaces.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SHOW_IN_SHARING_SURFACES_",
+            value = {
+                    SHOW_IN_SHARING_SURFACES_SEPARATE,
+                    SHOW_IN_SHARING_SURFACES_WITH_PARENT,
+                    SHOW_IN_SHARING_SURFACES_NO,
+            }
+    )
+    public @interface ShowInSharingSurfaces {
+    }
+
+    /**
+     * Indicates that the profile data and apps should be shown in sharing surfaces intermixed with
+     * parent user's data and apps.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SHARING_SURFACES_WITH_PARENT = SHOW_IN_LAUNCHER_WITH_PARENT;
+
+    /**
+     * Indicates that the profile data and apps should be shown in sharing surfaces separate from
+     * parent user's data and apps.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SHARING_SURFACES_SEPARATE = SHOW_IN_LAUNCHER_SEPARATE;
+
+    /**
+     * Indicates that the profile data and apps should not be shown in sharing surfaces at all.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SHARING_SURFACES_NO = SHOW_IN_LAUNCHER_NO;
+    /**
+     * Possible values for cross profile content sharing strategy for this profile.
+     *
+     * @hide
+     */
+    @IntDef(prefix = {"CROSS_PROFILE_CONTENT_SHARING_STRATEGY_"}, value = {
+            CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
+            CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CrossProfileContentSharingStrategy {
+    }
+
+    /**
+     * Signifies that cross-profile content sharing strategy, both to and from this profile, should
+     * not be delegated to any other user/profile.
+     * For ex:
+     * If this property is set for a profile, content sharing applications (such as Android
+     * Sharesheet), should not delegate the decision to share content between that profile and
+     * another profile to whether content sharing is allowed between any other profile/user related
+     * to those profiles. They should instead decide, based upon whether content sharing is
+     * specifically allowed between the two profiles in question.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION = 0;
+
+    /**
+     * Signifies that cross-profile content sharing strategy, both to and from this profile, should
+     * be based upon the strategy used by the parent user of the profile.
+     * For ex:
+     * If this property is set for a profile A, content sharing applications (such as Android
+     * Sharesheet), should share content between profile A and profile B, based upon whether content
+     * sharing is allowed between the parent of profile A and profile B.
+     * If it's also set for profile B, then decision should, in turn be made by considering content
+     * sharing strategy between the parents of both profiles.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT = 1;
+
 
     /**
      * Creates a UserProperties (intended for the SystemServer) that stores a reference to the given
@@ -316,11 +453,15 @@ public final class UserProperties implements Parcelable {
                     orig.getCrossProfileIntentFilterAccessControl());
             setCrossProfileIntentResolutionStrategy(orig.getCrossProfileIntentResolutionStrategy());
             setDeleteAppWithParent(orig.getDeleteAppWithParent());
+            setAlwaysVisible(orig.getAlwaysVisible());
+            setAllowStoppingUserWithDelayedLocking(orig.getAllowStoppingUserWithDelayedLocking());
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
             setShowInSettings(orig.getShowInSettings());
             setUseParentsContacts(orig.getUseParentsContacts());
+            setAuthAlwaysRequiredToDisableQuietMode(
+                    orig.isAuthAlwaysRequiredToDisableQuietMode());
         }
         if (hasQueryOrManagePermission) {
             // Add items that require QUERY_USERS or stronger.
@@ -329,6 +470,9 @@ public final class UserProperties implements Parcelable {
         setShowInLauncher(orig.getShowInLauncher());
         setMediaSharedWithParent(orig.isMediaSharedWithParent());
         setCredentialShareableWithParent(orig.isCredentialShareableWithParent());
+        setShowInQuietMode(orig.getShowInQuietMode());
+        setShowInSharingSurfaces(orig.getShowInSharingSurfaces());
+        setCrossProfileContentSharingStrategy(orig.getCrossProfileContentSharingStrategy());
     }
 
     /**
@@ -405,6 +549,61 @@ public final class UserProperties implements Parcelable {
     private @ShowInSettings int mShowInSettings;
 
     /**
+     * Returns whether a user should be shown in the Settings and sharing surfaces depending on the
+     * {@link android.os.UserManager#requestQuietModeEnabled(boolean, android.os.UserHandle)
+     * quiet mode}. This is only applicable to profile users since the quiet mode concept is only
+     * applicable to profile users.
+     *
+     * <p> Please note that, in Settings, this property takes effect only if
+     * {@link #getShowInSettings()} does not return {@link #SHOW_IN_SETTINGS_NO}.
+     * Also note that in Sharing surfaces this property takes effect only if
+     * {@link #getShowInSharingSurfaces()} does not return {@link #SHOW_IN_SHARING_SURFACES_NO}.
+     *
+     * @return One of {@link #SHOW_IN_QUIET_MODE_HIDDEN},
+     *         {@link #SHOW_IN_QUIET_MODE_PAUSED}, or
+     *         {@link #SHOW_IN_QUIET_MODE_DEFAULT} depending on whether the profile should be
+     *         shown in quiet mode or not.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public @ShowInQuietMode int getShowInQuietMode() {
+        // NOTE: Launcher currently does not make use of this property.
+        if (isPresent(INDEX_SHOW_IN_QUIET_MODE)) return mShowInQuietMode;
+        if (mDefaultProperties != null) return mDefaultProperties.mShowInQuietMode;
+        throw new SecurityException(
+                "You don't have permission to query ShowInQuietMode");
+    }
+    /** @hide */
+    public void setShowInQuietMode(@ShowInQuietMode int showInQuietMode) {
+        this.mShowInQuietMode = showInQuietMode;
+        setPresent(INDEX_SHOW_IN_QUIET_MODE);
+    }
+    private int mShowInQuietMode;
+
+    /**
+     * Returns whether a user's data and apps should be shown in sharing surfaces in a separate tab
+     * or mixed with the parent user's data/apps. This is only applicable to profile users.
+     *
+     * @return One of {@link #SHOW_IN_SHARING_SURFACES_NO},
+     *         {@link #SHOW_IN_SHARING_SURFACES_SEPARATE}, or
+     *         {@link #SHOW_IN_SHARING_SURFACES_WITH_PARENT} depending on whether the profile
+     *         should be shown separate from its parent's data, mixed with the parent's data, or
+     *         not shown at all.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public @ShowInSharingSurfaces int getShowInSharingSurfaces() {
+        if (isPresent(INDEX_SHOW_IN_SHARING_SURFACES)) return mShowInSharingSurfaces;
+        if (mDefaultProperties != null) return mDefaultProperties.mShowInSharingSurfaces;
+        throw new SecurityException(
+                "You don't have permission to query ShowInSharingSurfaces");
+    }
+    /** @hide */
+    public void setShowInSharingSurfaces(@ShowInSharingSurfaces int showInSharingSurfaces) {
+        this.mShowInSharingSurfaces = showInSharingSurfaces;
+        setPresent(INDEX_SHOW_IN_SHARING_SURFACES);
+    }
+    private int mShowInSharingSurfaces;
+
+    /**
      * Returns whether a profile should be started when its parent starts (unless in quiet mode).
      * This only applies for users that have parents (i.e. for profiles).
      * @hide
@@ -438,6 +637,24 @@ public final class UserProperties implements Parcelable {
         setPresent(INDEX_DELETE_APP_WITH_PARENT);
     }
     private boolean mDeleteAppWithParent;
+
+    /**
+     * Returns whether the user should always
+     * be {@link android.os.UserManager#isUserVisible() visible}.
+     * The intended usage is for the Communal Profile, which is running and accessible at all times.
+     * @hide
+     */
+    public boolean getAlwaysVisible() {
+        if (isPresent(INDEX_ALWAYS_VISIBLE)) return mAlwaysVisible;
+        if (mDefaultProperties != null) return mDefaultProperties.mAlwaysVisible;
+        throw new SecurityException("You don't have permission to query alwaysVisible");
+    }
+    /** @hide */
+    public void setAlwaysVisible(boolean val) {
+        this.mAlwaysVisible = val;
+        setPresent(INDEX_ALWAYS_VISIBLE);
+    }
+    private boolean mAlwaysVisible;
 
     /**
      * Return whether, and how, select user restrictions or device policies should be inherited
@@ -513,6 +730,11 @@ public final class UserProperties implements Parcelable {
         this.mUpdateCrossProfileIntentFiltersOnOTA = val;
         setPresent(INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA);
     }
+    /**
+     Indicate if {@link com.android.server.pm.CrossProfileIntentFilter}s need to be updated during
+     OTA update between user-parent
+     */
+    private boolean mUpdateCrossProfileIntentFiltersOnOTA;
 
     /**
      * Returns whether a profile shares media with its parent user.
@@ -549,12 +771,63 @@ public final class UserProperties implements Parcelable {
     }
     private boolean mCredentialShareableWithParent;
 
-    /*
-     Indicate if {@link com.android.server.pm.CrossProfileIntentFilter}s need to be updated during
-     OTA update between user-parent
+    /**
+     * Returns whether the profile always requires user authentication to disable from quiet mode.
+     *
+     * <p> Settings this field to true will ensure that the credential confirmation activity is
+     * always shown whenever the user requests to disable quiet mode. The behavior of credential
+     * checks is not guaranteed when the property is false and may vary depending on user types.
+     * @hide
      */
-    private boolean mUpdateCrossProfileIntentFiltersOnOTA;
+    public boolean isAuthAlwaysRequiredToDisableQuietMode() {
+        if (isPresent(INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE)) {
+            return mAuthAlwaysRequiredToDisableQuietMode;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mAuthAlwaysRequiredToDisableQuietMode;
+        }
+        throw new SecurityException(
+                "You don't have permission to query authAlwaysRequiredToDisableQuietMode");
+    }
+    /** @hide */
+    public void setAuthAlwaysRequiredToDisableQuietMode(boolean val) {
+        this.mAuthAlwaysRequiredToDisableQuietMode = val;
+        setPresent(INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE);
+    }
+    private boolean mAuthAlwaysRequiredToDisableQuietMode;
 
+    /**
+     * Returns whether a user (usually a profile) is allowed to leave the CE storage unlocked when
+     * stopped.
+     *
+     * <p> Setting this property to true will enable the user's CE storage to remain unlocked when
+     * the user is stopped using
+     * {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int,
+     * boolean, IStopUserCallback)}.
+     *
+     * <p> When this property is false, delayed locking may still be applicable at a global
+     * level for all users via the {@code config_multiuserDelayUserDataLocking}. That is, delayed
+     * locking for a user can happen if either the device configuration is set or if this property
+     * is set. When both, the config and the property value is false, the user storage is always
+     * locked when the user is stopped.
+     * @hide
+     */
+    public boolean getAllowStoppingUserWithDelayedLocking() {
+        if (isPresent(INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING)) {
+            return mAllowStoppingUserWithDelayedLocking;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mAllowStoppingUserWithDelayedLocking;
+        }
+        throw new SecurityException(
+                "You don't have permission to query allowStoppingUserWithDelayedLocking");
+    }
+    /** @hide */
+    public void setAllowStoppingUserWithDelayedLocking(boolean val) {
+        this.mAllowStoppingUserWithDelayedLocking = val;
+        setPresent(INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING);
+    }
+    private boolean mAllowStoppingUserWithDelayedLocking;
 
     /**
      * Returns the user's {@link CrossProfileIntentFilterAccessControlLevel}.
@@ -584,8 +857,7 @@ public final class UserProperties implements Parcelable {
     private @CrossProfileIntentFilterAccessControlLevel int mCrossProfileIntentFilterAccessControl;
 
     /**
-     * Returns the user's {@link CrossProfileIntentResolutionStrategy}. If not explicitly
-     * configured, default value is {@link #CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT}.
+     * Returns the user's {@link CrossProfileIntentResolutionStrategy}.
      * @return user's {@link CrossProfileIntentResolutionStrategy}.
      *
      * @hide
@@ -600,17 +872,47 @@ public final class UserProperties implements Parcelable {
         throw new SecurityException("You don't have permission to query "
                 + "crossProfileIntentResolutionStrategy");
     }
-    /**
-     * Sets {@link CrossProfileIntentResolutionStrategy} for the user.
-     * @param val resolution strategy for user
-     * @hide
-     */
+
+    /** @hide */
     public void setCrossProfileIntentResolutionStrategy(
             @CrossProfileIntentResolutionStrategy int val) {
         this.mCrossProfileIntentResolutionStrategy = val;
         setPresent(INDEX_CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY);
     }
     private @CrossProfileIntentResolutionStrategy int mCrossProfileIntentResolutionStrategy;
+
+    /**
+     * Returns the user's {@link CrossProfileContentSharingStrategy}.
+     *
+     * Content sharing applications, such as Android Sharesheet allow sharing of content
+     * (an image, for ex.) between profiles, based upon cross-profile access checks between the
+     * originating and destined profile.
+     * In some cases however, we may want another user (such as profile parent) to serve as the
+     * delegated user to be used for such checks.
+     * To effect the same, clients can fetch this property and accordingly replace the
+     * originating/destined profile by another user for cross-profile access checks.
+     *
+     * @return user's {@link CrossProfileContentSharingStrategy}.
+     */
+    @SuppressLint("UnflaggedApi")  // b/306636213
+    public @CrossProfileContentSharingStrategy int getCrossProfileContentSharingStrategy() {
+        if (isPresent(INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY)) {
+            return mCrossProfileContentSharingStrategy;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mCrossProfileContentSharingStrategy;
+        }
+        throw new SecurityException("You don't have permission to query "
+                + "crossProfileContentSharingStrategy");
+    }
+
+    /** @hide */
+    public void setCrossProfileContentSharingStrategy(
+            @CrossProfileContentSharingStrategy int val) {
+        this.mCrossProfileContentSharingStrategy = val;
+        setPresent(INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY);
+    }
+    private @CrossProfileContentSharingStrategy int mCrossProfileContentSharingStrategy;
 
 
     @Override
@@ -631,7 +933,13 @@ public final class UserProperties implements Parcelable {
                 + getCrossProfileIntentResolutionStrategy()
                 + ", mMediaSharedWithParent=" + isMediaSharedWithParent()
                 + ", mCredentialShareableWithParent=" + isCredentialShareableWithParent()
+                + ", mAuthAlwaysRequiredToDisableQuietMode="
+                + isAuthAlwaysRequiredToDisableQuietMode()
+                + ", mAllowStoppingUserWithDelayedLocking="
+                + getAllowStoppingUserWithDelayedLocking()
                 + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
+                + ", mAlwaysVisible=" + getAlwaysVisible()
+                + ", mCrossProfileContentSharingStrategy=" + getCrossProfileContentSharingStrategy()
                 + "}";
     }
 
@@ -657,7 +965,14 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mMediaSharedWithParent=" + isMediaSharedWithParent());
         pw.println(prefix + "    mCredentialShareableWithParent="
                 + isCredentialShareableWithParent());
+        pw.println(prefix + "    mAuthAlwaysRequiredToDisableQuietMode="
+                + isAuthAlwaysRequiredToDisableQuietMode());
+        pw.println(prefix + "    mAllowStoppingUserWithDelayedLocking="
+                + getAllowStoppingUserWithDelayedLocking());
         pw.println(prefix + "    mDeleteAppWithParent=" + getDeleteAppWithParent());
+        pw.println(prefix + "    mAlwaysVisible=" + getAlwaysVisible());
+        pw.println(prefix + "    mCrossProfileContentSharingStrategy="
+                + getCrossProfileContentSharingStrategy());
     }
 
     /**
@@ -700,6 +1015,12 @@ public final class UserProperties implements Parcelable {
                 case ATTR_SHOW_IN_SETTINGS:
                     setShowInSettings(parser.getAttributeInt(i));
                     break;
+                case ATTR_SHOW_IN_QUIET_MODE:
+                    setShowInQuietMode(parser.getAttributeInt(i));
+                    break;
+                case ATTR_SHOW_IN_SHARING_SURFACES:
+                    setShowInSharingSurfaces(parser.getAttributeInt(i));
+                    break;
                 case ATTR_INHERIT_DEVICE_POLICY:
                     setInheritDevicePolicy(parser.getAttributeInt(i));
                     break;
@@ -721,9 +1042,20 @@ public final class UserProperties implements Parcelable {
                 case ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT:
                     setCredentialShareableWithParent(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE:
+                    setAuthAlwaysRequiredToDisableQuietMode(parser.getAttributeBoolean(i));
+                    break;
+                case ATTR_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING:
+                    setAllowStoppingUserWithDelayedLocking(parser.getAttributeBoolean(i));
+                    break;
                 case ATTR_DELETE_APP_WITH_PARENT:
                     setDeleteAppWithParent(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_ALWAYS_VISIBLE:
+                    setAlwaysVisible(parser.getAttributeBoolean(i));
+                    break;
+                case ATTR_CROSS_PROFILE_CONTENT_SHARING_STRATEGY:
+                    setCrossProfileContentSharingStrategy(parser.getAttributeInt(i));
                 default:
                     Slog.w(LOG_TAG, "Skipping unknown property " + attributeName);
             }
@@ -749,6 +1081,13 @@ public final class UserProperties implements Parcelable {
         }
         if (isPresent(INDEX_SHOW_IN_SETTINGS)) {
             serializer.attributeInt(null, ATTR_SHOW_IN_SETTINGS, mShowInSettings);
+        }
+        if (isPresent(INDEX_SHOW_IN_QUIET_MODE)) {
+            serializer.attributeInt(null, ATTR_SHOW_IN_QUIET_MODE,
+                    mShowInQuietMode);
+        }
+        if (isPresent(INDEX_SHOW_IN_SHARING_SURFACES)) {
+            serializer.attributeInt(null, ATTR_SHOW_IN_SHARING_SURFACES, mShowInSharingSurfaces);
         }
         if (isPresent(INDEX_INHERIT_DEVICE_POLICY)) {
             serializer.attributeInt(null, ATTR_INHERIT_DEVICE_POLICY,
@@ -779,9 +1118,25 @@ public final class UserProperties implements Parcelable {
             serializer.attributeBoolean(null, ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT,
                     mCredentialShareableWithParent);
         }
+        if (isPresent(INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE)) {
+            serializer.attributeBoolean(null, ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
+                    mAuthAlwaysRequiredToDisableQuietMode);
+        }
+        if (isPresent(INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING)) {
+            serializer.attributeBoolean(null, ATTR_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING,
+                    mAllowStoppingUserWithDelayedLocking);
+        }
         if (isPresent(INDEX_DELETE_APP_WITH_PARENT)) {
             serializer.attributeBoolean(null, ATTR_DELETE_APP_WITH_PARENT,
                     mDeleteAppWithParent);
+        }
+        if (isPresent(INDEX_ALWAYS_VISIBLE)) {
+            serializer.attributeBoolean(null, ATTR_ALWAYS_VISIBLE,
+                    mAlwaysVisible);
+        }
+        if (isPresent(INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY)) {
+            serializer.attributeInt(null, ATTR_CROSS_PROFILE_CONTENT_SHARING_STRATEGY,
+                    mCrossProfileContentSharingStrategy);
         }
     }
 
@@ -792,6 +1147,8 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mShowInLauncher);
         dest.writeBoolean(mStartWithParent);
         dest.writeInt(mShowInSettings);
+        dest.writeInt(mShowInQuietMode);
+        dest.writeInt(mShowInSharingSurfaces);
         dest.writeInt(mInheritDevicePolicy);
         dest.writeBoolean(mUseParentsContacts);
         dest.writeBoolean(mUpdateCrossProfileIntentFiltersOnOTA);
@@ -799,7 +1156,11 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mCrossProfileIntentResolutionStrategy);
         dest.writeBoolean(mMediaSharedWithParent);
         dest.writeBoolean(mCredentialShareableWithParent);
+        dest.writeBoolean(mAuthAlwaysRequiredToDisableQuietMode);
+        dest.writeBoolean(mAllowStoppingUserWithDelayedLocking);
         dest.writeBoolean(mDeleteAppWithParent);
+        dest.writeBoolean(mAlwaysVisible);
+        dest.writeInt(mCrossProfileContentSharingStrategy);
     }
 
     /**
@@ -813,6 +1174,8 @@ public final class UserProperties implements Parcelable {
         mShowInLauncher = source.readInt();
         mStartWithParent = source.readBoolean();
         mShowInSettings = source.readInt();
+        mShowInQuietMode = source.readInt();
+        mShowInSharingSurfaces = source.readInt();
         mInheritDevicePolicy = source.readInt();
         mUseParentsContacts = source.readBoolean();
         mUpdateCrossProfileIntentFiltersOnOTA = source.readBoolean();
@@ -820,7 +1183,11 @@ public final class UserProperties implements Parcelable {
         mCrossProfileIntentResolutionStrategy = source.readInt();
         mMediaSharedWithParent = source.readBoolean();
         mCredentialShareableWithParent = source.readBoolean();
+        mAuthAlwaysRequiredToDisableQuietMode = source.readBoolean();
+        mAllowStoppingUserWithDelayedLocking = source.readBoolean();
         mDeleteAppWithParent = source.readBoolean();
+        mAlwaysVisible = source.readBoolean();
+        mCrossProfileContentSharingStrategy = source.readInt();
     }
 
     @Override
@@ -843,11 +1210,17 @@ public final class UserProperties implements Parcelable {
      * Intended for building default values (and so all properties are present in the built object).
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // b/306636213
     public static final class Builder {
         // UserProperties fields and their default values.
         private @ShowInLauncher int mShowInLauncher = SHOW_IN_LAUNCHER_WITH_PARENT;
         private boolean mStartWithParent = false;
         private @ShowInSettings int mShowInSettings = SHOW_IN_SETTINGS_WITH_PARENT;
+        private @ShowInQuietMode int mShowInQuietMode =
+                SHOW_IN_QUIET_MODE_PAUSED;
+        private @ShowInSharingSurfaces int mShowInSharingSurfaces =
+                SHOW_IN_SHARING_SURFACES_SEPARATE;
         private @InheritDevicePolicy int mInheritDevicePolicy = INHERIT_DEVICE_POLICY_NO;
         private boolean mUseParentsContacts = false;
         private boolean mUpdateCrossProfileIntentFiltersOnOTA = false;
@@ -858,44 +1231,89 @@ public final class UserProperties implements Parcelable {
                 CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT;
         private boolean mMediaSharedWithParent = false;
         private boolean mCredentialShareableWithParent = false;
+        private boolean mAuthAlwaysRequiredToDisableQuietMode = false;
+        private boolean mAllowStoppingUserWithDelayedLocking = false;
         private boolean mDeleteAppWithParent = false;
+        private boolean mAlwaysVisible = false;
+        private @CrossProfileContentSharingStrategy int mCrossProfileContentSharingStrategy =
+                CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION;
 
+        /**
+         * @hide
+         */
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @TestApi
+        public Builder() {}
+
+        /** @hide */
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
             return this;
         }
 
+        /** @hide */
         public Builder setStartWithParent(boolean startWithParent) {
             mStartWithParent = startWithParent;
             return this;
         }
 
-        /** Sets the value for {@link #mShowInSettings} */
+        /** Sets the value for {@link #mShowInSettings}
+         * @hide
+         */
         public Builder setShowInSettings(@ShowInSettings int showInSettings) {
             mShowInSettings = showInSettings;
             return this;
         }
 
-        /** Sets the value for {@link #mInheritDevicePolicy}*/
+        /** Sets the value for {@link #mShowInQuietMode}
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
+        public Builder setShowInQuietMode(@ShowInQuietMode int showInQuietMode) {
+            mShowInQuietMode = showInQuietMode;
+            return this;
+        }
+
+        /** Sets the value for {@link #mShowInSharingSurfaces}.
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
+        public Builder setShowInSharingSurfaces(@ShowInSharingSurfaces int showInSharingSurfaces) {
+            mShowInSharingSurfaces = showInSharingSurfaces;
+            return this;
+        }
+
+        /** Sets the value for {@link #mInheritDevicePolicy}
+         * @hide
+         */
         public Builder setInheritDevicePolicy(
                 @InheritDevicePolicy int inheritRestrictionsDevicePolicy) {
             mInheritDevicePolicy = inheritRestrictionsDevicePolicy;
             return this;
         }
 
+        /** @hide */
         public Builder setUseParentsContacts(boolean useParentsContacts) {
             mUseParentsContacts = useParentsContacts;
             return this;
         }
 
-        /** Sets the value for {@link #mUpdateCrossProfileIntentFiltersOnOTA} */
+        /** Sets the value for {@link #mUpdateCrossProfileIntentFiltersOnOTA}
+         * @hide
+         */
         public Builder setUpdateCrossProfileIntentFiltersOnOTA(boolean
                 updateCrossProfileIntentFiltersOnOTA) {
             mUpdateCrossProfileIntentFiltersOnOTA = updateCrossProfileIntentFiltersOnOTA;
             return this;
         }
 
-        /** Sets the value for {@link #mCrossProfileIntentFilterAccessControl} */
+        /** Sets the value for {@link #mCrossProfileIntentFilterAccessControl}
+         * @hide
+         */
         public Builder setCrossProfileIntentFilterAccessControl(
                 @CrossProfileIntentFilterAccessControlLevel int
                         crossProfileIntentFilterAccessControl) {
@@ -903,35 +1321,89 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
-        /** Sets the value for {@link #mCrossProfileIntentResolutionStrategy} */
+        /** Sets the value for {@link #mCrossProfileIntentResolutionStrategy}
+         * @hide
+         */
         public Builder setCrossProfileIntentResolutionStrategy(@CrossProfileIntentResolutionStrategy
                 int crossProfileIntentResolutionStrategy) {
             mCrossProfileIntentResolutionStrategy = crossProfileIntentResolutionStrategy;
             return this;
         }
 
+        /** @hide */
         public Builder setMediaSharedWithParent(boolean mediaSharedWithParent) {
             mMediaSharedWithParent = mediaSharedWithParent;
             return this;
         }
 
+        /** @hide */
         public Builder setCredentialShareableWithParent(boolean credentialShareableWithParent) {
             mCredentialShareableWithParent = credentialShareableWithParent;
             return this;
         }
 
-        /** Sets the value for {@link #mDeleteAppWithParent}*/
+        /** Sets the value for {@link #mAuthAlwaysRequiredToDisableQuietMode}
+         * @hide
+         */
+        public Builder setAuthAlwaysRequiredToDisableQuietMode(
+                boolean authAlwaysRequiredToDisableQuietMode) {
+            mAuthAlwaysRequiredToDisableQuietMode =
+                    authAlwaysRequiredToDisableQuietMode;
+            return this;
+        }
+
+        /** Sets the value for {@link #mAllowStoppingUserWithDelayedLocking}
+         * @hide
+         */
+        public Builder setAllowStoppingUserWithDelayedLocking(
+                boolean allowStoppingUserWithDelayedLocking) {
+            mAllowStoppingUserWithDelayedLocking =
+                    allowStoppingUserWithDelayedLocking;
+            return this;
+        }
+
+        /** Sets the value for {@link #mDeleteAppWithParent}
+         * @hide
+         */
         public Builder setDeleteAppWithParent(boolean deleteAppWithParent) {
             mDeleteAppWithParent = deleteAppWithParent;
             return this;
         }
 
-        /** Builds a UserProperties object with *all* values populated. */
+        /** Sets the value for {@link #mAlwaysVisible}
+         * @hide
+         */
+        public Builder setAlwaysVisible(boolean alwaysVisible) {
+            mAlwaysVisible = alwaysVisible;
+            return this;
+        }
+
+        /** Sets the value for {@link #mCrossProfileContentSharingStrategy}
+         * @hide
+         */
+
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
+        public Builder setCrossProfileContentSharingStrategy(@CrossProfileContentSharingStrategy
+                int crossProfileContentSharingStrategy) {
+            mCrossProfileContentSharingStrategy = crossProfileContentSharingStrategy;
+            return this;
+        }
+
+        /** Builds a UserProperties object with *all* values populated.
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
         public UserProperties build() {
             return new UserProperties(
                     mShowInLauncher,
                     mStartWithParent,
                     mShowInSettings,
+                    mShowInQuietMode,
+                    mShowInSharingSurfaces,
                     mInheritDevicePolicy,
                     mUseParentsContacts,
                     mUpdateCrossProfileIntentFiltersOnOTA,
@@ -939,7 +1411,11 @@ public final class UserProperties implements Parcelable {
                     mCrossProfileIntentResolutionStrategy,
                     mMediaSharedWithParent,
                     mCredentialShareableWithParent,
-                    mDeleteAppWithParent);
+                    mAuthAlwaysRequiredToDisableQuietMode,
+                    mAllowStoppingUserWithDelayedLocking,
+                    mDeleteAppWithParent,
+                    mAlwaysVisible,
+                    mCrossProfileContentSharingStrategy);
         }
     } // end Builder
 
@@ -948,17 +1424,25 @@ public final class UserProperties implements Parcelable {
             @ShowInLauncher int showInLauncher,
             boolean startWithParent,
             @ShowInSettings int showInSettings,
+            @ShowInQuietMode int showInQuietMode,
+            @ShowInSharingSurfaces int showInSharingSurfaces,
             @InheritDevicePolicy int inheritDevicePolicy,
             boolean useParentsContacts, boolean updateCrossProfileIntentFiltersOnOTA,
             @CrossProfileIntentFilterAccessControlLevel int crossProfileIntentFilterAccessControl,
             @CrossProfileIntentResolutionStrategy int crossProfileIntentResolutionStrategy,
             boolean mediaSharedWithParent,
             boolean credentialShareableWithParent,
-            boolean deleteAppWithParent) {
+            boolean authAlwaysRequiredToDisableQuietMode,
+            boolean allowStoppingUserWithDelayedLocking,
+            boolean deleteAppWithParent,
+            boolean alwaysVisible,
+            @CrossProfileContentSharingStrategy int crossProfileContentSharingStrategy) {
         mDefaultProperties = null;
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
         setShowInSettings(showInSettings);
+        setShowInQuietMode(showInQuietMode);
+        setShowInSharingSurfaces(showInSharingSurfaces);
         setInheritDevicePolicy(inheritDevicePolicy);
         setUseParentsContacts(useParentsContacts);
         setUpdateCrossProfileIntentFiltersOnOTA(updateCrossProfileIntentFiltersOnOTA);
@@ -966,6 +1450,11 @@ public final class UserProperties implements Parcelable {
         setCrossProfileIntentResolutionStrategy(crossProfileIntentResolutionStrategy);
         setMediaSharedWithParent(mediaSharedWithParent);
         setCredentialShareableWithParent(credentialShareableWithParent);
+        setAuthAlwaysRequiredToDisableQuietMode(
+                authAlwaysRequiredToDisableQuietMode);
+        setAllowStoppingUserWithDelayedLocking(allowStoppingUserWithDelayedLocking);
         setDeleteAppWithParent(deleteAppWithParent);
+        setAlwaysVisible(alwaysVisible);
+        setCrossProfileContentSharingStrategy(crossProfileContentSharingStrategy);
     }
 }

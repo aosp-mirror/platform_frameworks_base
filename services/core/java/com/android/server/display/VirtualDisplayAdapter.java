@@ -61,9 +61,10 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A display adapter that provides virtual displays on behalf of applications.
@@ -71,23 +72,24 @@ import java.util.Iterator;
  * Display adapters are guarded by the {@link DisplayManagerService.SyncRoot} lock.
  * </p>
  */
-@VisibleForTesting
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class VirtualDisplayAdapter extends DisplayAdapter {
     static final String TAG = "VirtualDisplayAdapter";
-    static final boolean DEBUG = false;
 
     // Unique id prefix for virtual displays
     @VisibleForTesting
     static final String UNIQUE_ID_PREFIX = "virtual:";
 
-    private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices =
-            new ArrayMap<IBinder, VirtualDisplayDevice>();
+    // Unique id suffix for virtual displays
+    private static final AtomicInteger sNextUniqueIndex = new AtomicInteger(0);
+
+    private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices = new ArrayMap<>();
     private final Handler mHandler;
     private final SurfaceControlDisplayFactory mSurfaceControlDisplayFactory;
 
     // Called with SyncRoot lock held.
     public VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener) {
+            Context context, Handler handler, Listener listener, DisplayManagerFlags featureFlags) {
         this(syncRoot, context, handler, listener, new SurfaceControlDisplayFactory() {
             @Override
             public IBinder createDisplay(String name, boolean secure, float requestedRefreshRate) {
@@ -98,43 +100,41 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             public void destroyDisplay(IBinder displayToken) {
                 DisplayControl.destroyDisplay(displayToken);
             }
-        });
+        }, featureFlags);
     }
 
     @VisibleForTesting
     VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener,
-            SurfaceControlDisplayFactory surfaceControlDisplayFactory) {
-        super(syncRoot, context, handler, listener, TAG);
+            SurfaceControlDisplayFactory surfaceControlDisplayFactory,
+            DisplayManagerFlags featureFlags) {
+        super(syncRoot, context, handler, listener, TAG, featureFlags);
         mHandler = handler;
         mSurfaceControlDisplayFactory = surfaceControlDisplayFactory;
     }
 
     public DisplayDevice createVirtualDisplayLocked(IVirtualDisplayCallback callback,
-            IMediaProjection projection, int ownerUid, String ownerPackageName, Surface surface,
-            int flags, VirtualDisplayConfig virtualDisplayConfig) {
+            IMediaProjection projection, int ownerUid, String ownerPackageName, String uniqueId,
+            Surface surface, int flags, VirtualDisplayConfig virtualDisplayConfig) {
+        IBinder appToken = callback.asBinder();
+        if (mVirtualDisplayDevices.containsKey(appToken)) {
+            Slog.wtfStack(TAG,
+                    "Can't create virtual display, display with same appToken already exists");
+            return null;
+        }
+
         String name = virtualDisplayConfig.getName();
         boolean secure = (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
-        IBinder appToken = callback.asBinder();
+
         IBinder displayToken = mSurfaceControlDisplayFactory.createDisplay(name, secure,
                 virtualDisplayConfig.getRequestedRefreshRate());
-        final String baseUniqueId =
-                UNIQUE_ID_PREFIX + ownerPackageName + "," + ownerUid + "," + name + ",";
-        final int uniqueIndex = getNextUniqueIndex(baseUniqueId);
-        String uniqueId = virtualDisplayConfig.getUniqueId();
-        if (uniqueId == null) {
-            uniqueId = baseUniqueId + uniqueIndex;
-        } else {
-            uniqueId = UNIQUE_ID_PREFIX + ownerPackageName + ":" + uniqueId;
-        }
         MediaProjectionCallback mediaProjectionCallback =  null;
         if (projection != null) {
             mediaProjectionCallback = new MediaProjectionCallback(appToken);
         }
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
-                ownerUid, ownerPackageName, surface, flags,
-                new Callback(callback, mHandler), projection, mediaProjectionCallback,
-                uniqueId, uniqueIndex, virtualDisplayConfig);
+                ownerUid, ownerPackageName, surface, flags, new Callback(callback, mHandler),
+                projection, mediaProjectionCallback, uniqueId, virtualDisplayConfig);
 
         mVirtualDisplayDevices.put(appToken, device);
 
@@ -212,26 +212,20 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     }
 
     /**
-     * Returns the next unique index for the uniqueIdPrefix
+     * Generates a virtual display's unique identifier.
+     *
+     * <p>It is always prefixed with "virtual:package-name". If the provided config explicitly
+     * specifies a unique ID, then it's simply appended. Otherwise, the UID, display name and a
+     * unique index are appended.</p>
+     *
+     * <p>The unique index is incremented for every virtual display unique ID generation and serves
+     * for differentiating between displays with the same name created by the same owner.</p>
      */
-    private int getNextUniqueIndex(String uniqueIdPrefix) {
-        if (mVirtualDisplayDevices.isEmpty()) {
-            return 0;
-        }
-
-        int nextUniqueIndex = 0;
-        Iterator<VirtualDisplayDevice> it = mVirtualDisplayDevices.values().iterator();
-        while (it.hasNext()) {
-            VirtualDisplayDevice device = it.next();
-            if (device.getUniqueId().startsWith(uniqueIdPrefix)
-                    && device.mUniqueIndex >= nextUniqueIndex) {
-                // Increment the next unique index to be greater than ones we have already ran
-                // across for displays that have the same unique Id prefix.
-                nextUniqueIndex = device.mUniqueIndex + 1;
-            }
-        }
-
-        return nextUniqueIndex;
+    static String generateDisplayUniqueId(String packageName, int uid,
+            VirtualDisplayConfig config) {
+        return UNIQUE_ID_PREFIX + packageName + ((config.getUniqueId() != null)
+                ? (":" + config.getUniqueId())
+                : ("," + uid + "," + config.getName() + "," + sNextUniqueIndex.getAndIncrement()));
     }
 
     private void handleBinderDiedLocked(IBinder appToken) {
@@ -271,7 +265,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private int mDisplayState;
         private boolean mStopped;
         private int mPendingChanges;
-        private int mUniqueIndex;
         private Display.Mode mMode;
         private boolean mIsDisplayOn;
         private int mDisplayIdToMirror;
@@ -280,7 +273,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName, Surface surface, int flags,
                 Callback callback, IMediaProjection projection,
-                IMediaProjectionCallback mediaProjectionCallback, String uniqueId, int uniqueIndex,
+                IMediaProjectionCallback mediaProjectionCallback, String uniqueId,
                 VirtualDisplayConfig virtualDisplayConfig) {
             super(VirtualDisplayAdapter.this, displayToken, uniqueId, getContext());
             mAppToken = appToken;
@@ -299,7 +292,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mMediaProjectionCallback = mediaProjectionCallback;
             mDisplayState = Display.STATE_UNKNOWN;
             mPendingChanges |= PENDING_SURFACE_CHANGE;
-            mUniqueIndex = uniqueIndex;
             mIsDisplayOn = surface != null;
             mDisplayIdToMirror = virtualDisplayConfig.getDisplayIdToMirror();
             mIsWindowManagerMirroring = virtualDisplayConfig.isWindowManagerMirroringEnabled();
@@ -389,7 +381,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
         @Override
         public Runnable requestDisplayStateLocked(int state, float brightnessState,
-                float sdrBrightnessState) {
+                float sdrBrightnessState, DisplayOffloadSessionImpl displayOffloadSession) {
             if (state != mDisplayState) {
                 mDisplayState = state;
                 if (state == Display.STATE_OFF) {

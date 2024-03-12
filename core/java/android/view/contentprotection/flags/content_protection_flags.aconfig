@@ -1,0 +1,36 @@
+package: "android.view.contentprotection.flags"
+
+flag {
+    name: "blocklist_update_enabled"
+    namespace: "content_protection"
+    description: "If true, content protection blocklist is mutable and can be updated."
+    bug: "301658008"
+}
+
+flag {
+    name: "parse_groups_config_enabled"
+    namespace: "content_protection"
+    description: "If true, content protection groups config will be parsed."
+    bug: "302187922"
+}
+
+flag {
+    name: "setting_ui_enabled"
+    namespace: "content_protection"
+    description: "If true, content protection setting ui is displayed in Settings > Privacy & Security > More security & privacy."
+    bug: "305792348"
+}
+
+flag {
+    name: "create_accessibility_overlay_app_op_enabled"
+    namespace: "content_protection"
+    description: "If true, an appop is logged on creation of accessibility overlays."
+    bug: "289081465"
+}
+
+flag {
+    name: "rapid_clear_notifications_by_listener_app_op_enabled"
+    namespace: "content_protection"
+    description: "If true, an appop is logged when a notification is rapidly cleared by a notification listener."
+    bug: "289080543"
+}

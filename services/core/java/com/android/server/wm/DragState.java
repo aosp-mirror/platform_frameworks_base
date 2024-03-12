@@ -48,7 +48,6 @@ import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.InputConfig;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -186,6 +185,10 @@ class DragState {
         // Crop the input surface to the display size.
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
 
+        // Make trusted overlay to not block any touches while D&D ongoing and allowing
+        // touches to pass through to windows underneath. This allows user to interact with the
+        // UI to navigate while dragging.
+        h.setTrustedOverlay(mTransaction, mInputSurface, true);
         mTransaction.show(mInputSurface)
                 .setInputWindowInfo(mInputSurface, h)
                 .setLayer(mInputSurface, Integer.MAX_VALUE)
@@ -377,11 +380,6 @@ class DragState {
             mDragWindowHandle.ownerUid = MY_UID;
             mDragWindowHandle.scaleFactor = 1.0f;
 
-            // InputConfig.TRUSTED_OVERLAY: To not block any touches while D&D ongoing and allowing
-            // touches to pass through to windows underneath. This allows user to interact with the
-            // UI to navigate while dragging.
-            mDragWindowHandle.inputConfig = InputConfig.TRUSTED_OVERLAY;
-
             // The drag window cannot receive new touches.
             mDragWindowHandle.touchableRegion.setEmpty();
 
@@ -416,6 +414,13 @@ class DragState {
 
     InputWindowHandle getInputWindowHandle() {
         return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
+    }
+
+    IBinder getInputToken() {
+        if (mInputInterceptor == null || mInputInterceptor.mClientChannel == null) {
+            return null;
+        }
+        return mInputInterceptor.mClientChannel.getToken();
     }
 
     /**
@@ -694,6 +699,7 @@ class DragState {
     void overridePointerIconLocked(int touchSource) {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            // TODO(b/293587049): Pointer Icon Refactor: Set the pointer icon from the drag window.
             InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
         }
     }

@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"App installed."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Do you want to install this app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Do you want to update this app?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Update this app from <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nThis app normally receives updates from <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. By updating from a different source, you may receive future updates from any source on your phone. App functionality may change."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Update this app from &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;This app normally receives updates from &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. By updating from a different source, you may receive future updates from any source on your tablet. App functionality may change.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Update this app from &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;This app normally receives updates from &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. By updating from a different source, you may receive future updates from any source on your TV. App functionality may change.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Update this app from &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;This app normally receives updates from &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. By updating from a different source, you may receive future updates from any source on your phone. App functionality may change.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"App not installed."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"The package was blocked from being installed."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"App not installed as package conflicts with an existing package."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Keep <xliff:g id="SIZE">%1$s</xliff:g> of app data."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Do you want to delete this app?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Do you want to uninstall this app? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> clone will also be deleted."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Do you want to uninstall this app from your private space?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Running uninstalls"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Failed uninstalls"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Uninstalling…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"App installed notification"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Successfully installed"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Successfully installed “<xliff:g id="APPNAME">%1$s</xliff:g>”"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Restore <xliff:g id="APPNAME">%1$s</xliff:g> from <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"This app will begin to download in the background"</string>
+    <string name="restore" msgid="8460854736328970444">"Restore"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"You\'re offline"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"This app will automatically restore when you\'re connected to the internet"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Something went wrong"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"There was a problem trying to restore this app"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Not enough storage"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"To restore this app, you can free up space on this device. Storage required: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Action required"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Follow the next steps to restore this app"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> is disabled"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> is uninstalled"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"To restore this app, you\'ll need to install <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continue"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Clear storage"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Settings"</string>
+    <string name="close" msgid="5214897374055647996">"Close"</string>
 </resources>

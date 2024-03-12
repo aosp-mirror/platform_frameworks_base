@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"เอาออกจากที่เก็บส่วนตัว"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"แอปอาจใช้ไม่ได้กับโหมดแยกหน้าจอ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"แอปไม่รองรับการแยกหน้าจอ"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"แอปนี้เปิดได้ใน 1 หน้าต่างเท่านั้น"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"แอปนี้เปิดได้ใน 1 หน้าต่างเท่านั้น"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"แอปอาจไม่ทำงานในจอแสดงผลรอง"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"แอปไม่รองรับการเรียกใช้ในจอแสดงผลรอง"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"เส้นแยกหน้าจอ"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ย้ายไปด้านขวาบน"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ย้ายไปด้านซ้ายล่าง"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ย้ายไปด้านขาวล่าง"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"ขยาย <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"ยุบ <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"การตั้งค่า <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ปิดบับเบิล"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"ไม่ต้องแสดงการสนทนาเป็นบับเบิล"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"รับทราบ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ไม่มีบับเบิลเมื่อเร็วๆ นี้"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"บับเบิลที่แสดงและที่ปิดไปเมื่อเร็วๆ นี้จะปรากฏที่นี่"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"แชทโดยใช้บับเบิล"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"การสนทนาครั้งใหม่ๆ จะปรากฏเป็นไอคอนที่มุมล่างของหน้าจอ โดยสามารถแตะเพื่อขยายหรือลากเพื่อปิด"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ควบคุมบับเบิลได้ทุกเมื่อ"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"แตะที่นี่เพื่อจัดการแอปและการสนทนาที่แสดงเป็นบับเบิลได้"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"บับเบิล"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"จัดการ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ปิดบับเบิลแล้ว"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"แตะเพื่อรีสตาร์ทแอปนี้และรับมุมมองที่ดียิ่งขึ้น"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"แตะเพื่อรีสตาร์ทแอปนี้และรับมุมมองที่ดียิ่งขึ้น"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"เปลี่ยนสัดส่วนภาพของแอปนี้ในการตั้งค่า"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"เปลี่ยนอัตราส่วนกว้างยาว"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"หากพบปัญหากับกล้อง\nแตะเพื่อแก้ไข"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"หากไม่ได้แก้ไข\nแตะเพื่อเปลี่ยนกลับ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"หากไม่พบปัญหากับกล้อง แตะเพื่อปิด"</string>

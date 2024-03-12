@@ -26,7 +26,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.ImageView
 import android.widget.LinearLayout
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableFrameLayout
 import com.android.systemui.statusbar.events.BackgroundAnimatableView
 

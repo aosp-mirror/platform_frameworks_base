@@ -1,0 +1,15 @@
+package: "android.appwidget.flags"
+
+flag {
+  name: "generated_previews"
+  namespace: "app_widgets"
+  description: "Enable support for generated previews in AppWidgetManager"
+  bug: "306546610"
+}
+
+flag {
+  name: "remote_adapter_conversion"
+  namespace: "app_widgets"
+  description: "Enable adapter conversion to RemoteCollectionItemsAdapter"
+  bug: "245950570"
+}

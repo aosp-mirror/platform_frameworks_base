@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • सावकाश चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • बॅटरीचे संरक्षण करण्यासाठी चार्जिंग ऑप्टिमाइझ केले आहे"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्जिंगच्या ॲक्सेसरीसंबंधित समस्या"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलॉक करण्यासाठी मेनू प्रेस करा."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लॉक केले"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"सिम नाही"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"सिम जोडा."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"सिम गहाळ झाले आहे किंवा ते रीड करू शकत नाही. सिम जोडा."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"वापरण्यायोग्य नसलेले सिम."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"तुमचे सिम कायमचे डीॲक्टिव्हेट केले गेले आहे.\n दुसऱ्या सिमसाठी तुमच्या वायरलेस सेवा पुरवठादाराशी संपर्क साधा."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"सिम लॉक केलेले आहे."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"सिम PUK लॉक केलेले आहे."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"सिम अनलॉक करत आहे…"</string>
@@ -61,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"चुकीचा पिन"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"पिन चुकीचा आहे. पुन्हा प्रयत्न करा."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"किंवा फिंगरप्रिंट वापरून अनलॉक करा"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिंट ओळखले नाही"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"चेहरा ओळखता आला नाही"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"पुन्हा प्रयत्न करा किंवा पिन एंटर करा"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"पुन्हा प्रयत्न करा किंवा पासवर्ड एंटर करा"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"लॉकडाउननंतर पिन आवश्यक आहे"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"लॉकडाउननंतर पासवर्ड आवश्यक आहे"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"लॉकडाउननंतर पॅटर्न आवश्यक आहे"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"अपडेट हे इनॅक्टिव्ह तासांदरम्यान इंस्टॉल होईल"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"डिव्हाइस वापरात नसताना अपडेट इंस्टॉल केले जाईल"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पिन अनलॉक केला गेला नव्हता."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पासवर्ड अनलॉक केला गेला नव्हता."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पॅटर्न अनलॉक केला गेला नव्हता."</string>
@@ -98,7 +94,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"सिम अनलॉक करत आहे…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4 ते 8 अंकांचा पिन टाईप करा."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK कोड 8 अंकी किंवा त्यापेक्षा अधिकचा असावा."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"तुम्ही तुमचा PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"तुम्ही तुमचा पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"तुम्ही तुमचा पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"सिम पिन कोड चुकीचा आहे तुम्ही आता तुमचे डिव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधावा."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"अ‍ॅनालॉग"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"पुढे सुरू ठेवण्यासाठी तुमचे डिव्हाइस अनलॉक करा"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"नंतर अपडेट इंस्टॉल करण्यासाठी पिन एंटर करा"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"नंतर अपडेट इंस्टॉल करण्यासाठी पासवर्ड एंटर करा"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"नंतर अपडेट इंस्टॉल करण्यासाठी पॅटर्न ड्रॉ करा"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"डिव्हाइस अपडेट केले आहे. पुढे सुरू ठेवण्यासाठी पिन एंटर करा."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"डिव्हाइस अपडेट केले आहे. पुढे सुरू ठेवण्यासाठी पासवर्ड एंटर करा."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"डिव्हाइस अपडेट केले आहे. पुढे सुरू ठेवण्यासाठी पॅटर्न ड्रॉ करा."</string>
 </resources>

@@ -184,6 +184,14 @@ public abstract class BackupAgent extends ContextWrapper {
     public static final int FLAG_DEVICE_TO_DEVICE_TRANSFER = 2;
 
     /**
+     * Flag for {@link RestoreSet#backupTransportFlags} to indicate if restore should be skipped
+     * for apps that have already been launched.
+     *
+     * @hide
+     */
+    public static final int FLAG_SKIP_RESTORE_FOR_LAUNCHED_APPS = 1 << 2;
+
+    /**
      * Flag for {@link BackupDataOutput#getTransportFlags()} and
      * {@link FullBackupDataOutput#getTransportFlags()} only.
      *

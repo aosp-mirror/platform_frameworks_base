@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -27,6 +29,9 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfte
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.RenderNotificationListInteractor
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
@@ -52,24 +57,40 @@ class StackCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var pipeline: NotifPipeline
     @Mock private lateinit var groupExpansionManagerImpl: GroupExpansionManagerImpl
     @Mock private lateinit var notificationIconAreaController: NotificationIconAreaController
+    @Mock private lateinit var renderListInteractor: RenderNotificationListInteractor
+    @Mock private lateinit var activeNotificationsInteractor: ActiveNotificationsInteractor
     @Mock private lateinit var stackController: NotifStackController
     @Mock private lateinit var section: NotifSection
 
     @Before
     fun setUp() {
         initMocks(this)
-        coordinator = StackCoordinator(groupExpansionManagerImpl, notificationIconAreaController)
+        entry = NotificationEntryBuilder().setSection(section).build()
+        coordinator =
+            StackCoordinator(
+                groupExpansionManagerImpl,
+                notificationIconAreaController,
+                renderListInteractor,
+                activeNotificationsInteractor,
+            )
         coordinator.attach(pipeline)
         afterRenderListListener = withArgCaptor {
             verify(pipeline).addOnAfterRenderListListener(capture())
         }
-        entry = NotificationEntryBuilder().setSection(section).build()
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testUpdateNotificationIcons() {
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(notificationIconAreaController).updateNotificationIcons(eq(listOf(entry)))
+    }
+
+    @Test
+    @EnableFlags(NotificationIconContainerRefactor.FLAG_NAME)
+    fun testSetRenderedListOnInteractor() {
+        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
     }
 
     @Test

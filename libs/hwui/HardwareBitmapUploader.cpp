@@ -22,9 +22,11 @@
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
 #include <GrDirectContext.h>
+#include <GrTypes.h>
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkImage.h>
+#include <SkImageAndroid.h>
 #include <SkImageInfo.h>
 #include <SkRefCnt.h>
 #include <gui/TraceUtils.h>
@@ -262,8 +264,9 @@ private:
           }
 
           sk_sp<SkImage> image =
-              SkImage::MakeFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(), ahb);
-          mGrContext->submit(true);
+              SkImages::TextureFromAHardwareBufferWithData(mGrContext.get(), bitmap.pixmap(),
+                                                           ahb);
+          mGrContext->submit(GrSyncCpu::kYes);
 
           uploadSucceeded = (image.get() != nullptr);
         });

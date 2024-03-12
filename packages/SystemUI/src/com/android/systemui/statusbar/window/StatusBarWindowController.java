@@ -47,7 +47,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
 import com.android.systemui.dagger.SysUISingleton;
@@ -125,14 +125,19 @@ public class StatusBarWindowController {
      * is different.
      */
     public void refreshStatusBarHeight() {
-        int heightFromConfig = SystemBarUtils.getStatusBarHeight(mContext);
+        Trace.beginSection("StatusBarWindowController#refreshStatusBarHeight");
+        try {
+            int heightFromConfig = SystemBarUtils.getStatusBarHeight(mContext);
 
-        if (mBarHeight != heightFromConfig) {
-            mBarHeight = heightFromConfig;
-            apply(mCurrentState);
+            if (mBarHeight != heightFromConfig) {
+                mBarHeight = heightFromConfig;
+                apply(mCurrentState);
+            }
+
+            if (DEBUG) Log.v(TAG, "defineSlots");
+        } finally {
+            Trace.endSection();
         }
-
-        if (DEBUG) Log.v(TAG, "defineSlots");
     }
 
     /**

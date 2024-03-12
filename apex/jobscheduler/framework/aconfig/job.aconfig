@@ -1,0 +1,15 @@
+package: "android.app.job"
+
+flag {
+    name: "enforce_minimum_time_windows"
+    namespace: "backstage_power"
+    description: "Enforce a minimum time window for job latencies & deadlines"
+    bug: "311402873"
+}
+
+flag {
+    name: "job_debug_info_apis"
+    namespace: "backstage_power"
+    description: "Add APIs to let apps attach debug information to jobs"
+    bug: "293491637"
+}

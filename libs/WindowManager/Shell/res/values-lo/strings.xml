@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ເອົາອອກຈາກບ່ອນເກັບສ່ວນຕົວ"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"ແອັບອາດໃຊ້ບໍ່ໄດ້ກັບໂໝດແບ່ງໜ້າຈໍ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ແອັບບໍ່ຮອງຮັບການແບ່ງໜ້າຈໍ"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ແອັບນີ້ສາມາດເປີດໄດ້ໃນ 1 ໜ້າຈໍເທົ່ານັ້ນ."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ແອັບນີ້ສາມາດເປີດໄດ້ໃນ 1 ໜ້າຈໍເທົ່ານັ້ນ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ແອັບອາດບໍ່ສາມາດໃຊ້ໄດ້ໃນໜ້າຈໍທີສອງ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ແອັບບໍ່ຮອງຮັບການເປີດໃນໜ້າຈໍທີສອງ."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"ເສັ້ນແບ່ງໜ້າຈໍ"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ຍ້າຍຂວາເທິງ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ຍ້າຍຊ້າຍລຸ່ມ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ຍ້າຍຂວາລຸ່ມ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"ຂະຫຍາຍ <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"ຫຍໍ້ <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ລົງ"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"ການຕັ້ງຄ່າ <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ປິດຟອງໄວ້"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"ຢ່າໃຊ້ຟອງໃນການສົນທະນາ"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ບໍ່ມີຟອງຫຼ້າສຸດ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ຟອງຫຼ້າສຸດ ແລະ ຟອງທີ່ປິດໄປຈະປາກົດຢູ່ບ່ອນນີ້"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ສົນທະນາໂດຍໃຊ້ຟອງ"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"ການສົນທະນາໃໝ່ໆຈະປາກົດເປັນໄອຄອນຢູ່ມຸມລຸ່ມສຸດຂອງໜ້າຈໍຂອງທ່ານ. ແຕະເພື່ອຂະຫຍາຍ ຫຼື ລາກເພື່ອປິດໄວ້."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ຄວບຄຸມຟອງໄດ້ທຸກເວລາ"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ແຕະບ່ອນນີ້ເພື່ອຈັດການແອັບ ແລະ ການສົນທະນາທີ່ສາມາດສະແດງເປັນແບບຟອງໄດ້"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ຟອງ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ຈັດການ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ປິດ Bubble ໄສ້ແລ້ວ."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"ແຕະເພື່ອຣີສະຕາດແອັບນີ້ເພື່ອມຸມມອງທີ່ດີຂຶ້ນ."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"ແຕະເພື່ອຣີສະຕາດແອັບນີ້ເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ປ່ຽນອັດຕາສ່ວນຂອງແອັບນີ້ໃນການຕັ້ງຄ່າ"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"ປ່ຽນອັດຕາສ່ວນ"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ມີບັນຫາກ້ອງຖ່າຍຮູບບໍ?\nແຕະເພື່ອປັບໃໝ່"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ບໍ່ໄດ້ແກ້ໄຂມັນບໍ?\nແຕະເພື່ອແປງກັບຄືນ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ບໍ່ມີບັນຫາກ້ອງຖ່າຍຮູບບໍ? ແຕະເພື່ອ​ປິດ​ໄວ້."</string>

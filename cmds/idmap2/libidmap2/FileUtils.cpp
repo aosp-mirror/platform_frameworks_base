@@ -16,11 +16,13 @@
 
 #include "idmap2/FileUtils.h"
 
+#include <random>
 #include <string>
+#include <string_view>
 
 #include "android-base/file.h"
 #include "android-base/macros.h"
-#include "android-base/stringprintf.h"
+#include "android-base/strings.h"
 #include "private/android_filesystem_config.h"
 
 namespace android::idmap2::utils {
@@ -33,9 +35,9 @@ bool UidHasWriteAccessToPath(uid_t uid, const std::string& path) {
     return false;
   }
 
-  const std::string cache_subdir = base::StringPrintf("%s/", kIdmapCacheDir);
-  if (canonical_path == kIdmapCacheDir ||
-      canonical_path.compare(0, cache_subdir.size(), cache_subdir) == 0) {
+  if (base::StartsWith(canonical_path, kIdmapCacheDir) &&
+      (canonical_path.size() == kIdmapCacheDir.size() ||
+       canonical_path[kIdmapCacheDir.size()] == '/')) {
     // limit access to /data/resource-cache to root and system
     return uid == AID_ROOT || uid == AID_SYSTEM;
   }
@@ -47,17 +49,17 @@ bool UidHasWriteAccessToPath(uid_t uid ATTRIBUTE_UNUSED, const std::string& path
 }
 #endif
 
-std::string RandomStringForPath(const size_t length) {
-  constexpr char kChars[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  constexpr size_t kCharLastIndex = sizeof(kChars) - 1;
+std::string RandomStringForPath(size_t length) {
+  constexpr std::string_view kChars =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   std::string out_rand;
-  out_rand.reserve(length);
+  out_rand.resize(length);
 
-  std::random_device rd;
-  std::uniform_int_distribution<int> dist(0, kCharLastIndex);
+  static thread_local std::random_device rd;
+  std::uniform_int_distribution<int> dist(0, kChars.size() - 1);
   for (size_t i = 0; i < length; i++) {
-    out_rand[i] = kChars[dist(rd) % (kCharLastIndex)];
+    out_rand[i] = kChars[dist(rd)];
   }
   return out_rand;
 }

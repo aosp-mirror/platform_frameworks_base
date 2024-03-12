@@ -20,18 +20,19 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.R
+import com.android.app.tracing.traceSection
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
 import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.calculateAlpha
 import com.android.systemui.media.controls.util.MediaFlags
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
 import com.android.systemui.util.animation.TransitionViewState
-import com.android.systemui.util.traceSection
 import java.lang.Float.max
 import java.lang.Float.min
 import javax.inject.Inject
@@ -60,7 +61,7 @@ constructor(
     }
 
     companion object {
-        @JvmField val GUTS_ANIMATION_DURATION = 500L
+        @JvmField val GUTS_ANIMATION_DURATION = 234L
     }
 
     /** A listener when the current dimensions of the player change */
@@ -207,6 +208,10 @@ constructor(
     var isGutsVisible = false
         private set
 
+    /** Size provided by the scene framework container */
+    var widthInSceneContainerPx = 0
+    var heightInSceneContainerPx = 0
+
     init {
         mediaHostStatesManager.addController(this)
         layoutController.sizeChangedListener = { width: Int, height: Int ->
@@ -234,7 +239,8 @@ constructor(
             currentStartLocation,
             currentEndLocation,
             currentTransitionProgress,
-            applyImmediately = false
+            applyImmediately = false,
+            isGutsAnimation = true,
         )
     }
 
@@ -254,7 +260,8 @@ constructor(
             currentStartLocation,
             currentEndLocation,
             currentTransitionProgress,
-            applyImmediately = immediate
+            applyImmediately = immediate,
+            isGutsAnimation = true,
         )
     }
 
@@ -414,7 +421,14 @@ constructor(
      * it's not available, it will recreate one by measuring, which may be expensive.
      */
     @VisibleForTesting
-    fun obtainViewState(state: MediaHostState?): TransitionViewState? {
+    fun obtainViewState(
+        state: MediaHostState?,
+        isGutsAnimation: Boolean = false
+    ): TransitionViewState? {
+        if (mediaFlags.isSceneContainerEnabled()) {
+            return obtainSceneContainerViewState()
+        }
+
         if (state == null || state.measurementInput == null) {
             return null
         }
@@ -423,7 +437,7 @@ constructor(
         val viewState = viewStates[cacheKey]
         if (viewState != null) {
             // we already have cached this measurement, let's continue
-            if (state.squishFraction <= 1f) {
+            if (state.squishFraction <= 1f && !isGutsAnimation) {
                 return squishViewState(viewState, state.squishFraction)
             }
             return viewState
@@ -455,13 +469,14 @@ constructor(
 
             // Given that we have a measurement and a view, let's get (guaranteed) viewstates
             // from the start and end state and interpolate them
-            val startViewState = obtainViewState(startState) as TransitionViewState
+            val startViewState = obtainViewState(startState, isGutsAnimation) as TransitionViewState
             val endState = state.copy().also { it.expansion = 1.0f }
-            val endViewState = obtainViewState(endState) as TransitionViewState
+            val endViewState = obtainViewState(endState, isGutsAnimation) as TransitionViewState
             result =
                 layoutController.getInterpolatedState(startViewState, endViewState, state.expansion)
         }
-        if (state.squishFraction <= 1f) {
+        // Skip the adjustments of squish view state if UMO changes due to guts animation.
+        if (state.squishFraction <= 1f && !isGutsAnimation) {
             return squishViewState(result, state.squishFraction)
         }
         return result
@@ -521,7 +536,8 @@ constructor(
         @MediaLocation startLocation: Int,
         @MediaLocation endLocation: Int,
         transitionProgress: Float,
-        applyImmediately: Boolean
+        applyImmediately: Boolean,
+        isGutsAnimation: Boolean = false,
     ) =
         traceSection("MediaViewController#setCurrentState") {
             currentEndLocation = endLocation
@@ -537,7 +553,7 @@ constructor(
             // Obtain the view state that we'd want to be at the end
             // The view might not be bound yet or has never been measured and in that case will be
             // reset once the state is fully available
-            var endViewState = obtainViewState(endHostState) ?: return
+            var endViewState = obtainViewState(endHostState, isGutsAnimation) ?: return
             endViewState = updateViewStateSize(endViewState, endLocation, tmpState2)!!
             layoutController.setMeasureState(endViewState)
 
@@ -548,7 +564,7 @@ constructor(
             }
 
             val result: TransitionViewState
-            var startViewState = obtainViewState(startHostState)
+            var startViewState = obtainViewState(startHostState, isGutsAnimation)
             startViewState = updateViewStateSize(startViewState, startLocation, tmpState3)
 
             if (!endHostState.visible) {
@@ -602,7 +618,8 @@ constructor(
                 applyImmediately,
                 shouldAnimate,
                 animationDuration,
-                animationDelay
+                animationDelay,
+                isGutsAnimation,
             )
         }
 
@@ -662,6 +679,24 @@ constructor(
         refreshState()
     }
 
+    /** Get a view state based on the width and height set by the scene */
+    private fun obtainSceneContainerViewState(): TransitionViewState? {
+        logger.logMediaSize("scene container", widthInSceneContainerPx, heightInSceneContainerPx)
+
+        // Similar to obtainViewState: Let's create a new measurement
+        val result =
+            transitionLayout?.calculateViewState(
+                MeasurementInput(widthInSceneContainerPx, heightInSceneContainerPx),
+                expandedLayout,
+                TransitionViewState()
+            )
+        result?.let {
+            // And then ensure the guts visibility is set correctly
+            setGutsViewState(it)
+        }
+        return result
+    }
+
     /**
      * Retrieves the [TransitionViewState] and [MediaHostState] of a [@MediaLocation]. In the event
      * of [location] not being visible, [locationWhenHidden] will be used instead.
@@ -673,6 +708,10 @@ constructor(
      */
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {
         val mediaHostState = mediaHostStatesManager.mediaHostStates[location] ?: return null
+        if (mediaFlags.isSceneContainerEnabled()) {
+            return obtainSceneContainerViewState()
+        }
+
         val viewState = obtainViewState(mediaHostState)
         if (viewState != null) {
             // update the size of the viewstate for the location with the override
@@ -700,6 +739,21 @@ constructor(
     /** Clear all existing measurements and refresh the state to match the view. */
     fun refreshState() =
         traceSection("MediaViewController#refreshState") {
+            if (mediaFlags.isSceneContainerEnabled()) {
+                // We don't need to recreate measurements for scene container, since it's a known
+                // size. Just get the view state and update the layout controller
+                obtainSceneContainerViewState()?.let {
+                    // Get scene container state, then setCurrentState
+                    layoutController.setState(
+                        state = it,
+                        applyImmediately = true,
+                        animate = false,
+                        isGuts = false,
+                    )
+                }
+                return
+            }
+
             // Let's clear all of our measurements and recreate them!
             viewStates.clear()
             if (firstRefresh) {

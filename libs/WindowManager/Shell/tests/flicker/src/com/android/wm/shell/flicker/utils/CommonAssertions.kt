@@ -265,6 +265,7 @@ fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
         val dividerRegion =
             layer(SPLIT_SCREEN_DIVIDER_COMPONENT)?.visibleRegion?.region
                 ?: error("$SPLIT_SCREEN_DIVIDER_COMPONENT component not found")
+        visibleRegion(component).isNotEmpty()
         visibleRegion(component)
             .coversAtMost(
                 if (displayBounds.width > displayBounds.height) {

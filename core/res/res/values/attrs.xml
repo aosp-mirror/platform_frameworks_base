@@ -3030,15 +3030,15 @@
              representation this attribute can be used for providing such. -->
         <attr name="contentDescription" format="string" localization="suggested" />
 
-        <!-- Sets the id of a view before which this one is visited in accessibility traversal.
-             A screen-reader must visit the content of this view before the content of the one
-             it precedes.
+        <!-- Sets the id of a view that screen readers are requested to visit after this view.
+             Requests that a screen-reader visits the content of this view before the content of the
+             one it precedes. This does nothing if either view is not important for accessibility.
              {@see android.view.View#setAccessibilityTraversalBefore(int)} -->
         <attr name="accessibilityTraversalBefore" format="integer" />
 
-        <!-- Sets the id of a view after which this one is visited in accessibility traversal.
-             A screen-reader must visit the content of the other view before the content of
-             this one.
+        <!-- Sets the id of a view that screen readers are requested to visit before this view.
+             Requests that a screen-reader visits the content of the other view before the content
+             of this one. This does nothing if either view is not important for accessibility.
              {@see android.view.View#setAccessibilityTraversalAfter(int)} -->
         <attr name="accessibilityTraversalAfter" format="integer" />
 
@@ -3854,6 +3854,11 @@
         <!-- Specifies if an IME can only be used while a device is in VR mode or on a dedicated
              device -->
         <attr name="isVrOnly" format="boolean"/>
+        <!-- Specifies if an IME can only be used on a display created by a virtual device.
+             @see android.companion.virtual.VirtualDeviceParams.Builder#setInputMethodComponent
+             @hide @SystemApi -->
+        <!-- @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") -->
+        <attr name="isVirtualDeviceOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
@@ -9100,7 +9105,10 @@
         <attr name="dotColor" format="color|reference"/>
         <!-- Color of the dot when it's activated -->
         <attr name="dotActivatedColor" format="color|reference"/>
-
+        <!-- Keep dot in activated state until segment completion -->
+        <attr name="keepDotActivated" format="boolean"/>
+        <!-- Enlarge vertex entry area for some form factors -->
+        <attr name="enlargeVertexEntryArea" format="boolean"/>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -9166,10 +9174,10 @@
              {@link android.os.Build.VERSION_CODES#N} and not used in previous versions. -->
         <attr name="supportsLocalInteraction" format="boolean" />
         <!-- The service that provides {@link android.service.voice.HotwordDetectionService}.
-             @hide @SystemApi -->
+             Expect a component name to be provided. @hide @SystemApi -->
         <attr name="hotwordDetectionService" format="string" />
         <!-- The service that provides {@link android.service.voice.VisualQueryDetectionService}.
-             @hide @SystemApi -->
+             Expect a component name to be provided. @hide @SystemApi -->
         <attr name="visualQueryDetectionService" format="string" />
 
     </declare-styleable>
@@ -10093,6 +10101,15 @@
     <!-- Perceptual luminance of a color, in accessibility friendly color space. From 0 to 100. -->
     <attr name="lStar" format="float"/>
 
+    <!-- The attributes of the {@code <locale-config>} tag. -->
+    <!-- @FlaggedApi("android.content.res.default_locale") -->
+    <declare-styleable name="LocaleConfig">
+        <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
+       the strings in values/strings.xml (the default strings in the directory with no locale
+       qualifier) are in. -->
+        <attr name="defaultLocale" format="string"/>
+    </declare-styleable>
+
     <!-- The attributes of the {@code <locale>} tag within {@code <locale-config>}. -->
     <declare-styleable name="LocaleConfig_Locale">
         <!-- The <a href="https://www.rfc-editor.org/rfc/bcp/bcp47.txt">IETF BCP47 language tag</a>
@@ -10119,13 +10136,15 @@
     <declare-styleable name="CredentialProvider">
         <!-- A string that is displayed to the user in the Credential Manager settings
              screen that can be used to provide more information about a provider. For
-             longer strings (40 char) it will be truncated. If multiple services
-             show the subtitle then the string will be joined together. -->
+             longer strings it will be truncated. -->
         <attr name="settingsSubtitle" format="string" />
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
     </declare-styleable>
 
     <!-- A list of capabilities that indicates to the OS what kinds of credentials
-             this provider supports. This list is defined in CredentialProviderService. -->
+             this provider supports. -->
     <declare-styleable name="CredentialProvider_Capabilities" parent="CredentialProvider">
         <!-- An individual capability declared by the provider. -->
         <attr name="capability" format="string" />

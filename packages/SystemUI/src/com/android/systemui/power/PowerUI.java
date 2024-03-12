@@ -35,32 +35,31 @@ import android.os.SystemClock;
 import android.os.Temperature;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Slog;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 @SysUISingleton
 public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
@@ -107,12 +106,15 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
     @VisibleForTesting int mBatteryLevel = 100;
     @VisibleForTesting int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
 
+    private boolean mInVrMode;
+
     private IThermalEventListener mSkinThermalEventListener;
     private IThermalEventListener mUsbThermalEventListener;
     private final Context mContext;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final CommandQueue mCommandQueue;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    @Nullable
+    private final IVrManager mVrManager;
     private final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
                 @Override
@@ -134,17 +136,28 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
                 }
             };
 
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            mInVrMode = enabled;
+        }
+    };
+
     @Inject
-    public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue, Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            WarningsUI warningsUI, EnhancedEstimates enhancedEstimates,
+    public PowerUI(
+            Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            CommandQueue commandQueue,
+            @Nullable IVrManager vrManager,
+            WarningsUI warningsUI,
+            EnhancedEstimates enhancedEstimates,
             WakefulnessLifecycle wakefulnessLifecycle,
             PowerManager powerManager,
             UserTracker userTracker) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mVrManager = vrManager;
         mWarnings = warningsUI;
         mEnhancedEstimates = enhancedEstimates;
         mPowerManager = powerManager;
@@ -164,7 +177,7 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
         };
         final ContentResolver resolver = mContext.getContentResolver();
         resolver.registerContentObserver(Settings.Global.getUriFor(
-                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
+                        Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
                 false, obs, UserHandle.USER_ALL);
         updateBatteryWarningLevels();
         mReceiver.init();
@@ -199,6 +212,14 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
                 });
         initThermalEventListeners();
         mCommandQueue.addCallback(this);
+
+        if (mVrManager != null) {
+            try {
+                mVrManager.registerListener(mVrStateCallbacks);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register VR mode state listener: " + e);
+            }
+        }
     }
 
     @Override
@@ -718,10 +739,7 @@ public class PowerUI implements CoreStartable, CommandQueue.Callbacks {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
-                final Optional<CentralSurfaces> centralSurfacesOptional =
-                        mCentralSurfacesOptionalLazy.get();
-                if (!centralSurfacesOptional.map(CentralSurfaces::isDeviceInVrMode)
-                        .orElse(false)) {
+                if (!mInVrMode) {
                     mWarnings.showHighTemperatureWarning();
                     Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "
                             + ", current skin status = " + status

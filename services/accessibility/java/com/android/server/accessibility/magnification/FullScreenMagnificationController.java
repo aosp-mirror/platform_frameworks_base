@@ -143,6 +143,8 @@ public class FullScreenMagnificationController implements
         private int mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
         private boolean mMagnificationActivated = false;
 
+        private boolean mZoomedOutFromService = false;
+
         @GuardedBy("mLock") @Nullable private MagnificationThumbnail mMagnificationThumbnail;
 
         DisplayMagnification(int displayId) {
@@ -244,6 +246,31 @@ public class FullScreenMagnificationController implements
 
         float getOffsetY() {
             return mCurrentMagnificationSpec.offsetY;
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtEdge() {
+            return isAtLeftEdge() || isAtRightEdge() || isAtTopEdge() || isAtBottomEdge();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtLeftEdge() {
+            return getOffsetX() == getMaxOffsetXLocked();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtRightEdge() {
+            return getOffsetX() == getMinOffsetXLocked();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtTopEdge() {
+            return getOffsetY() == getMaxOffsetYLocked();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtBottomEdge() {
+            return getOffsetY() == getMinOffsetYLocked();
         }
 
         @GuardedBy("mLock")
@@ -521,6 +548,24 @@ public class FullScreenMagnificationController implements
             return changed;
         }
 
+        /**
+         * Directly Zooms out the scale to 1f with animating the transition. This method is
+         * triggered only by service automatically, such as when user context changed.
+         */
+        void zoomOutFromService() {
+            setScaleAndCenter(1.0f, Float.NaN, Float.NaN,
+                    transformToStubCallback(true),
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+            mZoomedOutFromService = true;
+        }
+
+        /**
+         * Whether the zooming out is triggered by {@link #zoomOutFromService}.
+         */
+        boolean isZoomedOutFromService() {
+            return mZoomedOutFromService;
+        }
+
         @GuardedBy("mLock")
         boolean reset(boolean animate) {
             return reset(transformToStubCallback(animate));
@@ -595,6 +640,8 @@ public class FullScreenMagnificationController implements
                             mIdOfLastServiceToMagnify);
                 });
             }
+            // the zoom scale would be changed so we reset the flag
+            mZoomedOutFromService = false;
             return changed;
         }
 
@@ -951,9 +998,7 @@ public class FullScreenMagnificationController implements
             }
 
             if (isAlwaysOnMagnificationEnabled()) {
-                setScaleAndCenter(displayId, 1.0f, Float.NaN, Float.NaN,
-                        true,
-                        AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+                zoomOutFromService(displayId);
             } else {
                 reset(displayId, true);
             }
@@ -1114,6 +1159,87 @@ public class FullScreenMagnificationController implements
                 return 0.0f;
             }
             return display.getCenterX();
+        }
+    }
+
+    /**
+     * Returns whether the user is at one of the edges (left, right, top, bottom)
+     * of the magnification viewport
+     *
+     * @param displayId
+     * @return if user is at the edge of the view
+     */
+    public boolean isAtEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the left edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at left edge of view
+     */
+    public boolean isAtLeftEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtLeftEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the right edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at right edge of view
+     */
+    public boolean isAtRightEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtRightEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the top edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at top edge of view
+     */
+    public boolean isAtTopEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtTopEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the bottom edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at bottom edge of view
+     */
+    public boolean isAtBottomEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtBottomEdge();
         }
     }
 
@@ -1351,6 +1477,37 @@ public class FullScreenMagnificationController implements
         return MathUtils.constrain(mScaleProvider.getScale(displayId),
                 MagnificationConstants.PERSISTED_SCALE_MIN_VALUE,
                 MagnificationScaleProvider.MAX_SCALE);
+    }
+
+    /**
+     * Directly Zooms out the scale to 1f with animating the transition. This method is
+     * triggered only by service automatically, such as when user context changed.
+     *
+     * @param displayId The logical display id.
+     */
+    private void zoomOutFromService(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null || !display.isActivated()) {
+                return;
+            }
+            display.zoomOutFromService();
+        }
+    }
+
+    /**
+     * Whether the magnification is zoomed out by {@link #zoomOutFromService(int)}.
+     *
+     * @param displayId The logical display id.
+     */
+    public boolean isZoomedOutFromService(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null || !display.isActivated()) {
+                return false;
+            }
+            return display.isZoomedOutFromService();
+        }
     }
 
     /**

@@ -1,0 +1,10 @@
+package: "com.android.systemui"
+
+# NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
+
+flag {
+    name: "bp_talkback"
+    namespace: "biometrics_framework"
+    description: "Adds talkback directional guidance when using UDFPS with biometric prompt"
+    bug: "310044658"
+}

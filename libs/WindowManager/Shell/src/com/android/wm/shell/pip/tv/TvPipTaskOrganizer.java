@@ -35,7 +35,6 @@ import com.android.wm.shell.pip.PipMenuController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
-import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -46,6 +45,7 @@ import java.util.Optional;
  * TV specific changes to the PipTaskOrganizer.
  */
 public class TvPipTaskOrganizer extends PipTaskOrganizer {
+    private final TvPipTransition mTvPipTransition;
 
     public TvPipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
@@ -56,7 +56,7 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
             @NonNull PipMenuController pipMenuController,
             @NonNull PipAnimationController pipAnimationController,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
-            @NonNull PipTransitionController pipTransitionController,
+            @NonNull TvPipTransition tvPipTransition,
             @NonNull PipParamsChangedForwarder pipParamsChangedForwarder,
             Optional<SplitScreenController> splitScreenOptional,
             @NonNull DisplayController displayController,
@@ -65,9 +65,10 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
             ShellExecutor mainExecutor) {
         super(context, syncTransactionQueue, pipTransitionState, pipBoundsState,
                 pipDisplayLayoutState, boundsHandler, pipMenuController, pipAnimationController,
-                surfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
+                surfaceTransactionHelper, tvPipTransition, pipParamsChangedForwarder,
                 splitScreenOptional, displayController, pipUiEventLogger, shellTaskOrganizer,
                 mainExecutor);
+        mTvPipTransition = tvPipTransition;
     }
 
     @Override
@@ -104,5 +105,15 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
         // We always have a menu visible and want to sync the pip transaction with the menu, even
         // when the menu alpha is 0 (e.g. when a fade-in animation starts).
         return true;
+    }
+
+    @Override
+    protected void cancelAnimationOnTaskVanished() {
+        mTvPipTransition.cancelAnimations();
+        if (mLeash != null) {
+            mSurfaceControlTransactionFactory.getTransaction()
+                    .setAlpha(mLeash, 0f)
+                    .apply();
+        }
     }
 }

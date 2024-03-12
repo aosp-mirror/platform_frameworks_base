@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.provider.DeviceConfig;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -98,25 +97,26 @@ final class SynchedDeviceConfig implements DeviceConfig.OnPropertiesChangedListe
      * @throws IllegalArgumentException {@code key} isn't recognised.
      */
     boolean getFlagValue(@NonNull String key) {
-        return findEntry(key).map(SynchedDeviceConfigEntry::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected flag name: " + key));
+        final SynchedDeviceConfigEntry entry = mDeviceConfigEntries.get(key);
+        if (entry == null) {
+            throw new IllegalArgumentException("Unexpected flag name: " + key);
+        }
+        return entry.getValue();
     }
 
     /**
      * @return {@code true} if the flag for the given {@code key} was enabled at build time.
      */
     boolean isBuildTimeFlagEnabled(@NonNull String key) {
-        return findEntry(key).map(SynchedDeviceConfigEntry::isBuildTimeFlagEnabled)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected flag name: " + key));
+        final SynchedDeviceConfigEntry entry = mDeviceConfigEntries.get(key);
+        if (entry == null) {
+            throw new IllegalArgumentException("Unexpected flag name: " + key);
+        }
+        return entry.isBuildTimeFlagEnabled();
     }
 
     private boolean isDeviceConfigFlagEnabled(@NonNull String key, boolean defaultValue) {
         return DeviceConfig.getBoolean(mNamespace, key, defaultValue);
-    }
-
-    @NonNull
-    private Optional<SynchedDeviceConfigEntry> findEntry(@NonNull String key) {
-        return Optional.ofNullable(mDeviceConfigEntries.get(key));
     }
 
     static class SynchedDeviceConfigBuilder {

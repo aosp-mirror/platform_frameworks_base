@@ -21,7 +21,7 @@ import android.content.res.Resources;
 import android.util.TypedValue;
 import android.view.VelocityTracker;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
 import com.android.systemui.dreams.touch.DreamTouchHandler;

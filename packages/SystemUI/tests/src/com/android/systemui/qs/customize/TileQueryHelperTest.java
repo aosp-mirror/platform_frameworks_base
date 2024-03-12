@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -51,9 +50,8 @@ import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
@@ -126,6 +124,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
                     if (FACTORY_TILES.contains(spec)) {
                         FakeQSTile tile = new FakeQSTile(mBgExecutor, mMainExecutor);
                         tile.setState(mState);
+                        tile.setTileSpec(spec);
                         return tile;
                     } else {
                         return null;
@@ -286,7 +285,10 @@ public class TileQueryHelperTest extends SysuiTestCase {
         Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES, null);
 
         QSTile t = mock(QSTile.class);
-        when(mQSHost.createTile("hotspot")).thenReturn(t);
+        when(mQSHost.createTile("hotspot")).thenAnswer(invocation -> {
+            t.setTileSpec("hotspot");
+            return t;
+        });
 
         mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
                 "hotspot");
@@ -390,11 +392,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
         @Override
         public boolean isTileReady() {
             return mListening && mRefreshed;
-        }
-
-        @Override
-        public QSIconView createTileView(Context context) {
-            return null;
         }
 
         @Override

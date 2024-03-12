@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 

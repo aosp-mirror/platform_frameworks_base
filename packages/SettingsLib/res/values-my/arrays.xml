@@ -75,7 +75,7 @@
     <item msgid="1051534112762023603">"အပြည့်ဖယ်ရှားရန်"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="6603880723315236832">"AVRCP 1.5 (မူလ)"</item>
+    <item msgid="6603880723315236832">"AVRCP 1.5 (မူရင်း)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
     <item msgid="5896162189744596291">"AVRCP 1.4"</item>
     <item msgid="7556896992111771426">"AVRCP 1.6"</item>
@@ -200,7 +200,7 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"ပိတ်"</item>
-    <item msgid="7126170197336963369">"မှတ်တမ်းသိမ်းဆည်းရန် လျာထားချက်များ အားလုံး"</item>
+    <item msgid="7126170197336963369">"မှတ်တမ်းကြားခံနယ်အားလုံး"</item>
     <item msgid="7167543126036181392">"ရေဒီယို မှတ်တမ်းသိမ်းဆည်းရန်လျာထားချက်မှလွဲ၍ အားလုံး"</item>
     <item msgid="5135340178556563979">"ကာနယ်မှတ်တမ်းသိမ်းဆည်းရန် လျာထားချက်သာ"</item>
   </string-array>
@@ -282,6 +282,10 @@
     <item msgid="8828567335701536560">"အသံ ရင်းမြစ်"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
-  <string-array name="avatar_image_descriptions">
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

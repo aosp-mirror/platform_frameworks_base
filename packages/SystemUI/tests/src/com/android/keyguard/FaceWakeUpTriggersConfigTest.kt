@@ -67,7 +67,7 @@ class FaceWakeUpTriggersConfigTest : SysuiTestCase() {
 
     private fun createFaceWakeUpTriggersConfig(wakeUpTriggers: IntArray): FaceWakeUpTriggersConfig {
         overrideResource(
-            com.android.systemui.R.array.config_face_auth_wake_up_triggers,
+            com.android.systemui.res.R.array.config_face_auth_wake_up_triggers,
             wakeUpTriggers
         )
 

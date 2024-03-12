@@ -19,12 +19,12 @@ package com.android.commands.uinput;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 
 /**
@@ -35,7 +35,7 @@ import java.util.Objects;
 public class Uinput {
     private static final String TAG = "UINPUT";
 
-    private final Event.Reader mReader;
+    private final EventParser mParser;
     private final SparseArray<Device> mDevices;
 
     private static void usage() {
@@ -60,6 +60,10 @@ public class Uinput {
                 stream = new FileInputStream(f);
             }
             (new Uinput(stream)).run();
+        } catch (EvemuParser.ParsingException e) {
+            System.err.println(e.makeErrorMessage());
+            error(e.makeErrorMessage(), e);
+            System.exit(1);
         } catch (Exception e) {
             error("Uinput injection failed.", e);
             System.exit(1);
@@ -74,16 +78,36 @@ public class Uinput {
     private Uinput(InputStream in) {
         mDevices = new SparseArray<Device>();
         try {
-            mReader = new Event.Reader(new InputStreamReader(in, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            mParser = isEvemuFile(reader) ? new EvemuParser(reader) : new JsonStyleParser(reader);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isEvemuFile(BufferedReader in) throws IOException {
+        // After zero or more empty lines (not even containing horizontal whitespace), evemu
+        // recordings must either start with '#' (indicating the EVEMU version header or a comment)
+        // or 'N' (for the name line). If we encounter anything else, assume it's a JSON-style input
+        // file.
+
+        String lineSep = System.lineSeparator();
+        char[] buf = new char[1];
+
+        in.mark(1 /* readAheadLimit */);
+        int charsRead = in.read(buf);
+        while (charsRead > 0 && lineSep.contains(String.valueOf(buf[0]))) {
+            in.mark(1 /* readAheadLimit */);
+            charsRead = in.read(buf);
+        }
+        in.reset();
+        return buf[0] == '#' || buf[0] == 'N';
     }
 
     private void run() {
         try {
             Event e = null;
-            while ((e = mReader.getNextEvent()) != null) {
+            while ((e = mParser.getNextEvent()) != null) {
                 process(e);
             }
         } catch (IOException ex) {
@@ -111,7 +135,7 @@ public class Uinput {
             case REGISTER ->
                     error("Device id=" + e.getId() + " is already registered. Ignoring event.");
             case INJECT -> d.injectEvent(e.getInjections());
-            case DELAY -> d.addDelay(e.getDuration());
+            case DELAY -> d.addDelay(e.getDurationMillis());
             case SYNC -> d.syncEvent(e.getSyncToken());
         }
     }
@@ -122,8 +146,9 @@ public class Uinput {
                     "Tried to send command \"" + e.getCommand() + "\" to an unregistered device!");
         }
         int id = e.getId();
-        Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(), e.getBus(),
-                e.getConfiguration(), e.getFfEffectsMax(), e.getAbsInfo(), e.getPort());
+        Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(),
+                e.getVersionId(), e.getBus(), e.getConfiguration(), e.getFfEffectsMax(),
+                e.getAbsInfo(), e.getPort());
         mDevices.append(id, d);
     }
 

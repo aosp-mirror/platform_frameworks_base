@@ -264,7 +264,7 @@ public final class PendingIntent implements Parcelable {
      * be mutable by default, unless {@link #FLAG_IMMUTABLE} is set. Starting
      * with {@link android.os.Build.VERSION_CODES#S}, it will be required to
      * explicitly specify the mutability of PendingIntents on creation with
-     * either (@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE}. It is strongly
+     * either {@link #FLAG_IMMUTABLE} or {@link #FLAG_MUTABLE}. It is strongly
      * recommended to use {@link #FLAG_IMMUTABLE} when creating a
      * PendingIntent. {@link #FLAG_MUTABLE} should only be used when some
      * functionality relies on modifying the underlying intent, e.g. any

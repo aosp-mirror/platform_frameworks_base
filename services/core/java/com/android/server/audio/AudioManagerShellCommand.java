@@ -47,6 +47,12 @@ class AudioManagerShellCommand extends ShellCommand {
                 return setEncodedSurroundMode();
             case "get-encoded-surround-mode":
                 return getEncodedSurroundMode();
+            case "set-sound-dose-value":
+                return setSoundDoseValue();
+            case "get-sound-dose-value":
+                return getSoundDoseValue();
+            case "reset-sound-dose-timeout":
+                return resetSoundDoseTimeout();
         }
         return 0;
     }
@@ -66,6 +72,12 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    Sets the encoded surround sound mode to SURROUND_SOUND_MODE");
         pw.println("  get-encoded-surround-mode");
         pw.println("    Returns the encoded surround sound mode");
+        pw.println("  set-sound-dose-value");
+        pw.println("    Sets the current sound dose value");
+        pw.println("  get-sound-dose-value");
+        pw.println("    Returns the current sound dose value");
+        pw.println("  reset-sound-dose-timeout");
+        pw.println("    Resets the sound dose timeout used for momentary exposure");
     }
 
     private int setSurroundFormatEnabled() {
@@ -160,6 +172,48 @@ class AudioManagerShellCommand extends ShellCommand {
         final Context context = mService.mContext;
         final AudioManager am = context.getSystemService(AudioManager.class);
         getOutPrintWriter().println("Encoded surround mode: " + am.getEncodedSurroundMode());
+        return 0;
+    }
+
+    private int setSoundDoseValue() {
+        String soundDoseValueText = getNextArg();
+
+        if (soundDoseValueText == null) {
+            getErrPrintWriter().println("Error: no sound dose value specified");
+            return 1;
+        }
+
+        float soundDoseValue = 0.f;
+        try {
+            soundDoseValue = Float.parseFloat(soundDoseValueText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: wrong format specified for sound dose");
+            return 1;
+        }
+
+        if (soundDoseValue < 0) {
+            getErrPrintWriter().println("Error: invalid value of sound dose");
+            return 1;
+        }
+
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        am.setCsd(soundDoseValue);
+        return 0;
+    }
+
+    private int getSoundDoseValue() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        getOutPrintWriter().println("Sound dose value: " + am.getCsd());
+        return 0;
+    }
+
+    private int resetSoundDoseTimeout() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        am.setCsd(-1.f);
+        getOutPrintWriter().println("Reset sound dose momentary exposure timeout");
         return 0;
     }
 }

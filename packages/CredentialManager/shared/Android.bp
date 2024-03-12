@@ -1,0 +1,21 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_library {
+    name: "CredentialManagerShared",
+    manifest: "AndroidManifest.xml",
+    srcs: ["src/**/*.kt"],
+    static_libs: [
+        "androidx.activity_activity-compose",
+        "androidx.core_core-ktx",
+        "androidx.credentials_credentials",
+        "guava",
+        "hilt_android",
+    ],
+}

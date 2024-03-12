@@ -99,8 +99,7 @@ public class HdmiCecMessageValidator {
         // Messages related to the physical address.
         PhysicalAddressValidator physicalAddressValidator = new PhysicalAddressValidator();
         addValidationInfo(Constants.MESSAGE_ACTIVE_SOURCE,
-                physicalAddressValidator, ADDR_ALL ^ (ADDR_RECORDER_1 | ADDR_RECORDER_2
-                        | ADDR_AUDIO_SYSTEM | ADDR_RECORDER_3), ADDR_BROADCAST);
+                physicalAddressValidator, ADDR_ALL ^ ADDR_AUDIO_SYSTEM, ADDR_BROADCAST);
         addValidationInfo(Constants.MESSAGE_INACTIVE_SOURCE,
                 physicalAddressValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,

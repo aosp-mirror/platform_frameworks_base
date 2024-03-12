@@ -28,10 +28,10 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,12 +40,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TileServiceTest {
 
     @Mock
     private IQSService.Stub mIQSService;
+
+    private TestableLooper mTestableLooper;
 
     private IBinder mTileToken;
     private TileService mTileService;
@@ -54,6 +56,8 @@ public class TileServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
+        mTestableLooper = TestableLooper.get(this);
 
         mTileToken = new Binder();
         when(mIQSService.asBinder()).thenCallRealMethod();
@@ -72,6 +76,7 @@ public class TileServiceTest {
         when(mIQSService.getTile(mTileToken)).thenThrow(new RemoteException());
 
         IBinder result = mTileService.onBind(intent);
+        mTestableLooper.processAllMessages();
         assertNull(result);
     }
 
@@ -83,6 +88,7 @@ public class TileServiceTest {
         when(mIQSService.getTile(mTileToken)).thenReturn(null);
 
         IBinder result = mTileService.onBind(intent);
+        mTestableLooper.processAllMessages();
 
         assertNotNull(result);
         verify(mIQSService, never()).onStartSuccessful(any());
@@ -96,6 +102,7 @@ public class TileServiceTest {
         when(mIQSService.getTile(mTileToken)).thenReturn(mTile);
 
         IBinder result = mTileService.onBind(intent);
+        mTestableLooper.processAllMessages();
 
         assertNotNull(result);
         verify(mIQSService).onStartSuccessful(mTileToken);

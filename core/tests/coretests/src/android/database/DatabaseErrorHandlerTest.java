@@ -19,10 +19,13 @@ package android.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDiskIOException;
+import android.database.sqlite.SQLiteDatabaseCorruptException;
+
 import android.database.sqlite.SQLiteException;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -61,7 +64,6 @@ public class DatabaseErrorHandlerTest extends AndroidTestCase {
         assertTrue(mDatabaseFile.exists());
     }
 
-
     public void testDatabaseIsCorrupt() throws IOException {
         mDatabase.execSQL("create table t (i int);");
         // write junk into the database file
@@ -70,30 +72,23 @@ public class DatabaseErrorHandlerTest extends AndroidTestCase {
         writer.close();
         assertTrue(mDatabaseFile.exists());
         // since the database file is now corrupt, doing any sql on this database connection
-        // should trigger call to MyDatabaseCorruptionHandler.onCorruption
+        // should trigger call to MyDatabaseCorruptionHandler.onCorruption.  A corruption
+        // exception will also be throws.  This seems redundant.
         try {
             mDatabase.execSQL("select * from t;");
             fail("expected exception");
-        } catch (SQLiteDiskIOException e) {
-            /**
-             * this test used to produce a corrupted db. but with new sqlite it instead reports
-             * Disk I/O error. meh..
-             * need to figure out how to cause corruption in db
-             */
-            // expected
-            if (mDatabaseFile.exists()) {
-                mDatabaseFile.delete();
-            }
-        } catch (SQLiteException e) {
-            
+        } catch (SQLiteDatabaseCorruptException e) {
+            // Expected result.
         }
-        // database file should be gone
+
+        // The database file should be gone.
         assertFalse(mDatabaseFile.exists());
-        // after corruption handler is called, the database file should be free of
-        // database corruption
-        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile.getPath(), null,
+        // After corruption handler is called, the database file should be free of
+        // database corruption.   Reopen it.
+        mDatabase = SQLiteDatabase.openOrCreateDatabase(mDatabaseFile.getPath(), null,
                 new MyDatabaseCorruptionHandler());
-        assertTrue(db.isDatabaseIntegrityOk());
+        assertTrue(mDatabase.isDatabaseIntegrityOk());
+        // The teadDown() routine will close the database.
     }
 
     /**
@@ -102,8 +97,21 @@ public class DatabaseErrorHandlerTest extends AndroidTestCase {
      * corrupt before deleting the file.
      */
     public class MyDatabaseCorruptionHandler implements DatabaseErrorHandler {
+        private final AtomicBoolean mEntered = new AtomicBoolean(false);
         public void onCorruption(SQLiteDatabase dbObj) {
-            boolean databaseOk = dbObj.isDatabaseIntegrityOk();
+            boolean databaseOk = false;
+            if (!mEntered.get()) {
+                // The integrity check can retrigger the corruption handler if the database is,
+                // indeed, corrupted.  Use mEntered to detect recursion and to skip retrying the
+                // integrity check on recursion.
+                mEntered.set(true);
+                databaseOk = dbObj.isDatabaseIntegrityOk();
+            }
+            // At this point the database state has been detected and there is no further danger
+            // of recursion.  Setting mEntered to false allows this object to be reused, although
+            // it is not obvious how such reuse would work.
+            mEntered.set(false);
+
             // close the database
             try {
                 dbObj.close();

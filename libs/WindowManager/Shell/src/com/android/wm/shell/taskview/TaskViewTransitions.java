@@ -165,19 +165,6 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return null;
     }
 
-    /**
-     * Returns all the pending transitions for a given `taskView`.
-     * @param taskView the pending transition should be for this.
-     */
-    ArrayList<PendingTransition> findAllPending(TaskViewTaskController taskView) {
-        ArrayList<PendingTransition> list = new ArrayList<>();
-        for (int i = mPending.size() - 1; i >= 0; --i) {
-            if (mPending.get(i).mTaskView != taskView) continue;
-            list.add(mPending.get(i));
-        }
-        return list;
-    }
-
     private PendingTransition findPending(IBinder claimed) {
         for (int i = 0; i < mPending.size(); ++i) {
             if (mPending.get(i).mClaimed != claimed) continue;
@@ -273,10 +260,9 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             // Task view isn't visible, the bounds will next visibility update.
             return;
         }
-        PendingTransition pendingOpen = findPendingOpeningTransition(taskView);
-        if (pendingOpen != null) {
-            // There is already an opening transition in-flight, the window bounds will be
-            // set in prepareOpenAnimation (via the window crop) if needed.
+        if (hasPending()) {
+            // There is already a transition in-flight, the window bounds will be set in
+            // prepareOpenAnimation.
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -344,6 +330,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                     continue;
                 }
                 if (isHide) {
+                    if (pending.mType == TRANSIT_TO_BACK) {
+                        // TO_BACK is only used when setting the task view visibility immediately,
+                        // so in that case we can also hide the surface immediately
+                        startTransaction.hide(chg.getLeash());
+                    }
                     tv.prepareHideAnimation(finishTransaction);
                 } else {
                     tv.prepareCloseAnimation();

@@ -15,104 +15,119 @@
  */
 package com.android.systemui.wmshell
 
-import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ShortcutInfo
+import android.content.res.Resources
+import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.core.content.edit
 import androidx.test.filters.SmallTest
 import com.android.systemui.model.SysUiStateTest
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.BubbleEducationController
 import com.android.wm.shell.bubbles.PREF_MANAGED_EDUCATION
 import com.android.wm.shell.bubbles.PREF_STACK_EDUCATION
+import com.google.common.truth.Truth.assertThat
+import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class BubbleEducationControllerTest : SysUiStateTest() {
-    private val sharedPrefsEditor = Mockito.mock(SharedPreferences.Editor::class.java)
-    private val sharedPrefs = Mockito.mock(SharedPreferences::class.java)
-    private val context = Mockito.mock(Context::class.java)
+
+    private lateinit var sharedPrefs: SharedPreferences
     private lateinit var sut: BubbleEducationController
 
     @Before
     fun setUp() {
-        Mockito.`when`(context.packageName).thenReturn("packageName")
-        Mockito.`when`(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPrefs)
-        Mockito.`when`(context.contentResolver)
-            .thenReturn(Mockito.mock(ContentResolver::class.java))
-        Mockito.`when`(sharedPrefs.edit()).thenReturn(sharedPrefsEditor)
-        sut = BubbleEducationController(context)
+        sharedPrefs = mContext.getSharedPreferences(mContext.packageName, Context.MODE_PRIVATE)
+        sharedPrefs.edit {
+            remove(PREF_STACK_EDUCATION)
+            remove(PREF_MANAGED_EDUCATION)
+        }
+        sut = BubbleEducationController(mContext)
     }
 
     @Test
     fun testSeenStackEducation_read() {
-        Mockito.`when`(sharedPrefs.getBoolean(anyString(), anyBoolean())).thenReturn(true)
+        sharedPrefs.edit { putBoolean(PREF_STACK_EDUCATION, true) }
         assertEquals(sut.hasSeenStackEducation, true)
-        Mockito.verify(sharedPrefs).getBoolean(PREF_STACK_EDUCATION, false)
     }
 
     @Test
     fun testSeenStackEducation_write() {
         sut.hasSeenStackEducation = true
-        Mockito.verify(sharedPrefsEditor).putBoolean(PREF_STACK_EDUCATION, true)
+        assertThat(sharedPrefs.getBoolean(PREF_STACK_EDUCATION, false)).isTrue()
     }
 
     @Test
     fun testSeenManageEducation_read() {
-        Mockito.`when`(sharedPrefs.getBoolean(anyString(), anyBoolean())).thenReturn(true)
+        sharedPrefs.edit { putBoolean(PREF_MANAGED_EDUCATION, true) }
         assertEquals(sut.hasSeenManageEducation, true)
-        Mockito.verify(sharedPrefs).getBoolean(PREF_MANAGED_EDUCATION, false)
     }
 
     @Test
     fun testSeenManageEducation_write() {
         sut.hasSeenManageEducation = true
-        Mockito.verify(sharedPrefsEditor).putBoolean(PREF_MANAGED_EDUCATION, true)
+        assertThat(sharedPrefs.getBoolean(PREF_MANAGED_EDUCATION, false)).isTrue()
     }
 
     @Test
     fun testShouldShowStackEducation() {
-        val bubble = Mockito.mock(Bubble::class.java)
         // When bubble is null
         assertEquals(sut.shouldShowStackEducation(null), false)
+        var bubble = createFakeBubble(isConversational = false)
         // When bubble is not conversation
-        Mockito.`when`(bubble.isConversation).thenReturn(false)
         assertEquals(sut.shouldShowStackEducation(bubble), false)
         // When bubble is conversation and has seen stack edu
-        Mockito.`when`(bubble.isConversation).thenReturn(true)
-        Mockito.`when`(sharedPrefs.getBoolean(anyString(), anyBoolean())).thenReturn(true)
+        bubble = createFakeBubble(isConversational = true)
+        sharedPrefs.edit { putBoolean(PREF_STACK_EDUCATION, true) }
         assertEquals(sut.shouldShowStackEducation(bubble), false)
         // When bubble is conversation and has not seen stack edu
-        Mockito.`when`(bubble.isConversation).thenReturn(true)
-        Mockito.`when`(sharedPrefs.getBoolean(anyString(), anyBoolean())).thenReturn(false)
+        sharedPrefs.edit { remove(PREF_STACK_EDUCATION) }
         assertEquals(sut.shouldShowStackEducation(bubble), true)
     }
 
     @Test
     fun testShouldShowManageEducation() {
-        val bubble = Mockito.mock(Bubble::class.java)
         // When bubble is null
         assertEquals(sut.shouldShowManageEducation(null), false)
+        var bubble = createFakeBubble(isConversational = false)
         // When bubble is not conversation
-        Mockito.`when`(bubble.isConversation).thenReturn(false)
         assertEquals(sut.shouldShowManageEducation(bubble), false)
         // When bubble is conversation and has seen stack edu
-        Mockito.`when`(bubble.isConversation).thenReturn(true)
-        Mockito.`when`(sharedPrefs.getBoolean(anyString(), anyBoolean())).thenReturn(true)
+        bubble = createFakeBubble(isConversational = true)
+        sharedPrefs.edit { putBoolean(PREF_MANAGED_EDUCATION, true) }
         assertEquals(sut.shouldShowManageEducation(bubble), false)
         // When bubble is conversation and has not seen stack edu
-        Mockito.`when`(bubble.isConversation).thenReturn(true)
-        Mockito.`when`(sharedPrefs.getBoolean(anyString(), anyBoolean())).thenReturn(false)
+        sharedPrefs.edit { remove(PREF_MANAGED_EDUCATION) }
         assertEquals(sut.shouldShowManageEducation(bubble), true)
+    }
+
+    private fun createFakeBubble(isConversational: Boolean): Bubble {
+        return if (isConversational) {
+            val shortcutInfo = ShortcutInfo.Builder(mContext, "fakeId").build()
+            Bubble(
+                "key",
+                shortcutInfo,
+                /* desiredHeight= */ 6,
+                Resources.ID_NULL,
+                "title",
+                /* taskId= */ 0,
+                "locus",
+                /* isDismissable= */ true,
+                directExecutor()
+            ) {}
+        } else {
+            val intent = Intent(Intent.ACTION_VIEW).setPackage(mContext.packageName)
+            Bubble.createAppBubble(intent, UserHandle(1), null, directExecutor())
+        }
     }
 }

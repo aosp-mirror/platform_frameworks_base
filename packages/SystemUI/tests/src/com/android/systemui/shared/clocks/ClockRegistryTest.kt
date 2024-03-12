@@ -24,11 +24,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.TRANSIT_CLOCK
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockId
-import com.android.systemui.plugins.ClockMetadata
-import com.android.systemui.plugins.ClockProviderPlugin
-import com.android.systemui.plugins.ClockSettings
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.plugins.clocks.ClockMetadata
+import com.android.systemui.plugins.clocks.ClockProviderPlugin
+import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
@@ -131,11 +131,10 @@ class ClockRegistryTest : SysuiTestCase() {
 
         fun addClock(
             id: ClockId,
-            name: String,
             create: (ClockId) -> ClockController = ::failFactory,
             getThumbnail: (ClockId) -> Drawable? = ::failThumbnail
         ): FakeClockPlugin {
-            metadata.add(ClockMetadata(id, name))
+            metadata.add(ClockMetadata(id))
             createCallbacks[id] = create
             thumbnailCallbacks[id] = getThumbnail
             return this
@@ -149,7 +148,7 @@ class ClockRegistryTest : SysuiTestCase() {
         scope = TestScope(dispatcher)
 
         fakeDefaultProvider = FakeClockPlugin()
-            .addClock(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME, { mockDefaultClock }, { mockThumbnail })
+            .addClock(DEFAULT_CLOCK_ID, { mockDefaultClock }, { mockThumbnail })
         whenever(mockContext.contentResolver).thenReturn(mockContentResolver)
 
         val captor = argumentCaptor<PluginListener<ClockProviderPlugin>>()
@@ -183,13 +182,13 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun pluginRegistration_CorrectState() {
         val plugin1 = FakeClockPlugin()
-            .addClock("clock_1", "clock 1")
-            .addClock("clock_2", "clock 2")
+            .addClock("clock_1")
+            .addClock("clock_2")
         val lifecycle1 = FakeLifecycle("1", plugin1)
 
         val plugin2 = FakeClockPlugin()
-            .addClock("clock_3", "clock 3")
-            .addClock("clock_4", "clock 4")
+            .addClock("clock_3")
+            .addClock("clock_4")
         val lifecycle2 = FakeLifecycle("2", plugin2)
 
         pluginListener.onPluginLoaded(plugin1, mockContext, lifecycle1)
@@ -198,11 +197,11 @@ class ClockRegistryTest : SysuiTestCase() {
         assertEquals(
             list.toSet(),
             setOf(
-                ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
-                ClockMetadata("clock_1", "clock 1"),
-                ClockMetadata("clock_2", "clock 2"),
-                ClockMetadata("clock_3", "clock 3"),
-                ClockMetadata("clock_4", "clock 4")
+                ClockMetadata(DEFAULT_CLOCK_ID),
+                ClockMetadata("clock_1"),
+                ClockMetadata("clock_2"),
+                ClockMetadata("clock_3"),
+                ClockMetadata("clock_4")
             )
         )
     }
@@ -216,13 +215,13 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun clockIdConflict_ErrorWithoutCrash_unloadDuplicate() {
         val plugin1 = FakeClockPlugin()
-            .addClock("clock_1", "clock 1", { mockClock }, { mockThumbnail })
-            .addClock("clock_2", "clock 2", { mockClock }, { mockThumbnail })
+            .addClock("clock_1", { mockClock }, { mockThumbnail })
+            .addClock("clock_2", { mockClock }, { mockThumbnail })
         val lifecycle1 = spy(FakeLifecycle("1", plugin1))
 
         val plugin2 = FakeClockPlugin()
-            .addClock("clock_1", "clock 1")
-            .addClock("clock_2", "clock 2")
+            .addClock("clock_1")
+            .addClock("clock_2")
         val lifecycle2 = spy(FakeLifecycle("2", plugin2))
 
         pluginListener.onPluginLoaded(plugin1, mockContext, lifecycle1)
@@ -231,9 +230,9 @@ class ClockRegistryTest : SysuiTestCase() {
         assertEquals(
             list.toSet(),
             setOf(
-                ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
-                ClockMetadata("clock_1", "clock 1"),
-                ClockMetadata("clock_2", "clock 2")
+                ClockMetadata(DEFAULT_CLOCK_ID),
+                ClockMetadata("clock_1"),
+                ClockMetadata("clock_2")
             )
         )
 
@@ -248,13 +247,13 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun createCurrentClock_pluginConnected() {
         val plugin1 = FakeClockPlugin()
-            .addClock("clock_1", "clock 1")
-            .addClock("clock_2", "clock 2")
+            .addClock("clock_1")
+            .addClock("clock_2")
         val lifecycle1 = spy(FakeLifecycle("1", plugin1))
 
         val plugin2 = FakeClockPlugin()
-            .addClock("clock_3", "clock 3", { mockClock })
-            .addClock("clock_4", "clock 4")
+            .addClock("clock_3", { mockClock })
+            .addClock("clock_4")
         val lifecycle2 = spy(FakeLifecycle("2", plugin2))
 
         registry.applySettings(ClockSettings("clock_3", null))
@@ -268,13 +267,13 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun activeClockId_changeAfterPluginConnected() {
         val plugin1 = FakeClockPlugin()
-            .addClock("clock_1", "clock 1")
-            .addClock("clock_2", "clock 2")
+            .addClock("clock_1")
+            .addClock("clock_2")
         val lifecycle1 = spy(FakeLifecycle("1", plugin1))
 
         val plugin2 = FakeClockPlugin()
-            .addClock("clock_3", "clock 3", { mockClock })
-            .addClock("clock_4", "clock 4")
+            .addClock("clock_3", { mockClock })
+            .addClock("clock_4")
         val lifecycle2 = spy(FakeLifecycle("2", plugin2))
 
         registry.applySettings(ClockSettings("clock_3", null))
@@ -289,13 +288,13 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun createDefaultClock_pluginDisconnected() {
         val plugin1 = FakeClockPlugin()
-            .addClock("clock_1", "clock 1")
-            .addClock("clock_2", "clock 2")
+            .addClock("clock_1")
+            .addClock("clock_2")
         val lifecycle1 = spy(FakeLifecycle("1", plugin1))
 
         val plugin2 = FakeClockPlugin()
-            .addClock("clock_3", "clock 3")
-            .addClock("clock_4", "clock 4")
+            .addClock("clock_3")
+            .addClock("clock_4")
         val lifecycle2 = spy(FakeLifecycle("2", plugin2))
 
         registry.applySettings(ClockSettings("clock_3", null))
@@ -310,13 +309,13 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun pluginRemoved_clockAndListChanged() {
         val plugin1 = FakeClockPlugin()
-            .addClock("clock_1", "clock 1")
-            .addClock("clock_2", "clock 2")
+            .addClock("clock_1")
+            .addClock("clock_2")
         val lifecycle1 = spy(FakeLifecycle("1", plugin1))
 
         val plugin2 = FakeClockPlugin()
-            .addClock("clock_3", "clock 3", { mockClock })
-            .addClock("clock_4", "clock 4")
+            .addClock("clock_3", { mockClock })
+            .addClock("clock_4")
         val lifecycle2 = spy(FakeLifecycle("2", plugin2))
 
         var changeCallCount = 0
@@ -382,12 +381,15 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
-    fun knownPluginAttached_clockAndListChanged_notLoaded() {
-        val lifecycle1 = FakeLifecycle("Metro", null).apply {
-            mComponentName = ComponentName("com.android.systemui.clocks.metro", "MetroClock")
+    fun knownPluginAttached_clockAndListChanged_loadedCurrent() {
+        val metroLifecycle = FakeLifecycle("Metro", null).apply {
+            mComponentName = ComponentName("com.android.systemui.clocks.metro", "Metro")
         }
-        val lifecycle2 = FakeLifecycle("BigNum", null).apply {
-            mComponentName = ComponentName("com.android.systemui.clocks.bignum", "BigNumClock")
+        val bignumLifecycle = FakeLifecycle("BigNum", null).apply {
+            mComponentName = ComponentName("com.android.systemui.clocks.bignum", "BigNum")
+        }
+        val calligraphyLifecycle = FakeLifecycle("Calligraphy", null).apply {
+            mComponentName = ComponentName("com.android.systemui.clocks.calligraphy", "Calligraphy")
         }
 
         var changeCallCount = 0
@@ -402,26 +404,32 @@ class ClockRegistryTest : SysuiTestCase() {
         assertEquals(1, changeCallCount)
         assertEquals(0, listChangeCallCount)
 
-        assertEquals(false, pluginListener.onPluginAttached(lifecycle1))
+        assertEquals(false, pluginListener.onPluginAttached(metroLifecycle))
         scheduler.runCurrent()
         assertEquals(1, changeCallCount)
         assertEquals(1, listChangeCallCount)
 
-        assertEquals(false, pluginListener.onPluginAttached(lifecycle2))
+        assertEquals(false, pluginListener.onPluginAttached(bignumLifecycle))
         scheduler.runCurrent()
         assertEquals(1, changeCallCount)
         assertEquals(2, listChangeCallCount)
+
+        // This returns true, but doesn't trigger onCurrentClockChanged yet
+        assertEquals(true, pluginListener.onPluginAttached(calligraphyLifecycle))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(3, listChangeCallCount)
     }
 
     @Test
     fun pluginAddRemove_concurrentModification() {
-        val plugin1 = FakeClockPlugin().addClock("clock_1", "clock 1")
+        val plugin1 = FakeClockPlugin().addClock("clock_1")
         val lifecycle1 = FakeLifecycle("1", plugin1)
-        val plugin2 = FakeClockPlugin().addClock("clock_2", "clock 2")
+        val plugin2 = FakeClockPlugin().addClock("clock_2")
         val lifecycle2 = FakeLifecycle("2", plugin2)
-        val plugin3 = FakeClockPlugin().addClock("clock_3", "clock 3")
+        val plugin3 = FakeClockPlugin().addClock("clock_3")
         val lifecycle3 = FakeLifecycle("3", plugin3)
-        val plugin4 = FakeClockPlugin().addClock("clock_4", "clock 4")
+        val plugin4 = FakeClockPlugin().addClock("clock_4")
         val lifecycle4 = FakeLifecycle("4", plugin4)
 
         // Set the current clock to the final clock to load
@@ -450,10 +458,10 @@ class ClockRegistryTest : SysuiTestCase() {
 
         // Verify all plugins were correctly loaded into the registry
         assertEquals(registry.getClocks().toSet(), setOf(
-            ClockMetadata("DEFAULT", "Default Clock"),
-            ClockMetadata("clock_2", "clock 2"),
-            ClockMetadata("clock_3", "clock 3"),
-            ClockMetadata("clock_4", "clock 4")
+            ClockMetadata("DEFAULT"),
+            ClockMetadata("clock_2"),
+            ClockMetadata("clock_3"),
+            ClockMetadata("clock_4")
         ))
     }
 
@@ -527,8 +535,8 @@ class ClockRegistryTest : SysuiTestCase() {
         featureFlags.set(TRANSIT_CLOCK, flag)
         registry.isTransitClockEnabled = featureFlags.isEnabled(TRANSIT_CLOCK)
         val plugin = FakeClockPlugin()
-                .addClock("clock_1", "clock 1")
-                .addClock("DIGITAL_CLOCK_METRO", "metro clock")
+                .addClock("clock_1")
+                .addClock("DIGITAL_CLOCK_METRO")
         val lifecycle = FakeLifecycle("metro", plugin)
         pluginListener.onPluginLoaded(plugin, mockContext, lifecycle)
 
@@ -536,17 +544,17 @@ class ClockRegistryTest : SysuiTestCase() {
         if (flag) {
             assertEquals(
                     setOf(
-                            ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
-                            ClockMetadata("clock_1", "clock 1"),
-                            ClockMetadata("DIGITAL_CLOCK_METRO", "metro clock")
+                            ClockMetadata(DEFAULT_CLOCK_ID),
+                            ClockMetadata("clock_1"),
+                            ClockMetadata("DIGITAL_CLOCK_METRO")
                     ),
                     list.toSet()
             )
         } else {
             assertEquals(
                     setOf(
-                            ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
-                            ClockMetadata("clock_1", "clock 1")
+                            ClockMetadata(DEFAULT_CLOCK_ID),
+                            ClockMetadata("clock_1")
                     ),
                     list.toSet()
             )

@@ -1,0 +1,39 @@
+# Copyright 2023 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Key Layout file for flavor of Google Remote Control.
+#
+
+key 116   POWER         WAKE
+key 217   ASSIST
+
+key 103   DPAD_UP
+key 108   DPAD_DOWN
+key 105   DPAD_LEFT
+key 106   DPAD_RIGHT
+key 353   DPAD_CENTER   WAKE
+
+key 158   BACK          WAKE
+key 172   HOME          WAKE
+
+key 113   VOLUME_MUTE
+key 114   VOLUME_DOWN
+key 115   VOLUME_UP
+
+# custom keys
+key usage 0x000c0186    MACRO_1      WAKE
+
+key usage 0x000c0077    BUTTON_3     WAKE #YouTube
+key usage 0x000c0078    BUTTON_4     WAKE #Netflix

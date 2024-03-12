@@ -116,10 +116,8 @@ public class LocalMediaManagerTest {
         when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
 
-        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo1,
-                TEST_PACKAGE_NAME));
-        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo2,
-                TEST_PACKAGE_NAME);
+        mInfoMediaDevice1 = spy(new InfoMediaDevice(mContext, mRouteInfo1, TEST_PACKAGE_NAME));
+        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mRouteInfo2, TEST_PACKAGE_NAME);
         mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
                 mInfoMediaManager, "com.test.packagename");
         mLocalMediaManager.mAudioManager = mAudioManager;
@@ -150,7 +148,7 @@ public class LocalMediaManagerTest {
         assertThat(mLocalMediaManager.connectDevice(device)).isTrue();
 
         verify(currentDevice).disconnect();
-        verify(device).connect();
+        verify(mInfoMediaManager).connectToDevice(device);
     }
 
     @Test
@@ -435,9 +433,9 @@ public class LocalMediaManagerTest {
         final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
         when(info.getId()).thenReturn(TEST_SESSION_ID);
         routingSessionInfos.add(info);
-        when(mInfoMediaManager.getActiveMediaSession()).thenReturn(routingSessionInfos);
+        when(mInfoMediaManager.getRemoteSessions()).thenReturn(routingSessionInfos);
 
-        assertThat(mLocalMediaManager.getActiveMediaSession().get(0).getId())
+        assertThat(mLocalMediaManager.getRemoteRoutingSessions().get(0).getId())
                 .matches(TEST_SESSION_ID);
     }
 
@@ -508,7 +506,7 @@ public class LocalMediaManagerTest {
         devices.add(currentDevice);
         mLocalMediaManager.mMediaDeviceCallback.onDeviceListAdded(devices);
 
-        verify(mInfoMediaDevice1).connect();
+        verify(mInfoMediaManager).connectToDevice(mInfoMediaDevice1);
     }
 
     @Test
@@ -546,7 +544,7 @@ public class LocalMediaManagerTest {
         final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
         when(info.getId()).thenReturn(TEST_SESSION_ID);
         routingSessionInfos.add(info);
-        when(mInfoMediaManager.getActiveMediaSession()).thenReturn(routingSessionInfos);
+        when(mInfoMediaManager.getRoutingSessionById(TEST_SESSION_ID)).thenReturn(info);
 
         mLocalMediaManager.adjustSessionVolume(TEST_SESSION_ID, 10);
 

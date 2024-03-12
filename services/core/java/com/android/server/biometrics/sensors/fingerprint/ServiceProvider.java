@@ -135,6 +135,7 @@ public interface ServiceProvider extends
 
     void onPowerPressed();
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     /**
      * Sets side-fps controller
      * @param controller side-fps controller

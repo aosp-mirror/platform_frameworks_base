@@ -19,6 +19,7 @@ package com.android.wm.shell.back;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
 import android.animation.Animator;
@@ -55,13 +56,13 @@ import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
-/**
- * Class that handle customized close activity transition animation.
- */
+import javax.inject.Inject;
+
+/** Class that handle customized close activity transition animation. */
 @ShellMainThread
-class CustomizeActivityAnimation {
+public class CustomizeActivityAnimation extends ShellBackAnimation {
     private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
-    final BackAnimationRunner mBackAnimationRunner;
+    private final BackAnimationRunner mBackAnimationRunner;
     private final float mCornerRadius;
     private final SurfaceControl.Transaction mTransaction;
     private final BackAnimationBackground mBackground;
@@ -88,7 +89,8 @@ class CustomizeActivityAnimation {
 
     private final Choreographer mChoreographer;
 
-    CustomizeActivityAnimation(Context context, BackAnimationBackground background) {
+    @Inject
+    public CustomizeActivityAnimation(Context context, BackAnimationBackground background) {
         this(context, background, new SurfaceControl.Transaction(), null);
     }
 
@@ -96,7 +98,8 @@ class CustomizeActivityAnimation {
             SurfaceControl.Transaction transaction, Choreographer choreographer) {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mBackground = background;
-        mBackAnimationRunner = new BackAnimationRunner(new Callback(), new Runner());
+        mBackAnimationRunner = new BackAnimationRunner(
+                new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY);
         mCustomAnimationLoader = new CustomAnimationLoader(context);
 
         mProgressSpring = new SpringAnimation(this, ENTER_PROGRESS_PROP);
@@ -258,10 +261,12 @@ class CustomizeActivityAnimation {
         valueAnimator.start();
     }
 
-    /**
-     * Load customize animation before animation start.
-     */
-    boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
+    /** Load customize animation before animation start. */
+    @Override
+    public boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
+        if (animationInfo == null) {
+            return false;
+        }
         final AnimationLoadResult result = mCustomAnimationLoader.loadAll(animationInfo);
         if (result != null) {
             mCloseAnimation = result.mCloseAnimation;
@@ -270,6 +275,11 @@ class CustomizeActivityAnimation {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public BackAnimationRunner getRunner() {
+        return mBackAnimationRunner;
     }
 
     private final class Callback extends IOnBackInvokedCallback.Default {

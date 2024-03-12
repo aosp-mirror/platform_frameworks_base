@@ -19,7 +19,6 @@ package com.android.server.timezonedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.time.ITimeZoneDetectorListener;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
@@ -28,7 +27,6 @@ import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -168,8 +166,8 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         enforceManageTimeZoneDetectorPermission();
 
         // Resolve constants like USER_CURRENT to the true user ID as needed.
-        int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, false, "getCapabilitiesAndConfig", null);
+        int resolvedUserId =
+                mCallerIdentityInjector.resolveUserId(userId, "getCapabilitiesAndConfig");
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
@@ -190,8 +188,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     boolean updateConfiguration(
             @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration) {
         // Resolve constants like USER_CURRENT to the true user ID as needed.
-        int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, false, "updateConfiguration", null);
+        int resolvedUserId = mCallerIdentityInjector.resolveUserId(userId, "updateConfiguration");
 
         enforceManageTimeZoneDetectorPermission();
 

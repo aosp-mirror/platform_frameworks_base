@@ -22,7 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.asIndenting
-import com.android.systemui.util.withIncreasedIndent
+import com.android.systemui.util.printCollection
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -49,11 +49,7 @@ class NotificationDismissibilityProviderImpl @Inject constructor(dumpManager: Du
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) =
-        pw.asIndenting().run {
-            println("non-dismissible entries: ${nonDismissableEntryKeys.size}")
-
-            withIncreasedIndent { nonDismissableEntryKeys.forEach(this::println) }
-        }
+        pw.asIndenting().run { printCollection("non-dismissible entries", nonDismissableEntryKeys) }
 
     companion object {
         private const val TAG = "NotificationDismissibilityProvider"

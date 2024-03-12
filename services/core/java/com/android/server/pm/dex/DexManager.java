@@ -119,10 +119,10 @@ public class DexManager {
     private final int mCriticalBatteryLevel;
 
     // Possible outcomes of a dex search.
-    private static int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
-    private static int DEX_SEARCH_FOUND_PRIMARY = 1;  // dex file is the primary/base apk
-    private static int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
-    private static int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
+    private static final int DEX_SEARCH_NOT_FOUND = 0;  // dex file not found
+    private static final int DEX_SEARCH_FOUND_PRIMARY = 1;  // dex file is the primary/base apk
+    private static final int DEX_SEARCH_FOUND_SPLIT = 2;  // dex file is a split apk
+    private static final int DEX_SEARCH_FOUND_SECONDARY = 3;  // dex file is a secondary dex
 
     public DexManager(Context context, PackageDexOptimizer pdo, Installer installer,
             Object installLock, DynamicCodeLogger dynamicCodeLogger) {
@@ -959,8 +959,8 @@ public class DexManager {
      * Convenience class to store ownership search results.
      */
     private class DexSearchResult {
-        private String mOwningPackageName;
-        private int mOutcome;
+        private final String mOwningPackageName;
+        private final int mOutcome;
 
         public DexSearchResult(String owningPackageName, int outcome) {
             this.mOwningPackageName = owningPackageName;

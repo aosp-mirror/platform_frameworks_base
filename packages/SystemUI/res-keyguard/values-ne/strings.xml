@@ -20,11 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"आफ्नो PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"आफ्नो PIN हाल्नुहोस्"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN हाल्नुहोस्"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"आफ्नो ढाँचा प्रविष्टि गर्नुहोस्"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"प्याटर्न हाल्नुहोस्"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"प्याटर्न कोर्नुहोस्"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"आफ्नो पासवर्ड प्रविष्ट गर्नु…"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"पासवर्ड हाल्नुहोस्…"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"पासवर्ड हाल्नुहोस्"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"अमान्य कार्ड।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"चार्ज भयो"</string>
@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • मन्द गतिमा चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ब्याट्री जोगाउन चार्ज गर्ने प्रक्रिया अप्टिमाइज गरिएको छ"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गर्ने एक्सेसरीमा कुनै समस्या आयो"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"नेटवर्क लक भएको छ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM कार्ड हालिएको छैन"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM कार्ड हाल्नुहोस्।"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM कार्ड हालिएको छैन वा रिड गर्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"यो SIM कार्ड प्रयोग गर्न मिल्दैन।"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"तपाईंको SIM कार्ड सदाका लागि डिएक्टिभेट गरिएको छ।\n आफ्नो वायरलेस सेवा प्रदायकलाई सम्पर्क गरी अर्को SIM कार्ड प्राप्त गर्नुहोस्।"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM कार्ड लक गरिएको छ।"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM कार्ड PUK प्रयोग गरी लक गरिएको छ।"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM कार्ड अनलक गरिँदै छ…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"लकडाउन गरेपछि PIN हाल्नु पर्ने हुन्छ"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"लकडाउन गरेपछि पासवर्ड हाल्नु पर्ने हुन्छ"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"लकडाउन गरेपछि प्याटर्न कोर्नु पर्ने हुन्छ"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"डिभाइस प्रयोग नभएका बेला अपडेट इन्स्टल हुने छ"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"डिभाइस नचलाइएका बेला अपडेट इन्स्टल हुने छ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"थप सुरक्षित बनाउनु पर्ने हुन्छ। केही समयदेखि PIN प्रयोग गरिएको छैन।"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"थप सुरक्षित बनाउनु पर्ने हुन्छ। केही समयदेखि पासवर्ड प्रयोग गरिएको छैन।"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"थप सुरक्षित बनाउनु पर्ने हुन्छ। केही समयदेखि प्याटर्न प्रयोग गरिएको छैन।"</string>
@@ -88,17 +84,17 @@
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"अत्यन्तै धेरै पटक गलत प्याटर्न कोरियो"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"अत्यन्तै धेरै पटक गलत पासवर्ड हालियो"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# सेकेन्डपछि फेरि प्रयास गर्नुहोस्।}other{# सेकेन्डपछि फेरि प्रयास गर्नुहोस्।}}"</string>
-    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM को PIN प्रविष्टि गर्नुहोस्।"</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" को SIM को PIN प्रविष्टि गर्नुहोस्।"</string>
+    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM को PIN हाल्नुहोस्।"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" को SIM को PIN हाल्नुहोस्।"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> मोबाइल सेवा बिना डिभाइसको प्रयोग गर्न eSIM लाई असक्षम पार्नुहोस्।"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्टि गर्नुहोस्।  विवरणको लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM <xliff:g id="CARRIER">%1$s</xliff:g> अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्टि गर्नुहोस्। विवरणका लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"रूचाइएको PIN कोड प्रविष्टि गर्नुहोस्"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड हाल्नुहोस्।  विवरणको लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM <xliff:g id="CARRIER">%1$s</xliff:g> अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड हाल्नुहोस्। विवरणका लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"रूचाइएको PIN कोड हाल्नुहोस्"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"रूचाइएको PIN कोड पुष्टि गर्नुहोस्"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIM कार्ड अनलक गरिँदै छ…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"४ देखि ८ वटा नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK कोड ८ वा सो भन्दा बढी नम्बरको हुनु पर्छ।"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले आफ्नो PIN प्रविष्ट गर्नुभएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत PIN टाइप गर्नुभएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक आफ्नो गलत पासवर्ड  प्रविष्ट गर्नुभएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले आफ्नो अनलक प्याटर्न कोर्नुभएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM को PIN कोड गलत छ। तपाईंले अब आफ्नो यन्त्र खोल्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नै पर्ने हुन्छ।"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"बबल"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"एनालग"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"आफ्नो डिभाइस अनलक गरी जारी राख्नुहोस्"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"पछि अपडेट इन्स्टल गर्न PIN हाल्नुहोस्"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"पछि अपडेट इन्स्टल गर्न पासवर्ड हाल्नुहोस्"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"पछि अपडेट इन्स्टल गर्न प्याटर्न बनाउनुहोस्"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"डिभाइस अपडेट गरिएको छ। जारी राख्न PIN हाल्नुहोस्।"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"डिभाइस अपडेट गरिएको छ। जारी राख्न पासवर्ड हाल्नुहोस्।"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"डिभाइस अपडेट गरिएको छ। जारी राख्न प्याटर्न बनाउनुहोस्।"</string>
 </resources>

@@ -16,11 +16,20 @@
 
 package com.android.systemui.statusbar.phone
 
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.util.ViewController
 import javax.inject.Inject
 
-class KeyguardBottomAreaViewController @Inject constructor(view: KeyguardBottomAreaView) :
+class KeyguardBottomAreaViewController
+    @Inject constructor(view: KeyguardBottomAreaView, featureFlags: FeatureFlagsClassic) :
     ViewController<KeyguardBottomAreaView> (view) {
+
+    init {
+        view.setIsLockscreenLandscapeEnabled(
+                featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE))
+    }
+
     override fun onViewAttached() {
     }
 

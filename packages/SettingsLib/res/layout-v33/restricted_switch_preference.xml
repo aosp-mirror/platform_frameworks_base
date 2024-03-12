@@ -53,7 +53,7 @@
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="2"
+            android:maxLines="10"
             android:hyphenationFrequency="normalFast"
             android:lineBreakWordStyle="phrase"
             android:textAppearance="?android:attr/textAppearanceListItem"

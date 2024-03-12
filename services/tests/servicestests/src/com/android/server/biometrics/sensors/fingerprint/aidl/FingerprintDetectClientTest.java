@@ -83,7 +83,7 @@ public class FingerprintDetectClientTest {
     @Mock
     private ClientMonitorCallback mCallback;
     @Mock
-    private Sensor.HalSessionCallback mHalSessionCallback;
+    private AidlResponseHandler mAidlResponseHandler;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
@@ -150,7 +150,7 @@ public class FingerprintDetectClientTest {
 
     @Test
     public void testWhenListenerIsNull() {
-        final AidlSession aidl = new AidlSession(0, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(0, mHal, USER_ID, mAidlResponseHandler);
         final FingerprintDetectClient client =  new FingerprintDetectClient(mContext, () -> aidl,
                 mToken, 6 /* requestId */, null /* listener */,
                 new FingerprintAuthenticateOptions.Builder()
@@ -173,7 +173,7 @@ public class FingerprintDetectClientTest {
     private FingerprintDetectClient createClient(int version) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
-        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mAidlResponseHandler);
         return new FingerprintDetectClient(mContext, () -> aidl, mToken,
                 6 /* requestId */, mClientMonitorCallbackConverter,
                 new FingerprintAuthenticateOptions.Builder()

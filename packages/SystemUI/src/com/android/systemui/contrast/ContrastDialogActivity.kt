@@ -16,31 +16,19 @@
 package com.android.systemui.contrast
 
 import android.app.Activity
-import android.app.UiModeManager
-import android.content.Context
 import android.os.Bundle
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.settings.UserTracker
-import com.android.systemui.util.settings.SecureSettings
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
-/** Trampoline activity responsible for creating a [ContrastDialog] */
+/** Trampoline activity responsible for creating a [ContrastDialogDelegate] */
 class ContrastDialogActivity
 @Inject
 constructor(
-    private val context: Context,
-    @Main private val mainExecutor: Executor,
-    private val uiModeManager: UiModeManager,
-    private val userTracker: UserTracker,
-    private val secureSettings: SecureSettings
+    private val contrastDialogDelegate : ContrastDialogDelegate
 ) : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val contrastDialog =
-            ContrastDialog(context, mainExecutor, uiModeManager, userTracker, secureSettings)
-        contrastDialog.show()
+        contrastDialogDelegate.createDialog().show()
         finish()
     }
 }

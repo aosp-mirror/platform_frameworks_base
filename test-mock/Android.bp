@@ -54,6 +54,29 @@ java_sdk_library {
     dist_group: "android",
 }
 
+java_library {
+    name: "android.test.mock.ravenwood",
+    srcs: [":android-test-mock-sources"],
+    visibility: [
+        "//frameworks/base",
+    ],
+}
+
+android_ravenwood_test {
+    name: "android.test.mock.ravenwood.tests",
+    libs: [
+        "android.test.mock.ravenwood",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+    ],
+    srcs: [
+        "tests/**/*.java",
+    ],
+    auto_gen_config: true,
+}
+
 // Make the current.txt available for use by the cts/tests/signature and /vendor tests.
 // ========================================================================
 filegroup {

@@ -18,6 +18,7 @@ package com.android.systemui.dreams;
 
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
+import static com.android.systemui.dreams.dagger.DreamModule.HOME_CONTROL_PANEL_DREAM_COMPONENT;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -76,6 +77,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Nullable
     private final ComponentName mLowLightDreamComponent;
+    @Nullable
+    private final ComponentName mHomeControlPanelDreamComponent;
     private final UiEventLogger mUiEventLogger;
     private final WindowManager mWindowManager;
     private final String mWindowTitle;
@@ -165,6 +168,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             @Named(DREAM_TOUCH_INSET_MANAGER) TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
                     ComponentName lowLightDreamComponent,
+            @Nullable @Named(HOME_CONTROL_PANEL_DREAM_COMPONENT)
+                    ComponentName homeControlPanelDreamComponent,
             DreamOverlayCallbackController dreamOverlayCallbackController,
             @Named(DREAM_OVERLAY_WINDOW_TITLE) String windowTitle) {
         super(executor);
@@ -173,6 +178,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mWindowManager = windowManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLowLightDreamComponent = lowLightDreamComponent;
+        mHomeControlPanelDreamComponent = homeControlPanelDreamComponent;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
         mStateController = stateController;
         mUiEventLogger = uiEventLogger;
@@ -249,6 +255,10 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         final ComponentName dreamComponent = getDreamComponent();
         mStateController.setLowLightActive(
                 dreamComponent != null && dreamComponent.equals(mLowLightDreamComponent));
+
+        mStateController.setHomeControlPanelActive(
+                dreamComponent != null && dreamComponent.equals(mHomeControlPanelDreamComponent));
+
         mUiEventLogger.log(DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
 
         mDreamOverlayCallbackController.onStartDream();

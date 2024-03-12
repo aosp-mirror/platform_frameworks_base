@@ -24,13 +24,16 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
@@ -90,6 +93,9 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 settings,
                 fakeHandler,
                 configurationController,
+                ResourcesSplitShadeStateController(),
+                mock<KeyguardMediaControllerLogger>(),
+                mock<DumpManager>()
             )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
         keyguardMediaController.useSplitShade = false
@@ -99,7 +105,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     fun testHiddenWhenHostIsHidden() {
         whenever(mediaHost.visible).thenReturn(false)
 
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
 
         assertThat(mediaContainerView.visibility).isEqualTo(GONE)
     }
@@ -113,7 +119,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
 
     private fun testStateVisibility(state: Int, visibility: Int) {
         whenever(statusBarStateController.state).thenReturn(state)
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
         assertThat(mediaContainerView.visibility).isEqualTo(visibility)
     }
 
@@ -121,7 +127,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     fun testHiddenOnKeyguard_whenMediaOnLockScreenDisabled() {
         settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 0)
 
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
 
         assertThat(mediaContainerView.visibility).isEqualTo(GONE)
     }
@@ -130,7 +136,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     fun testAvailableOnKeyguard_whenMediaOnLockScreenEnabled() {
         settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 1)
 
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
 
         assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
     }
@@ -228,5 +234,9 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     private fun setDozing() {
         whenever(statusBarStateController.isDozing).thenReturn(true)
         statusBarStateListener.onDozingChanged(true)
+    }
+
+    private companion object {
+        private const val TEST_REASON = "test reason"
     }
 }

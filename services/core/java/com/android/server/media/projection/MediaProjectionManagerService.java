@@ -134,6 +134,7 @@ public final class MediaProjectionManagerService extends SystemService
 
     private final MediaRouter mMediaRouter;
     private final MediaRouterCallback mMediaRouterCallback;
+    private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
     private MediaRouter.RouteInfo mMediaRouteInfo;
 
     @GuardedBy("mLock")
@@ -160,6 +161,7 @@ public final class MediaProjectionManagerService extends SystemService
         mWmInternal = LocalServices.getService(WindowManagerInternal.class);
         mMediaRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         mMediaRouterCallback = new MediaRouterCallback();
+        mMediaProjectionMetricsLogger = injector.mediaProjectionMetricsLogger(context);
         Watchdog.getInstance().addMonitor(this);
     }
 
@@ -192,6 +194,10 @@ public final class MediaProjectionManagerService extends SystemService
         /** Creates the {@link Looper} to be used when notifying callbacks. */
         Looper createCallbackLooper() {
             return Looper.getMainLooper();
+        }
+
+        MediaProjectionMetricsLogger mediaProjectionMetricsLogger(Context context) {
+            return MediaProjectionMetricsLogger.getInstance(context);
         }
     }
 
@@ -286,6 +292,12 @@ public final class MediaProjectionManagerService extends SystemService
     private void stopProjectionLocked(final MediaProjection projection) {
         Slog.d(TAG, "Content Recording: Stopped active MediaProjection and "
                 + "dispatching stop to callbacks");
+        ContentRecordingSession session = projection.mSession;
+        int targetUid =
+                session != null
+                        ? session.getTargetUid()
+                        : ContentRecordingSession.TARGET_UID_UNKNOWN;
+        mMediaProjectionMetricsLogger.logStopped(projection.uid, targetUid);
         mProjectionToken = null;
         mProjectionGrant = null;
         dispatchStop(projection);
@@ -372,6 +384,12 @@ public final class MediaProjectionManagerService extends SystemService
             if (mProjectionGrant != null) {
                 // Cache the session details.
                 mProjectionGrant.mSession = incomingSession;
+                if (incomingSession != null) {
+                    // Only log in progress when session is not null.
+                    // setContentRecordingSession is called with a null session for the stop case.
+                    mMediaProjectionMetricsLogger.logInProgress(
+                            mProjectionGrant.uid, incomingSession.getTargetUid());
+                }
                 dispatchSessionSet(mProjectionGrant.getProjectionInfo(), incomingSession);
             }
             return true;
@@ -439,6 +457,38 @@ public final class MediaProjectionManagerService extends SystemService
                 .putExtra(EXTRA_USER_REVIEW_GRANTED_CONSENT, true)
                 .putExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT, mProjectionGrant.packageName)
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    }
+
+    @VisibleForTesting
+    void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource) {
+        mMediaProjectionMetricsLogger.logInitiated(hostUid, sessionCreationSource);
+    }
+
+    @VisibleForTesting
+    void notifyPermissionRequestDisplayed(int hostUid) {
+        mMediaProjectionMetricsLogger.logPermissionRequestDisplayed(hostUid);
+    }
+
+    @VisibleForTesting
+    void notifyPermissionRequestCancelled(int hostUid) {
+        mMediaProjectionMetricsLogger.logProjectionPermissionRequestCancelled(hostUid);
+    }
+
+    @VisibleForTesting
+    void notifyAppSelectorDisplayed(int hostUid) {
+        mMediaProjectionMetricsLogger.logAppSelectorDisplayed(hostUid);
+    }
+
+    @VisibleForTesting
+    void notifyWindowingModeChanged(int contentToRecord, int targetUid, int windowingMode) {
+        synchronized (mLock) {
+            if (mProjectionGrant == null) {
+                Slog.i(TAG, "Cannot log MediaProjectionTargetChanged atom due to null projection");
+            } else {
+                mMediaProjectionMetricsLogger.logChangedWindowingMode(
+                        contentToRecord, mProjectionGrant.uid, targetUid, windowingMode);
+            }
+        }
     }
 
     /**
@@ -652,13 +702,10 @@ public final class MediaProjectionManagerService extends SystemService
             return projection;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public boolean isCurrentProjection(IMediaProjection projection) {
-            if (mContext.checkCallingOrSelfPermission(MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to check "
-                        + "if the given projection is current.");
-            }
+            isCurrentProjection_enforcePermission();
             return MediaProjectionManagerService.this.isCurrentProjection(
                     projection == null ? null : projection.asBinder());
         }
@@ -678,13 +725,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public void stopActiveProjection() {
-            if (mContext.checkCallingOrSelfPermission(MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to stop "
-                        + "the active projection");
-            }
+            stopActiveProjection_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -698,13 +742,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public void notifyActiveProjectionCapturedContentResized(int width, int height) {
-            if (mContext.checkCallingOrSelfPermission(MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
-                        + "on captured content resize");
-            }
+            notifyActiveProjectionCapturedContentResized_enforcePermission();
             synchronized (mLock) {
                 if (!isCurrentProjection(mProjectionGrant)) {
                     return;
@@ -722,13 +763,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override
         public void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible) {
-            if (mContext.checkCallingOrSelfPermission(MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to notify "
-                        + "on captured content visibility changed");
-            }
+            notifyActiveProjectionCapturedContentVisibilityChanged_enforcePermission();
             synchronized (mLock) {
                 if (!isCurrentProjection(mProjectionGrant)) {
                     return;
@@ -747,12 +785,9 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override //Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
         public void addCallback(final IMediaProjectionWatcherCallback callback) {
-            if (mContext.checkCallingPermission(MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
-                        + "projection callbacks");
-            }
+            addCallback_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.addCallback(callback);
@@ -776,14 +811,11 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override
         public boolean setContentRecordingSession(@Nullable ContentRecordingSession incomingSession,
                 @NonNull IMediaProjection projection) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to set session "
-                        + "details.");
-            }
+            setContentRecordingSession_enforcePermission();
             synchronized (mLock) {
                 if (!isCurrentProjection(projection)) {
                     throw new SecurityException("Unable to set ContentRecordingSession on "
@@ -799,13 +831,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override
         public void requestConsentForInvalidProjection(@NonNull IMediaProjection projection) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to check if the given"
-                        + "projection is valid.");
-            }
+            requestConsentForInvalidProjection_enforcePermission();
             synchronized (mLock) {
                 if (!isCurrentProjection(projection)) {
                     Slog.v(TAG, "Reusing token: Won't request consent again for a token that "
@@ -833,6 +862,69 @@ public final class MediaProjectionManagerService extends SystemService
             try {
                 MediaProjectionManagerService.this.setUserReviewGrantedConsentResult(consentResult,
                         projection);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyPermissionRequestInitiated(int hostUid, int sessionCreationSource) {
+            notifyPermissionRequestInitiated_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyPermissionRequestInitiated(
+                        hostUid, sessionCreationSource);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyPermissionRequestDisplayed(int hostUid) {
+            notifyPermissionRequestDisplayed_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyPermissionRequestDisplayed(hostUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyPermissionRequestCancelled(int hostUid) {
+            notifyPermissionRequestCancelled_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyPermissionRequestCancelled(hostUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyAppSelectorDisplayed(int hostUid) {
+            notifyAppSelectorDisplayed_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyAppSelectorDisplayed(hostUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
+        public void notifyWindowingModeChanged(
+                int contentToRecord, int targetUid, int windowingMode) {
+            notifyWindowingModeChanged_enforcePermission();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                MediaProjectionManagerService.this.notifyWindowingModeChanged(
+                        contentToRecord, targetUid, windowingMode);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -922,13 +1014,10 @@ public final class MediaProjectionManagerService extends SystemService
                 || mType == MediaProjectionManager.TYPE_SCREEN_CAPTURE;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public int applyVirtualDisplayFlags(int flags) {
-            if (mContext.checkCallingOrSelfPermission(MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to apply virtual "
-                        + "display flags.");
-            }
+            applyVirtualDisplayFlags_enforcePermission();
             if (mType == MediaProjectionManager.TYPE_SCREEN_CAPTURE) {
                 flags &= ~DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
                 flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR
@@ -1088,33 +1177,24 @@ public final class MediaProjectionManagerService extends SystemService
             mCallbackDelegate.remove(callback);
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public void setLaunchCookie(IBinder launchCookie) {
-            if (mContext.checkCallingOrSelfPermission(MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to set launch "
-                        + "cookie.");
-            }
+            setLaunchCookie_enforcePermission();
             mLaunchCookie = launchCookie;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override // Binder call
         public IBinder getLaunchCookie() {
-            if (mContext.checkCallingOrSelfPermission(MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to get launch "
-                        + "cookie.");
-            }
+            getLaunchCookie_enforcePermission();
             return mLaunchCookie;
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override
         public boolean isValid() {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to check if this"
-                        + "projection is valid.");
-            }
+            isValid_enforcePermission();
             synchronized (mLock) {
                 final long curMs = mClock.uptimeMillis();
                 final boolean hasTimedOut = curMs - mCreateTimeMs > mTimeoutMs;
@@ -1141,13 +1221,10 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
         @Override
         public void notifyVirtualDisplayCreated(int displayId) {
-            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION to notify virtual "
-                        + "display created.");
-            }
+            notifyVirtualDisplayCreated_enforcePermission();
             synchronized (mLock) {
                 mVirtualDisplayId = displayId;
 

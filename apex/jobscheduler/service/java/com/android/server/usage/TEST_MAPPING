@@ -4,18 +4,22 @@
       "name": "CtsUsageStatsTestCases",
       "options": [
         {"include-filter": "android.app.usage.cts.UsageStatsTest"},
-        {"include-filter": "android.app.usage.cts.BroadcastResponseStatsTest"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.MediumTest"},
         {"exclude-annotation": "androidx.test.filters.LargeTest"}
       ]
     },
     {
+      "name": "CtsBRSTestCases",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
       "name": "FrameworksServicesTests",
       "options": [
         {"include-filter": "com.android.server.usage"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
     }

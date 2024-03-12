@@ -269,7 +269,7 @@ TEST(IdmapTests, FabricatedOverlay) {
                   .SetResourceValue("integer/int1", Res_value::TYPE_INT_DEC, 2U, "land-xxhdpi-v7")
                   .SetResourceValue("string/str1", Res_value::TYPE_REFERENCE, 0x7f010000, "land")
                   .SetResourceValue("string/str2", Res_value::TYPE_STRING, "foobar", "xxhdpi-v7")
-                  .SetResourceValue("drawable/dr1", fd, "port-xxhdpi-v7")
+                  .SetResourceValue("drawable/dr1", fd, 0, 8341, "port-xxhdpi-v7", false)
                   .setFrroPath("/foo/bar/biz.frro")
                   .Build();
 
@@ -613,19 +613,19 @@ class TestVisitor : public Visitor {
   }
 
   void visit(const Idmap& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(Idmap)" << std::endl;
+    stream_ << "TestVisitor::visit(Idmap)" << '\n';
   }
 
   void visit(const IdmapHeader& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(IdmapHeader)" << std::endl;
+    stream_ << "TestVisitor::visit(IdmapHeader)" << '\n';
   }
 
   void visit(const IdmapData& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(IdmapData)" << std::endl;
+    stream_ << "TestVisitor::visit(IdmapData)" << '\n';
   }
 
   void visit(const IdmapData::Header& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(IdmapData::Header)" << std::endl;
+    stream_ << "TestVisitor::visit(IdmapData::Header)" << '\n';
   }
 
  private:

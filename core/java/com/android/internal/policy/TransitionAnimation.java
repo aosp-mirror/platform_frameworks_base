@@ -1304,7 +1304,7 @@ public class TransitionAnimation {
             ScreenCapture.ScreenshotHardwareBuffer buffer) {
         t.setBuffer(layer, buffer.getHardwareBuffer());
         t.setDataSpace(layer, buffer.getColorSpace().getDataSpace());
-        // Avoid showing dimming effect for HDR content when running animation.
+        // Avoid showing dimming effect for HDR content when running animations.
         if (buffer.containsHdrLayers()) {
             t.setDimmingEnabled(layer, false);
         }

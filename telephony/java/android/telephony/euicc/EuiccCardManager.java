@@ -67,7 +67,11 @@ import java.util.concurrent.Executor;
 public class EuiccCardManager {
     private static final String TAG = "EuiccCardManager";
 
-    /** Reason for canceling a profile download session */
+    /**
+     * Reason for canceling a profile download session
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CANCEL_REASON_"}, value = {
             CANCEL_REASON_END_USER_REJECTED,
@@ -97,7 +101,11 @@ public class EuiccCardManager {
      */
     public static final int CANCEL_REASON_PPR_NOT_ALLOWED = 3;
 
-    /** Options for resetting eUICC memory */
+    /**
+     * Options for resetting eUICC memory
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = {"RESET_OPTION_"}, value = {
             RESET_OPTION_DELETE_OPERATIONAL_PROFILES,

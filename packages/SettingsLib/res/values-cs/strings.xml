@@ -59,8 +59,8 @@
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Zkontrolujte heslo a zkuste to znovu"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Mimo dosah"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Připojení nebude automaticky navázáno"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"Nebyl zjištěn žádný přístup k internetu"</string>
-    <string name="saved_network" msgid="7143698034077223645">"Uloženo uživatelem <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Není připojení k internetu"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Uložil(a): <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automaticky připojeno přes poskytovatele %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automaticky připojeno přes poskytovatele hodnocení sítí"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Připojeno přes <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -97,8 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktivní, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterie"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktivní, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterie, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterie"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterie"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterie, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterie"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Vlevo <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Vpravo <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktivní"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"Uloženo"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktivní, pouze levé"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktivní, pouze pravé"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktivní, levé a pravé"</string>
@@ -107,16 +111,16 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Přenos souborů"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Vstupní zařízení"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Přístup k internetu"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Sdílení kontaktů a historie volání"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Používat ke sdílení kontaktů a historie hovorů"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Povolit přístup ke kontaktům a historii"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informace poslouží k oznamování hovorů a k dalším účelům"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Sdílení internetového připojení"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Textové zprávy"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Přístup k SIM kartě"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD zvuk"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Naslouchátka"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Připojeno k naslouchátkům"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Naslouchátka"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Připojeno k naslouchátkům"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Připojeno k LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Připojeno ke zvukovému médiu"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Připojeno k náhlavní soupravě"</string>
@@ -134,7 +138,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Umožňuje připojení náhlavní soupravy"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Použít pro přenos souborů"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Použít pro vstup"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Použít pro naslouchátka"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Použít pro naslouchátka"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Používat pro LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Spárovat"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SPÁROVAT"</string>
@@ -157,6 +161,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi – dvě čárky."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi – tři čárky."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Wi-Fi – plný signál."</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Připojeno k vašemu zařízení."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Nezabezpečená síť"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Zabezpečená síť"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"OS Android"</string>
@@ -180,7 +185,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Výška"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Určuje tón syntetizované řeči"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Jazyk"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Použít jazyk systému"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Používat jazyk systému"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Nebyl vybrán jazyk"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Nastavení jazyka hlasu pro mluvený text"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Poslechnout příklad"</string>
@@ -215,6 +220,8 @@
     <string name="choose_profile" msgid="343803890897657450">"Vyberte profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobní"</string>
     <string name="category_work" msgid="4014193632325996115">"Pracovní"</string>
+    <string name="category_private" msgid="4244892185452788977">"Soukromé"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Pro vývojáře"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivovat možnosti pro vývojáře"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Umožňuje nastavit možnosti pro vývoj aplikací"</string>
@@ -299,7 +306,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Název hostitele poskytovatele soukromého DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadejte hostitele poskytovatele DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nelze se připojit"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazovat možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi, při výběru Wi‑Fi zobrazovat RSSI pro každý SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Snižuje vyčerpávání baterie a vylepšuje výkon sítě"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Když je tento režim aktivován, adresa MAC tohoto zařízení se může změnit pokaždé, když se zařízení připojí k síti s aktivovanou randomizací adres MAC."</string>
@@ -336,7 +343,7 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrola HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Nastavit chování kontroly HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ladění"</string>
-    <string name="debug_app" msgid="8903350241392391766">"Vybrat aplikaci pro ladění"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Výběr aplikace pro ladění"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Není nastavena žádná aplikace pro ladění"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Aplikace pro ladění: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Výběr aplikace"</string>
@@ -354,6 +361,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Překryvná vrstva zobrazuje aktuální data o dotycích"</string>
     <string name="show_touches" msgid="8437666942161289025">"Zobrazovat klepnutí"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Zobrazovat vizuální zpětnou vazbu pro klepnutí"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"Zobrazit stisknutí klávesy"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Zobrazit vizuální odezvu při stisknutí fyzické klávesy"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Zobrazit obnovení obsahu"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Rozbliká obsah okna při aktualizaci"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Ukazovat aktualizace zobrazení"</string>
@@ -365,7 +374,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Vždy použít GPU ke skládání obrazovky"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulace barevného prostoru"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Povolit trasování OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Směrování zvuku do USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Zakázat směrování zvuku do USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Vypnout automatické směrování zvuku do zvukových periferií USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Zobrazit ohraničení"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"U výstřižku zobrazit ohraničení, okraje atd."</string>
@@ -400,7 +409,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožní změnu velikosti všech aktivit na několik oken (bez ohledu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivovat okna s volným tvarem"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivuje podporu experimentálních oken s volným tvarem"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Režim počítače"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pro zálohy v počítači"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Úplné zálohy v počítači nejsou v současné době chráněny"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tuto možnost vyberte, chcete-li změnit nebo odebrat heslo pro úplné zálohy do počítače"</string>
@@ -428,6 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Předpokládat, že aplikace podporují moderní formáty"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Zobrazit oznámení o překódování"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Deaktivovat mezipaměť pro překódování"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Nastavení Widevine"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Vynucení L3 fallback"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Vybrat vynucení L3 fallback"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Spuštěné služby"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Umožňuje zobrazit a ovládat aktuálně spuštěné služby"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementace WebView"</string>
@@ -460,12 +471,6 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Zbývá méně než <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Zbývá více než <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Zbývá více než <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon se brzy vypne"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet se brzy vypne"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Zařízení se brzy vypne"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Telefon se brzy vypne (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet se brzy vypne (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Zařízení se brzy vypne (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> do úplného nabití"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabití"</string>
@@ -515,16 +520,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Neregistrováno"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Není k dispozici"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Adresa MAC je vybrána náhodně"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 připojených zařízení}=1{1 připojené zařízení}few{# připojená zařízení}many{# připojeného zařízení}other{# připojených zařízení}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 připojené zařízení}few{# připojená zařízení}many{# připojeného zařízení}other{# připojených zařízení}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Delší doba"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kratší doba"</string>
     <string name="cancel" msgid="5665114069455378395">"Zrušit"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Další"</string>
+    <string name="back" msgid="5554327870352703710">"Zpět"</string>
+    <string name="save" msgid="3745809743277153149">"Uložit"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Hotovo"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Budíky a připomenutí"</string>
@@ -547,14 +549,27 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Právě teď"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Tento telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tento tablet"</string>
+    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dok s reproduktorem"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externí zařízení"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Připojené zařízení"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefon"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Na tomto zařízení média přehrávat nelze"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Pokud chcete přejít, upgradujte účet"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"V zařízení nelze přehrávat"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Účet je třeba upgradovat"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Stažený obsah zde nelze přehrát"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Zkuste to znovu po reklamě"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Pokud zde chcete přehrávat média, probuďte zařízení"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Zařízení není schváleno k přehrávání"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Zařízení je třeba probudit"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Není schváleno k přehrávání"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Tato média zde přehrát nelze"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Připojeno"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Připojeno přes ARC"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Připojeno přes eARC"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Výchozí nastavení televize"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Výstup HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interní reproduktory"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problém s připojením. Vypněte zařízení a znovu jej zapněte"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kabelové audiozařízení"</string>
     <string name="help_label" msgid="3528360748637781274">"Nápověda a zpětná vazba"</string>
@@ -579,12 +594,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Přidat nového uživatele?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvořením dalších uživatelů můžete toto zařízení sdílet s jinými lidmi. Každý uživatel má svůj prostor, který si může přizpůsobit instalací aplikací, přidáním tapety apod. Uživatelé také mohou upravit nastavení zařízení (např. Wi-Fi), která ovlivní všechny uživatele.\n\nKaždý nově přidaný uživatel si musí nastavit vlastní prostor.\n\nKaždý uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Když přidáte nového uživatele, musí si nastavit vlastní prostor.\n\nJakýkoli uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Nastavit uživatele jako administrátora?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administrátoři mají zvláštní oprávnění, která ostatní uživatelé nemají. Administrátor může spravovat všechny uživatele, aktualizovat nebo resetovat toto zařízení, zobrazit všechny nainstalované aplikace a udělit nebo zrušit ostatním administrátorská práva."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Nastavit jako administrátora"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nastavit uživatele?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ujistěte se, že je uživatel k dispozici a může si v zařízení nastavit svůj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Nastavit profil?"</string>
@@ -616,10 +628,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tímto zahájíte novou relaci hosta a smažete všechny aplikace a data z aktuální relace"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Ukončit režim hosta?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tímto smažete aplikace a data z aktuální relace hosta"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ano, nastavit jako administrátora"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Ne, nenastavovat jako administrátora"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Ukončit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Uložit aktivitu hosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Aktivitu z aktuální relace můžete uložit, nebo všechny aplikace a data smazat"</string>
@@ -679,7 +689,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Výchozí"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínání obrazovky"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolit zapínání obrazovky"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez explicitního intentu."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zastavit vysílání v aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Pokud budete vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g> nebo změníte výstup, aktuální vysílání se zastaví"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
@@ -687,11 +697,9 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktivní animace gesta Zpět"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povolit systémové animace prediktivního gesta Zpět"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Toto nastavení aktivuje systémové prediktivní animace gest. Vyžaduje, aby v souborech manifestu jednotlivých aplikací byl nastaven atribut enableOnBackInvokedCallback na hodnotu True."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Přesunout doleva"</item>
-    <item msgid="5425394847942513942">"Přesunout dolů"</item>
-    <item msgid="7728484337962740316">"Přesunout doprava"</item>
-    <item msgid="324200556467459329">"Přesunout nahoru"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="not_specified" msgid="5423502443185110328">"Neurčeno"</string>
+    <string name="neuter" msgid="2075249330106127310">"Střední rod"</string>
+    <string name="feminine" msgid="1529155595310784757">"Ženský rod"</string>
+    <string name="masculine" msgid="4653978041013996303">"Mužský rod"</string>
 </resources>

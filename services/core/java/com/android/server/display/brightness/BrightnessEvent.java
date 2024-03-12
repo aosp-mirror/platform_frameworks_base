@@ -19,9 +19,11 @@ package com.android.server.display.brightness;
 import android.hardware.display.BrightnessInfo;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Represents a particular brightness change event.
@@ -33,6 +35,8 @@ public final class BrightnessEvent {
     public static final int FLAG_USER_SET = 0x8;
     public static final int FLAG_IDLE_CURVE = 0x10;
     public static final int FLAG_LOW_POWER_MODE = 0x20;
+
+    private static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
     private BrightnessReason mReason = new BrightnessReason();
     private int mDisplayId;
@@ -169,7 +173,7 @@ public final class BrightnessEvent {
      * @return A stringified BrightnessEvent
      */
     public String toString(boolean includeTime) {
-        return (includeTime ? TimeUtils.formatForLogging(mTime) + " - " : "")
+        return (includeTime ? FORMAT.format(new Date(mTime)) + " - " : "")
                 + "BrightnessEvent: "
                 + "disp=" + mDisplayId
                 + ", physDisp=" + mPhysicalDisplayId

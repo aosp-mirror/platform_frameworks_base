@@ -42,12 +42,10 @@ import androidx.annotation.NonNull;
 import androidx.core.graphics.drawable.IconCompat;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.settingslib.media.BluetoothMediaDevice;
-import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.qrcode.QrCodeGenerator;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import com.google.zxing.WriterException;
@@ -237,7 +235,11 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
 
     MediaOutputBroadcastDialog(Context context, boolean aboveStatusbar,
             BroadcastSender broadcastSender, MediaOutputController mediaOutputController) {
-        super(context, broadcastSender, mediaOutputController);
+        super(
+                context,
+                broadcastSender,
+                mediaOutputController, /* includePlaybackAndAppMetadata */
+                true);
         mAdapter = new MediaOutputAdapter(mMediaOutputController);
         // TODO(b/226710953): Move the part to MediaOutputBaseDialog for every class
         //  that extends MediaOutputBaseDialog

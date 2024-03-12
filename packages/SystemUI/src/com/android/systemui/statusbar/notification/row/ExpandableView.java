@@ -34,10 +34,11 @@ import androidx.annotation.Nullable;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
@@ -69,6 +70,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
     private ViewGroup mTransientContainer;
+
+    // Needs to be added as transient view when removed from parent, because it's in animation
+    private boolean mInRemovalAnimation;
     private boolean mInShelf;
     private boolean mTransformingInShelf;
     protected float mContentTransformationAmount;
@@ -381,6 +385,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
      */
     public abstract long performRemoveAnimation(long duration,
             long delay, float translationDirection, boolean isHeadsUpAnimation,
+            Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener);
 
@@ -396,6 +401,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
      * @param below true if it is below.
      */
     public void setBelowSpeedBump(boolean below) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
     }
 
     public int getPinnedHeadsUpHeight() {
@@ -604,6 +610,25 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     }
 
     /**
+     * Add the view to a transient container.
+     */
+    public void addToTransientContainer(ViewGroup container, int index) {
+        container.addTransientView(this, index);
+        setTransientContainer(container);
+    }
+
+    /**
+     * @return If the view is in a process of removal animation.
+     */
+    public boolean inRemovalAnimation() {
+        return mInRemovalAnimation;
+    }
+
+    public void setInRemovalAnimation(boolean inRemovalAnimation) {
+        mInRemovalAnimation = inRemovalAnimation;
+    }
+
+    /**
      * @return true if the group's expansion state is changing, false otherwise.
      */
     public boolean isGroupExpansionChanging() {
@@ -618,6 +643,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     }
 
     public boolean showingPulsing() {
+        return false;
+    }
+
+    public boolean isHeadsUpState() {
         return false;
     }
 
@@ -833,6 +862,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
                 pw.println();
             }
             if (DUMP_VERBOSE) {
+                pw.println("mInRemovalAnimation: " + mInRemovalAnimation);
                 pw.println("mClipTopAmount: " + mClipTopAmount);
                 pw.println("mClipBottomAmount " + mClipBottomAmount);
                 pw.println("mClipToActualHeight: " + mClipToActualHeight);

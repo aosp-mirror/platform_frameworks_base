@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -77,6 +78,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     }
 
     @Override
+    public long getDeDataInode() {
+        return 0;
+    }
+
+    @Override
     public int getDistractionFlags() {
         return 0;
     }
@@ -129,6 +135,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
         return false;
     }
 
+    @Override
+    public boolean isQuarantined() {
+        return false;
+    }
+
     @Nullable
     @Override
     public String getSplashScreenTheme() {
@@ -163,7 +174,7 @@ class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Nullable
     @Override
-    public WatchedArrayMap<String, SuspendParams> getSuspendParams() {
+    public WatchedArrayMap<UserPackage, SuspendParams> getSuspendParams() {
         return null;
     }
 
@@ -184,5 +195,16 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     public Pair<String, Integer> getOverrideLabelIconForComponent(
             @NonNull ComponentName componentName) {
         return null;
+    }
+
+    @Nullable
+    @Override
+    public ArchiveState getArchiveState() {
+        return null;
+    }
+
+    @Override
+    public boolean dataExists() {
+        return true;
     }
 }

@@ -4,23 +4,6 @@
       "name": "MediaProjectionTests",
       "options": [
         {
-          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
-    },
-    {
-      "name": "CtsMediaProjectionTestCases",
-      "options": [
-        {
-          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         },
         {

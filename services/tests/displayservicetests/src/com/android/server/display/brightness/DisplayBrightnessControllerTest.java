@@ -42,7 +42,9 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.BrightnessSetting;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
+import com.android.server.display.brightness.strategy.OffloadBrightnessStrategy;
 import com.android.server.display.brightness.strategy.TemporaryBrightnessStrategy;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,6 +68,8 @@ public final class DisplayBrightnessControllerTest {
     private BrightnessSetting mBrightnessSetting;
     @Mock
     private Runnable mOnBrightnessChangeRunnable;
+    @Mock
+    private DisplayManagerFlags mDisplayManagerFlags;
 
     @Mock
     private HandlerExecutor mBrightnessChangeExecutor;
@@ -74,7 +78,7 @@ public final class DisplayBrightnessControllerTest {
             DisplayBrightnessController.Injector() {
         @Override
         DisplayBrightnessStrategySelector getDisplayBrightnessStrategySelector(
-                Context context, int displayId) {
+                Context context, int displayId, DisplayManagerFlags flags) {
             return mDisplayBrightnessStrategySelector;
         }
     };
@@ -92,7 +96,7 @@ public final class DisplayBrightnessControllerTest {
                 .thenReturn(true);
         mDisplayBrightnessController = new DisplayBrightnessController(mContext, mInjector,
                 DISPLAY_ID, DEFAULT_BRIGHTNESS, mBrightnessSetting, mOnBrightnessChangeRunnable,
-                mBrightnessChangeExecutor);
+                mBrightnessChangeExecutor, mDisplayManagerFlags);
     }
 
     @Test
@@ -350,7 +354,7 @@ public final class DisplayBrightnessControllerTest {
         int nonDefaultDisplayId = 1;
         mDisplayBrightnessController = new DisplayBrightnessController(mContext, mInjector,
                 nonDefaultDisplayId, DEFAULT_BRIGHTNESS, mBrightnessSetting,
-                mOnBrightnessChangeRunnable, mBrightnessChangeExecutor);
+                mOnBrightnessChangeRunnable, mBrightnessChangeExecutor, mDisplayManagerFlags);
         brightness = 0.5f;
         when(mBrightnessSetting.getBrightness()).thenReturn(brightness);
         mDisplayBrightnessController.setAutomaticBrightnessController(
@@ -383,5 +387,15 @@ public final class DisplayBrightnessControllerTest {
         verify(mBrightnessSetting).setUserSerial(2);
         verify(mBrightnessSetting).setBrightness(brightnessValue2);
         verify(mBrightnessSetting).setBrightnessNitsForDefaultDisplay(nits2);
+    }
+
+    @Test
+    public void setBrightnessFromOffload() {
+        float brightness = 0.4f;
+        OffloadBrightnessStrategy offloadBrightnessStrategy = mock(OffloadBrightnessStrategy.class);
+        when(mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy()).thenReturn(
+                offloadBrightnessStrategy);
+        mDisplayBrightnessController.setBrightnessFromOffload(brightness);
+        verify(offloadBrightnessStrategy).setOffloadScreenBrightness(brightness);
     }
 }

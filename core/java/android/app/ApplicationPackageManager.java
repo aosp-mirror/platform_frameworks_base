@@ -48,6 +48,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApkChecksum;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.Checksum;
 import android.content.pm.ComponentInfo;
@@ -79,6 +80,8 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.res.ApkAssets;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -91,6 +94,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -142,6 +146,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** @hide */
 public class ApplicationPackageManager extends PackageManager {
@@ -177,6 +182,10 @@ public class ApplicationPackageManager extends PackageManager {
 
     @GuardedBy("mDelegates")
     private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
+
+    @NonNull
+    @GuardedBy("mPackageMonitorCallbacks")
+    private final ArraySet<IRemoteCallback> mPackageMonitorCallbacks = new ArraySet<>();
 
     UserManager getUserManager() {
         if (mUserManager == null) {
@@ -826,7 +835,8 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public int checkPermission(String permName, String pkgName) {
-        return PermissionManager.checkPackageNamePermission(permName, pkgName, getUserId());
+        return PermissionManager.checkPackageNamePermission(permName, pkgName,
+                mContext.getDeviceId(), getUserId());
     }
 
     @Override
@@ -939,6 +949,13 @@ public class ApplicationPackageManager extends PackageManager {
     @UnsupportedAppUsage
     public boolean shouldShowRequestPermissionRationale(String permName) {
         return getPermissionManager().shouldShowRequestPermissionRationale(permName);
+    }
+
+    @Override
+    public Intent buildRequestPermissionsIntent(@NonNull String[] permissions) {
+        Intent intent = super.buildRequestPermissionsIntent(permissions);
+        intent.putExtra(EXTRA_REQUEST_PERMISSIONS_DEVICE_ID, mContext.getDeviceId());
+        return intent;
     }
 
     @Override
@@ -2572,6 +2589,16 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean isAppArchivable(String packageName) throws NameNotFoundException {
+        try {
+            Objects.requireNonNull(packageName);
+            return mPM.isAppArchivable(packageName, new UserHandle(getUserId()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public int getMoveStatus(int moveId) {
         try {
             return mPM.getMoveStatus(moveId);
@@ -2863,17 +2890,26 @@ public class ApplicationPackageManager extends PackageManager {
         final SuspendDialogInfo dialogInfo = !TextUtils.isEmpty(dialogMessage)
                 ? new SuspendDialogInfo.Builder().setMessage(dialogMessage).build()
                 : null;
-        return setPackagesSuspended(packageNames, suspended, appExtras, launcherExtras, dialogInfo);
+        return setPackagesSuspended(packageNames, suspended, appExtras, launcherExtras,
+                dialogInfo, 0);
     }
 
     @Override
     public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
             PersistableBundle appExtras, PersistableBundle launcherExtras,
             SuspendDialogInfo dialogInfo) {
+        return setPackagesSuspended(packageNames, suspended, appExtras, launcherExtras,
+                dialogInfo, 0);
+    }
+
+    @Override
+    public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
+            PersistableBundle appExtras, PersistableBundle launcherExtras,
+            SuspendDialogInfo dialogInfo, int flags) {
         try {
             return mPM.setPackagesSuspendedAsUser(packageNames, suspended, appExtras,
-                    launcherExtras, dialogInfo, mContext.getOpPackageName(),
-                    getUserId());
+                    launcherExtras, dialogInfo, flags, mContext.getOpPackageName(),
+                    UserHandle.myUserId() /* suspendingUserId */, getUserId() /* targetUserId */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2892,6 +2928,15 @@ public class ApplicationPackageManager extends PackageManager {
     public Bundle getSuspendedPackageAppExtras() {
         try {
             return mPM.getSuspendedPackageAppExtras(mContext.getOpPackageName(), getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public String getSuspendingPackage(String suspendedPackage) {
+        try {
+            return mPM.getSuspendingPackage(suspendedPackage, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2919,6 +2964,28 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public boolean isPackageSuspended() {
         return isPackageSuspendedForUser(mContext.getOpPackageName(), getUserId());
+    }
+
+    @Override
+    public boolean isPackageQuarantined(@NonNull String packageName) throws NameNotFoundException {
+        try {
+            return mPM.isPackageQuarantinedForUser(packageName, getUserId());
+        } catch (IllegalArgumentException ie) {
+            throw new NameNotFoundException(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean isPackageStopped(@NonNull String packageName) throws NameNotFoundException {
+        try {
+            return mPM.isPackageStoppedForUser(packageName, getUserId());
+        } catch (IllegalArgumentException ie) {
+            throw new NameNotFoundException(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** @hide */
@@ -3333,7 +3400,11 @@ public class ApplicationPackageManager extends PackageManager {
         }
         Drawable dr = null;
         if (itemInfo.packageName != null) {
-            dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+            if (itemInfo.isArchived) {
+                dr = getArchivedAppIcon(itemInfo.packageName);
+            } else {
+                dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
+            }
         }
         if (dr == null && itemInfo != appInfo && appInfo != null) {
             dr = loadUnbadgedItemIcon(appInfo, appInfo);
@@ -3888,6 +3959,19 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public @Nullable ArchivedPackageInfo getArchivedPackage(@NonNull String packageName) {
+        try {
+            var parcel = mPM.getArchivedPackage(packageName, mContext.getUserId());
+            if (parcel == null) {
+                return null;
+            }
+            return new ArchivedPackageInfo(parcel);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public boolean canUserUninstall(String packageName, UserHandle user) {
         try {
             return mPM.getBlockUninstallForUser(packageName, user.getIdentifier());
@@ -3909,6 +3993,77 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.relinquishUpdateOwnership(targetPackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void registerPackageMonitorCallback(@NonNull IRemoteCallback callback, int userId) {
+        Objects.requireNonNull(callback);
+        try {
+            mPM.registerPackageMonitorCallback(callback, userId);
+            synchronized (mPackageMonitorCallbacks) {
+                if (mPackageMonitorCallbacks.contains(callback)) {
+                    throw new IllegalStateException(
+                            "registerPackageMonitorCallback: callback already registered: "
+                                    + callback);
+                }
+                mPackageMonitorCallbacks.add(callback);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void unregisterPackageMonitorCallback(@NonNull IRemoteCallback callback) {
+        Objects.requireNonNull(callback);
+        try {
+            mPM.unregisterPackageMonitorCallback(callback);
+            synchronized (mPackageMonitorCallbacks) {
+                mPackageMonitorCallbacks.remove(callback);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Nullable
+    private Drawable getArchivedAppIcon(String packageName) {
+        try {
+            return new BitmapDrawable(null,
+                    mPM.getArchivedAppIcon(packageName, new UserHandle(getUserId())));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+            @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
+        Objects.requireNonNull(apkFilePath, "apkFilePath cannot be null");
+        Objects.requireNonNull(parserFunction, "parserFunction cannot be null");
+        try (XmlResourceParser xmlResourceParser = getAndroidManifestParser(apkFilePath)) {
+            return parserFunction.apply(xmlResourceParser);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to get the android manifest parser", e);
+            throw e;
+        }
+    }
+
+    private static XmlResourceParser getAndroidManifestParser(@NonNull String apkFilePath)
+            throws IOException {
+        ApkAssets apkAssets = null;
+        try {
+            apkAssets = ApkAssets.loadFromPath(apkFilePath);
+            return apkAssets.openXml(ApkLiteParseUtils.ANDROID_MANIFEST_FILENAME);
+        } finally {
+            if (apkAssets != null) {
+                try {
+                    apkAssets.close();
+                } catch (Throwable ignored) {
+                    Log.w(TAG, "Failed to close apkAssets", ignored);
+                }
+            }
         }
     }
 }

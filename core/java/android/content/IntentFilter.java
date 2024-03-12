@@ -152,6 +152,7 @@ import java.util.function.Predicate;
  * that unlike the action, an IntentFilter with no categories
  * will only match an Intent that does not have any categories.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class IntentFilter implements Parcelable {
     private static final String TAG = "IntentFilter";
 

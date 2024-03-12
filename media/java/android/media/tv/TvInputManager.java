@@ -339,6 +339,14 @@ public final class TvInputManager {
      */
     public static final int VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN = VIDEO_UNAVAILABLE_REASON_END;
 
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * it has been stopped by stopPlayback.
+     * @hide
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_STOPPED = 19;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TIME_SHIFT_STATUS_UNKNOWN, TIME_SHIFT_STATUS_UNSUPPORTED,
@@ -3297,6 +3305,30 @@ public final class TvInputManager {
             }
             try {
                 mService.timeShiftEnablePositionTracking(mToken, enable, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void stopPlayback(int mode) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.stopPlayback(mToken, mode, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        void startPlayback() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.startPlayback(mToken, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

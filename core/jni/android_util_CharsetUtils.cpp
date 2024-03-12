@@ -25,7 +25,7 @@ static jint android_util_CharsetUtils_toModifiedUtf8Bytes(JNIEnv *env, jobject c
 
     // Quickly check if destination has plenty of room for worst-case
     // 4-bytes-per-char encoded size
-    const size_t worstLen = (srcLen * 4);
+    const jint worstLen = (srcLen * 4);
     if (destOff >= 0 && destOff + worstLen < destLen) {
         env->GetStringUTFRegion(src, 0, srcLen, destPtr + destOff);
         return strlen(destPtr + destOff + srcLen) + srcLen;
@@ -33,7 +33,7 @@ static jint android_util_CharsetUtils_toModifiedUtf8Bytes(JNIEnv *env, jobject c
 
     // String still might fit in destination, but we need to measure
     // its actual encoded size to be sure
-    const size_t encodedLen = env->GetStringUTFLength(src);
+    const jint encodedLen = env->GetStringUTFLength(src);
     if (destOff >= 0 && destOff + encodedLen < destLen) {
         env->GetStringUTFRegion(src, 0, srcLen, destPtr + destOff);
         return encodedLen;

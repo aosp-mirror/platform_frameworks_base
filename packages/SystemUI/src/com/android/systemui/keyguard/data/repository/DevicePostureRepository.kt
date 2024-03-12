@@ -19,11 +19,14 @@ package com.android.systemui.keyguard.data.repository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.statusbar.policy.DevicePostureController
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 
 /** Provide current device posture state. */
 interface DevicePostureRepository {
@@ -34,23 +37,28 @@ interface DevicePostureRepository {
 @SysUISingleton
 class DevicePostureRepositoryImpl
 @Inject
-constructor(private val postureController: DevicePostureController) : DevicePostureRepository {
+constructor(
+    private val postureController: DevicePostureController,
+    @Main private val mainDispatcher: CoroutineDispatcher
+) : DevicePostureRepository {
     override val currentDevicePosture: Flow<DevicePosture>
-        get() = conflatedCallbackFlow {
-            val sendPostureUpdate = { posture: Int ->
-                val currentDevicePosture = DevicePosture.toPosture(posture)
-                trySendWithFailureLogging(
-                    currentDevicePosture,
-                    TAG,
-                    "Error sending posture update to $currentDevicePosture"
-                )
-            }
-            val callback = DevicePostureController.Callback { sendPostureUpdate(it) }
-            postureController.addCallback(callback)
-            sendPostureUpdate(postureController.devicePosture)
+        get() =
+            conflatedCallbackFlow {
+                    val sendPostureUpdate = { posture: Int ->
+                        val currentDevicePosture = DevicePosture.toPosture(posture)
+                        trySendWithFailureLogging(
+                            currentDevicePosture,
+                            TAG,
+                            "Error sending posture update to $currentDevicePosture"
+                        )
+                    }
+                    val callback = DevicePostureController.Callback { sendPostureUpdate(it) }
+                    postureController.addCallback(callback)
+                    sendPostureUpdate(postureController.devicePosture)
 
-            awaitClose { postureController.removeCallback(callback) }
-        }
+                    awaitClose { postureController.removeCallback(callback) }
+                }
+                .flowOn(mainDispatcher) // DevicePostureController requirement
 
     companion object {
         const val TAG = "PostureRepositoryImpl"

@@ -29,7 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 
 /**

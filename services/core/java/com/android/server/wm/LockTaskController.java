@@ -670,7 +670,7 @@ public class LockTaskController {
             }
         }
 
-        // When a task is locked, dismiss the root pinned task if it exists
+        // When a task is locked, dismiss the root pinned task if it exists 
         mSupervisor.mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
 
         // System can only initiate screen pinning, not full lock task mode

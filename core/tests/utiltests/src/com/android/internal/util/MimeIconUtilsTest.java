@@ -16,12 +16,27 @@
 
 package com.android.internal.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link MimeIconUtils}.
  */
-public class MimeIconUtilsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = MimeIconUtils.class)
+public class MimeIconUtilsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Test
     public void testSimple() throws Exception {
         assertEquals("PNG image",
                 MimeIconUtils.getTypeInfo("image/png").getLabel());

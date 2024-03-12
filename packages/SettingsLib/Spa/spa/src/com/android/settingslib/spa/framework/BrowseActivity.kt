@@ -22,6 +22,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -126,18 +127,22 @@ private fun NavControllerWrapperImpl.NavContent(
     allProvider: Collection<SettingsPageProvider>,
     content: @Composable (SettingsPage) -> Unit,
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = NullPageProvider.name,
-    ) {
-        composable(NullPageProvider.name) {}
-        for (spp in allProvider) {
-            animatedComposable(
-                route = spp.name + spp.parameter.navRoute(),
-                arguments = spp.parameter,
-            ) { navBackStackEntry ->
-                val page = remember { spp.createSettingsPage(navBackStackEntry.arguments) }
-                content(page)
+    // TODO(b/298520326): Remove Box after the issue is fixed.
+    // Wrap the top level node into a Box to workaround an issue of Compose 1.6.0-alpha03.
+    Box {
+        NavHost(
+            navController = navController,
+            startDestination = NullPageProvider.name,
+        ) {
+            composable(NullPageProvider.name) {}
+            for (spp in allProvider) {
+                animatedComposable(
+                    route = spp.name + spp.parameter.navRoute(),
+                    arguments = spp.parameter,
+                ) { navBackStackEntry ->
+                    val page = remember { spp.createSettingsPage(navBackStackEntry.arguments) }
+                    content(page)
+                }
             }
         }
     }

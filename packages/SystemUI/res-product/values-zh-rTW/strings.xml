@@ -40,9 +40,27 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"你嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。你的工作資料夾將遭到移除，所有設定檔資料也會一併遭到刪除。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"你的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統會要求你透過電子郵件帳戶將平板電腦解鎖。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"你的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統會要求你透過電子郵件帳戶將手機解鎖。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="thermal_shutdown_title" product="default" msgid="8039593017174903505">"手機因過熱而關機"</string>
+    <string name="thermal_shutdown_title" product="device" msgid="2954206342842856379">"裝置因過熱而關機"</string>
+    <string name="thermal_shutdown_title" product="tablet" msgid="8941033526856177533">"平板電腦因過熱而關機"</string>
+    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"手機現在已恢復正常運作。\n輕觸即可瞭解詳情"</string>
+    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"裝置現在已恢復正常運作。\n輕觸即可瞭解詳情"</string>
+    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"平板電腦現在已恢復正常運作。\n輕觸即可瞭解詳情"</string>
+    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"手機先前過熱，因此關機降溫，現在已恢復正常運作。\n\n以下狀況可能會導致手機過熱：\n	• 使用的應用程式需要大量資源，例如遊戲、影片或導航應用程式\n	• 下載或上傳大型檔案\n	• 在高溫下使用手機"</string>
+    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"裝置先前過熱，因此關機降溫，現在已恢復正常運作。\n\n以下狀況可能會導致裝置過熱：\n	• 使用的應用程式需要大量資源，例如遊戲、影片或導航應用程式\n	• 下載或上傳大型檔案\n	• 在高溫下使用裝置"</string>
+    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"平板電腦先前過熱，因此關機降溫，現在已恢復正常運作。\n\n以下狀況可能會導致平板電腦過熱：\n	• 使用的應用程式需要大量資源，例如遊戲、影片或導航應用程式\n	• 下載或上傳大型檔案\n	• 在高溫下使用平板電腦"</string>
+    <string name="high_temp_title" product="default" msgid="5365000411304924115">"手機溫度上升"</string>
+    <string name="high_temp_title" product="device" msgid="6622009907401563664">"裝置溫度上升"</string>
+    <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"平板電腦溫度上升"</string>
+    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"手機降溫期間，某些功能會受到限制。\n輕觸即可瞭解詳情"</string>
+    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"裝置降溫時，某些功能會受到限制。\n輕觸即可瞭解詳情"</string>
+    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"平板電腦降溫時，某些功能會受到限制。\n輕觸即可瞭解詳情"</string>
+    <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"手機會自動嘗試降溫。你仍可繼續使用手機，但運作速度可能會變慢。\n\n手機降溫後就會恢復正常運作。"</string>
+    <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"裝置會自動嘗試降溫。你仍可繼續使用裝置，但運作速度可能會變慢。\n\n裝置降溫後就會恢復正常運作。"</string>
+    <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"平板電腦會自動嘗試降溫。你仍可繼續使用平板電腦，但運作速度可能會變慢。\n\n平板電腦降溫後就會恢復正常運作。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"指紋感應器在電源鍵上。電源鍵的形狀是扁平的，位在平板電腦側邊凸起的音量按鈕旁。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"指紋感應器在電源鍵上。電源鍵的形狀是扁平的，位在裝置側邊凸起的音量按鈕旁。"</string>
-    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指紋感應器在電源鍵上。電源鍵的形狀是扁平的，位在手機側邊凸起的音量按鈕旁。"</string>
+    <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指紋感應器在電源鍵上。電源鍵的形狀是扁平的，位在手機側邊凸起的音量鍵旁。"</string>
     <string name="global_action_lock_message" product="default" msgid="7092460751050168771">"解鎖手機可查看更多選項"</string>
     <string name="global_action_lock_message" product="tablet" msgid="1024230056230539493">"解鎖平板電腦可查看更多選項"</string>
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"解鎖裝置可查看更多選項"</string>

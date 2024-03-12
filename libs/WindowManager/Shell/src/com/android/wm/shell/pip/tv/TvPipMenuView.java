@@ -328,7 +328,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         return menuUiBounds;
     }
 
-    void transitionToMenuMode(int menuMode, boolean resetMenu) {
+    void transitionToMenuMode(int menuMode) {
         switch (menuMode) {
             case MODE_NO_MENU:
                 hideAllUserControls();
@@ -337,7 +337,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
                 showMoveMenu();
                 break;
             case MODE_ALL_ACTIONS_MENU:
-                showAllActionsMenu(resetMenu);
+                showAllActionsMenu();
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -362,13 +362,13 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         mEduTextDrawer.closeIfNeeded();
     }
 
-    private void showAllActionsMenu(boolean resetMenu) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: showAllActionsMenu(), resetMenu %b", TAG, resetMenu);
+    void resetMenu() {
+        scrollToFirstAction();
+    }
 
-        if (resetMenu) {
-            scrollToFirstAction();
-        }
+    private void showAllActionsMenu() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showAllActionsMenu()", TAG);
 
         if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU) return;
 
@@ -431,12 +431,6 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         }
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        super.onWindowFocusChanged(hasWindowFocus);
-        mListener.onPipWindowFocusChanged(hasWindowFocus);
-    }
-
     private void animateAlphaTo(float alpha, View view) {
         if (view.getAlpha() == alpha) {
             return;
@@ -483,28 +477,28 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         if (event.getAction() == ACTION_UP) {
 
             if (event.getKeyCode() == KEYCODE_BACK) {
-                mListener.onBackPress();
+                mListener.onExitCurrentMenuMode();
                 return true;
             }
 
-            if (mA11yManager.isEnabled()) {
-                return super.dispatchKeyEvent(event);
-            }
-
-            switch (event.getKeyCode()) {
-                case KEYCODE_DPAD_UP:
-                case KEYCODE_DPAD_DOWN:
-                case KEYCODE_DPAD_LEFT:
-                case KEYCODE_DPAD_RIGHT:
-                    return mListener.onPipMovement(event.getKeyCode()) || super.dispatchKeyEvent(
-                            event);
-                case KEYCODE_ENTER:
-                case KEYCODE_DPAD_CENTER:
-                    return mListener.onExitMoveMode() || super.dispatchKeyEvent(event);
-                default:
-                    break;
+            if (mCurrentMenuMode == MODE_MOVE_MENU && !mA11yManager.isEnabled()) {
+                switch (event.getKeyCode()) {
+                    case KEYCODE_DPAD_UP:
+                    case KEYCODE_DPAD_DOWN:
+                    case KEYCODE_DPAD_LEFT:
+                    case KEYCODE_DPAD_RIGHT:
+                        mListener.onPipMovement(event.getKeyCode());
+                        return true;
+                    case KEYCODE_ENTER:
+                    case KEYCODE_DPAD_CENTER:
+                        mListener.onExitCurrentMenuMode();
+                        return true;
+                    default:
+                        // Dispatch key event as normal below
+                }
             }
         }
+
         return super.dispatchKeyEvent(event);
     }
 
@@ -529,7 +523,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         if (a11yEnabled) {
             mA11yDoneButton.setVisibility(VISIBLE);
             mA11yDoneButton.setOnClickListener(v -> {
-                mListener.onExitMoveMode();
+                mListener.onExitCurrentMenuMode();
             });
             mA11yDoneButton.requestFocus();
             mA11yDoneButton.requestAccessibilityFocus();
@@ -626,26 +620,15 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
 
     interface Listener {
 
-        void onBackPress();
+        /**
+         * Called when a button for exiting the current menu mode was pressed.
+         */
+        void onExitCurrentMenuMode();
 
         /**
-         * Called when a button for exiting move mode was pressed.
-         *
-         * @return true if the event was handled or false if the key event should be handled by the
-         * next receiver.
+         * Called when a button to move the PiP in a certain direction, indicated by keycode.
          */
-        boolean onExitMoveMode();
-
-        /**
-         * @return whether pip movement was handled.
-         */
-        boolean onPipMovement(int keycode);
-
-        /**
-         * Called when the TvPipMenuView loses focus. This also means that the TV PiP menu window
-         * has lost focus.
-         */
-        void onPipWindowFocusChanged(boolean focused);
+        void onPipMovement(int keycode);
 
         /**
          *  The edu text closing impacts the size of the Picture-in-Picture window and influences

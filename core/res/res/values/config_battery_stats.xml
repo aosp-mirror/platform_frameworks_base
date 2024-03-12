@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2023 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds.  Do not translate.
+
+     NOTE: The naming convention is "config_camelCaseValue". -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
+    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
+    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
+    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
+
+    <!-- CPU power stats collection throttle period in milliseconds.  Since power stats collection
+    is a relatively expensive operation, this throttle period may need to be adjusted for low-power
+    devices-->
+    <integer name="config_defaultPowerStatsThrottlePeriodCpu">60000</integer>
+
+    <!-- PowerStats aggregation period in milliseconds. This is the interval at which the power
+    stats aggregation procedure is performed and the results stored in PowerStatsStore. -->
+    <integer name="config_powerStatsAggregationPeriod">14400000</integer>
+
+    <!-- PowerStats aggregation span duration in milliseconds. This is the length of battery
+    history time for every aggregated power stats span that is stored stored in PowerStatsStore.
+    It should not be larger than config_powerStatsAggregationPeriod (but it can be the same) -->
+    <integer name="config_aggregatedPowerStatsSpanDuration">3600000</integer>
+</resources>

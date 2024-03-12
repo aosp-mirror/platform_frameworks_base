@@ -10,7 +10,7 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.constraintlayout.widget.Guideline
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import javax.inject.Inject

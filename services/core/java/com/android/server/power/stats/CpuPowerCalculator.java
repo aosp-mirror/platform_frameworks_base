@@ -24,6 +24,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 
 import java.util.Arrays;
@@ -32,6 +33,8 @@ public class CpuPowerCalculator extends PowerCalculator {
     private static final String TAG = "CpuPowerCalculator";
     private static final boolean DEBUG = PowerCalculator.DEBUG;
     private static final BatteryConsumer.Key[] UNINITIALIZED_KEYS = new BatteryConsumer.Key[0];
+
+    private final CpuScalingPolicies mCpuScalingPolicies;
     private final int mNumCpuClusters;
 
     // Time-in-state based CPU power estimation model computes the estimated power
@@ -59,34 +62,33 @@ public class CpuPowerCalculator extends PowerCalculator {
         public long[] cpuFreqTimes;
     }
 
-    public CpuPowerCalculator(PowerProfile profile) {
-        mNumCpuClusters = profile.getNumCpuClusters();
+    public CpuPowerCalculator(CpuScalingPolicies cpuScalingPolicies, PowerProfile profile) {
+        mCpuScalingPolicies = cpuScalingPolicies;
+        int[] policies = mCpuScalingPolicies.getPolicies();
+        mNumCpuClusters = policies.length;
 
         mCpuActivePowerEstimator = new UsageBasedPowerEstimator(
                 profile.getAveragePower(PowerProfile.POWER_CPU_ACTIVE));
 
-        mPerClusterPowerEstimators = new UsageBasedPowerEstimator[mNumCpuClusters];
-        for (int cluster = 0; cluster < mNumCpuClusters; cluster++) {
-            mPerClusterPowerEstimators[cluster] = new UsageBasedPowerEstimator(
-                    profile.getAveragePowerForCpuCluster(cluster));
+        mPerClusterPowerEstimators = new UsageBasedPowerEstimator[policies.length];
+        for (int i = 0; i < policies.length; i++) {
+            mPerClusterPowerEstimators[i] = new UsageBasedPowerEstimator(
+                    profile.getAveragePowerForCpuScalingPolicy(policies[i]));
         }
 
-        int freqCount = 0;
-        for (int cluster = 0; cluster < mNumCpuClusters; cluster++) {
-            freqCount += profile.getNumSpeedStepsInCpuCluster(cluster);
-        }
-
+        mPerCpuFreqPowerEstimators =
+                new UsageBasedPowerEstimator[cpuScalingPolicies.getScalingStepCount()];
         mPerCpuFreqPowerEstimatorsByCluster = new UsageBasedPowerEstimator[mNumCpuClusters][];
-        mPerCpuFreqPowerEstimators = new UsageBasedPowerEstimator[freqCount];
         int index = 0;
-        for (int cluster = 0; cluster < mNumCpuClusters; cluster++) {
-            final int speedsForCluster = profile.getNumSpeedStepsInCpuCluster(cluster);
+        for (int cluster = 0; cluster < policies.length; cluster++) {
+            int policy = policies[cluster];
+            int[] freqs = cpuScalingPolicies.getFrequencies(policy);
             mPerCpuFreqPowerEstimatorsByCluster[cluster] =
-                    new UsageBasedPowerEstimator[speedsForCluster];
-            for (int speed = 0; speed < speedsForCluster; speed++) {
+                    new UsageBasedPowerEstimator[freqs.length];
+            for (int step = 0; step < freqs.length; step++) {
                 final UsageBasedPowerEstimator estimator = new UsageBasedPowerEstimator(
-                        profile.getAveragePowerForCpuCore(cluster, speed));
-                mPerCpuFreqPowerEstimatorsByCluster[cluster][speed] = estimator;
+                        profile.getAveragePowerForCpuScalingStep(policy, step));
+                mPerCpuFreqPowerEstimatorsByCluster[cluster][step] = estimator;
                 mPerCpuFreqPowerEstimators[index++] = estimator;
             }
         }
@@ -105,7 +107,7 @@ public class CpuPowerCalculator extends PowerCalculator {
         BatteryConsumer.Key[] keys = UNINITIALIZED_KEYS;
         Result result = new Result();
         if (query.isProcessStateDataNeeded()) {
-            result.cpuFreqTimes = new long[batteryStats.getCpuFreqCount()];
+            result.cpuFreqTimes = new long[mCpuScalingPolicies.getScalingStepCount()];
         }
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
@@ -333,7 +335,7 @@ public class CpuPowerCalculator extends PowerCalculator {
      * @param durationsMs duration of CPU usage.
      * @return a double in milliamp-hours of estimated active CPU power consumption.
      */
-    public double calculateActiveCpuPowerMah(long durationsMs) {
+    private double calculateActiveCpuPowerMah(long durationsMs) {
         return mCpuActivePowerEstimator.calculatePower(durationsMs);
     }
 

@@ -25,15 +25,19 @@ import android.view.ViewGroup
 import android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.SingleActivityFactory
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import dagger.Lazy
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -55,6 +59,8 @@ class BrightnessDialogTest : SysuiTestCase() {
     @Mock private lateinit var brightnessControllerFactory: BrightnessController.Factory
     @Mock private lateinit var brightnessController: BrightnessController
     @Mock private lateinit var accessibilityMgr: AccessibilityManagerWrapper
+    @Mock private lateinit var shadeInteractorLazy: Lazy<ShadeInteractor>
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
 
     private val clock = FakeSystemClock()
     private val mainExecutor = FakeExecutor(clock)
@@ -68,7 +74,8 @@ class BrightnessDialogTest : SysuiTestCase() {
                     brightnessSliderControllerFactory,
                     brightnessControllerFactory,
                     mainExecutor,
-                    accessibilityMgr
+                    accessibilityMgr,
+                    shadeInteractor
                 )
             },
             /* initialTouchMode= */ false,
@@ -82,6 +89,8 @@ class BrightnessDialogTest : SysuiTestCase() {
             .thenReturn(brightnessSliderController)
         `when`(brightnessSliderController.rootView).thenReturn(View(context))
         `when`(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
+        whenever(shadeInteractorLazy.get()).thenReturn(shadeInteractor)
+        whenever(shadeInteractor.isQsExpanded).thenReturn(MutableStateFlow(false))
     }
 
     @After
@@ -175,12 +184,24 @@ class BrightnessDialogTest : SysuiTestCase() {
         brightnessSliderControllerFactory: BrightnessSliderController.Factory,
         brightnessControllerFactory: BrightnessController.Factory,
         mainExecutor: DelayableExecutor,
-        accessibilityMgr: AccessibilityManagerWrapper
+        accessibilityMgr: AccessibilityManagerWrapper,
+        shadeInteractor: ShadeInteractor
     ) :
         BrightnessDialog(
             brightnessSliderControllerFactory,
             brightnessControllerFactory,
             mainExecutor,
-            accessibilityMgr
-        )
+            accessibilityMgr,
+            shadeInteractor
+        ) {
+        private var finishing = false
+
+        override fun isFinishing(): Boolean {
+            return finishing
+        }
+
+        override fun requestFinish() {
+            finishing = true
+        }
+    }
 }

@@ -3,10 +3,10 @@ package com.android.systemui.statusbar.notification
 import android.util.FloatProperty
 import android.view.View
 import androidx.annotation.FloatRange
-import com.android.systemui.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.ViewRefactorFlag
+import com.android.systemui.flags.RefactorFlag
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import kotlin.math.abs
@@ -323,7 +323,7 @@ constructor(
     internal var maxRadius = maxRadius
         private set
 
-    internal val newHeadsUpAnim = ViewRefactorFlag(featureFlags, Flags.IMPROVED_HUN_ANIMATIONS)
+    internal val newHeadsUpAnim = RefactorFlag.forView(Flags.IMPROVED_HUN_ANIMATIONS, featureFlags)
 
     /** Animatable for top roundness */
     private val topAnimatable = topAnimatable(roundable)

@@ -17,23 +17,33 @@
 package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import android.view.Display
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.IStatusBarService
+import com.android.keyguard.TestScopeProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.assist.AssistManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
 import org.junit.Before
 import org.junit.Test
@@ -45,8 +55,11 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
+    private val executor = FakeExecutor(FakeSystemClock())
+
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var statusBarStateController: StatusBarStateController
@@ -61,6 +74,18 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Mock private lateinit var nswvc: NotificationShadeWindowViewController
     @Mock private lateinit var display: Display
     @Mock private lateinit var touchLog: LogBuffer
+    @Mock private lateinit var iStatusBarService: IStatusBarService
+    @Mock private lateinit var headsUpManager: HeadsUpManager
+
+    private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor by lazy {
+        WindowRootViewVisibilityInteractor(
+            TestScopeProvider.getTestScope(),
+            WindowRootViewVisibilityRepository(iStatusBarService, executor),
+            FakeKeyguardRepository(),
+            headsUpManager,
+            PowerInteractorFactory.create().powerInteractor,
+        )
+    }
 
     private lateinit var shadeController: ShadeControllerImpl
 
@@ -74,6 +99,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 commandQueue,
                 FakeExecutor(FakeSystemClock()),
                 touchLog,
+                windowRootViewVisibilityInteractor,
                 keyguardStateController,
                 statusBarStateController,
                 statusBarKeyguardViewManager,
@@ -86,6 +112,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 Lazy { gutsManager },
             )
         shadeController.setNotificationShadeWindowViewController(nswvc)
+        shadeController.setVisibilityListener(mock())
     }
 
     @Test
@@ -132,5 +159,25 @@ class ShadeControllerImplTest : SysuiTestCase() {
 
         // VERIFY that cancelCurrentTouch is NOT called
         verify(nswvc, never()).cancelCurrentTouch()
+    }
+
+    @Test
+    fun visible_changesToTrue_windowInteractorUpdated() {
+        shadeController.makeExpandedVisible(true)
+
+        assertThat(windowRootViewVisibilityInteractor.isLockscreenOrShadeVisible.value).isTrue()
+    }
+
+    @Test
+    fun visible_changesToFalse_windowInteractorUpdated() {
+        // GIVEN the shade is currently expanded
+        shadeController.makeExpandedVisible(true)
+        assertThat(windowRootViewVisibilityInteractor.isLockscreenOrShadeVisible.value).isTrue()
+
+        // WHEN the shade is collapsed
+        shadeController.collapseShade()
+
+        // THEN the interactor is notified
+        assertThat(windowRootViewVisibilityInteractor.isLockscreenOrShadeVisible.value).isFalse()
     }
 }

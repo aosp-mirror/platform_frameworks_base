@@ -18,6 +18,7 @@ package android.telephony;
 
 import static android.text.TextUtils.formatSimple;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -44,6 +45,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.telephony.Rlog;
 
@@ -255,6 +257,11 @@ public class SubscriptionInfo implements Parcelable {
     private final boolean mIsGroupDisabled;
 
     /**
+     * Whether this subscription is used for communicating with non-terrestrial networks.
+     */
+    private final boolean mIsOnlyNonTerrestrialNetwork;
+
+    /**
      * @hide
      *
      * @deprecated Use {@link SubscriptionInfo.Builder}.
@@ -378,6 +385,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mAreUiccApplicationsEnabled = areUiccApplicationsEnabled;
         this.mPortIndex = portIndex;
         this.mUsageSetting = usageSetting;
+        this.mIsOnlyNonTerrestrialNetwork = false;
     }
 
     /**
@@ -416,6 +424,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mAreUiccApplicationsEnabled = builder.mAreUiccApplicationsEnabled;
         this.mPortIndex = builder.mPortIndex;
         this.mUsageSetting = builder.mUsageSetting;
+        this.mIsOnlyNonTerrestrialNetwork = builder.mIsOnlyNonTerrestrialNetwork;
     }
 
     /**
@@ -862,6 +871,17 @@ public class SubscriptionInfo implements Parcelable {
         return mUsageSetting;
     }
 
+    /**
+     * Check if the subscription is exclusively for non-terrestrial networks.
+     *
+     * @return {@code true} if it is a non-terrestrial network subscription, {@code false}
+     * otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public boolean isOnlyNonTerrestrialNetwork() {
+        return mIsOnlyNonTerrestrialNetwork;
+    }
+
     @NonNull
     public static final Parcelable.Creator<SubscriptionInfo> CREATOR =
             new Parcelable.Creator<SubscriptionInfo>() {
@@ -898,6 +918,7 @@ public class SubscriptionInfo implements Parcelable {
                             UiccAccessRule.CREATOR))
                     .setUiccApplicationsEnabled(source.readBoolean())
                     .setUsageSetting(source.readInt())
+                    .setOnlyNonTerrestrialNetwork(source.readBoolean())
                     .build();
         }
 
@@ -939,6 +960,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeTypedArray(mCarrierConfigAccessRules, flags);
         dest.writeBoolean(mAreUiccApplicationsEnabled);
         dest.writeInt(mUsageSetting);
+        dest.writeBoolean(mIsOnlyNonTerrestrialNetwork);
     }
 
     @Override
@@ -1001,6 +1023,7 @@ public class SubscriptionInfo implements Parcelable {
                 + " mType=" + SubscriptionManager.subscriptionTypeToString(mType)
                 + " areUiccApplicationsEnabled=" + mAreUiccApplicationsEnabled
                 + " usageSetting=" + SubscriptionManager.usageSettingToString(mUsageSetting)
+                + " isOnlyNonTerrestrialNetwork=" + mIsOnlyNonTerrestrialNetwork
                 + "]";
     }
 
@@ -1025,7 +1048,8 @@ public class SubscriptionInfo implements Parcelable {
                 that.mCardString) && Arrays.equals(mNativeAccessRules,
                 that.mNativeAccessRules) && Arrays.equals(mCarrierConfigAccessRules,
                 that.mCarrierConfigAccessRules) && Objects.equals(mGroupUuid, that.mGroupUuid)
-                && mCountryIso.equals(that.mCountryIso) && mGroupOwner.equals(that.mGroupOwner);
+                && mCountryIso.equals(that.mCountryIso) && mGroupOwner.equals(that.mGroupOwner)
+                && mIsOnlyNonTerrestrialNetwork == that.mIsOnlyNonTerrestrialNetwork;
     }
 
     @Override
@@ -1034,7 +1058,7 @@ public class SubscriptionInfo implements Parcelable {
                 mDisplayNameSource, mIconTint, mNumber, mDataRoaming, mMcc, mMnc, mIsEmbedded,
                 mCardString, mIsOpportunistic, mGroupUuid, mCountryIso, mCarrierId, mProfileClass,
                 mType, mGroupOwner, mAreUiccApplicationsEnabled, mPortIndex, mUsageSetting, mCardId,
-                mIsGroupDisabled);
+                mIsGroupDisabled, mIsOnlyNonTerrestrialNetwork);
         result = 31 * result + Arrays.hashCode(mEhplmns);
         result = 31 * result + Arrays.hashCode(mHplmns);
         result = 31 * result + Arrays.hashCode(mNativeAccessRules);
@@ -1234,6 +1258,11 @@ public class SubscriptionInfo implements Parcelable {
         private int mUsageSetting = SubscriptionManager.USAGE_SETTING_UNKNOWN;
 
         /**
+         * {@code true} if it is a non-terrestrial network subscription, {@code false} otherwise.
+         */
+        private boolean mIsOnlyNonTerrestrialNetwork = false;
+
+        /**
          * Default constructor.
          */
         public Builder() {
@@ -1275,6 +1304,7 @@ public class SubscriptionInfo implements Parcelable {
             mAreUiccApplicationsEnabled = info.mAreUiccApplicationsEnabled;
             mPortIndex = info.mPortIndex;
             mUsageSetting = info.mUsageSetting;
+            mIsOnlyNonTerrestrialNetwork = info.mIsOnlyNonTerrestrialNetwork;
         }
 
         /**
@@ -1656,6 +1686,19 @@ public class SubscriptionInfo implements Parcelable {
         @NonNull
         public Builder setUsageSetting(@UsageSetting int usageSetting) {
             mUsageSetting = usageSetting;
+            return this;
+        }
+
+        /**
+         * Set whether the subscription is exclusively used for non-terrestrial networks or not.
+         *
+         * @param isOnlyNonTerrestrialNetwork {@code true} if the subscription is for NTN,
+         * {@code false} otherwise.
+         * @return The builder.
+         */
+        @NonNull
+        public Builder setOnlyNonTerrestrialNetwork(boolean isOnlyNonTerrestrialNetwork) {
+            mIsOnlyNonTerrestrialNetwork = isOnlyNonTerrestrialNetwork;
             return this;
         }
 

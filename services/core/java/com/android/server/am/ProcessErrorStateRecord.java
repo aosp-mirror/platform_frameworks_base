@@ -327,11 +327,13 @@ class ProcessErrorStateRecord {
         }
 
         final boolean isSilentAnr;
-        final int pid = mApp.getPid();
+        final int pid;
         final UUID errorId;
         latencyTracker.waitingOnAMSLockStarted();
         synchronized (mService) {
             latencyTracker.waitingOnAMSLockEnded();
+            // Get the process's pid after obtaining the global lock.
+            pid = mApp.getPid();
             // Store annotation here as instance above will not be hit on all paths.
             setAnrAnnotation(annotation);
 

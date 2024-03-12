@@ -124,7 +124,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     private void verifyOnActivityLaunched(ActivityRecord activity) {
         final ArgumentCaptor<Long> idCaptor = ArgumentCaptor.forClass(Long.class);
         verifyAsync(mLaunchObserver).onActivityLaunched(idCaptor.capture(),
-                eq(activity.mActivityComponent), anyInt());
+                eq(activity.mActivityComponent), anyInt(), anyInt());
         final long id = idCaptor.getValue();
         setExpectedStartedId(id, activity);
         mLastLaunchedIds.put(activity.mActivityComponent, id);
@@ -132,7 +132,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     private void verifyOnActivityLaunchFinished(ActivityRecord activity) {
         verifyAsync(mLaunchObserver).onActivityLaunchFinished(eq(mExpectedStartedId),
-                eq(activity.mActivityComponent), anyLong());
+                eq(activity.mActivityComponent), anyLong(), anyInt());
     }
 
     private void setExpectedStartedId(long id, Object reason) {

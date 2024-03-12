@@ -38,7 +38,6 @@ import android.location.LocationManager;
 import android.location.util.identity.CallerIdentity;
 import android.os.BatteryStats;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
@@ -272,17 +271,6 @@ public class GnssManagerService {
      */
     public void removeGnssAntennaInfoListener(IGnssAntennaInfoListener listener) {
         mGnssAntennaInfoProvider.removeListener(listener);
-    }
-
-    /**
-     * Send Ni Response, indicating a location request initiated by a network carrier.
-     */
-    public void sendNiResponse(int notifId, int userResponse) {
-        try {
-            mGnssLocationProvider.getNetInitiatedListener().sendNiResponse(notifId, userResponse);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
     /**

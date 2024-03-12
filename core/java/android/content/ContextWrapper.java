@@ -71,6 +71,7 @@ import java.util.function.IntConsumer;
  * another Context.  Can be subclassed to modify behavior without changing
  * the original Context.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ContextWrapper extends Context {
     @UnsupportedAppUsage
     Context mBase;
@@ -1430,6 +1431,7 @@ public class ContextWrapper extends Context {
      * @throws IllegalStateException if this method calls before {@link #attachBaseContext(Context)}
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow
     public void registerComponentCallbacks(ComponentCallbacks callback) {
         if (mBase != null) {
             mBase.registerComponentCallbacks(callback);
@@ -1464,6 +1466,7 @@ public class ContextWrapper extends Context {
      * @throws IllegalStateException if this method calls before {@link #attachBaseContext(Context)}
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
         // It usually means the ComponentCallbacks is registered before this ContextWrapper attaches
         // to a base Context and Application is targeting prior to S-v2. We should unregister the

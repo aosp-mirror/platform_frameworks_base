@@ -57,14 +57,15 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
-import com.android.server.biometrics.sensors.BiometricNotificationImpl;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -108,6 +109,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull
     private final BiometricStateCallback mBiometricStateCallback;
     @NonNull
+    private final AuthenticationStateListeners mAuthenticationStateListeners;
+    @NonNull
     private final String mHalInstanceName;
     @NonNull
     private final Handler mHandler;
@@ -122,9 +125,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull private final BiometricContext mBiometricContext;
     @Nullable private IFingerprint mDaemon;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Nullable private ISidefpsController mSidefpsController;
     private AuthSessionCoordinator mAuthSessionCoordinator;
-    @NonNull private final AuthenticationStatsCollector mAuthenticationStatsCollector;
+    @Nullable private AuthenticationStatsCollector mAuthenticationStatsCollector;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -157,16 +161,19 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     public FingerprintProvider(@NonNull Context context,
             @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             @NonNull SensorProps[] props, @NonNull String halInstanceName,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull BiometricContext biometricContext) {
-        this(context, biometricStateCallback, props, halInstanceName, lockoutResetDispatcher,
-                gestureAvailabilityDispatcher, biometricContext, null /* daemon */);
+        this(context, biometricStateCallback, authenticationStateListeners, props, halInstanceName,
+                lockoutResetDispatcher, gestureAvailabilityDispatcher, biometricContext,
+                null /* daemon */);
     }
 
     @VisibleForTesting FingerprintProvider(@NonNull Context context,
             @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             @NonNull SensorProps[] props, @NonNull String halInstanceName,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
@@ -174,6 +181,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             IFingerprint daemon) {
         mContext = context;
         mBiometricStateCallback = biometricStateCallback;
+        mAuthenticationStateListeners = authenticationStateListeners;
         mHalInstanceName = halInstanceName;
         mFingerprintSensors = new SensorList<>(ActivityManager.getService());
         mHandler = new Handler(Looper.getMainLooper());
@@ -184,8 +192,14 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
         mDaemon = daemon;
 
-        mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT, new BiometricNotificationImpl());
+        AuthenticationStatsBroadcastReceiver mBroadcastReceiver =
+                new AuthenticationStatsBroadcastReceiver(
+                        mContext,
+                        BiometricsProtoEnums.MODALITY_FINGERPRINT,
+                        (AuthenticationStatsCollector collector) -> {
+                            Slog.d(getTag(), "Initializing AuthenticationStatsCollector");
+                            mAuthenticationStatsCollector = collector;
+                        });
 
         final List<SensorLocationInternal> workaroundLocations = getWorkaroundSensorProps(context);
 
@@ -422,13 +436,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintEnrollClient client = new FingerprintEnrollClient(mContext,
                     mFingerprintSensors.get(sensorId).getLazySession(), token, id,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
-                    opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
-                    createLogger(BiometricsProtoEnums.ACTION_ENROLL,
+                    opPackageName, FingerprintUtils.getInstance(sensorId),
+                    sensorId, createLogger(BiometricsProtoEnums.ACTION_ENROLL,
                             BiometricsProtoEnums.CLIENT_UNKNOWN, mAuthenticationStatsCollector),
                     mBiometricContext,
                     mFingerprintSensors.get(sensorId).getSensorProperties(),
                     mUdfpsOverlayController, mSidefpsController,
-                    maxTemplatesPerUser, enrollReason);
+                    mAuthenticationStateListeners, maxTemplatesPerUser, enrollReason);
             scheduleForSensor(sensorId, client, new ClientMonitorCompositeCallback(
                     mBiometricStateCallback, new ClientMonitorCallback() {
                 @Override
@@ -490,12 +504,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
                             mAuthenticationStatsCollector),
                     mBiometricContext, isStrongBiometric,
-                    mTaskStackListener, mFingerprintSensors.get(sensorId).getLockoutCache(),
+                    mTaskStackListener,
                     mUdfpsOverlayController, mSidefpsController,
-                    allowBackgroundAuthentication,
+                    mAuthenticationStateListeners, allowBackgroundAuthentication,
                     mFingerprintSensors.get(sensorId).getSensorProperties(), mHandler,
                     Utils.getCurrentStrength(sensorId),
-                    SystemClock.elapsedRealtimeClock());
+                    SystemClock.elapsedRealtimeClock(),
+                    null /* lockoutTracker */);
             scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
 
                 @Override
@@ -725,6 +740,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         }
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Override
     public void setSidefpsController(@NonNull ISidefpsController controller) {
         mSidefpsController = controller;
@@ -869,6 +885,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void simulateVhalFingerDown(int userId, int sensorId) {
         Slog.d(getTag(), "Simulate virtual HAL finger down event");
         final AidlSession session = mFingerprintSensors.get(sensorId).getSessionForUser(userId);
+        if (session == null) {
+            Slog.e(getTag(), "no existing hal session found - aborting");
+            return;
+        }
         final PointerContext pc = new PointerContext();
         try {
             session.getSession().onPointerDownWithContext(pc);

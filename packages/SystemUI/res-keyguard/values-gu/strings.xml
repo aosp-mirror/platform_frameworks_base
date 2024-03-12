@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ધીમેથી ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • બૅટરીની સુરક્ષા કરવા માટે, ચાર્જિંગ ઑપ્ટિમાઇઝ કરવામાં આવ્યું છે"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ ઍક્સેસરીમાં સમસ્યા"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"અનલૉક કરવા માટે મેનૂ દબાવો."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"નેટવર્ક લૉક થયું"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"કોઈ સિમ કાર્ડ નથી"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"સિમ કાર્ડ ઉમેરો."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"સિમ કાર્ડ ખૂટે છે અથવા વાંચી શકાય એવું નથી. સિમ કાર્ડ ઉમેરો."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ઉપયોગમાં ન લઈ શકાતું સિમ કાર્ડ."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"તમારું સિમ કાર્ડ કાયમ માટે નિષ્ક્રિય કરવામાં આવ્યું છે.\n બીજા સિમ કાર્ડ માટે તમારા વાયરલેસ સેવા પ્રદાતાનો સંપર્ક કરો."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"સિમ કાર્ડ લૉક કરેલું છે."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"સિમ કાર્ડ PUK-લૉક કરેલું છે."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"સિમ કાર્ડ અનલૉક કરી રહ્યાં છીએ…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"પિન પછી પાસવર્ડ આવશ્યક છે"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"લૉકડાઉન પછી પાસવર્ડ આવશ્યક છે"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"પૅટર્ન પછી પાસવર્ડ આવશ્યક છે"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"નિષ્ક્રિયતાના સમય દરમિયાન અપડેટ ઇન્સ્ટૉલ થશે"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"જ્યારે ડિવાઇસ ઉપયોગમાં ન હોય ત્યારે અપડેટ ઇન્સ્ટૉલ કરવામાં આવશે"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"વધારાની સુરક્ષા આવશ્યક છે. થોડા સમય માટે પિનનો ઉપયોગ થયો નથી."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"વધારાની સુરક્ષા આવશ્યક છે. થોડા સમય માટે પાસવર્ડનો ઉપયોગ થયો નથી."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"વધારાની સુરક્ષા આવશ્યક છે. થોડા સમય માટે પૅટર્નનો ઉપયોગ થયો નથી."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"બબલ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"એનાલોગ"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ચાલુ રાખવા માટે તમારા ડિવાઇસને અનલૉક કરો"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"પછીથી અપડેટ ઇન્સ્ટૉલ કરવા માટે પિન દાખલ કરો"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"પછીથી અપડેટ ઇન્સ્ટૉલ કરવા માટે પાસવર્ડ દાખલ કરો"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"પછીથી અપડેટ ઇન્સ્ટૉલ કરવા માટે પૅટર્ન દોરો"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"ડિવાઇસ અપડેટ કર્યું. ચાલુ રાખવા માટે પિન દાખલ કરો."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"ડિવાઇસ અપડેટ કર્યું. ચાલુ રાખવા માટે પાસવર્ડ દાખલ કરો."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"ડિવાઇસ અપડેટ કર્યું. ચાલુ રાખવા માટે પૅટર્ન દોરો."</string>
 </resources>

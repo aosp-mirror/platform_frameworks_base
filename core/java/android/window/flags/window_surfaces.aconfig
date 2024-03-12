@@ -1,0 +1,66 @@
+package: "com.android.window.flags"
+
+# Project link: https://gantry.corp.google.com/projects/android_platform_window_surfaces/changes
+
+flag {
+    namespace: "window_surfaces"
+    name: "surface_trusted_overlay"
+    description: "Whether to add trusted overlay flag on the SurfaceControl or the InputWindow"
+    is_fixed_read_only: true
+    bug: "292032926"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "explicit_refresh_rate_hints"
+    description: "Performance related hints during transitions"
+    is_fixed_read_only: true
+    bug: "300019131"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "get_host_token_api"
+    description: "Feature flag to associate the host and embedded windows"
+    is_fixed_read_only: true
+    bug: "304508760"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "transfer_gesture_to_embedded"
+    description: "Enable public API for Window Surfaces"
+    bug: "287076178"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "delete_capture_display"
+    description: "Delete uses of ScreenCapture#captureDisplay"
+    is_fixed_read_only: true
+    bug: "293445881"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "allow_disable_activity_record_input_sink"
+    description: "Whether to allow system activity to disable ActivityRecordInputSink"
+    is_fixed_read_only: true
+    bug: "262477923"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "secure_window_state"
+    description: "Move SC secure flag to WindowState level"
+    is_fixed_read_only: true
+    bug: "308662081"
+}
+
+flag {
+    namespace: "window_surfaces"
+    name: "trusted_presentation_listener_for_window"
+    description: "Enable trustedPresentationListener on windows public API"
+    is_fixed_read_only: true
+    bug: "278027319"
+}

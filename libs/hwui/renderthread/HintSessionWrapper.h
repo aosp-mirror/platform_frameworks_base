@@ -19,6 +19,7 @@
 #include <android/performance_hint.h>
 
 #include <future>
+#include <optional>
 
 #include "utils/TimeUtils.h"
 
@@ -26,6 +27,8 @@ namespace android {
 namespace uirenderer {
 
 namespace renderthread {
+
+class RenderThread;
 
 class HintSessionWrapper {
 public:
@@ -40,10 +43,15 @@ public:
     void sendLoadIncreaseHint();
     bool init();
     void destroy();
+    bool alive();
+    nsecs_t getLastUpdate();
+    void delayedDestroy(renderthread::RenderThread& rt, nsecs_t delay,
+                        std::shared_ptr<HintSessionWrapper> wrapperPtr);
 
 private:
     APerformanceHintSession* mHintSession = nullptr;
-    std::future<APerformanceHintSession*> mHintSessionFuture;
+    // This needs to work concurrently for testing
+    std::optional<std::shared_future<APerformanceHintSession*>> mHintSessionFuture;
 
     int mResetsSinceLastReport = 0;
     nsecs_t mLastFrameNotification = 0;
@@ -57,6 +65,7 @@ private:
     static constexpr nsecs_t kResetHintTimeout = 100_ms;
     static constexpr int64_t kSanityCheckLowerBound = 100_us;
     static constexpr int64_t kSanityCheckUpperBound = 10_s;
+    static constexpr int64_t kDefaultTargetDuration = 16666667;
 
     // Allows easier stub when testing
     class HintSessionBinding {

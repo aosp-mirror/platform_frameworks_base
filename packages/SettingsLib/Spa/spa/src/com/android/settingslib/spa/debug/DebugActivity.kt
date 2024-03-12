@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.SESSION_BROWSE
 import com.android.settingslib.spa.framework.util.SESSION_SEARCH
@@ -137,7 +136,7 @@ class DebugActivity : ComponentActivity() {
                 val page = pageWithEntry.page
                 Preference(object : PreferenceModel {
                     override val title = "${page.debugBrief()} (${pageWithEntry.entries.size})"
-                    override val summary = page.debugArguments().toState()
+                    override val summary = { page.debugArguments() }
                     override val onClick = navigator(route = ROUTE_PAGE + "/${page.id}")
                 })
             }
@@ -179,8 +178,9 @@ class DebugActivity : ComponentActivity() {
             Text(text = "Entry size: ${pageWithEntry.entries.size}")
             Preference(model = object : PreferenceModel {
                 override val title = "open page"
-                override val enabled = (spaEnvironment.browseActivityClass != null &&
-                    page.isBrowsable()).toState()
+                override val enabled = {
+                    spaEnvironment.browseActivityClass != null && page.isBrowsable()
+                }
                 override val onClick = openPage(page)
             })
             EntryList(pageWithEntry.entries)
@@ -196,9 +196,10 @@ class DebugActivity : ComponentActivity() {
         RegularScaffold(title = "Entry - ${entry.debugBrief()}") {
             Preference(model = object : PreferenceModel {
                 override val title = "open entry"
-                override val enabled = (spaEnvironment.browseActivityClass != null &&
-                    entry.containerPage().isBrowsable())
-                    .toState()
+                override val enabled = {
+                    spaEnvironment.browseActivityClass != null &&
+                        entry.containerPage().isBrowsable()
+                }
                 override val onClick = openEntry(entry)
             })
             Text(text = entryContent)
@@ -210,8 +211,9 @@ class DebugActivity : ComponentActivity() {
         for (entry in entries) {
             Preference(object : PreferenceModel {
                 override val title = entry.debugBrief()
-                override val summary =
-                    "${entry.fromPage?.displayName} -> ${entry.toPage?.displayName}".toState()
+                override val summary = {
+                    "${entry.fromPage?.displayName} -> ${entry.toPage?.displayName}"
+                }
                 override val onClick = navigator(route = ROUTE_ENTRY + "/${entry.id}")
             })
         }

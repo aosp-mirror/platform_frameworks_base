@@ -1,0 +1,40 @@
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "FrameworksVibratorCoreTests",
+
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        "frameworks-base-testutils",
+        "guava",
+        "androidx.core_core",
+        "androidx.test.ext.junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "truth",
+        "testng",
+    ],
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+        "framework",
+        "framework-res",
+    ],
+
+    sdk_version: "core_platform",
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
+
+    certificate: "platform",
+}

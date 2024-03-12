@@ -41,6 +41,11 @@ interface KeyguardFaceAuthInteractor {
     /** Whether face auth is in lock out state. */
     fun isLockedOut(): Boolean
 
+    /** Whether face auth is enrolled and enabled for the current user */
+    fun isFaceAuthEnabledAndEnrolled(): Boolean
+
+    /** Whether the current user is authenticated successfully with face auth */
+    fun isAuthenticated(): Boolean
     /**
      * Register listener for use from code that cannot use [authenticationStatus] or
      * [detectionStatus]
@@ -50,9 +55,6 @@ interface KeyguardFaceAuthInteractor {
     /** Unregister previously registered listener */
     fun unregisterListener(listener: FaceAuthenticationListener)
 
-    /** Whether the face auth interactor is enabled or not. */
-    fun isEnabled(): Boolean
-
     fun onUdfpsSensorTouched()
     fun onAssistantTriggeredOnLockScreen()
     fun onDeviceLifted()
@@ -61,6 +63,10 @@ interface KeyguardFaceAuthInteractor {
     fun onSwipeUpOnBouncer()
     fun onPrimaryBouncerUserInput()
     fun onAccessibilityAction()
+    fun onWalletLaunched()
+
+    /** Whether face auth is considered class 3 */
+    fun isFaceAuthStrong(): Boolean
 }
 
 /**
@@ -72,9 +78,18 @@ interface KeyguardFaceAuthInteractor {
  * flows.
  */
 interface FaceAuthenticationListener {
+    /** Receive face isAuthenticated updates */
+    fun onAuthenticatedChanged(isAuthenticated: Boolean)
+
     /** Receive face authentication status updates */
     fun onAuthenticationStatusChanged(status: FaceAuthenticationStatus)
 
     /** Receive status updates whenever face detection runs */
     fun onDetectionStatusChanged(status: FaceDetectionStatus)
+
+    fun onLockoutStateChanged(isLockedOut: Boolean)
+
+    fun onRunningStateChanged(isRunning: Boolean)
+
+    fun onAuthEnrollmentStateChanged(enrolled: Boolean)
 }

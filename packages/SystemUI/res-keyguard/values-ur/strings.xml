@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آہستہ چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • بیٹری کی حفاظت کے لیے چارجنگ کو بہتر بنایا گیا"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارجنگ ایکسیسری کے ساتھ مسئلہ"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"غیر مقفل کرنے کیلئے مینیو دبائیں۔"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"نیٹ ورک مقفل ہو گیا"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"‏کوئی SIM نہیں ہے"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"‏ایک SIM شامل کریں۔"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"‏SIM غائب ہے یا پڑھنے لائق نہیں ہے۔ ایک SIM شامل کریں۔"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"‏ناقابل استعمال SIM۔"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"‏آپ کے SIM کو مستقل طور پر غیر فعال کر دیا گیا ہے۔\n کسی دوسرے SIM کیلئے اپنے وائرلیس سروس فراہم کنندہ سے رابطہ کریں۔"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"‏SIM مقفل ہے۔"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"‏آپ کا SIM ‏PUK مقفل ہے۔"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"‏SIM کو غیر مقفل کیا جا رہا ہے…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"‏لاک ڈاؤن کے بعد PIN کی ضرورت ہوتی ہے"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"لاک ڈاؤن کے بعد پاس ورڈ کی ضرورت ہوتی ہے"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"لاک ڈاؤن کے بعد پیٹرن کی ضرورت ہوتی ہے"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"اپ ڈیٹ غیر فعال اوقات کے دوران انسٹال ہوگی"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"آلہ استعمال میں نہ ہونے پر اپ ڈیٹ انسٹال ہو جائے گی"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"‏مزید سیکیورٹی چاہیے۔ PIN کچھ عرصے اسے استعمال نہیں ہوا ہے۔"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"مزید سیکیورٹی چاہیے۔ پاس ورڈ کچھ عرصے سے استعمال نہیں ہوا ہے۔"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"مزید سیکیورٹی چاہیے۔ پیٹرن کچھ عرصے سے استعمال نہیں ہوا ہے۔"</string>
@@ -98,7 +94,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"‏SIM کو غیر مقفل کیا جا رہا ہے…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"‏ایسا PIN ٹائپ کریں جو 4 تا 8 اعداد پر مشتمل ہو۔"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"‏PUK کوڈ 8 یا زائد اعداد پر مشتمل ہونا چاہیے۔"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"‏آپ نے اپنا PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"‏آپ نے <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اپنا PIN غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"آپ نے اپنا پاس ورڈ <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏غلط SIM PIN کوڈ، اب آپ کو اپنا آلہ غیر مقفل کرنے کیلئے اپنے کیریئر سے رابطہ کرنا ہوگا۔"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"بلبلہ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"اینالاگ"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"جاری رکھنے کے لئے اپنا آلہ غیر مقفل کریں"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"‏بعد میں اپ ڈیٹ انسٹال کرنے کیلئے PIN درج کریں"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"بعد میں اپ ڈیٹ انسٹال کرنے کیلئے پاس ورڈ درج کریں"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"بعد میں اپ ڈیٹ انسٹال کرنے کیلئے پیٹرن ڈرا کریں"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"‏آلہ اپ ڈیٹ ہو گیا۔ جاری رکھنے کیلئے PIN درج کریں۔"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"آلہ اپ ڈیٹ ہو گیا۔ جاری رکھنے کیلئے پاس ورڈ درج کریں۔"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"آلہ اپ ڈیٹ ہو گیا۔ جاری رکھنے کیلئے پیٹرن ڈرا کریں۔"</string>
 </resources>

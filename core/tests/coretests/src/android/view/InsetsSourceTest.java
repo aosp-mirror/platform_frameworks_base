@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsSource.ID_IME_CAPTION_BAR;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.SIZE;
@@ -52,12 +53,15 @@ public class InsetsSourceTest {
 
     private final InsetsSource mSource = new InsetsSource(0 /* id */, navigationBars());
     private final InsetsSource mImeSource = new InsetsSource(1 /* id */, ime());
+    private final InsetsSource mImeCaptionSource = new InsetsSource(
+            ID_IME_CAPTION_BAR, captionBar());
     private final InsetsSource mCaptionSource = new InsetsSource(2 /* id */, captionBar());
 
     @Before
     public void setUp() {
         mSource.setVisible(true);
         mImeSource.setVisible(true);
+        mImeCaptionSource.setVisible(true);
         mCaptionSource.setVisible(true);
     }
 
@@ -106,6 +110,18 @@ public class InsetsSourceTest {
         mImeSource.setFrame(new Rect(100, 400, 500, 500));
         Insets insets = mImeSource.calculateInsets(new Rect(0, 0, 500, 500),
                 false /* ignoreVisibility */);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_imeCaptionBar() {
+        mImeCaptionSource.setFrame(new Rect(0, 400, 500, 500));
+        Insets insets = mImeCaptionSource.calculateInsets(new Rect(0, 0, 500, 500), false);
+        assertEquals(Insets.of(0, 0, 0, 100), insets);
+
+        // Place caption bar at top; IME caption bar must always return bottom insets
+        mImeCaptionSource.setFrame(new Rect(0, 0, 500, 100));
+        insets = mImeCaptionSource.calculateInsets(new Rect(0, 0, 500, 500), false);
         assertEquals(Insets.of(0, 0, 0, 100), insets);
     }
 

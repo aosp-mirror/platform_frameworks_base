@@ -98,6 +98,7 @@ interface INotificationManager
     ParceledListSlice getNotificationChannelGroupsForPackage(String pkg, int uid, boolean includeDeleted);
     NotificationChannelGroup getNotificationChannelGroupForPackage(String groupId, String pkg, int uid);
     NotificationChannelGroup getPopulatedNotificationChannelGroupForPackage(String pkg, int uid, String groupId, boolean includeDeleted);
+    ParceledListSlice getRecentBlockedNotificationChannelGroupsForPackage(String pkg, int uid);
     void updateNotificationChannelGroupForPackage(String pkg, int uid, in NotificationChannelGroup group);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
     void unlockNotificationChannel(String pkg, int uid, String channelId);
@@ -128,13 +129,16 @@ interface INotificationManager
     // INotificationListener method.
     @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
             String callingAttributionTag, int count, boolean includeSnoozed);
 
+    @EnforcePermission("ACCESS_NOTIFICATIONS")
     NotificationHistory getNotificationHistory(String callingPkg, String callingAttributionTag);
 
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);
@@ -210,6 +214,8 @@ interface INotificationManager
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
     void setNotificationPolicyAccessGrantedForUser(String pkg, int userId, boolean granted);
     AutomaticZenRule getAutomaticZenRule(String id);
+    Map<String, AutomaticZenRule> getAutomaticZenRules();
+    // TODO: b/310620812 - Remove getZenRules() when MODES_API is inlined.
     List<ZenModeConfig.ZenRule> getZenRules();
     String addAutomaticZenRule(in AutomaticZenRule automaticZenRule, String pkg);
     boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule);

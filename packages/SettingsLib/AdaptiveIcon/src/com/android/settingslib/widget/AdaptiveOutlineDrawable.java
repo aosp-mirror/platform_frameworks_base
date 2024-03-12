@@ -34,6 +34,8 @@ import android.view.WindowManagerGlobal;
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.settingslib.widget.adaptiveicon.R;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 

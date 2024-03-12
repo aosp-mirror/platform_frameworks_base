@@ -60,17 +60,10 @@
     <!-- Desktop Mode -->
     <color name="desktop_mode_caption_handle_bar_light">#EFF1F2</color>
     <color name="desktop_mode_caption_handle_bar_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_expand_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_expand_button_dark">#48473A</color>
-    <color name="desktop_mode_caption_close_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_close_button_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_maximize_button_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_maximize_button_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_app_name_light">#EFF1F2</color>
-    <color name="desktop_mode_caption_app_name_dark">#1C1C17</color>
-    <color name="desktop_mode_caption_menu_text_color">#191C1D</color>
-    <color name="desktop_mode_caption_menu_buttons_color_inactive">#191C1D</color>
-    <color name="desktop_mode_caption_menu_buttons_color_active">#00677E</color>
     <color name="desktop_mode_resize_veil_light">#EFF1F2</color>
     <color name="desktop_mode_resize_veil_dark">#1C1C17</color>
+    <color name="desktop_mode_maximize_menu_button">#DDDACD</color>
+    <color name="desktop_mode_maximize_menu_button_outline">#797869</color>
+    <color name="desktop_mode_maximize_menu_button_outline_on_hover">#606219</color>
+    <color name="desktop_mode_maximize_menu_button_on_hover">#E7E790</color>
 </resources>

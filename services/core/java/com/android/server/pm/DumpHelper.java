@@ -23,6 +23,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -160,7 +161,8 @@ final class DumpHelper {
                 pkg = snapshot.resolveInternalPackageName(pkg,
                         PackageManager.VERSION_CODE_HIGHEST);
 
-                pw.println(mPermissionManager.checkPermission(pkg, perm, user));
+                pw.println(mPermissionManager.checkPermission(
+                        pkg, perm, Context.DEVICE_ID_DEFAULT, user));
                 return;
             } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_LIBS);
@@ -617,7 +619,9 @@ final class DumpHelper {
         pw.println("    --checkin: dump for a checkin");
         pw.println("    -f: print details of intent filters");
         pw.println("    -h: print this help");
+        pw.println("    --proto: dump data to proto");
         pw.println("    --all-components: include all component names in package dump");
+        pw.println("    --include-apex: includes the apex packages in package dump");
         pw.println("  cmd may be one of:");
         pw.println("    apex: list active APEXes and APEX session state");
         pw.println("    l[ibraries]: list known shared libraries");
@@ -631,7 +635,7 @@ final class DumpHelper {
         pw.println("    prov[iders]: dump content providers");
         pw.println("    p[ackages]: dump installed packages");
         pw.println("    q[ueries]: dump app queryability calculations");
-        pw.println("    s[hared-users]: dump shared user IDs");
+        pw.println("    s[hared-users] [noperm]: dump shared user IDs");
         pw.println("    m[essages]: print collected runtime messages");
         pw.println("    v[erifiers]: print package verifier info");
         pw.println("    d[omain-preferred-apps]: print domains preferred apps");
@@ -644,9 +648,12 @@ final class DumpHelper {
         pw.println("    dexopt: dump dexopt state");
         pw.println("    compiler-stats: dump compiler statistics");
         pw.println("    service-permissions: dump permissions required by services");
-        pw.println("    snapshot: dump snapshot statistics");
+        pw.println("    snapshot [--full|--brief]: dump snapshot statistics");
         pw.println("    protected-broadcasts: print list of protected broadcast actions");
         pw.println("    known-packages: dump known packages");
+        pw.println("    changes: dump the packages that have been changed");
+        pw.println("    frozen: dump the frozen packages");
+        pw.println("    volumes: dump the loaded volumes");
         pw.println("    <package.name>: info about given package");
     }
 

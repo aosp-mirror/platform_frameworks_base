@@ -17,13 +17,14 @@
 package com.android.systemui
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
 import android.hardware.camera2.CameraManager
 import android.util.PathParser
+import com.android.systemui.res.R
 import java.util.concurrent.Executor
-
 import kotlin.math.roundToInt
 
 /**
@@ -33,37 +34,32 @@ import kotlin.math.roundToInt
  */
 class CameraAvailabilityListener(
     private val cameraManager: CameraManager,
-    private val cutoutProtectionPath: Path,
-    private val targetCameraId: String,
+    private val cameraProtectionInfoList: List<CameraProtectionInfo>,
     excludedPackages: String,
     private val executor: Executor
 ) {
-    private var cutoutBounds = Rect()
     private val excludedPackageIds: Set<String>
     private val listeners = mutableListOf<CameraTransitionCallback>()
     private val availabilityCallback: CameraManager.AvailabilityCallback =
             object : CameraManager.AvailabilityCallback() {
                 override fun onCameraClosed(cameraId: String) {
-                    if (targetCameraId == cameraId) {
-                        notifyCameraInactive()
+                    cameraProtectionInfoList.forEach {
+                        if (cameraId == it.cameraId) {
+                            notifyCameraInactive()
+                        }
                     }
                 }
 
                 override fun onCameraOpened(cameraId: String, packageId: String) {
-                    if (targetCameraId == cameraId && !isExcluded(packageId)) {
-                        notifyCameraActive()
+                    cameraProtectionInfoList.forEach {
+                        if (cameraId == it.cameraId && !isExcluded(packageId)) {
+                            notifyCameraActive(it)
+                        }
                     }
                 }
     }
 
     init {
-        val computed = RectF()
-        cutoutProtectionPath.computeBounds(computed, false /* unused */)
-        cutoutBounds.set(
-                computed.left.roundToInt(),
-                computed.top.roundToInt(),
-                computed.right.roundToInt(),
-                computed.bottom.roundToInt())
         excludedPackageIds = excludedPackages.split(",").toSet()
     }
 
@@ -100,8 +96,10 @@ class CameraAvailabilityListener(
         cameraManager.unregisterAvailabilityCallback(availabilityCallback)
     }
 
-    private fun notifyCameraActive() {
-        listeners.forEach { it.onApplyCameraProtection(cutoutProtectionPath, cutoutBounds) }
+    private fun notifyCameraActive(info: CameraProtectionInfo) {
+        listeners.forEach {
+            it.onApplyCameraProtection(info.cutoutProtectionPath, info.cutoutBounds)
+        }
     }
 
     private fun notifyCameraInactive() {
@@ -121,12 +119,11 @@ class CameraAvailabilityListener(
             val manager = context
                     .getSystemService(Context.CAMERA_SERVICE) as CameraManager
             val res = context.resources
-            val pathString = res.getString(R.string.config_frontBuiltInDisplayCutoutProtection)
-            val cameraId = res.getString(R.string.config_protectedCameraId)
+            val cameraProtectionInfoList = loadCameraProtectionInfoList(res)
             val excluded = res.getString(R.string.config_cameraProtectionExcludedPackages)
 
             return CameraAvailabilityListener(
-                    manager, pathFromString(pathString), cameraId, excluded, executor)
+                    manager, cameraProtectionInfoList, excluded, executor)
         }
 
         private fun pathFromString(pathString: String): Path {
@@ -140,5 +137,53 @@ class CameraAvailabilityListener(
 
             return p
         }
+
+        private fun loadCameraProtectionInfoList(res: Resources): List<CameraProtectionInfo> {
+            val list = mutableListOf<CameraProtectionInfo>()
+            val front = loadCameraProtectionInfo(
+                    res,
+                    R.string.config_protectedCameraId,
+                    R.string.config_frontBuiltInDisplayCutoutProtection
+            )
+            if (front != null) {
+                list.add(front)
+            }
+            val inner = loadCameraProtectionInfo(
+                    res,
+                    R.string.config_protectedInnerCameraId,
+                    R.string.config_innerBuiltInDisplayCutoutProtection
+            )
+            if (inner != null) {
+                list.add(inner)
+            }
+            return list
+        }
+
+        private fun loadCameraProtectionInfo(
+                res: Resources,
+                cameraIdRes: Int,
+                pathRes: Int
+        ): CameraProtectionInfo? {
+            val cameraId = res.getString(cameraIdRes)
+            if (cameraId == null || cameraId.isEmpty()) {
+                return null
+            }
+            val protectionPath = pathFromString(res.getString(pathRes))
+            val computed = RectF()
+            protectionPath.computeBounds(computed)
+            val protectionBounds = Rect(
+                    computed.left.roundToInt(),
+                    computed.top.roundToInt(),
+                    computed.right.roundToInt(),
+                    computed.bottom.roundToInt()
+            )
+            return CameraProtectionInfo(cameraId, protectionPath, protectionBounds)
+        }
     }
+
+    data class CameraProtectionInfo (
+            val cameraId: String,
+            val cutoutProtectionPath: Path,
+            val cutoutBounds: Rect
+    )
 }

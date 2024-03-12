@@ -15,6 +15,9 @@
  */
 package com.android.server.pm;
 
+import static android.os.UserManager.DISALLOW_OUTGOING_CALLS;
+import static android.os.UserManager.DISALLOW_SMS;
+import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -24,6 +27,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -33,6 +40,7 @@ import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -40,10 +48,12 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.Xml;
 
 import androidx.test.annotation.UiThreadTest;
 
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.am.UserState;
@@ -55,6 +65,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * Run as {@code atest FrameworksMockingServicesTests:com.android.server.pm.UserManagerServiceTest}
@@ -87,10 +103,17 @@ public final class UserManagerServiceTest {
      */
     private static final int PROFILE_USER_ID = 643;
 
+    private static final String USER_INFO_DIR = "system" + File.separator + "users";
+
+    private static final String XML_SUFFIX = ".xml";
+
+    private static final String TAG_RESTRICTIONS = "restrictions";
+
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
             .spyStatic(UserManager.class)
             .spyStatic(LocalServices.class)
+            .spyStatic(SystemProperties.class)
             .mockStatic(Settings.Global.class)
             .build();
 
@@ -98,6 +121,8 @@ public final class UserManagerServiceTest {
     private final Context mRealContext = androidx.test.InstrumentationRegistry.getInstrumentation()
             .getTargetContext();
     private final SparseArray<UserData> mUsers = new SparseArray<>();
+
+    private File mTestDir;
 
     private Context mSpiedContext;
 
@@ -136,17 +161,23 @@ public final class UserManagerServiceTest {
         doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
 
         // Must construct UserManagerService in the UiThread
+        mTestDir = new File(mRealContext.getDataDir(), "umstest");
+        mTestDir.mkdirs();
         mUms = new UserManagerService(mSpiedContext, mMockPms, mMockUserDataPreparer,
-                mPackagesLock, mRealContext.getDataDir(), mUsers);
+                mPackagesLock, mTestDir, mUsers);
         mUmi = LocalServices.getService(UserManagerInternal.class);
         assertWithMessage("LocalServices.getService(UserManagerInternal.class)").that(mUmi)
                 .isNotNull();
     }
 
     @After
-    public void resetUserManagerInternal() {
+    public void tearDown() {
         // LocalServices follows the "Highlander rule" - There can be only one!
         LocalServices.removeServiceForTest(UserManagerInternal.class);
+
+        // Clean up test dir to remove persisted user files.
+        deleteRecursive(mTestDir);
+        mUsers.clear();
     }
 
     @Test
@@ -290,7 +321,6 @@ public final class UserManagerServiceTest {
         addDefaultProfileAndParent();
 
         mUms.setBootUser(PROFILE_USER_ID);
-
         // Boot user not switchable so return most recently in foreground.
         assertWithMessage("getBootUser")
                 .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
@@ -407,11 +437,152 @@ public final class UserManagerServiceTest {
     }
 
     @Test
+    public void assertIsUserSwitcherEnabledOnMultiUserSettings() throws Exception {
+        resetUserSwitcherEnabled();
+
+        mockUserSwitcherEnabled(false);
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isFalse();
+
+        mockUserSwitcherEnabled(true);
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isTrue();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnMaxSupportedUsers()  throws Exception {
+        resetUserSwitcherEnabled();
+
+        mockMaxSupportedUsers(/* maxUsers= */ 1);
+        assertThat(UserManager.supportsMultipleUsers()).isFalse();
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isFalse();
+
+        mockMaxSupportedUsers(/* maxUsers= */ 8);
+        assertThat(UserManager.supportsMultipleUsers()).isTrue();
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isTrue();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabled()  throws Exception {
+        resetUserSwitcherEnabled();
+
+        mockMaxSupportedUsers(/* maxUsers= */ 8);
+        assertThat(mUms.isUserSwitcherEnabled(true, USER_ID)).isTrue();
+
+        mockUserSwitcherEnabled(false);
+        assertThat(mUms.isUserSwitcherEnabled(true, USER_ID)).isFalse();
+
+        mockUserSwitcherEnabled(true);
+        assertThat(mUms.isUserSwitcherEnabled(false, USER_ID)).isTrue();
+
+        mUms.setUserRestriction(DISALLOW_USER_SWITCH, true, USER_ID);
+        assertThat(mUms.isUserSwitcherEnabled(false, USER_ID)).isFalse();
+
+        mUms.setUserRestriction(DISALLOW_USER_SWITCH, false, USER_ID);
+        mockMaxSupportedUsers(1);
+        assertThat(mUms.isUserSwitcherEnabled(true, USER_ID)).isFalse();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnShowMultiuserUI()  throws Exception {
+        resetUserSwitcherEnabled();
+
+        mockShowMultiuserUI(/* show= */ false);
+        assertThat(UserManager.supportsMultipleUsers()).isFalse();
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isFalse();
+
+        mockShowMultiuserUI(/* show= */ true);
+        assertThat(UserManager.supportsMultipleUsers()).isTrue();
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isTrue();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnUserRestrictions() throws Exception {
+        resetUserSwitcherEnabled();
+
+        mUms.setUserRestriction(DISALLOW_USER_SWITCH, true, USER_ID);
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isFalse();
+
+        mUms.setUserRestriction(DISALLOW_USER_SWITCH, false, USER_ID);
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isTrue();
+    }
+
+    @Test
+    public void assertIsUserSwitcherEnabledOnDemoMode() throws Exception {
+        resetUserSwitcherEnabled();
+
+        mockDeviceDemoMode(/* enabled= */ true);
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isFalse();
+
+        mockDeviceDemoMode(/* enabled= */ false);
+        assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isTrue();
+    }
+
+    @Test
+    public void testMainUser_hasNoCallsOrSMSRestrictionsByDefault() {
+        // Remove the main user so we can add another one
+        for (int i = 0; i < mUsers.size(); i++) {
+            UserData userData = mUsers.valueAt(i);
+            if (userData.info.isMain()) {
+                mUsers.delete(i);
+                break;
+            }
+        }
+        UserInfo mainUser = mUms.createUserWithThrow("main user", USER_TYPE_FULL_SECONDARY,
+                UserInfo.FLAG_FULL | UserInfo.FLAG_MAIN);
+
+        assertThat(mUms.hasUserRestriction(DISALLOW_OUTGOING_CALLS, mainUser.id))
+                .isFalse();
+        assertThat(mUms.hasUserRestriction(DISALLOW_SMS, mainUser.id))
+                .isFalse();
+    }
+
+    @Test
     public void testCreateUserWithLongName_TruncatesName() {
         UserInfo user = mUms.createUserWithThrow(generateLongString(), USER_TYPE_FULL_SECONDARY, 0);
         assertThat(user.name.length()).isEqualTo(500);
         UserInfo user1 = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
         assertThat(user1.name.length()).isEqualTo(4);
+    }
+
+    @Test
+    public void testDefaultRestrictionsArePersistedAfterCreateUser()
+            throws IOException, XmlPullParserException {
+        UserInfo user = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
+        assertTrue(hasRestrictionsInUserXMLFile(user.id));
+    }
+
+    /**
+     * Returns true if the user's XML file has Default restrictions
+     * @param userId Id of the user.
+     */
+    private boolean hasRestrictionsInUserXMLFile(int userId)
+            throws IOException, XmlPullParserException {
+        FileInputStream is = new FileInputStream(getUserXmlFile(userId));
+        final TypedXmlPullParser parser = Xml.resolvePullParser(is);
+
+        int type;
+        while ((type = parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
+            // Skip
+        }
+
+        if (type != XmlPullParser.START_TAG) {
+            return false;
+        }
+
+        int outerDepth = parser.getDepth();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (TAG_RESTRICTIONS.equals(parser.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private File getUserXmlFile(int userId) {
+        File file = new File(mTestDir, USER_INFO_DIR);
+        return new File(file, userId + XML_SUFFIX);
     }
 
     private String generateLongString() {
@@ -430,6 +601,35 @@ public final class UserManagerServiceTest {
                 mUms.removeUserInfo(user.id);
             }
         }
+    }
+
+    private void resetUserSwitcherEnabled() {
+        mUms.putUserInfo(new UserInfo(USER_ID, "Test User", 0));
+        mUms.setUserRestriction(DISALLOW_USER_SWITCH, false, USER_ID);
+        mockUserSwitcherEnabled(/* enabled= */ true);
+        mockDeviceDemoMode(/* enabled= */ false);
+        mockMaxSupportedUsers(/* maxUsers= */ 8);
+        mockShowMultiuserUI(/* show= */ true);
+    }
+
+    private void mockUserSwitcherEnabled(boolean enabled) {
+        doReturn(enabled ? 1 : 0).when(() -> Settings.Global.getInt(
+                any(), eq(android.provider.Settings.Global.USER_SWITCHER_ENABLED), anyInt()));
+    }
+
+    private void mockDeviceDemoMode(boolean enabled) {
+        doReturn(enabled ? 1 : 0).when(() -> Settings.Global.getInt(
+                any(), eq(android.provider.Settings.Global.DEVICE_DEMO_MODE), anyInt()));
+    }
+
+    private void mockMaxSupportedUsers(int maxUsers) {
+        doReturn(maxUsers).when(() ->
+                SystemProperties.getInt(eq("fw.max_users"), anyInt()));
+    }
+
+    private void mockShowMultiuserUI(boolean show) {
+        doReturn(show).when(() ->
+                SystemProperties.getBoolean(eq("fw.show_multiuserui"), anyBoolean()));
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {
@@ -509,6 +709,18 @@ public final class UserManagerServiceTest {
     private void setLastForegroundTime(@UserIdInt int userId, long timeMillis) {
         UserData userData = mUsers.get(userId);
         userData.mLastEnteredForegroundTimeMillis = timeMillis;
+    }
+
+    public boolean deleteRecursive(File file) {
+        if (file.isDirectory()) {
+            for (File item : file.listFiles()) {
+                boolean success = deleteRecursive(item);
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return file.delete();
     }
 
     private static final class TestUserData extends UserData {

@@ -225,9 +225,9 @@ TEST(CanvasOp, simpleDrawLines) {
 TEST(CanvasOp, simpleDrawRect) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push<Op::DrawRect> ({
-        .paint = SkPaint{},
-        .rect = SkRect::MakeEmpty()
+    buffer.push<Op::DrawRect>({
+            .rect = SkRect::MakeEmpty(),
+            .paint = SkPaint{},
     });
 
     CallCountingCanvas canvas;
@@ -242,9 +242,9 @@ TEST(CanvasOp, simpleDrawRegionRect) {
     EXPECT_EQ(buffer.size(), 0);
     SkRegion region;
     region.setRect(SkIRect::MakeWH(12, 50));
-    buffer.push<Op::DrawRegion> ({
-        .paint = SkPaint{},
-        .region = region
+    buffer.push<Op::DrawRegion>({
+            .region = region,
+            .paint = SkPaint{},
     });
 
     CallCountingCanvas canvas;
@@ -264,9 +264,9 @@ TEST(CanvasOp, simpleDrawRegionPath) {
     clip.setRect(SkIRect::MakeWH(100, 100));
     SkRegion region;
     region.setPath(path, clip);
-    buffer.push<Op::DrawRegion> ({
-        .paint = SkPaint{},
-        .region = region
+    buffer.push<Op::DrawRegion>({
+            .region = region,
+            .paint = SkPaint{},
     });
 
     CallCountingCanvas canvas;
@@ -279,11 +279,11 @@ TEST(CanvasOp, simpleDrawRegionPath) {
 TEST(CanvasOp, simpleDrawRoundRect) {
     CanvasOpBuffer buffer;
     EXPECT_EQ(buffer.size(), 0);
-    buffer.push<Op::DrawRoundRect> ({
-        .paint = SkPaint{},
-        .rect = SkRect::MakeEmpty(),
-        .rx = 10,
-        .ry = 10
+    buffer.push<Op::DrawRoundRect>({
+            .rect = SkRect::MakeEmpty(),
+            .rx = 10,
+            .ry = 10,
+            .paint = SkPaint{},
     });
 
     CallCountingCanvas canvas;
@@ -611,9 +611,9 @@ TEST(CanvasOp, immediateRendering) {
 
     EXPECT_EQ(0, canvas->sumTotalDrawCalls());
     ImmediateModeRasterizer rasterizer{canvas};
-    auto op = CanvasOp<Op::DrawRect> {
-        .paint = SkPaint{},
-        .rect = SkRect::MakeEmpty()
+    auto op = CanvasOp<Op::DrawRect>{
+            .rect = SkRect::MakeEmpty(),
+            .paint = SkPaint{},
     };
     EXPECT_TRUE(CanvasOpTraits::can_draw<decltype(op)>);
     rasterizer.draw(op);

@@ -56,6 +56,8 @@ public final class NanoAppMessage implements Parcelable {
      *
      * @param targetNanoAppId the ID of the nanoapp to send the message to
      * @param messageType the nanoapp-dependent message type
+     *                    the value CHRE_MESSAGE_TYPE_RPC (0x7FFFFFF5) is reserved by the
+     *                    framework for RPC messages
      * @param messageBody the byte array message contents
      *
      * @return the NanoAppMessage object

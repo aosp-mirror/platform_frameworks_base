@@ -439,6 +439,21 @@ static std::string ComplexToString(uint32_t complex_value, bool fraction) {
   return str;
 }
 
+// This function is designed to using different specifier to print different floats,
+// which can print more accurate format rather than using %g only.
+const char* BinaryPrimitive::DecideFormat(float f) {
+  // if the float is either too big or too tiny, print it in scientific notation.
+  // eg: "10995116277760000000000" to 1.099512e+22, "0.00000000001" to 1.000000e-11
+  if (fabs(f) > std::numeric_limits<int64_t>::max() || fabs(f) < 1e-10) {
+    return "%e";
+    // Else if the number is an integer exactly, print it without trailing zeros.
+    // eg: "1099511627776" to 1099511627776
+  } else if (int64_t(f) == f) {
+    return "%.0f";
+  }
+  return "%g";
+}
+
 void BinaryPrimitive::PrettyPrint(Printer* printer) const {
   using ::android::Res_value;
   switch (value.dataType) {
@@ -470,7 +485,9 @@ void BinaryPrimitive::PrettyPrint(Printer* printer) const {
       break;
 
     case Res_value::TYPE_FLOAT:
-      printer->Print(StringPrintf("%g", *reinterpret_cast<const float*>(&value.data)));
+      float f;
+      f = *reinterpret_cast<const float*>(&value.data);
+      printer->Print(StringPrintf(DecideFormat(f), f));
       break;
 
     case Res_value::TYPE_DIMENSION:

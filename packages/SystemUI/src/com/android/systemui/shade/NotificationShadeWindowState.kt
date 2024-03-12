@@ -32,7 +32,7 @@ class NotificationShadeWindowState(
     @JvmField var keyguardNeedsInput: Boolean = false,
     @JvmField var panelVisible: Boolean = false,
     /** shade panel is expanded (expansion fraction > 0) */
-    @JvmField var panelExpanded: Boolean = false,
+    @JvmField var shadeOrQsExpanded: Boolean = false,
     @JvmField var notificationShadeFocusable: Boolean = false,
     @JvmField var bouncerShowing: Boolean = false,
     @JvmField var keyguardFadingAway: Boolean = false,
@@ -40,6 +40,7 @@ class NotificationShadeWindowState(
     @JvmField var qsExpanded: Boolean = false,
     @JvmField var headsUpNotificationShowing: Boolean = false,
     @JvmField var lightRevealScrimOpaque: Boolean = false,
+    @JvmField var isSwitchingUsers: Boolean = false,
     @JvmField var forceWindowCollapsed: Boolean = false,
     @JvmField var forceDozeBrightness: Boolean = false,
     // TODO: forceUserActivity seems to be unused, delete?
@@ -70,7 +71,7 @@ class NotificationShadeWindowState(
             keyguardOccluded.toString(),
             keyguardNeedsInput.toString(),
             panelVisible.toString(),
-            panelExpanded.toString(),
+            shadeOrQsExpanded.toString(),
             notificationShadeFocusable.toString(),
             bouncerShowing.toString(),
             keyguardFadingAway.toString(),
@@ -78,6 +79,7 @@ class NotificationShadeWindowState(
             qsExpanded.toString(),
             headsUpNotificationShowing.toString(),
             lightRevealScrimOpaque.toString(),
+            isSwitchingUsers.toString(),
             forceWindowCollapsed.toString(),
             forceDozeBrightness.toString(),
             forceUserActivity.toString(),
@@ -117,6 +119,7 @@ class NotificationShadeWindowState(
             qsExpanded: Boolean,
             headsUpShowing: Boolean,
             lightRevealScrimOpaque: Boolean,
+            isSwitchingUsers: Boolean,
             forceCollapsed: Boolean,
             forceDozeBrightness: Boolean,
             forceUserActivity: Boolean,
@@ -137,7 +140,7 @@ class NotificationShadeWindowState(
                 this.keyguardOccluded = keyguardOccluded
                 this.keyguardNeedsInput = keyguardNeedsInput
                 this.panelVisible = panelVisible
-                this.panelExpanded = panelExpanded
+                this.shadeOrQsExpanded = panelExpanded
                 this.notificationShadeFocusable = notificationShadeFocusable
                 this.bouncerShowing = bouncerShowing
                 this.keyguardFadingAway = keyguardFadingAway
@@ -145,6 +148,7 @@ class NotificationShadeWindowState(
                 this.qsExpanded = qsExpanded
                 this.headsUpNotificationShowing = headsUpShowing
                 this.lightRevealScrimOpaque = lightRevealScrimOpaque
+                this.isSwitchingUsers = isSwitchingUsers
                 this.forceWindowCollapsed = forceCollapsed
                 this.forceDozeBrightness = forceDozeBrightness
                 this.forceUserActivity = forceUserActivity
@@ -191,6 +195,7 @@ class NotificationShadeWindowState(
                 "qsExpanded",
                 "headsUpShowing",
                 "lightRevealScrimOpaque",
+                "isSwitchingUsers",
                 "forceCollapsed",
                 "forceDozeBrightness",
                 "forceUserActivity",

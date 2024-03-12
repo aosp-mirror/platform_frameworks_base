@@ -9,7 +9,31 @@
       ]
     },
     {
-      "name": "CtsVirtualDevicesTestCases",
+      "name": "CtsVirtualDevicesAudioTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsVirtualDevicesSensorTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsVirtualDevicesAppLaunchTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsHardwareTestCases",
       "options": [
         {
           "include-filter": "android.hardware.input.cts.tests"
@@ -19,6 +43,27 @@
         }
       ],
       "file_patterns": ["Virtual[^/]*\\.java"]
+    },
+    {
+      "name": "CtsAccessibilityServiceTestCases",
+      "options": [
+        {
+          "include-filter": "android.accessibilityservice.cts.AccessibilityDisplayProxyTest"
+        },
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsVirtualDevicesCameraTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
     }
   ]
 }

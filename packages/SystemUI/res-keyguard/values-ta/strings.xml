@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • மெதுவாகச் சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • பேட்டரியைப் பாதுகாக்க சார்ஜிங் மேம்படுத்தப்பட்டுள்ளது"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • சார்ஜரில் சிக்கல் உள்ளது"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"அன்லாக் செய்ய மெனுவை அழுத்தவும்."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"நெட்வொர்க் பூட்டப்பட்டது"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"சிம் இல்லை"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"சிம்மைச் சேருங்கள்."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"சிம் இல்லை அல்லது படிக்கக்கூடியதாக இல்லை. சிம்மைச் சேருங்கள்."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"பயன்படுத்த முடியாத சிம்."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"உங்கள் சிம் நிரந்தரமாக முடக்கப்பட்டுள்ளது.\n மற்றொரு சிம்மிற்கான உங்கள் வயர்லெஸ் சேவை வழங்குநரைத் தொடர்புகொள்ளுங்கள்."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"சிம் லாக் செய்யப்பட்டுள்ளது."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"சிம் PUK-லாக் செய்யப்பட்டுள்ளது."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"சிம்மை அன்லாக் செய்கிறது…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"முழுப் பூட்டு காரணமாகப் பின் தேவை"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"முழுப் பூட்டு காரணமாகக் கடவுச்சொல் தேவை"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"முழுப் பூட்டு காரணமாகப் பேட்டர்ன் தேவை"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"செயல்பாடில்லாத நேரத்தில் புதுப்பிப்பு நிறுவப்படும்"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"சாதனம் உபயோகத்தில் இல்லாதபோது புதுப்பிப்பு நிறுவப்படும்"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"சேர்த்த பாதுகாப்பு தேவை. பின் உபயோகிக்கவில்லை."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"சேர்த்த பாதுகாப்பு தேவை. கடவுச்சொல் உபயோகிக்கவில்லை."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"சேர்த்த பாதுகாப்பு தேவை. பேட்டர்ன் உபயோகிக்கவில்லை."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"பபிள்"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"அனலாக்"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"தொடர, சாதனத்தை அன்லாக் செய்யுங்கள்"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"புதுப்பிப்பைப் பின்னர் நிறுவ பின்னை உள்ளிடவும்"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"புதுப்பிப்பைப் பின்னர் நிறுவ கடவுச்சொல்லை உள்ளிடவும்"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"புதுப்பிப்பைப் பின்னர் நிறுவ பேட்டர்னை வரையவும்"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"சாதனம் புதுப்பிக்கப்பட்டது. தொடர பின்னை உள்ளிடவும்."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"சாதனம் புதுப்பிக்கப்பட்டது. தொடர கடவுச்சொல்லை உள்ளிடவும்."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"சாதனம் புதுப்பிக்கப்பட்டது. தொடர பேட்டர்னை வரையவும்."</string>
 </resources>

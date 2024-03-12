@@ -24,7 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableWrapper;
 import android.util.AttributeSet;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

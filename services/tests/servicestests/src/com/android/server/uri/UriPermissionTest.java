@@ -35,12 +35,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class UriPermissionTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     @Mock
     private UriGrantsManagerInternal mService;
 

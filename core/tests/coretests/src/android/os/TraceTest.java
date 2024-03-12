@@ -16,24 +16,36 @@
 
 package android.os;
 
-import android.test.AndroidTestCase;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.Log;
 
 import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * This class is used to test the native tracing support.  Run this test
  * while tracing on the emulator and then run traceview to view the trace.
  */
-public class TraceTest extends AndroidTestCase
-{
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = Trace.class)
+public class TraceTest {
     private static final String TAG = "TraceTest";
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private int eMethodCalls = 0;
     private int fMethodCalls = 0;
     private int gMethodCalls = 0;
 
+    @Test
     public void testNullStrings() {
         Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, 42);
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, null);
@@ -48,6 +60,7 @@ public class TraceTest extends AndroidTestCase
         Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, null, null);
     }
 
+    @Test
     @SmallTest
     public void testNativeTracingFromJava()
     {
@@ -80,7 +93,8 @@ public class TraceTest extends AndroidTestCase
 
     native void nativeMethod();
     native void nativeMethodAndStartTracing();
-    
+
+    @Test
     @LargeTest
     @Suppress  // Failing.
     public void testMethodTracing()

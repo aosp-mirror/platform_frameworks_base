@@ -5,7 +5,7 @@ import android.content.Intent
 import android.provider.Settings
 import android.view.LayoutInflater
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager

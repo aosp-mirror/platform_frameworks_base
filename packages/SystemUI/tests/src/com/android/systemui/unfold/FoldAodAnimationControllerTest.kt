@@ -26,7 +26,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
@@ -106,8 +105,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
             onActionStarted.run()
         }
 
-        val featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
-        val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        val withDeps = KeyguardInteractorFactory.create(featureFlags = FakeFeatureFlags())
         val keyguardInteractor = withDeps.keyguardInteractor
         keyguardRepository = withDeps.repository
 

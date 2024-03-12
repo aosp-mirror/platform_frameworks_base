@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikacija je nameščena."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ali želite namestiti to aplikacijo?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ali želite posodobiti to aplikacijo?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Želite to aplikacijo posodobiti iz vira <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nTa aplikacija običajno prejema posodobitve iz vira <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Če jo posodobite iz drugega vira, boste prihodnje posodobitve morda prejemali iz katerega koli vira v telefonu. Funkcija aplikacije se lahko spremeni."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Želite to aplikacijo posodobiti iz vira &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ta aplikacija običajno prejema posodobitve iz vira &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Če jo posodobite iz drugega vira, boste prihodnje posodobitve morda prejemali iz katerega koli vira v tabličnem računalniku. Funkcija aplikacije se lahko spremeni.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Želite to aplikacijo posodobiti iz vira &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ta aplikacija običajno prejema posodobitve iz vira &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Če jo posodobite iz drugega vira, boste prihodnje posodobitve morda prejemali iz katerega koli vira v televizorju. Funkcija aplikacije se lahko spremeni.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Želite to aplikacijo posodobiti iz vira &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Ta aplikacija običajno prejema posodobitve iz vira &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Če jo posodobite iz drugega vira, boste prihodnje posodobitve morda prejemali iz katerega koli vira v telefonu. Funkcija aplikacije se lahko spremeni.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikacija ni nameščena."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Namestitev paketa je bila blokirana."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacija ni bila nameščena, ker je paket v navzkrižju z obstoječim paketom."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Obdrži <xliff:g id="SIZE">%1$s</xliff:g> podatkov aplikacije."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Ali želite izbrisati to aplikacijo?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Ali želite odmestiti to aplikacijo? Izbrisana bo tudi klonirana aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Ali želite to aplikacijo odmestiti iz zasebnega prostora?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Odstranitve v teku"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Neuspele odstranitve"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Odstranjevanje …"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Obvestilo o namestitvi aplikacije"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Uspešno nameščeno"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Uspešno nameščeno: »<xliff:g id="APPNAME">%1$s</xliff:g>«"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"Želite obnoviti aplikacijo <xliff:g id="APPNAME">%1$s</xliff:g> iz aplikacije <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Aplikacija bo začela prenos v ozadju"</string>
+    <string name="restore" msgid="8460854736328970444">"Obnovi"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Nimate vzpostavljene povezave"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Ta aplikacija bo samodejno obnovljena, ko boste povezani v internet."</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Prišlo je do težave"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Pri obnavljanju te aplikacije je prišlo do težave."</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Ni dovolj prostora za shranjevanje"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Če želite obnoviti to aplikacijo, sprostite prostor v tej napravi. Potrebni prostor za shranjevanje: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Potrebno je ukrepanje"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Če želite obnoviti to aplikacijo, uporabite postopek, opisan v nadaljevanju."</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Namestitveni program <xliff:g id="INSTALLERNAME">%1$s</xliff:g> je onemogočen"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"Namestitveni program <xliff:g id="INSTALLERNAME">%1$s</xliff:g> je odmeščen"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Če želite obnoviti to aplikacijo, morate namestiti <xliff:g id="INSTALLERNAME">%1$s</xliff:g>."</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Nadaljuj"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Počisti shrambo"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Nastavitve"</string>
+    <string name="close" msgid="5214897374055647996">"Zapri"</string>
 </resources>

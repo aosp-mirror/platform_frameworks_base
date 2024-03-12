@@ -95,7 +95,6 @@ import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.Gravity;
 import android.view.IWindow;
-import android.view.IWindowSessionCallback;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
@@ -552,7 +551,7 @@ public class WindowStateTests extends WindowTestsBase {
         final SurfaceControl.Transaction[] handledT = { null };
         // The normal case that the draw transaction is applied with finishing drawing.
         win.applyWithNextDraw(t -> handledT[0] = t);
-        assertTrue(win.useBLASTSync());
+        assertTrue(win.syncNextBuffer());
         final SurfaceControl.Transaction drawT = new StubTransaction();
         final SurfaceControl.Transaction currT = win.getSyncTransaction();
         clearInvocations(currT);
@@ -561,12 +560,12 @@ public class WindowStateTests extends WindowTestsBase {
         // The draw transaction should be merged to current transaction even if the state is hidden.
         verify(currT).merge(eq(drawT));
         assertEquals(drawT, handledT[0]);
-        assertFalse(win.useBLASTSync());
+        assertFalse(win.syncNextBuffer());
 
         // If the window is gone before reporting drawn, the sync state should be cleared.
         win.applyWithNextDraw(t -> handledT[0] = t);
         win.destroySurfaceUnchecked();
-        assertFalse(win.useBLASTSync());
+        assertFalse(win.syncNextBuffer());
         assertNotEquals(drawT, handledT[0]);
     }
 
@@ -758,7 +757,6 @@ public class WindowStateTests extends WindowTestsBase {
         startingApp.getWindowFrames().setInsetsChanged(true);
         startingApp.updateResizingWindowIfNeeded();
         assertTrue(startingApp.isDrawn());
-        assertFalse(startingApp.getOrientationChanging());
     }
 
     @SetupWindows(addWindows = W_ABOVE_ACTIVITY)
@@ -1332,12 +1330,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowToken windowToken = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
                 mDisplayContent);
         final IWindow client = new TestIWindow();
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float v) throws RemoteException {
-
-            }
-        });
+        final Session session = getTestSession();
         final ClientWindowFrames outFrames = new ClientWindowFrames();
         final MergedConfiguration outConfig = new MergedConfiguration();
         final SurfaceControl outSurfaceControl = new SurfaceControl();
@@ -1375,7 +1368,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(listener.mIsVisibleForImeTargetOverlay).isFalse();
 
         // Scenario 3: test removeWindow to remove the Ime layering target overlay window.
-        mWm.removeWindow(session, client);
+        mWm.removeClientToken(session, client.asBinder());
         waitHandlerIdle(mWm.mH);
 
         assertThat(listener.mImeTargetToken).isEqualTo(client.asBinder());

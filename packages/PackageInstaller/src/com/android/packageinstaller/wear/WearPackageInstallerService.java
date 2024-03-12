@@ -44,15 +44,12 @@ import android.os.Process;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
-
 import androidx.annotation.Nullable;
-
 import com.android.packageinstaller.DeviceUtils;
-import com.android.packageinstaller.EventResultPersister;
 import com.android.packageinstaller.PackageUtil;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.UninstallEventReceiver;
-
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;

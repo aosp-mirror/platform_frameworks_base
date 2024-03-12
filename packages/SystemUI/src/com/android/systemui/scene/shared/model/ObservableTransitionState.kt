@@ -32,5 +32,23 @@ sealed class ObservableTransitionState {
         val fromScene: SceneKey,
         val toScene: SceneKey,
         val progress: Flow<Float>,
+
+        /**
+         * Whether the transition was originally triggered by user input rather than being
+         * programmatic. If this value is initially true, it will remain true until the transition
+         * fully completes, even if the user input that triggered the transition has ended. Any
+         * sub-transitions launched by this one will inherit this value. For example, if the user
+         * drags a pointer but does not exceed the threshold required to transition to another
+         * scene, this value will remain true after the pointer is no longer touching the screen and
+         * will be true in any transition created to animate back to the original position.
+         */
+        val isInitiatedByUserInput: Boolean,
+
+        /**
+         * Whether user input is currently driving the transition. For example, if a user is
+         * dragging a pointer, this emits true. Once they lift their finger, this emits false while
+         * the transition completes/settles.
+         */
+        val isUserInputOngoing: Flow<Boolean>,
     ) : ObservableTransitionState()
 }

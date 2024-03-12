@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 public class SysuiResourceLoadingTest extends SysuiRoboBase {
     @Test
     public void testResources() {
-        assertThat(getContext().getString(com.android.systemui.R.string.app_label))
+        assertThat(getContext().getString(com.android.systemui.res.R.string.app_label))
                 .isEqualTo("System UI");
         assertThat(getContext().getString(com.android.systemui.tests.R.string.test_content))
                 .isNotEmpty();

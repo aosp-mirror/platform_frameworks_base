@@ -16,15 +16,15 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
 import android.annotation.Nullable;
+import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.app.TaskInfo;
-import android.app.TaskInfo.CameraCompatControlState;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
@@ -75,8 +75,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> onRestartButtonClicked) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
-        mHasSizeCompat = taskInfo.topActivityInSizeCompat;
-        mCameraCompatControlState = taskInfo.cameraCompatControlState;
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        mCameraCompatControlState = taskInfo.appCompatTaskInfo.cameraCompatControlState;
         mCompatUIHintsState = compatUIHintsState;
         mCompatUIConfiguration = compatUIConfiguration;
         mOnRestartButtonClicked = onRestartButtonClicked;
@@ -127,8 +127,8 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             boolean canShow) {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
-        mHasSizeCompat = taskInfo.topActivityInSizeCompat;
-        mCameraCompatControlState = taskInfo.cameraCompatControlState;
+        mHasSizeCompat = taskInfo.appCompatTaskInfo.topActivityInSizeCompat;
+        mCameraCompatControlState = taskInfo.appCompatTaskInfo.cameraCompatControlState;
 
         if (!super.updateCompatInfo(taskInfo, taskListener, canShow)) {
             return false;

@@ -171,19 +171,8 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetFsiState_stickyHunFlagDisabled_zero() {
-        final int fsiState = NotificationRecordLogger.getFsiState(
-                /* isStickyHunFlagEnabled= */ false,
-                /* hasFullScreenIntent= */ true,
-                /* hasFsiRequestedButDeniedFlag= */ true,
-                /* eventType= */ NOTIFICATION_POSTED);
-        assertEquals(0, fsiState);
-    }
-
-    @Test
     public void testGetFsiState_isUpdate_zero() {
         final int fsiState = NotificationRecordLogger.getFsiState(
-                /* isStickyHunFlagEnabled= */ true,
                 /* hasFullScreenIntent= */ true,
                 /* hasFsiRequestedButDeniedFlag= */ true,
                 /* eventType= */ NOTIFICATION_UPDATED);
@@ -193,7 +182,6 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
     @Test
     public void testGetFsiState_hasFsi_allowedEnum() {
         final int fsiState = NotificationRecordLogger.getFsiState(
-                /* isStickyHunFlagEnabled= */ true,
                 /* hasFullScreenIntent= */ true,
                 /* hasFsiRequestedButDeniedFlag= */ false,
                 /* eventType= */ NOTIFICATION_POSTED);
@@ -203,7 +191,6 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
     @Test
     public void testGetFsiState_fsiPermissionDenied_deniedEnum() {
         final int fsiState = NotificationRecordLogger.getFsiState(
-                /* isStickyHunFlagEnabled= */ true,
                 /* hasFullScreenIntent= */ false,
                 /* hasFsiRequestedButDeniedFlag= */ true,
                 /* eventType= */ NOTIFICATION_POSTED);
@@ -213,7 +200,6 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
     @Test
     public void testGetFsiState_noFsi_noFsiEnum() {
         final int fsiState = NotificationRecordLogger.getFsiState(
-                /* isStickyHunFlagEnabled= */ true,
                 /* hasFullScreenIntent= */ false,
                 /* hasFsiRequestedButDeniedFlag= */ false,
                 /* eventType= */ NOTIFICATION_POSTED);

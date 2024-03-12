@@ -24,7 +24,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Container for image of the multi user switcher (tappable).

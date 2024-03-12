@@ -17,63 +17,68 @@
 package com.android.server.permission.access.appop
 
 import android.app.AppOpsManager
-import com.android.server.permission.access.AccessUri
-import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.GetStateScope
+import com.android.server.permission.access.MutableAccessState
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.PackageUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
+import com.android.server.pm.pkg.PackageState
 
 class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
+    private val migration = PackageAppOpMigration()
+
+    private val upgrade = PackageAppOpUpgrade(this)
+
     @Volatile
-    private var onAppOpModeChangedListeners = IndexedListSet<OnAppOpModeChangedListener>()
+    private var onAppOpModeChangedListeners: IndexedListSet<OnAppOpModeChangedListener> =
+        MutableIndexedListSet()
     private val onAppOpModeChangedListenersLock = Any()
 
     override val subjectScheme: String
         get() = PackageUri.SCHEME
-
-    override fun GetStateScope.getDecision(subject: AccessUri, `object`: AccessUri): Int {
-        subject as PackageUri
-        `object` as AppOpUri
-        return getAppOpMode(subject.packageName, subject.userId, `object`.appOpName)
-    }
-
-    override fun MutateStateScope.setDecision(
-        subject: AccessUri,
-        `object`: AccessUri,
-        decision: Int
-    ) {
-        subject as PackageUri
-        `object` as AppOpUri
-        setAppOpMode(subject.packageName, subject.userId, `object`.appOpName, decision)
-    }
 
     override fun GetStateScope.onStateMutated() {
         onAppOpModeChangedListeners.forEachIndexed { _, it -> it.onStateMutated() }
     }
 
     override fun MutateStateScope.onPackageRemoved(packageName: String, appId: Int) {
-        newState.userStates.forEachIndexed { _, _, userState ->
-            userState.packageAppOpModes -= packageName
-            userState.requestWrite()
-            // Skip notifying the change listeners since the package no longer exists.
+        newState.userStates.forEachIndexed { userStateIndex, _, userState ->
+            val packageNameIndex = userState.packageAppOpModes.indexOfKey(packageName)
+            if (packageNameIndex >= 0) {
+                newState
+                    .mutateUserStateAt(userStateIndex)
+                    .mutatePackageAppOpModes()
+                    .removeAt(packageNameIndex)
+                // Skip notifying the change listeners since the package no longer exists.
+            }
         }
     }
 
     fun GetStateScope.getAppOpModes(packageName: String, userId: Int): IndexedMap<String, Int>? =
-        state.userStates[userId].packageAppOpModes[packageName]
+        state.userStates[userId]?.packageAppOpModes?.get(packageName)
 
     fun MutateStateScope.removeAppOpModes(packageName: String, userId: Int): Boolean {
-        val userState = newState.userStates[userId]
-        val isChanged = userState.packageAppOpModes.remove(packageName) != null
-        if (isChanged) {
-            userState.requestWrite()
+        val userStateIndex = newState.userStates.indexOfKey(userId)
+        if (userStateIndex < 0) {
+            return false
         }
-        return isChanged
+        val packageNameIndex =
+            newState.userStates.valueAt(userStateIndex).packageAppOpModes.indexOfKey(packageName)
+        if (packageNameIndex < 0) {
+            return false
+        }
+        newState
+            .mutateUserStateAt(userStateIndex)
+            .mutatePackageAppOpModes()
+            .removeAt(packageNameIndex)
+        return true
     }
 
     fun GetStateScope.getAppOpMode(packageName: String, userId: Int, appOpName: String): Int =
-        state.userStates[userId].packageAppOpModes[packageName]
+        state.userStates[userId]
+            ?.packageAppOpModes
+            ?.get(packageName)
             .getWithDefault(appOpName, AppOpsManager.opToDefaultMode(appOpName))
 
     fun MutateStateScope.setAppOpMode(
@@ -82,23 +87,20 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         appOpName: String,
         mode: Int
     ): Boolean {
-        val userState = newState.userStates[userId]
-        val packageAppOpModes = userState.packageAppOpModes
-        var appOpModes = packageAppOpModes[packageName]
         val defaultMode = AppOpsManager.opToDefaultMode(appOpName)
-        val oldMode = appOpModes.getWithDefault(appOpName, defaultMode)
+        val oldMode =
+            newState.userStates[userId]!!
+                .packageAppOpModes[packageName]
+                .getWithDefault(appOpName, defaultMode)
         if (oldMode == mode) {
             return false
         }
-        if (appOpModes == null) {
-            appOpModes = IndexedMap()
-            packageAppOpModes[packageName] = appOpModes
-        }
+        val packageAppOpModes = newState.mutateUserState(userId)!!.mutatePackageAppOpModes()
+        val appOpModes = packageAppOpModes.mutateOrPut(packageName) { MutableIndexedMap() }
         appOpModes.putWithDefault(appOpName, mode, defaultMode)
         if (appOpModes.isEmpty()) {
             packageAppOpModes -= packageName
         }
-        userState.requestWrite()
         onAppOpModeChangedListeners.forEachIndexed { _, it ->
             it.onAppOpModeChanged(packageName, userId, appOpName, oldMode, mode)
         }
@@ -117,9 +119,19 @@ class PackageAppOpPolicy : BaseAppOpPolicy(PackageAppOpPersistence()) {
         }
     }
 
-    /**
-     * Listener for app op mode changes.
-     */
+    override fun migrateUserState(state: MutableAccessState, userId: Int) {
+        with(migration) { migrateUserState(state, userId) }
+    }
+
+    override fun MutateStateScope.upgradePackageState(
+        packageState: PackageState,
+        userId: Int,
+        version: Int,
+    ) {
+        with(upgrade) { upgradePackageState(packageState, userId, version) }
+    }
+
+    /** Listener for app op mode changes. */
     abstract class OnAppOpModeChangedListener {
         /**
          * Called when an app op mode change has been made to the upcoming new state.

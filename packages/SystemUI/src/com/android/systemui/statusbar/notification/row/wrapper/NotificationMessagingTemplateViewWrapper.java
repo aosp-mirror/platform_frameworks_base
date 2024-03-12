@@ -26,7 +26,7 @@ import com.android.internal.widget.MessagingGroup;
 import com.android.internal.widget.MessagingImageMessage;
 import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.notification.NotificationUtils;

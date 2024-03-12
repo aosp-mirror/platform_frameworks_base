@@ -17,15 +17,70 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 @SysUISingleton
 class KeyguardBlueprintInteractor
 @Inject
-constructor(private val keyguardBlueprintRepository: KeyguardBlueprintRepository) {
-    val blueprint = keyguardBlueprintRepository.blueprint
+constructor(
+    private val keyguardBlueprintRepository: KeyguardBlueprintRepository,
+    @Application private val applicationScope: CoroutineScope,
+    private val context: Context,
+    private val splitShadeStateController: SplitShadeStateController,
+) {
+
+    /**
+     * The current blueprint for the lockscreen.
+     *
+     * This flow can also emit the same blueprint value if refreshBlueprint is emitted.
+     */
+    val blueprint: Flow<KeyguardBlueprint> =
+        merge(
+            keyguardBlueprintRepository.blueprint,
+            keyguardBlueprintRepository.refreshBluePrint.map {
+                keyguardBlueprintRepository.blueprint.value
+            }
+        )
+
+    init {
+        applicationScope.launch {
+            keyguardBlueprintRepository.configurationChange
+                .onStart { emit(Unit) }
+                .collect { updateBlueprint() }
+        }
+    }
+
+    /**
+     * Detects when a new blueprint should be applied and calls [transitionToBlueprint]. This may
+     * end up reapplying the same blueprint, which is fine as configuration may have changed.
+     */
+    private fun updateBlueprint() {
+        val useSplitShade =
+            splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
+
+        val blueprintId =
+            if (useSplitShade) {
+                SplitShadeKeyguardBlueprint.ID
+            } else {
+                DefaultKeyguardBlueprint.DEFAULT
+            }
+
+        transitionToBlueprint(blueprintId)
+    }
 
     /**
      * Transitions to a blueprint.
@@ -37,8 +92,22 @@ constructor(private val keyguardBlueprintRepository: KeyguardBlueprintRepository
         return keyguardBlueprintRepository.applyBlueprint(blueprintId)
     }
 
+    /**
+     * Transitions to a blueprint.
+     *
+     * @param blueprintId
+     * @return whether the transition has succeeded.
+     */
+    fun transitionToBlueprint(blueprintId: Int): Boolean {
+        return keyguardBlueprintRepository.applyBlueprint(blueprintId)
+    }
+
     /** Re-emits the blueprint value to the collectors. */
     fun refreshBlueprint() {
         keyguardBlueprintRepository.refreshBlueprint()
+    }
+
+    fun getCurrentBlueprint(): KeyguardBlueprint {
+        return keyguardBlueprintRepository.blueprint.value
     }
 }

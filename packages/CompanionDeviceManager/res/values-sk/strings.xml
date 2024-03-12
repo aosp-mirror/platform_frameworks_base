@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Správca sprievodných zariadení"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"Chcete povoliť aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; prístup k zariadeniu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Chcete povoliť aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; prístup k zariadeniu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"hodinky"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Vyberte profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, ktorý bude spravovať aplikácia &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="898569637110705523">"Táto aplikácia sa vyžaduje na správu zariadenia <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> bude môcť synchronizovať informácie, napríklad meno volajúceho, interagovať s vašimi upozorneniami a získavať prístup k povoleniam telefónu, SMS, kontaktov, kalendára, zoznamu hovorov a zariadení v okolí."</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"Táto aplikácia bude môcť synchronizovať informácie, napríklad meno volajúceho, a získavať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Vyberte zariadenie, ktoré bude spravovať aplikácia &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Vyberte profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g>, ktorý nastavíte"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"Táto aplikácia bude môcť synchronizovať informácie, napríklad meno volajúceho, a získavať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Chcete povoliť aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; spravovať zariadenie &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"okuliare"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"Táto aplikácia sa vyžaduje na správu zariadenia <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> bude môcť interagovať s vašimi upozorneniami a získa prístup k povoleniam pre telefón, SMS, kontakty, mikrofón a zariadenia v okolí."</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"Táto aplikácia bude mať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"zariadenie"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"Táto aplikácia bude mať prístup k týmto povoleniam v zariadení <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Povoľte aplikácii &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; prístup k týmto informáciám z vášho telefónu"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Služby pre viacero zariadení"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> povolenie streamovať aplikácie medzi vašimi zariadeniami."</string>
@@ -38,15 +37,16 @@
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Chcete povoliť zariadeniu &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; vykonať túto akciu?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> vyžaduje pre zariadenie <xliff:g id="DEVICE_NAME">%2$s</xliff:g> povolenie streamovať aplikácie a ďalšie systémové funkcie do zariadení v okolí"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"zariadenie"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"Táto aplikácia bude môcť synchronizovať informácie, napríklad meno volajúceho, medzi telefónom a zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Táto aplikácia bude môcť synchronizovať informácie, napríklad meno volajúceho, medzi telefónom a vybraným zariadením"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Povoliť"</string>
     <string name="consent_no" msgid="2640796915611404382">"Nepovoliť"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Zrušiť"</string>
     <string name="consent_back" msgid="2560683030046918882">"Späť"</string>
+    <string name="permission_expand" msgid="893185038020887411">"Rozbaliť sekciu <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"Zbaliť sekciu <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Chcete udeliť aplikáciám v zariadení &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; rovnaké povolenia ako v zariadení &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Môžu zahŕňať prístup k &lt;strong&gt;mikrofónu&lt;/strong&gt;, &lt;strong&gt;kamere&lt;/strong&gt; a &lt;strong&gt;polohe&lt;/strong&gt;, a ďalšie citlivé povolenia v zariadení &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Tieto povolenia môžete kedykoľvek zmeniť v nastaveniach zariadenia &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Ikona aplikácie"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Tlačidlo Ďalšie informácie"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Ďalšie informácie"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefón"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Kontakty"</string>
@@ -68,7 +68,7 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"Môže čítať všetky upozornenia vrátane informácií, ako sú kontakty, správy a fotky"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Streamovať aplikácie telefónu"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Steaming aplikácii a ďalších systémov funkcií zo zariadenia"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Streaming aplikácii a ďalších systémových funkcií zo zariadenia"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefón"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

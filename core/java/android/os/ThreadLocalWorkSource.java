@@ -37,6 +37,7 @@ package android.os;
  *
  * @hide Only for use within system server.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ThreadLocalWorkSource {
     public static final int UID_NONE = Message.UID_NONE;
     private static final ThreadLocal<int []> sWorkSourceUid =

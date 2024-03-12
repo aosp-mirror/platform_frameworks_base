@@ -74,7 +74,7 @@ import com.android.settingslib.mobile.MobileMappings;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
-import com.android.systemui.R;
+import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -83,6 +83,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -1128,6 +1129,15 @@ public class InternetDialogController implements AccessPointController.AccessPoi
     public void onSettingsActivityTriggered(Intent settingsIntent) {
     }
 
+    @Override
+    public void onWifiScan(boolean isScan) {
+        if (!isWifiEnabled() || isDeviceLocked()) {
+            mCallback.onWifiScan(false);
+            return;
+        }
+        mCallback.onWifiScan(isScan);
+    }
+
     private class InternetTelephonyCallback extends TelephonyCallback implements
             TelephonyCallback.DataConnectionStateListener,
             TelephonyCallback.DisplayInfoListener,
@@ -1331,6 +1341,18 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mDefaultDataSubId = defaultDataSubId;
     }
 
+    boolean mayLaunchShareWifiSettings(WifiEntry wifiEntry) {
+        Intent intent = getConfiguratorQrCodeGeneratorIntentOrNull(wifiEntry);
+        if (intent == null) {
+            return false;
+        }
+        if (mCallback != null) {
+            mCallback.dismissDialog();
+        }
+        mActivityStarter.startActivity(intent, false /* dismissShade */);
+        return true;
+    }
+
     interface InternetDialogCallback {
 
         void onRefreshCarrierInfo();
@@ -1359,6 +1381,8 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
         void onAccessPointsChanged(@Nullable List<WifiEntry> wifiEntries,
                 @Nullable WifiEntry connectedEntry, boolean hasMoreWifiEntries);
+
+        void onWifiScan(boolean isScan);
     }
 
     void makeOverlayToast(int stringId) {
@@ -1415,5 +1439,18 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                 }
             }
         }, SHORT_DURATION_TIMEOUT);
+    }
+
+    Intent getConfiguratorQrCodeGeneratorIntentOrNull(WifiEntry wifiEntry) {
+        if (!mFeatureFlags.isEnabled(Flags.SHARE_WIFI_QS_BUTTON) || wifiEntry == null
+                || mWifiManager == null || !wifiEntry.canShare()) {
+            return null;
+        }
+        Intent intent = new Intent();
+        intent.setAction(WifiDppIntentHelper.ACTION_CONFIGURATOR_AUTH_QR_CODE_GENERATOR);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        WifiDppIntentHelper.setConfiguratorIntentExtra(intent, mWifiManager,
+                wifiEntry.getWifiConfiguration());
+        return intent;
     }
 }

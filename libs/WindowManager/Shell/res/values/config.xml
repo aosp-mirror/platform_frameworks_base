@@ -58,6 +58,9 @@
          if a custom action is present before closing it. -->
     <integer name="config_pipForceCloseDelay">1000</integer>
 
+    <!-- Allow PIP to resize via pinch gesture. -->
+    <bool name="config_pipEnablePinchResize">true</bool>
+
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 
@@ -82,6 +85,11 @@
 
     <!-- Animation duration when exit starting window: reveal app -->
     <integer name="starting_window_app_reveal_anim_duration">266</integer>
+
+    <!-- Default animation type when hiding the starting window. The possible values are:
+          - 0 for radial vanish + slide up
+          - 1 for fade out -->
+    <integer name="starting_window_exit_animation_type">0</integer>
 
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
@@ -128,4 +136,12 @@
 
     <!-- Whether DragAndDrop capability is enabled -->
     <bool name="config_enableShellDragDrop">true</bool>
+
+    <!-- Whether this device allows to use the appIcon as a fallback icon for the splash screen
+        window. If false, the splash screen will be a solid color splash screen whenever the
+        app has not provided a windowSplashScreenAnimatedIcon. -->
+    <bool name="config_canUseAppIconForSplashScreen">true</bool>
+
+    <!-- Whether CompatUIController is enabled -->
+    <bool name="config_enableCompatUIController">true</bool>
 </resources>

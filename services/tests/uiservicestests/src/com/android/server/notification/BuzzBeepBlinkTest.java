@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -147,6 +148,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     private static final int CUSTOM_LIGHT_ON = 10000;
     private static final int CUSTOM_LIGHT_OFF = 10000;
     private static final int MAX_VIBRATION_DELAY = 1000;
+    private static final float DEFAULT_VOLUME = 1.0f;
 
     @Before
     public void setUp() throws Exception {
@@ -397,19 +399,22 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     //
 
     private void verifyNeverBeep() throws RemoteException {
-        verify(mRingtonePlayer, never()).playAsync(any(), any(), anyBoolean(), any());
+        verify(mRingtonePlayer, never()).playAsync(any(), any(), anyBoolean(), any(), anyFloat());
     }
 
     private void verifyBeepUnlooped() throws RemoteException  {
-        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(false), any());
+        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(false), any(),
+                eq(DEFAULT_VOLUME));
     }
 
     private void verifyBeepLooped() throws RemoteException  {
-        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(true), any());
+        verify(mRingtonePlayer, times(1)).playAsync(any(), any(), eq(true), any(),
+                eq(DEFAULT_VOLUME));
     }
 
     private void verifyBeep(int times)  throws RemoteException  {
-        verify(mRingtonePlayer, times(times)).playAsync(any(), any(), anyBoolean(), any());
+        verify(mRingtonePlayer, times(times)).playAsync(any(), any(), anyBoolean(), any(),
+                eq(DEFAULT_VOLUME));
     }
 
     private void verifyNeverStopAudio() throws RemoteException {
@@ -905,7 +910,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyDelayedVibrate(
                 mService.getVibratorHelper().createFallbackVibration(/* insistent= */ false));
         verify(mRingtonePlayer, never()).playAsync
-                (anyObject(), anyObject(), anyBoolean(), anyObject());
+                (anyObject(), anyObject(), anyBoolean(), anyObject(), anyFloat());
         assertTrue(r.isInterruptive());
         assertNotEquals(-1, r.getLastAudiblyAlertedMs());
     }

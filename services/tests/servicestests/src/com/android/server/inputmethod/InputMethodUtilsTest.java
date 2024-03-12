@@ -60,6 +60,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.inputmethod.StartInputFlags;
 
+import com.google.common.truth.Truth;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -287,7 +289,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_EN_US), imi);
+                            new LocaleList(LOCALE_EN_US), imi);
             assertEquals(1, result.size());
             verifyEquality(autoSubtype, result.get(0));
         }
@@ -311,7 +313,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_EN_US), imi);
+                            new LocaleList(LOCALE_EN_US), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoEnUS, result.get(0));
             verifyEquality(nonAutoHandwritingEn, result.get(1));
@@ -335,7 +337,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_EN_GB), imi);
+                            new LocaleList(LOCALE_EN_GB), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoEnGB, result.get(0));
             verifyEquality(nonAutoHandwritingEn, result.get(1));
@@ -360,7 +362,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_FR), imi);
+                            new LocaleList(LOCALE_FR), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
             verifyEquality(nonAutoHandwritingFr, result.get(1));
@@ -381,7 +383,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_FR_CA), imi);
+                            new LocaleList(LOCALE_FR_CA), imi);
             assertEquals(2, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
             verifyEquality(nonAutoHandwritingFr, result.get(1));
@@ -403,7 +405,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_JA_JP), imi);
+                            new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(3, result.size());
             verifyEquality(nonAutoJa, result.get(0));
             verifyEquality(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, result.get(1));
@@ -425,7 +427,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_JA_JP), imi);
+                            new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoHi, result.get(0));
         }
@@ -442,7 +444,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_JA_JP), imi);
+                            new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoEnUS, result.get(0));
         }
@@ -459,7 +461,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_JA_JP), imi);
+                            new LocaleList(LOCALE_JA_JP), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoEnUS, result.get(0));
         }
@@ -481,7 +483,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(Locale.forLanguageTag("sr-Latn-RS")), imi);
+                            new LocaleList(Locale.forLanguageTag("sr-Latn-RS")), imi);
             assertEquals(2, result.size());
             assertThat(nonAutoSrLatn, is(in(result)));
             assertThat(nonAutoHandwritingSrLatn, is(in(result)));
@@ -501,7 +503,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(Locale.forLanguageTag("sr-Cyrl-RS")), imi);
+                            new LocaleList(Locale.forLanguageTag("sr-Cyrl-RS")), imi);
             assertEquals(2, result.size());
             assertThat(nonAutoSrCyrl, is(in(result)));
             assertThat(nonAutoHandwritingSrCyrl, is(in(result)));
@@ -527,7 +529,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(
+                            new LocaleList(
                                     Locale.forLanguageTag("sr-Latn-RS-x-android"),
                                     Locale.forLanguageTag("ja-JP"),
                                     Locale.forLanguageTag("fr-FR"),
@@ -554,7 +556,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_FIL_PH), imi);
+                            new LocaleList(LOCALE_FIL_PH), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFil, result.get(0));
         }
@@ -572,7 +574,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_FI), imi);
+                            new LocaleList(LOCALE_FI), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoJa, result.get(0));
         }
@@ -588,7 +590,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_IN), imi);
+                            new LocaleList(LOCALE_IN), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
         }
@@ -602,7 +604,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_ID), imi);
+                            new LocaleList(LOCALE_ID), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
         }
@@ -616,7 +618,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_IN), imi);
+                            new LocaleList(LOCALE_IN), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
         }
@@ -630,7 +632,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_ID), imi);
+                            new LocaleList(LOCALE_ID), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
         }
@@ -652,7 +654,7 @@ public class InputMethodUtilsTest {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                            getResourcesForLocales(LOCALE_FR, LOCALE_EN_US, LOCALE_JA_JP), imi);
+                            new LocaleList(LOCALE_FR, LOCALE_EN_US, LOCALE_JA_JP), imi);
             assertThat(nonAutoFrCA, is(in(result)));
             assertThat(nonAutoEnUS, is(in(result)));
             assertThat(nonAutoJa, is(in(result)));
@@ -938,10 +940,6 @@ public class InputMethodUtilsTest {
         return InstrumentationRegistry.getInstrumentation()
                 .getTargetContext()
                 .createConfigurationContext(resourceConfiguration);
-    }
-
-    private Resources getResourcesForLocales(Locale... locales) {
-        return createTargetContextWithLocales(new LocaleList(locales)).getResources();
     }
 
     private String[] getPackageNames(final ArrayList<InputMethodInfo> imis) {
@@ -1238,7 +1236,7 @@ public class InputMethodUtilsTest {
         // Init InputMethodSettings for the owner user (userId=0), verify calls can get the
         // corresponding user's context, contentResolver and the resources configuration.
         InputMethodUtils.InputMethodSettings settings = new InputMethodUtils.InputMethodSettings(
-                ownerUserContext, methodMap, 0 /* userId */, true);
+                methodMap, 0 /* userId */, true);
         assertEquals(0, settings.getCurrentUserId());
 
         settings.isShowImeWithHardKeyboardEnabled();
@@ -1338,6 +1336,54 @@ public class InputMethodUtilsTest {
         static Context getSecondaryUserContext() {
             return sSecondaryUserContext;
         }
+    }
+
+    private static void verifySplitEnabledImeStr(@NonNull String enabledImeStr,
+            @NonNull String... expected) {
+        final ArrayList<String> actual = new ArrayList<>();
+        InputMethodUtils.splitEnabledImeStr(enabledImeStr, actual::add);
+        if (expected.length == 0) {
+            Truth.assertThat(actual).isEmpty();
+        } else {
+            Truth.assertThat(actual).containsExactlyElementsIn(expected);
+        }
+    }
+
+    @Test
+    public void testSplitEnabledImeStr() {
+        verifySplitEnabledImeStr("");
+        verifySplitEnabledImeStr("com.android/.ime1", "com.android/.ime1");
+        verifySplitEnabledImeStr("com.android/.ime1;1;2;3", "com.android/.ime1");
+        verifySplitEnabledImeStr("com.android/.ime1;1;2;3:com.android/.ime2",
+                "com.android/.ime1", "com.android/.ime2");
+        verifySplitEnabledImeStr("com.android/.ime1:com.android/.ime2",
+                "com.android/.ime1", "com.android/.ime2");
+        verifySplitEnabledImeStr("com.android/.ime1:com.android/.ime2:com.android/.ime3",
+                "com.android/.ime1", "com.android/.ime2", "com.android/.ime3");
+        verifySplitEnabledImeStr("com.android/.ime1;1:com.android/.ime2;1:com.android/.ime3;1",
+                "com.android/.ime1", "com.android/.ime2", "com.android/.ime3");
+    }
+
+    @Test
+    public void testConcatEnabledImeIds() {
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds("")).isEmpty();
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds("", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime2"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime2", "com.android/.ime3"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2:com.android/.ime3");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1:com.android/.ime2", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1:com.android/.ime2", "com.android/.ime3"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2:com.android/.ime3");
     }
 
     @Test

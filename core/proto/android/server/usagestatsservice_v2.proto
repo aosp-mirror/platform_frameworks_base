@@ -110,6 +110,7 @@ message EventObfuscatedProto {
   optional int32 task_root_package_token = 11;
   optional int32 task_root_class_token = 12;
   optional int32 locus_id_token = 13;
+  optional ObfuscatedUserInteractionExtrasProto interaction_extras = 14;
 }
 
 /**
@@ -129,6 +130,7 @@ message PendingEventProto {
   optional string task_root_package = 11;
   optional string task_root_class = 12;
   optional string locus_id = 13 [(.android.privacy).dest = DEST_EXPLICIT];
+  optional bytes extras = 14;
 }
 
 /**
@@ -144,4 +146,12 @@ message ObfuscatedPackagesProto {
   optional int32 counter = 1;
   // Stores the mappings for every package
   repeated PackagesMap packages_map = 2;
+}
+
+/**
+ * Store the relevant information from extra details for user interaction event.
+ */
+message ObfuscatedUserInteractionExtrasProto {
+  optional int32 category_token = 1;
+  optional int32 action_token = 2;
 }

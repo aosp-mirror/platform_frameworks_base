@@ -285,15 +285,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             return false;
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
-        ArrayList<SurfaceParams> params = new ArrayList<>();
-        updateLeashesForSide(ISIDE_LEFT, offset.left, mPendingInsets.left, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_TOP, offset.top, mPendingInsets.top, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_RIGHT, offset.right, mPendingInsets.right, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params, outState,
-                mPendingAlpha);
+        final ArrayList<SurfaceParams> params = new ArrayList<>();
+        updateLeashesForSide(ISIDE_LEFT, offset.left, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_TOP, offset.top, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_RIGHT, offset.right, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, params, outState, mPendingAlpha);
 
         mController.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
@@ -456,7 +452,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         return alpha >= 1 ? 1 : (alpha <= 0 ? 0 : alpha);
     }
 
-    private void updateLeashesForSide(@InternalInsetsSide int side, int offset, int inset,
+    private void updateLeashesForSide(@InternalInsetsSide int side, int offset,
             ArrayList<SurfaceParams> surfaceParams, @Nullable InsetsState outState, float alpha) {
         final ArraySet<InsetsSourceControl> controls = mSideControlsMap.get(side);
         if (controls == null) {
@@ -474,9 +470,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             }
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 
-            final boolean visible = mHasZeroInsetsIme && side == ISIDE_BOTTOM
-                    ? (mAnimationType == ANIMATION_TYPE_SHOW || !mFinished)
-                    : inset != 0;
+            // The first frame of ANIMATION_TYPE_SHOW should be invisible since it is animated from
+            // the hidden state.
+            final boolean visible = mPendingFraction == 0
+                    ? mAnimationType != ANIMATION_TYPE_SHOW
+                    : !mFinished || mShownOnFinish;
 
             if (outState != null && source != null) {
                 outState.addSource(new InsetsSource(source)

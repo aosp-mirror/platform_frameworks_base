@@ -70,6 +70,15 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
         return false;
     }
 
+    /**
+     * If AVB has been enabled, send <Give Audio Status> and notify AudioService of the response.
+     */
+    void requestAndUpdateAudioStatus() {
+        if (mState == STATE_MONITOR_AUDIO_STATUS) {
+            sendGiveAudioStatus();
+        }
+    }
+
     private boolean handleReportAudioStatus(HdmiCecMessage cmd) {
         if (mTargetAddress != cmd.getSource() || cmd.getParams().length == 0) {
             return false;
@@ -89,9 +98,17 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
             localDevice().getService().enableAbsoluteVolumeBehavior(audioStatus);
             mState = STATE_MONITOR_AUDIO_STATUS;
         } else if (mState == STATE_MONITOR_AUDIO_STATUS) {
-            if (audioStatus.getVolume() != mLastAudioStatus.getVolume()) {
+            // On TV panels, we notify AudioService even if neither volume nor mute state changed.
+            // This ensures that the user sees volume UI if they tried to adjust the AVR's volume,
+            // even if the new volume level is the same as the previous one.
+            boolean notifyAvbVolumeToShowUi = localDevice().getService().isTvDevice()
+                    && audioStatus.equals(mLastAudioStatus);
+
+            if (audioStatus.getVolume() != mLastAudioStatus.getVolume()
+                    || notifyAvbVolumeToShowUi) {
                 localDevice().getService().notifyAvbVolumeChange(audioStatus.getVolume());
             }
+
             if (audioStatus.getMute() != mLastAudioStatus.getMute()) {
                 localDevice().getService().notifyAvbMuteChange(audioStatus.getMute());
             }

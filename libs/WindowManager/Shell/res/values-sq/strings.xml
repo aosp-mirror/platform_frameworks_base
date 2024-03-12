@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Mos e fshih"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikacioni mund të mos funksionojë me ekranin e ndarë"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikacioni nuk mbështet ekranin e ndarë"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ky aplikacion mund të hapet vetëm në 1 dritare."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Ky aplikacion mund të hapet vetëm në 1 dritare"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacioni mund të mos funksionojë në një ekran dytësor."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacioni nuk mbështet nisjen në ekrane dytësore."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Ndarësi i ekranit të ndarë"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Lëviz lart djathtas"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Zhvendos poshtë majtas"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Lëvize poshtë djathtas"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"zgjero <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"palos <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Cilësimet e <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Hiqe flluskën"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Mos e vendos bisedën në flluskë"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"E kuptova"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Nuk ka flluska të fundit"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Flluskat e fundit dhe flluskat e hequra do të shfaqen këtu"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Bisedo duke përdorur flluskat"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Bisedat e reja shfaqen si ikona në këndin e poshtëm të ekranit tënd. Trokit për t\'i zgjeruar ose zvarrit për t\'i hequr ato."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Kontrollo flluskat në çdo moment"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Trokit këtu për të menaxhuar aplikacionet e bisedat që do të shfaqen në flluska"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Flluskë"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Menaxho"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Flluska u hoq."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Trokit për të rifilluar këtë aplikacion për një pamje më të mirë."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Trokit për ta rinisur këtë aplikacion për një pamje më të mirë"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Ndrysho raportin e pamjes së këtij aplikacioni te \"Cilësimet\""</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Ndrysho raportin e pamjes"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Ka probleme me kamerën?\nTrokit për ta ripërshtatur"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nuk u rregullua?\nTrokit për ta rikthyer"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nuk ka probleme me kamerën? Trokit për ta shpërfillur."</string>
@@ -89,7 +97,7 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"E kuptova"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Zgjeroje për më shumë informacion."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Rinis për një pamje më të mirë?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Mund të rinisësh aplikacionin në mënyrë që të duket më mirë në ekranin tënd, por mund të humbësh progresin ose çdo ndryshim të paruajtur"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Mund ta rinisësh aplikacionin në mënyrë që të duket më mirë në ekranin tënd, por mund ta humbasësh progresin ose çdo ndryshim të paruajtur"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Anulo"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Rinis"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Mos e shfaq përsëri"</string>

@@ -19,6 +19,7 @@ package com.android.systemui.media.controls.pipeline
 import android.content.Context
 import android.os.SystemProperties
 import android.util.Log
+import com.android.internal.annotations.KeepForWeakReference
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.qualifiers.Main
@@ -82,6 +83,8 @@ constructor(
     private var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
     private var reactivatedKey: String? = null
 
+    // Ensure the field (and associated reference) isn't removed during optimization.
+    @KeepForWeakReference
     private val userTrackerCallback =
         object : UserTracker.Callback {
             override fun onUserChanged(newUser: Int, userContext: Context) {

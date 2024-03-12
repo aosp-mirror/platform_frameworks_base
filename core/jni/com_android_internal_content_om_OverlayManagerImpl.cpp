@@ -44,6 +44,9 @@ static struct fabricated_overlay_internal_entry_offsets_t {
     jfieldID stringData;
     jfieldID binaryData;
     jfieldID configuration;
+    jfieldID binaryDataOffset;
+    jfieldID binaryDataSize;
+    jfieldID isNinePatch;
 } gFabricatedOverlayInternalEntryOffsets;
 
 static struct parcel_file_descriptor_offsets_t {
@@ -264,11 +267,11 @@ static void CreateFrroFile(JNIEnv* env, jclass /*clazz*/, jstring jsFrroFilePath
         auto jsResourceName = reinterpret_cast<jstring>(
                 env->GetObjectField(entry, gFabricatedOverlayInternalEntryOffsets.resourceName));
         const ScopedUtfChars resourceName(env, jsResourceName);
-        const auto dataType =
+        const jint dataType =
                 env->GetIntField(entry, gFabricatedOverlayInternalEntryOffsets.dataType);
 
         // In Java, the data type is int but the maximum value of data Type is less than 0xff.
-        if (dataType >= UCHAR_MAX) {
+        if (dataType >= static_cast<jint>(UCHAR_MAX)) {
             jniThrowException(env, IllegalArgumentException, "Unsupported data type");
             return;
         }
@@ -281,11 +284,21 @@ static void CreateFrroFile(JNIEnv* env, jclass /*clazz*/, jstring jsFrroFilePath
         auto binary_data =
                 getNullableFileDescriptor(env, entry,
                                           gFabricatedOverlayInternalEntryOffsets.binaryData);
+
+        const auto data_offset =
+                env->GetLongField(entry, gFabricatedOverlayInternalEntryOffsets.binaryDataOffset);
+        const auto data_size =
+                env->GetLongField(entry, gFabricatedOverlayInternalEntryOffsets.binaryDataSize);
+        const auto nine_patch =
+                env->GetBooleanField(entry, gFabricatedOverlayInternalEntryOffsets.isNinePatch);
         entries_params.push_back(
                 FabricatedOverlayEntryParameters{resourceName.c_str(), (DataType)dataType,
                                                  (DataValue)data,
                                                  string_data.value_or(std::string()), binary_data,
-                                                 configuration.value_or(std::string())});
+                                                 static_cast<off64_t>(data_offset),
+                                                 static_cast<size_t>(data_size),
+                                                 configuration.value_or(std::string()),
+                                                 static_cast<bool>(nine_patch)});
         ALOGV("resourceName = %s, dataType = 0x%08x, data = 0x%08x, dataString = %s,"
               " binaryData = %d, configuration = %s",
               resourceName.c_str(), dataType, data, string_data.value_or(std::string()).c_str(),
@@ -440,6 +453,15 @@ int register_com_android_internal_content_om_OverlayManagerImpl(JNIEnv* env) {
     gFabricatedOverlayInternalEntryOffsets.configuration =
             GetFieldIDOrDie(env, gFabricatedOverlayInternalEntryOffsets.classObject,
                             "configuration", "Ljava/lang/String;");
+    gFabricatedOverlayInternalEntryOffsets.binaryDataOffset =
+            GetFieldIDOrDie(env, gFabricatedOverlayInternalEntryOffsets.classObject,
+                            "binaryDataOffset", "J");
+    gFabricatedOverlayInternalEntryOffsets.binaryDataSize =
+            GetFieldIDOrDie(env, gFabricatedOverlayInternalEntryOffsets.classObject,
+                            "binaryDataSize", "J");
+    gFabricatedOverlayInternalEntryOffsets.isNinePatch =
+            GetFieldIDOrDie(env, gFabricatedOverlayInternalEntryOffsets.classObject, "isNinePatch",
+                            "Z");
 
     jclass parcelFileDescriptorClass =
             android::FindClassOrDie(env, "android/os/ParcelFileDescriptor");

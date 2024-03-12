@@ -16,6 +16,8 @@
 package android.service.controls;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -25,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -32,12 +35,15 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.service.controls.actions.ControlAction;
 import android.service.controls.actions.ControlActionWrapper;
+import android.service.controls.flags.Flags;
 import android.service.controls.templates.ControlTemplate;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
@@ -80,6 +86,40 @@ public abstract class ControlsProviderService extends Service {
      */
     public static final String EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS =
             "android.service.controls.extra.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({CONTROLS_SURFACE_ACTIVITY_PANEL, CONTROLS_SURFACE_DREAM})
+    public @interface ControlsSurface {
+    }
+
+    /**
+     * Controls are being shown on the device controls activity panel.
+     */
+    @FlaggedApi(Flags.FLAG_HOME_PANEL_DREAM)
+    public static final int CONTROLS_SURFACE_ACTIVITY_PANEL = 0;
+
+    /**
+     * Controls are being shown as a dream, while the device is idle.
+     */
+    @FlaggedApi(Flags.FLAG_HOME_PANEL_DREAM)
+    public static final int CONTROLS_SURFACE_DREAM = 1;
+
+    /**
+     * Integer extra whose value specifies the surface which controls are being displayed on.
+     * <p>
+     * The possible values are:
+     * <ul>
+     * <li>{@link #CONTROLS_SURFACE_ACTIVITY_PANEL}
+     * <li>{@link #CONTROLS_SURFACE_DREAM}
+     * </ul>
+     *
+     * This is passed with the intent when the panel specified by {@link #META_DATA_PANEL_ACTIVITY}
+     * is launched.
+     */
+    @FlaggedApi(Flags.FLAG_HOME_PANEL_DREAM)
+    public static final String EXTRA_CONTROLS_SURFACE =
+            "android.service.controls.extra.CONTROLS_SURFACE";
 
     /**
      * @hide
@@ -285,6 +325,7 @@ public abstract class ControlsProviderService extends Service {
         private IControlsSubscriber mCs;
         private boolean mEnforceStateless;
         private Context mContext;
+        private SubscriptionAdapter mSubscription;
 
         SubscriberProxy(boolean enforceStateless, IBinder token, IControlsSubscriber cs) {
             mEnforceStateless = enforceStateless;
@@ -300,11 +341,14 @@ public abstract class ControlsProviderService extends Service {
 
         public void onSubscribe(Subscription subscription) {
             try {
-                mCs.onSubscribe(mToken, new SubscriptionAdapter(subscription));
+                SubscriptionAdapter subscriptionAdapter = new SubscriptionAdapter(subscription);
+                mCs.onSubscribe(mToken, subscriptionAdapter);
+                mSubscription = subscriptionAdapter;
             } catch (RemoteException ex) {
-                ex.rethrowAsRuntimeException();
+                handleRemoteException(ex);
             }
         }
+
         public void onNext(@NonNull Control control) {
             Preconditions.checkNotNull(control);
             try {
@@ -318,20 +362,36 @@ public abstract class ControlsProviderService extends Service {
                 }
                 mCs.onNext(mToken, control);
             } catch (RemoteException ex) {
-                ex.rethrowAsRuntimeException();
+                handleRemoteException(ex);
             }
         }
+
         public void onError(Throwable t) {
             try {
                 mCs.onError(mToken, t.toString());
+                mSubscription = null;
             } catch (RemoteException ex) {
-                ex.rethrowAsRuntimeException();
+                handleRemoteException(ex);
             }
         }
+
         public void onComplete() {
             try {
                 mCs.onComplete(mToken);
+                mSubscription = null;
             } catch (RemoteException ex) {
+                handleRemoteException(ex);
+            }
+        }
+
+        private void handleRemoteException(RemoteException ex) {
+            if (ex instanceof DeadObjectException) {
+                // System UI crashed or is restarting. There is no need to rethrow this
+                SubscriptionAdapter subscriptionAdapter = mSubscription;
+                if (subscriptionAdapter != null) {
+                    subscriptionAdapter.cancel();
+                }
+            } else {
                 ex.rethrowAsRuntimeException();
             }
         }

@@ -24,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
 import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
@@ -45,6 +46,7 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.window.ScreenCapture;
@@ -61,10 +63,10 @@ public class TransitionAnimationHelper {
 
     /** Loads the animation that is defined through attribute id for the given transition. */
     @Nullable
-    public static Animation loadAttributeAnimation(@NonNull TransitionInfo info,
+    public static Animation loadAttributeAnimation(@WindowManager.TransitionType int type,
+            @NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, int wallpaperTransit,
             @NonNull TransitionAnimation transitionAnimation, boolean isDreamTransition) {
-        final int type = info.getType();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
         final boolean enter = TransitionUtil.isOpeningType(changeMode);
@@ -184,6 +186,38 @@ public class TransitionAnimationHelper {
         }
 
         return options.getCustomActivityTransition(isOpen);
+    }
+
+    /**
+     * Gets the final transition type from {@link TransitionInfo} for determining the animation.
+     */
+    public static int getTransitionTypeFromInfo(@NonNull TransitionInfo info) {
+        final int type = info.getType();
+        // If the info transition type is opening transition, iterate its changes to see if it
+        // has any opening change, if none, returns TRANSIT_CLOSE type for closing animation.
+        if (type == TRANSIT_OPEN) {
+            boolean hasOpenTransit = false;
+            for (TransitionInfo.Change change : info.getChanges()) {
+                if ((change.getTaskInfo() != null || change.hasFlags(FLAG_IS_DISPLAY))
+                        && !TransitionUtil.isOrderOnly(change)) {
+                    // This isn't an activity-level transition.
+                    return type;
+                }
+                if (change.getTaskInfo() != null
+                        && change.hasFlags(FLAG_IS_DISPLAY | FLAGS_IS_NON_APP_WINDOW)) {
+                    // Ignore non-activity containers.
+                    continue;
+                }
+                if (change.getMode() == TRANSIT_OPEN) {
+                    hasOpenTransit = true;
+                    break;
+                }
+            }
+            if (!hasOpenTransit) {
+                return TRANSIT_CLOSE;
+            }
+        }
+        return type;
     }
 
     static Animation loadCustomActivityTransition(
@@ -346,7 +380,7 @@ public class TransitionAnimationHelper {
                         .setFrameScale(1)
                         .setPixelFormat(PixelFormat.RGBA_8888)
                         .setChildrenOnly(true)
-                        .setAllowProtected(true)
+                        .setAllowProtected(false)
                         .setCaptureSecureLayers(true)
                         .build();
         final ScreenCapture.ScreenshotHardwareBuffer edgeBuffer =

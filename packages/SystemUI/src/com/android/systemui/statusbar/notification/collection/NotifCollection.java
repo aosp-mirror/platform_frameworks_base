@@ -225,7 +225,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
 
     /** @see NotifPipeline#getEntry(String) () */
     @Nullable
-    NotificationEntry getEntry(@NonNull String key) {
+    public NotificationEntry getEntry(@NonNull String key) {
         return mNotificationSet.get(key);
     }
 

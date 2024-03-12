@@ -1,0 +1,15 @@
+package: "com.android.server.biometrics"
+
+flag {
+  name: "face_vhal_feature"
+  namespace: "biometrics_framework"
+  description: "This flag controls tunscany virtual HAL feature"
+  bug: "294254230"
+}
+
+flag {
+    name: "de_hidl"
+    namespace: "biometrics_framework"
+    description: "feature flag for biometrics de-hidl"
+    bug: "287332354"
+}

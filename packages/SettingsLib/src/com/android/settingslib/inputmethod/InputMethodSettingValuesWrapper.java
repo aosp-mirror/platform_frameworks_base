@@ -89,8 +89,14 @@ public class InputMethodSettingValuesWrapper {
 
     public void refreshAllInputMethodAndSubtypes() {
         mMethodList.clear();
-        mMethodList.addAll(mImm.getInputMethodListAsUser(
-                mContentResolver.getUserId(), DirectBootAwareness.ANY));
+        List<InputMethodInfo> imis = mImm.getInputMethodListAsUser(
+                mContentResolver.getUserId(), DirectBootAwareness.ANY);
+        for (int i = 0; i < imis.size(); ++i) {
+            InputMethodInfo imi = imis.get(i);
+            if (!imi.isVirtualDeviceOnly()) {
+                mMethodList.add(imi);
+            }
+        }
     }
 
     public List<InputMethodInfo> getInputMethodList() {

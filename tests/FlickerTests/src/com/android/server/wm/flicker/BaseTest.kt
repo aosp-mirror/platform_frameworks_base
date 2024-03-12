@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker
 
 import android.app.Instrumentation
+import android.content.Intent
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerBuilderProvider
@@ -39,16 +40,28 @@ abstract class BaseTest
 constructor(
     protected val flicker: LegacyFlickerTest,
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
-    protected val tapl: LauncherInstrumentation = LauncherInstrumentation()
 ) {
-    init {
-        tapl.setExpectedRotationCheckEnabled(true)
+    protected val tapl: LauncherInstrumentation by lazy {
+        LauncherInstrumentation().also { it.expectedRotationCheckEnabled = true }
     }
 
     private val logTag = this::class.java.simpleName
 
     /** Specification of the test transition to execute */
     abstract val transition: FlickerBuilder.() -> Unit
+
+    protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
+
+    // Helper class to process test actions by broadcast.
+    protected class BroadcastActionTrigger(private val instrumentation: Instrumentation) {
+        private fun createIntentWithAction(broadcastAction: String): Intent {
+            return Intent(broadcastAction).setFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        }
+
+        fun doAction(broadcastAction: String) {
+            instrumentation.context.sendBroadcast(createIntentWithAction(broadcastAction))
+        }
+    }
 
     /**
      * Entry point for the test runner. It will use this method to initialize and cache flicker

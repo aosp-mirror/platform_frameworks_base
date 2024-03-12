@@ -34,17 +34,20 @@ import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.traceSection
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.R
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeStateEvents
-import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -52,11 +55,12 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.traceSection
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 private val TAG: String = MediaHierarchyManager::class.java.simpleName
 
@@ -96,11 +100,16 @@ constructor(
     private val mediaManager: MediaDataManager,
     private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController,
+    private val communalInteractor: CommunalInteractor,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
-    panelEventsEvents: ShadeStateEvents,
+    shadeInteractor: ShadeInteractor,
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
+    @Application private val coroutineScope: CoroutineScope,
+    private val splitShadeStateController: SplitShadeStateController,
+    private val logger: MediaViewLogger,
+    private val mediaFlags: MediaFlags,
 ) {
 
     /** Track the media player setting status on lock screen. */
@@ -207,7 +216,8 @@ constructor(
         else result.setIntersect(animationStartClipping, targetClipping)
     }
 
-    private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_DREAM_OVERLAY + 1)
+    private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_COMMUNAL_HUB + 1)
+
     /**
      * The last location where this view was at before going to the desired location. This is useful
      * for guided transitions.
@@ -399,6 +409,9 @@ constructor(
             }
         }
 
+    /** Is the communal UI showing */
+    private var isCommunalShowing: Boolean = false
+
     /**
      * The current cross fade progress. 0.5f means it's just switching between the start and the end
      * location and the content is fully faded, while 0.75f means that we're halfway faded in again
@@ -448,6 +461,15 @@ constructor(
                     // the
                     // location of the previous state to still be up to date when the animation
                     // starts
+                    if (
+                        newState == StatusBarState.SHADE_LOCKED &&
+                            oldState == StatusBarState.KEYGUARD &&
+                            fullShadeTransitionProgress < 1.0f
+                    ) {
+                        // Since the new state is SHADE_LOCKED, we need to set the transition amount
+                        // to maximum if the progress is not 1f.
+                        setTransitionToFullShadeAmount(distanceForFullShadeTransition.toFloat())
+                    }
                     statusbarState = newState
                     updateDesiredLocation()
                 }
@@ -534,14 +556,12 @@ constructor(
             mediaHosts.forEach { it?.updateViewVisibility() }
         }
 
-        panelEventsEvents.addShadeStateEventsListener(
-            object : ShadeStateEventsListener {
-                override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
-                    skipQqsOnExpansion = isExpandImmediateEnabled
-                    updateDesiredLocation()
-                }
+        coroutineScope.launch {
+            shadeInteractor.isQsBypassingShade.collect { isExpandImmediateEnabled ->
+                skipQqsOnExpansion = isExpandImmediateEnabled
+                updateDesiredLocation()
             }
-        )
+        }
 
         val settingsObserver: ContentObserver =
             object : ContentObserver(handler) {
@@ -561,6 +581,14 @@ constructor(
             settingsObserver,
             UserHandle.USER_ALL
         )
+
+        // Listen to the communal UI state.
+        coroutineScope.launch {
+            communalInteractor.isCommunalShowing.collect { value ->
+                isCommunalShowing = value
+                updateDesiredLocation(forceNoAnimation = true)
+            }
+        }
     }
 
     private fun updateConfiguration() {
@@ -568,7 +596,7 @@ constructor(
             context.resources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_media_transition_distance
             )
-        inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        inSplitShade = splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
     }
 
     /**
@@ -1025,6 +1053,17 @@ constructor(
 
     private fun updateHostAttachment() =
         traceSection("MediaHierarchyManager#updateHostAttachment") {
+            if (mediaFlags.isSceneContainerEnabled()) {
+                // No need to manage transition states - just update the desired location directly
+                logger.logMediaHostAttachment(desiredLocation)
+                mediaCarouselController.onDesiredLocationChanged(
+                    desiredLocation = desiredLocation,
+                    desiredHostState = getHost(desiredLocation),
+                    animate = false,
+                )
+                return
+            }
+
             var newLocation = resolveLocationForFading()
             // Don't use the overlay when fading or when we don't have active media
             var canUseOverlay = !isCurrentlyFading() && hasActiveMediaOrRecommendation
@@ -1056,6 +1095,7 @@ constructor(
                     // that and directly set the mediaFrame's bounds within the premeasured host.
                     targetHost.addView(mediaFrame)
                 }
+                logger.logMediaHostAttachment(currentAttachmentLocation)
                 if (isCrossFadeAnimatorRunning) {
                     // When cross-fading with an animation, we only notify the media carousel of the
                     // location change, once the view is reattached to the new place and not
@@ -1107,11 +1147,15 @@ constructor(
             (!bypassController.bypassEnabled && (statusbarState == StatusBarState.KEYGUARD))
         val location =
             when {
+                mediaFlags.isSceneContainerEnabled() -> desiredLocation
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
                 onLockscreen && isSplitShadeExpanding() -> LOCATION_QS
                 onLockscreen && isTransformingToFullShadeAndInQQS() -> LOCATION_QQS
+                // TODO(b/308813166): revisit logic once interactions between the hub and
+                //  shade/keyguard state are finalized
+                isCommunalShowing && communalInteractor.isCommunalEnabled -> LOCATION_COMMUNAL_HUB
                 onLockscreen && allowMediaPlayerOnLockScreen -> LOCATION_LOCKSCREEN
                 else -> LOCATION_QQS
             }
@@ -1221,6 +1265,9 @@ constructor(
         /** Attached on the dream overlay */
         const val LOCATION_DREAM_OVERLAY = 3
 
+        /** Attached to a view in the communal UI grid */
+        const val LOCATION_COMMUNAL_HUB = 4
+
         /** Attached at the root of the hierarchy in an overlay */
         const val IN_OVERLAY = -1000
 
@@ -1258,7 +1305,8 @@ private annotation class TransformationType
             MediaHierarchyManager.LOCATION_QS,
             MediaHierarchyManager.LOCATION_QQS,
             MediaHierarchyManager.LOCATION_LOCKSCREEN,
-            MediaHierarchyManager.LOCATION_DREAM_OVERLAY
+            MediaHierarchyManager.LOCATION_DREAM_OVERLAY,
+            MediaHierarchyManager.LOCATION_COMMUNAL_HUB,
         ]
 )
 @Retention(AnnotationRetention.SOURCE)

@@ -22,7 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.media.controls.ui.accentPrimaryFromScheme
 import com.android.systemui.media.controls.ui.surfaceFromScheme
 import com.android.systemui.media.controls.ui.textPrimaryFromScheme

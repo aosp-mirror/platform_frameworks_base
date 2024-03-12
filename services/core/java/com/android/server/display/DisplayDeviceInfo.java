@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.view.Display.Mode.INVALID_MODE_ID;
+
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayViewport;
 import android.util.DisplayMetrics;
@@ -120,11 +122,10 @@ final class DisplayDeviceInfo {
 
     /**
      * Flag: This flag identifies secondary displays that should show system decorations, such as
-     * status bar, navigation bar, home activity or IME.
+     * navigation bar, home activity or wallpaper.
      * <p>Note that this flag doesn't work without {@link #FLAG_TRUSTED}</p>
      * @hide
      */
-    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 12;
 
     /**
@@ -273,6 +274,11 @@ final class DisplayDeviceInfo {
      * The default mode of the display.
      */
     public int defaultModeId;
+
+    /**
+     * The mode of the display which is preferred by user.
+     */
+    public int userPreferredModeId = INVALID_MODE_ID;
 
     /**
      * The supported modes of the display.
@@ -472,6 +478,7 @@ final class DisplayDeviceInfo {
                 || modeId != other.modeId
                 || renderFrameRate != other.renderFrameRate
                 || defaultModeId != other.defaultModeId
+                || userPreferredModeId != other.userPreferredModeId
                 || !Arrays.equals(supportedModes, other.supportedModes)
                 || !Arrays.equals(supportedColorModes, other.supportedColorModes)
                 || !Objects.equals(hdrCapabilities, other.hdrCapabilities)
@@ -517,6 +524,7 @@ final class DisplayDeviceInfo {
         modeId = other.modeId;
         renderFrameRate = other.renderFrameRate;
         defaultModeId = other.defaultModeId;
+        userPreferredModeId = other.userPreferredModeId;
         supportedModes = other.supportedModes;
         colorMode = other.colorMode;
         supportedColorModes = other.supportedColorModes;
@@ -559,6 +567,7 @@ final class DisplayDeviceInfo {
         sb.append(", modeId ").append(modeId);
         sb.append(", renderFrameRate ").append(renderFrameRate);
         sb.append(", defaultModeId ").append(defaultModeId);
+        sb.append(", userPreferredModeId ").append(userPreferredModeId);
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));
         sb.append(", colorMode ").append(colorMode);
         sb.append(", supportedColorModes ").append(Arrays.toString(supportedColorModes));

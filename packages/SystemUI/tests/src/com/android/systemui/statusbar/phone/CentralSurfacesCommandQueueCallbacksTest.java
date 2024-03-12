@@ -18,48 +18,41 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.os.PowerManager;
 import android.os.UserHandle;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.view.HapticFeedbackConstants;
-import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.testing.FakeMetricsLogger;
-import com.android.internal.statusbar.LetterboxDetails;
-import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 
@@ -79,6 +72,7 @@ import java.util.Optional;
 public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
     @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private QuickSettingsController mQuickSettingsController;
@@ -87,7 +81,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private KeyguardStateController mKeyguardStateController;
-    @Mock private HeadsUpManagerPhone mHeadsUpManager;
+    @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -95,15 +89,12 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private PowerManager mPowerManager;
-    @Mock private VibratorHelper mVibratorHelper;
     @Mock private Vibrator mVibrator;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
-    @Mock private SystemBarAttributesListener mSystemBarAttributesListener;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private UserTracker mUserTracker;
     @Mock private QSHost mQSHost;
     @Mock private ActivityStarter mActivityStarter;
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -116,6 +107,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mQuickSettingsController,
                 mContext,
                 mContext.getResources(),
+                mScreenPinningRequest,
                 mShadeController,
                 mCommandQueue,
                 mShadeViewController,
@@ -132,16 +124,13 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mNotificationStackScrollLayoutController,
                 mStatusBarHideIconsForBouncerManager,
                 mPowerManager,
-                mVibratorHelper,
                 Optional.of(mVibrator),
                 new DisableFlagsLogger(),
                 DEFAULT_DISPLAY,
-                mSystemBarAttributesListener,
                 mCameraLauncherLazy,
                 mUserTracker,
                 mQSHost,
-                mActivityStarter,
-                mFeatureFlags);
+                mActivityStarter);
 
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
@@ -194,74 +183,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     }
 
     @Test
-    public void onSystemBarAttributesChanged_forwardsToSysBarAttrsListener() {
-        int displayId = DEFAULT_DISPLAY;
-        int appearance = 123;
-        AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
-        boolean navbarColorManagedByIme = true;
-        int behavior = 456;
-        int requestedVisibleTypes = WindowInsets.Type.systemBars();
-        String packageName = "test package name";
-        LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
-
-        mSbcqCallbacks.onSystemBarAttributesChanged(
-                displayId,
-                appearance,
-                appearanceRegions,
-                navbarColorManagedByIme,
-                behavior,
-                requestedVisibleTypes,
-                packageName,
-                letterboxDetails);
-
-        verify(mSystemBarAttributesListener).onSystemBarAttributesChanged(
-                displayId,
-                appearance,
-                appearanceRegions,
-                navbarColorManagedByIme,
-                behavior,
-                requestedVisibleTypes,
-                packageName,
-                letterboxDetails
-        );
-    }
-
-    @Test
-    public void onSystemBarAttributesChanged_differentDisplayId_doesNotForwardToAttrsListener() {
-        int appearance = 123;
-        AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{};
-        boolean navbarColorManagedByIme = true;
-        int behavior = 456;
-        int requestedVisibleTypes = WindowInsets.Type.systemBars();
-        String packageName = "test package name";
-        LetterboxDetails[] letterboxDetails = new LetterboxDetails[]{};
-
-        mSbcqCallbacks.onSystemBarAttributesChanged(
-                DEFAULT_DISPLAY + 1,
-                appearance,
-                appearanceRegions,
-                navbarColorManagedByIme,
-                behavior,
-                requestedVisibleTypes,
-                packageName,
-                letterboxDetails);
-
-        verifyZeroInteractions(mSystemBarAttributesListener);
-    }
-
-    @Test
-    public void vibrateOnNavigationKeyDown_oneWayHapticsDisabled_usesVibrate() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
-
-        mSbcqCallbacks.vibrateOnNavigationKeyDown();
-
-        verify(mVibratorHelper).vibrate(VibrationEffect.EFFECT_TICK);
-    }
-
-    @Test
-    public void vibrateOnNavigationKeyDown_oneWayHapticsEnabled_usesPerformHapticFeedback() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-
+    public void vibrateOnNavigationKeyDown_usesPerformHapticFeedback() {
         mSbcqCallbacks.vibrateOnNavigationKeyDown();
 
         verify(mShadeViewController).performHapticFeedback(

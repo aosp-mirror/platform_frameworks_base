@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 慢速充電中"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 為保護電池，系統已優化充電"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電配件發生問題"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"按下 [選單] 即可解鎖。"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"網絡已鎖定"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"沒有 SIM 卡"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"請新增 SIM 卡。"</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"找不到 SIM 卡或 SIM 卡無法讀取，請新增 SIM 卡。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM 卡無法使用。"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM 卡已永久停用。\n請向無線服務供應商索取其他 SIM 卡。"</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM 卡已鎖定。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM 卡已使用 PUK 鎖定。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"正在解鎖 SIM 卡…"</string>
@@ -73,10 +69,10 @@
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"使用密碼或指紋解鎖"</string>
     <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"使用解鎖圖案或指紋解鎖"</string>
     <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"為提高安全性，公司政策已鎖定裝置"</string>
-    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"需要輸入 PIN 才能解除禁閉模式"</string>
-    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"需要輸入密碼解才能解除禁閉模式"</string>
-    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"需要畫出解鎖圖案才能解除禁閉模式"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"裝置會在閒置時安裝更新"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"需要輸入 PIN 才能解除鎖定"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"需要輸入密碼解才能解除鎖定"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"需要畫出解鎖圖案才能解除鎖定"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"系統會在裝置未使用時安裝更新"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"需要加強安全設定：已有一段時間沒有使用 PIN。"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"需要加強安全設定：已有一段時間沒有使用密碼。"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"需要加強安全設定：已有一段時間沒有使用解鎖圖案。"</string>
@@ -98,13 +94,13 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"正在解鎖 SIM 卡…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"請輸入 4 至 8 位數的 PIN 碼。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK 碼應由 8 個或以上數字組成。"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"您已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"您已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM 卡 PIN 碼不正確，您現在必須聯絡流動網絡供應商為您的裝置解鎖。"</string>
-    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM 卡的 PIN 碼不正確，您還可以再試 # 次。如果仍然輸入錯誤，您必須聯絡流動網絡供應商解鎖您的裝置。}other{SIM 卡的 PIN 碼不正確，您還可以再試 # 次。}}"</string>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM 卡無法使用，請聯絡您的流動網絡供應商。"</string>
-    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM 卡的 PUK 碼不正確，您還可以再試 # 次。如果仍然輪入錯誤，SIM 卡將永久無法使用。}other{SIM 卡的 PUK 碼不正確，您還可以再試 # 次。如果仍然輪入錯誤，SIM 卡將永久無法使用。}}"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"你已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"你已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"你已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM 卡 PIN 碼不正確，你現在必須聯絡流動網絡供應商為你的裝置解鎖。"</string>
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM 卡的 PIN 碼不正確，你還可以再試 # 次。如果仍然輸入錯誤，你必須聯絡流動網絡供應商解鎖你的裝置。}other{SIM 卡的 PIN 碼不正確，你還可以再試 # 次。}}"</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM 卡無法使用，請聯絡你的流動網絡供應商。"</string>
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM 卡的 PUK 碼不正確，你還可以再試 # 次。如果仍然輪入錯誤，SIM 卡將永久無法使用。}other{SIM 卡的 PUK 碼不正確，你還可以再試 # 次。如果仍然輪入錯誤，SIM 卡將永久無法使用。}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"無法使用 SIM 卡 PIN 碼解鎖！"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"無法使用 SIM 卡 PUK 碼解鎖！"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"轉換輸入方法"</string>
@@ -119,10 +115,16 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"使用者已手動將裝置上鎖"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"未能識別"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"如要使用「面孔解鎖」，請在「設定」開啟相機存取權"</string>
-    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{輸入 SIM 卡的 PIN，您還可以再試 # 次。如果仍然輸入錯誤，您必須聯絡流動網絡供應商解鎖您的裝置。}other{輸入 SIM 卡的 PIN。您還可以再試 # 次。}}"</string>
-    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM 卡已停用。請輸入 PUK 碼以繼續進行。您還可以再試 # 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請向流動網絡供應商查詢。}other{SIM 卡已停用。請輸入 PUK 碼以繼續進行。您還可以再試 # 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請向流動網絡供應商查詢。}}"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{輸入 SIM 卡的 PIN，你還可以再試 # 次。如果仍然輸入錯誤，你必須聯絡流動網絡供應商解鎖你的裝置。}other{輸入 SIM 卡的 PIN。你還可以再試 # 次。}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM 卡已停用。請輸入 PUK 碼以繼續進行。你還可以再試 # 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請向流動網絡供應商查詢。}other{SIM 卡已停用。請輸入 PUK 碼以繼續進行。你還可以再試 # 次。如果仍然輸入錯誤，SIM 卡將永久無法使用。詳情請向流動網絡供應商查詢。}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"預設"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"泡泡"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"指針"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"解鎖裝置以繼續"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"輸入 PIN 即可在稍後安裝更新"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"輸入密碼即可在稍後安裝更新"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"畫出解鎖圖案即可在稍後安裝更新"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"裝置已更新。輸入 PIN 即可繼續。"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"裝置已更新。輸入密碼即可繼續。"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"裝置已更新。畫出解鎖圖案即可繼續。"</string>
 </resources>

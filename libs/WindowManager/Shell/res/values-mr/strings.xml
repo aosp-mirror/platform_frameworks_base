@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"अनस्टॅश करा"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"अ‍ॅप कदाचित स्प्लिट स्क्रीनसह काम करणार नाही"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"अ‍ॅप हे स्प्लिट स्क्रीनला सपोर्ट करत नाही"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"हे अ‍ॅप फक्त एका विंडोमध्ये उघडले जाऊ शकते."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"हे अ‍ॅप फक्त एका विंडोमध्ये उघडले जाऊ शकते"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"दुसऱ्या डिस्प्लेवर अ‍ॅप कदाचित चालणार नाही."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"दुसऱ्या डिस्प्लेवर अ‍ॅप लाँच होणार नाही."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"स्प्लिट स्क्रीन विभाजक"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"वर उजवीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"तळाशी डावीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"तळाशी उजवीकडे हलवा"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> विस्तार करा"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> कोलॅप्स करा"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> सेटिंग्ज"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"बबल डिसमिस करा"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"संभाषणाला बबल करू नका"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"समजले"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"अलीकडील कोणतेही बबल नाहीत"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"अलीकडील बबल आणि डिसमिस केलेले बबल येथे दिसतील"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"बबल वापरून चॅट करा"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"नवीन संभाषणे ही तुमच्या स्क्रीनच्या तळाशी असलेल्या कोपऱ्यात आयकनच्या स्वरूपात दिसतात. त्यांचा विस्तार करण्यासाठी टॅप करा किंवा ती डिसमिस करण्यासाठी ड्रॅग करा."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"बबल कधीही नियंत्रित करा"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"कोणती ॲप्स आणि संभाषणे बबल होऊ शकतात हे व्यवस्थापित करण्यासाठी येथे टॅप करा"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापित करा"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल डिसमिस केला."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"अधिक चांगल्या व्ह्यूसाठी हे अ‍ॅप रीस्टार्ट करण्याकरिता टॅप करा."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"अधिक चांगल्या दृश्यासाठी हे अ‍ॅप रीस्टार्ट करण्याकरिता टॅप करा"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"सेटिंग्ज मध्ये या ॲपचा आस्पेक्ट रेशो बदला"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"आस्पेक्ट रेशो बदला"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"कॅमेराशी संबंधित काही समस्या आहेत का?\nपुन्हा फिट करण्यासाठी टॅप करा"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"निराकरण झाले नाही?\nरिव्हर्ट करण्यासाठी कृपया टॅप करा"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"कॅमेराशी संबंधित कोणत्याही समस्या नाहीत का? डिसमिस करण्‍यासाठी टॅप करा."</string>

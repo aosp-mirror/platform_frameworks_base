@@ -23,21 +23,23 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.hardware.broadcastradio.AmFmRegionConfig;
 import android.hardware.broadcastradio.Announcement;
+import android.hardware.broadcastradio.ConfigFlag;
 import android.hardware.broadcastradio.DabTableEntry;
 import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.Metadata;
 import android.hardware.broadcastradio.ProgramFilter;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
-import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.Properties;
 import android.hardware.broadcastradio.Result;
 import android.hardware.broadcastradio.VendorKeyValue;
+import android.hardware.radio.Flags;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.Build;
 import android.os.ParcelableException;
 import android.os.ServiceSpecificException;
@@ -45,6 +47,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
@@ -65,12 +68,21 @@ final class ConversionUtils {
 
     /**
      * With RADIO_U_VERSION_REQUIRED enabled, 44-bit DAB identifier
-     * {@link IdentifierType#DAB_SID_EXT} from broadcast radio HAL can be passed as
-     * {@link ProgramSelector#IDENTIFIER_TYPE_DAB_DMB_SID_EXT} to {@link RadioTuner}.
+     * {@code IdentifierType#DAB_SID_EXT} from broadcast radio HAL can be passed as
+     * {@code ProgramSelector#IDENTIFIER_TYPE_DAB_DMB_SID_EXT} to {@code RadioTuner}.
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static final long RADIO_U_VERSION_REQUIRED = 261770108L;
+
+    /**
+     * With RADIO_V_VERSION_REQUIRED enabled, identifier types, config flags and metadata added
+     * in V for HD radio can be passed to {@code RadioTuner} by
+     * {@code android.hardware.radio.ITunerCallback}
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long RADIO_V_VERSION_REQUIRED = 302589903L;
 
     private ConversionUtils() {
         throw new UnsupportedOperationException("ConversionUtils class is noninstantiable");
@@ -79,6 +91,11 @@ final class ConversionUtils {
     @SuppressLint("AndroidFrameworkRequiresPermission")
     static boolean isAtLeastU(int uid) {
         return CompatChanges.isChangeEnabled(RADIO_U_VERSION_REQUIRED, uid);
+    }
+
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    static boolean isAtLeastV(int uid) {
+        return CompatChanges.isChangeEnabled(RADIO_V_VERSION_REQUIRED, uid);
     }
 
     static RuntimeException throwOnError(RuntimeException halException, String action) {
@@ -181,6 +198,7 @@ final class ConversionUtils {
                 // TODO(b/69958423): verify AM/FM with frequency range
                 return ProgramSelector.PROGRAM_TYPE_FM;
             case ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT:
+            case ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME:
                 // TODO(b/69958423): verify AM/FM with frequency range
                 return ProgramSelector.PROGRAM_TYPE_FM_HD;
             case ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC:
@@ -195,6 +213,12 @@ final class ConversionUtils {
             case ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID:
             case ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL:
                 return ProgramSelector.PROGRAM_TYPE_SXM;
+            default:
+                if (Flags.hdRadioImproved()) {
+                    if (idType == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION) {
+                        return ProgramSelector.PROGRAM_TYPE_FM_HD;
+                    }
+                }
         }
         if (idType >= ProgramSelector.IDENTIFIER_TYPE_VENDOR_PRIMARY_START
                 && idType <= ProgramSelector.IDENTIFIER_TYPE_VENDOR_PRIMARY_END) {
@@ -322,9 +346,16 @@ final class ConversionUtils {
 
     static ProgramIdentifier identifierToHalProgramIdentifier(ProgramSelector.Identifier id) {
         ProgramIdentifier hwId = new ProgramIdentifier();
-        hwId.type = id.getType();
         if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
             hwId.type = IdentifierType.DAB_SID_EXT;
+        } else if (Flags.hdRadioImproved()) {
+            if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION) {
+                hwId.type = IdentifierType.HD_STATION_LOCATION;
+            } else {
+                hwId.type = id.getType();
+            }
+        } else {
+            hwId.type = id.getType();
         }
         long value = id.getValue();
         if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT) {
@@ -344,6 +375,12 @@ final class ConversionUtils {
         int idType;
         if (id.type == IdentifierType.DAB_SID_EXT) {
             idType = ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT;
+        } else if (id.type == IdentifierType.HD_STATION_LOCATION) {
+            if (Flags.hdRadioImproved()) {
+                idType = ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION;
+            } else {
+                return null;
+            }
         } else {
             idType = id.type;
         }
@@ -375,7 +412,12 @@ final class ConversionUtils {
         ProgramSelector.Identifier[] secondaryIds = sel.getSecondaryIds();
         ArrayList<ProgramIdentifier> secondaryIdList = new ArrayList<>(secondaryIds.length);
         for (int i = 0; i < secondaryIds.length; i++) {
-            secondaryIdList.add(identifierToHalProgramIdentifier(secondaryIds[i]));
+            ProgramIdentifier hwId = identifierToHalProgramIdentifier(secondaryIds[i]);
+            if (hwId.type != IdentifierType.INVALID) {
+                secondaryIdList.add(hwId);
+            } else {
+                Slogf.w(TAG, "Invalid secondary id: %s", secondaryIds[i]);
+            }
         }
         hwSel.secondaryIds = secondaryIdList.toArray(ProgramIdentifier[]::new);
         if (!isValidHalProgramSelector(hwSel)) {
@@ -400,7 +442,12 @@ final class ConversionUtils {
         List<ProgramSelector.Identifier> secondaryIdList = new ArrayList<>();
         for (int i = 0; i < sel.secondaryIds.length; i++) {
             if (sel.secondaryIds[i] != null) {
-                secondaryIdList.add(identifierFromHalProgramIdentifier(sel.secondaryIds[i]));
+                ProgramSelector.Identifier id = identifierFromHalProgramIdentifier(
+                        sel.secondaryIds[i]);
+                if (id == null) {
+                    Slogf.e(TAG, "invalid secondary id: %s", sel.secondaryIds[i]);
+                }
+                secondaryIdList.add(id);
             }
         }
 
@@ -411,11 +458,13 @@ final class ConversionUtils {
                 /* vendorIds= */ null);
     }
 
-    private static RadioMetadata radioMetadataFromHalMetadata(Metadata[] meta) {
+    @VisibleForTesting
+    static RadioMetadata radioMetadataFromHalMetadata(Metadata[] meta) {
         RadioMetadata.Builder builder = new RadioMetadata.Builder();
 
         for (int i = 0; i < meta.length; i++) {
-            switch (meta[i].getTag()) {
+            int tag = meta[i].getTag();
+            switch (tag) {
                 case Metadata.rdsPs:
                     builder.putString(RadioMetadata.METADATA_KEY_RDS_PS, meta[i].getRdsPs());
                     break;
@@ -472,10 +521,52 @@ final class ConversionUtils {
                             meta[i].getDabComponentNameShort());
                     break;
                 default:
-                    Slogf.w(TAG, "Ignored unknown metadata entry: %s", meta[i]);
+                    if (Flags.hdRadioImproved()) {
+                        switch (tag) {
+                            case Metadata.genre:
+                                builder.putString(RadioMetadata.METADATA_KEY_GENRE,
+                                        meta[i].getGenre());
+                                break;
+                            case Metadata.commentShortDescription:
+                                builder.putString(
+                                        RadioMetadata.METADATA_KEY_COMMENT_SHORT_DESCRIPTION,
+                                        meta[i].getCommentShortDescription());
+                                break;
+                            case Metadata.commentActualText:
+                                builder.putString(RadioMetadata.METADATA_KEY_COMMENT_ACTUAL_TEXT,
+                                        meta[i].getCommentActualText());
+                                break;
+                            case Metadata.commercial:
+                                builder.putString(RadioMetadata.METADATA_KEY_COMMERCIAL,
+                                        meta[i].getCommercial());
+                                break;
+                            case Metadata.ufids:
+                                builder.putStringArray(RadioMetadata.METADATA_KEY_UFIDS,
+                                        meta[i].getUfids());
+                                break;
+                            case Metadata.hdStationNameShort:
+                                builder.putString(RadioMetadata.METADATA_KEY_HD_STATION_NAME_SHORT,
+                                        meta[i].getHdStationNameShort());
+                                break;
+                            case Metadata.hdStationNameLong:
+                                builder.putString(RadioMetadata.METADATA_KEY_HD_STATION_NAME_LONG,
+                                        meta[i].getHdStationNameLong());
+                                break;
+                            case Metadata.hdSubChannelsAvailable:
+                                builder.putInt(RadioMetadata.METADATA_KEY_HD_SUBCHANNELS_AVAILABLE,
+                                        meta[i].getHdSubChannelsAvailable());
+                                break;
+                            default:
+                                Slogf.w(TAG, "Ignored unknown metadata entry: %s with HD radio flag"
+                                        + " enabled", meta[i]);
+                                break;
+                        }
+                    } else {
+                        Slogf.w(TAG, "Ignored unknown metadata entry: %s with HD radio flag "
+                                + "disabled", meta[i]);
+                    }
                     break;
             }
-
         }
 
         return builder.build();
@@ -547,7 +638,13 @@ final class ConversionUtils {
         }
         Iterator<ProgramSelector.Identifier> idIterator = filter.getIdentifiers().iterator();
         while (idIterator.hasNext()) {
-            identifiersList.add(identifierToHalProgramIdentifier(idIterator.next()));
+            ProgramSelector.Identifier id = idIterator.next();
+            ProgramIdentifier hwId = identifierToHalProgramIdentifier(id);
+            if (hwId.type != IdentifierType.INVALID) {
+                identifiersList.add(hwId);
+            } else {
+                Slogf.w(TAG, "Invalid identifiers: %s", id);
+            }
         }
 
         hwFilter.identifierTypes = identifierTypeList.toArray();
@@ -558,45 +655,26 @@ final class ConversionUtils {
         return hwFilter;
     }
 
-    static ProgramList.Chunk chunkFromHalProgramListChunk(ProgramListChunk chunk) {
-        Set<RadioManager.ProgramInfo> modified = new ArraySet<>(chunk.modified.length);
-        for (int i = 0; i < chunk.modified.length; i++) {
-            RadioManager.ProgramInfo modifiedInfo =
-                    programInfoFromHalProgramInfo(chunk.modified[i]);
-            if (modifiedInfo == null) {
-                Slogf.w(TAG, "Program info %s in program list chunk is not valid",
-                        chunk.modified[i]);
-                continue;
-            }
-            modified.add(modifiedInfo);
-        }
-        Set<ProgramSelector.Identifier> removed = new ArraySet<>();
-        if (chunk.removed != null) {
-            for (int i = 0; i < chunk.removed.length; i++) {
-                ProgramSelector.Identifier removedId =
-                        identifierFromHalProgramIdentifier(chunk.removed[i]);
-                if (removedId != null) {
-                    removed.add(removedId);
-                }
+    private static boolean identifierMeetsSdkVersionRequirement(ProgramSelector.Identifier id,
+            int uid) {
+        if (Flags.hdRadioImproved() && !isAtLeastV(uid)) {
+            if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION) {
+                return false;
             }
         }
-        return new ProgramList.Chunk(chunk.purge, chunk.complete, modified, removed);
-    }
-
-    private static boolean isNewIdentifierInU(ProgramSelector.Identifier id) {
-        return id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT;
+        if (!isAtLeastU(uid)) {
+            return id.getType() != ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT;
+        }
+        return true;
     }
 
     static boolean programSelectorMeetsSdkVersionRequirement(ProgramSelector sel, int uid) {
-        if (isAtLeastU(uid)) {
-            return true;
-        }
-        if (sel.getPrimaryId().getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
+        if (!identifierMeetsSdkVersionRequirement(sel.getPrimaryId(), uid)) {
             return false;
         }
         ProgramSelector.Identifier[] secondaryIds = sel.getSecondaryIds();
         for (int i = 0; i < secondaryIds.length; i++) {
-            if (isNewIdentifierInU(secondaryIds[i])) {
+            if (!identifierMeetsSdkVersionRequirement(secondaryIds[i], uid)) {
                 return false;
             }
         }
@@ -604,14 +682,11 @@ final class ConversionUtils {
     }
 
     static boolean programInfoMeetsSdkVersionRequirement(RadioManager.ProgramInfo info, int uid) {
-        if (isAtLeastU(uid)) {
-            return true;
-        }
         if (!programSelectorMeetsSdkVersionRequirement(info.getSelector(), uid)) {
             return false;
         }
-        if (isNewIdentifierInU(info.getLogicallyTunedTo())
-                || isNewIdentifierInU(info.getPhysicallyTunedTo())) {
+        if (!identifierMeetsSdkVersionRequirement(info.getLogicallyTunedTo(), uid)
+                || !identifierMeetsSdkVersionRequirement(info.getPhysicallyTunedTo(), uid)) {
             return false;
         }
         if (info.getRelatedContent() == null) {
@@ -619,7 +694,7 @@ final class ConversionUtils {
         }
         Iterator<ProgramSelector.Identifier> relatedContentIt = info.getRelatedContent().iterator();
         while (relatedContentIt.hasNext()) {
-            if (isNewIdentifierInU(relatedContentIt.next())) {
+            if (!identifierMeetsSdkVersionRequirement(relatedContentIt.next(), uid)) {
                 return false;
             }
         }
@@ -627,9 +702,6 @@ final class ConversionUtils {
     }
 
     static ProgramList.Chunk convertChunkToTargetSdkVersion(ProgramList.Chunk chunk, int uid) {
-        if (isAtLeastU(uid)) {
-            return chunk;
-        }
         Set<RadioManager.ProgramInfo> modified = new ArraySet<>();
         Iterator<RadioManager.ProgramInfo> modifiedIterator = chunk.getModified().iterator();
         while (modifiedIterator.hasNext()) {
@@ -638,15 +710,23 @@ final class ConversionUtils {
                 modified.add(info);
             }
         }
-        Set<ProgramSelector.Identifier> removed = new ArraySet<>();
-        Iterator<ProgramSelector.Identifier> removedIterator = chunk.getRemoved().iterator();
+        Set<UniqueProgramIdentifier> removed = new ArraySet<>();
+        Iterator<UniqueProgramIdentifier> removedIterator = chunk.getRemoved().iterator();
         while (removedIterator.hasNext()) {
-            ProgramSelector.Identifier id = removedIterator.next();
-            if (!isNewIdentifierInU(id)) {
+            UniqueProgramIdentifier id = removedIterator.next();
+            if (identifierMeetsSdkVersionRequirement(id.getPrimaryId(), uid)) {
                 removed.add(id);
             }
         }
         return new ProgramList.Chunk(chunk.isPurge(), chunk.isComplete(), modified, removed);
+    }
+
+    static boolean configFlagMeetsSdkVersionRequirement(int configFlag, int uid) {
+        if (!Flags.hdRadioImproved() || !isAtLeastV(uid)) {
+            return configFlag != ConfigFlag.FORCE_ANALOG_AM
+                    && configFlag != ConfigFlag.FORCE_ANALOG_FM;
+        }
+        return true;
     }
 
     public static android.hardware.radio.Announcement announcementFromHalAnnouncement(

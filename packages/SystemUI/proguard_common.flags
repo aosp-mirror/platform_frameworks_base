@@ -1,57 +1,19 @@
-# Preserve line number information for debugging stack traces.
--keepattributes SourceFile,LineNumberTable
-
+-include proguard_kotlin.flags
 -keep class com.android.systemui.VendorServices
-
-# the `#inject` methods are accessed via reflection to work on ContentProviders
--keepclassmembers class * extends com.android.systemui.dagger.SysUIComponent { void inject(***); }
-
-# Needed for builds to properly initialize KeyFrames from xml scene
--keepclassmembers class * extends androidx.constraintlayout.motion.widget.Key {
-  public <init>();
-}
 
 # Needed to ensure callback field references are kept in their respective
 # owning classes when the downstream callback registrars only store weak refs.
-# TODO(b/264686688): Handle these cases with more targeted annotations.
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  private com.android.keyguard.KeyguardUpdateMonitorCallback *;
-  private com.android.systemui.privacy.PrivacyConfig$Callback *;
-  private com.android.systemui.privacy.PrivacyItemController$Callback *;
-  private com.android.systemui.settings.UserTracker$Callback *;
-  private com.android.systemui.statusbar.phone.StatusBarWindowCallback *;
-  private com.android.systemui.util.service.Observer$Callback *;
-  private com.android.systemui.util.service.ObservableServiceConnection$Callback *;
-}
-# Note that these rules are temporary companions to the above rules, required
-# for cases like Kotlin where fields with anonymous types use the anonymous type
-# rather than the supertype.
--if class * extends com.android.keyguard.KeyguardUpdateMonitorCallback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
+# Note that we restrict this to SysUISingleton classes, as other registering
+# classes should either *always* unregister or *never* register from their
+# constructor. We also keep callback class names for easier debugging.
+-keepnames @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
+-keepnames class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback **
+-if @com.android.systemui.util.annotations.WeaklyReferencedCallback class *
+-keepclassmembers,allowaccessmodification @com.android.systemui.dagger.SysUISingleton class * {
   <1> *;
 }
--if class * extends com.android.systemui.privacy.PrivacyConfig$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.privacy.PrivacyItemController$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.settings.UserTracker$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.statusbar.phone.StatusBarWindowCallback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.util.service.Observer$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
-  <1> *;
-}
--if class * extends com.android.systemui.util.service.ObservableServiceConnection$Callback
--keepclassmembers,allowaccessmodification class com.android.systemui.**, com.android.keyguard.** {
+-if class * extends @com.android.systemui.util.annotations.WeaklyReferencedCallback **
+-keepclassmembers,allowaccessmodification @com.android.systemui.dagger.SysUISingleton class * {
   <1> *;
 }
 
@@ -59,16 +21,6 @@
     public <init>(android.content.Context, android.util.AttributeSet);
 }
 
--keep class ** extends androidx.preference.PreferenceFragment
--keep class com.android.systemui.tuner.*
-
-# The plugins, log & common subpackages act as shared libraries that might be referenced in
-# dynamically-loaded plugin APKs.
--keep class com.android.systemui.plugins.** { *; }
--keep class com.android.systemui.log.core.** { *; }
--keep class com.android.systemui.fragments.FragmentService$FragmentCreator {
-    *;
-}
 -keep class androidx.core.app.CoreComponentFactory
 
 # Keep the wm shell lib
@@ -89,45 +41,6 @@
 # Allows proguard to make private and protected methods and fields public as
 # part of optimization. This lets proguard inline trivial getter/setter methods.
 -allowaccessmodification
-
-# Removes runtime checks added through Kotlin to JVM code genereration to
-# avoid linear growth as more Kotlin code is converted / added to the codebase.
-# These checks are generally applied to Java platform types (values returned
-# from Java code that don't have nullness annotations), but we remove them to
-# avoid code size increases.
-#
-# See also https://kotlinlang.org/docs/reference/java-interop.html
-#
-# TODO(b/199941987): Consider standardizing these rules in a central place as
-# Kotlin gains adoption with other platform targets.
--assumenosideeffects class kotlin.jvm.internal.Intrinsics {
-    # Remove check for method parameters being null
-    static void checkParameterIsNotNull(java.lang.Object, java.lang.String);
-
-    # When a Java platform type is returned and passed to Kotlin NonNull method,
-    # remove the null check
-    static void checkExpressionValueIsNotNull(java.lang.Object, java.lang.String);
-    static void checkNotNullExpressionValue(java.lang.Object, java.lang.String);
-
-    # Remove check that final value returned from method is null, if passing
-    # back Java platform type.
-    static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
-    static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String);
-
-    # Null check for accessing a field from a parent class written in Java.
-    static void checkFieldIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
-    static void checkFieldIsNotNull(java.lang.Object, java.lang.String);
-
-    # Removes code generated from !! operator which converts Nullable type to
-    # NonNull type. These would throw an NPE immediate after on access.
-    static void checkNotNull(java.lang.Object, java.lang.String);
-    static void checkNotNullParameter(java.lang.Object, java.lang.String);
-
-    # Removes lateinit var check being used before being set. Check is applied
-    # on every field access without this.
-    static void throwUninitializedPropertyAccessException(java.lang.String);
-}
-
 
 # Strip verbose logs.
 -assumenosideeffects class android.util.Log {

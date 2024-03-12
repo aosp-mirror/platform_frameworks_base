@@ -81,7 +81,6 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.widget.CachingIconView;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.ActivityIntentHelper;
-import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.bluetooth.BroadcastDialogController;
@@ -102,6 +101,7 @@ import com.android.systemui.media.controls.models.recommendation.RecommendationV
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.util.MediaDataUtils;
+import com.android.systemui.media.controls.util.MediaFlags;
 import com.android.systemui.media.controls.util.MediaUiEventLogger;
 import com.android.systemui.media.controls.util.SmallHash;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
@@ -109,6 +109,7 @@ import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -190,6 +191,7 @@ public class MediaControlPanel {
     @VisibleForTesting static final long TURBULENCE_NOISE_PLAY_DURATION = 7500L;
 
     private final SeekBarViewModel mSeekBarViewModel;
+    private final MediaFlags mMediaFlags;
     private SeekBarObserver mSeekBarObserver;
     protected final Executor mBackgroundExecutor;
     private final DelayableExecutor mMainExecutor;
@@ -280,7 +282,8 @@ public class MediaControlPanel {
             NotificationLockscreenUserManager lockscreenUserManager,
             BroadcastDialogController broadcastDialogController,
             FeatureFlags featureFlags,
-            GlobalSettings globalSettings
+            GlobalSettings globalSettings,
+            MediaFlags mediaFlags
     ) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
@@ -299,6 +302,7 @@ public class MediaControlPanel {
         mActivityIntentHelper = activityIntentHelper;
         mLockscreenUserManager = lockscreenUserManager;
         mBroadcastDialogController = broadcastDialogController;
+        mMediaFlags = mediaFlags;
 
         mSeekBarViewModel.setLogSeek(() -> {
             if (mPackageName != null && mInstanceId != null) {
@@ -575,7 +579,10 @@ public class MediaControlPanel {
         // to something which might impact the measurement
         // State refresh interferes with the translation animation, only run it if it's not running.
         if (!mMetadataAnimationHandler.isRunning()) {
-            mMediaViewController.refreshState();
+            // Don't refresh in scene framework, because it will calculate with invalid layout sizes
+            if (!mMediaFlags.isSceneContainerEnabled()) {
+                mMediaViewController.refreshState();
+            }
         }
 
         // Turbulence noise
@@ -669,7 +676,7 @@ public class MediaControlPanel {
                             mLogger.logOpenBroadcastDialog(mUid, mPackageName, mInstanceId);
                             mCurrentBroadcastApp = device.getName().toString();
                             mBroadcastDialogController.createBroadcastDialog(mCurrentBroadcastApp,
-                                    mPackageName, true, mMediaViewHolder.getSeamlessButton());
+                                    mPackageName, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                             mMediaOutputDialogFactory.create(mPackageName, true,
@@ -805,7 +812,14 @@ public class MediaControlPanel {
         // Capture width & height from views in foreground for artwork scaling in background
         int width = mMediaViewHolder.getAlbumView().getMeasuredWidth();
         int height = mMediaViewHolder.getAlbumView().getMeasuredHeight();
+        if (mMediaFlags.isSceneContainerEnabled() && (width <= 0 || height <= 0)) {
+            // TODO(b/312714128): ensure we have a valid size before setting background
+            width = mMediaViewController.getWidthInSceneContainerPx();
+            height = mMediaViewController.getHeightInSceneContainerPx();
+        }
 
+        final int finalWidth = width;
+        final int finalHeight = height;
         mBackgroundExecutor.execute(() -> {
             // Album art
             ColorScheme mutableColorScheme = null;
@@ -815,7 +829,8 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToPlayerAlbum(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToPlayerAlbum(artworkIcon, mutableColorScheme, finalWidth,
+                        finalHeight);
                 isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
@@ -857,8 +872,10 @@ public class MediaControlPanel {
                         TransitionDrawable transitionDrawable = new TransitionDrawable(
                                 new Drawable[]{mPrevArtwork, artwork});
 
-                        scaleTransitionDrawableLayer(transitionDrawable, 0, width, height);
-                        scaleTransitionDrawableLayer(transitionDrawable, 1, width, height);
+                        scaleTransitionDrawableLayer(transitionDrawable, 0, finalWidth,
+                                finalHeight);
+                        scaleTransitionDrawableLayer(transitionDrawable, 1, finalWidth,
+                                finalHeight);
                         transitionDrawable.setLayerGravity(0, Gravity.CENTER);
                         transitionDrawable.setLayerGravity(1, Gravity.CENTER);
                         transitionDrawable.setCrossFadeEnabled(true);

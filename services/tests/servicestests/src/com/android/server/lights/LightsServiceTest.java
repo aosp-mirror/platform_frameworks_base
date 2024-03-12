@@ -24,6 +24,10 @@ import static android.hardware.lights.LightsRequest.Builder;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+
+import android.Manifest;
 import android.content.Context;
 import android.hardware.light.HwLight;
 import android.hardware.light.HwLightState;
@@ -33,6 +37,8 @@ import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
 import android.hardware.lights.SystemLightsManager;
 import android.os.Looper;
+import android.os.PermissionEnforcer;
+import android.os.test.FakePermissionEnforcer;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -92,6 +98,13 @@ public class LightsServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        // The AIDL stub will use PermissionEnforcer to check permission from the caller.
+        FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        permissionEnforcer.grant(Manifest.permission.CONTROL_DEVICE_LIGHTS);
+        doReturn(Context.PERMISSION_ENFORCER_SERVICE).when(mContext).getSystemServiceName(
+                eq(PermissionEnforcer.class));
+        doReturn(permissionEnforcer).when(mContext).getSystemService(
+                eq(Context.PERMISSION_ENFORCER_SERVICE));
     }
 
     @Test

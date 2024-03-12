@@ -30,8 +30,6 @@ import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -63,7 +61,6 @@ class BackPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var latencyTracker: LatencyTracker
     @Mock private lateinit var layoutParams: WindowManager.LayoutParams
     @Mock private lateinit var backCallback: NavigationEdgeBackPlugin.BackCallback
-    private val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setup() {
@@ -77,7 +74,6 @@ class BackPanelControllerTest : SysuiTestCase() {
                 vibratorHelper,
                 configurationController,
                 latencyTracker,
-                featureFlags
             )
         mBackPanelController.setLayoutParams(layoutParams)
         mBackPanelController.setBackCallback(backCallback)
@@ -106,32 +102,6 @@ class BackPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun handlesBackCommitted() {
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
-        startTouch()
-        // Move once to cross the touch slop
-        continueTouch(START_X + touchSlop.toFloat() + 1)
-        // Move again to cross the back trigger threshold
-        continueTouch(START_X + touchSlop + triggerThreshold + 1)
-        // Wait threshold duration and hold touch past trigger threshold
-        Thread.sleep((MAX_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION + 1).toLong())
-        continueTouch(START_X + touchSlop + triggerThreshold + 1)
-
-        assertThat(mBackPanelController.currentState)
-            .isEqualTo(BackPanelController.GestureState.ACTIVE)
-        verify(backCallback).setTriggerBack(true)
-        testableLooper.moveTimeForward(100)
-        testableLooper.processAllMessages()
-        verify(vibratorHelper).vibrate(VIBRATE_ACTIVATED_EFFECT)
-
-        finishTouchActionUp(START_X + touchSlop + triggerThreshold + 1)
-        assertThat(mBackPanelController.currentState)
-            .isEqualTo(BackPanelController.GestureState.COMMITTED)
-        verify(backCallback).triggerBack()
-    }
-
-    @Test
-    fun handlesBackCommitted_withOneWayHapticsAPI() {
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
         startTouch()
         // Move once to cross the touch slop
         continueTouch(START_X + touchSlop.toFloat() + 1)
@@ -148,7 +118,6 @@ class BackPanelControllerTest : SysuiTestCase() {
         testableLooper.processAllMessages()
         verify(vibratorHelper)
             .performHapticFeedback(any(), eq(HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE))
-
         finishTouchActionUp(START_X + touchSlop + triggerThreshold + 1)
         assertThat(mBackPanelController.currentState)
             .isEqualTo(BackPanelController.GestureState.COMMITTED)
@@ -157,38 +126,6 @@ class BackPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun handlesBackCancelled() {
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
-        startTouch()
-        // Move once to cross the touch slop
-        continueTouch(START_X + touchSlop.toFloat() + 1)
-        // Move again to cross the back trigger threshold
-        continueTouch(
-            START_X + touchSlop + triggerThreshold -
-                mBackPanelController.params.deactivationTriggerThreshold
-        )
-        // Wait threshold duration and hold touch before trigger threshold
-        Thread.sleep((MAX_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION + 1).toLong())
-        continueTouch(
-            START_X + touchSlop + triggerThreshold -
-                mBackPanelController.params.deactivationTriggerThreshold
-        )
-        clearInvocations(backCallback)
-        Thread.sleep(MIN_DURATION_ACTIVE_BEFORE_INACTIVE_ANIMATION)
-        // Move in the opposite direction to cross the deactivation threshold and cancel back
-        continueTouch(START_X)
-
-        assertThat(mBackPanelController.currentState)
-            .isEqualTo(BackPanelController.GestureState.INACTIVE)
-        verify(backCallback).setTriggerBack(false)
-        verify(vibratorHelper).vibrate(VIBRATE_DEACTIVATED_EFFECT)
-
-        finishTouchActionUp(START_X)
-        verify(backCallback).cancelBack()
-    }
-
-    @Test
-    fun handlesBackCancelled_withOneWayHapticsAPI() {
-        featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
         startTouch()
         // Move once to cross the touch slop
         continueTouch(START_X + touchSlop.toFloat() + 1)

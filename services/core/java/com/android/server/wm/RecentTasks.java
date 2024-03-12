@@ -64,6 +64,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -503,6 +504,16 @@ class RecentTasks {
 
         Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
         List<Task> tasks = mTaskPersister.restoreTasksForUserLocked(userId, preaddedTasks);
+
+        // Tasks are ordered from most recent to least recent. Update the last active time to be
+        // in sync with task recency when device reboots, so the most recent task has the
+        // highest last active time
+        long currentElapsedTime = SystemClock.elapsedRealtime();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            task.lastActiveTime = currentElapsedTime - i;
+        }
+
         mTasks.addAll(tasks);
         cleanupLocked(userId);
         mUsersWithRecentsLoaded.put(userId, true);

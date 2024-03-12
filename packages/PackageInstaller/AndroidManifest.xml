@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.READ_INSTALL_SESSIONS" />
     <uses-permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS" />
     <uses-permission android:name="android.permission.USE_RESERVED_DISK" />
@@ -35,15 +36,20 @@
             android:forceQueryable="true"
             android:directBootAware="true">
 
-        <receiver android:name=".TemporaryFileManager"
+        <receiver android:name=".common.TemporaryFileManager"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
+        <activity android:name=".v2.ui.InstallLaunch"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.AlertDialogActivity"
+            android:exported="false"/>
+
         <activity android:name=".InstallStart"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                android:theme="@style/Theme.AlertDialogActivity"
                 android:exported="true"
                 android:excludeFromRecents="true">
             <intent-filter android:priority="1">
@@ -69,21 +75,25 @@
             </intent-filter>
         </activity>
 
+        <!-- NOTE: the workaround to fix the screen flash problem. Remember to check the problem
+            is resolved for new implementation -->
         <activity android:name=".InstallStaging"
-                android:exported="false" />
+                  android:theme="@style/Theme.AlertDialogActivity.NoDim"
+                  android:exported="false" />
 
         <activity android:name=".DeleteStagedFileOnResult"
             android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
             android:exported="false" />
 
         <activity android:name=".PackageInstallerActivity"
-                android:exported="false" />
+                  android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
+                  android:exported="false" />
 
         <activity android:name=".InstallInstalling"
                 android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
-        <receiver android:name=".InstallEventReceiver"
+        <receiver android:name=".common.InstallEventReceiver"
                 android:permission="android.permission.INSTALL_PACKAGES"
                 android:exported="false">
             <intent-filter android:priority="1">
@@ -113,7 +123,15 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".UninstallEventReceiver"
+        <activity android:name=".v2.ui.UninstallLaunch"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:exported="false">
+        </activity>
+
+        <receiver android:name=".common.UninstallEventReceiver"
             android:permission="android.permission.INSTALL_PACKAGES"
             android:exported="false">
             <intent-filter android:priority="1">
@@ -154,6 +172,30 @@
 
         <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
             tools:node="remove" />
+
+        <activity android:name=".UnarchiveActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true"
+                  android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.intent.action.UNARCHIVE_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".UnarchiveErrorActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true"
+                  android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.intent.action.UNARCHIVE_ERROR_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

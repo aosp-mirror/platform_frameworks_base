@@ -16,8 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
@@ -287,7 +285,7 @@ final class PolicyEnforcerCallbacks {
                 suspendPersonalAppsInPackageManager(context, userId);
             } else {
                 LocalServices.getService(PackageManagerInternal.class)
-                        .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, userId);
+                        .unsuspendAdminSuspendedPackages(userId);
             }
         });
         return true;
@@ -301,5 +299,15 @@ final class PolicyEnforcerCallbacks {
         if (!ArrayUtils.isEmpty(failedApps)) {
             Slogf.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
         }
+    }
+
+    static boolean setUsbDataSignalingEnabled(@Nullable Boolean value, @NonNull Context context) {
+        return Binder.withCleanCallingIdentity(() -> {
+            Objects.requireNonNull(context);
+
+            boolean enabled = value == null || value;
+            DevicePolicyManagerService.updateUsbDataSignal(context, enabled);
+            return true;
+        });
     }
 }

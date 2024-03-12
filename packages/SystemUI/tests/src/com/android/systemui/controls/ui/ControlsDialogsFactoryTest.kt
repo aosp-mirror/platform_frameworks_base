@@ -19,7 +19,7 @@ package com.android.systemui.controls.ui
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.FakeSystemUIDialogController
 import com.google.common.truth.Truth.assertThat

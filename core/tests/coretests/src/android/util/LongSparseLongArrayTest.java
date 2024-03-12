@@ -16,9 +16,13 @@
 
 package android.util;
 
-import androidx.test.filters.LargeTest;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.TestCase;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,9 +33,11 @@ import java.util.Random;
  * Tests for {@link LongSparseLongArray}.
  */
 @LargeTest
-public class LongSparseLongArrayTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class LongSparseLongArrayTest {
     private static final String TAG = "LongSparseLongArrayTest";
 
+    @Test
     public void testSimplePut() throws Exception {
         final LongSparseLongArray array = new LongSparseLongArray(5);
         for (int i = 0; i < 48; i++) {
@@ -45,6 +51,7 @@ public class LongSparseLongArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testSimplePutBackwards() throws Exception {
         final LongSparseLongArray array = new LongSparseLongArray(5);
         for (int i = 47; i >= 0; i--) {
@@ -58,6 +65,7 @@ public class LongSparseLongArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testMiddleInsert() throws Exception {
         final LongSparseLongArray array = new LongSparseLongArray(5);
         for (int i = 0; i < 48; i++) {
@@ -74,6 +82,7 @@ public class LongSparseLongArrayTest extends TestCase {
         assertEquals(1024, array.get(special, -1));
     }
 
+    @Test
     public void testFuzz() throws Exception {
         final Random r = new Random();
 

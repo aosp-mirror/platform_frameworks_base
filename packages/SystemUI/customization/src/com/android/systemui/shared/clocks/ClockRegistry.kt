@@ -30,15 +30,15 @@ import com.android.systemui.log.core.Logger
 import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockId
-import com.android.systemui.plugins.ClockMetadata
-import com.android.systemui.plugins.ClockProvider
-import com.android.systemui.plugins.ClockProviderPlugin
-import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.plugins.clocks.ClockMetadata
+import com.android.systemui.plugins.clocks.ClockProvider
+import com.android.systemui.plugins.clocks.ClockProviderPlugin
+import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.util.Assert
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
@@ -173,8 +173,10 @@ open class ClockRegistry(
                     { "Skipping initial load of known clock package package: $str1" }
                 )
 
+                var isCurrentClock = false
                 var isClockListChanged = false
                 for (metadata in knownClocks) {
+                    isCurrentClock = isCurrentClock || currentClockId == metadata.clockId
                     val id = metadata.clockId
                     val info =
                         availableClocks.concurrentGetOrPut(id, ClockInfo(metadata, null, manager)) {
@@ -207,8 +209,9 @@ open class ClockRegistry(
                 }
                 verifyLoadedProviders()
 
-                // Load executed via verifyLoadedProviders
-                return false
+                // Load immediately if it's the current clock, otherwise let verifyLoadedProviders
+                // load and unload clocks as necessary on the background thread.
+                return isCurrentClock
             }
 
             override fun onPluginLoaded(
@@ -509,7 +512,6 @@ open class ClockRegistry(
 
     private var isQueued = AtomicBoolean(false)
     fun verifyLoadedProviders() {
-        Log.i(TAG, Thread.currentThread().getStackTrace().toString())
         val shouldSchedule = isQueued.compareAndSet(false, true)
         if (!shouldSchedule) {
             logger.tryLog(

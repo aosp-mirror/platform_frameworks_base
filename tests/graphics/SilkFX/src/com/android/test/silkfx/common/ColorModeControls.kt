@@ -37,6 +37,8 @@ class ColorModeControls : LinearLayout, WindowObserver {
     private var window: Window? = null
     private var currentModeDisplay: TextView? = null
 
+    private var desiredRatio = 0.0f
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         val window = window ?: throw IllegalStateException("Failed to attach window")
@@ -67,6 +69,7 @@ class ColorModeControls : LinearLayout, WindowObserver {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        desiredRatio = window?.desiredHdrHeadroom ?: 0.0f
         val hdrVis = if (display.isHdrSdrRatioAvailable) {
             display.registerHdrSdrRatioChangedListener({ it.run() }, hdrSdrListener)
             View.VISIBLE
@@ -83,6 +86,11 @@ class ColorModeControls : LinearLayout, WindowObserver {
     }
 
     private fun setColorMode(newMode: Int) {
+        if (newMode == ActivityInfo.COLOR_MODE_HDR &&
+                window!!.colorMode == ActivityInfo.COLOR_MODE_HDR) {
+            desiredRatio = (desiredRatio + 1) % 5.0f
+            window!!.desiredHdrHeadroom = desiredRatio
+        }
         window!!.colorMode = newMode
         updateModeInfoDisplay()
     }

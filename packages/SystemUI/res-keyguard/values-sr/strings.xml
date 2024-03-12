@@ -27,7 +27,7 @@
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Унесите лозинку"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Унесите лозинку"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Неважећа картица."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"Напуњена је"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"Напуњено"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бежично пуњење"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуни се"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуни се"</string>
@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Споро се пуни"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Пуњење је оптимизовано да би се заштитила батерија"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Проблем са додатним прибором за пуњење"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Притисните Мени да бисте откључали."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мрежа је закључана"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Нема SIM-а"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Додајте SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM недостаје или не може да се прочита. Додајте SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Неупотребљив SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM је трајно деактивиран.\n Обратите се добављачу услуге бежичне телефоније да бисте добили други SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM је закључан."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM је закључан PUK-ом."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Откључава се SIM…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN је обавезан после закључавања"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Лозинка је обавезна после закључавања"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Шаблон је обавезан после закључавања"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Ажурирање се инсталира током неактивности"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Ажурирање ће се инсталирати када се уређај не користи"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Потребна је додатна заштита. PIN дуго није коришћен."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Потребна је додатна заштита. Лозинка дуго није коришћена."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Потребна је додатна заштита. Шаблон дуго није коришћен."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Мехурићи"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналогни"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Откључајте уређај да бисте наставили"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Унесите PIN да бисте касније исталирали ажурирање"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Унесите лозинку да бисте касније инсталирали ажурирање"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Нацртајте шаблон да бисте касније инсталирали ажурирање"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Уређај је ажуриран. Унесите PIN да бисте наставили."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Уређај је ажуриран. Унесите лозинку да бисте наставили."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Уређај је ажуриран. Нацртајте шаблон да бисте наставили."</string>
 </resources>

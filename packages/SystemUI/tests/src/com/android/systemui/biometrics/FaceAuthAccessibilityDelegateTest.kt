@@ -21,13 +21,10 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.FaceAuthApiRequestReason
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -44,7 +41,6 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 class FaceAuthAccessibilityDelegateTest : SysuiTestCase() {
 
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var hostView: View
     @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
     private lateinit var underTest: FaceAuthAccessibilityDelegate
@@ -55,14 +51,13 @@ class FaceAuthAccessibilityDelegateTest : SysuiTestCase() {
         underTest =
             FaceAuthAccessibilityDelegate(
                 context.resources,
-                keyguardUpdateMonitor,
                 faceAuthInteractor,
             )
     }
 
     @Test
     fun shouldListenForFaceTrue_onInitializeAccessibilityNodeInfo_clickActionAdded() {
-        whenever(keyguardUpdateMonitor.shouldListenForFace()).thenReturn(true)
+        whenever(faceAuthInteractor.canFaceAuthRun()).thenReturn(true)
 
         // WHEN node is initialized
         val mockedNodeInfo = mock(AccessibilityNodeInfo::class.java)
@@ -81,7 +76,7 @@ class FaceAuthAccessibilityDelegateTest : SysuiTestCase() {
 
     @Test
     fun shouldListenForFaceFalse_onInitializeAccessibilityNodeInfo_clickActionNotAdded() {
-        whenever(keyguardUpdateMonitor.shouldListenForFace()).thenReturn(false)
+        whenever(faceAuthInteractor.canFaceAuthRun()).thenReturn(false)
 
         // WHEN node is initialized
         val mockedNodeInfo = mock(AccessibilityNodeInfo::class.java)
@@ -94,7 +89,7 @@ class FaceAuthAccessibilityDelegateTest : SysuiTestCase() {
 
     @Test
     fun performAccessibilityAction_actionClick_retriesFaceAuth() {
-        whenever(keyguardUpdateMonitor.shouldListenForFace()).thenReturn(true)
+        whenever(faceAuthInteractor.canFaceAuthRun()).thenReturn(true)
 
         // WHEN click action is performed
         underTest.performAccessibilityAction(
@@ -103,9 +98,6 @@ class FaceAuthAccessibilityDelegateTest : SysuiTestCase() {
             null
         )
 
-        // THEN retry face auth
-        verify(keyguardUpdateMonitor)
-            .requestFaceAuth(eq(FaceAuthApiRequestReason.ACCESSIBILITY_ACTION))
         verify(faceAuthInteractor).onAccessibilityAction()
     }
 }

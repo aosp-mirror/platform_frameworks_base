@@ -17,6 +17,7 @@
 package com.android.systemui.qs.external
 
 import android.app.Dialog
+import android.app.IUriGrantsManager
 import android.app.StatusBarManager
 import android.content.ComponentName
 import android.content.DialogInterface
@@ -25,7 +26,7 @@ import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.internal.statusbar.IAddTileResultCallback
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.QSHost
 import com.android.systemui.statusbar.CommandQueue
@@ -42,12 +43,13 @@ private const val TAG = "TileServiceRequestController"
 /**
  * Controller to interface between [TileRequestDialog] and [QSHost].
  */
-class TileServiceRequestController constructor(
-    private val qsHost: QSHost,
-    private val commandQueue: CommandQueue,
-    private val commandRegistry: CommandRegistry,
-    private val eventLogger: TileRequestDialogEventLogger,
-    private val dialogCreator: () -> TileRequestDialog = { TileRequestDialog(qsHost.context) }
+class TileServiceRequestController(
+        private val qsHost: QSHost,
+        private val commandQueue: CommandQueue,
+        private val commandRegistry: CommandRegistry,
+        private val eventLogger: TileRequestDialogEventLogger,
+        private val iUriGrantsManager: IUriGrantsManager,
+        private val dialogCreator: () -> TileRequestDialog = { TileRequestDialog(qsHost.context) }
 ) {
 
     companion object {
@@ -62,13 +64,14 @@ class TileServiceRequestController constructor(
 
     private val commandQueueCallback = object : CommandQueue.Callbacks {
         override fun requestAddTile(
+            callingUid: Int,
             componentName: ComponentName,
             appName: CharSequence,
             label: CharSequence,
             icon: Icon,
             callback: IAddTileResultCallback
         ) {
-            requestTileAdd(componentName, appName, label, icon) {
+            requestTileAdd(callingUid, componentName, appName, label, icon) {
                 try {
                     callback.onTileRequest(it)
                 } catch (e: RemoteException) {
@@ -98,6 +101,7 @@ class TileServiceRequestController constructor(
 
     @VisibleForTesting
     internal fun requestTileAdd(
+        callingUid: Int,
         componentName: ComponentName,
         appName: CharSequence,
         label: CharSequence,
@@ -119,7 +123,13 @@ class TileServiceRequestController constructor(
             eventLogger.logUserResponse(response, packageName, instanceId)
             callback.accept(response)
         }
-        val tileData = TileRequestDialog.TileData(appName, label, icon)
+        val tileData = TileRequestDialog.TileData(
+                callingUid,
+                appName,
+                label,
+                icon,
+                componentName.packageName,
+        )
         createDialog(tileData, dialogResponse).also { dialog ->
             dialogCanceller = {
                 if (packageName == it) {
@@ -143,7 +153,7 @@ class TileServiceRequestController constructor(
             }
         }
         return dialogCreator().apply {
-            setTileData(tileData)
+            setTileData(tileData, iUriGrantsManager)
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
             setOnCancelListener { responseHandler.accept(DISMISSED) }
@@ -168,7 +178,7 @@ class TileServiceRequestController constructor(
                         Log.w(TAG, "Malformed componentName ${args[0]}")
                         return
                     }
-            requestTileAdd(componentName, args[1], args[2], null) {
+            requestTileAdd(0, componentName, args[1], args[2], null) {
                 Log.d(TAG, "Response: $it")
             }
         }
@@ -192,14 +202,16 @@ class TileServiceRequestController constructor(
     @SysUISingleton
     class Builder @Inject constructor(
         private val commandQueue: CommandQueue,
-        private val commandRegistry: CommandRegistry
+        private val commandRegistry: CommandRegistry,
+        private val iUriGrantsManager: IUriGrantsManager,
     ) {
         fun create(qsHost: QSHost): TileServiceRequestController {
             return TileServiceRequestController(
                     qsHost,
                     commandQueue,
                     commandRegistry,
-                    TileRequestDialogEventLogger()
+                    TileRequestDialogEventLogger(),
+                    iUriGrantsManager,
             )
         }
     }

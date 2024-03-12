@@ -15,6 +15,7 @@
  */
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,10 +40,13 @@ import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
 import android.util.Size;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -129,6 +133,12 @@ public final class CameraExtensionCharacteristics {
     public static final int EXTENSION_NIGHT = 4;
 
     /**
+     * An extension that aims to lock and stabilize a given region or object of interest.
+     */
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final int EXTENSION_EYES_FREE_VIDEOGRAPHY = 5;
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -136,7 +146,8 @@ public final class CameraExtensionCharacteristics {
                 EXTENSION_FACE_RETOUCH,
                 EXTENSION_BOKEH,
                 EXTENSION_HDR,
-                EXTENSION_NIGHT})
+                EXTENSION_NIGHT,
+                EXTENSION_EYES_FREE_VIDEOGRAPHY})
     public @interface Extension {
     }
 
@@ -594,8 +605,13 @@ public final class CameraExtensionCharacteristics {
             return Collections.unmodifiableList(ret);
         }
 
+        IntArray extensionList = new IntArray(EXTENSION_LIST.length);
+        extensionList.addAll(EXTENSION_LIST);
+        if (Flags.concertMode()) {
+            extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
+        }
         try {
-            for (int extensionType : EXTENSION_LIST) {
+            for (int extensionType : extensionList.toArray()) {
                 if (isExtensionSupported(mCameraId, extensionType, mCharacteristicsMapNative)) {
                     ret.add(extensionType);
                 }
@@ -705,6 +721,7 @@ public final class CameraExtensionCharacteristics {
                 switch(format) {
                     case ImageFormat.YUV_420_888:
                     case ImageFormat.JPEG:
+                    case ImageFormat.JPEG_R:
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported format: " + format);
@@ -736,6 +753,9 @@ public final class CameraExtensionCharacteristics {
                     return generateJpegSupportedSizes(
                             extenders.second.getSupportedPostviewResolutions(sz),
                                     streamMap);
+                }  else if (format == ImageFormat.JPEG_R) {
+                    // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                    return new ArrayList<>();
                 } else {
                     throw new IllegalArgumentException("Unsupported format: " + format);
                 }
@@ -858,6 +878,7 @@ public final class CameraExtensionCharacteristics {
                     switch(format) {
                         case ImageFormat.YUV_420_888:
                         case ImageFormat.JPEG:
+                        case ImageFormat.JPEG_R:
                             break;
                         default:
                             throw new IllegalArgumentException("Unsupported format: " + format);
@@ -890,6 +911,9 @@ public final class CameraExtensionCharacteristics {
                         } else {
                             return generateSupportedSizes(null, format, streamMap);
                         }
+                    } else if (format == ImageFormat.JPEG_R) {
+                        // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                        return new ArrayList<>();
                     } else {
                         throw new IllegalArgumentException("Unsupported format: " + format);
                     }
@@ -1034,6 +1058,12 @@ public final class CameraExtensionCharacteristics {
      * <p>The set returned is not modifiable, so any attempts to modify it will throw
      * a {@code UnsupportedOperationException}.</p>
      *
+     * <p>Devices launching on Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
+     * or newer versions are required to support {@link CaptureRequest#CONTROL_AF_MODE},
+     * {@link CaptureRequest#CONTROL_AF_REGIONS}, {@link CaptureRequest#CONTROL_AF_TRIGGER},
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO} for
+     * {@link CameraExtensionCharacteristics#EXTENSION_NIGHT}.</p>
+     *
      * @param extension the extension type
      *
      * @return non-modifiable set of capture keys supported by camera extension session initialized
@@ -1114,6 +1144,12 @@ public final class CameraExtensionCharacteristics {
      * <p>In case the set is empty, then the extension is not able to support any capture results
      * and the {@link CameraExtensionSession.ExtensionCaptureCallback#onCaptureResultAvailable}
      * callback will not be fired.</p>
+     *
+     * <p>Devices launching on Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
+     * or newer versions are required to support {@link CaptureResult#CONTROL_AF_MODE},
+     * {@link CaptureResult#CONTROL_AF_REGIONS}, {@link CaptureResult#CONTROL_AF_TRIGGER},
+     * {@link CaptureResult#CONTROL_AF_STATE}, {@link CaptureResult#CONTROL_ZOOM_RATIO} for
+     * {@link CameraExtensionCharacteristics#EXTENSION_NIGHT}.</p>
      *
      * @param extension the extension type
      *

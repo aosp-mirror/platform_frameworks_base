@@ -19,7 +19,6 @@ package com.android.server.companion;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
-import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME;
 import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
 import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.content.ComponentName.createRelative;
@@ -56,6 +55,8 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.util.Slog;
+
+import com.android.internal.R;
 
 import java.util.List;
 
@@ -106,9 +107,6 @@ import java.util.List;
 class AssociationRequestsProcessor {
     private static final String TAG = "CDM_AssociationRequestsProcessor";
 
-    private static final ComponentName ASSOCIATION_REQUEST_APPROVAL_ACTIVITY =
-            createRelative(COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, ".CompanionDeviceActivity");
-
     // AssociationRequestsProcessor <-> UI
     private static final String EXTRA_APPLICATION_CALLBACK = "application_callback";
     private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
@@ -130,6 +128,8 @@ class AssociationRequestsProcessor {
     private final @NonNull CompanionDeviceManagerService mService;
     private final @NonNull PackageManagerInternal mPackageManager;
     private final @NonNull AssociationStoreImpl mAssociationStore;
+    @NonNull
+    private final ComponentName mCompanionDeviceActivity;
 
     AssociationRequestsProcessor(@NonNull CompanionDeviceManagerService service,
             @NonNull AssociationStoreImpl associationStore) {
@@ -137,6 +137,9 @@ class AssociationRequestsProcessor {
         mService = service;
         mPackageManager = service.mPackageManagerInternal;
         mAssociationStore = associationStore;
+        mCompanionDeviceActivity = createRelative(
+                mContext.getString(R.string.config_companionDeviceManagerPackage),
+                ".CompanionDeviceActivity");
     }
 
     /**
@@ -189,7 +192,7 @@ class AssociationRequestsProcessor {
         extras.putParcelable(EXTRA_RESULT_RECEIVER, prepareForIpc(mOnRequestConfirmationReceiver));
 
         final Intent intent = new Intent();
-        intent.setComponent(ASSOCIATION_REQUEST_APPROVAL_ACTIVITY);
+        intent.setComponent(mCompanionDeviceActivity);
         intent.putExtras(extras);
 
         // 2b.3. Create a PendingIntent.
@@ -216,7 +219,7 @@ class AssociationRequestsProcessor {
         extras.putBoolean(EXTRA_FORCE_CANCEL_CONFIRMATION, true);
 
         final Intent intent = new Intent();
-        intent.setComponent(ASSOCIATION_REQUEST_APPROVAL_ACTIVITY);
+        intent.setComponent(mCompanionDeviceActivity);
         intent.putExtras(extras);
 
         return createPendingIntent(packageUid, intent);
@@ -278,9 +281,9 @@ class AssociationRequestsProcessor {
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
-                macAddress, displayName, deviceProfile, associatedDevice, selfManaged,
-                /* notifyOnDeviceNearby */ false, /* revoked */ false, timestamp, Long.MAX_VALUE,
-                /* systemDataSyncFlags */ 0);
+                /* tag */ null, macAddress, displayName, deviceProfile, associatedDevice,
+                selfManaged, /* notifyOnDeviceNearby */ false, /* revoked */ false,
+                timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0);
 
         if (deviceProfile != null) {
             // If the "Device Profile" is specified, make the companion application a holder of the

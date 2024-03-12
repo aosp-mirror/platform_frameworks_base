@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.airplane.data.repository
 
+import android.net.ConnectivityManager
 import android.os.Handler
-import android.os.UserHandle
 import android.provider.Settings.Global
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -29,13 +29,14 @@ import com.android.systemui.qs.SettingObserver
 import com.android.systemui.statusbar.pipeline.dagger.AirplaneTableLog
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /**
  * Provides data related to airplane mode.
@@ -49,15 +50,19 @@ import kotlinx.coroutines.flow.stateIn
 interface AirplaneModeRepository {
     /** Observable for whether the device is currently in airplane mode. */
     val isAirplaneMode: StateFlow<Boolean>
+
+    /** Sets airplane mode state. */
+    suspend fun setIsAirplaneMode(isEnabled: Boolean)
 }
 
 @SysUISingleton
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
-@OptIn(ExperimentalCoroutinesApi::class)
 class AirplaneModeRepositoryImpl
 @Inject
 constructor(
-    @Background private val bgHandler: Handler,
+    private val connectivityManager: ConnectivityManager,
+    @Background private val bgHandler: Handler?,
+    @Background private val backgroundContext: CoroutineContext,
     private val globalSettings: GlobalSettings,
     @AirplaneTableLog logger: TableLogBuffer,
     @Application scope: CoroutineScope,
@@ -66,13 +71,7 @@ constructor(
     override val isAirplaneMode: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val observer =
-                    object :
-                        SettingObserver(
-                            globalSettings,
-                            bgHandler,
-                            Global.AIRPLANE_MODE_ON,
-                            UserHandle.USER_ALL
-                        ) {
+                    object : SettingObserver(globalSettings, bgHandler, Global.AIRPLANE_MODE_ON) {
                         override fun handleValueChanged(value: Int, observedChange: Boolean) {
                             trySend(value == 1)
                         }
@@ -96,4 +95,7 @@ constructor(
                 // initialValue here is irrelevant.
                 initialValue = false,
             )
+
+    override suspend fun setIsAirplaneMode(isEnabled: Boolean) =
+        withContext(backgroundContext) { connectivityManager.setAirplaneMode(isEnabled) }
 }
