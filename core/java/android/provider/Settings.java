@@ -12395,6 +12395,13 @@ public final class Settings {
          */
         public static final String HIDE_PRIVATESPACE_ENTRY_POINT = "hide_privatespace_entry_point";
 
+        /**
+         * Whether or not secure windows should be disabled. This only works on debuggable builds.
+         *
+         * @hide
+         */
+        public static final String DISABLE_SECURE_WINDOWS = "disable_secure_windows";
+
         /** @hide */
         public static final int PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK = 0;
         /** @hide */

@@ -794,6 +794,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE);
         private final Uri mImmersiveModeConfirmationsUri =
                 Settings.Secure.getUriFor(Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS);
+        private final Uri mDisableSecureWindowsUri =
+                Settings.Secure.getUriFor(Settings.Secure.DISABLE_SECURE_WINDOWS);
         private final Uri mPolicyControlUri =
                 Settings.Global.getUriFor(Settings.Global.POLICY_CONTROL);
         private final Uri mForceDesktopModeOnExternalDisplaysUri = Settings.Global.getUriFor(
@@ -821,6 +823,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mAnimationDurationScaleUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mImmersiveModeConfirmationsUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mDisableSecureWindowsUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mPolicyControlUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mForceDesktopModeOnExternalDisplaysUri, false, this,
@@ -876,6 +880,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            if (mDisableSecureWindowsUri.equals(uri)) {
+                updateDisableSecureWindows();
+                return;
+            }
+
             @UpdateAnimationScaleMode
             final int mode;
             if (mWindowAnimationScaleUri.equals(uri)) {
@@ -895,6 +904,7 @@ public class WindowManagerService extends IWindowManager.Stub
         void loadSettings() {
             updateSystemUiSettings(false /* handleChange */);
             updateMaximumObscuringOpacityForTouch();
+            updateDisableSecureWindows();
         }
 
         void updateMaximumObscuringOpacityForTouch() {
@@ -975,6 +985,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     mDisplayWindowSettings.applySettingsToDisplayLocked(display);
                     display.reconfigureDisplayLocked();
                 });
+            }
+        }
+
+        void updateDisableSecureWindows() {
+            if (!SystemProperties.getBoolean(SYSTEM_DEBUGGABLE, false)) {
+                return;
+            }
+
+            final boolean disableSecureWindows;
+            try {
+                disableSecureWindows = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.DISABLE_SECURE_WINDOWS, 0) != 0;
+            } catch (Settings.SettingNotFoundException e) {
+                return;
+            }
+            if (mDisableSecureWindows == disableSecureWindows) {
+                return;
+            }
+
+            synchronized (mGlobalLock) {
+                mDisableSecureWindows = disableSecureWindows;
+                mRoot.refreshSecureSurfaceState();
             }
         }
     }
@@ -1114,6 +1146,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private final ScreenRecordingCallbackController mScreenRecordingCallbackController;
+
+    private volatile boolean mDisableSecureWindows = false;
 
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, WindowManagerPolicy policy,
@@ -6897,6 +6931,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(mLastFinishedFreezeSource);
                 }
                 pw.println();
+        pw.print("  mDisableSecureWindows="); pw.println(mDisableSecureWindows);
 
         mInputManagerCallback.dump(pw, "  ");
         mSnapshotController.dump(pw, " ");
@@ -10067,5 +10102,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             mDragDropController.setGlobalDragListener(listener);
         }
+    }
+
+    boolean getDisableSecureWindows() {
+        return mDisableSecureWindows;
     }
 }
