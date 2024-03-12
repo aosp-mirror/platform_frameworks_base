@@ -19,12 +19,18 @@ package com.android.systemui.media.controls.util
 import android.app.StatusBarManager
 import android.os.UserHandle
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import javax.inject.Inject
 
 @SysUISingleton
-class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
+class MediaFlags
+@Inject
+constructor(
+    private val featureFlags: FeatureFlagsClassic,
+    private val sceneContainerFlags: SceneContainerFlags
+) {
     /**
      * Check whether media control actions should be based on PlaybackState instead of notification
      */
@@ -48,4 +54,8 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
 
     /** Check whether we allow remote media to generate resume controls */
     fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
+
+    /** Check whether to use scene framework */
+    fun isSceneContainerEnabled() =
+        sceneContainerFlags.isEnabled() && MediaInSceneContainerFlag.isEnabled
 }

@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.android.systemui.common.ui.data.repository
 
 import android.content.Context
 import android.content.res.Configuration
 import android.view.DisplayInfo
+import androidx.annotation.DimenRes
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.wrapper.DisplayUtilsWrapper
+import dagger.Binds
+import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,12 +44,19 @@ import kotlinx.coroutines.flow.stateIn
 interface ConfigurationRepository {
     /** Called whenever ui mode, theme or configuration has changed. */
     val onAnyConfigurationChange: Flow<Unit>
+
+    /** Called whenever the configuration has changed. */
+    val onConfigurationChange: Flow<Unit>
+
     val scaleForResolution: Flow<Float>
+    val configurationValues: Flow<Configuration>
 
     fun getResolutionScale(): Float
+
+    /** Convenience to context.resources.getDimensionPixelSize() */
+    fun getDimensionPixelSize(id: Int): Int
 }
 
-@ExperimentalCoroutinesApi
 @SysUISingleton
 class ConfigurationRepositoryImpl
 @Inject
@@ -58,7 +69,7 @@ constructor(
     private val displayInfo = MutableStateFlow(DisplayInfo())
 
     override val onAnyConfigurationChange: Flow<Unit> =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
+        conflatedCallbackFlow {
             val callback =
                 object : ConfigurationController.ConfigurationListener {
                     override fun onUiModeChanged() {
@@ -81,8 +92,8 @@ constructor(
             awaitClose { configurationController.removeCallback(callback) }
         }
 
-    private val configurationChange: Flow<Unit> =
-        ConflatedCallbackFlow.conflatedCallbackFlow {
+    override val onConfigurationChange: Flow<Unit> =
+        conflatedCallbackFlow {
             val callback =
                 object : ConfigurationController.ConfigurationListener {
                     override fun onConfigChanged(newConfig: Configuration) {
@@ -93,8 +104,22 @@ constructor(
             awaitClose { configurationController.removeCallback(callback) }
         }
 
+    override val configurationValues: Flow<Configuration> =
+            conflatedCallbackFlow {
+                val callback =
+                        object : ConfigurationController.ConfigurationListener {
+                            override fun onConfigChanged(newConfig: Configuration) {
+                                trySend(newConfig)
+                            }
+                        }
+
+                trySend(context.resources.configuration)
+                configurationController.addCallback(callback)
+                awaitClose { configurationController.removeCallback(callback) }
+            }
+
     override val scaleForResolution: StateFlow<Float> =
-        configurationChange
+        onConfigurationChange
             .mapLatest { getResolutionScale() }
             .distinctUntilChanged()
             .stateIn(scope, SharingStarted.WhileSubscribed(), getResolutionScale())
@@ -115,4 +140,13 @@ constructor(
         }
         return 1f
     }
+
+    override fun getDimensionPixelSize(@DimenRes id: Int): Int {
+        return context.resources.getDimensionPixelSize(id)
+    }
+}
+
+@Module
+interface ConfigurationRepositoryModule {
+    @Binds fun bindImpl(impl: ConfigurationRepositoryImpl): ConfigurationRepository
 }

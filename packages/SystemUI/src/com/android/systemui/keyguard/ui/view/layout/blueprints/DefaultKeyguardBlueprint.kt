@@ -17,18 +17,26 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import androidx.constraintlayout.widget.ConstraintSet
+import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.KeyguardBlueprint
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
+import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLongPressHandlingSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
-import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
+import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule.Companion.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION
+import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
+import java.util.Optional
 import javax.inject.Inject
+import javax.inject.Named
+import kotlin.jvm.optionals.getOrNull
 
 /**
  * Positions elements of the lockscreen to the default position.
@@ -40,27 +48,39 @@ import javax.inject.Inject
 class DefaultKeyguardBlueprint
 @Inject
 constructor(
-    private val defaultIndicationAreaSection: DefaultIndicationAreaSection,
-    private val defaultLockIconSection: DefaultLockIconSection,
-    private val defaultShortcutsSection: DefaultShortcutsSection,
-    private val defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
-    private val defaultLongPressHandlingSection: DefaultLongPressHandlingSection,
-    private val defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
-    private val defaultStatusViewSection: DefaultStatusViewSection,
-    private val splitShadeGuidelines: SplitShadeGuidelines,
+    defaultIndicationAreaSection: DefaultIndicationAreaSection,
+    defaultDeviceEntrySection: DefaultDeviceEntrySection,
+    defaultShortcutsSection: DefaultShortcutsSection,
+    @Named(KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
+    defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
+    defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
+    defaultStatusViewSection: DefaultStatusViewSection,
+    defaultStatusBarSection: DefaultStatusBarSection,
+    defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
+    aodNotificationIconsSection: AodNotificationIconsSection,
+    aodBurnInSection: AodBurnInSection,
+    communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
+    clockSection: ClockSection,
+    smartspaceSection: SmartspaceSection,
 ) : KeyguardBlueprint {
     override val id: String = DEFAULT
 
-    override fun apply(constraintSet: ConstraintSet) {
-        defaultIndicationAreaSection.apply(constraintSet)
-        defaultLockIconSection.apply(constraintSet)
-        defaultShortcutsSection.apply(constraintSet)
-        defaultAmbientIndicationAreaSection.apply(constraintSet)
-        defaultLongPressHandlingSection.apply(constraintSet)
-        defaultSettingsPopupMenuSection.apply(constraintSet)
-        defaultStatusViewSection.apply(constraintSet)
-        splitShadeGuidelines.apply(constraintSet)
-    }
+    override val sections =
+        listOfNotNull(
+            defaultIndicationAreaSection,
+            defaultShortcutsSection,
+            defaultAmbientIndicationAreaSection.getOrNull(),
+            defaultSettingsPopupMenuSection,
+            defaultStatusViewSection,
+            defaultStatusBarSection,
+            defaultNotificationStackScrollLayoutSection,
+            aodNotificationIconsSection,
+            smartspaceSection,
+            aodBurnInSection,
+            communalTutorialIndicatorSection,
+            clockSection,
+            defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
+        )
 
     companion object {
         const val DEFAULT = "default"

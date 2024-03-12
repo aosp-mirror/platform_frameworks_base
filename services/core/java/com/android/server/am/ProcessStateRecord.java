@@ -29,6 +29,7 @@ import static com.android.server.am.ProcessRecord.TAG;
 import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.os.Flags;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
@@ -454,6 +455,9 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     private int mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
 
+    @GuardedBy("mService")
+    private boolean mScheduleLikeTopApp = false;
+
     ProcessStateRecord(ProcessRecord app) {
         mApp = app;
         mService = app.mService;
@@ -614,9 +618,11 @@ final class ProcessStateRecord {
     void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
             synchronized (mProcLock) {
+                final int prevProcState = mRepProcState;
                 setReportedProcState(newState);
                 setCurProcState(newState);
                 setCurRawProcState(newState);
+                mService.mOomAdjuster.onProcessStateChanged(mApp, prevProcState);
             }
         }
     }
@@ -1134,6 +1140,16 @@ final class ProcessStateRecord {
         return mCachedSchedGroup;
     }
 
+    @GuardedBy("mService")
+    boolean shouldScheduleLikeTopApp() {
+        return mScheduleLikeTopApp;
+    }
+
+    @GuardedBy("mService")
+    void setScheduleLikeTopApp(boolean scheduleLikeTopApp) {
+        mScheduleLikeTopApp = scheduleLikeTopApp;
+    }
+
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     public String makeAdjReason() {
         if (mAdjSource != null || mAdjTarget != null) {
@@ -1335,7 +1351,12 @@ final class ProcessStateRecord {
         }
         if (mNotCachedSinceIdle) {
             pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(mNotCachedSinceIdle);
-            pw.print(" initialIdlePss="); pw.println(mApp.mProfile.getInitialIdlePss());
+            if (!Flags.removeAppProfilerPssCollection()) {
+                pw.print(" initialIdlePss=");
+            } else {
+                pw.print(" initialIdleRss=");
+            }
+            pw.println(mApp.mProfile.getInitialIdlePssOrRss());
         }
         if (hasTopUi() || hasOverlayUi() || mRunningRemoteAnimation) {
             pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi());

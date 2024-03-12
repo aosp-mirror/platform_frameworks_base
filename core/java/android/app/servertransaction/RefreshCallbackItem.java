@@ -48,12 +48,12 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client,
-            @NonNull ActivityClientRecord r, PendingTransactionActions pendingActions) {}
+            @NonNull ActivityClientRecord r, @NonNull PendingTransactionActions pendingActions) {}
 
     @Override
-    public void postExecute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
-        final ActivityClientRecord r = getActivityClientRecord(client, token);
+    public void postExecute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
+        final ActivityClientRecord r = getActivityClientRecord(client);
         client.reportRefresh(r);
     }
 
@@ -71,6 +71,7 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
 
     @Override
     public void recycle() {
+        super.recycle();
         ObjectPool.recycle(this);
     }
 
@@ -79,7 +80,9 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
     * @param postExecutionState indicating whether refresh should happen using the
     *        "stopped -> resumed" cycle or "paused -> resumed" cycle.
     */
-    public static RefreshCallbackItem obtain(@LifecycleState int postExecutionState) {
+    @NonNull
+    public static RefreshCallbackItem obtain(@NonNull IBinder activityToken,
+            @LifecycleState int postExecutionState) {
         if (postExecutionState != ON_STOP && postExecutionState != ON_PAUSE) {
             throw new IllegalArgumentException(
                     "Only ON_STOP or ON_PAUSE are allowed as a post execution state for "
@@ -90,6 +93,7 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
         if (instance == null) {
             instance = new RefreshCallbackItem();
         }
+        instance.setActivityToken(activityToken);
         instance.mPostExecutionState = postExecutionState;
         return instance;
     }
@@ -99,7 +103,8 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
     // Parcelable implementation
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeInt(mPostExecutionState);
     }
 
@@ -108,7 +113,7 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final RefreshCallbackItem other = (RefreshCallbackItem) o;
@@ -118,23 +123,25 @@ public class RefreshCallbackItem extends ActivityTransactionItem {
     @Override
     public int hashCode() {
         int result = 17;
+        result = 31 * result + super.hashCode();
         result = 31 * result + mPostExecutionState;
         return result;
     }
 
     @Override
     public String toString() {
-        return "RefreshCallbackItem{mPostExecutionState=" + mPostExecutionState + "}";
+        return "RefreshCallbackItem{" + super.toString()
+                + ",mPostExecutionState=" + mPostExecutionState + "}";
     }
 
-    private RefreshCallbackItem(Parcel in) {
+    private RefreshCallbackItem(@NonNull Parcel in) {
+        super(in);
         mPostExecutionState = in.readInt();
     }
 
-    public static final @NonNull Creator<RefreshCallbackItem> CREATOR =
-            new Creator<RefreshCallbackItem>() {
+    public static final @NonNull Creator<RefreshCallbackItem> CREATOR = new Creator<>() {
 
-        public RefreshCallbackItem createFromParcel(Parcel in) {
+        public RefreshCallbackItem createFromParcel(@NonNull Parcel in) {
             return new RefreshCallbackItem(in);
         }
 

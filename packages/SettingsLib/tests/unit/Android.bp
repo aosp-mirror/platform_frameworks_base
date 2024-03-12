@@ -20,6 +20,7 @@ package {
 
 android_test {
     name: "SettingsLibUnitTests",
+    use_resource_processor: true,
     test_suites: ["device-tests"],
 
     srcs: [

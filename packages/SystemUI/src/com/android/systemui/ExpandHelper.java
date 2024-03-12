@@ -36,6 +36,8 @@ import androidx.core.animation.Animator;
 import androidx.core.animation.AnimatorListenerAdapter;
 import androidx.core.animation.ObjectAnimator;
 
+import com.android.systemui.res.R;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;

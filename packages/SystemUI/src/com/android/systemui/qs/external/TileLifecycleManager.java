@@ -17,6 +17,7 @@ package com.android.systemui.qs.external;
 
 import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
 
+import android.app.ActivityManager;
 import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -35,6 +36,7 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.TileService;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -81,7 +83,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
-    private static final int DEFAULT_BIND_RETRY_DELAY = 1000;
+    private static final long DEFAULT_BIND_RETRY_DELAY = 5 * DateUtils.SECOND_IN_MILLIS;
+    private static final long LOW_MEMORY_BIND_RETRY_DELAY = 20 * DateUtils.SECOND_IN_MILLIS;
 
     // Shared prefs that hold tile lifecycle info.
     private static final String TILES = "tiles_prefs";
@@ -94,6 +97,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final IBinder mToken = new Binder();
     private final PackageManagerAdapter mPackageManagerAdapter;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final ActivityManager mActivityManager;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     @Nullable
@@ -102,7 +106,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private IBinder mClickBinder;
 
     private int mBindTryCount;
-    private int mBindRetryDelay = DEFAULT_BIND_RETRY_DELAY;
+    private long mBindRetryDelay = DEFAULT_BIND_RETRY_DELAY;
+    private AtomicBoolean isDeathRebindScheduled = new AtomicBoolean(false);
     private AtomicBoolean mBound = new AtomicBoolean(false);
     private AtomicBoolean mPackageReceiverRegistered = new AtomicBoolean(false);
     private AtomicBoolean mUserReceiverRegistered = new AtomicBoolean(false);
@@ -115,7 +120,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @AssistedInject
     TileLifecycleManager(@Main Handler handler, Context context, IQSService service,
             PackageManagerAdapter packageManagerAdapter, BroadcastDispatcher broadcastDispatcher,
-            @Assisted Intent intent, @Assisted UserHandle user,
+            @Assisted Intent intent, @Assisted UserHandle user, ActivityManager activityManager,
             @Background DelayableExecutor executor) {
         mContext = context;
         mHandler = handler;
@@ -126,6 +131,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mExecutor = executor;
         mPackageManagerAdapter = packageManagerAdapter;
         mBroadcastDispatcher = broadcastDispatcher;
+        mActivityManager = activityManager;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
 
@@ -150,10 +156,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         synchronized (mQueuedMessages) {
             return mQueuedMessages.contains(MSG_ON_CLICK);
         }
-    }
-
-    public void setBindRetryDelay(int delayMs) {
-        mBindRetryDelay = delayMs;
     }
 
     public boolean isActiveTile() {
@@ -250,19 +252,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     private boolean bindServices() {
         String packageName = mIntent.getComponent().getPackageName();
+        int flags = Context.BIND_AUTO_CREATE
+                | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                | Context.BIND_WAIVE_PRIORITY;
         if (CompatChanges.isChangeEnabled(START_ACTIVITY_NEEDS_PENDING_INTENT, packageName,
                 mUser)) {
-            return mContext.bindServiceAsUser(mIntent, this,
-                    Context.BIND_AUTO_CREATE
-                            | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
-                            | Context.BIND_WAIVE_PRIORITY,
-                    mUser);
+            return mContext.bindServiceAsUser(mIntent, this, flags, mUser);
         }
         return mContext.bindServiceAsUser(mIntent, this,
-                Context.BIND_AUTO_CREATE
-                        | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
-                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
-                        | Context.BIND_WAIVE_PRIORITY,
+                flags | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                 mUser);
     }
 
@@ -278,6 +276,11 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
         mWrapper = wrapper;
         handlePendingMessages();
+    }
+
+    @Override
+    public void onNullBinding(ComponentName name) {
+        executeSetBindService(false);
     }
 
     @Override
@@ -352,8 +355,32 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         if (!mBound.get()) return;
         if (DEBUG) Log.d(TAG, "handleDeath");
         if (checkComponentState()) {
-            mExecutor.executeDelayed(() -> setBindService(true), mBindRetryDelay);
+            if (isDeathRebindScheduled.compareAndSet(false, true)) {
+                mExecutor.executeDelayed(() -> {
+                    setBindService(true);
+                    isDeathRebindScheduled.set(false);
+                }, getRebindDelay());
+            }
         }
+    }
+
+    /**
+     * @return the delay to automatically rebind after a service died. It provides a longer delay if
+     * the device is a low memory state because the service is likely to get killed again by the
+     * system. In this case we want to rebind later and not to cause a loop of a frequent rebinds.
+     */
+    private long getRebindDelay() {
+        final ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
+        mActivityManager.getMemoryInfo(info);
+
+        final long delay;
+        if (info.lowMemory) {
+            delay = LOW_MEMORY_BIND_RETRY_DELAY;
+        } else {
+            delay = mBindRetryDelay;
+        }
+        Log.i(TAG, "Rebinding with a delay=" + delay);
+        return delay;
     }
 
     private boolean checkComponentState() {

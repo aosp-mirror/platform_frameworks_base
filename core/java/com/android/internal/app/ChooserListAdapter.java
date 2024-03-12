@@ -102,6 +102,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     // Sorted list of DisplayResolveInfos for the alphabetical app section.
     private List<DisplayResolveInfo> mSortedList = new ArrayList<>();
     private AppPredictor mAppPredictor;
+    private ResolverAppPredictorCallback mAppPredictorCallbackWrapper;
     private AppPredictor.Callback mAppPredictorCallback;
 
     // Represents the UserSpace in which the Initial Intents should be resolved.
@@ -744,8 +745,11 @@ public class ChooserListAdapter extends ResolverListAdapter {
         mAppPredictor = appPredictor;
     }
 
-    public void setAppPredictorCallback(AppPredictor.Callback appPredictorCallback) {
+    public void setAppPredictorCallback(
+            AppPredictor.Callback appPredictorCallback,
+            ResolverAppPredictorCallback appPredictorCallbackWrapper) {
         mAppPredictorCallback = appPredictorCallback;
+        mAppPredictorCallbackWrapper = appPredictorCallbackWrapper;
     }
 
     public void destroyAppPredictor() {
@@ -753,6 +757,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
             getAppPredictor().unregisterPredictionUpdates(mAppPredictorCallback);
             getAppPredictor().destroy();
             setAppPredictor(null);
+        }
+
+        if (mAppPredictorCallbackWrapper != null) {
+            mAppPredictorCallbackWrapper.destroy();
         }
     }
 

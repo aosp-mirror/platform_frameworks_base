@@ -82,11 +82,14 @@ import static android.view.WindowLayoutParamsProto.Y;
 
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -119,7 +122,11 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.ITrustedPresentationListener;
 import android.window.TaskFpsCallback;
+import android.window.TrustedPresentationThresholds;
+
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -585,6 +592,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_UNOCCLUDING = (1 << 13); // 0x2000
 
     /**
+     * Transition flag: Indicates that there is a physical display switch
+     * TODO(b/316112906) remove after defer_display_updates flag roll out
+     * @hide
+     */
+    int TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH = (1 << 14); // 0x4000
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
@@ -601,7 +615,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_INVISIBLE,
             TRANSIT_FLAG_KEYGUARD_APPEARING,
             TRANSIT_FLAG_KEYGUARD_OCCLUDING,
-            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING
+            TRANSIT_FLAG_KEYGUARD_UNOCCLUDING,
+            TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionFlags {}
@@ -648,30 +663,40 @@ public interface WindowManager extends ViewManager {
             REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
             REMOVE_CONTENT_MODE_DESTROY,
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface RemoveContentMode {}
 
     /**
      * Display IME Policy: The IME should appear on the local display.
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_LOCAL = 0;
 
     /**
-     * Display IME Policy: The IME should appear on the fallback display.
+     * Display IME Policy: The IME should appear on a fallback display.
+     *
+     * <p>The fallback display is always {@link Display#DEFAULT_DISPLAY}.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1;
 
     /**
      * Display IME Policy: The IME should be hidden.
      *
-     * Setting this policy will prevent the IME from making a connection. This
-     * will prevent any IME from receiving metadata about input.
+     * <p>Setting this policy will prevent the IME from making a connection. This
+     * will prevent any IME from receiving metadata about input and this display will effectively
+     * have no IME.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_HIDE = 2;
 
     /**
@@ -682,6 +707,7 @@ public interface WindowManager extends ViewManager {
             DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
             DISPLAY_IME_POLICY_HIDE,
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface DisplayImePolicy {}
 
     /**
@@ -1683,7 +1709,7 @@ public interface WindowManager extends ViewManager {
      * orientation (e.g. with {@link android.app.Activity#setRequestedOrientation(int)}). This
      * listener gives application an opportunity to selectively react to device orientation changes.
      * The newly added listener will be called with current proposed rotation. Note that the context
-     * of this window manager instance must be a {@link android.annotation.UiContext}.
+     * of this window manager instance must be a {@code UiContext}.
      *
      * @param executor The executor on which callback method will be invoked.
      * @param listener Called when the proposed rotation for the context is being delivered.
@@ -1691,7 +1717,7 @@ public interface WindowManager extends ViewManager {
      *                 {@link Surface#ROTATION_90}, {@link Surface#ROTATION_180} and
      *                 {@link Surface#ROTATION_270}.
      * @throws UnsupportedOperationException if this method is called on an instance that is not
-     *         associated with a {@link android.annotation.UiContext}.
+     *         associated with a {@code UiContext}.
      */
     default void addProposedRotationListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull IntConsumer listener) {
@@ -1850,6 +1876,8 @@ public interface WindowManager extends ViewManager {
                         to = "PHONE"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_ALERT,
                         to = "SYSTEM_ALERT"),
+                @ViewDebug.IntToString(from = TYPE_KEYGUARD,
+                        to = "KEYGUARD"),
                 @ViewDebug.IntToString(from = TYPE_TOAST,
                         to = "TOAST"),
                 @ViewDebug.IntToString(from = TYPE_SYSTEM_OVERLAY,
@@ -1898,6 +1926,8 @@ public interface WindowManager extends ViewManager {
                         to = "PRIVATE_PRESENTATION"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION,
                         to = "VOICE_INTERACTION"),
+                @ViewDebug.IntToString(from = TYPE_ACCESSIBILITY_OVERLAY,
+                        to = "ACCESSIBILITY_OVERLAY"),
                 @ViewDebug.IntToString(from = TYPE_VOICE_INTERACTION_STARTING,
                         to = "VOICE_INTERACTION_STARTING"),
                 @ViewDebug.IntToString(from = TYPE_DOCK_DIVIDER,
@@ -1907,7 +1937,13 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.IntToString(from = TYPE_SCREENSHOT,
                         to = "SCREENSHOT"),
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_OVERLAY,
-                        to = "APPLICATION_OVERLAY")
+                        to = "APPLICATION_OVERLAY"),
+                @ViewDebug.IntToString(from = TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
+                        to = "ACCESSIBILITY_MAGNIFICATION_OVERLAY"),
+                @ViewDebug.IntToString(from = TYPE_NOTIFICATION_SHADE,
+                        to = "NOTIFICATION_SHADE"),
+                @ViewDebug.IntToString(from = TYPE_STATUS_BAR_ADDITIONAL,
+                        to = "STATUS_BAR_ADDITIONAL")
         })
         @WindowType
         public int type;
@@ -3103,7 +3139,7 @@ public interface WindowManager extends ViewManager {
         /**
          * Never animate position changes of the window.
          *
-         * @see android.R.attr#Window_windowNoMoveAnimation
+         * @see android.R.styleable#Window_windowNoMoveAnimation
          * {@hide}
          */
         @UnsupportedAppUsage
@@ -3236,11 +3272,11 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 1 << 24;
 
         /**
-         * Flag to request creation of a BLAST (Buffer as LayerState) Layer.
-         * If not specified the client will receive a BufferQueue layer.
+         * Flag to indicate that the window consumes the insets of {@link Type#ime()}. This makes
+         * windows below this window unable to receive visible IME insets.
          * @hide
          */
-        public static final int PRIVATE_FLAG_USE_BLAST = 1 << 25;
+        public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
 
         /**
          * Flag to indicate that the window is controlling the appearance of system bars. So we
@@ -3293,9 +3329,8 @@ public interface WindowManager extends ViewManager {
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
-         * @hide
+         * @removed mistakenly exposed as system-api previously
          */
-        @SystemApi
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "SYSTEM_FLAG_" }, value = {
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
@@ -3327,7 +3362,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
-                PRIVATE_FLAG_USE_BLAST,
+                PRIVATE_FLAG_CONSUME_IME_INSETS,
                 PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                 PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
@@ -3336,6 +3371,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
                 PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
+        @Retention(RetentionPolicy.SOURCE)
         public @interface PrivateFlags {}
 
         /**
@@ -3425,9 +3461,9 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_USE_BLAST,
-                        equals = PRIVATE_FLAG_USE_BLAST,
-                        name = "USE_BLAST"),
+                        mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        name = "CONSUME_IME_INSETS"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
@@ -3455,7 +3491,7 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
                         equals = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
-                        name = "PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
+                        name = "SYSTEM_APPLICATION_OVERLAY")
         })
         @PrivateFlags
         @TestApi
@@ -3893,6 +3929,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         @TestApi
         public float preferredMinDisplayRefreshRate;
 
@@ -3902,6 +3939,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         @TestApi
         public float preferredMaxDisplayRefreshRate;
 
@@ -4304,6 +4342,9 @@ public interface WindowManager extends ViewManager {
         @ActivityInfo.ColorMode
         private int mColorMode = COLOR_MODE_DEFAULT;
 
+        /** @hide */
+        private float mDesiredHdrHeadroom = 0;
+
         /**
          * Carries the requests about {@link WindowInsetsController.Appearance} and
          * {@link WindowInsetsController.Behavior} to the system windows which can produce insets.
@@ -4516,7 +4557,7 @@ public interface WindowManager extends ViewManager {
          * Set whether animations can be played for position changes on this window. If disabled,
          * the window will move to its new position instantly without animating.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public void setCanPlayMoveAnimation(boolean enable) {
             if (enable) {
@@ -4531,7 +4572,7 @@ public interface WindowManager extends ViewManager {
          * This does not guarantee that an animation will be played in all such situations. For
          * example, drag-resizing may move the window but not play an animation.
          *
-         * @attr ref android.R.attr#Window_windowNoMoveAnimation
+         * @attr ref android.R.styleable#Window_windowNoMoveAnimation
          */
         public boolean canPlayMoveAnimation() {
             return (privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0;
@@ -4706,6 +4747,39 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
+         * <p>Sets the desired about of HDR headroom to be used when rendering as a ratio of
+         * targetHdrPeakBrightnessInNits / targetSdrWhitePointInNits. Only applies when
+         * {@link #setColorMode(int)} is {@link ActivityInfo#COLOR_MODE_HDR}</p>
+         *
+         * @see Window#setDesiredHdrHeadroom(float)
+         * @param desiredHeadroom Desired amount of HDR headroom. Must be in the range of 1.0 (SDR)
+         *                        to 10,000.0, or 0.0 to reset to default.
+         */
+        @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+        public void setDesiredHdrHeadroom(
+                @FloatRange(from = 0.0f, to = 10000.0f) float desiredHeadroom) {
+            if (!Float.isFinite(desiredHeadroom)) {
+                throw new IllegalArgumentException("desiredHeadroom must be finite: "
+                        + desiredHeadroom);
+            }
+            if (desiredHeadroom != 0 && (desiredHeadroom < 1.0f || desiredHeadroom > 10000.0f)) {
+                throw new IllegalArgumentException(
+                        "desiredHeadroom must be 0.0 or in the range [1.0, 10000.0f], received: "
+                                + desiredHeadroom);
+            }
+            mDesiredHdrHeadroom = desiredHeadroom;
+        }
+
+        /**
+         * Get the desired amount of HDR headroom as set by {@link #setDesiredHdrHeadroom(float)}
+         * @return The amount of HDR headroom set, or 0 for automatic/default behavior.
+         */
+        @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_LIMITED_HDR)
+        public float getDesiredHdrHeadroom() {
+            return mDesiredHdrHeadroom;
+        }
+
+        /**
          * <p>
          * Blurs the screen behind the window. The effect is similar to that of {@link #dimAmount},
          * but instead of dimmed, the content behind the window will be blurred (or combined with
@@ -4855,6 +4929,7 @@ public interface WindowManager extends ViewManager {
             checkNonRecursiveParams();
             out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
             out.writeInt(mDisplayFlags);
+            out.writeFloat(mDesiredHdrHeadroom);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -4926,6 +5001,7 @@ public interface WindowManager extends ViewManager {
             forciblyShownTypes = in.readInt();
             paramsForRotation = in.createTypedArray(LayoutParams.CREATOR);
             mDisplayFlags = in.readInt();
+            mDesiredHdrHeadroom = in.readFloat();
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -5186,6 +5262,11 @@ public interface WindowManager extends ViewManager {
                 changes |= COLOR_MODE_CHANGED;
             }
 
+            if (mDesiredHdrHeadroom != o.mDesiredHdrHeadroom) {
+                mDesiredHdrHeadroom = o.mDesiredHdrHeadroom;
+                changes |= COLOR_MODE_CHANGED;
+            }
+
             if (preferMinimalPostProcessing != o.preferMinimalPostProcessing) {
                 preferMinimalPostProcessing = o.preferMinimalPostProcessing;
                 changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
@@ -5412,6 +5493,9 @@ public interface WindowManager extends ViewManager {
             }
             if (mColorMode != COLOR_MODE_DEFAULT) {
                 sb.append(" colorMode=").append(ActivityInfo.colorModeToString(mColorMode));
+            }
+            if (mDesiredHdrHeadroom != 0) {
+                sb.append(" desiredHdrHeadroom=").append(mDesiredHdrHeadroom);
             }
             if (preferMinimalPostProcessing) {
                 sb.append(" preferMinimalPostProcessing=");
@@ -5798,6 +5882,69 @@ public interface WindowManager extends ViewManager {
      */
     @SystemApi
     default @NonNull List<ComponentName> notifyScreenshotListeners(int displayId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param displayId The displayId to that should have its content replaced.
+     * @param window The window that should get mirrored and the mirrored content rendered on
+     *               displayId passed in.
+     *
+     * @return Whether it successfully created a mirror SurfaceControl and replaced the display
+     * content with the mirror of the Window.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    @TestApi
+    @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
+    default boolean replaceContentOnDisplayWithMirror(int displayId, @NonNull Window window) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param displayId The displayId to that should have its content replaced.
+     * @param sc The SurfaceControl that should get rendered onto the displayId passed in.
+     *
+     * @return Whether it successfully created a mirror SurfaceControl and replaced the display
+     * content with the mirror of the Window.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // The API is only used for tests.
+    @TestApi
+    @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
+    default boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Add a trusted presentation listener associated with a window.
+     *
+     * <p> If this listener is already registered then the window and thresholds will be updated.
+     *
+     * @param window     The Window to add the trusted presentation listener for
+     * @param thresholds The {@link TrustedPresentationThresholds} that will specify
+     *                   when the to invoke the callback.
+     * @param executor   The {@link Executor} where the callback will be invoked on.
+     * @param listener   The {@link Consumer} that will receive the callbacks
+     *                  when entered or exited trusted presentation per the thresholds.
+     */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    default void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds,  @NonNull Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Removes a presentation listener associated with a window. If the listener was not previously
+     * registered, the call will be a noop.
+     *
+     * @see WindowManager#registerTrustedPresentationListener(IBinder, TrustedPresentationThresholds, Executor, Consumer)
+     */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    default void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
         throw new UnsupportedOperationException();
     }
 }

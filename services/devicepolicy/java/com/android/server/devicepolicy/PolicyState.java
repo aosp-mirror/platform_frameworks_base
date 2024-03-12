@@ -189,9 +189,10 @@ final class PolicyState<V> {
 
     @Override
     public String toString() {
-        return "PolicyState { mPolicyDefinition= " + mPolicyDefinition + ", mPoliciesSetByAdmins= "
-                + mPoliciesSetByAdmins + ", mCurrentResolvedPolicy= " + mCurrentResolvedPolicy
-                + " }";
+        return "\nPolicyKey - " + mPolicyDefinition.getPolicyKey()
+                + "\nmPolicyDefinition= \n\t" + mPolicyDefinition
+                + "\nmPoliciesSetByAdmins= \n\t" + mPoliciesSetByAdmins
+                + ",\nmCurrentResolvedPolicy= \n\t" + mCurrentResolvedPolicy + " }";
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
@@ -260,11 +261,14 @@ final class PolicyState<V> {
                                 break;
                         }
                     }
-                    if (admin != null) {
+                    if (admin != null && value != null) {
                         policiesSetByAdmins.put(admin, value);
                     } else {
-                        Slogf.wtf(TAG, "Error Parsing TAG_ADMIN_POLICY_ENTRY, EnforcingAdmin "
-                                + "is null");
+                        Slogf.wtf(TAG, "Error Parsing TAG_ADMIN_POLICY_ENTRY for "
+                                + (policyDefinition == null ? "unknown policy" : "policy with "
+                                + "definition " + policyDefinition) + ", EnforcingAdmin is: "
+                                + (admin == null ? "null" : admin) + ", value is : "
+                                + (value == null ? "null" : value));
                     }
                     break;
                 case TAG_POLICY_DEFINITION_ENTRY:
@@ -283,7 +287,9 @@ final class PolicyState<V> {
                     }
                     currentResolvedPolicy = policyDefinition.readPolicyValueFromXml(parser);
                     if (currentResolvedPolicy == null) {
-                        Slogf.wtf(TAG, "Error Parsing TAG_RESOLVED_VALUE_ENTRY, "
+                        Slogf.wtf(TAG, "Error Parsing TAG_RESOLVED_VALUE_ENTRY for "
+                                + (policyDefinition == null ? "unknown policy" : "policy with "
+                                + "definition " + policyDefinition) + ", "
                                 + "currentResolvedPolicy is null");
                     }
                     break;

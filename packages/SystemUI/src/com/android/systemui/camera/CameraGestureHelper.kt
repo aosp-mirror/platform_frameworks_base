@@ -27,15 +27,16 @@ import android.content.pm.ResolveInfo
 import android.os.RemoteException
 import android.util.Log
 import android.view.WindowManager
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.ActivityIntentHelper
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -43,10 +44,12 @@ import javax.inject.Inject
  * Helps with handling camera-related gestures (for example, double-tap the power button to launch
  * the camera).
  */
+@SysUISingleton
 class CameraGestureHelper @Inject constructor(
     private val context: Context,
     private val centralSurfaces: CentralSurfaces,
     private val keyguardStateController: KeyguardStateController,
+    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     private val packageManager: PackageManager,
     private val activityManager: ActivityManager,
     private val activityStarter: ActivityStarter,
@@ -55,7 +58,7 @@ class CameraGestureHelper @Inject constructor(
     private val cameraIntents: CameraIntentsWrapper,
     private val contentResolver: ContentResolver,
     @Main private val uiExecutor: Executor,
-    private val userTracker: UserTracker
+    private val selectedUserInteractor: SelectedUserInteractor,
 ) {
     /**
      * Whether the camera application can be launched for the camera launch gesture.
@@ -68,12 +71,12 @@ class CameraGestureHelper @Inject constructor(
         val resolveInfo: ResolveInfo? = packageManager.resolveActivityAsUser(
             getStartCameraIntent(),
             PackageManager.MATCH_DEFAULT_ONLY,
-            KeyguardUpdateMonitor.getCurrentUser()
+            selectedUserInteractor.getSelectedUserId()
         )
         val resolvedPackage = resolveInfo?.activityInfo?.packageName
         return (resolvedPackage != null &&
                 (statusBarState != StatusBarState.SHADE ||
-                !activityManager.isInForeground(resolvedPackage)))
+                        !activityManager.isInForeground(resolvedPackage)))
     }
 
     /**
@@ -85,7 +88,7 @@ class CameraGestureHelper @Inject constructor(
         val intent: Intent = getStartCameraIntent()
         intent.putExtra(CameraIntents.EXTRA_LAUNCH_SOURCE, source)
         val wouldLaunchResolverActivity = activityIntentHelper.wouldLaunchResolverActivity(
-            intent, KeyguardUpdateMonitor.getCurrentUser()
+            intent, selectedUserInteractor.getSelectedUserId()
         )
         if (CameraIntents.isSecureCameraIntent(intent) && !wouldLaunchResolverActivity) {
             uiExecutor.execute {
@@ -98,7 +101,7 @@ class CameraGestureHelper @Inject constructor(
                 val activityOptions = ActivityOptions.makeBasic()
                 activityOptions.setDisallowEnterPictureInPictureWhileLaunching(true)
                 activityOptions.rotationAnimationHint =
-                    WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
+                        WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
                 try {
                     activityTaskManager.startActivityAsUser(
                         null,
@@ -112,7 +115,7 @@ class CameraGestureHelper @Inject constructor(
                         Intent.FLAG_ACTIVITY_NEW_TASK,
                         null,
                         activityOptions.toBundle(),
-                        userTracker.userId,
+                        selectedUserInteractor.getSelectedUserId(true),
                     )
                 } catch (e: RemoteException) {
                     Log.w(
@@ -133,7 +136,7 @@ class CameraGestureHelper @Inject constructor(
         centralSurfaces.startLaunchTransitionTimeout()
         // Call this to make sure the keyguard is ready to be dismissed once the next intent is
         // handled by the OS (in our case it is the activity we started right above)
-        centralSurfaces.readyForKeyguardDone()
+        statusBarKeyguardViewManager.readyForKeyguardDone()
     }
 
     /**

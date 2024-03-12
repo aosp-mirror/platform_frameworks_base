@@ -24,8 +24,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
@@ -35,6 +37,7 @@ import android.util.ArraySet;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 import com.android.server.pm.pkg.PackageUserStateImpl;
 import com.android.server.pm.pkg.SuspendParams;
@@ -43,6 +46,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
+import java.nio.file.Path;
+import java.util.List;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -84,7 +90,7 @@ public class PackageUserStateTest {
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserStateImpl();
-        oldUserState.putSuspendParams("suspendingPackage",
+        oldUserState.putSuspendParams(UserPackage.of(0, "suspendingPackage"),
                 new SuspendParams(null, new PersistableBundle(), null));
         assertThat(testUserState.equals(oldUserState), is(false));
 
@@ -188,8 +194,8 @@ public class PackageUserStateTest {
         return new SuspendParams(dialogInfo, appExtras, launcherExtras);
     }
 
-    private static PersistableBundle createPersistableBundle(String lKey, long lValue, String sKey,
-            String sValue, String dKey, double dValue) {
+    private static PersistableBundle createPersistableBundle(
+            String lKey, long lValue, String sKey, String sValue, String dKey, double dValue) {
         final PersistableBundle result = new PersistableBundle(3);
         if (lKey != null) {
             result.putLong("com.unit_test." + lKey, lValue);
@@ -215,6 +221,8 @@ public class PackageUserStateTest {
         final PersistableBundle launcherExtras2 = createPersistableBundle(null, 0, "name",
                 "launcherExtras2", null, 0);
 
+        final int suspendingUser1 = 0;
+        final int suspendingUser2 = 10;
         final String suspendingPackage1 = "package1";
         final String suspendingPackage2 = "package2";
 
@@ -225,12 +233,12 @@ public class PackageUserStateTest {
                 .setMessage("dialogMessage2")
                 .build();
 
-        final ArrayMap<String, SuspendParams> paramsMap1 = new ArrayMap<>();
-        paramsMap1.put(suspendingPackage1, createSuspendParams(dialogInfo1, appExtras1,
-                launcherExtras1));
-        final ArrayMap<String, SuspendParams> paramsMap2 = new ArrayMap<>();
-        paramsMap2.put(suspendingPackage2, createSuspendParams(dialogInfo2,
-                appExtras2, launcherExtras2));
+        final ArrayMap<UserPackage, SuspendParams> paramsMap1 = new ArrayMap<>();
+        paramsMap1.put(UserPackage.of(suspendingUser1, suspendingPackage1),
+                createSuspendParams(dialogInfo1, appExtras1, launcherExtras1));
+        final ArrayMap<UserPackage, SuspendParams> paramsMap2 = new ArrayMap<>();
+        paramsMap2.put(UserPackage.of(suspendingUser2, suspendingPackage2),
+                createSuspendParams(dialogInfo2, appExtras2, launcherExtras2));
 
 
         final PackageUserStateImpl testUserState1 = new PackageUserStateImpl();
@@ -316,6 +324,7 @@ public class PackageUserStateTest {
             assertEquals(0L, state.getLastPackageUsageTimeInMills()[i]);
         }
     }
+
     private static void assertLastPackageUsageSet(
             PackageStateUnserialized state, int reason, long value) throws Exception {
         for (int i = state.getLastPackageUsageTimeInMills().length - 1; i >= 0; --i) {
@@ -326,6 +335,7 @@ public class PackageUserStateTest {
             }
         }
     }
+
     @Test
     public void testPackageUseReasons() throws Exception {
         PackageSetting packageSetting = Mockito.mock(PackageSetting.class);
@@ -373,6 +383,7 @@ public class PackageUserStateTest {
         assertTrue(testState.setOverlayPaths(new OverlayPaths.Builder().build()));
         assertFalse(testState.setOverlayPaths(null));
     }
+
     @Test
     public void testSharedLibOverlayPaths() {
         final PackageUserStateImpl testState = new PackageUserStateImpl();
@@ -394,4 +405,37 @@ public class PackageUserStateTest {
         assertFalse(testState.setSharedLibraryOverlayPaths(LIB_ONE, null));
     }
 
+    @Test
+    public void archiveState() {
+        final long currentTimeMillis = System.currentTimeMillis();
+        PackageUserStateImpl packageUserState = new PackageUserStateImpl();
+        ArchiveState.ArchiveActivityInfo archiveActivityInfo =
+                new ArchiveState.ArchiveActivityInfo(
+                        "appTitle",
+                        new ComponentName("pkg", "class"),
+                        Path.of("/path1"),
+                        Path.of("/path2"));
+        ArchiveState archiveState = new ArchiveState(List.of(archiveActivityInfo),
+                "installerTitle");
+        packageUserState.setArchiveState(archiveState);
+        assertEquals(archiveState, packageUserState.getArchiveState());
+        assertTrue(archiveState.getArchiveTimeMillis() > currentTimeMillis);
+    }
+
+    @Test
+    public void archiveStateWithTimestamp() {
+        final long currentTimeMillis = System.currentTimeMillis();
+        PackageUserStateImpl packageUserState = new PackageUserStateImpl();
+        ArchiveState.ArchiveActivityInfo archiveActivityInfo =
+                new ArchiveState.ArchiveActivityInfo(
+                        "appTitle",
+                        new ComponentName("pkg", "class"),
+                        Path.of("/path1"),
+                        Path.of("/path2"));
+        ArchiveState archiveState = new ArchiveState(List.of(archiveActivityInfo),
+                "installerTitle", currentTimeMillis);
+        packageUserState.setArchiveState(archiveState);
+        assertEquals(archiveState, packageUserState.getArchiveState());
+        assertEquals(archiveState.getArchiveTimeMillis(), currentTimeMillis);
+    }
 }

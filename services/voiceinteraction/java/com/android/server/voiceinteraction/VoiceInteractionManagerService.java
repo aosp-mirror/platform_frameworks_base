@@ -18,12 +18,14 @@ package com.android.server.voiceinteraction;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
@@ -58,6 +60,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PermissionEnforcer;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
@@ -67,6 +70,7 @@ import android.os.SharedMemory;
 import android.os.ShellCallback;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 import android.provider.Settings;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
@@ -1286,6 +1290,17 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        // Enforce permissions that are flag controlled. The flag value decides if the permission
+        // should be enforced.
+        private void initAndVerifyDetector_enforcePermissionWithFlags() {
+            PermissionEnforcer enforcer = mContext.getSystemService(PermissionEnforcer.class);
+            if (Flags.voiceActivationPermissionApis()) {
+                enforcer.enforcePermission(
+                        android.Manifest.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO,
+                        getCallingPid(), getCallingUid());
+            }
+        }
+
         @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
         @Override
         public void initAndVerifyDetector(
@@ -1295,7 +1310,13 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull IBinder token,
                 IHotwordRecognitionStatusCallback callback,
                 int detectorType) {
+            // TODO(b/305787465): Remove the MANAGE_HOTWORD_DETECTION permission enforcement on the
+            // {@link #initAndVerifyDetector(Identity,  PersistableBundle, ShareMemory, IBinder,
+            // IHotwordRecognitionStatusCallback, int)}
+            // and replace with the permission RECEIVE_SANDBOX_TRIGGER_AUDIO when it is fully
+            // launched.
             super.initAndVerifyDetector_enforcePermission();
+            initAndVerifyDetector_enforcePermissionWithFlags();
 
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
@@ -1522,7 +1543,60 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
         }
-        //----------------- Model management APIs --------------------------------//
+
+        @Override
+        @android.annotation.EnforcePermission(
+                android.Manifest.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT)
+        public void resetHotwordTrainingDataEgressCountForTest() {
+            super.resetHotwordTrainingDataEgressCountForTest_enforcePermission();
+            synchronized (this) {
+                enforceIsCurrentVoiceInteractionService();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "resetHotwordTrainingDataEgressCountForTest without running"
+                            + " voice interaction service");
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.resetHotwordTrainingDataEgressCountForTest();
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+
+            }
+        }
+
+        @Override
+        @EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
+        public void setShouldReceiveSandboxedTrainingData(boolean allowed) {
+            super.setShouldReceiveSandboxedTrainingData_enforcePermission();
+
+            synchronized (this) {
+                if (mImpl == null) {
+                    throw new IllegalStateException(
+                            "setShouldReceiveSandboxedTrainingData without running voice "
+                                    + "interaction service");
+                }
+
+                enforceIsCallerPreinstalledAssistant();
+
+                int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    AppOpsManager appOpsManager = (AppOpsManager)
+                            mContext.getSystemService(Context.APP_OPS_SERVICE);
+                    appOpsManager.setUidMode(
+                            AppOpsManager.OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
+                            callingUid, allowed ? AppOpsManager.MODE_ALLOWED :
+                                    AppOpsManager.MODE_ERRORED);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+      //----------------- Model management APIs --------------------------------//
 
         @Override
         public KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, String bcp47Locale) {
@@ -2176,6 +2250,13 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        private void enforceIsCallerPreinstalledAssistant() {
+            if (!isCallerPreinstalledAssistant()) {
+                throw new
+                        SecurityException("Caller is not the pre-installed assistant.");
+            }
+        }
+
         private void enforceCallerAllowedToEnrollVoiceModel() {
             if (isCallerHoldingPermission(Manifest.permission.KEYPHRASE_ENROLLMENT_APPLICATION)) {
                 return;
@@ -2188,6 +2269,13 @@ public class VoiceInteractionManagerService extends SystemService {
         private boolean isCallerCurrentVoiceInteractionService() {
             return mImpl != null
                     && mImpl.mInfo.getServiceInfo().applicationInfo.uid == Binder.getCallingUid();
+        }
+
+        private boolean isCallerPreinstalledAssistant() {
+            return mImpl != null
+                    && mImpl.getApplicationInfo().uid == Binder.getCallingUid()
+                    && (mImpl.getApplicationInfo().isSystemApp()
+                    || mImpl.getApplicationInfo().isUpdatedSystemApp());
         }
 
         private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {
@@ -2377,8 +2465,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 }
                 if (hitInt && doit) {
-                    // The user is force stopping our current interactor.
-                    // Clear the current settings and restore default state.
+                    // The user is force stopping our current interactor, restart the service.
                     synchronized (VoiceInteractionManagerServiceStub.this) {
                         Slog.i(TAG, "Force stopping current voice interactor: "
                                 + getCurInteractor(userHandle));
@@ -2387,28 +2474,7 @@ public class VoiceInteractionManagerService extends SystemService {
                             mImpl.shutdownLocked();
                             setImplLocked(null);
                         }
-
-                        setCurInteractor(null, userHandle);
-                        // TODO: should not reset null here. But even remove this line, the
-                        // initForUser() still reset it because the interactor will be null. Keep
-                        // it now but we should still need to fix it.
-                        setCurRecognizer(null, userHandle);
-                        resetCurAssistant(userHandle);
-                        initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
-
-                        // When resetting the interactor, the recognizer and the assistant settings
-                        // value, we also need to reset the assistant role to keep the values
-                        // consistent. Clear the assistant role will reset to the default value.
-                        Context context = getContext();
-                        context.getSystemService(RoleManager.class).clearRoleHoldersAsUser(
-                                RoleManager.ROLE_ASSISTANT, 0, UserHandle.of(userHandle),
-                                context.getMainExecutor(), successful -> {
-                                    if (!successful) {
-                                        Slog.e(TAG,
-                                                "Failed to clear default assistant for force stop");
-                                    }
-                                });
                     }
                 } else if (hitRec && doit) {
                     // We are just force-stopping the current recognizer, which is not
@@ -2416,16 +2482,10 @@ public class VoiceInteractionManagerService extends SystemService {
                     synchronized (VoiceInteractionManagerServiceStub.this) {
                         Slog.i(TAG, "Force stopping current voice recognizer: "
                                 + getCurRecognizer(userHandle));
-                        // TODO: Figure out why the interactor was being cleared and document it.
-                        setCurInteractor(null, userHandle);
                         initRecognizer(userHandle);
                     }
                 }
                 return hitInt || hitRec;
-            }
-
-            @Override
-            public void onHandleUserStop(Intent intent, int userHandle) {
             }
 
             @Override

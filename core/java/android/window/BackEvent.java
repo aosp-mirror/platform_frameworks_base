@@ -49,7 +49,7 @@ public final class BackEvent {
     private final int mSwipeEdge;
 
     /**
-     * Creates a new {@link BackMotionEvent} instance.
+     * Creates a new {@link BackEvent} instance.
      *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.

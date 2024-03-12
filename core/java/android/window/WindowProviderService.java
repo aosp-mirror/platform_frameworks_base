@@ -129,7 +129,6 @@ public abstract class WindowProviderService extends Service implements WindowPro
     @SuppressLint({"OnNameExpected", "ExecutorRegistration"})
     // Suppress lint because this is a legacy named function and doesn't have an optional param
     // for executor.
-    // TODO(b/259347943): Update documentation for U.
     /**
      * Here we override to prevent WindowProviderService from invoking
      * {@link Application.registerComponentCallback}, which will result in callback registered
@@ -155,7 +154,7 @@ public abstract class WindowProviderService extends Service implements WindowPro
     }
 
     /**
-     * Override {@link Service}'s empty implementation and listen to {@link ActivityThread} for
+     * Override {@link Service}'s empty implementation and listen to {@code ActivityThread} for
      * low memory and trim memory events.
      */
     @Override

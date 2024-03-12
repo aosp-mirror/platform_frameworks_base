@@ -28,7 +28,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -37,9 +36,10 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.onehanded.OneHanded;
@@ -53,7 +53,7 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
 
     private final Icon mIcon = ResourceIcon.get(
             com.android.internal.R.drawable.ic_qs_one_handed_mode);
-    private final SettingObserver mSetting;
+    private final UserSettingObserver mSetting;
 
     @Inject
     public OneHandedModeTile(
@@ -70,7 +70,7 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
             SecureSettings secureSettings) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
-        mSetting = new SettingObserver(secureSettings, mHandler,
+        mSetting = new UserSettingObserver(secureSettings, mHandler,
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
@@ -130,10 +130,6 @@ public class OneHandedModeTile extends QSTileImpl<BooleanState> {
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_onehanded_label);
         state.icon = mIcon;
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-        state.slash.isSlashed = !state.value;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();

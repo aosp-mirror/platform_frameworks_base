@@ -18,14 +18,11 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -46,7 +43,6 @@ import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class UdfpsAodViewModelTest : SysuiTestCase() {
     private val defaultPadding = 12
@@ -56,7 +52,6 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
     private lateinit var configRepository: FakeConfigurationRepository
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
 
@@ -66,23 +61,15 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        overrideResource(com.android.systemui.R.dimen.lock_icon_padding, defaultPadding)
+        overrideResource(com.android.systemui.res.R.dimen.lock_icon_padding, defaultPadding)
         testScope = TestScope()
         shadeRepository = FakeShadeRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
-        KeyguardInteractorFactory.create(
-                featureFlags = featureFlags,
-            )
-            .also {
-                keyguardInteractor = it.keyguardInteractor
-                keyguardRepository = it.repository
-                configRepository = it.configurationRepository
-                bouncerRepository = it.bouncerRepository
-            }
+        KeyguardInteractorFactory.create().also {
+            keyguardInteractor = it.keyguardInteractor
+            keyguardRepository = it.repository
+            configRepository = it.configurationRepository
+            bouncerRepository = it.bouncerRepository
+        }
         val udfpsKeyguardInteractor =
             UdfpsKeyguardInteractor(
                 configRepository,

@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.annotation.NonNull;
 import android.app.backup.BackupHelper;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
@@ -47,14 +48,20 @@ public class SystemBackupAgentTest {
 
     private TestableSystemBackupAgent mSystemBackupAgent;
 
-    @Mock private Context mContextMock;
-    @Mock private UserManager mUserManagerMock;
+    @Mock
+    private Context mContextMock;
+    @Mock
+    private UserManager mUserManagerMock;
+    @Mock
+    private PackageManager mPackageManagerMock;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mSystemBackupAgent = new TestableSystemBackupAgent();
         when(mContextMock.getSystemService(UserManager.class)).thenReturn(mUserManagerMock);
+        when(mPackageManagerMock.hasSystemFeature(
+                PackageManager.FEATURE_SLICES_DISABLED)).thenReturn(false);
     }
 
     @Test
@@ -76,7 +83,32 @@ public class SystemBackupAgentTest {
                         "slices",
                         "people",
                         "app_locales",
-                        "app_gender");
+                        "app_gender",
+                        "companion");
+    }
+
+    @Test
+    public void onCreate_systemUser_slicesDisabled_addsAllNonSlicesHelpers() {
+        UserHandle userHandle = new UserHandle(UserHandle.USER_SYSTEM);
+        when(mUserManagerMock.isProfile()).thenReturn(false);
+        when(mPackageManagerMock.hasSystemFeature(
+                PackageManager.FEATURE_SLICES_DISABLED)).thenReturn(true);
+
+        mSystemBackupAgent.onCreate(userHandle, /* backupDestination= */ 0);
+
+        assertThat(mSystemBackupAgent.mAddedHelpers)
+                .containsExactly(
+                        "account_sync_settings",
+                        "preferred_activities",
+                        "notifications",
+                        "permissions",
+                        "usage_stats",
+                        "shortcut_manager",
+                        "account_manager",
+                        "people",
+                        "app_locales",
+                        "app_gender",
+                        "companion");
     }
 
     @Test
@@ -91,7 +123,8 @@ public class SystemBackupAgentTest {
                         "account_sync_settings",
                         "notifications",
                         "permissions",
-                        "app_locales");
+                        "app_locales",
+                        "companion");
     }
 
     @Test
@@ -110,7 +143,8 @@ public class SystemBackupAgentTest {
                         "app_locales",
                         "account_manager",
                         "usage_stats",
-                        "shortcut_manager");
+                        "shortcut_manager",
+                        "companion");
     }
 
     private class TestableSystemBackupAgent extends SystemBackupAgent {
@@ -129,6 +163,11 @@ public class SystemBackupAgentTest {
         @Override
         public Object getSystemService(@ServiceName @NonNull String name) {
             return null;
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mPackageManagerMock;
         }
     }
 }

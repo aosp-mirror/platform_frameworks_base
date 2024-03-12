@@ -17,7 +17,8 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import com.android.systemui.keyguard.data.repository.KeyguardBlueprint
+import com.android.systemui.communal.ui.view.layout.blueprints.DefaultCommunalBlueprint
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -32,7 +33,19 @@ abstract class KeyguardBlueprintModule {
 
     @Binds
     @IntoSet
+    abstract fun bindSplitShadeBlueprint(
+        splitShadeBlueprint: SplitShadeKeyguardBlueprint
+    ): KeyguardBlueprint
+
+    @Binds
+    @IntoSet
     abstract fun bindShortcutsBesideUdfpsLockscreenBlueprint(
         shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
+    ): KeyguardBlueprint
+
+    @Binds
+    @IntoSet
+    abstract fun bindDefaultCommunalBlueprint(
+        defaultCommunalBlueprint: DefaultCommunalBlueprint
     ): KeyguardBlueprint
 }

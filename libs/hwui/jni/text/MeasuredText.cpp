@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "MeasuredText"
-
 #include "GraphicsJNI.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
@@ -65,13 +62,14 @@ static jlong nInitBuilder(CRITICAL_JNI_PARAMS) {
 
 // Regular JNI
 static void nAddStyleRun(JNIEnv* /* unused */, jclass /* unused */, jlong builderPtr,
-                         jlong paintPtr, jint lbStyle, jint lbWordStyle, jint start, jint end,
-                         jboolean isRtl) {
+                         jlong paintPtr, jint lbStyle, jint lbWordStyle, jboolean hyphenation,
+                         jint start, jint end, jboolean isRtl) {
     Paint* paint = toPaint(paintPtr);
     const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
     minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
     toBuilder(builderPtr)
-            ->addStyleRun(start, end, std::move(minikinPaint), lbStyle, lbWordStyle, isRtl);
+            ->addStyleRun(start, end, std::move(minikinPaint), lbStyle, lbWordStyle, hyphenation,
+                          isRtl);
 }
 
 // Regular JNI
@@ -84,13 +82,14 @@ static void nAddReplacementRun(JNIEnv* /* unused */, jclass /* unused */, jlong 
 // Regular JNI
 static jlong nBuildMeasuredText(JNIEnv* env, jclass /* unused */, jlong builderPtr, jlong hintPtr,
                                 jcharArray javaText, jboolean computeHyphenation,
-                                jboolean computeLayout, jboolean fastHyphenationMode) {
+                                jboolean computeLayout, jboolean computeBounds,
+                                jboolean fastHyphenationMode) {
     ScopedCharArrayRO text(env, javaText);
     const minikin::U16StringPiece textBuffer(text.get(), text.size());
 
     // Pass the ownership to Java.
     return toJLong(toBuilder(builderPtr)
-                           ->build(textBuffer, computeHyphenation, computeLayout,
+                           ->build(textBuffer, computeHyphenation, computeLayout, computeBounds,
                                    fastHyphenationMode, toMeasuredParagraph(hintPtr))
                            .release());
 }
@@ -161,9 +160,9 @@ static jint nGetMemoryUsage(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
 static const JNINativeMethod gMTBuilderMethods[] = {
         // MeasuredParagraphBuilder native functions.
         {"nInitBuilder", "()J", (void*)nInitBuilder},
-        {"nAddStyleRun", "(JJIIIIZ)V", (void*)nAddStyleRun},
+        {"nAddStyleRun", "(JJIIZIIZ)V", (void*)nAddStyleRun},
         {"nAddReplacementRun", "(JJIIF)V", (void*)nAddReplacementRun},
-        {"nBuildMeasuredText", "(JJ[CZZZ)J", (void*)nBuildMeasuredText},
+        {"nBuildMeasuredText", "(JJ[CZZZZ)J", (void*)nBuildMeasuredText},
         {"nFreeBuilder", "(J)V", (void*)nFreeBuilder},
 };
 

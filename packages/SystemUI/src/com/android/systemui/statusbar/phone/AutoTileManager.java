@@ -28,15 +28,16 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
 import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -142,6 +143,7 @@ public class AutoTileManager implements UserAwareController {
      * Init method must be called after construction to start listening
      */
     public void init() {
+        QSPipelineFlagsRepository.Utils.assertInLegacyMode();
         if (mInitialized) {
             Log.w(TAG, "Trying to re-initialize");
             return;
@@ -461,8 +463,8 @@ public class AutoTileManager implements UserAwareController {
     };
 
     @VisibleForTesting
-    protected SettingObserver getSecureSettingForKey(String key) {
-        for (SettingObserver s : mAutoAddSettingList) {
+    protected UserSettingObserver getSecureSettingForKey(String key) {
+        for (UserSettingObserver s : mAutoAddSettingList) {
             if (Objects.equals(key, s.getKey())) {
                 return s;
             }
@@ -476,7 +478,7 @@ public class AutoTileManager implements UserAwareController {
      * When the setting changes to a value different from 0, if the tile has not been auto added
      * before, it will be added and the listener will be stopped.
      */
-    private class AutoAddSetting extends SettingObserver {
+    private class AutoAddSetting extends UserSettingObserver {
         private final String mSpec;
 
         AutoAddSetting(

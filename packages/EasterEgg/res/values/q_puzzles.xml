@@ -205,7 +205,7 @@
         <item>com.android.systemui:drawable/ic_volume_ringer_vibrate</item>
         <item>com.android.systemui:drawable/ic_volume_voice</item>
         <item>com.android.systemui:drawable/stat_sys_camera</item>
-        <item>com.android.systemui:drawable/stat_sys_managed_profile_status</item>
+        <item>android:drawable/stat_sys_managed_profile_status</item>
         <item>com.android.systemui:drawable/stat_sys_mic_none</item>
         <item>com.android.systemui:drawable/stat_sys_vpn_ic</item>
 

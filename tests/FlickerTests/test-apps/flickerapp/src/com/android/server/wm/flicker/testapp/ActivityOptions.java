@@ -40,6 +40,18 @@ public class ActivityOptions {
             public static final String LABEL = "ImeActivity";
             public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                     FLICKER_APP_PACKAGE + ".ImeActivity");
+
+            /** Intent action used to finish the test activity. */
+            public static final String ACTION_FINISH_ACTIVITY =
+                    FLICKER_APP_PACKAGE + ".ImeActivity.FINISH_ACTIVITY";
+
+            /** Intent action used to start a {@link DialogThemedActivity}. */
+            public static final String ACTION_START_DIALOG_THEMED_ACTIVITY =
+                    FLICKER_APP_PACKAGE + ".ImeActivity.START_DIALOG_THEMED_ACTIVITY";
+
+            /** Intent action used to toggle activity orientation. */
+            public static final String ACTION_TOGGLE_ORIENTATION =
+                    FLICKER_APP_PACKAGE + ".ImeActivity.TOGGLE_ORIENTATION";
         }
 
         public static class AutoFocusActivity {
@@ -71,6 +83,12 @@ public class ActivityOptions {
         public static final String LABEL = "NonResizeablePortraitActivity";
         public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                 FLICKER_APP_PACKAGE + ".NonResizeablePortraitActivity");
+    }
+
+    public static class PortraitImmersiveActivity {
+        public static final String LABEL = "PortraitImmersiveActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".PortraitImmersiveActivity");
     }
 
     public static class TransparentActivity {
@@ -176,6 +194,12 @@ public class ActivityOptions {
         public static final String LABEL = "LaunchNewActivity";
         public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
                 FLICKER_APP_PACKAGE + ".LaunchNewActivity");
+    }
+
+    public static class TransferSplashscreenActivity {
+        public static final String LABEL = "TransferSplashscreenActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".TransferSplashscreenActivity");
     }
 
     public static class Pip {

@@ -22,9 +22,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import android.Manifest;
-import android.app.compat.CompatChanges;
 import android.hardware.display.DisplayManager;
 import android.os.Looper;
 import android.support.test.uiautomator.UiDevice;
@@ -34,6 +34,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
@@ -52,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 public class AttachedChoreographerTest {
     private static final String TAG = "AttachedChoreographerTest";
     private static final long DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE_CHANGEID = 170503758;
-    private static final long THRESHOLD_MS = 10;
+    private static final long THRESHOLD_MS = 4;
     private static final int FRAME_ITERATIONS = 21;
     private static final int CALLBACK_MISSED_THRESHOLD = 2;
 
@@ -66,7 +67,7 @@ public class AttachedChoreographerTest {
     private SurfaceView mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
     private Choreographer mChoreographer;
-    private boolean mIsFirstCallback = true;
+    private long mExpectedPresentTime;
     private int mCallbackMissedCounter = 0;
 
     @Before
@@ -74,6 +75,13 @@ public class AttachedChoreographerTest {
         mScenario = ActivityScenario.launch(GraphicsActivity.class);
         mScenario.moveToState(Lifecycle.State.CREATED);
         mScenario.onActivity(activity -> {
+            // Lock the display frame rate. This will not allow SurfaceFlinger to use the frame rate
+            // override feature that throttles down the global choreographer for this test.
+            float refreshRate = activity.getDisplay().getMode().getRefreshRate();
+            WindowManager.LayoutParams attrs = activity.getWindow().getAttributes();
+            attrs.preferredRefreshRate = refreshRate;
+            activity.getWindow().setAttributes(attrs);
+
             mSurfaceView = activity.findViewById(R.id.surface);
             mSurfaceHolder = mSurfaceView.getHolder();
             mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
@@ -95,6 +103,12 @@ public class AttachedChoreographerTest {
         });
 
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+
+        // TODO(b/290634611): clean this up once SF new front end is enabled by default
+        boolean sfNewFeEnabled = uiDevice.executeShellCommand("dumpsys SurfaceFlinger")
+                .indexOf("SurfaceFlinger New Frontend Enabled:true") != -1;
+        assumeTrue(sfNewFeEnabled);
+
         uiDevice.wakeUp();
         uiDevice.executeShellCommand("wm dismiss-keyguard");
         mScenario.moveToState(Lifecycle.State.RESUMED);
@@ -112,18 +126,16 @@ public class AttachedChoreographerTest {
             mDisplayManager.setRefreshRateSwitchingType(
                     DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY);
             mDisplayManager.setShouldAlwaysRespectAppRequestedMode(true);
-            boolean changeIsEnabled =
-                    CompatChanges.isChangeEnabled(
-                            DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE_CHANGEID);
-            Log.i(TAG, "DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE_CHANGE_ID is "
-                    + (changeIsEnabled ? "enabled" : "disabled"));
         });
     }
 
     @After
     public void tearDown() {
-        mDisplayManager.setRefreshRateSwitchingType(mInitialMatchContentFrameRate);
-        mDisplayManager.setShouldAlwaysRespectAppRequestedMode(false);
+        if (mDisplayManager != null) {
+            mDisplayManager.setRefreshRateSwitchingType(mInitialMatchContentFrameRate);
+            mDisplayManager.setShouldAlwaysRespectAppRequestedMode(false);
+        }
+
         InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .dropShellPermissionIdentity();
     }
@@ -407,18 +419,141 @@ public class AttachedChoreographerTest {
         }
     }
 
+    @Test
+    public void testChoreographerAttachedAfterSetFrameRate() {
+        Log.i(TAG, "starting testChoreographerAttachedAfterSetFrameRate");
+
+        class TransactionGenerator implements SurfaceControl.TransactionCommittedListener {
+            private SurfaceControl mSc;
+            private int mFrame;
+            private static final int NUM_FRAMES = 50;
+            private final CountDownLatch mCompleteLatch = new CountDownLatch(1);
+
+            TransactionGenerator(SurfaceControl sc) {
+                mSc = sc;
+
+            }
+
+            @Override
+            public void onTransactionCommitted() {
+                mFrame++;
+                if (mFrame >= NUM_FRAMES) {
+                    mCompleteLatch.countDown();
+                    return;
+                }
+
+                SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+                transaction.setAlpha(mSc, 1.0f / mFrame)
+                        .addTransactionCommittedListener(Runnable::run, this)
+                        .apply();
+
+            }
+
+            public void startAndWaitForCompletion() {
+                onTransactionCommitted();
+                if (waitForCountDown(mCompleteLatch, /* timeoutInSeconds */ 10L)) {
+                    fail("failed to send new transactions");
+                }
+            }
+        }
+
+
+        for (int divisor : new int[]{2, 3}) {
+            CountDownLatch choreographerLatch = new CountDownLatch(1);
+            mScenario.onActivity(activity -> {
+                if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
+                    fail("Unable to create surface within 1 Second");
+                }
+
+                SurfaceControl sc = mSurfaceView.getSurfaceControl();
+                SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+                float displayRefreshRate = activity.getDisplay().getMode().getRefreshRate();
+                float fps = displayRefreshRate / divisor;
+                long callbackDurationMs = Math.round(1000 / fps);
+                mCallbackMissedCounter = 0;
+                transaction.setFrameRate(sc, fps, Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
+                        .apply();
+
+
+                new TransactionGenerator(sc).startAndWaitForCompletion();
+
+                Choreographer choreographer = sc.getChoreographer();
+                verifyVsyncCallbacks(choreographer, callbackDurationMs,
+                        choreographerLatch, FRAME_ITERATIONS);
+            });
+            // wait for the previous callbacks to finish before moving to the next divisor
+            if (waitForCountDown(choreographerLatch, /* timeoutInSeconds */ 5L)) {
+                fail("Test not finished in 5 Seconds");
+            }
+        }
+    }
+
+    @Test
+    public void testChoreographerNonDivisorFixedSourceRefreshRate() {
+        CountDownLatch continueLatch = new CountDownLatch(1);
+        mScenario.onActivity(activity -> {
+            if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
+                fail("Unable to create surface within 1 Second");
+            }
+            SurfaceControl sc = mSurfaceView.getSurfaceControl();
+            Choreographer choreographer = sc.getChoreographer();
+            SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+            float displayRefreshRate = activity.getDisplay().getMode().getRefreshRate();
+            float fps = 61.7f; // hopefully not a divisor
+            long callbackDurationMs = Math.round(1000 / displayRefreshRate);
+            mCallbackMissedCounter = 0;
+            transaction.setFrameRate(sc, fps, Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
+                    .addTransactionCommittedListener(Runnable::run,
+                            () -> verifyVsyncCallbacks(choreographer,
+                                    callbackDurationMs, continueLatch, FRAME_ITERATIONS))
+                    .apply();
+        });
+        // wait for the previous callbacks to finish before moving to the next divisor
+        if (waitForCountDown(continueLatch, /* timeoutInSeconds */ 5L)) {
+            fail("Test not finished in 5 Seconds");
+        }
+    }
+
+    @Test
+    public void testChoreographerNonDivisorRefreshRate() {
+        CountDownLatch continueLatch = new CountDownLatch(1);
+        mScenario.onActivity(activity -> {
+            if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
+                fail("Unable to create surface within 1 Second");
+            }
+            SurfaceControl sc = mSurfaceView.getSurfaceControl();
+            Choreographer choreographer = sc.getChoreographer();
+            SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+            float displayRefreshRate = activity.getDisplay().getMode().getRefreshRate();
+            float fps = 61.7f; // hopefully not a divisor
+            float expectedFps = displayRefreshRate / Math.round(displayRefreshRate / fps);
+            long callbackDurationMs = Math.round(1000 / expectedFps);
+            mCallbackMissedCounter = 0;
+            transaction.setFrameRate(sc, fps, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT)
+                    .addTransactionCommittedListener(Runnable::run,
+                            () -> verifyVsyncCallbacks(choreographer,
+                                    callbackDurationMs, continueLatch, FRAME_ITERATIONS))
+                    .apply();
+        });
+        // wait for the previous callbacks to finish before moving to the next divisor
+        if (waitForCountDown(continueLatch, /* timeoutInSeconds */ 5L)) {
+            fail("Test not finished in 5 Seconds");
+        }
+    }
+
     private void verifyVsyncCallbacks(Choreographer choreographer, long callbackDurationMs,
             CountDownLatch continueLatch, int frameCount) {
-        long callbackRequestedTimeNs = System.nanoTime();
         choreographer.postVsyncCallback(frameData -> {
+            long expectedPresentTime =
+                    frameData.getPreferredFrameTimeline().getExpectedPresentationTimeNanos();
             if (frameCount > 0) {
-                if (!mIsFirstCallback) {
-                    // Skip the first callback as it takes 1 frame
-                    // to reflect the new refresh rate
-                    long callbackDurationDiffMs = getCallbackDurationDiffInMs(
-                            frameData.getFrameTimeNanos(),
-                            callbackRequestedTimeNs, callbackDurationMs);
-                    if (callbackDurationDiffMs < 0 || callbackDurationDiffMs > THRESHOLD_MS) {
+                if (mExpectedPresentTime > 0) {
+                    long callbackDurationDiffMs =
+                            TimeUnit.NANOSECONDS.toMillis(
+                                    expectedPresentTime - mExpectedPresentTime);
+                    if (callbackDurationDiffMs < 0
+                            || Math.abs(callbackDurationMs - callbackDurationDiffMs)
+                                > THRESHOLD_MS) {
                         mCallbackMissedCounter++;
                         Log.e(TAG, "Frame #" + Math.abs(frameCount - FRAME_ITERATIONS)
                                 + " vsync callback failed, expected callback in "
@@ -427,23 +562,17 @@ public class AttachedChoreographerTest {
                                 + " but actual duration difference is " + callbackDurationDiffMs);
                     }
                 }
-                mIsFirstCallback = false;
+                mExpectedPresentTime = expectedPresentTime;
                 verifyVsyncCallbacks(choreographer, callbackDurationMs,
                         continueLatch, frameCount - 1);
             } else {
-                assertTrue("Missed timeline for " + mCallbackMissedCounter + " callbacks, while "
-                                + CALLBACK_MISSED_THRESHOLD + " missed callbacks are allowed",
+                assertTrue("Missed timeline for " + mCallbackMissedCounter
+                                + " callbacks, while " + CALLBACK_MISSED_THRESHOLD
+                                + " missed callbacks are allowed",
                         mCallbackMissedCounter <= CALLBACK_MISSED_THRESHOLD);
                 continueLatch.countDown();
             }
         });
-    }
-
-    private long getCallbackDurationDiffInMs(long callbackTimeNs, long requestedTimeNs,
-            long expectedCallbackMs) {
-        long actualTimeMs = TimeUnit.NANOSECONDS.toMillis(callbackTimeNs)
-                - TimeUnit.NANOSECONDS.toMillis(requestedTimeNs);
-        return Math.abs(expectedCallbackMs - actualTimeMs);
     }
 
     private boolean waitForCountDown(CountDownLatch countDownLatch, long timeoutInSeconds) {

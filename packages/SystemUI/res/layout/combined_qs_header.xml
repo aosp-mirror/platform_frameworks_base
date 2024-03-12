@@ -118,34 +118,38 @@ frame when animating QS <-> QQS transition
         app:layout_constraintStart_toEndOf="@id/date"
         app:layout_constraintTop_toTopOf="@id/clock" />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/shade_header_system_icons"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/shade_header_system_icons_height"
-        android:clickable="true"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="@dimen/shade_header_system_icons_padding_start"
-        android:paddingEnd="@dimen/shade_header_system_icons_padding_end"
-        android:paddingTop="@dimen/shade_header_system_icons_padding_top"
-        android:paddingBottom="@dimen/shade_header_system_icons_padding_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/privacy_container"
         app:layout_constraintTop_toTopOf="@id/clock">
-
-        <com.android.systemui.statusbar.phone.StatusIconContainer
-            android:id="@+id/statusIcons"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/signal_cluster_battery_padding" />
-
-        <com.android.systemui.battery.BatteryMeterView
-            android:id="@+id/batteryRemainingIcon"
+        <LinearLayout
+            android:id="@+id/hover_system_icons_container"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:textAppearance="@style/TextAppearance.QS.Status" />
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:layout_gravity="right|center_vertical"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/hover_system_icons_container_padding_start"
+            android:paddingEnd="@dimen/hover_system_icons_container_padding_end"
+            android:paddingTop="@dimen/hover_system_icons_container_padding_top"
+            android:paddingBottom="@dimen/hover_system_icons_container_padding_bottom">
+
+            <com.android.systemui.statusbar.phone.StatusIconContainer
+                android:id="@+id/statusIcons"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/signal_cluster_battery_padding" />
+
+            <com.android.systemui.battery.BatteryMeterView
+                android:id="@+id/batteryRemainingIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:textAppearance="@style/TextAppearance.QS.Status" />
+        </LinearLayout>
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/privacy_container"

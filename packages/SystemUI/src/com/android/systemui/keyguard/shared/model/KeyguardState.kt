@@ -71,5 +71,40 @@ enum class KeyguardState {
     /*
      * An activity is displaying over the keyguard.
      */
-    OCCLUDED,
+    OCCLUDED;
+
+    companion object {
+
+        /** Whether the lockscreen is visible when we're FINISHED in the given state. */
+        fun lockscreenVisibleInState(state: KeyguardState): Boolean {
+            return state != GONE
+        }
+
+        /**
+         * Whether the device is awake ([PowerInteractor.isAwake]) when we're FINISHED in the given
+         * keyguard state.
+         */
+        fun deviceIsAwakeInState(state: KeyguardState): Boolean {
+            return when (state) {
+                OFF -> false
+                DOZING -> false
+                DREAMING -> false
+                DREAMING_LOCKSCREEN_HOSTED -> false
+                AOD -> false
+                ALTERNATE_BOUNCER -> true
+                PRIMARY_BOUNCER -> true
+                LOCKSCREEN -> true
+                GONE -> true
+                OCCLUDED -> true
+            }
+        }
+
+        /**
+         * Whether the device is awake ([PowerInteractor.isAsleep]) when we're FINISHED in the given
+         * keyguard state.
+         */
+        fun deviceIsAsleepInState(state: KeyguardState): Boolean {
+            return !deviceIsAwakeInState(state)
+        }
+    }
 }

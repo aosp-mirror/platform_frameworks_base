@@ -1212,11 +1212,29 @@ public class BugreportProgressService extends Service {
 
     private void maybeShowWarningMessageAndCloseNotification(int id) {
         if (!hasUserDecidedNotToGetWarningMessage()) {
-            Intent warningIntent = buildWarningIntent(mContext, /* sendIntent */ null);
+            Intent warningIntent;
+            if (mIsWatch) {
+                warningIntent = buildWearWarningIntent();
+            } else {
+                warningIntent = buildWarningIntent(mContext, /* sendIntent */ null);
+            }
             warningIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(warningIntent);
         }
         NotificationManager.from(mContext).cancel(id);
+    }
+
+    /**
+     * Build intent to show warning dialog on Wear after bugreport is done
+     */
+    private Intent buildWearWarningIntent() {
+        Intent intent = new Intent();
+        intent.setClassName(mContext, getPackageName() + ".WearBugreportWarningActivity");
+        if (mContext.getPackageManager().resolveActivity(intent, /* flags */ 0) == null) {
+            Log.e(TAG, "Cannot find wear bugreport warning activity");
+            return buildWarningIntent(mContext, /* sendIntent */ null);
+        }
+        return intent;
     }
 
     private void shareBugreport(int id, BugreportInfo sharedInfo) {

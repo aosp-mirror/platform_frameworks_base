@@ -503,6 +503,7 @@ public class EditorInfoTest {
                 + "prefix: hintLocales=null\n"
                 + "prefix: supportedHandwritingGestureTypes=(none)\n"
                 + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
+                + "prefix: isStylusHandwritingEnabled=false\n"
                 + "prefix: contentMimeTypes=null\n");
     }
 
@@ -521,6 +522,9 @@ public class EditorInfoTest {
         info.setSupportedHandwritingGestures(Arrays.asList(SelectGesture.class));
         info.setSupportedHandwritingGesturePreviews(
                 Stream.of(SelectGesture.class).collect(Collectors.toSet()));
+        if (Flags.editorinfoHandwritingEnabled()) {
+            info.setStylusHandwritingEnabled(true);
+        }
         info.packageName = "android.view.inputmethod";
         info.autofillId = new AutofillId(123);
         info.fieldId = 456;
@@ -544,6 +548,8 @@ public class EditorInfoTest {
                         + "prefix2: hintLocales=[en,es,zh]\n"
                         + "prefix2: supportedHandwritingGestureTypes=SELECT\n"
                         + "prefix2: supportedHandwritingGesturePreviewTypes=SELECT\n"
+                        + "prefix2: isStylusHandwritingEnabled="
+                                + Flags.editorinfoHandwritingEnabled() + "\n"
                         + "prefix2: contentMimeTypes=[image/png]\n"
                         + "prefix2: targetInputMethodUserId=10\n");
     }
@@ -565,6 +571,7 @@ public class EditorInfoTest {
                         + "prefix: hintLocales=null\n"
                         + "prefix: supportedHandwritingGestureTypes=(none)\n"
                         + "prefix: supportedHandwritingGesturePreviewTypes=(none)\n"
+                        + "prefix: isStylusHandwritingEnabled=false\n"
                         + "prefix: contentMimeTypes=null\n");
     }
 

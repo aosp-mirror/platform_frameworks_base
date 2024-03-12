@@ -45,7 +45,6 @@ import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.SystemClockTime.TIME_CONFIDENCE_HIGH;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
-import static com.android.server.SystemTimeZone.getTimeZoneId;
 import static com.android.server.alarm.Alarm.APP_STANDBY_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.BATTERY_SAVER_POLICY_INDEX;
 import static com.android.server.alarm.Alarm.DEVICE_IDLE_POLICY_INDEX;
@@ -70,7 +69,10 @@ import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_R
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.EnforcePermission;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
@@ -139,7 +141,6 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.Keep;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
@@ -172,10 +173,10 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import dalvik.annotation.optimization.NeverCompile;
 
-import libcore.util.EmptyArray;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -183,7 +184,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -229,19 +229,6 @@ public class AlarmManagerService extends SystemService {
 
     private static final long TEMPORARY_QUOTA_DURATION = INTERVAL_DAY;
 
-    /*
-     * b/246256335: This compile-time constant controls whether Android attempts to sync the Kernel
-     * time zone offset via settimeofday(null, tz). For <= Android T behavior is the same as
-     * {@code true}, the state for future releases is the same as {@code false}.
-     * It is unlikely anything depends on this, but a compile-time constant has been used to limit
-     * the size of the revert if this proves to be invorrect. The guarded code and associated
-     * methods / native code can be removed after release testing has proved that removing the
-     * behavior doesn't break anything.
-     * TODO(b/246256335): After this change has soaked for a release, remove this constant and
-     * everything it affects.
-     */
-    private static final boolean KERNEL_TIME_ZONE_SYNC_ENABLED = false;
-
     private final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
 
@@ -271,7 +258,7 @@ public class AlarmManagerService extends SystemService {
     /**
      * A map from uid to the last op-mode we have seen for
      * {@link AppOpsManager#OP_SCHEDULE_EXACT_ALARM}. Used for evaluating permission state change
-     * when the denylist changes.
+     * when the app-op changes.
      */
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -682,9 +669,6 @@ public class AlarmManagerService extends SystemService {
     @VisibleForTesting
     final class Constants implements DeviceConfig.OnPropertiesChangedListener,
             EconomyManagerInternal.TareStateChangeListener {
-        @VisibleForTesting
-        static final int MAX_EXACT_ALARM_DENY_LIST_SIZE = 250;
-
         // Key names stored in the settings value.
         @VisibleForTesting
         static final String KEY_MIN_FUTURITY = "min_futurity";
@@ -738,14 +722,9 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_PRIORITY_ALARM_DELAY = "priority_alarm_delay";
         @VisibleForTesting
-        static final String KEY_EXACT_ALARM_DENY_LIST = "exact_alarm_deny_list";
-        @VisibleForTesting
         static final String KEY_MIN_DEVICE_IDLE_FUZZ = "min_device_idle_fuzz";
         @VisibleForTesting
         static final String KEY_MAX_DEVICE_IDLE_FUZZ = "max_device_idle_fuzz";
-        @VisibleForTesting
-        static final String KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
-                "kill_on_schedule_exact_alarm_revoked";
         @VisibleForTesting
         static final String KEY_TEMPORARY_QUOTA_BUMP = "temporary_quota_bump";
         @VisibleForTesting
@@ -788,8 +767,6 @@ public class AlarmManagerService extends SystemService {
 
         private static final long DEFAULT_MIN_DEVICE_IDLE_FUZZ = 2 * 60_000;
         private static final long DEFAULT_MAX_DEVICE_IDLE_FUZZ = 15 * 60_000;
-
-        private static final boolean DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = true;
 
         private static final int DEFAULT_TEMPORARY_QUOTA_BUMP = 0;
 
@@ -851,13 +828,6 @@ public class AlarmManagerService extends SystemService {
         public long PRIORITY_ALARM_DELAY = DEFAULT_PRIORITY_ALARM_DELAY;
 
         /**
-         * Read-only set of apps that won't get SCHEDULE_EXACT_ALARM when the app-op mode for
-         * OP_SCHEDULE_EXACT_ALARM is MODE_DEFAULT. Since this is read-only and volatile, this can
-         * be accessed without synchronizing on {@link #mLock}.
-         */
-        public volatile Set<String> EXACT_ALARM_DENY_LIST = Collections.emptySet();
-
-        /**
          * Minimum time interval that an IDLE_UNTIL will be pulled earlier to a subsequent
          * WAKE_FROM_IDLE alarm.
          */
@@ -868,13 +838,6 @@ public class AlarmManagerService extends SystemService {
          * WAKE_FROM_IDLE alarm.
          */
         public long MAX_DEVICE_IDLE_FUZZ = DEFAULT_MAX_DEVICE_IDLE_FUZZ;
-
-        /**
-         * Whether or not to kill app when the permission
-         * {@link Manifest.permission#SCHEDULE_EXACT_ALARM} is revoked.
-         */
-        public boolean KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
-                DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED;
 
         public int USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_ALARM
                 ? EconomyManager.DEFAULT_ENABLE_TARE_MODE : EconomyManager.ENABLED_MODE_OFF;
@@ -927,6 +890,7 @@ public class AlarmManagerService extends SystemService {
                     economyManagerInternal.getEnabledMode(AlarmManagerEconomicPolicy.POLICY_ALARM));
         }
 
+        @SuppressLint("MissingPermission")
         public void updateAllowWhileIdleWhitelistDurationLocked() {
             if (mLastAllowWhileIdleWhitelistDuration != ALLOW_WHILE_IDLE_WHITELIST_DURATION) {
                 mLastAllowWhileIdleWhitelistDuration = ALLOW_WHILE_IDLE_WHITELIST_DURATION;
@@ -1047,32 +1011,12 @@ public class AlarmManagerService extends SystemService {
                             PRIORITY_ALARM_DELAY = properties.getLong(KEY_PRIORITY_ALARM_DELAY,
                                     DEFAULT_PRIORITY_ALARM_DELAY);
                             break;
-                        case KEY_EXACT_ALARM_DENY_LIST:
-                            final String rawValue = properties.getString(KEY_EXACT_ALARM_DENY_LIST,
-                                    "");
-                            final String[] values = rawValue.isEmpty()
-                                    ? EmptyArray.STRING
-                                    : rawValue.split(",", MAX_EXACT_ALARM_DENY_LIST_SIZE + 1);
-                            if (values.length > MAX_EXACT_ALARM_DENY_LIST_SIZE) {
-                                Slog.w(TAG, "Deny list too long, truncating to "
-                                        + MAX_EXACT_ALARM_DENY_LIST_SIZE + " elements.");
-                                updateExactAlarmDenyList(
-                                        Arrays.copyOf(values, MAX_EXACT_ALARM_DENY_LIST_SIZE));
-                            } else {
-                                updateExactAlarmDenyList(values);
-                            }
-                            break;
                         case KEY_MIN_DEVICE_IDLE_FUZZ:
                         case KEY_MAX_DEVICE_IDLE_FUZZ:
                             if (!deviceIdleFuzzBoundariesUpdated) {
                                 updateDeviceIdleFuzzBoundaries();
                                 deviceIdleFuzzBoundariesUpdated = true;
                             }
-                            break;
-                        case KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED:
-                            KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = properties.getBoolean(
-                                    KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED,
-                                    DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
                             break;
                         case KEY_TEMPORARY_QUOTA_BUMP:
                             TEMPORARY_QUOTA_BUMP = properties.getInt(KEY_TEMPORARY_QUOTA_BUMP,
@@ -1134,28 +1078,6 @@ public class AlarmManagerService extends SystemService {
                         updateNextAlarmClockLocked();
                     }
                 }
-            }
-        }
-
-        private void updateExactAlarmDenyList(String[] newDenyList) {
-            final Set<String> newSet = Collections.unmodifiableSet(new ArraySet<>(newDenyList));
-            final Set<String> removed = new ArraySet<>(EXACT_ALARM_DENY_LIST);
-            final Set<String> added = new ArraySet<>(newDenyList);
-
-            added.removeAll(EXACT_ALARM_DENY_LIST);
-            removed.removeAll(newSet);
-            if (added.size() > 0) {
-                mHandler.obtainMessage(AlarmHandler.EXACT_ALARM_DENY_LIST_PACKAGES_ADDED, added)
-                        .sendToTarget();
-            }
-            if (removed.size() > 0) {
-                mHandler.obtainMessage(AlarmHandler.EXACT_ALARM_DENY_LIST_PACKAGES_REMOVED, removed)
-                        .sendToTarget();
-            }
-            if (newDenyList.length == 0) {
-                EXACT_ALARM_DENY_LIST = Collections.emptySet();
-            } else {
-                EXACT_ALARM_DENY_LIST = newSet;
             }
         }
 
@@ -1304,9 +1226,6 @@ public class AlarmManagerService extends SystemService {
             TimeUtils.formatDuration(PRIORITY_ALARM_DELAY, pw);
             pw.println();
 
-            pw.print(KEY_EXACT_ALARM_DENY_LIST, EXACT_ALARM_DENY_LIST);
-            pw.println();
-
             pw.print(KEY_MIN_DEVICE_IDLE_FUZZ);
             pw.print("=");
             TimeUtils.formatDuration(MIN_DEVICE_IDLE_FUZZ, pw);
@@ -1315,10 +1234,6 @@ public class AlarmManagerService extends SystemService {
             pw.print(KEY_MAX_DEVICE_IDLE_FUZZ);
             pw.print("=");
             TimeUtils.formatDuration(MAX_DEVICE_IDLE_FUZZ, pw);
-            pw.println();
-
-            pw.print(KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED,
-                    KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
             pw.println();
 
             pw.print(Settings.Global.ENABLE_TARE,
@@ -1356,87 +1271,91 @@ public class AlarmManagerService extends SystemService {
 
     Constants mConstants;
 
-    // Alarm delivery ordering bookkeeping
-    static final int PRIO_TICK = 0;
-    static final int PRIO_WAKEUP = 1;
-    static final int PRIO_NORMAL = 2;
+    /** Dispatch priority to use for system alarms. */
+    static final int PRIORITY_SYSTEM = 0;
+    /** Dispatch priority to use for a package that has any wakeup alarm in the pending batch. */
+    static final int PRIORITY_WAKEUP = 1;
+    /** The default dispatch priority to use when no special conditions apply. */
+    static final int PRIORITY_NORMAL = 2;
 
-    final class PriorityClass {
-        int seq;
-        int priority;
+    /**
+     * Priority to assign to alarms in an outgoing batch. Higher priority alarms are considered more
+     * urgent than lower priority ones (smaller value is higher priority). Priorities are assigned
+     * per package, so all alarms in one package will share the same priority in an outgoing batch -
+     * which should be the highest (minimum) priority computed over all its alarms.
+     * This is done to ensure that alarms in the same package preserve their relative ordering.
+     */
+    @IntDef(prefix = "PRIORITY_", value = {
+            PRIORITY_SYSTEM,
+            PRIORITY_WAKEUP,
+            PRIORITY_NORMAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DispatchPriority {}
 
-        PriorityClass() {
-            seq = mCurrentSeq - 1;
-            priority = PRIO_NORMAL;
+    final Comparator<Alarm> mAlarmDispatchComparator = (lhs, rhs) -> {
+
+        // Alarm to exit device_idle should go out first.
+        final boolean idleUntil1 = (lhs.flags & FLAG_IDLE_UNTIL) != 0;
+        final boolean idleUntil2 = (rhs.flags & FLAG_IDLE_UNTIL) != 0;
+        if (idleUntil1 != idleUntil2) {
+            return idleUntil1 ? -1 : 1;
         }
-    }
 
-    final HashMap<String, PriorityClass> mPriorities = new HashMap<>();
-    int mCurrentSeq = 0;
-
-    final Comparator<Alarm> mAlarmDispatchComparator = new Comparator<Alarm>() {
-        @Override
-        public int compare(Alarm lhs, Alarm rhs) {
-
-            // Alarm to exit device_idle should go out first.
-            final boolean lhsIdleUntil = (lhs.flags & FLAG_IDLE_UNTIL) != 0;
-            final boolean rhsIdleUntil = (rhs.flags & FLAG_IDLE_UNTIL) != 0;
-            if (lhsIdleUntil != rhsIdleUntil) {
-                return lhsIdleUntil ? -1 : 1;
-            }
-
-            // Then, priority class trumps everything.  TICK < WAKEUP < NORMAL
-            if (lhs.priorityClass.priority < rhs.priorityClass.priority) {
-                return -1;
-            } else if (lhs.priorityClass.priority > rhs.priorityClass.priority) {
-                return 1;
-            }
-
-            // within each class, sort by requested delivery time
-            if (lhs.getRequestedElapsed() < rhs.getRequestedElapsed()) {
-                return -1;
-            } else if (lhs.getRequestedElapsed() > rhs.getRequestedElapsed()) {
-                return 1;
-            }
-
-            return 0;
+        // Then, priority class trumps everything.  SYSTEM < WAKEUP < NORMAL
+        if (lhs.priorityClass < rhs.priorityClass) {
+            return -1;
+        } else if (lhs.priorityClass > rhs.priorityClass) {
+            return 1;
         }
+
+        // Within all system alarms, pulling time_tick to the front, as it is time-sensitive.
+        final boolean timeTick1 = (lhs.listener == mTimeTickTrigger);
+        final boolean timeTick2 = (rhs.listener == mTimeTickTrigger);
+        if (timeTick1 != timeTick2) {
+            return timeTick1 ? -1 : 1;
+        }
+
+        // Within each class, sort by requested delivery time
+        if (lhs.getRequestedElapsed() < rhs.getRequestedElapsed()) {
+            return -1;
+        } else if (lhs.getRequestedElapsed() > rhs.getRequestedElapsed()) {
+            return 1;
+        }
+
+        return 0;
     };
 
+    /**
+     * Assigns a {@link DispatchPriority} to each alarm that will be used to order alarms in an
+     * outgoing batch.
+     *
+     * @param alarms The batch of alarms about to be sent.
+     */
     void calculateDeliveryPriorities(ArrayList<Alarm> alarms) {
         final int N = alarms.size();
+
+        // Batches are expected to be small (generally N < 10). So an additional iteration to
+        // collect a small set of UserPackage objects should be unnoticeable.
+        final ArraySet<UserPackage> wakeupPackages = new ArraySet<>(4);
         for (int i = 0; i < N; i++) {
-            Alarm a = alarms.get(i);
-
-            final int alarmPrio;
-            if (a.listener == mTimeTickTrigger) {
-                alarmPrio = PRIO_TICK;
-            } else if (a.wakeup) {
-                alarmPrio = PRIO_WAKEUP;
-            } else {
-                alarmPrio = PRIO_NORMAL;
+            final Alarm a = alarms.get(i);
+            if (a.wakeup) {
+                wakeupPackages.add(
+                        UserPackage.of(UserHandle.getUserId(a.creatorUid), a.sourcePackage));
             }
+        }
 
-            PriorityClass packagePrio = a.priorityClass;
-            String alarmPackage = a.sourcePackage;
-            if (packagePrio == null) packagePrio = mPriorities.get(alarmPackage);
-            if (packagePrio == null) {
-                packagePrio = a.priorityClass = new PriorityClass(); // lowest prio & stale sequence
-                mPriorities.put(alarmPackage, packagePrio);
-            }
-            a.priorityClass = packagePrio;
+        for (int i = 0; i < N; i++) {
+            final Alarm a = alarms.get(i);
 
-            if (packagePrio.seq != mCurrentSeq) {
-                // first alarm we've seen in the current delivery generation from this package
-                packagePrio.priority = alarmPrio;
-                packagePrio.seq = mCurrentSeq;
+            if (a.creatorUid == Process.SYSTEM_UID && "android".equals(a.sourcePackage)) {
+                a.priorityClass = PRIORITY_SYSTEM;
+            } else if (wakeupPackages.contains(
+                    UserPackage.of(UserHandle.getUserId(a.creatorUid), a.sourcePackage))) {
+                a.priorityClass = PRIORITY_WAKEUP;
             } else {
-                // Multiple alarms from this package being delivered in this generation;
-                // bump the package's delivery class if it's warranted.
-                // TICK < WAKEUP < NORMAL
-                if (alarmPrio < packagePrio.priority) {
-                    packagePrio.priority = alarmPrio;
-                }
+                a.priorityClass = PRIORITY_NORMAL;
             }
         }
     }
@@ -1753,6 +1672,7 @@ public class AlarmManagerService extends SystemService {
         final BroadcastStats mBroadcastStats;
         final FilterStats mFilterStats;
         final int mAlarmType;
+        final int mPriorityClass;
 
         InFlight(AlarmManagerService service, Alarm alarm, long nowELAPSED) {
             mPendingIntent = alarm.operation;
@@ -1773,6 +1693,7 @@ public class AlarmManagerService extends SystemService {
             fs.lastTime = nowELAPSED;
             mFilterStats = fs;
             mAlarmType = alarm.type;
+            mPriorityClass = alarm.priorityClass;
         }
 
         boolean isBroadcast() {
@@ -1791,6 +1712,7 @@ public class AlarmManagerService extends SystemService {
                     + ", broadcastStats=" + mBroadcastStats
                     + ", filterStats=" + mFilterStats
                     + ", alarmType=" + mAlarmType
+                    + ", priorityClass=" + mPriorityClass
                     + "}";
         }
 
@@ -1967,13 +1889,6 @@ public class AlarmManagerService extends SystemService {
             mTemporaryQuotaReserve = new TemporaryQuotaReserve(TEMPORARY_QUOTA_DURATION);
 
             mNextWakeup = mNextNonWakeup = 0;
-
-            if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                // We set the current offset in kernel because the kernel doesn't keep this after a
-                // reboot. Keeping the kernel time zone in sync is "best effort" and can be wrong
-                // for a period after daylight savings transitions.
-                mInjector.syncKernelTimeZoneOffset();
-            }
 
             // Ensure that we're booting with a halfway sensible current time.
             mInjector.initializeTimeIfRequired();
@@ -2157,14 +2072,10 @@ public class AlarmManagerService extends SystemService {
                                             ? permissionState
                                             : (newMode == AppOpsManager.MODE_ALLOWED);
                                 } else {
-                                    final boolean allowedByDefault =
-                                            !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
                                     hadPermission = (oldMode == AppOpsManager.MODE_DEFAULT)
-                                            ? allowedByDefault
-                                            : (oldMode == AppOpsManager.MODE_ALLOWED);
+                                            || (oldMode == AppOpsManager.MODE_ALLOWED);
                                     hasPermission = (newMode == AppOpsManager.MODE_DEFAULT)
-                                            ? allowedByDefault
-                                            : (newMode == AppOpsManager.MODE_ALLOWED);
+                                            || (newMode == AppOpsManager.MODE_ALLOWED);
                                 }
 
                                 if (hadPermission && !hasPermission) {
@@ -2208,19 +2119,7 @@ public class AlarmManagerService extends SystemService {
             @CurrentTimeMillisLong long newSystemClockTimeMillis, @TimeConfidence int confidence,
             @NonNull String logMsg) {
         synchronized (mLock) {
-            final long oldSystemClockTimeMillis = mInjector.getCurrentTimeMillis();
             mInjector.setCurrentTimeMillis(newSystemClockTimeMillis, confidence, logMsg);
-
-            if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                // Changing the time may cross a DST transition; sync the kernel offset if needed.
-                final TimeZone timeZone = TimeZone.getTimeZone(SystemTimeZone.getTimeZoneId());
-                final int currentTzOffset = timeZone.getOffset(oldSystemClockTimeMillis);
-                final int newTzOffset = timeZone.getOffset(newSystemClockTimeMillis);
-                if (currentTzOffset != newTzOffset) {
-                    Slog.i(TAG, "Timezone offset has changed, updating kernel timezone");
-                    mInjector.setKernelTimeZoneOffset(newTzOffset);
-                }
-            }
 
             // The native implementation of setKernelTime can return -1 even when the kernel
             // time was set correctly, so assume setting kernel time was successful and always
@@ -2243,12 +2142,6 @@ public class AlarmManagerService extends SystemService {
             // "GMT" if the ID is unrecognized). The parameter ID is used here rather than
             // newZone.getId(). It will be rejected if it is invalid.
             timeZoneWasChanged = SystemTimeZone.setTimeZoneId(tzId, confidence, logInfo);
-
-            if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                // Update the kernel timezone information
-                int utcOffsetMillis = newZone.getOffset(mInjector.getCurrentTimeMillis());
-                mInjector.setKernelTimeZoneOffset(utcOffsetMillis);
-            }
         }
 
         // Clear the default time zone in the system server process. This forces the next call
@@ -2270,6 +2163,8 @@ public class AlarmManagerService extends SystemService {
                     mActivityManagerInternal.getBootTimeTempAllowListDuration(),
                     TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     PowerExemptionManager.REASON_TIMEZONE_CHANGED, "");
+            mOptsTimeBroadcast.setDeliveryGroupPolicy(
+                    BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                     null /* receiverPermission */, mOptsTimeBroadcast.toBundle());
         }
@@ -2830,11 +2725,8 @@ public class AlarmManagerService extends SystemService {
             // Compatibility permission check for older apps.
             final int mode = mAppOps.checkOpNoThrow(AppOpsManager.OP_SCHEDULE_EXACT_ALARM, uid,
                     packageName);
-            if (mode == AppOpsManager.MODE_DEFAULT) {
-                hasPermission = !mConstants.EXACT_ALARM_DENY_LIST.contains(packageName);
-            } else {
-                hasPermission = (mode == AppOpsManager.MODE_ALLOWED);
-            }
+            hasPermission = (mode == AppOpsManager.MODE_DEFAULT)
+                    || (mode == AppOpsManager.MODE_ALLOWED);
         }
         mStatLogger.logDurationStat(Stats.HAS_SCHEDULE_EXACT_ALARM, start);
         return hasPermission;
@@ -3052,11 +2944,10 @@ public class AlarmManagerService extends SystemService {
             return (uid > 0) ? hasScheduleExactAlarmInternal(packageName, uid) : false;
         }
 
+        @EnforcePermission(android.Manifest.permission.SET_TIME)
         @Override
         public boolean setTime(@CurrentTimeMillisLong long millis) {
-            getContext().enforceCallingOrSelfPermission(
-                    "android.permission.SET_TIME",
-                    "setTime");
+            setTime_enforcePermission();
 
             // The public API (and the shell command that also uses this method) have no concept
             // of confidence, but since the time should come either from apps working on behalf of
@@ -3065,11 +2956,10 @@ public class AlarmManagerService extends SystemService {
             return setTimeImpl(millis, timeConfidence, "AlarmManager.setTime() called");
         }
 
+        @EnforcePermission(android.Manifest.permission.SET_TIME_ZONE)
         @Override
         public void setTimeZone(String tz) {
-            getContext().enforceCallingOrSelfPermission(
-                    "android.permission.SET_TIME_ZONE",
-                    "setTimeZone");
+            setTimeZone_enforcePermission();
 
             final long oldId = Binder.clearCallingIdentity();
             try {
@@ -3127,10 +3017,10 @@ public class AlarmManagerService extends SystemService {
             return getNextAlarmClockImpl(userId);
         }
 
+        @EnforcePermission(android.Manifest.permission.DUMP)
         @Override
         public int getConfigVersion() {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.DUMP,
-                    "getConfigVersion");
+            getConfigVersion_enforcePermission();
             return mConstants.getVersion();
         }
 
@@ -4056,63 +3946,6 @@ public class AlarmManagerService extends SystemService {
     }
 
     /**
-     * Called when the {@link Constants#EXACT_ALARM_DENY_LIST}, changes with the packages that
-     * either got added or deleted.
-     * These packages may lose or gain the SCHEDULE_EXACT_ALARM permission.
-     *
-     * Note that these packages don't need to be installed on the device, but if they are and they
-     * do undergo a permission change, we will handle them appropriately.
-     *
-     * This should not be called with the lock held as it calls out to other services.
-     * This is not expected to get called frequently.
-     */
-    void handleChangesToExactAlarmDenyList(ArraySet<String> changedPackages, boolean added) {
-        Slog.w(TAG, "Packages " + changedPackages + (added ? " added to" : " removed from")
-                + " the exact alarm deny list.");
-
-        final int[] startedUserIds = mActivityManagerInternal.getStartedUserIds();
-
-        for (int i = 0; i < changedPackages.size(); i++) {
-            final String changedPackage = changedPackages.valueAt(i);
-            for (final int userId : startedUserIds) {
-                final int uid = mPackageManagerInternal.getPackageUid(changedPackage, 0, userId);
-                if (uid <= 0) {
-                    continue;
-                }
-                if (!isExactAlarmChangeEnabled(changedPackage, userId)) {
-                    continue;
-                }
-                if (isScheduleExactAlarmDeniedByDefault(changedPackage, userId)) {
-                    continue;
-                }
-                if (hasUseExactAlarmInternal(changedPackage, uid)) {
-                    continue;
-                }
-                if (!mExactAlarmCandidates.contains(UserHandle.getAppId(uid))) {
-                    // Permission isn't requested, deny list doesn't matter.
-                    continue;
-                }
-                final int appOpMode;
-                synchronized (mLock) {
-                    appOpMode = mLastOpScheduleExactAlarm.get(uid,
-                            AppOpsManager.opToDefaultMode(AppOpsManager.OP_SCHEDULE_EXACT_ALARM));
-                }
-                if (appOpMode != AppOpsManager.MODE_DEFAULT) {
-                    // Deny list doesn't matter.
-                    continue;
-                }
-                // added: true => package was added to the deny list
-                // added: false => package was removed from the deny list
-                if (added) {
-                    removeExactAlarmsOnPermissionRevoked(uid, changedPackage, /*killUid = */ true);
-                } else {
-                    sendScheduleExactAlarmPermissionStateChangedBroadcast(changedPackage, userId);
-                }
-            }
-        }
-    }
-
-    /**
      * Called when an app loses the permission to use exact alarms. This will happen when the app
      * no longer has either {@link Manifest.permission#SCHEDULE_EXACT_ALARM} or
      * {@link Manifest.permission#USE_EXACT_ALARM}.
@@ -4133,7 +3966,7 @@ public class AlarmManagerService extends SystemService {
             removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
         }
 
-        if (killUid && mConstants.KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED) {
+        if (killUid) {
             PermissionManagerService.killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
                     "schedule_exact_alarm revoked");
         }
@@ -4398,16 +4231,6 @@ public class AlarmManagerService extends SystemService {
     private static native void close(long nativeData);
     private static native int set(long nativeData, int type, long seconds, long nanoseconds);
     private static native int waitForAlarm(long nativeData);
-
-    /*
-     * b/246256335: The @Keep ensures that the native definition is kept even when the optimizer can
-     * tell no calls will be made due to a compile-time constant. Allowing this definition to be
-     * optimized away breaks loadLibrary("alarm_jni") at boot time.
-     * TODO(b/246256335): Remove this native method and the associated native code when it is no
-     * longer needed.
-     */
-    @Keep
-    private static native int setKernelTimezone(long nativeData, int minuteswest);
     private static native long getNextAlarm(long nativeData, int type);
 
     @GuardedBy("mLock")
@@ -4482,9 +4305,6 @@ public class AlarmManagerService extends SystemService {
             }
         }
 
-        // This is a new alarm delivery set; bump the sequence number to indicate that
-        // all apps' alarm delivery classes should be recalculated.
-        mCurrentSeq++;
         calculateDeliveryPriorities(triggerList);
         Collections.sort(triggerList, mAlarmDispatchComparator);
 
@@ -4676,20 +4496,6 @@ public class AlarmManagerService extends SystemService {
             return AlarmManagerService.getNextAlarm(mNativeData, type);
         }
 
-        void setKernelTimeZoneOffset(int utcOffsetMillis) {
-            // Kernel tracks time offsets as 'minutes west of GMT'
-            AlarmManagerService.setKernelTimezone(mNativeData, -(utcOffsetMillis / 60000));
-        }
-
-        void syncKernelTimeZoneOffset() {
-            long currentTimeMillis = getCurrentTimeMillis();
-            TimeZone currentTimeZone = TimeZone.getTimeZone(getTimeZoneId());
-            // If the time zone ID is invalid, GMT will be returned and this will set a kernel
-            // offset of zero.
-            int utcOffsetMillis = currentTimeZone.getOffset(currentTimeMillis);
-            setKernelTimeZoneOffset(utcOffsetMillis);
-        }
-
         void initializeTimeIfRequired() {
             SystemClockTime.initializeIfRequired();
         }
@@ -4804,6 +4610,8 @@ public class AlarmManagerService extends SystemService {
                                 mActivityManagerInternal.getBootTimeTempAllowListDuration(),
                                 TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                                 PowerExemptionManager.REASON_TIME_CHANGED, "");
+                        mOptsTimeBroadcast.setDeliveryGroupPolicy(
+                                BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
                         getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                                 null /* receiverPermission */, mOptsTimeBroadcast.toBundle());
                         // The world has changed on us, so we need to re-evaluate alarms
@@ -5021,8 +4829,8 @@ public class AlarmManagerService extends SystemService {
         public static final int CHARGING_STATUS_CHANGED = 6;
         public static final int REMOVE_FOR_CANCELED = 7;
         public static final int REMOVE_EXACT_ALARMS = 8;
-        public static final int EXACT_ALARM_DENY_LIST_PACKAGES_ADDED = 9;
-        public static final int EXACT_ALARM_DENY_LIST_PACKAGES_REMOVED = 10;
+        // Unused id 9
+        // Unused id 10
         public static final int REFRESH_EXACT_ALARM_CANDIDATES = 11;
         public static final int TARE_AFFORDABILITY_CHANGED = 12;
         public static final int CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE = 13;
@@ -5131,12 +4939,6 @@ public class AlarmManagerService extends SystemService {
                     String packageName = (String) msg.obj;
                     removeExactAlarmsOnPermissionRevoked(uid, packageName, /*killUid = */true);
                     break;
-                case EXACT_ALARM_DENY_LIST_PACKAGES_ADDED:
-                    handleChangesToExactAlarmDenyList((ArraySet<String>) msg.obj, true);
-                    break;
-                case EXACT_ALARM_DENY_LIST_PACKAGES_REMOVED:
-                    handleChangesToExactAlarmDenyList((ArraySet<String>) msg.obj, false);
-                    break;
                 case REFRESH_EXACT_ALARM_CANDIDATES:
                     refreshExactAlarmCandidates();
                     break;
@@ -5211,12 +5013,6 @@ public class AlarmManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_DATE_CHANGED)) {
-                if (KERNEL_TIME_ZONE_SYNC_ENABLED) {
-                    // Since the kernel does not keep track of DST, we reset the TZ information at
-                    // the beginning of each day. This may miss a DST transition, but it will
-                    // correct itself within 24 hours.
-                    mInjector.syncKernelTimeZoneOffset();
-                }
                 scheduleDateChangedEvent();
             }
         }
@@ -5374,7 +5170,6 @@ public class AlarmManagerService extends SystemService {
                             // external-applications-unavailable case
                             removeLocked(pkg, REMOVE_REASON_UNDEFINED);
                         }
-                        mPriorities.remove(pkg);
                         for (int i = mBroadcastStats.size() - 1; i >= 0; i--) {
                             ArrayMap<String, BroadcastStats> uidStats = mBroadcastStats.valueAt(i);
                             if (uidStats.remove(pkg) != null) {

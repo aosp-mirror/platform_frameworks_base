@@ -17,7 +17,6 @@
 package com.android.server.pm
 
 import android.os.Build
-import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
 import com.android.server.pm.pkg.PackageStateInternal
@@ -37,6 +36,7 @@ import org.mockito.MockitoAnnotations
 open class PackageHelperTestBase {
 
     companion object {
+        const val PLATFORM_PACKAGE_NAME = "android"
         const val TEST_PACKAGE_1 = "com.android.test.package1"
         const val TEST_PACKAGE_2 = "com.android.test.package2"
         const val DEVICE_OWNER_PACKAGE = "com.android.test.owner"
@@ -68,7 +68,11 @@ open class PackageHelperTestBase {
     lateinit var protectedPackages: ProtectedPackages
 
     @Captor
-    lateinit var bundleCaptor: ArgumentCaptor<Bundle>
+    lateinit var pkgListCaptor: ArgumentCaptor<Array<String>>
+    @Captor
+    lateinit var flagsCaptor: ArgumentCaptor<Int>
+    @Captor
+    lateinit var uidsCaptor: ArgumentCaptor<IntArray>
 
     @Rule
     @JvmField
@@ -84,8 +88,8 @@ open class PackageHelperTestBase {
                 TEST_PACKAGE_1, TEST_PACKAGE_2, DEVICE_OWNER_PACKAGE, DEVICE_ADMIN_PACKAGE,
                 DEFAULT_HOME_PACKAGE, DIALER_PACKAGE, INSTALLER_PACKAGE, UNINSTALLER_PACKAGE,
                 VERIFIER_PACKAGE, PERMISSION_CONTROLLER_PACKAGE))
-        suspendPackageHelper = SuspendPackageHelper(pms, rule.mocks().injector,
-                rule.mocks().userManagerService, broadcastHelper, protectedPackages)
+        suspendPackageHelper = SuspendPackageHelper(
+                pms, rule.mocks().injector, broadcastHelper, protectedPackages)
         defaultAppProvider = rule.mocks().defaultAppProvider
         testHandler = rule.mocks().handler
         packageSetting1 = pms.snapshotComputer().getPackageStateInternal(TEST_PACKAGE_1)!!

@@ -107,7 +107,7 @@
     <item msgid="506175145534048710">"Opus"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="8868109554557331312">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
+    <item msgid="8868109554557331312">"सिस्टम की डिफ़ॉल्ट सेटिंग का इस्तेमाल करें"</item>
     <item msgid="9024885861221697796">"SBC"</item>
     <item msgid="4688890470703790013">"AAC"</item>
     <item msgid="8627333814413492563">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ऑडियो"</item>
@@ -124,7 +124,7 @@
     <item msgid="8887519571067543785">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="2284090879080331090">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
+    <item msgid="2284090879080331090">"सिस्टम की डिफ़ॉल्ट सेटिंग का इस्तेमाल करें"</item>
     <item msgid="1872276250541651186">"44.1 kHz"</item>
     <item msgid="8736780630001704004">"48.0 kHz"</item>
     <item msgid="7698585706868856888">"88.2 kHz"</item>
@@ -137,7 +137,7 @@
     <item msgid="1212577207279552119">"32 बिट/नमूना"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="9196208128729063711">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
+    <item msgid="9196208128729063711">"सिस्टम की डिफ़ॉल्ट सेटिंग का इस्तेमाल करें"</item>
     <item msgid="1084497364516370912">"16 बिट/नमूना"</item>
     <item msgid="2077889391457961734">"24 बिट/नमूना"</item>
     <item msgid="3836844909491316925">"32 बिट/नमूना"</item>
@@ -148,7 +148,7 @@
     <item msgid="927546067692441494">"स्टीरियो"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="1997302811102880485">"सिस्टम से चुने जाने का इस्तेमाल करें (डिफ़ॉल्ट)"</item>
+    <item msgid="1997302811102880485">"सिस्टम की डिफ़ॉल्ट सेटिंग का इस्तेमाल करें"</item>
     <item msgid="8005696114958453588">"मोनो"</item>
     <item msgid="1333279807604675720">"स्टीरियो"</item>
   </string-array>
@@ -188,7 +188,7 @@
     <item msgid="409235464399258501">"बंद"</item>
     <item msgid="4195153527464162486">"64K प्रति लॉग बफ़र"</item>
     <item msgid="7464037639415220106">"256K प्रति लॉग बफ़र"</item>
-    <item msgid="8539423820514360724">"1M प्रति लॉग बफ़र"</item>
+    <item msgid="8539423820514360724">"हर लॉग बफ़र का साइज़ 1 एमबी"</item>
     <item msgid="1984761927103140651">"4M प्रति लॉग बफ़र"</item>
     <item msgid="2983219471251787208">"8 एमबी प्रति लॉग बफ़र"</item>
   </string-array>
@@ -216,7 +216,7 @@
   <string-array name="transition_animation_scale_entries">
     <item msgid="3376676813923486384">"एनिमेशन बंद"</item>
     <item msgid="753422683600269114">"एनिमेशन स्‍केल .5x"</item>
-    <item msgid="3695427132155563489">"एनिमेशन स्‍केल 1x"</item>
+    <item msgid="3695427132155563489">"ऐनिमेशन स्‍केल 1x"</item>
     <item msgid="9032615844198098981">"एनिमेशन स्‍केल 1.5x"</item>
     <item msgid="8473868962499332073">"एनिमेशन स्‍केल 2x"</item>
     <item msgid="4403482320438668316">"एनिमेशन स्‍केल 5x"</item>
@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (सुरक्षित)"</item>
     <item msgid="7322156123728520872">"4K (बेहतर)"</item>
     <item msgid="7735692090314849188">"4K (बेहतर, सुरक्षित)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (ड्यूअल स्‍क्रीन)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (dual screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"कोई नहीं"</item>
@@ -282,6 +282,10 @@
     <item msgid="8828567335701536560">"ऑडियो स्रोत"</item>
     <item msgid="8688681727755534982">"एमआईडीआई"</item>
   </string-array>
-  <string-array name="avatar_image_descriptions">
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

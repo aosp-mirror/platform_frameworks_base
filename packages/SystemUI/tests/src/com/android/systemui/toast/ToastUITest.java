@@ -62,7 +62,7 @@ import android.widget.Toast;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.IntPair;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.PluginManager;
@@ -342,6 +342,31 @@ public class ToastUITest extends SysuiTestCase {
     }
 
     @Test
+    public void testShowToast_afterShowToast_animationListenerCleanup() throws RemoteException {
+        mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
+                mCallback, Display.DEFAULT_DISPLAY);
+        final SystemUIToast toast = mToastUI.mToast;
+
+        View view = verifyWmAddViewAndAttachToParent();
+        mToastUI.showToast(UID_2, PACKAGE_NAME_2, TOKEN_2, TEXT, WINDOW_TOKEN_2, Toast.LENGTH_LONG,
+                null, Display.DEFAULT_DISPLAY);
+
+        if (toast.getOutAnimation() != null) {
+            assertThat(mToastUI.mToastOutAnimatorListener).isNotNull();
+            assertThat(toast.getOutAnimation().getListeners()
+                .contains(mToastUI.mToastOutAnimatorListener)).isTrue();
+            assertThat(toast.getOutAnimation().isRunning()).isTrue();
+            toast.getOutAnimation().cancel(); // end early if applicable
+            assertThat(toast.getOutAnimation().getListeners()).isNull();
+        }
+
+        verify(mWindowManager).removeViewImmediate(view);
+        verify(mNotificationManager).finishToken(PACKAGE_NAME_1, TOKEN_1);
+        verify(mCallback).onToastHidden();
+        assertThat(mToastUI.mToastOutAnimatorListener).isNull();
+    }
+
+    @Test
     public void testShowToast_logs() {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
                 mCallback, Display.DEFAULT_DISPLAY);
@@ -364,7 +389,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // THEN the view can have unlimited lines
         assertThat(((TextView) mToastUI.mToast.getView()
-                .findViewById(com.android.systemui.R.id.text))
+                .findViewById(com.android.systemui.res.R.id.text))
                 .getMaxLines()).isEqualTo(Integer.MAX_VALUE);
     }
 
@@ -383,7 +408,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // THEN the view is limited to 2 lines
         assertThat(((TextView) mToastUI.mToast.getView()
-                .findViewById(com.android.systemui.R.id.text))
+                .findViewById(com.android.systemui.res.R.id.text))
                 .getMaxLines()).isEqualTo(2);
     }
 

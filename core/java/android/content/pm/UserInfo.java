@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -384,6 +385,16 @@ public class UserInfo implements Parcelable {
 
     public boolean isCloneProfile() {
         return UserManager.isUserTypeCloneProfile(userType);
+    }
+
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    public boolean isCommunalProfile() {
+        return UserManager.isUserTypeCommunalProfile(userType);
+    }
+
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    public boolean isPrivateProfile() {
+        return UserManager.isUserTypePrivateProfile(userType);
     }
 
     @UnsupportedAppUsage

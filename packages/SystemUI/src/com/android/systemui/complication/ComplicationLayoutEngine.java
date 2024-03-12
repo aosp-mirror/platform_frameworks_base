@@ -40,7 +40,7 @@ import android.view.ViewGroup;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.complication.ComplicationLayoutParams.Direction;
 import com.android.systemui.complication.ComplicationLayoutParams.Position;
 import com.android.systemui.complication.dagger.ComplicationModule;
@@ -652,8 +652,7 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
             CrossFadeHelper.fadeOut(
                     mLayout,
                     mFadeOutDuration,
-                    /* delay= */ 0,
-                    /* endRunnable= */ null);
+                    /* delay= */ 0);
         }
     }
 

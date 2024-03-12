@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Niet meer verbergen"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"De app werkt misschien niet met gesplitst scherm"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"App ondersteunt geen gesplitst scherm"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Deze app kan slechts in 1 venster worden geopend."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Deze app kan maar in 1 venster worden geopend"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"App werkt mogelijk niet op een secundair scherm."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"App kan niet op secundaire displays worden gestart."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Scheiding voor gesplitst scherm"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Naar rechtsboven verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Naar linksonder verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Naar rechtsonder verplaatsen"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> uitvouwen"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> samenvouwen"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Instellingen voor <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Bubbel sluiten"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Gesprekken niet in bubbels tonen"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Geen recente bubbels"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Recente bubbels en gesloten bubbels zie je hier"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chatten met bubbels"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Nieuwe gesprekken verschijnen als iconen in een benedenhoek van je scherm. Tik om ze uit te vouwen of sleep om ze te sluiten."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Bubbels beheren wanneer je wilt"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Tik hier om te beheren welke apps en gesprekken als bubbel kunnen worden getoond"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubbel"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Beheren"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubbel gesloten."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Tik om deze app opnieuw op te starten voor een betere weergave."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Tik om deze app opnieuw op te starten voor een betere weergave"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Wijzig de beeldverhouding van deze app in Instellingen"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Beeldverhouding wijzigen"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Cameraproblemen?\nTik om opnieuw passend te maken."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Is dit geen oplossing?\nTik om terug te zetten."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Geen cameraproblemen? Tik om te sluiten."</string>

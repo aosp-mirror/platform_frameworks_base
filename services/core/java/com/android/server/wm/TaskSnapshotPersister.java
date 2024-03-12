@@ -67,10 +67,11 @@ class TaskSnapshotPersister extends BaseAppSnapshotPersister {
      * @param taskId The id of task that has been removed.
      * @param userId The id of the user the task belonged to.
      */
-    void onTaskRemovedFromRecents(int taskId, int userId) {
+    @Override
+    void removeSnapshot(int taskId, int userId) {
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.remove(taskId);
-            super.removeSnap(taskId, userId);
+            super.removeSnapshot(taskId, userId);
         }
     }
 

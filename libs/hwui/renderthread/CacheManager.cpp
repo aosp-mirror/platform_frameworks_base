@@ -17,6 +17,7 @@
 #include "CacheManager.h"
 
 #include <GrContextOptions.h>
+#include <GrTypes.h>
 #include <SkExecutor.h>
 #include <SkGraphics.h>
 #include <math.h>
@@ -110,13 +111,18 @@ void CacheManager::configureContext(GrContextOptions* contextOptions, const void
     contextOptions->fPersistentCache = &cache;
 }
 
+static GrPurgeResourceOptions toSkiaEnum(bool scratchOnly) {
+    return scratchOnly ? GrPurgeResourceOptions::kScratchResourcesOnly :
+                         GrPurgeResourceOptions::kAllResources;
+}
+
 void CacheManager::trimMemory(TrimLevel mode) {
     if (!mGrContext) {
         return;
     }
 
     // flush and submit all work to the gpu and wait for it to finish
-    mGrContext->flushAndSubmit(/*syncCpu=*/true);
+    mGrContext->flushAndSubmit(GrSyncCpu::kYes);
 
     switch (mode) {
         case TrimLevel::BACKGROUND:
@@ -130,7 +136,7 @@ void CacheManager::trimMemory(TrimLevel mode) {
             // that have persistent data to be purged in LRU order.
             mGrContext->setResourceCacheLimit(mBackgroundResourceBytes);
             SkGraphics::SetFontCacheLimit(mBackgroundCpuFontCacheBytes);
-            mGrContext->purgeUnlockedResources(mMemoryPolicy.purgeScratchOnly);
+            mGrContext->purgeUnlockedResources(toSkiaEnum(mMemoryPolicy.purgeScratchOnly));
             mGrContext->setResourceCacheLimit(mMaxResourceBytes);
             SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
             break;
@@ -150,7 +156,7 @@ void CacheManager::trimCaches(CacheTrimLevel mode) {
         case CacheTrimLevel::ALL_CACHES:
             SkGraphics::PurgeAllCaches();
             if (mGrContext) {
-                mGrContext->purgeUnlockedResources(false);
+                mGrContext->purgeUnlockedResources(GrPurgeResourceOptions::kAllResources);
             }
             break;
         default:
@@ -163,7 +169,8 @@ void CacheManager::trimStaleResources() {
         return;
     }
     mGrContext->flushAndSubmit();
-    mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
+    mGrContext->performDeferredCleanup(std::chrono::seconds(30),
+                                       GrPurgeResourceOptions::kAllResources);
 }
 
 void CacheManager::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
@@ -282,9 +289,10 @@ void CacheManager::onThreadIdle() {
         const nsecs_t frameCompleteNanos = mFrameCompletions[0];
         const nsecs_t frameDiffNanos = now - frameCompleteNanos;
         const nsecs_t cleanupMillis =
-                ns2ms(std::max(frameDiffNanos, mMemoryPolicy.minimumResourceRetention));
+                ns2ms(std::clamp(frameDiffNanos, mMemoryPolicy.minimumResourceRetention,
+                                 mMemoryPolicy.maximumResourceRetention));
         mGrContext->performDeferredCleanup(std::chrono::milliseconds(cleanupMillis),
-                                           mMemoryPolicy.purgeScratchOnly);
+                                           toSkiaEnum(mMemoryPolicy.purgeScratchOnly));
     }
 }
 

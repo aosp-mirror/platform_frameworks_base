@@ -16,9 +16,13 @@
 
 package com.android.systemui.util.kotlin
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+
 class Utils {
     companion object {
         fun <A, B, C> toTriple(a: A, bc: Pair<B, C>) = Triple(a, bc.first, bc.second)
+        fun <A, B, C> toTriple(ab: Pair<A, B>, c: C) = Triple(ab.first, ab.second, c)
 
         fun <A, B, C, D> toQuad(a: A, b: B, c: C, d: D) = Quad(a, b, c, d)
         fun <A, B, C, D> toQuad(a: A, bcd: Triple<B, C, D>) =
@@ -26,6 +30,45 @@ class Utils {
 
         fun <A, B, C, D, E> toQuint(a: A, bcde: Quad<B, C, D, E>) =
             Quint(a, bcde.first, bcde.second, bcde.third, bcde.fourth)
+
+        /**
+         * Samples the provided flows, emitting a tuple of the original flow's value as well as each
+         * of the combined flows' values.
+         *
+         * Flow<A>.sample(Flow<B>, Flow<C>) -> (A, B, C)
+         */
+        fun <A, B, C> Flow<A>.sample(b: Flow<B>, c: Flow<C>): Flow<Triple<A, B, C>> {
+            return this.sample(combine(b, c, ::Pair), ::toTriple)
+        }
+
+        /**
+         * Samples the provided flows, emitting a tuple of the original flow's value as well as each
+         * of the combined flows' values.
+         *
+         * Flow<A>.sample(Flow<B>, Flow<C>, Flow<D>) -> (A, B, C, D)
+         */
+        fun <A, B, C, D> Flow<A>.sample(
+            b: Flow<B>,
+            c: Flow<C>,
+            d: Flow<D>
+        ): Flow<Quad<A, B, C, D>> {
+            return this.sample(combine(b, c, d, ::Triple), ::toQuad)
+        }
+
+        /**
+         * Samples the provided flows, emitting a tuple of the original flow's value as well as each
+         * of the combined flows' values.
+         *
+         * Flow<A>.sample(Flow<B>, Flow<C>, Flow<D>, Flow<E>) -> (A, B, C, D, E)
+         */
+        fun <A, B, C, D, E> Flow<A>.sample(
+            b: Flow<B>,
+            c: Flow<C>,
+            d: Flow<D>,
+            e: Flow<E>,
+        ): Flow<Quint<A, B, C, D, E>> {
+            return this.sample(combine(b, c, d, e, ::Quad), ::toQuint)
+        }
     }
 }
 

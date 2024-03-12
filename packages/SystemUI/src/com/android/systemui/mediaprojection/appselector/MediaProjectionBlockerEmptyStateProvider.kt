@@ -21,7 +21,7 @@ import com.android.internal.R as AndroidR
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.EmptyState
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.EmptyStateProvider
 import com.android.internal.app.ResolverListAdapter
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.mediaprojection.devicepolicy.PersonalProfile
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
 import javax.inject.Inject

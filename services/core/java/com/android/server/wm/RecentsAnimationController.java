@@ -40,6 +40,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -61,6 +62,7 @@ import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -243,7 +245,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public void finish(boolean moveHomeToTop, boolean sendUserLeaveHint) {
+        public void finish(boolean moveHomeToTop, boolean sendUserLeaveHint,
+                IResultReceiver finishCb) {
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "finish(%b): mCanceled=%b", moveHomeToTop, mCanceled);
             final long token = Binder.clearCallingIdentity();
@@ -255,6 +258,13 @@ public class RecentsAnimationController implements DeathRecipient {
                         : REORDER_MOVE_TO_ORIGINAL_POSITION, sendUserLeaveHint);
             } finally {
                 Binder.restoreCallingIdentity(token);
+            }
+            if (finishCb != null) {
+                try {
+                    finishCb.send(0, new Bundle());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to report animation finished", e);
+                }
             }
         }
 
@@ -546,7 +556,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 contentInsets = mTmpRect;
             }
             mRunner.onAnimationStart(mController, appTargets, wallpaperTargets, contentInsets,
-                    null);
+                    null, new Bundle());
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "startAnimation(): Notify animation start: %s",
                     mPendingAnimations.stream()
@@ -900,7 +910,8 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             final Task task = adapter.mTask;
-            snapshotController.recordSnapshot(task, false /* allowSnapshotHome */);
+            if (task.isActivityTypeHome()) continue;
+            snapshotController.recordSnapshot(task);
             final TaskSnapshot snapshot = snapshotController.getSnapshot(task.mTaskId, task.mUserId,
                     false /* restoreFromDisk */, false /* isLowResolution */);
             if (snapshot != null) {
@@ -956,7 +967,8 @@ public class RecentsAnimationController implements DeathRecipient {
         // Restore IME icon only when moving the original app task to front from recents, in case
         // IME icon may missing if the moving task has already been the current focused task.
         if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION && !mIsAddingTaskToTargets) {
-            InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
+            InputMethodManagerInternal.get().updateImeWindowStatus(
+                    false /* disableImeIcon */, mDisplayId);
         }
 
         // Update the input windows after the animation is complete
@@ -1010,7 +1022,11 @@ public class RecentsAnimationController implements DeathRecipient {
         synchronized (mService.getWindowManagerLock()) {
             // Clear associated input consumers on runner death
             final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
-            inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+            final InputConsumerImpl consumer = inputMonitor.getInputConsumer(
+                    INPUT_CONSUMER_RECENTS_ANIMATION);
+            if (consumer != null) {
+                inputMonitor.destroyInputConsumer(consumer.mToken);
+            }
         }
     }
 

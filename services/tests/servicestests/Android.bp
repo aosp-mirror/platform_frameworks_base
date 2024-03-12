@@ -48,6 +48,7 @@ android_test {
         "services.net",
         "services.people",
         "services.usage",
+        "service-permission.stubs.system_server",
         "guava",
         "guava-android-testlib",
         "androidx.test.core",
@@ -62,7 +63,7 @@ android_test {
         "ShortcutManagerTestUtils",
         "truth",
         "testables",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "platformprotosnano",
         "framework-protos",
         "hamcrest-library",
@@ -78,6 +79,7 @@ android_test {
         "coretests-aidl",
         "securebox",
         "flag-junit",
+        "ravenwood-junit",
         "net_flags_lib",
     ],
 
@@ -123,7 +125,6 @@ android_test {
     },
 
     data: [
-        ":BstatsTestApp",
         ":JobTestApp",
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
@@ -141,11 +142,27 @@ android_test {
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
 }
 
+android_ravenwood_test {
+    name: "FrameworksServicesTestsRavenwood",
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "mockito_ravenwood",
+        "services.core",
+    ],
+    srcs: [
+        "src/com/android/server/uri/**/*.java",
+    ],
+    auto_gen_config: true,
+}
+
 java_library {
     name: "servicestests-core-utils",
     srcs: [
         "src/com/android/server/am/DeviceConfigSession.java",
-        "src/com/android/server/display/TestUtils.java",
         "src/com/android/server/pm/PackageSettingBuilder.java",
         "src/com/android/server/pm/parsing/TestPackageParser2.kt",
     ],

@@ -42,7 +42,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.NotificationExpandButton;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
@@ -1362,7 +1362,7 @@ public class NotificationChildrenContainer extends ViewGroup
         Resources.Theme theme = new ContextThemeWrapper(mContext,
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight).getTheme();
         try (TypedArray ta = theme.obtainStyledAttributes(
-                new int[]{com.android.internal.R.attr.colorAccent})) {
+                new int[]{com.android.internal.R.attr.materialColorPrimary})) {
             color = ta.getColor(0, color);
         }
         mHybridGroupManager.setOverflowNumberColor(mOverflowNumber, color);

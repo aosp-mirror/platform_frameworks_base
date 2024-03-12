@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آهسته‌آهسته شارژ می‌شود"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • برای محافظت از باتری، شارژ بهینه می‌شود"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • در شارژ وسیله جانبی مشکلی وجود دارد"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"برای باز کردن قفل روی «منو» فشار دهید."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"شبکه قفل شد"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"سیم‌کارتی وجود ندارد"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"سیم‌کارت اضافه کنید."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"سیم‌کارت موجود نیست یا قابل‌خواندن نیست. سیم‌کارت اضافه کنید."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"سیم‌کارت قابل‌استفاده نیست."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"سیم‌کارت شما برای همیشه غیرفعال شده است.\n برای دریافت سیم‌کارتی دیگر، با رساننده خدمات بی‌سیم خود تماس بگیرید."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"سیم‌کارت قفل است."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"‏سیم‌کارت با کد PUK قفل شده است."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"درحال باز کردن قفل سیم‌کارت…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"بعداز قفل همه باید از پین استفاده کرد"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"بعداز قفل همه باید از گذرواژه استفاده کرد"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"بعداز قفل همه باید از الگو استفاده کرد"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"به‌روزرسانی درطول ساعات غیرفعال نصب خواهد شد"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"به‌روزرسانی وقتی دستگاه درحال استفاده نیست نصب خواهد شد"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"امنیت بیشتر لازم است. مدتی از پین استفاده نشده است."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"امنیت بیشتر لازم است. گذرواژه مدتی استفاده نشده است."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"امنیت بیشتر لازم است. مدتی از الگو استفاده نشده است."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"حباب"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"آنالوگ"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"برای ادامه، قفل دستگاهتان را باز کنید"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"پین را وارد کنید و به‌روزرسانی را در فرصتی دیگر انجام دهید"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"گذرواژه را وارد کنید و به‌روزرسانی را در فرصتی دیگر انجام دهید"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"الگو را وارد کنید و به‌روزرسانی را در فرصتی دیگر انجام دهید"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"دستگاه به‌روز شد. برای ادامه، پین را وارد کنید."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"دستگاه به‌روز شد. برای ادامه، گذرواژه را وارد کنید."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"دستگاه به‌روز شد. برای ادامه، الگو را وارد کنید."</string>
 </resources>

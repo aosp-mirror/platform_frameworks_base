@@ -33,17 +33,18 @@ class GoneToDreamingLockscreenHostedTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
 
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = TO_DREAMING_DURATION,
-            transitionFlow = interactor.goneToDreamingLockscreenHostedTransition,
+        animationFlow.setup(
+            duration = TO_DREAMING_DURATION,
+            stepFlow = interactor.goneToDreamingLockscreenHostedTransition,
         )
 
     /** Lockscreen views alpha - hide immediately */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 1.milliseconds,
             onStep = { 0f },
         )

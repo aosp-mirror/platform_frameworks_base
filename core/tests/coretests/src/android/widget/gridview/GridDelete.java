@@ -16,7 +16,7 @@
 
 package android.widget.gridview;
 
-import android.util.GridScenario;
+import android.widget.GridScenario;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;

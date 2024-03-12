@@ -19,6 +19,7 @@ import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -54,6 +55,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telecom.ClientTransactionalServiceRepository;
 import com.android.internal.telecom.ClientTransactionalServiceWrapper;
 import com.android.internal.telecom.ITelecomService;
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -224,6 +226,14 @@ public class TelecomManager {
      */
     public static final String EXTRA_DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME =
             "android.telecom.extra.DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME";
+
+    /**
+     * Optional extra to indicate a call should not be added to the call log.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DO_NOT_LOG_CALL =
+            "android.telecom.extra.DO_NOT_LOG_CALL";
 
     /**
      * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
@@ -410,6 +420,23 @@ public class TelecomManager {
      */
     public static final String EXTRA_CALL_CREATED_TIME_MILLIS =
             "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
+
+    /**
+     * The extra for call log uri that was used to mark missed calls as read when dialer gets the
+     * notification on reboot.
+     */
+    @FlaggedApi(Flags.FLAG_ADD_CALL_URI_FOR_MISSED_CALLS)
+    public static final String EXTRA_CALL_LOG_URI =
+            "android.telecom.extra.CALL_LOG_URI";
+
+    /**
+     * Optional extra for incoming containing a long which specifies the time the
+     * call was answered by user. This value is in milliseconds.
+     * @hide
+     */
+    public static final String EXTRA_CALL_ANSWERED_TIME_MILLIS =
+            "android.telecom.extra.CALL_ANSWERED_TIME_MILLIS";
+
 
     /**
      * Optional extra for incoming and outgoing calls containing a long which specifies the Epoch

@@ -38,9 +38,4 @@
          protected. -->
     <bool name="flag_battery_shield_icon">false</bool>
 
-    <!-- Whether face auth will immediately stop when the display state is OFF -->
-    <bool name="flag_stop_face_auth_on_display_off">true</bool>
-
-    <!-- Whether we want to stop pulsing while running the face scanning animation -->
-    <bool name="flag_stop_pulsing_face_scanning_animation">true</bool>
 </resources>

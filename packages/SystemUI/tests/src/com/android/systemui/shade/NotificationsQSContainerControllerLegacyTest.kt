@@ -18,7 +18,6 @@ package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.testing.TestableResources
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
@@ -27,7 +26,6 @@ import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -38,13 +36,17 @@ import com.android.systemui.navigationbar.NavigationModeController.ModeChangedLi
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
+import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.function.Consumer
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,9 +65,12 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-/** Uses Flags.MIGRATE_NSSL set to false. If all goes well, this set of tests will be deleted. */
+/**
+ * Uses Flags.KEYGUARD_STATUS_VIEW_MIGRATE_NSSL set to false. If all goes well, this set of tests
+ * will be deleted.
+ */
 @RunWith(AndroidTestingRunner::class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
@@ -73,7 +78,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     @Mock lateinit var navigationModeController: NavigationModeController
     @Mock lateinit var overviewProxyService: OverviewProxyService
     @Mock lateinit var shadeHeaderController: ShadeHeaderController
-    @Mock lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
+    @Mock lateinit var shadeInteractor: ShadeInteractor
     @Mock lateinit var fragmentService: FragmentService
     @Mock lateinit var fragmentHostManager: FragmentHostManager
     @Mock
@@ -87,7 +92,6 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     lateinit var underTest: NotificationsQSContainerController
 
-    private lateinit var fakeResources: TestableResources
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var navigationModeCallback: ModeChangedListener
     private lateinit var taskbarVisibilityCallback: OverviewProxyListener
@@ -100,12 +104,13 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        featureFlags = FakeFeatureFlags().apply { set(Flags.MIGRATE_NSSL, false) }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.QS_CONTAINER_GRAPH_OPTIMIZER, false) }
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)
 
         whenever(fragmentService.getFragmentHostManager(any())).thenReturn(fragmentHostManager)
+        whenever(shadeInteractor.isQsExpanded).thenReturn(MutableStateFlow(false))
 
         underTest =
             NotificationsQSContainerController(
@@ -113,11 +118,12 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 navigationModeController,
                 overviewProxyService,
                 shadeHeaderController,
-                shadeExpansionStateManager,
+                shadeInteractor,
                 fragmentService,
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
+                ResourcesSplitShadeStateController()
             )
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
@@ -469,11 +475,12 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 navigationModeController,
                 overviewProxyService,
                 shadeHeaderController,
-                shadeExpansionStateManager,
+                shadeInteractor,
                 fragmentService,
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
+                ResourcesSplitShadeStateController()
             )
         controller.updateConstraints()
 

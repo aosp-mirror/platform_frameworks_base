@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.icon
 
 import android.app.Notification
+import android.app.Notification.MessagingStyle
 import android.app.Person
 import android.content.pm.LauncherApps
 import android.graphics.drawable.Icon
@@ -26,14 +27,14 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import com.android.internal.statusbar.StatusBarIcon
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 import javax.inject.Inject
 
 /**
@@ -184,12 +185,10 @@ class IconManager @Inject constructor(
     }
 
     @Throws(InflationException::class)
-    private fun getIconDescriptors(
-        entry: NotificationEntry
-    ): Pair<StatusBarIcon, StatusBarIcon> {
-        val iconDescriptor = getIconDescriptor(entry, false /* redact */)
+    private fun getIconDescriptors(entry: NotificationEntry): Pair<StatusBarIcon, StatusBarIcon> {
+        val iconDescriptor = getIconDescriptor(entry, redact = false)
         val sensitiveDescriptor = if (entry.isSensitive) {
-            getIconDescriptor(entry, true /* redact */)
+            getIconDescriptor(entry, redact = true)
         } else {
             iconDescriptor
         }
@@ -197,10 +196,7 @@ class IconManager @Inject constructor(
     }
 
     @Throws(InflationException::class)
-    private fun getIconDescriptor(
-        entry: NotificationEntry,
-        redact: Boolean
-    ): StatusBarIcon {
+    private fun getIconDescriptor(entry: NotificationEntry, redact: Boolean): StatusBarIcon {
         val n = entry.sbn.notification
         val showPeopleAvatar = isImportantConversation(entry) && !redact
 
@@ -228,7 +224,8 @@ class IconManager @Inject constructor(
                 icon,
                 n.iconLevel,
                 n.number,
-                iconBuilder.getIconContentDescription(n))
+                iconBuilder.getIconContentDescription(n)
+            )
 
         // Cache if important conversation.
         if (isImportantConversation(entry)) {
@@ -267,8 +264,10 @@ class IconManager @Inject constructor(
         // Fall back to extract from message
         if (ic == null) {
             val extras: Bundle = entry.sbn.notification.extras
-            val messages = Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                    extras.getParcelableArray(Notification.EXTRA_MESSAGES))
+            val messages =
+                MessagingStyle.Message.getMessagesFromBundleArray(
+                    extras.getParcelableArray(Notification.EXTRA_MESSAGES)
+                )
             val user = extras.getParcelable<Person>(Notification.EXTRA_MESSAGING_PERSON)
             for (i in messages.indices.reversed()) {
                 val message = messages[i]
@@ -315,8 +314,11 @@ class IconManager @Inject constructor(
     }
 
     private fun isImportantConversation(entry: NotificationEntry): Boolean {
+        // Also verify that the Notification is MessagingStyle, since we're going to access
+        // MessagingStyle-specific data (EXTRA_MESSAGES, EXTRA_MESSAGING_PERSON).
         return entry.ranking.channel != null &&
                 entry.ranking.channel.isImportantConversation &&
+                entry.sbn.notification.isStyle(MessagingStyle::class.java) &&
                 entry.key !in unimportantConversationKeys
     }
 

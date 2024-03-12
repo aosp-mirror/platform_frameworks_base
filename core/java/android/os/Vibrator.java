@@ -153,7 +153,7 @@ public abstract class Vibrator {
      *
      * @hide
      */
-    protected VibratorInfo getInfo() {
+    public VibratorInfo getInfo() {
         return VibratorInfo.EMPTY_VIBRATOR_INFO;
     }
 
@@ -181,6 +181,16 @@ public abstract class Vibrator {
     @VibrationIntensity
     public int getDefaultVibrationIntensity(@VibrationAttributes.Usage int usage) {
         return getConfig().getDefaultVibrationIntensity(usage);
+    }
+
+    /**
+     * Whether the keyboard vibration is enabled by default.
+     *
+     * @return {@code true} if the keyboard vibration is default enabled, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isDefaultKeyboardVibrationEnabled() {
+        return getConfig().isDefaultKeyboardVibrationEnabled();
     }
 
     /**
@@ -216,9 +226,7 @@ public abstract class Vibrator {
      */
     @TestApi
     public boolean hasFrequencyControl() {
-        // We currently can only control frequency of the vibration using the compose PWLE method.
-        return getInfo().hasCapability(
-                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        return getInfo().hasFrequencyControl();
     }
 
     /**
@@ -240,7 +248,7 @@ public abstract class Vibrator {
      * @hide
      */
     public boolean areVibrationFeaturesSupported(@NonNull VibrationEffect effect) {
-        return effect.areVibrationFeaturesSupported(this);
+        return getInfo().areVibrationFeaturesSupported(effect);
     }
 
     /**
@@ -510,6 +518,28 @@ public abstract class Vibrator {
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void vibrate(int uid, String opPkg, @NonNull VibrationEffect vibe,
             String reason, @NonNull VibrationAttributes attributes);
+
+    /**
+     * Performs a haptic feedback.
+     *
+     * <p>A haptic feedback is a short vibration feedback. The type of feedback is identified via
+     * the {@code constant}, which should be one of the effect constants provided in
+     * {@link HapticFeedbackConstants}. The haptic feedback provided for a given effect ID is
+     * consistent across all usages on the same device.
+     *
+     * @param constant the ID for the haptic feedback. This should be one of the constants defined
+     *          in {@link HapticFeedbackConstants}.
+     * @param always {@code true} if the haptic feedback should be played regardless of the user
+     *          vibration intensity settings applicable to the corresponding vibration.
+     *          {@code false} if the vibration for the haptic feedback should respect the applicable
+     *          vibration intensity settings.
+     * @param reason the reason for this haptic feedback.
+     *
+     * @hide
+     */
+    public void performHapticFeedback(int constant, boolean always, String reason) {
+        Log.w(TAG, "performHapticFeedback is not supported");
+    }
 
     /**
      * Query whether the vibrator natively supports the given effects.

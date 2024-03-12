@@ -277,6 +277,10 @@ public class DevicePowerStatusActionTest {
 
     @Test
     public void pendingActionDoesNotBlockSendingStandby() throws Exception {
+        mPlaybackDevice.mService.getHdmiCecConfig().setStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
+                HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
+
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(
                 mPlaybackDevice.getDeviceInfo().getLogicalAddress(),
                 mPhysicalAddress);
@@ -291,7 +295,7 @@ public class DevicePowerStatusActionTest {
         mTestLooper.dispatchAll();
         HdmiCecMessage standbyMessage =
                 HdmiCecMessageBuilder.buildStandby(
-                        mPlaybackDevice.getDeviceInfo().getLogicalAddress(), ADDR_TV);
+                        mPlaybackDevice.getDeviceInfo().getLogicalAddress(), ADDR_BROADCAST);
         assertThat(mNativeWrapper.getResultMessages()).contains(standbyMessage);
     }
 }

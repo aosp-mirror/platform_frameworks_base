@@ -191,9 +191,20 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         launchDeviceDiscovery();
         startQueuedActions();
         if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
-            mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildRequestActiveSource(
-                            getDeviceInfo().getLogicalAddress()));
+            addAndStartAction(new RequestActiveSourceAction(this, new IHdmiControlCallback.Stub() {
+                @Override
+                public void onComplete(int result) {
+                    if (!mService.getLocalActiveSource().isValid()
+                            && result != HdmiControlManager.RESULT_SUCCESS) {
+                        mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
+                                getDeviceInfo().getLogicalAddress(),
+                                getDeviceInfo().getPhysicalAddress()));
+                        updateActiveSource(getDeviceInfo().getLogicalAddress(),
+                                getDeviceInfo().getPhysicalAddress(),
+                                "RequestActiveSourceAction#finishWithCallback()");
+                    }
+                }
+            }));
         }
     }
 
@@ -250,6 +261,7 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (isAlreadyActiveSource(targetDevice, targetAddress, callback)) {
             return;
         }
+        removeAction(RequestActiveSourceAction.class);
         if (targetAddress == Constants.ADDR_INTERNAL) {
             handleSelectInternalSource();
             // Switching to internal source is always successful even when CEC control is disabled.
@@ -1185,7 +1197,11 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (mService.isSystemAudioActivated()) {
             return Constants.ABORT_NOT_IN_CORRECT_MODE;
         } else {
-            mService.setStreamMusicVolume(message.getAudioVolumeLevel(), 0);
+            int audioVolumeLevel = message.getAudioVolumeLevel();
+            if (audioVolumeLevel >= AudioStatus.MIN_VOLUME
+                    && audioVolumeLevel <= AudioStatus.MAX_VOLUME) {
+                mService.setStreamMusicVolume(audioVolumeLevel, 0);
+            }
             return Constants.HANDLED;
         }
     }
@@ -1225,14 +1241,6 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     HdmiDeviceInfo getSafeAvrDeviceInfo() {
         return mService.getHdmiCecNetwork().getSafeCecDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
     }
-
-    /**
-     * Returns the audio output device used for System Audio Mode.
-     */
-    AudioDeviceAttributes getSystemAudioOutputDevice() {
-        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI_ARC;
-    }
-
 
     @ServiceThreadOnly
     void handleRemoveActiveRoutingPath(int path) {
@@ -1329,8 +1337,13 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(TimerRecordingAction.class);
         removeAction(NewDeviceAction.class);
         removeAction(AbsoluteVolumeAudioStatusAction.class);
+        // Remove pending actions.
+        removeAction(RequestActiveSourceAction.class);
 
-        disableSystemAudioIfExist();
+        // Keep SAM enabled if eARC is enabled, unless we're going to Standby.
+        if (initiatedByCec || !mService.isEarcEnabled()){
+            disableSystemAudioIfExist();
+        }
         disableArcIfExist();
 
         super.disableDevice(initiatedByCec, callback);
@@ -1396,10 +1409,12 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
-    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+    protected void onStandby(boolean initiatedByCec, int standbyAction,
+            StandbyCompletedCallback callback) {
         assertRunOnServiceThread();
         // Seq #11
         if (!mService.isCecControlEnabled()) {
+            invokeStandbyCompletedCallback(callback);
             return;
         }
         boolean sendStandbyOnSleep =
@@ -1409,7 +1424,15 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!initiatedByCec && sendStandbyOnSleep) {
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildStandby(
-                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST));
+                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST),
+                    new SendMessageCallback() {
+                        @Override
+                        public void onSendCompleted(int error) {
+                            invokeStandbyCompletedCallback(callback);
+                        }
+                    });
+        } else {
+            invokeStandbyCompletedCallback(callback);
         }
     }
 

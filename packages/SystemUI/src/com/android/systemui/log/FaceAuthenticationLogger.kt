@@ -5,9 +5,10 @@ import android.hardware.face.FaceSensorPropertiesInternal
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.FaceAuthLog
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessModel
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -29,33 +30,27 @@ class FaceAuthenticationLogger
 constructor(
     @FaceAuthLog private val logBuffer: LogBuffer,
 ) {
-    fun ignoredFaceAuthTrigger(uiEvent: FaceAuthUiEvent, ignoredReason: String) {
+
+    fun ignoredWakeupReason(lastWakeReason: WakeSleepReason) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { str1 = "$lastWakeReason" },
+            {
+                "Ignoring off/aod/dozing -> Lockscreen transition " +
+                    "because the last wake up reason is not allow-listed: $str1"
+            }
+        )
+    }
+    fun ignoredFaceAuthTrigger(uiEvent: FaceAuthUiEvent?, ignoredReason: String) {
         logBuffer.log(
             TAG,
             DEBUG,
             {
-                str1 = uiEvent.reason
+                str1 = "${uiEvent?.reason}"
                 str2 = ignoredReason
             },
             { "Ignoring trigger because $str2, Trigger reason: $str1" }
-        )
-    }
-
-    fun queuingRequestWhileCancelling(
-        alreadyQueuedRequest: FaceAuthUiEvent?,
-        newRequest: FaceAuthUiEvent
-    ) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            {
-                str1 = alreadyQueuedRequest?.reason
-                str2 = newRequest.reason
-            },
-            {
-                "Face auth requested while previous request is being cancelled, " +
-                    "already queued request: $str1 queueing the new request: $str2"
-            }
         )
     }
 
@@ -137,6 +132,10 @@ constructor(
         logBuffer.log(TAG, DEBUG, "Face authentication failed")
     }
 
+    fun clearFaceRecognized() {
+        logBuffer.log(TAG, DEBUG, "Clear face recognized")
+    }
+
     fun authenticationError(
         errorCode: Int,
         errString: CharSequence?,
@@ -161,15 +160,6 @@ constructor(
         )
     }
 
-    fun launchingQueuedFaceAuthRequest(faceAuthRequestedWhileCancellation: FaceAuthUiEvent?) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            { str1 = "${faceAuthRequestedWhileCancellation?.reason}" },
-            { "Received cancellation error and starting queued face auth request: $str1" }
-        )
-    }
-
     fun faceAuthSuccess(result: FaceManager.AuthenticationResult) {
         logBuffer.log(
             TAG,
@@ -182,29 +172,8 @@ constructor(
         )
     }
 
-    fun observedConditionChanged(newValue: Boolean, context: String) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            {
-                bool1 = newValue
-                str1 = context
-            },
-            { "Observed condition changed: $str1, new value: $bool1" }
-        )
-    }
-
     fun canFaceAuthRunChanged(canRun: Boolean) {
         logBuffer.log(TAG, DEBUG, { bool1 = canRun }, { "canFaceAuthRun value changed to $bool1" })
-    }
-
-    fun canRunDetectionChanged(canRunDetection: Boolean) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            { bool1 = canRunDetection },
-            { "canRunDetection value changed to $bool1" }
-        )
     }
 
     fun cancellingFaceAuth() {
@@ -223,12 +192,12 @@ constructor(
         logBuffer.log(TAG, DEBUG, "Triggering face auth because alternate bouncer is visible")
     }
 
-    fun lockscreenBecameVisible(transitionStep: TransitionStep?) {
+    fun lockscreenBecameVisible(wake: WakefulnessModel?) {
         logBuffer.log(
             TAG,
             DEBUG,
-            { str1 = "$transitionStep" },
-            { "Triggering face auth because lockscreen became visible due to transition: $str1" }
+            { str1 = "${wake?.lastWakeReason}" },
+            { "Triggering face auth because lockscreen became visible due to wake reason: $str1" }
         )
     }
 
@@ -236,7 +205,7 @@ constructor(
         logBuffer.log(
             TAG,
             DEBUG,
-            { str1 = "$uiEvent" },
+            { str1 = uiEvent.reason },
             { "Requesting face auth for trigger: $str1" }
         )
     }
@@ -268,5 +237,78 @@ constructor(
 
     fun faceLockedOut(@CompileTimeConstant reason: String) {
         logBuffer.log(TAG, DEBUG, "Face auth has been locked out: $reason")
+    }
+
+    fun queueingRequest(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = "$uiEvent"
+                bool1 = fallbackToDetection
+            },
+            { "Queueing $str1 request for face auth, fallbackToDetection: $bool1" }
+        )
+    }
+
+    fun notProcessingRequestYet(
+        uiEvent: FaceAuthUiEvent?,
+        canRunAuth: Boolean,
+        canRunDetect: Boolean,
+        cancelInProgress: Boolean
+    ) {
+        uiEvent?.let {
+            logBuffer.log(
+                TAG,
+                DEBUG,
+                {
+                    str1 = uiEvent.reason
+                    bool1 = canRunAuth
+                    bool2 = canRunDetect
+                    bool3 = cancelInProgress
+                },
+                {
+                    "Waiting to process request: reason: $str1, " +
+                        "canRunAuth: $bool1, " +
+                        "canRunDetect: $bool2, " +
+                        "cancelInProgress: $bool3"
+                }
+            )
+        }
+    }
+
+    fun processingRequest(uiEvent: FaceAuthUiEvent?, fallbackToDetection: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = "${uiEvent?.reason}"
+                bool1 = fallbackToDetection
+            },
+            { "Processing face auth request: $str1, fallbackToDetect: $bool1" }
+        )
+    }
+
+    fun clearingPendingAuthRequest(
+        @CompileTimeConstant loggingContext: String,
+        uiEvent: FaceAuthUiEvent?,
+        fallbackToDetection: Boolean?
+    ) {
+        uiEvent?.let {
+            logBuffer.log(
+                TAG,
+                DEBUG,
+                {
+                    str1 = uiEvent.reason
+                    str2 = "$fallbackToDetection"
+                    str3 = loggingContext
+                },
+                {
+                    "Clearing pending auth: $str1, " +
+                        "fallbackToDetection: $str2, " +
+                        "reason: $str3"
+                }
+            )
+        }
     }
 }

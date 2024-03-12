@@ -30,21 +30,21 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.util.SparseIntArray
 import com.android.internal.R
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils
-import com.android.server.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils
+import com.android.internal.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedApexSystemServiceImpl
+import com.android.internal.pm.pkg.component.ParsedAttributionImpl
+import com.android.internal.pm.pkg.component.ParsedComponentImpl
+import com.android.internal.pm.pkg.component.ParsedInstrumentationImpl
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl
+import com.android.internal.pm.pkg.component.ParsedPermissionGroupImpl
+import com.android.internal.pm.pkg.component.ParsedPermissionImpl
+import com.android.internal.pm.pkg.component.ParsedProcessImpl
+import com.android.internal.pm.pkg.component.ParsedProviderImpl
+import com.android.internal.pm.pkg.component.ParsedServiceImpl
+import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl
 import com.android.server.pm.pkg.AndroidPackage
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedApexSystemServiceImpl
-import com.android.server.pm.pkg.component.ParsedAttributionImpl
-import com.android.server.pm.pkg.component.ParsedComponentImpl
-import com.android.server.pm.pkg.component.ParsedInstrumentationImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
-import com.android.server.pm.pkg.component.ParsedPermissionGroupImpl
-import com.android.server.pm.pkg.component.ParsedPermissionImpl
-import com.android.server.pm.pkg.component.ParsedProcessImpl
-import com.android.server.pm.pkg.component.ParsedProviderImpl
-import com.android.server.pm.pkg.component.ParsedServiceImpl
-import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import java.security.KeyPairGenerator
@@ -127,6 +127,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "getUsesSdkLibraries",
         "getUsesSdkLibrariesVersionsMajor",
         "getUsesSdkLibrariesCertDigests",
+        "getUsesSdkLibrariesOptional",
         // Tested through addUsesStaticLibrary
         "addUsesStaticLibrary",
         "getUsesStaticLibraries",
@@ -270,7 +271,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getMinAspectRatio,
         AndroidPackage::hasPreserveLegacyExternalStorage,
         AndroidPackage::hasRequestForegroundServiceExemption,
-        AndroidPackage::hasRequestRawExternalStorageAccess
+        AndroidPackage::hasRequestRawExternalStorageAccess,
+        AndroidPackage::isUpdatableSystem
     )
 
     override fun extraParams() = listOf(
@@ -532,34 +534,34 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             }
         ),
         getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
-        getSetByValue({ AndroidPackageUtils.isOdm(it) }, "isOdm", PackageImpl::setOdm, true),
-        getSetByValue({ AndroidPackageUtils.isOem(it) }, "isOem", PackageImpl::setOem, true),
+        getSetByValue({ AndroidPackageLegacyUtils.isOdm(it) }, "isOdm", PackageImpl::setOdm, true),
+        getSetByValue({ AndroidPackageLegacyUtils.isOem(it) }, "isOem", PackageImpl::setOem, true),
         getSetByValue(
-            { AndroidPackageUtils.isPrivileged(it) },
+            { AndroidPackageLegacyUtils.isPrivileged(it) },
             "isPrivileged",
             PackageImpl::setPrivileged,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isProduct(it) },
+            { AndroidPackageLegacyUtils.isProduct(it) },
             "isProduct",
             PackageImpl::setProduct,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isVendor(it) },
+            { AndroidPackageLegacyUtils.isVendor(it) },
             "isVendor",
             PackageImpl::setVendor,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isSystem(it) },
+            { AndroidPackageLegacyUtils.isSystem(it) },
             "isSystem",
             PackageImpl::setSystem,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isSystemExt(it) },
+            { AndroidPackageLegacyUtils.isSystemExt(it) },
             "isSystemExt",
             PackageImpl::setSystemExt,
             true
@@ -591,7 +593,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                 )
             ) { "" }
         },
-        true
+        true, null
     )
         .asSplit(
             arrayOf("testSplitNameZero", "testSplitNameOne"),
@@ -607,7 +609,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         .setSplitHasCode(1, false)
         .setSplitClassLoaderName(0, "testSplitClassLoaderNameZero")
         .setSplitClassLoaderName(1, "testSplitClassLoaderNameOne")
-        .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"))
+        .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"), true)
         .addUsesStaticLibrary("testStatic", 3L, arrayOf("testCertDigest2"))
 
     override fun finalizeObject(parcelable: Parcelable) {
@@ -623,7 +625,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         expect.that(after.longVersionCode).isEqualTo(38654705667)
         expect.that(after.requestedPermissions)
             .containsExactlyElementsIn(after.usesPermissions.map { it.name })
-            .inOrder()
 
         expect.that(after.mimeGroups).containsExactly(
             "TestActivityName/mimeGroup",
@@ -661,6 +662,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         expect.that(after.usesSdkLibrariesCertDigests!!.size).isEqualTo(1)
         expect.that(after.usesSdkLibrariesCertDigests!![0]).asList()
                 .containsExactly("testCertDigest1")
+        expect.that(after.usesSdkLibrariesOptional).asList().containsExactly(true)
 
         expect.that(after.usesStaticLibraries).containsExactly("testStatic")
         expect.that(after.usesStaticLibrariesVersions).asList().containsExactly(3L)

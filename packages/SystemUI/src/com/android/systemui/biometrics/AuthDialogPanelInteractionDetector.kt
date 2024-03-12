@@ -1,79 +1,68 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.biometrics
 
-import android.annotation.AnyThread
 import android.annotation.MainThread
 import android.util.Log
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.shade.ShadeExpansionChangeEvent
-import com.android.systemui.shade.ShadeExpansionStateManager
-import java.util.concurrent.Executor
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class AuthDialogPanelInteractionDetector
 @Inject
 constructor(
-    private val shadeExpansionStateManager: ShadeExpansionStateManager,
-    @Main private val mainExecutor: Executor,
+    @Application private val scope: CoroutineScope,
+    private val shadeInteractorLazy: Lazy<ShadeInteractor>,
 ) {
-    private var action: Action? = null
-    private var panelState: Int = -1
+    private var shadeExpansionCollectorJob: Job? = null
 
     @MainThread
-    fun enable(onPanelInteraction: Runnable) {
-        if (action == null) {
-            action = Action(onPanelInteraction)
-            shadeExpansionStateManager.addStateListener(this::onPanelStateChanged)
-            shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
-        } else {
+    fun enable(onShadeInteraction: Runnable) {
+        if (shadeExpansionCollectorJob != null) {
             Log.e(TAG, "Already enabled")
+            return
         }
+        //TODO(b/313957306) delete this check
+        if (shadeInteractorLazy.get().isUserInteracting.value) {
+            // Workaround for b/311266890. This flow is in an error state that breaks this.
+            Log.e(TAG, "isUserInteracting already true, skipping enable")
+            return
+        }
+        shadeExpansionCollectorJob =
+            scope.launch {
+                Log.i(TAG, "Enable detector")
+                // wait for it to emit true once
+                shadeInteractorLazy.get().isUserInteracting.first { it }
+                Log.i(TAG, "Detector detected shade interaction")
+                onShadeInteraction.run()
+            }
+        shadeExpansionCollectorJob?.invokeOnCompletion { shadeExpansionCollectorJob = null }
     }
 
     @MainThread
     fun disable() {
-        if (action != null) {
-            Log.i(TAG, "Disable dectector")
-            action = null
-            panelState = -1
-            shadeExpansionStateManager.removeStateListener(this::onPanelStateChanged)
-            shadeExpansionStateManager.removeExpansionListener(this::onPanelExpansionChanged)
-        }
+        Log.i(TAG, "Disable detector")
+        shadeExpansionCollectorJob?.cancel()
     }
-
-    @AnyThread
-    private fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) =
-        mainExecutor.execute {
-            action?.let {
-                if (event.tracking || (event.expanded && event.fraction > 0 && panelState == 1)) {
-                    Log.i(TAG, "onPanelExpansionChanged, event: $event")
-                    it.onPanelInteraction.run()
-                    disable()
-                }
-            }
-        }
-
-    @AnyThread
-    private fun onPanelStateChanged(state: Int) =
-        mainExecutor.execute {
-            // When device owner set screen lock type as Swipe, and install work profile with
-            // pin/pattern/password & fingerprint or face, if work profile allow user to verify
-            // by BP, it is possible that BP will be displayed when keyguard is closing, in this
-            // case event.expanded = true and event.fraction > 0, so BP will be closed, adding
-            // panel state into consideration is workaround^2, this workaround works because
-            // onPanelStateChanged is earlier than onPanelExpansionChanged
-
-            // we don't want to close BP in below case
-            //
-            // |      Action       |  tracking  |  expanded  |  fraction  |  panelState  |
-            // |      HeadsUp      |    NA      |     NA     |     NA     |      1       |
-            // |   b/285111529     |   false    |    true    |    > 0     |      2       |
-
-            // Note: HeadsUp behavior was changed, so we can't got onPanelExpansionChanged now
-            panelState = state
-            Log.i(TAG, "onPanelStateChanged, state: $state")
-        }
 }
-
-private data class Action(val onPanelInteraction: Runnable)
 
 private const val TAG = "AuthDialogPanelInteractionDetector"

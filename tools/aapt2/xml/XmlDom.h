@@ -24,8 +24,8 @@
 #include "Resource.h"
 #include "ResourceValues.h"
 #include "androidfw/IDiagnostics.h"
+#include "androidfw/Streams.h"
 #include "androidfw/StringPiece.h"
-#include "io/Io.h"
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
 
@@ -152,7 +152,7 @@ class XmlResource {
 };
 
 // Inflates an XML DOM from an InputStream, logging errors to the logger.
-std::unique_ptr<XmlResource> Inflate(io::InputStream* in, android::IDiagnostics* diag,
+std::unique_ptr<XmlResource> Inflate(android::InputStream* in, android::IDiagnostics* diag,
                                      const android::Source& source);
 
 // Inflates an XML DOM from a binary ResXMLTree.

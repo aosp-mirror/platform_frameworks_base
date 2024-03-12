@@ -85,6 +85,7 @@ public final class HotwordDetectedResult implements Parcelable {
             CONFIDENCE_LEVEL_HIGH,
             CONFIDENCE_LEVEL_VERY_HIGH
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface HotwordConfidenceLevelValue {
     }
 

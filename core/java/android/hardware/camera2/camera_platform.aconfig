@@ -1,8 +1,0 @@
-package: "com.android.hardware.camera2"
-
-flag {
-     namespace: "camera_platform"
-     name: "initial_test_flag"
-     description: "Flag infrastructure test flag"
-     bug: "292631208"
-}

@@ -438,7 +438,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         }
 
         if ("free".equals(lockMode)) {
-            mInternal.thawDisplayRotation(displayId);
+            mInternal.thawDisplayRotation(displayId,
+                    /* caller= */ "WindowManagerShellCommand#free");
             return 0;
         }
 
@@ -451,7 +452,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         try {
             final int rotation =
                     arg != null ? Integer.parseInt(arg) : -1 /* lock to current rotation */;
-            mInternal.freezeDisplayRotation(displayId, rotation);
+            mInternal.freezeDisplayRotation(displayId, rotation,
+                    /* caller= */ "WindowManagerShellCommand#lock");
             return 0;
         } catch (IllegalArgumentException e) {
             getErrPrintWriter().println("Error: " + e.getMessage());
@@ -1433,7 +1435,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         mInterface.setForcedDisplayScalingMode(displayId, DisplayContent.FORCE_SCALING_MODE_AUTO);
 
         // user-rotation
-        mInternal.thawDisplayRotation(displayId);
+        mInternal.thawDisplayRotation(displayId,
+                /* caller= */ "WindowManagerShellCommand#runReset");
 
         // fixed-to-user-rotation
         mInterface.setFixedToUserRotation(displayId, IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT);

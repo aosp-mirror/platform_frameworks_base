@@ -1,8 +1,0 @@
-package: "com.android.text.flags"
-
-flag {
-  name: "use_bounds_for_width"
-  namespace: "text"
-  description: "Feature flag for preventing horizontal clipping."
-  bug: "63938206"
-}

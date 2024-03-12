@@ -39,12 +39,16 @@ class FakeAutoAddable(
         return getFlow(userId).asStateFlow().filterNotNull()
     }
 
-    suspend fun sendRemoveSignal(userId: Int) {
+    fun sendRemoveSignal(userId: Int) {
         getFlow(userId).value = AutoAddSignal.Remove(spec)
     }
 
-    suspend fun sendAddSignal(userId: Int, position: Int = POSITION_AT_END) {
+    fun sendAddSignal(userId: Int, position: Int = POSITION_AT_END) {
         getFlow(userId).value = AutoAddSignal.Add(spec, position)
+    }
+
+    fun sendRemoveTrackingSignal(userId: Int) {
+        getFlow(userId).value = AutoAddSignal.RemoveTracking(spec)
     }
 
     override val description: String

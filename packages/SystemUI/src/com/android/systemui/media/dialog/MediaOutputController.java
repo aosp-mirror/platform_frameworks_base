@@ -78,7 +78,6 @@ import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
-import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -86,6 +85,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -127,7 +127,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final ActivityStarter mActivityStarter;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final CommonNotifCollection mNotifCollection;
-    private final Object mMediaDevicesLock = new Object();
+    protected final Object mMediaDevicesLock = new Object();
     @VisibleForTesting
     final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     final List<MediaDevice> mCachedMediaDevices = new CopyOnWriteArrayList<>();
@@ -193,7 +193,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mKeyGuardManager = keyGuardManager;
         mFeatureFlags = featureFlags;
         mUserTracker = userTracker;
-        InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
+        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogLaunchAnimator = dialogLaunchAnimator;
@@ -222,7 +222,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 R.dimen.media_output_dialog_selectable_margin_end);
     }
 
-    void start(@NonNull Callback cb) {
+    protected void start(@NonNull Callback cb) {
         synchronized (mMediaDevicesLock) {
             mCachedMediaDevices.clear();
             mMediaItemList.clear();
@@ -256,15 +256,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return false;
     }
 
-    boolean isRefreshing() {
+    public boolean isRefreshing() {
         return mIsRefreshing;
     }
 
-    void setRefreshing(boolean refreshing) {
+    public void setRefreshing(boolean refreshing) {
         mIsRefreshing = refreshing;
     }
 
-    void stop() {
+    protected void stop() {
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mCb);
         }
@@ -358,7 +358,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     Drawable getAppSourceIconFromPackage() {
-        if (mPackageName.isEmpty()) {
+        if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
         try {
@@ -372,7 +372,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     String getAppSourceName() {
-        if (mPackageName.isEmpty()) {
+        if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
         final PackageManager packageManager = mContext.getPackageManager();
@@ -391,7 +391,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     Intent getAppLaunchIntent() {
-        if (mPackageName.isEmpty()) {
+        if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
         return mContext.getPackageManager().getLaunchIntentForPackage(mPackageName);
@@ -551,7 +551,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
     }
 
-    void refreshDataSetIfNeeded() {
+    public void refreshDataSetIfNeeded() {
         if (mNeedRefresh) {
             buildMediaItems(mCachedMediaDevices);
             mCallback.onDeviceListChanged();
@@ -605,6 +605,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     private void buildMediaItems(List<MediaDevice> devices) {
         synchronized (mMediaDevicesLock) {
+            List<MediaItem> updatedMediaItems = buildMediaItems(mMediaItemList, devices);
+            mMediaItemList.clear();
+            mMediaItemList.addAll(updatedMediaItems);
+        }
+    }
+
+    protected List<MediaItem> buildMediaItems(List<MediaItem> oldMediaItems,
+            List<MediaDevice> devices) {
+        synchronized (mMediaDevicesLock) {
             if (!mLocalMediaManager.isPreferenceRouteListingExist()) {
                 attachRangeInfo(devices);
                 Collections.sort(devices, Comparator.naturalOrder());
@@ -616,22 +625,20 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             final MediaDevice connectedMediaDevice =
                     needToHandleMutingExpectedDevice ? null
                             : getCurrentConnectedMediaDevice();
-            if (mMediaItemList.isEmpty()) {
+            if (oldMediaItems.isEmpty()) {
                 if (connectedMediaDevice == null) {
                     if (DEBUG) {
                         Log.d(TAG, "No connected media device or muting expected device exist.");
                     }
-                    categorizeMediaItems(null, devices, needToHandleMutingExpectedDevice);
-                    return;
+                    return categorizeMediaItems(null, devices, needToHandleMutingExpectedDevice);
                 }
                 // selected device exist
-                categorizeMediaItems(connectedMediaDevice, devices, false);
-                return;
+                return categorizeMediaItems(connectedMediaDevice, devices, false);
             }
             // To keep the same list order
             final List<MediaDevice> targetMediaDevices = new ArrayList<>();
             final Map<Integer, MediaItem> dividerItems = new HashMap<>();
-            for (MediaItem originalMediaItem : mMediaItemList) {
+            for (MediaItem originalMediaItem : oldMediaItems) {
                 for (MediaDevice newDevice : devices) {
                     if (originalMediaItem.getMediaDevice().isPresent()
                             && TextUtils.equals(originalMediaItem.getMediaDevice().get().getId(),
@@ -642,7 +649,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 }
                 if (originalMediaItem.getMediaItemType()
                         == MediaItem.MediaItemType.TYPE_GROUP_DIVIDER) {
-                    dividerItems.put(mMediaItemList.indexOf(originalMediaItem), originalMediaItem);
+                    dividerItems.put(oldMediaItems.indexOf(originalMediaItem), originalMediaItem);
                 }
             }
             if (targetMediaDevices.size() != devices.size()) {
@@ -651,16 +658,18 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             }
             List<MediaItem> finalMediaItems = targetMediaDevices.stream().map(
                     MediaItem::new).collect(Collectors.toList());
-            dividerItems.forEach((key, item) -> {
-                finalMediaItems.add(key, item);
-            });
+            dividerItems.forEach(finalMediaItems::add);
             attachConnectNewDeviceItemIfNeeded(finalMediaItems);
-            mMediaItemList.clear();
-            mMediaItemList.addAll(finalMediaItems);
+            return finalMediaItems;
         }
     }
 
-    private void categorizeMediaItems(MediaDevice connectedMediaDevice, List<MediaDevice> devices,
+    /**
+     * Initial categorization of current devices, will not be called for updates to the devices
+     * list.
+     */
+    private List<MediaItem> categorizeMediaItems(MediaDevice connectedMediaDevice,
+            List<MediaDevice> devices,
             boolean needToHandleMutingExpectedDevice) {
         synchronized (mMediaDevicesLock) {
             List<MediaItem> finalMediaItems = new ArrayList<>();
@@ -691,8 +700,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 }
             }
             attachConnectNewDeviceItemIfNeeded(finalMediaItems);
-            mMediaItemList.clear();
-            mMediaItemList.addAll(finalMediaItems);
+            return finalMediaItems;
         }
     }
 
@@ -765,7 +773,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mGroupMediaDevices.clear();
     }
 
-    void connectDevice(MediaDevice device) {
+    protected void connectDevice(MediaDevice device) {
         mMetricLogger.updateOutputEndPoints(getCurrentConnectedMediaDevice(), device);
 
         ThreadUtils.postOnBackgroundThread(() -> {
@@ -777,7 +785,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mMediaItemList;
     }
 
-    MediaDevice getCurrentConnectedMediaDevice() {
+    public MediaDevice getCurrentConnectedMediaDevice() {
         return mLocalMediaManager.getCurrentConnectedDevice();
     }
 
@@ -794,7 +802,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mLocalMediaManager.getSelectableMediaDevice();
     }
 
-    List<MediaDevice> getSelectedMediaDevice() {
+    public List<MediaDevice> getSelectedMediaDevice() {
         return mLocalMediaManager.getSelectedMediaDevice();
     }
 
@@ -824,18 +832,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     List<RoutingSessionInfo> getActiveRemoteMediaDevices() {
-        final List<RoutingSessionInfo> sessionInfos = new ArrayList<>();
-        for (RoutingSessionInfo info : mLocalMediaManager.getActiveMediaSession()) {
-            if (!info.isSystemSession()) {
-                sessionInfos.add(info);
-            }
-        }
-        return sessionInfos;
+        return new ArrayList<>(mLocalMediaManager.getRemoteRoutingSessions());
     }
 
     void adjustVolume(MediaDevice device, int volume) {
         ThreadUtils.postOnBackgroundThread(() -> {
-            device.requestSetVolume(volume);
+            mLocalMediaManager.adjustDeviceVolume(device, volume);
         });
     }
 
@@ -865,7 +867,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 UserHandle.of(UserHandle.myUserId()));
     }
 
-    boolean isAnyDeviceTransferring() {
+    public boolean isAnyDeviceTransferring() {
         synchronized (mMediaDevicesLock) {
             for (MediaItem mediaItem : mMediaItemList) {
                 if (mediaItem.getMediaDevice().isPresent()
@@ -982,7 +984,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         broadcast.setBroadcastCode(broadcastCode.getBytes(StandardCharsets.UTF_8));
     }
 
-    void setTemporaryAllowListExceptionIfNeeded(MediaDevice targetDevice) {
+    protected void setTemporaryAllowListExceptionIfNeeded(MediaDevice targetDevice) {
         if (mPowerExemptionManager == null || mPackageName == null) {
             Log.w(TAG, "powerExemptionManager or package name is null");
             return;
@@ -1227,7 +1229,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
     };
 
-    interface Callback {
+    public interface Callback {
         /**
          * Override to handle the media content updating.
          */

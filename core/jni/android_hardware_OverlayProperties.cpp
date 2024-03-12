@@ -85,6 +85,18 @@ static jboolean android_hardware_OverlayProperties_supportMixedColorSpaces(JNIEn
     return false;
 }
 
+static jlong android_hardware_OverlayProperties_createDefault(JNIEnv* env, jobject thiz) {
+    gui::OverlayProperties* overlayProperties = new gui::OverlayProperties;
+    gui::OverlayProperties::SupportedBufferCombinations combination;
+    combination.pixelFormats = {HAL_PIXEL_FORMAT_RGBA_8888};
+    combination.standards = {HAL_DATASPACE_BT709};
+    combination.transfers = {HAL_DATASPACE_TRANSFER_SRGB};
+    combination.ranges = {HAL_DATASPACE_RANGE_FULL};
+    overlayProperties->combinations.emplace_back(combination);
+    overlayProperties->supportMixedColorSpaces = true;
+    return reinterpret_cast<jlong>(overlayProperties);
+}
+
 // ----------------------------------------------------------------------------
 // Serialization
 // ----------------------------------------------------------------------------
@@ -150,6 +162,7 @@ static const JNINativeMethod gMethods[] = {
             (void*) android_hardware_OverlayProperties_write },
     { "nReadOverlayPropertiesFromParcel", "(Landroid/os/Parcel;)J",
             (void*) android_hardware_OverlayProperties_read },
+    {"nCreateDefault", "()J", (void*) android_hardware_OverlayProperties_createDefault },
 };
 // clang-format on
 

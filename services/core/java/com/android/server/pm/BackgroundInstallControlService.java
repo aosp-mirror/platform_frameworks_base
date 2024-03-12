@@ -234,7 +234,7 @@ public class BackgroundInstallControlService extends SystemService {
         // the installers without INSTALL_PACKAGES perm can't perform
         // the installation in background. So we can just filter out them.
         if (mPermissionManager.checkPermission(installerPackageName,
-                android.Manifest.permission.INSTALL_PACKAGES,
+                android.Manifest.permission.INSTALL_PACKAGES, Context.DEVICE_ID_DEFAULT,
                 userId) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -433,7 +433,7 @@ public class BackgroundInstallControlService extends SystemService {
             return true;
         }
         return mPermissionManager.checkPermission(pkgName,
-                android.Manifest.permission.INSTALL_PACKAGES,
+                android.Manifest.permission.INSTALL_PACKAGES, Context.DEVICE_ID_DEFAULT,
                 userId) == PackageManager.PERMISSION_GRANTED;
     }
 

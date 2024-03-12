@@ -251,7 +251,14 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
 
     private int runSetDeviceOwner(PrintWriter pw) {
         parseArgs();
-        mService.setActiveAdmin(mComponent, /* refreshing= */ true, mUserId);
+        boolean isAdminAdded = false;
+        try {
+            mService.setActiveAdmin(mComponent, /* refreshing= */ false, mUserId);
+            isAdminAdded = true;
+        } catch (IllegalArgumentException e) {
+            pw.printf("%s was already an admin for user %d. No need to set it again.\n",
+                    mComponent.flattenToShortString(), mUserId);
+        }
 
         try {
             if (!mService.setDeviceOwner(mComponent, mUserId,
@@ -260,8 +267,10 @@ final class DevicePolicyManagerServiceShellCommand extends ShellCommand {
                         "Can't set package " + mComponent + " as device owner.");
             }
         } catch (Exception e) {
-            // Need to remove the admin that we just added.
-            mService.removeActiveAdmin(mComponent, UserHandle.USER_SYSTEM);
+            if (isAdminAdded) {
+                // Need to remove the admin that we just added.
+                mService.removeActiveAdmin(mComponent, mUserId);
+            }
             throw e;
         }
 

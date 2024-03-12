@@ -23,7 +23,7 @@
   <string-array name="wifi_status">
     <item msgid="1596683495752107015"></item>
     <item msgid="3288373008277313483">"स्क्यान गरिँदै..."</item>
-    <item msgid="6050951078202663628">"जडान हुँदै..."</item>
+    <item msgid="6050951078202663628">"कनेक्ट गरिँदै छ..."</item>
     <item msgid="8356618438494652335">"प्रमाणित गर्दै ..."</item>
     <item msgid="2837871868181677206">"IP एड्रेस पत्ता लगाउँदै ..."</item>
     <item msgid="4613015005934755724">"जडान गरिएको"</item>
@@ -37,7 +37,7 @@
   <string-array name="wifi_status_with_ssid">
     <item msgid="5969842512724979061"></item>
     <item msgid="1818677602615822316">"स्क्यान गर्दै..."</item>
-    <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>सँग जडान हुँदै..."</item>
+    <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>सँग कनेक्ट गरिँदै छ..."</item>
     <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>को साथ प्रमाणित गर्दै…"</item>
     <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>बाट IP एड्रेस प्राप्त गर्दै…"</item>
     <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> मा कनेक्ट भएको छ छ"</item>
@@ -59,9 +59,9 @@
     <item msgid="6421717003037072581">"सधैँ HDCP जाँच प्रयोग गर्नुहोस्"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="695678520785580527">"असक्षम पारिएको छ"</item>
-    <item msgid="6336372935919715515">"फिल्टर सक्षम पारियो"</item>
-    <item msgid="2779123106632690576">"सक्षम पारिएको छ"</item>
+    <item msgid="695678520785580527">"अफ गरिएको छ"</item>
+    <item msgid="6336372935919715515">"फिल्टर अफ पारियो"</item>
+    <item msgid="2779123106632690576">"अन गरिएको छ"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
     <item msgid="195768089203590086">"ACL हेडर मात्र छाड्नुहोस्"</item>
@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"४ हजार (सुरक्षित)"</item>
     <item msgid="7322156123728520872">"४ हजार (upscaled)"</item>
     <item msgid="7735692090314849188">"४ हजार (upscaled, सुरक्षित)"</item>
-    <item msgid="7346816300608639624">"७२० पिक्सेल, १०८० पिक्सेल (दोहरो स्क्रिन)"</item>
+    <item msgid="7346816300608639624">"७२० पिक्सेल, १०८० पिक्सेल (Dual Screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"कुनै पनि होइन"</item>
@@ -282,6 +282,10 @@
     <item msgid="8828567335701536560">"अडियो स्रोत"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
-  <string-array name="avatar_image_descriptions">
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"०"</item>
+    <item msgid="2646486108212979598">"१"</item>
+    <item msgid="3753634915787796632">"२"</item>
+    <item msgid="4779928470672877922">"३"</item>
   </string-array>
 </resources>

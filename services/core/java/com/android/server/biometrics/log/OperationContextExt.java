@@ -23,6 +23,7 @@ import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.DisplayState;
+import android.hardware.biometrics.common.FoldState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.common.WakeReason;
@@ -103,8 +104,14 @@ public class OperationContextExt {
      */
     @NonNull
     public OperationContext toAidlContext(@NonNull FingerprintAuthenticateOptions options) {
-        mAidlContext.authenticateReason = AuthenticateReason
-                .fingerprintAuthenticateReason(getAuthReason(options));
+        if (options.getVendorReason() != null) {
+            mAidlContext.authenticateReason = AuthenticateReason
+                    .vendorAuthenticateReason(options.getVendorReason());
+
+        } else {
+            mAidlContext.authenticateReason = AuthenticateReason
+                    .fingerprintAuthenticateReason(getAuthReason(options));
+        }
         mAidlContext.wakeReason = getWakeReason(options);
 
         return mAidlContext;
@@ -244,6 +251,7 @@ public class OperationContextExt {
     OperationContextExt update(@NonNull BiometricContext biometricContext, boolean isCrypto) {
         mAidlContext.isAod = biometricContext.isAod();
         mAidlContext.displayState = toAidlDisplayState(biometricContext.getDisplayState());
+        mAidlContext.foldState = toAidlFoldState(biometricContext.getFoldState());
         mAidlContext.isCrypto = isCrypto;
         setFirstSessionId(biometricContext);
 
@@ -268,6 +276,19 @@ public class OperationContextExt {
                 return DisplayState.SCREENSAVER;
         }
         return DisplayState.UNKNOWN;
+    }
+
+    @FoldState
+    private static int toAidlFoldState(@IBiometricContextListener.FoldState int state) {
+        switch (state) {
+            case IBiometricContextListener.FoldState.FULLY_CLOSED:
+                return FoldState.FULLY_CLOSED;
+            case IBiometricContextListener.FoldState.FULLY_OPENED:
+                return FoldState.FULLY_OPENED;
+            case IBiometricContextListener.FoldState.HALF_OPENED:
+                return FoldState.HALF_OPENED;
+        }
+        return FoldState.UNKNOWN;
     }
 
     private void setFirstSessionId(@NonNull BiometricContext biometricContext) {

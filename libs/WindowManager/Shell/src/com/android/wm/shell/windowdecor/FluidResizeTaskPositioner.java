@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
@@ -45,6 +46,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
     private final int mDisallowedAreaForEndBoundsHeight;
     private boolean mHasDragResized;
     private int mCtrlType;
+    @Surface.Rotation private int mRotation;
 
     FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
             DisplayController displayController, int disallowedAreaForEndBoundsHeight) {
@@ -66,7 +68,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
     }
 
     @Override
-    public void onDragPositioningStart(int ctrlType, float x, float y) {
+    public Rect onDragPositioningStart(int ctrlType, float x, float y) {
         mCtrlType = ctrlType;
         mTaskBoundsAtDragStart.set(
                 mWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
@@ -78,10 +80,14 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
             mTaskOrganizer.applyTransaction(wct);
         }
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
-        if (mStableBounds.isEmpty()) {
+        int rotation = mWindowDecoration
+                .mTaskInfo.configuration.windowConfiguration.getDisplayRotation();
+        if (mStableBounds.isEmpty() || mRotation != rotation) {
+            mRotation = rotation;
             mDisplayController.getDisplayLayout(mWindowDecoration.mDisplay.getDisplayId())
                     .getStableBounds(mStableBounds);
         }
+        return new Rect(mRepositionTaskBounds);
     }
 
     @Override
@@ -125,7 +131,9 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
             }
             mTaskOrganizer.applyTransaction(wct);
         } else if (mCtrlType == CTRL_TYPE_UNDEFINED
-                && y > mDisallowedAreaForEndBoundsHeight) {
+                && DragPositioningCallbackUtility.isBelowDisallowedArea(
+                mDisallowedAreaForEndBoundsHeight, mTaskBoundsAtDragStart, mRepositionStartPoint,
+                y)) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             DragPositioningCallbackUtility.onDragEnd(mRepositionTaskBounds,
                     mTaskBoundsAtDragStart, mStableBounds, mRepositionStartPoint, x, y);

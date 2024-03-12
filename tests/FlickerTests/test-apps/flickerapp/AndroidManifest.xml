@@ -70,7 +70,7 @@
         <activity android:name=".SeamlessRotationActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
                   android:theme="@style/CutoutShortEdges"
-                  android:configChanges="orientation|screenSize"
+                  android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
                   android:label="SeamlessActivity"
                   android:exported="true">
             <intent-filter>
@@ -96,6 +96,20 @@
                   android:screenOrientation="portrait"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.NonResizeablePortraitActivity"
                   android:label="NonResizeablePortraitActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".PortraitImmersiveActivity"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.PortraitImmersiveActivity"
+                  android:immersive="true"
+                  android:resizeableActivity="true"
+                  android:screenOrientation="portrait"
+                  android:theme="@android:style/Theme.NoTitleBar"
+                  android:configChanges="screenSize"
+                  android:label="PortraitImmersiveActivity"
                   android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -347,6 +361,17 @@
             android:exported="false"
             android:theme="@style/CutoutShortEdges"
             android:resizeableActivity="true"/>
+        <activity
+            android:name=".TransferSplashscreenActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.TransferSplashscreenActivity"
+            android:label="TransferSplashscreenActivity"
+            android:theme="@style/SplashscreenAppTheme"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <service
             android:name=".AssistantInteractionSessionService"
             android:exported="true"

@@ -7,18 +7,18 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-//location sources that will populate the new module
 filegroup {
-    name: "framework-location-nonupdatable-sources",
+    name: "framework-location-sources",
     srcs: [
-        "placeholder_java/android/location/Placeholder.java",
+        "java/**/*.java",
+        "java/**/*.aidl",
     ],
 }
 
 java_sdk_library {
     name: "framework-location",
     srcs: [
-        ":framework-location-nonupdatable-sources",
+        ":framework-location-sources",
     ],
     defaults: ["framework-non-updatable-unbundled-defaults"],
     permitted_packages: [
@@ -38,4 +38,9 @@ java_sdk_library {
             "frameworks/base/core/java",
         ],
     },
+}
+
+platform_compat_config {
+    name: "framework-location-compat-config",
+    src: ":framework-location",
 }

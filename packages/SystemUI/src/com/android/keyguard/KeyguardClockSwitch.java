@@ -22,10 +22,10 @@ import androidx.core.content.res.ResourcesCompat;
 
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
-import com.android.systemui.R;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
-import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.clocks.ClockController;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.DefaultClockController;
 
 import java.io.PrintWriter;
@@ -182,6 +182,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
             mSplitShadeCentered = splitShadeCentered;
             updateStatusArea(/* animate= */true);
         }
+    }
+
+    public boolean getSplitShadeCentered() {
+        return mSplitShadeCentered;
     }
 
     @Override
@@ -448,12 +452,17 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+        // TODO: b/305022530
+        if (mClock != null && mClock.getConfig().getId().equals("DIGITAL_CLOCK_METRO")) {
+            mClock.getEvents().onColorPaletteChanged(mContext.getResources());
+        }
 
         if (changed) {
             post(() -> updateClockTargetRegions());
         }
 
-        if (mSmartspace != null && mSmartspaceTop != mSmartspace.getTop()) {
+        if (mSmartspace != null && mSmartspaceTop != mSmartspace.getTop()
+                && mDisplayedClockSize != null) {
             mSmartspaceTop = mSmartspace.getTop();
             post(() -> updateClockViews(mDisplayedClockSize == LARGE, mAnimateOnLayout));
         }

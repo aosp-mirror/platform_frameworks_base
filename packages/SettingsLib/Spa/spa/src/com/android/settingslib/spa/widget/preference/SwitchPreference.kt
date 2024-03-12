@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,11 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import com.android.settingslib.spa.framework.compose.stateOf
-import com.android.settingslib.spa.framework.compose.toState
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.EntryHighlight
@@ -52,8 +49,8 @@ interface SwitchPreferenceModel {
     /**
      * The summary of this [SwitchPreference].
      */
-    val summary: State<String>
-        get() = stateOf("")
+    val summary: () -> String
+        get() = { "" }
 
     /**
      * The icon of this [Preference].
@@ -68,15 +65,15 @@ interface SwitchPreferenceModel {
      *
      * This can be `null` during the data loading before the data is available.
      */
-    val checked: State<Boolean?>
+    val checked: () -> Boolean?
 
     /**
      * Indicates whether this [SwitchPreference] is changeable.
      *
      * Not changeable [SwitchPreference] will be displayed in disabled style.
      */
-    val changeable: State<Boolean>
-        get() = stateOf(true)
+    val changeable: () -> Boolean
+        get() = { true }
 
     /**
      * The switch change handler of this [SwitchPreference].
@@ -98,8 +95,8 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
             title = model.title,
             summary = model.summary,
             icon = model.icon,
-            checked = model.checked,
-            changeable = model.changeable,
+            checked = model.checked(),
+            changeable = model.changeable(),
             onCheckedChange = model.onCheckedChange,
         )
     }
@@ -108,25 +105,25 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
 @Composable
 internal fun InternalSwitchPreference(
     title: String,
-    summary: State<String> = "".toState(),
+    summary: () -> String = { "" },
     icon: @Composable (() -> Unit)? = null,
-    checked: State<Boolean?>,
-    changeable: State<Boolean> = true.toState(),
+    checked: Boolean?,
+    changeable: Boolean = true,
     paddingStart: Dp = SettingsDimension.itemPaddingStart,
     paddingEnd: Dp = SettingsDimension.itemPaddingEnd,
     paddingVertical: Dp = SettingsDimension.itemPaddingVertical,
     onCheckedChange: ((newChecked: Boolean) -> Unit)?,
 ) {
-    val checkedValue = checked.value
     val indication = LocalIndication.current
     val onChangeWithLog = wrapOnSwitchWithLog(onCheckedChange)
-    val modifier = remember(checkedValue, changeable.value) {
-        if (checkedValue != null && onChangeWithLog != null) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val modifier = remember(checked, changeable) {
+        if (checked != null && onChangeWithLog != null) {
             Modifier.toggleable(
-                value = checkedValue,
-                interactionSource = MutableInteractionSource(),
+                value = checked,
+                interactionSource = interactionSource,
                 indication = indication,
-                enabled = changeable.value,
+                enabled = changeable,
                 role = Role.Switch,
                 onValueChange = onChangeWithLog,
             )
@@ -136,7 +133,7 @@ internal fun InternalSwitchPreference(
         title = title,
         summary = summary,
         modifier = modifier,
-        enabled = changeable,
+        enabled = { changeable },
         paddingStart = paddingStart,
         paddingEnd = paddingEnd,
         paddingVertical = paddingVertical,
@@ -145,10 +142,11 @@ internal fun InternalSwitchPreference(
         Spacer(Modifier.width(SettingsDimension.itemPaddingEnd))
         SettingsSwitch(
             checked = checked,
-            changeable = changeable,
+            changeable = { changeable },
             // The onCheckedChange is handled on the whole SwitchPreference.
             // DO NOT set it on SettingsSwitch.
             onCheckedChange = null,
+            interactionSource = interactionSource,
         )
     }
 }
@@ -160,19 +158,19 @@ private fun SwitchPreferencePreview() {
         Column {
             InternalSwitchPreference(
                 title = "Use Dark theme",
-                checked = true.toState(),
+                checked = true,
                 onCheckedChange = {},
             )
             InternalSwitchPreference(
                 title = "Use Dark theme",
-                summary = "Summary".toState(),
-                checked = false.toState(),
+                summary = { "Summary" },
+                checked = false,
                 onCheckedChange = {},
             )
             InternalSwitchPreference(
                 title = "Use Dark theme",
-                summary = "Summary".toState(),
-                checked = true.toState(),
+                summary = { "Summary" },
+                checked = true,
                 onCheckedChange = {},
                 icon = @Composable {
                     SettingsIcon(imageVector = Icons.Outlined.AirplanemodeActive)

@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification.collection.render
 
 import android.annotation.MainThread
 import android.view.View
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 
 /**
  * Given a "spec" that describes a "tree" of views, adds and removes views from the
@@ -231,18 +231,24 @@ private class ShadeNode(val controller: NodeController) {
     fun getChildCount(): Int = controller.getChildCount()
 
     fun addChildAt(child: ShadeNode, index: Int) {
-        controller.addChildAt(child.controller, index)
-        child.controller.onViewAdded()
+        traceSection("ShadeNode#addChildAt") {
+            controller.addChildAt(child.controller, index)
+            child.controller.onViewAdded()
+        }
     }
 
     fun moveChildTo(child: ShadeNode, index: Int) {
-        controller.moveChildTo(child.controller, index)
-        child.controller.onViewMoved()
+        traceSection("ShadeNode#moveChildTo") {
+            controller.moveChildTo(child.controller, index)
+            child.controller.onViewMoved()
+        }
     }
 
     fun removeChild(child: ShadeNode, isTransfer: Boolean) {
-        controller.removeChild(child.controller, isTransfer)
-        child.controller.onViewRemoved()
+        traceSection("ShadeNode#removeChild") {
+            controller.removeChild(child.controller, isTransfer)
+            child.controller.onViewRemoved()
+        }
     }
 
     fun offerToKeepInParentForAnimation(): Boolean {

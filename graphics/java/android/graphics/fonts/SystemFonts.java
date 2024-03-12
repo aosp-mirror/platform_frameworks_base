@@ -16,10 +16,15 @@
 
 package android.graphics.fonts;
 
+import static android.text.FontConfig.Customization.LocaleFallback.OPERATION_APPEND;
+import static android.text.FontConfig.Customization.LocaleFallback.OPERATION_PREPEND;
+import static android.text.FontConfig.Customization.LocaleFallback.OPERATION_REPLACE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.FontListParser;
 import android.graphics.Typeface;
+import android.os.LocaleList;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -38,6 +43,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,6 +54,8 @@ public final class SystemFonts {
     private static final String TAG = "SystemFonts";
 
     private static final String FONTS_XML = "/system/etc/font_fallback.xml";
+    private static final String LEGACY_FONTS_XML = "/system/etc/fonts.xml";
+
     /** @hide */
     public static final String SYSTEM_FONT_DIR = "/system/fonts/";
     private static final String OEM_XML = "/product/etc/fonts_customization.xml";
@@ -117,9 +125,9 @@ public final class SystemFonts {
             }
         }
 
-
         final FontFamily defaultFamily = defaultFonts.isEmpty() ? null : createFontFamily(
-                defaultFonts, languageTags, variant, false, cache);
+                defaultFonts, languageTags, variant, xmlFamily.getVariableFontFamilyType(), false,
+                cache);
         // Insert family into fallback map.
         for (int i = 0; i < fallbackMap.size(); i++) {
             final String name = fallbackMap.keyAt(i);
@@ -136,8 +144,8 @@ public final class SystemFonts {
                     familyListSet.familyList.add(defaultFamily);
                 }
             } else {
-                final FontFamily family = createFontFamily(fallback, languageTags, variant, false,
-                        cache);
+                final FontFamily family = createFontFamily(fallback, languageTags, variant,
+                        xmlFamily.getVariableFontFamilyType(), false, cache);
                 if (family != null) {
                     familyListSet.familyList.add(family);
                 } else if (defaultFamily != null) {
@@ -153,6 +161,7 @@ public final class SystemFonts {
             @NonNull List<FontConfig.Font> fonts,
             @NonNull String languageTags,
             @FontConfig.FontFamily.Variant int variant,
+            int varFamilyType,
             boolean isDefaultFallback,
             @NonNull Map<String, ByteBuffer> cache) {
         if (fonts.size() == 0) {
@@ -194,7 +203,7 @@ public final class SystemFonts {
             }
         }
         return b == null ? null : b.build(languageTags, variant, false /* isCustomFallback */,
-                isDefaultFallback);
+                isDefaultFallback, varFamilyType);
     }
 
     private static void appendNamedFamilyList(@NonNull FontConfig.NamedFamilyList namedFamilyList,
@@ -208,6 +217,7 @@ public final class SystemFonts {
             final FontFamily family = createFontFamily(
                     xmlFamily.getFontList(),
                     xmlFamily.getLocaleList().toLanguageTags(), xmlFamily.getVariant(),
+                    xmlFamily.getVariableFontFamilyType(),
                     true, // named family is always default
                     bufferCache);
             if (family == null) {
@@ -217,19 +227,6 @@ public final class SystemFonts {
             familyListSet.seenXmlFamilies.append(System.identityHashCode(xmlFamily), 1);
         }
         fallbackListMap.put(familyName, familyListSet);
-    }
-
-    /**
-     * Get the updated FontConfig for testing purposes.
-     * @hide
-     */
-    public static @NonNull FontConfig getSystemFontConfigForTesting(
-            @NonNull String fontsXmlPath,
-            @Nullable Map<String, File> updatableFontMap,
-            long lastModifiedDate,
-            int configVersion) {
-        return getSystemFontConfigInternal(fontsXmlPath, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
-                updatableFontMap, lastModifiedDate, configVersion);
     }
 
     /**
@@ -243,7 +240,29 @@ public final class SystemFonts {
             long lastModifiedDate,
             int configVersion
     ) {
-        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+        final String fontsXml;
+        if (com.android.text.flags.Flags.newFontsFallbackXml()) {
+            fontsXml = FONTS_XML;
+        } else {
+            fontsXml = LEGACY_FONTS_XML;
+        }
+        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+                updatableFontMap, lastModifiedDate, configVersion);
+    }
+
+    /**
+     * Get the updated FontConfig.
+     *
+     * @param updatableFontMap a font mapping of updated font files.
+     * @hide
+     */
+    public static @NonNull FontConfig getSystemFontConfigForTesting(
+            @NonNull String fontsXml,
+            @Nullable Map<String, File> updatableFontMap,
+            long lastModifiedDate,
+            int configVersion
+    ) {
+        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
                 updatableFontMap, lastModifiedDate, configVersion);
     }
 
@@ -252,8 +271,22 @@ public final class SystemFonts {
      * @hide
      */
     public static @NonNull FontConfig getSystemPreinstalledFontConfig() {
-        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
+        final String fontsXml;
+        if (com.android.text.flags.Flags.newFontsFallbackXml()) {
+            fontsXml = FONTS_XML;
+        } else {
+            fontsXml = LEGACY_FONTS_XML;
+        }
+        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
                 0, 0);
+    }
+
+    /**
+     * @hide
+     */
+    public static @NonNull FontConfig getSystemPreinstalledFontConfigFromLegacyXml() {
+        return getSystemFontConfigInternal(LEGACY_FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+                null, 0, 0);
     }
 
     /* package */ static @NonNull FontConfig getSystemFontConfigInternal(
@@ -266,16 +299,17 @@ public final class SystemFonts {
             int configVersion
     ) {
         try {
+            Log.i(TAG, "Loading font config from " + fontsXml);
             return FontListParser.parse(fontsXml, systemFontDir, oemXml, productFontDir,
                                                 updatableFontMap, lastModifiedDate, configVersion);
         } catch (IOException e) {
             Log.e(TAG, "Failed to open/read system font configurations.", e);
             return new FontConfig(Collections.emptyList(), Collections.emptyList(),
-                    Collections.emptyList(), 0, 0);
+                    Collections.emptyList(), Collections.emptyList(), 0, 0);
         } catch (XmlPullParserException e) {
             Log.e(TAG, "Failed to parse the system font configuration.", e);
             return new FontConfig(Collections.emptyList(), Collections.emptyList(),
-                    Collections.emptyList(), 0, 0);
+                    Collections.emptyList(), Collections.emptyList(), 0, 0);
         }
     }
 
@@ -299,6 +333,8 @@ public final class SystemFonts {
             ArrayMap<String, ByteBuffer> outBufferCache) {
 
         final ArrayMap<String, NativeFamilyListSet> fallbackListMap = new ArrayMap<>();
+        final List<FontConfig.Customization.LocaleFallback> localeFallbacks =
+                fontConfig.getLocaleFallbackCustomizations();
 
         final List<FontConfig.NamedFamilyList> namedFamilies = fontConfig.getNamedFamilyLists();
         for (int i = 0; i < namedFamilies.size(); ++i) {
@@ -307,10 +343,54 @@ public final class SystemFonts {
         }
 
         // Then, add fallback fonts to the fallback map.
+        final List<FontConfig.Customization.LocaleFallback> customizations = new ArrayList<>();
         final List<FontConfig.FontFamily> xmlFamilies = fontConfig.getFontFamilies();
+        final SparseIntArray seenCustomization = new SparseIntArray();
         for (int i = 0; i < xmlFamilies.size(); i++) {
             final FontConfig.FontFamily xmlFamily = xmlFamilies.get(i);
-            pushFamilyToFallback(xmlFamily, fallbackListMap, outBufferCache);
+
+            customizations.clear();
+            for (int j = 0; j < localeFallbacks.size(); ++j) {
+                if (seenCustomization.get(j, -1) != -1) {
+                    continue;  // The customization is already applied.
+                }
+                FontConfig.Customization.LocaleFallback localeFallback = localeFallbacks.get(j);
+                if (scriptMatch(xmlFamily.getLocaleList(), localeFallback.getScript())) {
+                    customizations.add(localeFallback);
+                    seenCustomization.put(j, 1);
+                }
+            }
+
+            if (customizations.isEmpty()) {
+                pushFamilyToFallback(xmlFamily, fallbackListMap, outBufferCache);
+            } else {
+                for (int j = 0; j < customizations.size(); ++j) {
+                    FontConfig.Customization.LocaleFallback localeFallback = customizations.get(j);
+                    if (localeFallback.getOperation() == OPERATION_PREPEND) {
+                        pushFamilyToFallback(localeFallback.getFamily(), fallbackListMap,
+                                outBufferCache);
+                    }
+                }
+                boolean isReplaced = false;
+                for (int j = 0; j < customizations.size(); ++j) {
+                    FontConfig.Customization.LocaleFallback localeFallback = customizations.get(j);
+                    if (localeFallback.getOperation() == OPERATION_REPLACE) {
+                        pushFamilyToFallback(localeFallback.getFamily(), fallbackListMap,
+                                outBufferCache);
+                        isReplaced = true;
+                    }
+                }
+                if (!isReplaced) {  // If nothing is replaced, push the original one.
+                    pushFamilyToFallback(xmlFamily, fallbackListMap, outBufferCache);
+                }
+                for (int j = 0; j < customizations.size(); ++j) {
+                    FontConfig.Customization.LocaleFallback localeFallback = customizations.get(j);
+                    if (localeFallback.getOperation() == OPERATION_APPEND) {
+                        pushFamilyToFallback(localeFallback.getFamily(), fallbackListMap,
+                                outBufferCache);
+                    }
+                }
+            }
         }
 
         // Build the font map and fallback map.
@@ -335,5 +415,43 @@ public final class SystemFonts {
         final ArrayMap<String, Typeface> result = new ArrayMap<>();
         Typeface.initSystemDefaultTypefaces(fallbackMap, fontConfig.getAliases(), result);
         return result;
+    }
+
+    private static boolean scriptMatch(LocaleList localeList, String targetScript) {
+        if (localeList == null || localeList.isEmpty()) {
+            return false;
+        }
+        for (int i = 0; i < localeList.size(); ++i) {
+            Locale locale = localeList.get(i);
+            if (locale == null) {
+                continue;
+            }
+            String baseScript = FontConfig.resolveScript(locale);
+            if (baseScript.equals(targetScript)) {
+                return true;
+            }
+
+            // Subtag match
+            if (targetScript.equals("Bopo") && baseScript.equals("Hanb")) {
+                // Hanb is Han with Bopomofo.
+                return true;
+            } else if (targetScript.equals("Hani")) {
+                if (baseScript.equals("Hanb") || baseScript.equals("Hans")
+                        || baseScript.equals("Hant") || baseScript.equals("Kore")
+                        || baseScript.equals("Jpan")) {
+                    // Han id suppoted by Taiwanese, Traditional Chinese, Simplified Chinese, Korean
+                    // and Japanese.
+                    return true;
+                }
+            } else if (targetScript.equals("Hira") || targetScript.equals("Hrkt")
+                    || targetScript.equals("Kana")) {
+                if (baseScript.equals("Jpan") || baseScript.equals("Hrkt")) {
+                    // Hiragana, Hiragana-Katakana, Katakana is supported by Japanese and
+                    // Hiragana-Katakana script.
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

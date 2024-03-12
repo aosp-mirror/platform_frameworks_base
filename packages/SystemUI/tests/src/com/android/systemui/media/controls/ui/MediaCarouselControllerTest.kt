@@ -31,17 +31,13 @@ import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.TestScopeProvider
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
@@ -53,10 +49,12 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -105,7 +103,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock @Main private lateinit var executor: DelayableExecutor
     @Mock lateinit var mediaDataManager: MediaDataManager
     @Mock lateinit var configurationController: ConfigurationController
-    @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var logger: MediaUiEventLogger
@@ -128,6 +125,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Captor lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
 
     private val clock = FakeSystemClock()
+    private lateinit var bgExecutor: FakeExecutor
     private lateinit var mediaCarouselController: MediaCarouselController
 
     @Before
@@ -135,6 +133,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
         transitionRepository = FakeKeyguardTransitionRepository()
+        bgExecutor = FakeExecutor(clock)
         mediaCarouselController =
             MediaCarouselController(
                 context,
@@ -144,9 +143,9 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 activityStarter,
                 clock,
                 executor,
+                bgExecutor,
                 mediaDataManager,
                 configurationController,
-                falsingCollector,
                 falsingManager,
                 dumpManager,
                 logger,
@@ -463,6 +462,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(LOCATION_QS)
     }
 
@@ -473,6 +473,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QQS)
     }
 
@@ -483,6 +484,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_LOCKSCREEN)
     }
 
@@ -493,6 +495,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
     }
 
@@ -813,8 +816,10 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaCarouselController.mediaCarousel = mediaCarousel
 
             val job = mediaCarouselController.listenForAnyStateToGoneKeyguardTransition(this)
-            transitionRepository.sendTransitionStep(
-                TransitionStep(to = KeyguardState.GONE, transitionState = TransitionState.FINISHED)
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                this
             )
 
             verify(mediaCarousel).visibility = View.VISIBLE

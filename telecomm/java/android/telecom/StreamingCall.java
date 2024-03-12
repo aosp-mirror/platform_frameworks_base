@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
@@ -24,6 +25,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.server.telecom.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -56,8 +59,8 @@ public final class StreamingCall implements Parcelable {
 
     /**
      * The ID associated with this call.  This is the same value as {@link CallControl#getCallId()}.
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_CALL_DETAILS_ID_CHANGES)
     public static final String EXTRA_CALL_ID = "android.telecom.extra.CALL_ID";
 
     /**

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -30,8 +31,10 @@ import android.graphics.SurfaceTexture;
 import android.graphics.TextureLayer;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.flags.Flags;
 
 /**
  * <p>A TextureView can be used to display a content stream, such as that
@@ -51,9 +54,9 @@ import android.util.Log;
  *       <th style="text-align: center;">SurfaceView</th>
  *     </tr>
  *     <tr>
- *       <td>Supports alpha</td>
+ *       <td>Supports View alpha</td>
  *       <td style="text-align: center;">X</td>
- *       <td style="text-align: center;">&nbsp;</td>
+ *       <td style="text-align: center;">U+</td>
  *     </tr>
  *     <tr>
  *       <td>Supports rotations</td>
@@ -193,6 +196,9 @@ public class TextureView extends View {
 
     private Canvas mCanvas;
     private int mSaveCount;
+
+    @FloatRange(from = 0.0) float mFrameRate;
+    @Surface.FrameRateCompatibility int mFrameRateCompatibility;
 
     private final Object[] mNativeWindowLock = new Object[0];
     // Set by native code, do not write!
@@ -418,11 +424,13 @@ public class TextureView extends View {
 
             TextureLayer layer = getTextureLayer();
             if (layer != null) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "TextureView#draw()");
                 applyUpdate();
                 applyTransformMatrix();
 
                 mLayer.setLayerPaint(mLayerPaint); // ensure layer paint is up to date
                 recordingCanvas.drawTextureLayer(layer);
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
             }
         }
     }
@@ -465,6 +473,16 @@ public class TextureView extends View {
             mLayer.setSurfaceTexture(mSurface);
             mSurface.setDefaultBufferSize(getWidth(), getHeight());
             mSurface.setOnFrameAvailableListener(mUpdateListener, mAttachInfo.mHandler);
+            if (Flags.toolkitSetFrameRate()) {
+                mSurface.setOnSetFrameRateListener(
+                        (surfaceTexture, frameRate, compatibility, strategy) -> {
+                            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                                Trace.instant(Trace.TRACE_TAG_VIEW, "setFrameRate: " + frameRate);
+                            }
+                            mFrameRate = frameRate;
+                            mFrameRateCompatibility = compatibility;
+                        }, mAttachInfo.mHandler);
+            }
 
             if (mListener != null && createNewSurface) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());

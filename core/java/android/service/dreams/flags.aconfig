@@ -1,0 +1,9 @@
+package: "android.service.dreams"
+
+flag {
+  name: "dream_overlay_host"
+  namespace: "communal"
+  description: "This flag enables using a host to handle displaying a dream's overlay rather than "
+      "relying on the dream's window"
+  bug: "291990564"
+}

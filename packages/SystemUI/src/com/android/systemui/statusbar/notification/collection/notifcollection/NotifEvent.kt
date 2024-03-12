@@ -23,7 +23,7 @@ import android.service.notification.StatusBarNotification
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.NamedListenerSet
-import com.android.systemui.util.traceSection
+import com.android.app.tracing.traceSection
 
 /**
  * Set of classes that represent the various events that [NotifCollection] can dispatch to

@@ -55,12 +55,12 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Никогаш не користи HDCP проверка"</item>
-    <item msgid="8254225038262324761">"Користи HDCP-проверка само за DRM-содржини"</item>
+    <item msgid="8254225038262324761">"Користи проверка со HDCP само за DRM-содржини"</item>
     <item msgid="6421717003037072581">"Секогаш користи HDCP проверка"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Оневозможено"</item>
-    <item msgid="6336372935919715515">"Овозможено е филтрирано"</item>
+    <item msgid="6336372935919715515">"Овозможено филтрирање"</item>
     <item msgid="2779123106632690576">"Овозможено"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
@@ -186,11 +186,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="409235464399258501">"Исклучено"</item>
-    <item msgid="4195153527464162486">"64 K/меѓумеморија"</item>
-    <item msgid="7464037639415220106">"256 K/меѓумеморија"</item>
-    <item msgid="8539423820514360724">"1 M/меѓумеморија"</item>
-    <item msgid="1984761927103140651">"4 M/меѓумеморија"</item>
-    <item msgid="2983219471251787208">"8 M/привремена меморија за евиденција"</item>
+    <item msgid="4195153527464162486">"64 K по евиденциска меѓумеморија"</item>
+    <item msgid="7464037639415220106">"256 K по евиденциска меѓумеморија"</item>
+    <item msgid="8539423820514360724">"1 M по евиденциска меѓумеморија"</item>
+    <item msgid="1984761927103140651">"4 M по евиденциска меѓумеморија"</item>
+    <item msgid="2983219471251787208">"8 M по евиденциска меѓумеморија"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Исклучено"</item>
@@ -200,36 +200,36 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"Исклучено"</item>
-    <item msgid="7126170197336963369">"Привремена меморија на целата евиденција"</item>
+    <item msgid="7126170197336963369">"Сите евиденциски меѓумемории"</item>
     <item msgid="7167543126036181392">"Привремена мем. на цела евиденција освен за радио"</item>
     <item msgid="5135340178556563979">"само привремена меморија за евиденција на јадро"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="2675263395797191850">"Без анимација"</item>
-    <item msgid="5790132543372767872">"Опсег на анимација 0,5x"</item>
-    <item msgid="2529692189302148746">"Опсег на анимација 1x"</item>
-    <item msgid="8072785072237082286">"Опсег на анимација 1,5x"</item>
-    <item msgid="3531560925718232560">"Опсег на анимација 2x"</item>
-    <item msgid="4542853094898215187">"Опсег на анимација 5x"</item>
-    <item msgid="5643881346223901195">"Опсег на анимација 10x"</item>
+    <item msgid="5790132543372767872">"Брзина на анимации 0,5x"</item>
+    <item msgid="2529692189302148746">"Брзина на анимации 1x"</item>
+    <item msgid="8072785072237082286">"Брзина на анимации 1,5x"</item>
+    <item msgid="3531560925718232560">"Брзина на анимации 2x"</item>
+    <item msgid="4542853094898215187">"Брзина на анимации 5x"</item>
+    <item msgid="5643881346223901195">"Брзина на анимации 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
     <item msgid="3376676813923486384">"Без анимација"</item>
-    <item msgid="753422683600269114">"Опсег на анимација 0,5x"</item>
-    <item msgid="3695427132155563489">"Опсег на анимација 1x"</item>
-    <item msgid="9032615844198098981">"Опсег на анимација 1,5x"</item>
-    <item msgid="8473868962499332073">"Опсег на анимација 2x"</item>
-    <item msgid="4403482320438668316">"Опсег на анимација 5x"</item>
-    <item msgid="169579387974966641">"Опсег на анимација 10x"</item>
+    <item msgid="753422683600269114">"Брзина на анимации 0,5x"</item>
+    <item msgid="3695427132155563489">"Брзина на анимации 1x"</item>
+    <item msgid="9032615844198098981">"Брзина на анимации 1,5x"</item>
+    <item msgid="8473868962499332073">"Брзина на анимации 2x"</item>
+    <item msgid="4403482320438668316">"Брзина на анимации 5x"</item>
+    <item msgid="169579387974966641">"Брзина на анимации 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6416998593844817378">"Исклучи анимација"</item>
-    <item msgid="875345630014338616">"Опсег на анимација 5x"</item>
-    <item msgid="2753729231187104962">"Опсег на анимација 1x"</item>
-    <item msgid="1368370459723665338">"Опсег на анимација 1,5x"</item>
-    <item msgid="5768005350534383389">"Опсег на анимација 2x"</item>
-    <item msgid="3728265127284005444">"Опсег на анимација 5x"</item>
-    <item msgid="2464080977843960236">"Опсег на анимација 10x"</item>
+    <item msgid="875345630014338616">"Брзина на анимации 5x"</item>
+    <item msgid="2753729231187104962">"Брзина на анимации 1x"</item>
+    <item msgid="1368370459723665338">"Брзина на анимации 1,5x"</item>
+    <item msgid="5768005350534383389">"Брзина на анимации 2x"</item>
+    <item msgid="3728265127284005444">"Брзина на анимации 5x"</item>
+    <item msgid="2464080977843960236">"Брзина на анимации 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="4497393944195787240">"Ниедна"</item>
@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4 илјади (безбедно)"</item>
     <item msgid="7322156123728520872">"4 илјади (подобрено)"</item>
     <item msgid="7735692090314849188">"4 илјади (подобрено, безбедно)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (двоен екран)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (Dual Screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Ниедна"</item>
@@ -282,6 +282,10 @@
     <item msgid="8828567335701536560">"Аудиоизвор"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
-  <string-array name="avatar_image_descriptions">
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"0"</item>
+    <item msgid="2646486108212979598">"1"</item>
+    <item msgid="3753634915787796632">"2"</item>
+    <item msgid="4779928470672877922">"3"</item>
   </string-array>
 </resources>

@@ -9,7 +9,7 @@
             ]
         },
         {
-            "name": "CtsAppSecurityHostTestCases",
+            "name": "CtsStorageHostTestCases",
             "options": [
                 {
                     "include-filter": "android.appsecurity.cts.ExternalStorageHostTest#testGrantUriPermission"
@@ -39,10 +39,10 @@
             ]
         },
         {
-            "name": "CtsWindowManagerDeviceTestCases",
+            "name": "CtsWindowManagerDeviceWindow",
             "options": [
                 {
-                    "include-filter": "android.server.wm.CrossAppDragAndDropTests"
+                    "include-filter": "android.server.wm.window.CrossAppDragAndDropTests"
                 }
             ]
         }

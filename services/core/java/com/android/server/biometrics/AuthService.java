@@ -36,6 +36,7 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.ComponentInfoInternal;
@@ -381,6 +382,26 @@ public class AuthService extends SystemService {
                 mBiometricService.registerEnabledOnKeyguardCallback(callback);
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void registerAuthenticationStateListener(AuthenticationStateListener listener)
+                throws RemoteException {
+            checkInternalPermission();
+            final IFingerprintService fingerprintService = mInjector.getFingerprintService();
+            if (fingerprintService != null) {
+                fingerprintService.registerAuthenticationStateListener(listener);
+            }
+        }
+
+        @Override
+        public void unregisterAuthenticationStateListener(AuthenticationStateListener listener)
+                throws RemoteException {
+            checkInternalPermission();
+            final IFingerprintService fingerprintService = mInjector.getFingerprintService();
+            if (fingerprintService != null) {
+                fingerprintService.unregisterAuthenticationStateListener(listener);
             }
         }
 

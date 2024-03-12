@@ -17,6 +17,8 @@
 package com.android.settingslib.spaprivileged.model.app
 
 import android.content.Context
+import android.content.pm.FeatureFlags
+import android.content.pm.FeatureFlagsImpl
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -65,9 +67,17 @@ object AppListRepositoryUtil {
         AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId)
 }
 
-class AppListRepositoryImpl(private val context: Context) : AppListRepository {
+/**
+ * This constructor is visible for tests only in order to override `featureFlags`.
+ */
+class AppListRepositoryImpl(
+    private val context: Context,
+    private val featureFlags: FeatureFlags
+) : AppListRepository {
     private val packageManager = context.packageManager
     private val userManager = context.userManager
+
+    constructor(context: Context) : this(context, FeatureFlagsImpl())
 
     override suspend fun loadApps(
         userId: Int,
@@ -98,9 +108,13 @@ class AppListRepositoryImpl(private val context: Context) : AppListRepository {
         userId: Int,
         matchAnyUserForAdmin: Boolean,
     ): List<ApplicationInfo> {
+        val disabledComponentsFlag = (PackageManager.MATCH_DISABLED_COMPONENTS or
+            PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
+        val archivedPackagesFlag: Long = if (featureFlags.archiving())
+            PackageManager.MATCH_ARCHIVED_PACKAGES else 0L
         val regularFlags = ApplicationInfoFlags.of(
-            (PackageManager.MATCH_DISABLED_COMPONENTS or
-                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
+            disabledComponentsFlag or
+                archivedPackagesFlag
         )
         return if (!matchAnyUserForAdmin || !userManager.getUserInfo(userId).isAdmin) {
             packageManager.getInstalledApplicationsAsUser(regularFlags, userId)

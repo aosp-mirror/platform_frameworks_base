@@ -16,16 +16,30 @@
 
 package android.os.health;
 
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IPowerStatsService;
+import android.os.PowerMonitor;
+import android.os.PowerMonitorReadings;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 
 import com.android.internal.app.IBatteryStats;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Provides access to data about how various system resources are used by applications.
@@ -46,20 +60,30 @@ import com.android.internal.app.IBatteryStats;
  */
 @SystemService(Context.SYSTEM_HEALTH_SERVICE)
 public class SystemHealthManager {
+    @NonNull
     private final IBatteryStats mBatteryStats;
+    @Nullable
+    private final IPowerStatsService mPowerStats;
+    private List<PowerMonitor> mPowerMonitorsInfo;
+    private final Object mPowerMonitorsLock = new Object();
 
     /**
      * Construct a new SystemHealthManager object.
+     *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public SystemHealthManager() {
-        this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)));
+        this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)),
+                IPowerStatsService.Stub.asInterface(
+                        ServiceManager.getService(Context.POWER_STATS_SERVICE)));
     }
 
     /** {@hide} */
-    public SystemHealthManager(IBatteryStats batteryStats) {
+    public SystemHealthManager(@NonNull IBatteryStats batteryStats,
+            @Nullable IPowerStatsService powerStats) {
         mBatteryStats = batteryStats;
+        mPowerStats = powerStats;
     }
 
     /**
@@ -69,22 +93,20 @@ public class SystemHealthManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static SystemHealthManager from(Context context) {
-        return (SystemHealthManager)context.getSystemService(Context.SYSTEM_HEALTH_SERVICE);
+        return (SystemHealthManager) context.getSystemService(Context.SYSTEM_HEALTH_SERVICE);
     }
 
     /**
      * Return a {@link HealthStats} object containing a snapshot of system health
      * metrics for the given uid (user-id, which in usually corresponds to application).
-     * @more
-     *
-     * An application must hold the {@link android.Manifest.permission#BATTERY_STATS
-     * android.permission.BATTERY_STATS} permission in order to retrieve any HealthStats
-     * other than its own.
      *
      * @param uid User ID for a given application.
      * @return A {@link HealthStats} object containing the metrics for the requested
      * application. The keys for this HealthStats object will be from the {@link UidHealthStats}
      * class.
+     * @more An application must hold the {@link android.Manifest.permission#BATTERY_STATS
+     * android.permission.BATTERY_STATS} permission in order to retrieve any HealthStats
+     * other than its own.
      * @see Process#myUid() Process.myUid()
      */
     public HealthStats takeUidSnapshot(int uid) {
@@ -111,23 +133,21 @@ public class SystemHealthManager {
     /**
      * Return a {@link HealthStats} object containing a snapshot of system health
      * metrics for the given uids (user-id, which in usually corresponds to application).
-     * @more
-     *
-     * An application must hold the {@link android.Manifest.permission#BATTERY_STATS
-     * android.permission.BATTERY_STATS} permission in order to retrieve any HealthStats
-     * other than its own.
      *
      * @param uids An array of User IDs to retrieve.
      * @return An array of {@link HealthStats} objects containing the metrics for each of
      * the requested uids. The keys for this HealthStats object will be from the
      * {@link UidHealthStats} class.
+     * @more An application must hold the {@link android.Manifest.permission#BATTERY_STATS
+     * android.permission.BATTERY_STATS} permission in order to retrieve any HealthStats
+     * other than its own.
      */
     public HealthStats[] takeUidSnapshots(int[] uids) {
         try {
             final HealthStatsParceler[] parcelers = mBatteryStats.takeUidSnapshots(uids);
             final HealthStats[] results = new HealthStats[uids.length];
             final int N = uids.length;
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 results[i] = parcelers[i].getHealthStats();
             }
             return results;
@@ -136,5 +156,102 @@ public class SystemHealthManager {
         }
     }
 
-}
+    /**
+     * Asynchronously retrieves a list of supported  {@link PowerMonitor}'s, which include raw ODPM
+     * (on-device power rail monitor) rails and modeled energy consumers.  If ODPM is unsupported
+     * on this device this method delivers an empty list.
+     *
+     * @param handler  optional Handler to deliver the callback. If not supplied, the callback
+     *                 may be invoked on an arbitrary thread.
+     * @param onResult callback for the result
+     */
+    @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
+    public void getSupportedPowerMonitors(@Nullable Handler handler,
+            @NonNull Consumer<List<PowerMonitor>> onResult) {
+        final List<PowerMonitor> result;
+        synchronized (mPowerMonitorsLock) {
+            if (mPowerMonitorsInfo != null) {
+                result = mPowerMonitorsInfo;
+            } else if (mPowerStats == null) {
+                mPowerMonitorsInfo = List.of();
+                result = mPowerMonitorsInfo;
+            } else {
+                result = null;
+            }
+        }
+        if (result != null) {
+            if (handler != null) {
+                handler.post(() -> onResult.accept(result));
+            } else {
+                onResult.accept(result);
+            }
+            return;
+        }
+        try {
+            mPowerStats.getSupportedPowerMonitors(new ResultReceiver(handler) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    PowerMonitor[] array = resultData.getParcelableArray(
+                            IPowerStatsService.KEY_MONITORS, PowerMonitor.class);
+                    List<PowerMonitor> result = array != null ? Arrays.asList(array) : List.of();
+                    synchronized (mPowerMonitorsLock) {
+                        mPowerMonitorsInfo = result;
+                    }
+                    onResult.accept(result);
+                }
+            });
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
+    private static final Comparator<PowerMonitor> POWER_MONITOR_COMPARATOR =
+            Comparator.comparingInt(pm -> pm.index);
+
+    /**
+     * Asynchronously retrieves the accumulated power consumption reported by the specified power
+     * monitors.
+     *
+     * @param powerMonitors power monitors to be retrieved.
+     * @param handler       optional Handler to deliver the callbacks. If not supplied, the callback
+     *                      may be invoked on an arbitrary thread.
+     * @param onSuccess     callback for the result
+     * @param onError       callback invoked in case of an error
+     */
+    @FlaggedApi("com.android.server.power.optimization.power_monitor_api")
+    public void getPowerMonitorReadings(@NonNull List<PowerMonitor> powerMonitors,
+            @Nullable Handler handler, @NonNull Consumer<PowerMonitorReadings> onSuccess,
+            @NonNull Consumer<RuntimeException> onError) {
+        if (mPowerStats == null) {
+            onError.accept(new IllegalArgumentException("Unsupported power monitor"));
+            return;
+        }
+
+        PowerMonitor[] powerMonitorsArray =
+                powerMonitors.toArray(new PowerMonitor[powerMonitors.size()]);
+        Arrays.sort(powerMonitorsArray, POWER_MONITOR_COMPARATOR);
+        int[] indices = new int[powerMonitors.size()];
+        for (int i = 0; i < powerMonitors.size(); i++) {
+            indices[i] = powerMonitorsArray[i].index;
+        }
+        try {
+            mPowerStats.getPowerMonitorReadings(indices, new ResultReceiver(handler) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    if (resultCode == IPowerStatsService.RESULT_SUCCESS) {
+                        onSuccess.accept(new PowerMonitorReadings(powerMonitorsArray,
+                                resultData.getLongArray(IPowerStatsService.KEY_ENERGY),
+                                resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS)));
+                    } else if (resultCode == IPowerStatsService.RESULT_UNSUPPORTED_POWER_MONITOR) {
+                        onError.accept(new IllegalArgumentException("Unsupported power monitor"));
+                    } else {
+                        onError.accept(new IllegalStateException(
+                                "Unrecognized result code " + resultCode));
+                    }
+                }
+            });
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+}

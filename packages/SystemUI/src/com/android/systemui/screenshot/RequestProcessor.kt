@@ -16,95 +16,37 @@
 
 package com.android.systemui.screenshot
 
-import android.graphics.Insets
 import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
+import com.android.app.tracing.TraceUtils.Companion.launch
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.util.function.Consumer
 import javax.inject.Inject
 
-/**
- * Processes a screenshot request sent from {@link ScreenshotHelper}.
- */
-@SysUISingleton
-class RequestProcessor @Inject constructor(
-        private val capture: ImageCapture,
-        private val policy: ScreenshotPolicy,
-        private val flags: FeatureFlags,
-        /** For the Java Async version, to invoke the callback. */
-        @Application private val mainScope: CoroutineScope
-) {
-    /**
-     * Inspects the incoming request, returning a potentially modified request depending on policy.
-     *
-     * @param request the request to process
-     */
-    // TODO: Delete once SCREENSHOT_METADATA flag is launched
-    suspend fun process(request: ScreenshotRequest): ScreenshotRequest {
-        var result = request
-
-        // Apply work profile screenshots policy:
-        //
-        // If the focused app belongs to a work profile, transforms a full screen
-        // (or partial) screenshot request to a task snapshot (provided image) screenshot.
-
-        // Whenever displayContentInfo is fetched, the topComponent is also populated
-        // regardless of the managed profile status.
-
-        if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-
-            val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
-            Log.d(TAG, "findPrimaryContent: $info")
-
-            result = if (policy.isManagedProfile(info.user.identifier)) {
-                val image = capture.captureTask(info.taskId)
-                        ?: error("Task snapshot returned a null Bitmap!")
-
-                // Provide the task snapshot as the screenshot
-                ScreenshotRequest.Builder(TAKE_SCREENSHOT_PROVIDED_IMAGE, request.source)
-                        .setTopComponent(info.component)
-                        .setTaskId(info.taskId)
-                        .setUserId(info.user.identifier)
-                        .setBitmap(image)
-                        .setBoundsOnScreen(info.bounds)
-                        .setInsets(Insets.NONE)
-                        .build()
-            } else {
-                // Create a new request of the same type which includes the top component
-                ScreenshotRequest.Builder(request.type, request.source)
-                        .setTopComponent(info.component).build()
-            }
-        }
-
-        return result
-    }
-
-    /**
-     * Note: This is for compatibility with existing Java. Prefer the suspending function when
-     * calling from a Coroutine context.
-     *
-     * @param request the request to process
-     * @param callback the callback to provide the processed request, invoked from the main thread
-     */
-    // TODO: Delete once SCREENSHOT_METADATA flag is launched
-    fun processAsync(request: ScreenshotRequest, callback: Consumer<ScreenshotRequest>) {
-        mainScope.launch {
-            val result = process(request)
-            callback.accept(result)
-        }
-    }
-
+/** Processes a screenshot request sent from [ScreenshotHelper]. */
+interface ScreenshotRequestProcessor {
     /**
      * Inspects the incoming ScreenshotData, potentially modifying it based upon policy.
      *
      * @param screenshot the screenshot to process
      */
-    suspend fun process(screenshot: ScreenshotData): ScreenshotData {
+    suspend fun process(screenshot: ScreenshotData): ScreenshotData
+}
+
+/** Implementation of [ScreenshotRequestProcessor] */
+@SysUISingleton
+class RequestProcessor
+@Inject
+constructor(
+    private val capture: ImageCapture,
+    private val policy: ScreenshotPolicy,
+    /** For the Java Async version, to invoke the callback. */
+    @Application private val mainScope: CoroutineScope
+) : ScreenshotRequestProcessor {
+
+    override suspend fun process(screenshot: ScreenshotData): ScreenshotData {
         var result = screenshot
 
         // Apply work profile screenshots policy:
@@ -116,15 +58,16 @@ class RequestProcessor @Inject constructor(
         // regardless of the managed profile status.
 
         if (screenshot.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
+            val info = policy.findPrimaryContent(screenshot.displayId)
             Log.d(TAG, "findPrimaryContent: $info")
             result.taskId = info.taskId
             result.topComponent = info.component
             result.userHandle = info.user
 
             if (policy.isManagedProfile(info.user.identifier)) {
-                val image = capture.captureTask(info.taskId)
-                    ?: error("Task snapshot returned a null Bitmap!")
+                val image =
+                    capture.captureTask(info.taskId)
+                        ?: throw RequestProcessorException("Task snapshot returned a null Bitmap!")
 
                 // Provide the task snapshot as the screenshot
                 result.type = TAKE_SCREENSHOT_PROVIDED_IMAGE
@@ -145,7 +88,7 @@ class RequestProcessor @Inject constructor(
      *                 thread
      */
     fun processAsync(screenshot: ScreenshotData, callback: Consumer<ScreenshotData>) {
-        mainScope.launch {
+        mainScope.launch({ "$TAG#processAsync" }) {
             val result = process(screenshot)
             callback.accept(result)
         }
@@ -153,3 +96,6 @@ class RequestProcessor @Inject constructor(
 }
 
 private const val TAG = "RequestProcessor"
+
+/** Exception thrown by [RequestProcessor] if something goes wrong. */
+class RequestProcessorException(message: String) : IllegalStateException(message)

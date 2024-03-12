@@ -18,33 +18,72 @@ package com.android.systemui.keyguard.data.repository
 
 import android.os.UserHandle
 import android.provider.Settings
+import androidx.annotation.VisibleForTesting
+import com.android.keyguard.ClockEventController
+import com.android.keyguard.KeyguardClockSwitch.ClockSize
+import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
-import com.android.systemui.plugins.ClockId
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
+interface KeyguardClockRepository {
+    /** clock size determined by notificationPanelViewController, LARGE or SMALL */
+    val clockSize: StateFlow<Int>
+
+    /** clock size selected in picker, DYNAMIC or SMALL */
+    val selectedClockSize: Flow<SettingsClockSize>
+
+    /** clock id, selected from clock carousel in wallpaper picker */
+    val currentClockId: Flow<ClockId>
+
+    val currentClock: StateFlow<ClockController?>
+
+    val clockEventController: ClockEventController
+    fun setClockSize(@ClockSize size: Int)
+}
+
 @SysUISingleton
-class KeyguardClockRepository
+class KeyguardClockRepositoryImpl
 @Inject
 constructor(
     private val secureSettings: SecureSettings,
     private val clockRegistry: ClockRegistry,
+    override val clockEventController: ClockEventController,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-) {
+    @Application private val applicationScope: CoroutineScope,
+) : KeyguardClockRepository {
 
-    val selectedClockSize: Flow<SettingsClockSize> =
+    /** Receive SMALL or LARGE clock should be displayed on keyguard. */
+    private val _clockSize: MutableStateFlow<Int> = MutableStateFlow(LARGE)
+    override val clockSize: StateFlow<Int> = _clockSize.asStateFlow()
+
+    override fun setClockSize(size: Int) {
+        _clockSize.value = size
+    }
+
+    override val selectedClockSize: Flow<SettingsClockSize> =
         secureSettings
             .observerFlow(
                 names = arrayOf(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
@@ -53,7 +92,7 @@ constructor(
             .onStart { emit(Unit) } // Forces an initial update.
             .map { getClockSize() }
 
-    val currentClockId: Flow<ClockId> =
+    override val currentClockId: Flow<ClockId> =
         callbackFlow {
                 fun send() {
                     trySend(clockRegistry.currentClockId)
@@ -70,8 +109,19 @@ constructor(
                 awaitClose { clockRegistry.unregisterClockChangeListener(listener) }
             }
             .mapNotNull { it }
+            .distinctUntilChanged()
 
-    private suspend fun getClockSize(): SettingsClockSize {
+    override val currentClock: StateFlow<ClockController?> =
+        currentClockId
+            .map { clockRegistry.createCurrentClock() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = clockRegistry.createCurrentClock()
+            )
+
+    @VisibleForTesting
+    suspend fun getClockSize(): SettingsClockSize {
         return withContext(backgroundDispatcher) {
             if (
                 secureSettings.getIntForUser(

@@ -23,17 +23,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.back.domain.interactor.BackActionInteractor
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.media.controls.util.MediaSessionLegacyHelperWrapper
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
+import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -45,6 +47,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
+@ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardKeyEventInteractorTest : SysuiTestCase() {
@@ -55,13 +58,8 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     private val actionDownVolumeUpKeyEvent =
         KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)
     private val backKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK)
-    private val awakeWakefulnessMode =
-        WakefulnessModel(WakefulnessState.AWAKE, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
-    private val asleepWakefulnessMode =
-        WakefulnessModel(WakefulnessState.ASLEEP, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
 
-    private lateinit var keyguardInteractorWithDependencies:
-        KeyguardInteractorFactory.WithDependencies
+    private lateinit var powerInteractor: PowerInteractor
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var shadeController: ShadeController
@@ -75,16 +73,17 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     fun setup() {
         whenever(mediaSessionLegacyHelperWrapper.getHelper(any()))
             .thenReturn(mediaSessionLegacyHelper)
-        keyguardInteractorWithDependencies = KeyguardInteractorFactory.create()
+        powerInteractor = PowerInteractorFactory.create().powerInteractor
+
         underTest =
             KeyguardKeyEventInteractor(
                 context,
                 statusBarStateController,
-                keyguardInteractorWithDependencies.keyguardInteractor,
                 statusBarKeyguardViewManager,
                 shadeController,
                 mediaSessionLegacyHelperWrapper,
                 backActionInteractor,
+                powerInteractor,
             )
     }
 
@@ -131,58 +130,53 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun dispatchKeyEvent_menuActionUp_interactiveKeyguard_collapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(awakeWakefulnessMode)
-        whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
-        whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
-
-        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MENU)
-        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isTrue()
-        verify(shadeController).animateCollapseShadeForced()
-    }
-
-    @Test
-    fun dispatchKeyEvent_menuActionUp_interactiveShadeLocked_collapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(awakeWakefulnessMode)
+    fun dispatchKeyEvent_menuActionUp_awakeShadeLocked_collapsesShade() {
+        powerInteractor.setAwakeForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
         whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
 
-        // action down: does NOT collapse the shade
-        val actionDownMenuKeyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU)
-        assertThat(underTest.dispatchKeyEvent(actionDownMenuKeyEvent)).isFalse()
-        verify(shadeController, never()).animateCollapseShadeForced()
-
-        // action up: collapses the shade
-        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MENU)
-        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isTrue()
-        verify(shadeController).animateCollapseShadeForced()
+        verifyActionUpCollapsesTheShade(KeyEvent.KEYCODE_MENU)
     }
 
     @Test
-    fun dispatchKeyEvent_menuActionUp_nonInteractiveKeyguard_neverCollapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(asleepWakefulnessMode)
+    fun dispatchKeyEvent_menuActionUp_asleepKeyguard_neverCollapsesShade() {
+        powerInteractor.setAsleepForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
         whenever(statusBarKeyguardViewManager.shouldDismissOnMenuPressed()).thenReturn(true)
 
-        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MENU)
-        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isFalse()
-        verify(shadeController, never()).animateCollapseShadeForced()
+        verifyActionsDoNothing(KeyEvent.KEYCODE_MENU)
     }
 
     @Test
-    fun dispatchKeyEvent_spaceActionUp_interactiveKeyguard_collapsesShade() {
-        keyguardInteractorWithDependencies.repository.setWakefulnessModel(awakeWakefulnessMode)
+    fun dispatchKeyEvent_spaceActionUp_awakeKeyguard_collapsesShade() {
+        powerInteractor.setAwakeForTest()
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
 
-        // action down: does NOT collapse the shade
-        val actionDownMenuKeyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SPACE)
-        assertThat(underTest.dispatchKeyEvent(actionDownMenuKeyEvent)).isFalse()
-        verify(shadeController, never()).animateCollapseShadeForced()
+        verifyActionUpShowsPrimaryBouncer(KeyEvent.KEYCODE_SPACE)
+    }
 
-        // action up: collapses the shade
-        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE)
-        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isTrue()
-        verify(shadeController).animateCollapseShadeForced()
+    @Test
+    fun dispatchKeyEvent_spaceActionUp_shadeLocked_collapsesShade() {
+        powerInteractor.setAwakeForTest()
+        whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
+
+        verifyActionUpCollapsesTheShade(KeyEvent.KEYCODE_SPACE)
+    }
+
+    @Test
+    fun dispatchKeyEvent_enterActionUp_awakeKeyguard_showsPrimaryBouncer() {
+        powerInteractor.setAwakeForTest()
+        whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
+
+        verifyActionUpShowsPrimaryBouncer(KeyEvent.KEYCODE_ENTER)
+    }
+
+    @Test
+    fun dispatchKeyEvent_enterActionUp_shadeLocked_collapsesShade() {
+        powerInteractor.setAwakeForTest()
+        whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
+
+        verifyActionUpCollapsesTheShade(KeyEvent.KEYCODE_ENTER)
     }
 
     @Test
@@ -251,5 +245,43 @@ class KeyguardKeyEventInteractorTest : SysuiTestCase() {
             )
             .isFalse()
         verify(statusBarKeyguardViewManager, never()).interceptMediaKey(any())
+    }
+
+    private fun verifyActionUpCollapsesTheShade(keycode: Int) {
+        // action down: does NOT collapse the shade
+        val actionDownMenuKeyEvent = KeyEvent(KeyEvent.ACTION_DOWN, keycode)
+        assertThat(underTest.dispatchKeyEvent(actionDownMenuKeyEvent)).isFalse()
+        verify(shadeController, never()).animateCollapseShadeForced()
+
+        // action up: collapses the shade
+        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, keycode)
+        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isTrue()
+        verify(shadeController).animateCollapseShadeForced()
+    }
+
+    private fun verifyActionUpShowsPrimaryBouncer(keycode: Int) {
+        // action down: does NOT collapse the shade
+        val actionDownMenuKeyEvent = KeyEvent(KeyEvent.ACTION_DOWN, keycode)
+        assertThat(underTest.dispatchKeyEvent(actionDownMenuKeyEvent)).isFalse()
+        verify(statusBarKeyguardViewManager, never()).showPrimaryBouncer(any())
+
+        // action up: collapses the shade
+        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, keycode)
+        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isTrue()
+        verify(statusBarKeyguardViewManager).showPrimaryBouncer(eq(true))
+    }
+
+    private fun verifyActionsDoNothing(keycode: Int) {
+        // action down: does nothing
+        val actionDownMenuKeyEvent = KeyEvent(KeyEvent.ACTION_DOWN, keycode)
+        assertThat(underTest.dispatchKeyEvent(actionDownMenuKeyEvent)).isFalse()
+        verify(shadeController, never()).animateCollapseShadeForced()
+        verify(statusBarKeyguardViewManager, never()).showPrimaryBouncer(any())
+
+        // action up: doesNothing
+        val actionUpMenuKeyEvent = KeyEvent(KeyEvent.ACTION_UP, keycode)
+        assertThat(underTest.dispatchKeyEvent(actionUpMenuKeyEvent)).isFalse()
+        verify(shadeController, never()).animateCollapseShadeForced()
+        verify(statusBarKeyguardViewManager, never()).showPrimaryBouncer(any())
     }
 }

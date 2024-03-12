@@ -23,7 +23,6 @@ import android.widget.FrameLayout
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
 import com.android.systemui.biometrics.UdfpsKeyguardView
 import com.android.systemui.biometrics.ui.binder.UdfpsKeyguardInternalViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.BackgroundViewModel
@@ -32,6 +31,7 @@ import com.android.systemui.keyguard.ui.viewmodel.UdfpsAodViewModel
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardInternalViewModel
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -52,8 +52,6 @@ object UdfpsKeyguardViewBinder {
         fingerprintViewModel: FingerprintViewModel,
         backgroundViewModel: BackgroundViewModel,
     ) {
-        view.useExpandedOverlay(viewModel.useExpandedOverlay())
-
         val layoutInflaterFinishListener =
             AsyncLayoutInflater.OnInflateFinishedListener { inflatedInternalView, _, parent ->
                 UdfpsKeyguardInternalViewBinder.bind(
@@ -63,25 +61,21 @@ object UdfpsKeyguardViewBinder {
                     fingerprintViewModel,
                     backgroundViewModel,
                 )
-                if (viewModel.useExpandedOverlay()) {
-                    val lp = inflatedInternalView.layoutParams as FrameLayout.LayoutParams
-                    lp.width = viewModel.sensorBounds.width()
-                    lp.height = viewModel.sensorBounds.height()
-                    val relativeToView =
-                        getBoundsRelativeToView(
-                            inflatedInternalView,
-                            RectF(viewModel.sensorBounds),
-                        )
-                    lp.setMarginsRelative(
-                        relativeToView.left.toInt(),
-                        relativeToView.top.toInt(),
-                        relativeToView.right.toInt(),
-                        relativeToView.bottom.toInt(),
+                val lp = inflatedInternalView.layoutParams as FrameLayout.LayoutParams
+                lp.width = viewModel.sensorBounds.width()
+                lp.height = viewModel.sensorBounds.height()
+                val relativeToView =
+                    getBoundsRelativeToView(
+                        inflatedInternalView,
+                        RectF(viewModel.sensorBounds),
                     )
-                    parent!!.addView(inflatedInternalView, lp)
-                } else {
-                    parent!!.addView(inflatedInternalView)
-                }
+                lp.setMarginsRelative(
+                    relativeToView.left.toInt(),
+                    relativeToView.top.toInt(),
+                    relativeToView.right.toInt(),
+                    relativeToView.bottom.toInt(),
+                )
+                parent!!.addView(inflatedInternalView, lp)
             }
         val inflater = AsyncLayoutInflater(view.context)
         inflater.inflate(R.layout.udfps_keyguard_view_internal, view, layoutInflaterFinishListener)

@@ -88,9 +88,12 @@
       "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
       "name": "FrameworksServicesTests",
       "options": [
-        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.power.stats.BatteryStatsTests" }
+        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" }
       ]
+    },
+    {
+      "file_patterns": ["Battery[^/]*\\.java", "MeasuredEnergy[^/]*\\.java"],
+      "name": "PowerStatsTests"
     },
     {
       "file_patterns": ["Broadcast.*"],
@@ -111,27 +114,14 @@
       ]
     },
     {
-      "name": "CtsUsageStatsTestCases",
+      "name": "CtsBRSTestCases",
       "file_patterns": [
         "ActivityManagerService\\.java",
         "BroadcastQueue\\.java"
       ],
       "options": [
-        {
-          "include-filter": "android.app.usage.cts.BroadcastResponseStatsTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.MediumTest"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.LargeTest"
-        }
+        { "exclude-annotation": "androidx.test.filters.FlakyTest" },
+        { "exclude-annotation": "org.junit.Ignore" }
       ]
     }
   ],
@@ -145,12 +135,7 @@
       ]
     },
     {
-      "name": "CtsAppSecurityHostTestCases",
-      "options": [
-        {
-          "include-filter": "android.appsecurity.cts.AppDataIsolationTests"
-        }
-      ]
+      "name": "CtsAppDataIsolationHostTestCases"
     },
     {
       "name": "CtsAppTestCases",

@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -38,7 +37,6 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations.initMocks
 
 @SmallTest
-@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
@@ -233,12 +231,10 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
 
             surfaceBehindIsAnimatingFlow.emit(true)
             runCurrent()
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.FINISHED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                )
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
             )
             runCurrent()
 

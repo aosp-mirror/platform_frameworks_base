@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN кодуңузду киргизиңиз"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN кодду киргизиңиз"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Графикалык ачкычты киргизиңиз"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Графикалык ачкычты тартыңыз"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Графикалык ачкчты тартңыз"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Сырсөзүңүздү киргизиңиз"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Сырсөздү киргизиңиз"</string>
@@ -35,19 +35,15 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жай кубатталууда"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батареяны коргоо үчүн кубаттоо процесси оптималдаштырылды"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубаттоочу шайманда көйгөй бар"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Кулпуну ачуу үчүн Менюну басыңыз."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Тармак кулпуланган"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM карта жок"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"SIM карта кошуңуз."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM карта жок же окулбайт. SIM карта кошуңуз."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Жараксыз SIM карта."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"SIM картаңыз биротоло өчүрүлдү.\n Башка SIM карта алуу үчүн зымсыз кызмат көрсөтүүчүгө кайрылыңыз."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM карта кулпуланган."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM карта PUK менен кулпуланган."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM картанын кулпусу ачылууда…"</string>
-    <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN-коддун аймагы"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN коддун аймагы"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Түзмөктүн сырсөзү"</string>
-    <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM-картанын PIN-кодунун аймагы"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM-картанын PIN кодунун аймагы"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"SIM-картанын PUK-кодунун аймагы"</string>
     <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Өчүрүү"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"eSIM-картаны өчүрүү"</string>
@@ -58,7 +54,7 @@
     <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Графклк ачкч тура эмс. Кайтлап крүңз."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Сырсөз туура эмес"</string>
     <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Сырсөз туура эмес. Кайтлап крүңз."</string>
-    <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN-код туура эмес"</string>
+    <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN код туура эмес"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN кд тура эмс. Кайтлап крүңз."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Болбосо манжа изи менен кулпусун ачыңыз"</string>
     <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Манжа изи таанылган жок"</string>
@@ -72,11 +68,11 @@
     <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"PIN кд же мнжа изи мнен клпусн ачңыз"</string>
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Срсөз же мнжа изи мнен клпусн ачңз"</string>
     <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Грфиклык ачкч же мнжа изи менн клпусн ачңз"</string>
-    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Кошумча коопсуздук үчүн түзмөк жумуш саясатына ылайык кулпуланган"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Кошумча коопсуздук үчүн түзмөк жумуш эрежеси боюнча кулпуланган"</string>
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Бекем кулпулангандан кийин PIN код талап кылынат"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Бекем кулпулангандан кийин сырсөз талап кылынат"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Бекем кулпулангандан кийн грфикалык ачкыч талп клынт"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Жигердүү эмес сааттарда жаңыртылат"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Жаңыртуу түзмөк колдонулбай турганда орнотулат"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Кошмча кпсуздук тлап клнат. PIN код бир нче убкыт бою клднулгн эмeс."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Кошмча кпсуздук тлап клнат. Сырсз бир нче убкыт бою клднулгн эмeс."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Кошмча кпсуздук тлап клнат. Грфиклык ачкч бир нче убкыт бою клднулгн эмeс."</string>
@@ -88,20 +84,20 @@
     <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Туура эмес графикалык ачкыч менен өтө көп аракет"</string>
     <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Туура эмес сырсөз менен өтө көп аракет"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{# секунддан кийин кайталаңыз.}other{# секунддан кийин кайталаңыз.}}"</string>
-    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM-картанын PIN-кодун киргизиңиз."</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" SIM-картасынын PIN-кодун киргизиңиз."</string>
+    <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM-картанын PIN кодун киргизиңиз."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" SIM-картасынын PIN кодун киргизиңиз."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Түзмөктү мобилдик кызматсыз колдонуу үчүн eSIM-картаны өчүрүңүз."</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK-кодду киргизиңиз. Анын чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Эми SIM-картанын \"<xliff:g id="CARRIER">%1$s</xliff:g>\" байланыш оператору өчүрүлдү. Улантуу үчүн PUK-кодду киргизиңиз. Анын чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Сиз каалаган PIN-кодду териңиз"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Сиз каалаган PIN-кодду ырастаңыз"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Сиз каалаган PIN кодду териңиз"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Сиз каалаган PIN кодду ырастаңыз"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIM картанын кулпусу ачылууда…"</string>
-    <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4–8 сандан турган PIN-кодду териңиз."</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"4–8 сандан турган PIN кодду териңиз."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK-код 8 же андан көп сандан турушу керек."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"PIN-кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"PIN кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Түзмөктү ачуучу графикалык  ачкычты <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тарттыңыз. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секунддан кийин дагы аракет кылып көрүңүз."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM-картанын PIN-коду туура эмес. Эми түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуңузга кайрылышыңыз керек."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM-картанын PIN коду туура эмес. Эми түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуңузга кайрылышыңыз керек."</string>
     <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM-картанын PIN коду туура эмес киргизилди. # аракет калды. Болбосо, түзмөктү бөгөттөн чыгаруу үчүн операторуңузга кайрылышыңыз керек болот.}other{SIM-картанын PIN коду туура эмес киргизилди. # аракет калды. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-карта жараксыз. Байланыш операторуңузга кайрылыңыз."</string>
     <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM-картанын PUK коду туура эмес киргизилди. SIM-картанын биротоло жарактан чыгаарына # аракет калды.}other{SIM-картанын PUK коду туура эмес киргизилди. SIM-картанын биротоло жарактан чыгаарына # аракет калды.}}"</string>
@@ -118,11 +114,17 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Түзмөктү администратор кулпулап койгон"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Түзмөк кол менен кулпуланды"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Таанылган жок"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Жөндөөлөрдөн камерага уруксат беришиңиз керек"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Параметрлерден камерага уруксат беришиңиз керек"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{SIM-картанын PIN кодун киргизиңиз. Сизде # аракет калды, андан кийин түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуна кайрылышыңыз керек болот.}other{SIM-картанын PIN кодун киргизиңиз. # аракет калды.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK кодду киргизиңиз. SIM-картанын биротоло жарактан чыгаарына # аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.}other{SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK кодду киргизиңиз. SIM-картанын биротоло жарактан чыгарына # аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Демейки"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Көбүк"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналог"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Улантуу үчүн түзмөгүңүздүн кулпусун ачыңыз"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Кийинчерээк жаңыртуу үчүн PIN кодду териңиз"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Кийинчерээк жаңыртуу үчүн сырсөздү териңиз"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Кийинчерээк жаңыртуу үчүн графикалык ачкычты тартыңыз"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Түзмөк жаңырды. Улантуу үчүн PIN кодду териңиз."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Түзмөк жаңырды. Улантуу үчүн сырсөздү териңиз."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Түзмөк жаңырды. Улантуу үчүн графикалык ачкычты тартыңыз."</string>
 </resources>

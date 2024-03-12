@@ -17,21 +17,42 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.keyguard.ClockEventController
+import com.android.keyguard.KeyguardClockSwitch.ClockSize
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
-import com.android.systemui.plugins.ClockId
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
+private val TAG = KeyguardClockInteractor::class.simpleName
+/** Manages keyguard clock for the lockscreen root view. */
 /** Encapsulates business-logic related to the keyguard clock. */
 @SysUISingleton
 class KeyguardClockInteractor
 @Inject
 constructor(
-    repository: KeyguardClockRepository,
+    private val keyguardClockRepository: KeyguardClockRepository,
 ) {
-    val selectedClockSize: Flow<SettingsClockSize> = repository.selectedClockSize
 
-    val currentClockId: Flow<ClockId> = repository.currentClockId
+    val selectedClockSize: Flow<SettingsClockSize> = keyguardClockRepository.selectedClockSize
+
+    val currentClockId: Flow<ClockId> = keyguardClockRepository.currentClockId
+
+    val currentClock: StateFlow<ClockController?> = keyguardClockRepository.currentClock
+
+    var clock: ClockController? by keyguardClockRepository.clockEventController::clock
+
+    val clockSize: StateFlow<Int> = keyguardClockRepository.clockSize
+    fun setClockSize(@ClockSize size: Int) {
+        keyguardClockRepository.setClockSize(size)
+    }
+
+    val clockEventController: ClockEventController
+        get() {
+            return keyguardClockRepository.clockEventController
+        }
 }

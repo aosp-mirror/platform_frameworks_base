@@ -16,16 +16,11 @@
 
 package com.android.systemui.bluetooth;
 
-import android.annotation.Nullable;
-import android.content.Context;
 import android.view.View;
 
-import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.animation.DialogLaunchAnimator;
-import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import javax.inject.Inject;
 
@@ -35,25 +30,15 @@ import javax.inject.Inject;
 @SysUISingleton
 public class BroadcastDialogController {
 
-    private Context mContext;
-    private UiEventLogger mUiEventLogger;
-    private DialogLaunchAnimator mDialogLaunchAnimator;
-    private MediaOutputDialogFactory mMediaOutputDialogFactory;
-    private final LocalBluetoothManager mLocalBluetoothManager;
-    private BroadcastSender mBroadcastSender;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final BroadcastDialogDelegate.Factory mBroadcastDialogFactory;
 
     @Inject
-    public BroadcastDialogController(Context context, UiEventLogger uiEventLogger,
+    public BroadcastDialogController(
             DialogLaunchAnimator dialogLaunchAnimator,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
-            @Nullable LocalBluetoothManager localBluetoothManager,
-            BroadcastSender broadcastSender) {
-        mContext = context;
-        mUiEventLogger = uiEventLogger;
+            BroadcastDialogDelegate.Factory broadcastDialogFactory) {
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
-        mLocalBluetoothManager = localBluetoothManager;
-        mBroadcastSender = broadcastSender;
+        mBroadcastDialogFactory = broadcastDialogFactory;
     }
 
     /** Creates a [BroadcastDialog] for the user to switch broadcast or change the output device
@@ -61,11 +46,10 @@ public class BroadcastDialogController {
      * @param currentBroadcastAppName Indicates the APP name currently broadcasting
      * @param outputPkgName Indicates the output media package name to be switched
      */
-    public void createBroadcastDialog(String currentBroadcastAppName, String outputPkgName,
-            boolean aboveStatusBar, View view) {
-        BroadcastDialog broadcastDialog = new BroadcastDialog(mContext, mMediaOutputDialogFactory,
-                mLocalBluetoothManager, currentBroadcastAppName, outputPkgName, mUiEventLogger,
-                mBroadcastSender);
+    public void createBroadcastDialog(
+            String currentBroadcastAppName, String outputPkgName, View view) {
+        SystemUIDialog broadcastDialog = mBroadcastDialogFactory.create(
+                currentBroadcastAppName, outputPkgName).createDialog();
         if (view != null) {
             mDialogLaunchAnimator.showFromView(broadcastDialog, view);
         } else {

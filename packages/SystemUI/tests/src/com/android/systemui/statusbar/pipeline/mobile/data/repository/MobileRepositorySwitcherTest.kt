@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -135,6 +136,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 FakeAirplaneModeRepository(),
                 wifiRepository,
                 mock(),
+                mock(),
             )
 
         demoRepo =
@@ -248,11 +250,13 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_1_ID)
                 whenever(it.carrierName).thenReturn(SUB_1_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
         private val MODEL_1 =
             SubscriptionModel(
                 subscriptionId = SUB_1_ID,
                 carrierName = SUB_1_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
 
         private const val SUB_2_ID = 2
@@ -261,11 +265,13 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_2_ID)
                 whenever(it.carrierName).thenReturn(SUB_2_NAME)
+                whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
             }
         private val MODEL_2 =
             SubscriptionModel(
                 subscriptionId = SUB_2_ID,
                 carrierName = SUB_2_NAME,
+                profileClass = PROFILE_CLASS_UNSET,
             )
     }
 }

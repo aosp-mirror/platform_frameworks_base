@@ -66,6 +66,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -75,6 +76,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.util.CollectionUtils;
+import com.android.modules.utils.build.SdkLevel;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -177,6 +179,13 @@ public final class PermissionManager {
     public static final long CANNOT_INSTALL_WITH_BAD_PERMISSION_GROUPS = 146211400;
 
     /**
+     * Whether to use the new {@link com.android.server.permission.access.AccessCheckingService}.
+     *
+     * @hide
+     */
+    public static final boolean USE_ACCESS_CHECKING_SERVICE = SdkLevel.isAtLeastV();
+
+    /**
      * The time to wait in between refreshing the exempted indicator role packages
      */
     private static final long EXEMPTED_INDICATOR_ROLE_UPDATE_FREQUENCY_MS = 15000;
@@ -203,6 +212,12 @@ public final class PermissionManager {
      * @hide
      */
     public static final boolean DEBUG_TRACE_PERMISSION_UPDATES = false;
+
+    /**
+     * Additional debug log for virtual device permissions.
+     * @hide
+     */
+    public static final boolean DEBUG_DEVICE_PERMISSIONS = false;
 
     /**
      * Intent extra: List of PermissionGroupUsages
@@ -563,7 +578,7 @@ public final class PermissionManager {
             @NonNull String permissionName) {
         try {
             return mPermissionManager.isPermissionRevokedByPolicy(packageName, permissionName,
-                    mContext.getUserId());
+                    mContext.getDeviceId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -607,7 +622,7 @@ public final class PermissionManager {
         }
         try {
             mPermissionManager.grantRuntimePermission(packageName, permissionName,
-                    user.getIdentifier());
+                    mContext.getDeviceId(), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -644,8 +659,8 @@ public final class PermissionManager {
                     + reason, new RuntimeException());
         }
         try {
-            mPermissionManager
-                    .revokeRuntimePermission(packageName, permName, user.getIdentifier(), reason);
+            mPermissionManager.revokeRuntimePermission(packageName, permName,
+                    mContext.getDeviceId(), user.getIdentifier(), reason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -672,7 +687,7 @@ public final class PermissionManager {
             @NonNull UserHandle user) {
         try {
             return mPermissionManager.getPermissionFlags(packageName, permissionName,
-                    user.getIdentifier());
+                    mContext.getDeviceId(), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -711,7 +726,8 @@ public final class PermissionManager {
             final boolean checkAdjustPolicyFlagPermission =
                     mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
             mPermissionManager.updatePermissionFlags(packageName, permissionName, flagMask,
-                    flagValues, checkAdjustPolicyFlagPermission, user.getIdentifier());
+                    flagValues, checkAdjustPolicyFlagPermission,
+                    mContext.getDeviceId(), user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -967,7 +983,7 @@ public final class PermissionManager {
         try {
             final String packageName = mContext.getPackageName();
             return mPermissionManager.shouldShowRequestPermissionRationale(packageName,
-                    permissionName, mContext.getUserId());
+                    permissionName, mContext.getDeviceId(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1382,8 +1398,8 @@ public final class PermissionManager {
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
         try {
-            mPermissionManager.startOneTimePermissionSession(packageName, mContext.getUserId(),
-                    timeoutMillis, revokeAfterKilledDelayMillis);
+            mPermissionManager.startOneTimePermissionSession(packageName, mContext.getDeviceId(),
+                    mContext.getUserId(), timeoutMillis, revokeAfterKilledDelayMillis);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -1501,8 +1517,8 @@ public final class PermissionManager {
     // to reduce duplicate logcat output.
     private static volatile boolean sShouldWarnMissingActivityManager = true;
 
-    /* @hide */
-    private static int checkPermissionUncached(@Nullable String permission, int pid, int uid) {
+    private static int checkPermissionUncached(@Nullable String permission, int pid, int uid,
+            int deviceId) {
         final IActivityManager am = ActivityManager.getService();
         if (am == null) {
             // Well this is super awkward; we somehow don't have an active ActivityManager
@@ -1523,7 +1539,7 @@ public final class PermissionManager {
         }
         try {
             sShouldWarnMissingActivityManager = true;
-            return am.checkPermission(permission, pid, uid);
+            return am.checkPermissionForDevice(permission, pid, uid, deviceId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1543,26 +1559,26 @@ public final class PermissionManager {
         final String permission;
         final int pid;
         final int uid;
+        final int deviceId;
 
-        PermissionQuery(@Nullable String permission, int pid, int uid) {
+        PermissionQuery(@Nullable String permission, int pid, int uid, int deviceId) {
             this.permission = permission;
             this.pid = pid;
             this.uid = uid;
+            this.deviceId = deviceId;
         }
 
         @Override
         public String toString() {
-            return String.format("PermissionQuery(permission=\"%s\", pid=%s, uid=%s)",
-                    permission, pid, uid);
+            return TextUtils.formatSimple("PermissionQuery(permission=\"%s\", pid=%d, uid=%d, "
+                            + "deviceId=%d)", permission, pid, uid, deviceId);
         }
 
         @Override
         public int hashCode() {
             // N.B. pid doesn't count toward equality and therefore shouldn't count for
             // hashing either.
-            int hash = Objects.hashCode(permission);
-            hash = hash * 13 + Objects.hashCode(uid);
-            return hash;
+            return Objects.hash(permission, uid, deviceId);
         }
 
         @Override
@@ -1577,7 +1593,7 @@ public final class PermissionManager {
             } catch (ClassCastException ex) {
                 return false;
             }
-            return uid == other.uid
+            return uid == other.uid && deviceId == other.deviceId
                     && Objects.equals(permission, other.permission);
         }
     }
@@ -1591,13 +1607,14 @@ public final class PermissionManager {
                     2048, CACHE_KEY_PACKAGE_INFO, "checkPermission") {
                 @Override
                 public Integer recompute(PermissionQuery query) {
-                    return checkPermissionUncached(query.permission, query.pid, query.uid);
+                    return checkPermissionUncached(query.permission, query.pid, query.uid,
+                            query.deviceId);
                 }
             };
 
     /** @hide */
-    public static int checkPermission(@Nullable String permission, int pid, int uid) {
-        return sPermissionCache.query(new PermissionQuery(permission, pid, uid));
+    public static int checkPermission(@Nullable String permission, int pid, int uid, int deviceId) {
+        return sPermissionCache.query(new PermissionQuery(permission, pid, uid, deviceId));
     }
 
     /**
@@ -1617,26 +1634,29 @@ public final class PermissionManager {
     private static final class PackageNamePermissionQuery {
         final String permName;
         final String pkgName;
+        final int deviceId;
         @UserIdInt
         final int userId;
 
         PackageNamePermissionQuery(@Nullable String permName, @Nullable String pkgName,
-                @UserIdInt int userId) {
+                int deviceId, @UserIdInt int userId) {
             this.permName = permName;
             this.pkgName = pkgName;
+            this.deviceId = deviceId;
             this.userId = userId;
         }
 
         @Override
         public String toString() {
-            return String.format(
-                    "PackageNamePermissionQuery(pkgName=\"%s\", permName=\"%s, userId=%s\")",
-                    pkgName, permName, userId);
+            return TextUtils.formatSimple(
+                    "PackageNamePermissionQuery(pkgName=\"%s\", permName=\"%s\", "
+                            + "deviceId=%s, userId=%s\")",
+                    pkgName, permName, deviceId, userId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(permName, pkgName, userId);
+            return Objects.hash(permName, pkgName, deviceId, userId);
         }
 
         @Override
@@ -1652,16 +1672,17 @@ public final class PermissionManager {
             }
             return Objects.equals(permName, other.permName)
                     && Objects.equals(pkgName, other.pkgName)
+                    && deviceId == other.deviceId
                     && userId == other.userId;
         }
     }
 
     /* @hide */
     private static int checkPackageNamePermissionUncached(
-            String permName, String pkgName, @UserIdInt int userId) {
+            String permName, String pkgName, int deviceId, @UserIdInt int userId) {
         try {
-            return ActivityThread.getPackageManager().checkPermission(
-                    permName, pkgName, userId);
+            return ActivityThread.getPermissionManager().checkPermission(
+                    pkgName, permName, deviceId, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1675,7 +1696,7 @@ public final class PermissionManager {
                 @Override
                 public Integer recompute(PackageNamePermissionQuery query) {
                     return checkPackageNamePermissionUncached(
-                            query.permName, query.pkgName, query.userId);
+                            query.permName, query.pkgName, query.deviceId, query.userId);
                 }
                 @Override
                 public boolean bypass(PackageNamePermissionQuery query) {
@@ -1684,14 +1705,14 @@ public final class PermissionManager {
             };
 
     /**
-     * Check whether a package has a permission.
+     * Check whether a package has a permission for given device.
      *
      * @hide
      */
-    public static int checkPackageNamePermission(String permName, String pkgName,
+    public static int checkPackageNamePermission(String permName, String pkgName, int deviceId,
             @UserIdInt int userId) {
         return sPackageNamePermissionCache.query(
-                new PackageNamePermissionQuery(permName, pkgName, userId));
+                new PackageNamePermissionQuery(permName, pkgName, deviceId, userId));
     }
 
     /**
@@ -1704,7 +1725,7 @@ public final class PermissionManager {
     }
 
     private final class OnPermissionsChangeListenerDelegate
-            extends IOnPermissionsChangeListener.Stub implements Handler.Callback{
+            extends IOnPermissionsChangeListener.Stub implements Handler.Callback {
         private static final int MSG_PERMISSIONS_CHANGED = 1;
 
         private final PackageManager.OnPermissionsChangedListener mListener;
@@ -1717,8 +1738,9 @@ public final class PermissionManager {
         }
 
         @Override
-        public void onPermissionsChanged(int uid) {
-            mHandler.obtainMessage(MSG_PERMISSIONS_CHANGED, uid, 0).sendToTarget();
+        public void onPermissionsChanged(int uid, String persistentDeviceId) {
+            mHandler.obtainMessage(MSG_PERMISSIONS_CHANGED, uid, 0, persistentDeviceId)
+                    .sendToTarget();
         }
 
         @Override
@@ -1726,7 +1748,8 @@ public final class PermissionManager {
             switch (msg.what) {
                 case MSG_PERMISSIONS_CHANGED: {
                     final int uid = msg.arg1;
-                    mListener.onPermissionsChanged(uid);
+                    final String persistentDeviceId = msg.obj.toString();
+                    mListener.onPermissionsChanged(uid, persistentDeviceId);
                     return true;
                 }
                 default:

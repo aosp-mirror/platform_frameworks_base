@@ -87,7 +87,7 @@ public class FaceDetectClientTest {
     @Mock
     private ClientMonitorCallback mCallback;
     @Mock
-    private Sensor.HalSessionCallback mHalSessionCallback;
+    private AidlResponseHandler mAidlResponseHandler;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
@@ -170,7 +170,7 @@ public class FaceDetectClientTest {
     private FaceDetectClient createClient(int version) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
-        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mAidlResponseHandler);
         return new FaceDetectClient(mContext, () -> aidl, mToken,
                 99 /* requestId */, mClientMonitorCallbackConverter,
                 new FaceAuthenticateOptions.Builder()

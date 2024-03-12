@@ -60,12 +60,9 @@ public class AuthenticationStatsCollector {
     private final boolean mEnabled;
     private final float mThreshold;
     private final int mModality;
-    private boolean mPersisterInitialized = false;
 
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
-
-    // TODO(b/295582896): Find a way to make this NonNull
-    @Nullable private AuthenticationStatsPersister mAuthenticationStatsPersister;
+    @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
     @NonNull private BiometricNotification mBiometricNotification;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -95,23 +92,20 @@ public class AuthenticationStatsCollector {
         mFaceManager = mContext.getSystemService(FaceManager.class);
         mFingerprintManager = mContext.getSystemService(FingerprintManager.class);
 
+        mAuthenticationStatsPersister = new AuthenticationStatsPersister(mContext);
+
+        initializeUserAuthenticationStatsMap();
+        mAuthenticationStatsPersister.persistFrrThreshold(mThreshold);
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         context.registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     private void initializeUserAuthenticationStatsMap() {
-        try {
-            mAuthenticationStatsPersister = new AuthenticationStatsPersister(mContext);
-            for (AuthenticationStats stats :
-                    mAuthenticationStatsPersister.getAllFrrStats(mModality)) {
-                mUserAuthenticationStatsMap.put(stats.getUserId(), stats);
-            }
-            mAuthenticationStatsPersister.persistFrrThreshold(mThreshold);
-
-            mPersisterInitialized = true;
-        } catch (IllegalStateException e) {
-            Slog.w(TAG, "Failed to initialize AuthenticationStatsPersister.", e);
+        for (AuthenticationStats stats :
+                mAuthenticationStatsPersister.getAllFrrStats(mModality)) {
+            mUserAuthenticationStatsMap.put(stats.getUserId(), stats);
         }
     }
 
@@ -150,9 +144,7 @@ public class AuthenticationStatsCollector {
 
         sendNotificationIfNeeded(userId);
 
-        if (mPersisterInitialized) {
-            persistDataIfNeeded(userId);
-        }
+        persistDataIfNeeded(userId);
     }
 
     /** Check if a notification should be sent after a calculation cycle. */
@@ -195,13 +187,8 @@ public class AuthenticationStatsCollector {
     }
 
     private void onUserRemoved(final int userId) {
-        if (!mPersisterInitialized) {
-            initializeUserAuthenticationStatsMap();
-        }
-        if (mPersisterInitialized) {
-            mUserAuthenticationStatsMap.remove(userId);
-            mAuthenticationStatsPersister.removeFrrStats(userId);
-        }
+        mUserAuthenticationStatsMap.remove(userId);
+        mAuthenticationStatsPersister.removeFrrStats(userId);
     }
 
     private boolean isSingleModalityDevice() {

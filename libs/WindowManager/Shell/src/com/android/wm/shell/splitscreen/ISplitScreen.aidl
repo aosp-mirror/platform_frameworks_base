@@ -91,42 +91,42 @@ interface ISplitScreen {
      * Starts tasks simultaneously in one transition.
      */
     oneway void startTasks(int taskId1, in Bundle options1, int taskId2, in Bundle options2,
-            int splitPosition, float splitRatio, in RemoteTransition remoteTransition,
+            int splitPosition, int snapPosition, in RemoteTransition remoteTransition,
             in InstanceId instanceId) = 10;
 
     /**
      * Starts a pair of intent and task in one transition.
      */
     oneway void startIntentAndTask(in PendingIntent pendingIntent, int userId1, in Bundle options1,
-            int taskId, in Bundle options2, int sidePosition, float splitRatio,
+            int taskId, in Bundle options2, int sidePosition, int snapPosition,
             in RemoteTransition remoteTransition, in InstanceId instanceId) = 16;
 
     /**
      * Starts a pair of shortcut and task in one transition.
      */
     oneway void startShortcutAndTask(in ShortcutInfo shortcutInfo, in Bundle options1, int taskId,
-            in Bundle options2, int splitPosition, float splitRatio,
+            in Bundle options2, int splitPosition, int snapPosition,
             in RemoteTransition remoteTransition, in InstanceId instanceId) = 17;
 
     /**
      * Version of startTasks using legacy transition system.
      */
     oneway void startTasksWithLegacyTransition(int taskId1, in Bundle options1, int taskId2,
-            in Bundle options2, int splitPosition, float splitRatio,
+            in Bundle options2, int splitPosition, int snapPosition,
             in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 11;
 
     /**
      * Starts a pair of intent and task using legacy transition system.
      */
     oneway void startIntentAndTaskWithLegacyTransition(in PendingIntent pendingIntent, int userId1,
-            in Bundle options1, int taskId, in Bundle options2, int splitPosition, float splitRatio,
+            in Bundle options1, int taskId, in Bundle options2, int splitPosition, int snapPosition,
             in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 12;
 
     /**
      * Starts a pair of shortcut and task using legacy transition system.
      */
     oneway void startShortcutAndTaskWithLegacyTransition(in ShortcutInfo shortcutInfo,
-            in Bundle options1, int taskId, in Bundle options2, int splitPosition, float splitRatio,
+            in Bundle options1, int taskId, in Bundle options2, int splitPosition, int snapPosition,
             in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 15;
 
     /**
@@ -135,7 +135,7 @@ interface ISplitScreen {
     oneway void startIntentsWithLegacyTransition(in PendingIntent pendingIntent1, int userId1,
             in ShortcutInfo shortcutInfo1, in Bundle options1, in PendingIntent pendingIntent2,
             int userId2, in ShortcutInfo shortcutInfo2, in Bundle options2, int splitPosition,
-            float splitRatio, in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 18;
+            int snapPosition, in RemoteAnimationAdapter adapter, in InstanceId instanceId) = 18;
 
     /**
      * Start a pair of intents in one transition.
@@ -143,7 +143,7 @@ interface ISplitScreen {
     oneway void startIntents(in PendingIntent pendingIntent1, int userId1,
             in ShortcutInfo shortcutInfo1, in Bundle options1, in PendingIntent pendingIntent2,
             int userId2, in ShortcutInfo shortcutInfo2, in Bundle options2, int splitPosition,
-            float splitRatio, in RemoteTransition remoteTransition, in InstanceId instanceId) = 19;
+            int snapPosition, in RemoteTransition remoteTransition, in InstanceId instanceId) = 19;
 
     /**
      * Blocking call that notifies and gets additional split-screen targets when entering

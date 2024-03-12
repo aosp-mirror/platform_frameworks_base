@@ -20,8 +20,8 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.Gravity
-import com.android.systemui.R
 import com.android.systemui.plugins.DarkIconDispatcher
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
@@ -51,13 +51,23 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
     override fun getSlot() = slot
 
     override fun onDarkChanged(areas: ArrayList<Rect>?, darkIntensity: Float, tint: Int) {
+        // nop
+    }
+
+    override fun onDarkChangedWithContrast(areas: ArrayList<Rect>, tint: Int, contrastTint: Int) {
         val newTint = DarkIconDispatcher.getTint(areas, this, tint)
-        binding.onIconTintChanged(newTint)
+        val contrast = DarkIconDispatcher.getInverseTint(areas, this, contrastTint)
+
+        binding.onIconTintChanged(newTint, contrast)
         binding.onDecorTintChanged(newTint)
     }
 
     override fun setStaticDrawableColor(color: Int) {
-        binding.onIconTintChanged(color)
+        // nop
+    }
+
+    override fun setStaticDrawableColor(color: Int, foregroundColor: Int) {
+        binding.onIconTintChanged(color, foregroundColor)
     }
 
     override fun setDecorColor(color: Int) {

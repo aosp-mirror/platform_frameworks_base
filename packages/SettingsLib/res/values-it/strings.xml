@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> Connesso"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento in corso…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono escluso)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (contenuti multimediali esclusi)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono o media esclusi)"</string>
@@ -97,26 +97,30 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Attivo - Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Attivo, S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Sinistra: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Destra: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Attivo"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attivo, solo sinistra"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attivo, solo destra"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"Dispositivo salvato"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attiva, solo sinistra"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attiva, solo destra"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Attivo, destra e sinistra"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimediale"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonate"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Trasferimento file"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositivo di input"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accesso a Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Condivisione contatti e cronologia chiamate"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Usa per condivisione di contatti e cronologia chiamate"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Consenti l\'accesso ai contatti e alla cronologia delle chiamate"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Le informazioni saranno utilizzate per gli annunci delle chiamate e altro ancora"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Condivisione connessione Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Accesso alla SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Apparecchi acustici"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connessione con gli apparecchi acustici stabilita"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Apparecchi acustici"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE audio"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Connessione con gli apparecchi acustici stabilita"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connesso a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Collegato ad audio media"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Collegato ad audio telefono"</string>
@@ -134,7 +138,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Usa per audio telefono"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Usa per trasferimento file"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Utilizza per l\'input"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Utilizza per gli apparecchi acustici"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Utilizza per gli apparecchi acustici"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Usa per LE_AUDIO"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Accoppia"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ACCOPPIA"</string>
@@ -157,6 +161,7 @@
     <string name="accessibility_wifi_two_bars" msgid="687800024970972270">"Wi-Fi: due barre."</string>
     <string name="accessibility_wifi_three_bars" msgid="779895671061950234">"Wi-Fi: tre barre."</string>
     <string name="accessibility_wifi_signal_full" msgid="7165262794551355617">"Segnale Wi-Fi completo."</string>
+    <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Connessione al dispositivo effettuata."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Rete aperta"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Rete protetta"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Sistema operativo Android"</string>
@@ -215,6 +220,8 @@
     <string name="choose_profile" msgid="343803890897657450">"Scegli profilo"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personale"</string>
     <string name="category_work" msgid="4014193632325996115">"Lavoro"</string>
+    <string name="category_private" msgid="4244892185452788977">"Privato"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opzioni sviluppatore"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Attiva Opzioni sviluppatore"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Imposta opzioni per lo sviluppo di applicazioni"</string>
@@ -354,6 +361,8 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
+    <string name="show_key_presses" msgid="6360141722735900214">"Mostra pressioni tasti"</string>
+    <string name="show_key_presses_summary" msgid="725387457373015024">"Mostra feedback visivo per pressioni tasti fisici"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Fai lampeggiare le superfici delle finestre quando si aggiornano"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
@@ -400,7 +409,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Attiva finestre a forma libera"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Modalità desktop"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Password di backup desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"I backup desktop completi non sono attualmente protetti"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tocca per modificare o rimuovere la password per i backup desktop completi"</string>
@@ -428,6 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Presupponi che le app supportino i formati moderni"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostra notifiche relative alla transcodifica"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Disattiva memorizzazione nella cache per la transcodifica"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Impostazioni Widevine"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Forza riserva L3"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Seleziona per forzare riserva L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Servizi in esecuzione"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualizza e controlla i servizi attualmente in esecuzione"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementazione di WebView"</string>
@@ -460,12 +471,6 @@
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Carica residua: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Tempo residuo: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Tempo rimanente: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Il telefono potrebbe spegnersi a breve"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Il tablet potrebbe spegnersi a breve"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Il dispositivo potrebbe spegnersi a breve"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="4429259621177089719">"Il telefono potrebbe spegnersi a breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Il tablet potrebbe spegnersi a breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Il dispositivo potrebbe spegnersi a breve (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> alla ricarica completa"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> alla ricarica completa"</string>
@@ -515,7 +520,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non registrato"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Non disponibile"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Selezione casuale dell\'indirizzo MAC"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivi connessi}=1{1 dispositivo connesso}other{# dispositivi connessi}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5100712926640492336">"{count,plural, =1{1 dispositivo connesso}other{# dispositivi connessi}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Più tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Meno tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Annulla"</string>
@@ -542,9 +547,14 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Chiedi ogni volta"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fino alla disattivazione"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Adesso"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo telefono"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo smartphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Questo tablet"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo telefono"</string>
+    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <skip />
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Base con altoparlante"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo esterno"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo connesso"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo smartphone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossibile riprodurre su questo dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Esegui l\'upgrade dell\'account per cambiare"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Qui non è possibile riprodurre i download"</string>
@@ -552,6 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Riattiva il dispositivo per riprodurre qui"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Dispositivo non approvato per la riproduzione"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Impossibile riprodurre questo contenuto multimediale qui"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Connessione eseguita"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"ARC HDMI"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"eARC HDMI"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Connessione tramite ARC"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connessione tramite eARC"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV predefinita"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Uscita HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Speaker interni"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema di connessione. Spegni e riaccendi il dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo audio cablato"</string>
     <string name="help_label" msgid="3528360748637781274">"Guida e feedback"</string>
@@ -574,7 +592,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utente"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. È possibile che i servizi e le impostazioni di accessibilità non vengano trasferiti al nuovo utente."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Vuoi impostare questo utente come amministratore?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Gli amministratori hanno privilegi speciali che altri utenti non hanno. Un amministratore può gestire tutti gli utenti, aggiornare o resettare questo dispositivo, modificare le impostazioni, vedere tutte le app installate e concedere o revocare privilegi amministrativi per altri utenti."</string>
@@ -679,11 +697,9 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animazioni predittive per Indietro"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Attiva le animazioni di sistema per il gesto Indietro predittivo."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Questa impostazione attiva le animazioni di sistema per il gesto Indietro predittivo. Richiede di impostare il metodo enableOnBackInvokedCallback su true nel file manifest di tutte le app."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1737722959616802157">"Sposta a sinistra"</item>
-    <item msgid="5425394847942513942">"Sposta in basso"</item>
-    <item msgid="7728484337962740316">"Sposta a destra"</item>
-    <item msgid="324200556467459329">"Sposta in alto"</item>
-  </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="not_specified" msgid="5423502443185110328">"Non specificato"</string>
+    <string name="neuter" msgid="2075249330106127310">"Neutro"</string>
+    <string name="feminine" msgid="1529155595310784757">"Femminile"</string>
+    <string name="masculine" msgid="4653978041013996303">"Maschile"</string>
 </resources>

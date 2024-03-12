@@ -16,14 +16,16 @@
 
 #include "SkiaPipeline.h"
 
+#include <include/android/SkSurfaceAndroid.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/encode/SkPngEncoder.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkColorSpace.h>
 #include <SkData.h>
 #include <SkImage.h>
-#include <SkImageEncoder.h>
+#include <SkImageAndroid.h>
 #include <SkImageInfo.h>
-#include <SkImagePriv.h>
 #include <SkMatrix.h>
 #include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
@@ -75,7 +77,7 @@ bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
         return false;
     }
     for (SkImage* image : mutableImages) {
-        if (SkImage_pinAsTexture(image, mRenderThread.getGrContext())) {
+        if (skgpu::ganesh::PinAsTexture(mRenderThread.getGrContext(), image)) {
             mPinnedImages.emplace_back(sk_ref_sp(image));
         } else {
             return false;
@@ -86,7 +88,7 @@ bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
 
 void SkiaPipeline::unpinImages() {
     for (auto& image : mPinnedImages) {
-        SkImage_unpinAsTexture(image.get(), mRenderThread.getGrContext());
+        skgpu::ganesh::UnpinTexture(mRenderThread.getGrContext(), image.get());
     }
     mPinnedImages.clear();
 }
@@ -187,9 +189,9 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
                                  kPremul_SkAlphaType, getSurfaceColorSpace());
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
-        node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                          skgpu::Budgeted::kYes, info, 0,
-                                                          this->getSurfaceOrigin(), &props));
+        node->setLayerSurface(SkSurfaces::RenderTarget(mRenderThread.getGrContext(),
+                                                       skgpu::Budgeted::kYes, info, 0,
+                                                       this->getSurfaceOrigin(), &props));
         if (node->getLayerSurface()) {
             // update the transform in window of the layer to reset its origin wrt light source
             // position
@@ -222,8 +224,8 @@ void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
         auto image = bitmap->makeImage();
         if (image.get()) {
-            SkImage_pinAsTexture(image.get(), context);
-            SkImage_unpinAsTexture(image.get(), context);
+            skgpu::ganesh::PinAsTexture(context, image.get());
+            skgpu::ganesh::UnpinTexture(context, image.get());
             // A submit is necessary as there may not be a frame coming soon, so without a call
             // to submit these texture uploads can just sit in the queue building up until
             // we run out of RAM
@@ -439,6 +441,13 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 procs.fTypefaceProc = [](SkTypeface* tf, void* ctx){
                     return tf->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
                 };
+                procs.fImageProc = [](SkImage* img, void* ctx) -> sk_sp<SkData> {
+                    GrDirectContext* dCtx = static_cast<GrDirectContext*>(ctx);
+                    return SkPngEncoder::Encode(dCtx,
+                                                img,
+                                                SkPngEncoder::Options{});
+                };
+                procs.fImageCtx = mRenderThread.getGrContext();
                 auto data = picture->serialize(&procs);
                 savePictureAsync(data, mCapturedFile);
                 mCaptureSequence = 0;
@@ -621,7 +630,7 @@ sk_sp<SkSurface> SkiaPipeline::getBufferSkSurface(
     auto bufferColorSpace = bufferParams.getColorSpace();
     if (mBufferSurface == nullptr || mBufferColorSpace == nullptr ||
         !SkColorSpace::Equals(mBufferColorSpace.get(), bufferColorSpace.get())) {
-        mBufferSurface = SkSurface::MakeFromAHardwareBuffer(
+        mBufferSurface = SkSurfaces::WrapAndroidHardwareBuffer(
                 mRenderThread.getGrContext(), mHardwareBuffer, kTopLeft_GrSurfaceOrigin,
                 bufferColorSpace, nullptr, true);
         mBufferColorSpace = bufferColorSpace;

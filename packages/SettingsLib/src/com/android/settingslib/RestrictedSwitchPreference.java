@@ -36,18 +36,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
-import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
-import androidx.preference.SwitchPreference;
+import androidx.preference.SwitchPreferenceCompat;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
- * Version of SwitchPreference that can be disabled by a device admin
+ * Version of SwitchPreferenceCompat that can be disabled by a device admin
  * using a user restriction.
  */
-public class RestrictedSwitchPreference extends SwitchPreference {
+public class RestrictedSwitchPreference extends SwitchPreferenceCompat {
     RestrictedPreferenceHelper mHelper;
     AppOpsManager mAppOpsManager;
     boolean mUseAdditionalSummary = false;
@@ -93,8 +92,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     }
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.switchPreferenceStyle,
-                android.R.attr.switchPreferenceStyle));
+        this(context, attrs, androidx.preference.R.attr.switchPreferenceCompatStyle);
     }
 
     public RestrictedSwitchPreference(Context context) {
@@ -113,7 +111,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        final View switchView = holder.findViewById(android.R.id.switch_widget);
+        final View switchView = holder.findViewById(androidx.preference.R.id.switchWidget);
         if (switchView != null) {
             final View rootView = switchView.getRootView();
             rootView.setFilterTouchesWhenObscured(true);
@@ -126,10 +124,10 @@ public class RestrictedSwitchPreference extends SwitchPreference {
             switchSummary = isChecked()
                     ? getUpdatableEnterpriseString(
                             getContext(), ENABLED_BY_ADMIN_SWITCH_SUMMARY,
-                            R.string.enabled_by_admin)
+                            com.android.settingslib.widget.restricted.R.string.enabled_by_admin)
                     : getUpdatableEnterpriseString(
                             getContext(), DISABLED_BY_ADMIN_SWITCH_SUMMARY,
-                            R.string.disabled_by_admin);
+                            com.android.settingslib.widget.restricted.R.string.disabled_by_admin);
         } else {
             switchSummary = mRestrictedSwitchSummary;
         }
@@ -199,6 +197,17 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         mHelper.checkRestrictionAndSetDisabled(userRestriction, userId);
     }
 
+    /**
+     * Checks if the given setting is subject to Enhanced Confirmation Mode restrictions for this
+     * package. Marks the preference as disabled if so.
+     * @param restriction The key identifying the setting
+     * @param packageName the package to check the restriction for
+     * @param uid the uid of the package
+     */
+    public void checkEcmRestrictionAndSetDisabled(String restriction, String packageName, int uid) {
+        mHelper.checkEcmRestrictionAndSetDisabled(restriction, packageName, uid);
+    }
+
     @Override
     public void setEnabled(boolean enabled) {
         boolean changed = false;
@@ -206,8 +215,8 @@ public class RestrictedSwitchPreference extends SwitchPreference {
             mHelper.setDisabledByAdmin(null);
             changed = true;
         }
-        if (enabled && isDisabledByAppOps()) {
-            mHelper.setDisabledByAppOps(false);
+        if (enabled && isDisabledByEcm()) {
+            mHelper.setDisabledByEcm(null);
             changed = true;
         }
         if (!changed) {
@@ -225,25 +234,50 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         return mHelper.isDisabledByAdmin();
     }
 
+    public boolean isDisabledByEcm() {
+        return mHelper.isDisabledByEcm();
+    }
+
+    /**
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
     private void setDisabledByAppOps(boolean disabled) {
         if (mHelper.setDisabledByAppOps(disabled)) {
             notifyChanged();
         }
     }
 
-    public boolean isDisabledByAppOps() {
-        return mHelper.isDisabledByAppOps();
-    }
-
+    /**
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
     public int getUid() {
         return mHelper != null ? mHelper.uid : Process.INVALID_UID;
     }
 
+    /**
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
     public String getPackageName() {
         return mHelper != null ? mHelper.packageName : null;
     }
 
-    /** Updates enabled state based on associated package. */
+    /**
+     * Updates enabled state based on associated package
+     *
+     * @deprecated TODO(b/308921175): This will be deleted with the
+     * {@link android.security.Flags#extendEcmToAllSettings} feature flag. Do not use for any new
+     * code.
+     */
+    @Deprecated
     public void updateState(
             @NonNull String packageName, int uid, boolean isEnableAllowed, boolean isEnabled) {
         mHelper.updatePackageDetails(packageName, uid);
@@ -260,7 +294,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
             setEnabled(false);
         } else if (isEnabled) {
             setEnabled(true);
-        } else if (appOpsAllowed && isDisabledByAppOps()) {
+        } else if (appOpsAllowed && isDisabledByEcm()) {
             setEnabled(true);
         } else if (!appOpsAllowed){
             setDisabledByAppOps(true);

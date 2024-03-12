@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Zrušit uložení"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikace v režimu rozdělené obrazovky nemusí fungovat"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikace nepodporuje režim rozdělené obrazovky"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Tuto aplikaci lze otevřít jen na jednom okně."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Tuto aplikaci lze otevřít jen v jednom okně"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikace na sekundárním displeji nemusí fungovat."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikace nepodporuje spuštění na sekundárních displejích."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Čára rozdělující obrazovku"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Přesunout vpravo nahoru"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Přesunout vlevo dolů"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Přesunout vpravo dolů"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"rozbalit <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"sbalit <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Nastavení <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Zavřít bublinu"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Nezobrazovat konverzaci v bublinách"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Žádné nedávné bubliny"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Zde se budou zobrazovat nedávné bubliny a zavřené bubliny"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Chatujte pomocí bublin"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Nové konverzace se zobrazí jako ikony v dolním rohu obrazovky. Klepnutím je rozbalíte, přetažením zavřete."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Nastavení bublin můžete kdykoli upravit"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Klepnutím sem lze spravovat, které aplikace a konverzace mohou vytvářet bubliny"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bublina"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Spravovat"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bublina byla zavřena."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Klepnutím tuto aplikaci kvůli lepšímu zobrazení restartujete."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Klepnutím tuto aplikaci kvůli lepšímu zobrazení restartujete"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Změnit v Nastavení poměr stran této aplikace"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Změnit poměr stran"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problémy s fotoaparátem?\nKlepnutím vyřešíte"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nepomohlo to?\nKlepnutím se vrátíte"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Žádné problémy s fotoaparátem? Klepnutím zavřete."</string>

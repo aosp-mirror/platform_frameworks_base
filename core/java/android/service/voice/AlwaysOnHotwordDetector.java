@@ -306,6 +306,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private static final int MSG_DETECTION_HOTWORD_DETECTION_SERVICE_FAILURE = 9;
     private static final int MSG_DETECTION_SOUND_TRIGGER_FAILURE = 10;
     private static final int MSG_DETECTION_UNKNOWN_FAILURE = 11;
+    private static final int MSG_HOTWORD_TRAINING_DATA = 12;
 
     private final String mText;
     private final Locale mLocale;
@@ -325,6 +326,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final boolean mSupportSandboxedDetectionService;
+    private final String mAttributionTag;
 
     @GuardedBy("mLock")
     private boolean mIsAvailabilityOverriddenByTestApi = false;
@@ -578,8 +580,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
 
         /**
-         * Timestamp of when the trigger event from SoundTriggerHal was received by the system
-         * server.
+         * Timestamp of when the trigger event from SoundTriggerHal was received by the framework.
          *
          * Clock monotonic including suspend time or its equivalent on the system,
          * in the same units and timebase as {@link SystemClock#elapsedRealtime()}.
@@ -848,13 +849,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      * @param targetSdkVersion The target SDK version.
      * @param SupportSandboxedDetectionService {@code true} if HotwordDetectionService should be
      * triggered, otherwise {@code false}.
+     * @param attributionTag an optional attribution tag passed form the
+     * {@link VoiceInteractionService} context via the
+     * {@link createAlwaysOnHotwordDetectorInternal(String, Locale, boolean, PersistableBundle,
+     * SharedMemory, ModuleProperties, Executor, Callback)}.
      *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, Locale locale, Executor executor, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportSandboxedDetectionService) {
+            boolean supportSandboxedDetectionService, @Nullable String attributionTag) {
         super(modelManagementService, executor, callback);
 
         mHandler = new MyHandler(Looper.getMainLooper());
@@ -867,6 +872,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mSupportSandboxedDetectionService = supportSandboxedDetectionService;
+        mAttributionTag = attributionTag;
     }
 
     // Do nothing. This method should not be abstract.
@@ -878,11 +884,14 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             @Nullable SoundTrigger.ModuleProperties moduleProperties) {
         if (mSupportSandboxedDetectionService) {
             initAndVerifyDetector(options, sharedMemory, mInternalCallback,
-                    DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
+                    DETECTOR_TYPE_TRUSTED_HOTWORD_DSP, mAttributionTag);
         }
         try {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
+            if (IS_IDENTITY_WITH_ATTRIBUTION_TAG) {
+                identity.attributionTag = mAttributionTag;
+            }
             if (moduleProperties == null) {
                 moduleProperties = mModelManagementService
                         .listModuleProperties(identity)
@@ -951,8 +960,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 mKeyphraseMetadata = new KeyphraseMetadata(1, mText, fakeSupportedLocales,
                         AlwaysOnHotwordDetector.RECOGNITION_MODE_VOICE_TRIGGER);
             }
-            notifyStateChangedLocked();
         }
+        notifyStateChanged(availability);
     }
 
     /**
@@ -1362,8 +1371,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
 
             mAvailability = STATE_INVALID;
             mIsAvailabilityOverriddenByTestApi = false;
-            notifyStateChangedLocked();
         }
+        notifyStateChanged(STATE_INVALID);
         super.destroy();
     }
 
@@ -1393,6 +1402,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      */
     // TODO(b/281608561): remove the enrollment flow from AlwaysOnHotwordDetector
     void onSoundModelsChanged() {
+        boolean notifyError = false;
+
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
                     || mAvailability == STATE_HARDWARE_UNAVAILABLE
@@ -1433,6 +1444,9 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     // calling stopRecognition where there is no started session.
                     Log.w(TAG, "Failed to stop recognition after enrollment update: code="
                             + result);
+
+                    // Execute a refresh availability task - which should then notify of a change.
+                    new RefreshAvailabilityTask().execute();
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to stop recognition after enrollment update", e);
                     if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
@@ -1441,14 +1455,14 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                                         + Log.getStackTraceString(e),
                                 FailureSuggestedAction.RECREATE_DETECTOR));
                     } else {
-                        updateAndNotifyStateChangedLocked(STATE_ERROR);
+                        notifyError = true;
                     }
-                    return;
                 }
             }
+        }
 
-            // Execute a refresh availability task - which should then notify of a change.
-            new RefreshAvailabilityTask().execute();
+        if (notifyError) {
+            updateAndNotifyStateChanged(STATE_ERROR);
         }
     }
 
@@ -1564,10 +1578,11 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
-    @GuardedBy("mLock")
-    private void updateAndNotifyStateChangedLocked(int availability) {
-        updateAvailabilityLocked(availability);
-        notifyStateChangedLocked();
+    private void updateAndNotifyStateChanged(int availability) {
+        synchronized (mLock) {
+            updateAvailabilityLocked(availability);
+        }
+        notifyStateChanged(availability);
     }
 
     @GuardedBy("mLock")
@@ -1581,17 +1596,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
-    @GuardedBy("mLock")
-    private void notifyStateChangedLocked() {
+    private void notifyStateChanged(int newAvailability) {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
-        message.arg1 = mAvailability;
+        message.arg1 = newAvailability;
         message.sendToTarget();
     }
 
-    @GuardedBy("mLock")
     private void sendUnknownFailure(String failureMessage) {
-        // update but do not call onAvailabilityChanged callback for STATE_ERROR
-        updateAvailabilityLocked(STATE_ERROR);
+        synchronized (mLock) {
+            // update but do not call onAvailabilityChanged callback for STATE_ERROR
+            updateAvailabilityLocked(STATE_ERROR);
+        }
         Message.obtain(mHandler, MSG_DETECTION_UNKNOWN_FAILURE, failureMessage).sendToTarget();
     }
 
@@ -1636,6 +1651,16 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 Slog.i(TAG, "onRejected");
             }
             Message.obtain(mHandler, MSG_HOTWORD_REJECTED, result).sendToTarget();
+        }
+
+        @Override
+        public void onTrainingData(@NonNull HotwordTrainingData data) {
+            if (DBG) {
+                Slog.d(TAG, "onTrainingData(" + data + ")");
+            } else {
+                Slog.i(TAG, "onTrainingData");
+            }
+            Message.obtain(mHandler, MSG_HOTWORD_TRAINING_DATA, data).sendToTarget();
         }
 
         @Override
@@ -1769,6 +1794,9 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     case MSG_DETECTION_UNKNOWN_FAILURE:
                         mExternalCallback.onUnknownFailure((String) message.obj);
                         break;
+                    case MSG_HOTWORD_TRAINING_DATA:
+                        mExternalCallback.onTrainingData((HotwordTrainingData) message.obj);
+                        break;
                     default:
                         super.handleMessage(message);
                 }
@@ -1794,19 +1822,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                             availability = STATE_KEYPHRASE_UNENROLLED;
                         }
                     }
-                    updateAndNotifyStateChangedLocked(availability);
                 }
+                updateAndNotifyStateChanged(availability);
             } catch (Exception e) {
                 // Any exception here not caught will crash the process because AsyncTask does not
                 // bubble up the exceptions to the client app, so we must propagate it to the app.
                 Slog.w(TAG, "Failed to refresh availability", e);
-                synchronized (mLock) {
-                    if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
-                        sendUnknownFailure(
-                                "Failed to refresh availability: " + Log.getStackTraceString(e));
-                    } else {
-                        updateAndNotifyStateChangedLocked(STATE_ERROR);
-                    }
+                if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
+                    sendUnknownFailure(
+                            "Failed to refresh availability: " + Log.getStackTraceString(e));
+                } else {
+                    updateAndNotifyStateChanged(STATE_ERROR);
                 }
             }
 

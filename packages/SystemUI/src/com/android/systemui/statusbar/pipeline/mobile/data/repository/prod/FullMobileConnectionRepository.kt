@@ -309,6 +309,17 @@ class FullMobileConnectionRepository(
                 activeRepo.value.isAllowedDuringAirplaneMode.value,
             )
 
+    override val hasPrioritizedNetworkCapabilities =
+        activeRepo
+            .flatMapLatest { it.hasPrioritizedNetworkCapabilities }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.hasPrioritizedNetworkCapabilities.value,
+            )
+
+    override suspend fun isInEcmMode(): Boolean = activeRepo.value.isInEcmMode()
+
     class Factory
     @Inject
     constructor(

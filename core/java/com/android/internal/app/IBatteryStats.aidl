@@ -158,7 +158,8 @@ interface IBatteryStats {
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void notePhoneSignalStrength(in SignalStrength signalStrength);
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType, int nrFrequency);
+    void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType, int nrState,
+            int nrFrequency);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void notePhoneState(int phoneState);
     @EnforcePermission("UPDATE_DEVICE_STATS")

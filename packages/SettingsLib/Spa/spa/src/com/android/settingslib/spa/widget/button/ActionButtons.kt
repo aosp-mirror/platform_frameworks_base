@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Launch
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -52,6 +51,7 @@ import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.divider
+import androidx.compose.material.icons.automirrored.outlined.Launch
 
 data class ActionButton(
     val text: String,
@@ -65,7 +65,7 @@ fun ActionButtons(actionButtons: List<ActionButton>) {
     Row(
         Modifier
             .padding(SettingsDimension.buttonPadding)
-            .clip(SettingsShape.CornerLarge)
+            .clip(SettingsShape.CornerExtraLarge)
             .height(IntrinsicSize.Min)
     ) {
         for ((index, actionButton) in actionButtons.withIndex()) {
@@ -101,7 +101,9 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
                 modifier = Modifier.size(SettingsDimension.itemIconSize),
             )
             Box(
-                modifier = Modifier.padding(top = 4.dp).fillMaxHeight(),
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxHeight(),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -129,7 +131,7 @@ private fun ActionButtonsPreview() {
     SettingsTheme {
         ActionButtons(
             listOf(
-                ActionButton(text = "Open", imageVector = Icons.Outlined.Launch) {},
+                ActionButton(text = "Open", imageVector = Icons.AutoMirrored.Outlined.Launch) {},
                 ActionButton(text = "Uninstall", imageVector = Icons.Outlined.Delete) {},
                 ActionButton(text = "Force stop", imageVector = Icons.Outlined.WarningAmber) {},
             )

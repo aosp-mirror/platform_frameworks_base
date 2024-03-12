@@ -103,6 +103,10 @@ constructor(
                                     qsPipelineLogger.logTileAutoRemoved(userId, signal.spec)
                                     repository.unmarkTileAdded(userId, signal.spec)
                                 }
+                                is AutoAddSignal.RemoveTracking -> {
+                                    qsPipelineLogger.logTileUnmarked(userId, signal.spec)
+                                    repository.unmarkTileAdded(userId, signal.spec)
+                                }
                             }
                         }
                 }

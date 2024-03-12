@@ -1,0 +1,57 @@
+package: "android.app.admin.flags"
+
+flag {
+  name: "policy_engine_migration_v2_enabled"
+  namespace: "enterprise"
+  description: "V2 of the policy engine migrations for Android V"
+  bug: "289520697"
+}
+
+flag {
+  name: "device_policy_size_tracking_enabled"
+  namespace: "enterprise"
+  description: "Add feature to track the total policy size and have a max threshold."
+  bug: "281543351"
+}
+
+flag {
+  name: "onboarding_bugreport_v2_enabled"
+  namespace: "enterprise"
+  description: "Add feature to track required changes for enabled V2 of auto-capturing of onboarding bug reports."
+  bug: "302517677"
+}
+
+flag {
+  name: "cross_user_suspension_enabled"
+  namespace: "enterprise"
+  description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
+  bug: "263464464"
+}
+
+flag {
+  name: "dedicated_device_control_enabled"
+  namespace: "enterprise"
+  description: "Allow the device management role holder to control which platform features are available on dedicated devices."
+  bug: "281964214"
+}
+
+flag {
+  name: "security_log_v2_enabled"
+  namespace: "enterprise"
+  description: "Improve access to security logging in the context of Zero Trust."
+  bug: "295324350"
+}
+
+flag {
+  name: "dumpsys_policy_engine_migration_enabled"
+  namespace: "enterprise"
+  description: "Update DumpSys to include information about migrated APIs in DPE"
+  bug: "304999634"
+}
+
+flag {
+  name: "quiet_mode_credential_bug_fix"
+  namespace: "enterprise"
+  description: "Guards a bugfix that ends the credential input flow if the managed user has not stopped."
+  bug: "293441361"
+}

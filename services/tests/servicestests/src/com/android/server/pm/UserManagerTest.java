@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 
 import android.annotation.UserIdInt;
@@ -30,10 +31,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -120,10 +123,18 @@ public final class UserManagerTest {
 
     private void removeExistingUsers() {
         int currentUser = ActivityManager.getCurrentUser();
+
+        UserHandle communalProfile = mUserManager.getCommunalProfile();
+        int communalProfileId = communalProfile != null
+                ? communalProfile.getIdentifier() : UserHandle.USER_NULL;
+
         List<UserInfo> list = mUserManager.getUsers();
         for (UserInfo user : list) {
             // Keep system and current user
-            if (user.id != UserHandle.USER_SYSTEM && user.id != currentUser) {
+            if (user.id != UserHandle.USER_SYSTEM &&
+                    user.id != currentUser &&
+                    user.id != communalProfileId &&
+                    !user.isMain()) {
                 removeUser(user.id);
             }
         }
@@ -207,7 +218,12 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.isMediaSharedWithParent());
         assertThat(typeProps.isCredentialShareableWithParent())
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
+        assertThat(typeProps.getCrossProfileContentSharingStrategy())
+                .isEqualTo(cloneUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
+        assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -216,6 +232,131 @@ public final class UserManagerTest {
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(userInfo.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+    }
+
+    @Test
+    public void testCommunalProfile() throws Exception {
+        assumeTrue("Device doesn't support communal profiles ",
+                mUserManager.isUserTypeEnabled(UserManager.USER_TYPE_PROFILE_COMMUNAL));
+
+        // Create communal profile if needed
+        if (mUserManager.getCommunalProfile() == null) {
+            Slog.i(TAG, "Attempting to create a communal profile for a test");
+            createUser("Communal", UserManager.USER_TYPE_PROFILE_COMMUNAL, /*flags*/ 0);
+        }
+        final UserHandle communal = mUserManager.getCommunalProfile();
+        assertWithMessage("Couldn't create communal profile").that(communal).isNotNull();
+
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_COMMUNAL);
+        assertWithMessage("No communal user type on device").that(userTypeDetails).isNotNull();
+
+        // Test that only one communal profile can be created
+        final UserInfo secondCommunalProfile =
+                createUser("Communal", UserManager.USER_TYPE_PROFILE_COMMUNAL, /*flags*/ 0);
+        assertThat(secondCommunalProfile).isNull();
+
+        // Verify that communal profile doesn't have a parent
+        assertThat(mUserManager.getProfileParent(communal.getIdentifier())).isNull();
+
+        // Make sure that, when switching users, the communal profile remains visible.
+        final boolean isStarted = mActivityManager.startProfile(communal);
+        assertWithMessage("Unable to start communal profile").that(isStarted).isTrue();
+        final UserManager umCommunal = (UserManager) mContext.createPackageContextAsUser(
+                        "android", 0, communal).getSystemService(Context.USER_SERVICE);
+        final int originalCurrent = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        switchUser(testUser.id);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        switchUser(originalCurrent);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    public void testGetProfilesIncludingCommunal() throws Exception {
+        int mainUserId = mUserManager.getMainUser().getIdentifier();
+        final UserInfo otherUser = createUser("TestUser", /* flags= */ 0);
+        final UserInfo profile = createProfileForUser("Profile",
+                UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
+
+        final UserHandle communalProfile = mUserManager.getCommunalProfile();
+
+        final List<UserInfo> mainsActual = mUserManager.getProfilesIncludingCommunal(mainUserId);
+        final List<UserInfo> othersActual = mUserManager.getProfilesIncludingCommunal(otherUser.id);
+
+        final List<Integer> mainsExpected = new ArrayList<>();
+        mainsExpected.add(mainUserId);
+        if (profile != null) mainsExpected.add(profile.id);
+        if (communalProfile != null) mainsExpected.add(communalProfile.getIdentifier());
+        assertEquals(mainsExpected.stream().sorted().toList(),
+                mainsActual.stream().map(ui -> ui.id).sorted().toList());
+
+
+        final List<Integer> othersExpected = new ArrayList<>();
+        othersExpected.add(otherUser.id);
+        if (communalProfile != null) othersExpected.add(communalProfile.getIdentifier());
+        assertEquals(othersExpected.stream().sorted().toList(),
+                othersActual.stream().map(ui -> ui.id).sorted().toList());
+    }
+
+    @Test
+    public void testPrivateProfile() throws Exception {
+        UserHandle mainUser = mUserManager.getMainUser();
+        assumeTrue("Main user is null", mainUser != null);
+        // Get the default properties for private profile user type.
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_PRIVATE);
+        assertWithMessage("No %s type on device", UserManager.USER_TYPE_PROFILE_PRIVATE)
+                .that(userTypeDetails).isNotNull();
+        final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
+
+        // Test that only one private profile  can be created
+        final int mainUserId = mainUser.getIdentifier();
+        UserInfo userInfo = createProfileForUser("Private profile1",
+                UserManager.USER_TYPE_PROFILE_PRIVATE,
+                mainUserId);
+        assertThat(userInfo).isNotNull();
+        UserInfo userInfo2 = createProfileForUser("Private profile2",
+                UserManager.USER_TYPE_PROFILE_PRIVATE,
+                mainUserId);
+        assertThat(userInfo2).isNull();
+
+        // Check that the new private profile has the expected properties (relative to the defaults)
+        // provided that the test caller has the necessary permissions.
+        UserProperties privateProfileUserProperties =
+                mUserManager.getUserProperties(UserHandle.of(userInfo.id));
+        assertThat(typeProps.getShowInLauncher())
+                .isEqualTo(privateProfileUserProperties.getShowInLauncher());
+        assertThrows(SecurityException.class, privateProfileUserProperties::getStartWithParent);
+        assertThrows(SecurityException.class,
+                privateProfileUserProperties::getCrossProfileIntentFilterAccessControl);
+        assertThat(typeProps.isMediaSharedWithParent())
+                .isEqualTo(privateProfileUserProperties.isMediaSharedWithParent());
+        assertThat(typeProps.isCredentialShareableWithParent())
+                .isEqualTo(privateProfileUserProperties.isCredentialShareableWithParent());
+        assertThat(typeProps.isAuthAlwaysRequiredToDisableQuietMode())
+                .isEqualTo(privateProfileUserProperties
+                        .isAuthAlwaysRequiredToDisableQuietMode());
+        assertThat(typeProps.getCrossProfileContentSharingStrategy())
+                .isEqualTo(privateProfileUserProperties.getCrossProfileContentSharingStrategy());
+        assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
+        assertThrows(SecurityException.class,
+                privateProfileUserProperties::getAllowStoppingUserWithDelayedLocking);
+
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
+
+        // Verify private profile parent
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+        UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
+        assertThat(parentProfileInfo).isNotNull();
+        assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
+        removeUser(userInfo.id);
+        assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+        assertThat(mUserManager.getProfileLabel()).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getLabel(0)));
     }
 
     @MediumTest
@@ -824,6 +965,10 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgePlain());
         assertThat(mUserManager.getUserBadgeNoBackgroundResId(userId))
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
+        assertThat(mUserManager.getUserStatusBarIconResId(userId))
+                .isEqualTo(userTypeDetails.getStatusBarIcon());
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
@@ -875,8 +1020,8 @@ public final class UserManagerTest {
         assertThat(userProps.isMediaSharedWithParent()).isFalse();
         assertThat(userProps.isCredentialShareableWithParent()).isTrue();
         assertThrows(SecurityException.class, userProps::getDeleteAppWithParent);
+        assertThrows(SecurityException.class, userProps::getAlwaysVisible);
     }
-
 
     // Make sure only max managed profiles can be created
     @MediumTest
@@ -1009,16 +1154,16 @@ public final class UserManagerTest {
     public void testCreateProfileForUser_disallowAddManagedProfile() throws Exception {
         assumeManagedUsersSupported();
         final int mainUserId = mUserManager.getMainUser().getIdentifier();
-        final UserHandle mainUserHandle = asHandle(mainUserId);
+        final UserHandle currentUserHandle = asHandle(ActivityManager.getCurrentUser());
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
-                mainUserHandle);
+                currentUserHandle);
         try {
             UserInfo userInfo = createProfileForUser("Managed",
                     UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
             assertThat(userInfo).isNull();
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
-                    mainUserHandle);
+                    currentUserHandle);
         }
     }
 
@@ -1059,6 +1204,24 @@ public final class UserManagerTest {
         }
     }
 
+    // Make sure the creation of a private profile fails if DISALLOW_ADD_PRIVATE_PROFILE is true.
+    @MediumTest
+    @Test
+    public void testCreateProfileForUser_disallowAddPrivateProfile() {
+        final int mainUserId = ActivityManager.getCurrentUser();
+        final UserHandle mainUserHandle = asHandle(mainUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                true, mainUserHandle);
+        try {
+            UserInfo privateProfileInfo = createProfileForUser("Private",
+                    UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+            assertThat(privateProfileInfo).isNull();
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, false,
+                    mainUserHandle);
+        }
+    }
+
     @MediumTest
     @Test
     public void testAddRestrictedProfile() throws Exception {
@@ -1094,6 +1257,7 @@ public final class UserManagerTest {
     @Test
     public void testGetManagedProfileCreationTime() throws Exception {
         assumeManagedUsersSupported();
+        assumeTrue("User does not have access to creation time", mUserManager.isMainUser());
         final int mainUserId = mUserManager.getMainUser().getIdentifier();
         final long startTime = System.currentTimeMillis();
         UserInfo profile = createProfileForUser("Managed 1",
@@ -1299,6 +1463,24 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    public void testConcurrentUserSwitch() {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo user1 = createUser("User 1", 0);
+        assertThat(user1).isNotNull();
+        final UserInfo user2 = createUser("User 2", 0);
+        assertThat(user2).isNotNull();
+        final UserInfo user3 = createUser("User 3", 0);
+        assertThat(user3).isNotNull();
+
+        // Switch to the users just created without waiting for the completion of the previous one.
+        switchUserThenRun(user1.id, () -> switchUserThenRun(user2.id, () -> switchUser(user3.id)));
+
+        // Switch back to the starting user.
+        switchUser(startUser);
+    }
+
+    @MediumTest
+    @Test
     public void testConcurrentUserCreate() throws Exception {
         int userCount = mUserManager.getUsers().size();
         int maxSupportedUsers = UserManager.getMaxSupportedUsers();
@@ -1429,6 +1611,25 @@ public final class UserManagerTest {
 
         UserInfo userInfo = mUserManager.getUserInfo(userInfo1.id);
         assertThat(userInfo.name).isEqualTo(newName);
+    }
+
+    @Test
+    public void testCannotCreateAdditionalMainUser() {
+        UserHandle mainUser = mUserManager.getMainUser();
+        assumeTrue("There is no main user", mainUser != null);
+
+        // Users with FLAG_MAIN can't be removed, so no point using the local createUser method.
+        UserInfo newMainUser = mUserManager.createUser("test", UserInfo.FLAG_MAIN);
+        assertThat(newMainUser).isNull();
+
+        List<UserInfo> users = mUserManager.getUsers();
+        int mainUserCount = 0;
+        for (UserInfo user : users) {
+            if (user.isMain()) {
+                mainUserCount++;
+            }
+        }
+        assertThat(mainUserCount).isEqualTo(1);
     }
 
     private boolean isPackageInstalledForUser(String packageName, int userId) {
@@ -1573,6 +1774,12 @@ public final class UserManagerTest {
     private boolean isMainUserPermanentAdmin() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
+    }
+
+    private void compareDrawables(Drawable actual, Drawable expected){
+        assertEquals(actual.getIntrinsicWidth(), expected.getIntrinsicWidth());
+        assertEquals(actual.getIntrinsicHeight(), expected.getIntrinsicHeight());
+        assertEquals(actual.getLevel(), expected.getLevel());
     }
 
 }

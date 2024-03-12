@@ -1,6 +1,3 @@
-#undef LOG_TAG
-#define LOG_TAG "GraphicsJNI"
-
 #include <assert.h>
 #include <unistd.h>
 

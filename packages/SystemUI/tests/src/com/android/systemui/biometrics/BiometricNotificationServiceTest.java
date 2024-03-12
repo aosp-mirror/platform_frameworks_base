@@ -18,9 +18,7 @@ package com.android.systemui.biometrics;
 
 import static com.android.systemui.biometrics.BiometricNotificationBroadcastReceiver.ACTION_SHOW_FACE_REENROLL_DIALOG;
 import static com.android.systemui.biometrics.BiometricNotificationBroadcastReceiver.ACTION_SHOW_FINGERPRINT_REENROLL_DIALOG;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -71,6 +69,8 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
     @Mock
     NotificationManager mNotificationManager;
     @Mock
+    BiometricNotificationDialogFactory mNotificationDialogFactory;
+    @Mock
     Optional<FingerprintReEnrollNotification> mFingerprintReEnrollNotificationOptional;
     @Mock
     FingerprintReEnrollNotification mFingerprintReEnrollNotification;
@@ -87,10 +87,10 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
 
     private final ArgumentCaptor<Notification> mNotificationArgumentCaptor =
             ArgumentCaptor.forClass(Notification.class);
-    private BiometricNotificationService mBiometricNotificationService;
     private TestableLooper mLooper;
     private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
     private KeyguardStateController.Callback mKeyguardStateControllerCallback;
+    private BiometricNotificationService mBiometricNotificationService;
     private BiometricStateListener mFaceStateListener;
     private BiometricStateListener mFingerprintStateListener;
 
@@ -103,9 +103,8 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
 
         mLooper = TestableLooper.get(this);
         Handler handler = new Handler(mLooper.getLooper());
-        BiometricNotificationDialogFactory dialogFactory = new BiometricNotificationDialogFactory();
         BiometricNotificationBroadcastReceiver broadcastReceiver =
-                new BiometricNotificationBroadcastReceiver(mContext, dialogFactory);
+                new BiometricNotificationBroadcastReceiver(mContext, mNotificationDialogFactory);
         mBiometricNotificationService =
                 new BiometricNotificationService(mContext,
                         mKeyguardUpdateMonitor, mKeyguardStateController, handler,
@@ -252,5 +251,4 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
         verify(mNotificationManager, never()).notifyAsUser(eq(TAG), eq(FACE_NOTIFICATION_ID),
                 mNotificationArgumentCaptor.capture(), any());
     }
-
 }

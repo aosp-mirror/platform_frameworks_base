@@ -46,7 +46,8 @@ public interface SysuiDarkIconDispatcher extends DarkIconDispatcher, Dumpable {
     /** Model for {@link #darkChangeFlow()} */
     class DarkChange {
 
-        public static final DarkChange EMPTY = new DarkChange(new ArrayList<>(), 0, 0);
+        public static final DarkChange EMPTY =
+                new DarkChange(new ArrayList<>(), /* darkIntensity= */ 0f, DEFAULT_ICON_TINT);
 
         public DarkChange(Collection<Rect> areas, float darkIntensity, int tint) {
             this.areas = areas;

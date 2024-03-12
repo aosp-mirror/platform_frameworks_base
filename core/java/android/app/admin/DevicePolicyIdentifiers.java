@@ -16,9 +16,12 @@
 
 package android.app.admin;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.app.admin.flags.Flags;
 import android.os.UserManager;
+
 
 import java.util.Objects;
 
@@ -158,6 +161,12 @@ public final class DevicePolicyIdentifiers {
      * @hide
      */
     public static final String CROSS_PROFILE_WIDGET_PROVIDER_POLICY = "crossProfileWidgetProvider";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.
+     */
+    @FlaggedApi(Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
+    public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
 
     /**
      * @hide

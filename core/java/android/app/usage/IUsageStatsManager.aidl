@@ -20,9 +20,9 @@ import android.app.PendingIntent;
 import android.app.usage.BroadcastResponseStats;
 import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageEventsQuery;
 import android.content.pm.ParceledListSlice;
-
-import java.util.Map;
+import android.os.PersistableBundle;
 
 /**
  * System private API for talking with the UsageStatsManagerService.
@@ -42,6 +42,8 @@ interface IUsageStatsManager {
     UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
     UsageEvents queryEventsForUser(long beginTime, long endTime, int userId, String callingPackage);
     UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    UsageEvents queryEventsWithFilter(in UsageEventsQuery query, String callingPackage);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setAppInactive(String packageName, boolean inactive, int userId);
     boolean isAppStandbyEnabled();
@@ -76,6 +78,8 @@ interface IUsageStatsManager {
             String callingPackage);
     void reportUsageStop(in IBinder activity, String token, String callingPackage);
     void reportUserInteraction(String packageName, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)")
+    void reportUserInteractionWithBundle(String packageName, int userId, in PersistableBundle eventExtras);
     int getUsageSource();
     void forceUsageSourceSettingRead();
     long getLastTimeAnyComponentUsed(String packageName, String callingPackage);
@@ -87,6 +91,8 @@ interface IUsageStatsManager {
             int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
     void clearBroadcastEvents(String callingPackage, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    boolean isPackageExemptedFromBroadcastResponseStats(String packageName, int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG)")
     String getAppStandbyConstant(String key);
 }

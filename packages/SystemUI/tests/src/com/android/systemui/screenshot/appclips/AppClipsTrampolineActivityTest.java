@@ -57,7 +57,7 @@ import androidx.test.runner.intercepting.SingleActivityFactory;
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IAppClipsService;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -123,6 +123,8 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     public void setUp() {
         assumeFalse("Skip test: does not apply to watches",
             mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH));
+        assumeFalse("Skip test: does not apply to TVs",
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK));
 
         MockitoAnnotations.initMocks(this);
         mBgExecutor = MoreExecutors.directExecutor();

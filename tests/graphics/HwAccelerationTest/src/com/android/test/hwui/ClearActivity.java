@@ -77,7 +77,7 @@ public class ClearActivity extends Activity {
                     canvas.drawPath(mPath, mClearPaint);
                 }
                 canvas.restore();
-                canvas.drawText("OpenGLRenderer", 50.0f, 50.0f, mClearPaint);
+                canvas.drawText("HWUI", 50.0f, 50.0f, mClearPaint);
                 mClearPaint.setColor(0xff000000);
                 canvas.drawRect(800.0f, 100.0f, 900.0f, 200.0f, mClearPaint);
                 mClearPaint.setColor(0x0000ff00);

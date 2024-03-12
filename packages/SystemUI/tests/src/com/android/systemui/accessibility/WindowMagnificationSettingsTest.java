@@ -20,16 +20,19 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPAB
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.view.WindowInsets.Type.systemBars;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -40,6 +43,7 @@ import android.annotation.IdRes;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.ContentObserver;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -47,6 +51,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
@@ -57,10 +62,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
@@ -109,6 +114,11 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
 
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), anyInt())).then(
+                returnsSecondArg());
+        when(mSecureSettings.getFloatForUser(anyString(), anyFloat(), anyInt())).then(
+                returnsSecondArg());
+
         mWindowMagnificationSettings = new WindowMagnificationSettings(mContext,
                 mWindowMagnificationSettingsCallback, mSfVsyncFrameProvider,
                 mSecureSettings);
@@ -125,6 +135,14 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     public void tearDown() {
         mMotionEventHelper.recycleEvents();
         mWindowMagnificationSettings.hideSettingPanel();
+    }
+
+    @Test
+    public void initSettingPanel_checkAllowDiagonalScrollingWithSecureSettings() {
+        verify(mSecureSettings).getIntForUser(
+                eq(Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING),
+                /* def */ eq(1), /* userHandle= */ anyInt());
+        assertThat(mWindowMagnificationSettings.isDiagonalScrollingEnabled()).isTrue();
     }
 
     @Test
@@ -273,7 +291,12 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         // Perform click
         diagonalScrollingSwitch.performClick();
 
-        verify(mWindowMagnificationSettingsCallback).onSetDiagonalScrolling(!currentCheckedState);
+        final boolean isAllowed = !currentCheckedState;
+        verify(mSecureSettings).putIntForUser(
+                eq(Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING),
+                /* value= */ eq(isAllowed ? 1 : 0),
+                /* userHandle= */ anyInt());
+        verify(mWindowMagnificationSettingsCallback).onSetDiagonalScrolling(isAllowed);
     }
 
     @Test
@@ -291,6 +314,42 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         // we need to get the view again.
         magnifierMediumButton = getInternalView(R.id.magnifier_medium_button);
         assertThat(magnifierMediumButton.isSelected()).isTrue();
+    }
+
+    @Test
+    public void onWindowBoundsChanged_updateDraggableWindowBounds() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
+
+        // get the measured panel view frame size
+        final int panelWidth = mSettingView.getMeasuredWidth();
+        final int panelHeight = mSettingView.getMeasuredHeight();
+
+        final Rect testWindowBounds = new Rect(10, 20, 1010, 2020);
+        final WindowInsets testWindowInsets = new WindowInsets.Builder()
+                .setInsetsIgnoringVisibility(systemBars(), Insets.of(100, 200, 100, 200))
+                .build();
+        mWindowManager.setWindowBounds(testWindowBounds);
+        mWindowManager.setWindowInsets(testWindowInsets);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            mWindowMagnificationSettings.onConfigurationChanged(ActivityInfo.CONFIG_SCREEN_SIZE);
+        });
+
+        // the draggable window bounds left/top should be only related to the insets,
+        // and the bounds right/bottom should consider the panel frame size
+        // inset left (100) = 100
+        int expectedLeft = 100;
+        // inset top (200) = 200
+        int expectedTop = 200;
+        // window width (1010 - 10) - inset right (100) - panel width
+        int expectedRight = 900 - panelWidth;
+        // window height (2020 - 20) - inset bottom (200) - panel height
+        int expectedBottom = 1800 - panelHeight;
+        Rect expectedBounds = new Rect(expectedLeft, expectedTop, expectedRight, expectedBottom);
+        assertThat(mWindowMagnificationSettings.mDraggableWindowBounds).isEqualTo(expectedBounds);
     }
 
     @Test

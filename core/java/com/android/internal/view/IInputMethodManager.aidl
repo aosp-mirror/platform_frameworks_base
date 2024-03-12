@@ -114,9 +114,6 @@ interface IInputMethodManager {
     // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight(in IInputMethodClient client);
 
-    oneway void reportVirtualDisplayGeometryAsync(in IInputMethodClient parentClient,
-            int childDisplayId, in @nullable float[] matrixValues);
-
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
 
     @EnforcePermission("INTERNAL_SYSTEM_WINDOW")
@@ -155,8 +152,8 @@ interface IInputMethodManager {
                 in String delegatorPackageName);
 
     /** Accepts and starts a stylus handwriting session for the delegate view **/
-    boolean acceptStylusHandwritingDelegation(in IInputMethodClient client,
-                in int userId, in String delegatePackageName, in String delegatorPackageName);
+    boolean acceptStylusHandwritingDelegation(in IInputMethodClient client, in int userId,
+            in String delegatePackageName, in String delegatorPackageName, int flags);
 
     /** Returns {@code true} if currently selected IME supports Stylus handwriting. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "

@@ -52,8 +52,8 @@ class DesktopModeTaskRepository {
     private val activeTasksListeners = ArraySet<ActiveTasksListener>()
     // Track visible tasks separately because a task may be part of the desktop but not visible.
     private val visibleTasksListeners = ArrayMap<VisibleTasksListener, Executor>()
-    // Track corners of desktop tasks, used to determine gesture exclusion
-    private val desktopCorners = SparseArray<Region>()
+    // Track corner/caption regions of desktop tasks, used to determine gesture exclusion
+    private val desktopExclusionRegions = SparseArray<Region>()
     private var desktopGestureExclusionListener: Consumer<Region>? = null
     private var desktopGestureExclusionExecutor: Executor? = null
 
@@ -96,10 +96,11 @@ class DesktopModeTaskRepository {
     }
 
     /**
-     * Add a Consumer which will inform other classes of changes to corners for all Desktop tasks.
+     * Add a Consumer which will inform other classes of changes to exclusion regions for all
+     * Desktop tasks.
      */
-    fun setTaskCornerListener(cornersListener: Consumer<Region>, executor: Executor) {
-        desktopGestureExclusionListener = cornersListener
+    fun setExclusionRegionListener(regionListener: Consumer<Region>, executor: Executor) {
+        desktopGestureExclusionListener = regionListener
         desktopGestureExclusionExecutor = executor
         executor.execute {
             desktopGestureExclusionListener?.accept(calculateDesktopExclusionRegion())
@@ -107,14 +108,14 @@ class DesktopModeTaskRepository {
     }
 
     /**
-     * Create a new merged region representative of all corners in all desktop tasks.
+     * Create a new merged region representative of all exclusion regions in all desktop tasks.
      */
     private fun calculateDesktopExclusionRegion(): Region {
-        val desktopCornersRegion = Region()
-        desktopCorners.valueIterator().forEach { taskCorners ->
-            desktopCornersRegion.op(taskCorners, Region.Op.UNION)
+        val desktopExclusionRegion = Region()
+        desktopExclusionRegions.valueIterator().forEach { taskExclusionRegion ->
+            desktopExclusionRegion.op(taskExclusionRegion, Region.Op.UNION)
         }
-        return desktopCornersRegion
+        return desktopExclusionRegion
     }
 
     /**
@@ -294,22 +295,24 @@ class DesktopModeTaskRepository {
     }
 
     /**
-     * Updates the active desktop corners; if desktopCorners has been accepted by
-     * desktopCornersListener, it will be updated in the appropriate classes.
+     * Updates the active desktop gesture exclusion regions; if desktopExclusionRegions has been
+     * accepted by desktopGestureExclusionListener, it will be updated in the
+     * appropriate classes.
      */
-    fun updateTaskCorners(taskId: Int, taskCorners: Region) {
-        desktopCorners.put(taskId, taskCorners)
+    fun updateTaskExclusionRegions(taskId: Int, taskExclusionRegions: Region) {
+        desktopExclusionRegions.put(taskId, taskExclusionRegions)
         desktopGestureExclusionExecutor?.execute {
             desktopGestureExclusionListener?.accept(calculateDesktopExclusionRegion())
         }
     }
 
     /**
-     * Removes the active desktop corners for the specified task; if desktopCorners has been
-     * accepted by desktopCornersListener, it will be updated in the appropriate classes.
+     * Removes the desktop gesture exclusion region for the specified task; if exclusionRegion
+     * has been accepted by desktopGestureExclusionListener, it will be updated in the
+     * appropriate classes.
      */
-    fun removeTaskCorners(taskId: Int) {
-        desktopCorners.delete(taskId)
+    fun removeExclusionRegion(taskId: Int) {
+        desktopExclusionRegions.delete(taskId)
         desktopGestureExclusionExecutor?.execute {
             desktopGestureExclusionListener?.accept(calculateDesktopExclusionRegion())
         }

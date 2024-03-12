@@ -34,7 +34,7 @@ using NullOrIOError = std::variant<std::nullopt_t, IOError>;
 
 // Checks whether the result holds an unexpected I/O error.
 template <typename T>
-static inline bool IsIOError(const base::expected<T, NullOrIOError> result) {
+static inline bool IsIOError(const base::expected<T, NullOrIOError>& result) {
   return !result.has_value() && std::holds_alternative<IOError>(result.error());
 }
 

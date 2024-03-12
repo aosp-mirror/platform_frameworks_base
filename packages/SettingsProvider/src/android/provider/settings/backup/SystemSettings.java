@@ -84,6 +84,7 @@ public class SystemSettings {
         Settings.System.RING_VIBRATION_INTENSITY,
         Settings.System.HAPTIC_FEEDBACK_INTENSITY,
         Settings.System.HARDWARE_HAPTIC_FEEDBACK_INTENSITY,
+        Settings.System.KEYBOARD_VIBRATION_ENABLED,
         Settings.System.HAPTIC_FEEDBACK_ENABLED,
         Settings.System.DISPLAY_COLOR_MODE_VENDOR_HINT, // must precede DISPLAY_COLOR_MODE
         Settings.System.DISPLAY_COLOR_MODE,
@@ -101,5 +102,10 @@ public class SystemSettings {
         Settings.System.CAMERA_FLASH_NOTIFICATION,
         Settings.System.SCREEN_FLASH_NOTIFICATION,
         Settings.System.SCREEN_FLASH_NOTIFICATION_COLOR,
+        Settings.System.PEAK_REFRESH_RATE,
+        Settings.System.MIN_REFRESH_RATE,
+        Settings.System.NOTIFICATION_COOLDOWN_ENABLED,
+        Settings.System.NOTIFICATION_COOLDOWN_ALL,
+        Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
     };
 }

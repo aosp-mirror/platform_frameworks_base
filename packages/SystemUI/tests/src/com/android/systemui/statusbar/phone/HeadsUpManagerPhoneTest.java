@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -25,16 +26,15 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -43,9 +43,13 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -54,6 +58,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import kotlinx.coroutines.flow.StateFlowKt;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -69,9 +75,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
     @Mock private AccessibilityManagerWrapper mAccessibilityManagerWrapper;
-    @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private UiEventLogger mUiEventLogger;
-    private boolean mLivesPastNormalTime;
+    @Mock private JavaAdapter mJavaAdapter;
+    @Mock private ShadeInteractor mShadeInteractor;
 
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
@@ -82,10 +88,13 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,
                 ConfigurationController configurationController,
-                Handler handler,
+                GlobalSettings globalSettings,
+                SystemClock systemClock,
+                DelayableExecutor executor,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
-                ShadeExpansionStateManager shadeExpansionStateManager
+                JavaAdapter javaAdapter,
+                ShadeInteractor shadeInteractor
         ) {
             super(
                     context,
@@ -95,13 +104,17 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     groupManager,
                     visualStabilityProvider,
                     configurationController,
-                    handler,
+                    mockExecutorHandler(executor),
+                    globalSettings,
+                    systemClock,
+                    executor,
                     accessibilityManagerWrapper,
                     uiEventLogger,
-                    shadeExpansionStateManager
+                    javaAdapter,
+                    shadeInteractor
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
         }
     }
 
@@ -114,10 +127,13 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mStatusBarStateController,
                 mBypassController,
                 mConfigurationController,
-                mTestHandler,
+                mGlobalSettings,
+                mSystemClock,
+                mExecutor,
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
-                mShadeExpansionStateManager
+                mJavaAdapter,
+                mShadeInteractor
         );
     }
 
@@ -127,8 +143,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     }
 
     @Before
-    @Override
     public void setUp() {
+        when(mShadeInteractor.isAnyExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));
         final AccessibilityManagerWrapper accessibilityMgr =
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
         when(accessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
@@ -137,19 +153,11 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mContext.getOrCreateTestableResources().addOverride(
                 R.integer.ambient_notification_extension_time, 500);
-
-        super.setUp();
-    }
-
-    @After
-    @Override
-    public void tearDown() {
-        super.tearDown();
     }
 
     @Test
     public void testSnooze() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry entry = createEntry(/* id = */ 0);
 
         hmp.showNotification(entry);
@@ -160,7 +168,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testSwipedOutNotification() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry entry = createEntry(/* id = */ 0);
 
         hmp.showNotification(entry);
@@ -176,7 +184,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     @Test
     public void testCanRemoveImmediately_swipedOut() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry entry = createEntry(/* id = */ 0);
 
         hmp.showNotification(entry);
@@ -189,7 +197,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Ignore("b/141538055")
     @Test
     public void testCanRemoveImmediately_notTopEntry() {
-        final HeadsUpManagerPhone hmp = createHeadsUpManagerPhone();
+        final HeadsUpManager hmp = createHeadsUpManagerPhone();
         final NotificationEntry earlierEntry = createEntry(/* id = */ 0);
         final NotificationEntry laterEntry = createEntry(/* id = */ 1);
         laterEntry.setRow(mRow);
@@ -208,8 +216,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
         hmp.showNotification(entry);
         hmp.extendHeadsUp();
+        mSystemClock.advanceTime(TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2);
 
-        final int pastNormalTimeMillis = TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2;
-        verifyAlertingAtTime(hmp, entry, true, pastNormalTimeMillis, "normal time");
+        assertTrue(hmp.isAlerting(entry.getKey()));
     }
 }

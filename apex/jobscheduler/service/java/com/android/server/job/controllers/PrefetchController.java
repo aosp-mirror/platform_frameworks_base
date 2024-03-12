@@ -134,7 +134,10 @@ public class PrefetchController extends StateController {
         mThresholdAlarmListener = new ThresholdAlarmListener(
                 mContext, AppSchedulingModuleThread.get().getLooper());
         mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
+    }
 
+    @Override
+    public void startTrackingLocked() {
         mUsageStatsManagerInternal
                 .registerLaunchTimeChangedListener(mEstimatedLaunchTimeChangedListener);
     }
@@ -536,10 +539,13 @@ public class PrefetchController extends StateController {
         static final String KEY_LAUNCH_TIME_ALLOWANCE_MS =
                 PC_CONSTANT_PREFIX + "launch_time_allowance_ms";
 
-        private static final long DEFAULT_LAUNCH_TIME_THRESHOLD_MS = 7 * HOUR_IN_MILLIS;
-        private static final long DEFAULT_LAUNCH_TIME_ALLOWANCE_MS = 20 * MINUTE_IN_MILLIS;
+        private static final long DEFAULT_LAUNCH_TIME_THRESHOLD_MS = HOUR_IN_MILLIS;
+        private static final long DEFAULT_LAUNCH_TIME_ALLOWANCE_MS = 30 * MINUTE_IN_MILLIS;
 
-        /** How much time each app will have to run jobs within their standby bucket window. */
+        /**
+         * The earliest amount of time before the next estimated app launch time that we may choose
+         * to run a prefetch job for the app.
+         */
         public long LAUNCH_TIME_THRESHOLD_MS = DEFAULT_LAUNCH_TIME_THRESHOLD_MS;
 
         /**

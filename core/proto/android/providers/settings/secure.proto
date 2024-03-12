@@ -97,6 +97,10 @@ message SecureSettingsProto {
         optional SettingProto accessibility_magnification_joystick_enabled = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Settings for font scaling
         optional SettingProto accessibility_font_scaling_has_been_changed = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_force_invert_color_enabled = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_magnification_two_finger_triple_tap_enabled = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto qs_targets = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     }
     optional Accessibility accessibility = 2;
 
@@ -265,6 +269,13 @@ message SecureSettingsProto {
 
     optional SettingProto enhanced_voice_privacy_enabled = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    message EvenDimmer {
+        optional SettingProto even_dimmer_activated = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto even_dimmer_min_nits = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+
+    optional EvenDimmer even_dimmer = 98;
+
     optional SettingProto font_weight_adjustment = 85 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Gesture {
@@ -376,6 +387,8 @@ message SecureSettingsProto {
     optional SettingProto lock_to_app_exit_locked = 33 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto lockdown_in_power_menu = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto long_press_timeout = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto key_press_timeout_ms = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto key_press_delay_ms = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message ManagedProfile {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -707,5 +720,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 96;
+    // Next tag = 99;
 }

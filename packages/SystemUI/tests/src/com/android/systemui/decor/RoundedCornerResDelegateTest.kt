@@ -23,7 +23,7 @@ import android.util.Size
 import androidx.annotation.DrawableRes
 import androidx.test.filters.SmallTest
 import com.android.internal.R as InternalR
-import com.android.systemui.R as SystemUIR
+import com.android.systemui.res.R as SystemUIR
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.tests.R
 import org.junit.Assert.assertEquals

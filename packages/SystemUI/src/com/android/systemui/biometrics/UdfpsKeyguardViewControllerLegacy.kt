@@ -16,10 +16,8 @@
 
 package com.android.systemui.biometrics
 
-import android.animation.ValueAnimator
 import android.content.res.Configuration
 import android.util.MathUtils
-import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
@@ -27,21 +25,20 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionListener
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.KeyguardViewManagerCallback
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.OccludingAppBiometricUI
@@ -49,17 +46,19 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
-open class UdfpsKeyguardViewControllerLegacy
-constructor(
+@ExperimentalCoroutinesApi
+open class UdfpsKeyguardViewControllerLegacy(
     private val view: UdfpsKeyguardViewLegacy,
     statusBarStateController: StatusBarStateController,
-    shadeExpansionStateManager: ShadeExpansionStateManager,
     private val keyguardViewManager: StatusBarKeyguardViewManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     dumpManager: DumpManager,
@@ -70,22 +69,21 @@ constructor(
     systemUIDialogManager: SystemUIDialogManager,
     private val udfpsController: UdfpsController,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
-    featureFlags: FeatureFlags,
-    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+    primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
+    private val selectedUserInteractor: SelectedUserInteractor,
+    private val transitionInteractor: KeyguardTransitionInteractor,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
         statusBarStateController,
-        shadeExpansionStateManager,
+        primaryBouncerInteractor,
         systemUIDialogManager,
         dumpManager,
     ),
     UdfpsKeyguardViewControllerAdapter {
     private val uniqueIdentifier = this.toString()
-    private val useExpandedOverlay: Boolean =
-        featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
     private var showingUdfpsBouncer = false
     private var udfpsRequested = false
     private var qsExpansion = 0f
@@ -97,44 +95,10 @@ constructor(
     private var launchTransitionFadingAway = false
     private var isLaunchingActivity = false
     private var activityLaunchProgress = 0f
-    private val unlockedScreenOffDozeAnimator =
-        ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = StackStateAnimator.ANIMATION_DURATION_STANDARD.toLong()
-            interpolator = Interpolators.ALPHA_IN
-            addUpdateListener { animation ->
-                view.onDozeAmountChanged(
-                    animation.animatedFraction,
-                    animation.animatedValue as Float,
-                    UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF
-                )
-            }
-        }
     private var inputBouncerExpansion = 0f
 
     private val stateListener: StatusBarStateController.StateListener =
         object : StatusBarStateController.StateListener {
-            override fun onDozeAmountChanged(linear: Float, eased: Float) {
-                if (lastDozeAmount < linear) {
-                    showUdfpsBouncer(false)
-                }
-                unlockedScreenOffDozeAnimator.cancel()
-                val animatingFromUnlockedScreenOff =
-                    unlockedScreenOffAnimationController.isAnimationPlaying()
-                if (animatingFromUnlockedScreenOff && linear != 0f) {
-                    // we manually animate the fade in of the UDFPS icon since the unlocked
-                    // screen off animation prevents the doze amounts to be incrementally eased in
-                    unlockedScreenOffDozeAnimator.start()
-                } else {
-                    view.onDozeAmountChanged(
-                        linear,
-                        eased,
-                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN
-                    )
-                }
-                lastDozeAmount = linear
-                updatePauseAuth()
-            }
-
             override fun onStateChanged(statusBarState: Int) {
                 this@UdfpsKeyguardViewControllerLegacy.statusBarState = statusBarState
                 updateAlpha()
@@ -158,17 +122,6 @@ constructor(
                 view.updateColor()
             }
         }
-
-    private val shadeExpansionListener = ShadeExpansionListener { (fraction) ->
-        panelExpansionFraction =
-            if (keyguardViewManager.isPrimaryBouncerInTransit) {
-                aboutToShowBouncerProgress(fraction)
-            } else {
-                fraction
-            }
-        updateAlpha()
-        updatePauseAuth()
-    }
 
     private val keyguardStateControllerCallback: KeyguardStateController.Callback =
         object : KeyguardStateController.Callback {
@@ -207,24 +160,6 @@ constructor(
                 updateAlpha()
                 updatePauseAuth()
             }
-
-            /**
-             * Forward touches to the UdfpsController. This allows the touch to start from outside
-             * the sensor area and then slide their finger into the sensor area.
-             */
-            override fun onTouch(event: MotionEvent) {
-                // Don't forward touches if the shade has already started expanding.
-                if (transitionToFullShadeProgress != 0f) {
-                    return
-                }
-
-                // Forwarding touches not needed with expanded overlay
-                if (useExpandedOverlay) {
-                    return
-                } else {
-                    udfpsController.onTouch(event)
-                }
-            }
         }
 
     private val occludingAppBiometricUI: OccludingAppBiometricUI =
@@ -250,6 +185,7 @@ constructor(
     }
 
     init {
+        com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor.assertInLegacyMode()
         view.repeatWhenAttached {
             // repeatOnLifecycle CREATED (as opposed to STARTED) because the Bouncer expansion
             // can make the view not visible; and we still want to listen for events
@@ -257,15 +193,129 @@ constructor(
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 listenForBouncerExpansion(this)
                 listenForAlternateBouncerVisibility(this)
+                listenForOccludedToAodTransition(this)
+                listenForGoneToAodTransition(this)
+                listenForLockscreenAodTransitions(this)
+                listenForAodToOccludedTransitions(this)
+                listenForAlternateBouncerToAodTransitions(this)
+                listenForDreamingToAodTransitions(this)
             }
         }
     }
 
     @VisibleForTesting
-    suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
+    suspend fun listenForDreamingToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.transition(KeyguardState.DREAMING, KeyguardState.AOD).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    ANIMATE_APPEAR_ON_SCREEN_OFF,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForAlternateBouncerToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor
+                .transition(KeyguardState.ALTERNATE_BOUNCER, KeyguardState.AOD)
+                .collect { transitionStep ->
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                    )
+                }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForAodToOccludedTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.transition(KeyguardState.AOD, KeyguardState.OCCLUDED).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    1f - transitionStep.value,
+                    1f - transitionStep.value,
+                    UdfpsKeyguardViewLegacy.ANIMATION_NONE,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForOccludedToAodTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.transition(KeyguardState.OCCLUDED, KeyguardState.AOD).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    ANIMATE_APPEAR_ON_SCREEN_OFF,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForGoneToAodTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.goneToAodTransition.collect { transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    ANIMATE_APPEAR_ON_SCREEN_OFF,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForLockscreenAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.dozeAmountTransition.collect { transitionStep ->
+                if (
+                    transitionStep.from == KeyguardState.AOD &&
+                        transitionStep.transitionState == TransitionState.CANCELED
+                ) {
+                    if (
+                        transitionInteractor.startedKeyguardTransitionStep.first().to !=
+                            KeyguardState.AOD
+                    ) {
+                        // If the next started transition isn't transitioning back to AOD, force
+                        // doze amount to be 0f (as if the transition to the lockscreen completed).
+                        view.onDozeAmountChanged(
+                            0f,
+                            0f,
+                            UdfpsKeyguardViewLegacy.ANIMATION_NONE,
+                        )
+                    }
+                } else {
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                    )
+                }
+            }
+        }
+    }
+
+    @VisibleForTesting
+    override suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
         return scope.launch {
             primaryBouncerInteractor.bouncerExpansion.collect { bouncerExpansion: Float ->
                 inputBouncerExpansion = bouncerExpansion
+
+                panelExpansionFraction =
+                    if (keyguardViewManager.isPrimaryBouncerInTransit) {
+                        aboutToShowBouncerProgress(1f - bouncerExpansion)
+                    } else {
+                        1f - bouncerExpansion
+                    }
                 updateAlpha()
                 updatePauseAuth()
             }
@@ -295,8 +345,6 @@ constructor(
         qsExpansion = keyguardViewManager.qsExpansion
         keyguardViewManager.addCallback(statusBarKeyguardViewManagerCallback)
         configurationController.addCallback(configurationListener)
-        val currentState = shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
-        shadeExpansionListener.onPanelExpansionChanged(currentState)
         updateScaleFactor()
         view.updatePadding()
         updateAlpha()
@@ -304,7 +352,6 @@ constructor(
         keyguardViewManager.setOccludingAppBiometricUI(occludingAppBiometricUI)
         lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
-        view.mUseExpandedOverlay = useExpandedOverlay
         view.startIconAsyncInflate {
             val animationViewInternal: View =
                 view.requireViewById(R.id.udfps_animation_view_internal)
@@ -319,9 +366,7 @@ constructor(
         keyguardStateController.removeCallback(keyguardStateControllerCallback)
         statusBarStateController.removeCallback(stateListener)
         keyguardViewManager.removeOccludingAppBiometricUI(occludingAppBiometricUI)
-        keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         configurationController.removeCallback(configurationListener)
-        shadeExpansionStateManager.removeExpansionListener(shadeExpansionListener)
         if (lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy === this) {
             lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = null
         }
@@ -368,14 +413,9 @@ constructor(
             if (udfpsAffordanceWasNotShowing) {
                 view.animateInUdfpsBouncer(null)
             }
-            if (keyguardStateController.isOccluded) {
-                keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(true)
-            }
             view.announceForAccessibility(
                 view.context.getString(R.string.accessibility_fingerprint_bouncer)
             )
-        } else {
-            keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         }
         updateAlpha()
         updatePauseAuth()
@@ -418,7 +458,7 @@ constructor(
         }
         if (
             keyguardUpdateMonitor.getUserUnlockedWithBiometric(
-                KeyguardUpdateMonitor.getCurrentUser()
+                selectedUserInteractor.getSelectedUserId()
             )
         ) {
             // If the device was unlocked by a biometric, immediately hide the UDFPS icon to avoid

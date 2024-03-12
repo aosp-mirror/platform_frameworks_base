@@ -16,12 +16,19 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.controls.ui.MediaHostState
+import com.android.systemui.media.dagger.MediaModule
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,14 +41,18 @@ class ShadeSceneViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    authenticationInteractor: AuthenticationInteractor,
-    private val bouncerInteractor: BouncerInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
+    val qsSceneAdapter: QSSceneAdapter,
+    val shadeHeaderViewModel: ShadeHeaderViewModel,
+    val notifications: NotificationsPlaceholderViewModel,
+    val mediaDataManager: MediaDataManager,
+    @Named(MediaModule.QUICK_QS_PANEL) private val mediaHost: MediaHost,
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =
         combine(
-                authenticationInteractor.isUnlocked,
-                authenticationInteractor.canSwipeToDismiss,
+                deviceEntryInteractor.isUnlocked,
+                deviceEntryInteractor.canSwipeToEnter,
             ) { isUnlocked, canSwipeToDismiss ->
                 upDestinationSceneKey(
                     isUnlocked = isUnlocked,
@@ -53,24 +64,33 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
                     upDestinationSceneKey(
-                        isUnlocked = authenticationInteractor.isUnlocked.value,
-                        canSwipeToDismiss = authenticationInteractor.canSwipeToDismiss.value,
+                        isUnlocked = deviceEntryInteractor.isUnlocked.value,
+                        canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
                     ),
             )
 
     /** Notifies that some content in the shade was clicked. */
-    fun onContentClicked() {
-        bouncerInteractor.showOrUnlockDevice()
-    }
+    fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
 
     private fun upDestinationSceneKey(
         isUnlocked: Boolean,
-        canSwipeToDismiss: Boolean,
+        canSwipeToDismiss: Boolean?,
     ): SceneKey {
         return when {
-            canSwipeToDismiss -> SceneKey.Lockscreen
+            canSwipeToDismiss == true -> SceneKey.Lockscreen
             isUnlocked -> SceneKey.Gone
             else -> SceneKey.Lockscreen
         }
+    }
+
+    init {
+        mediaHost.expansion = MediaHostState.EXPANDED
+        mediaHost.showsOnlyActiveMedia = true
+        mediaHost.init(MediaHierarchyManager.LOCATION_QQS)
+    }
+
+    fun isMediaVisible(): Boolean {
+        // TODO(b/296122467): handle updates to carousel visibility while scene is still visible
+        return mediaDataManager.hasActiveMediaOrRecommendation()
     }
 }

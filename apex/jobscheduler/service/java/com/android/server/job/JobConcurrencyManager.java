@@ -235,7 +235,9 @@ class JobConcurrencyManager {
     private final Handler mHandler;
     private final Injector mInjector;
 
+    private final ActivityManagerInternal mActivityManagerInternal;
     private PowerManager mPowerManager;
+    private final UserManagerInternal mUserManagerInternal;
 
     private boolean mCurrentInteractiveState;
     private boolean mEffectiveInteractiveState;
@@ -506,6 +508,9 @@ class JobConcurrencyManager {
         mContext = service.getTestableContext();
         mInjector = injector;
         mNotificationCoordinator = new JobNotificationCoordinator();
+
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
         mHandler = AppSchedulingModuleThread.getHandler();
 
@@ -1253,9 +1258,7 @@ class JobConcurrencyManager {
                 return false;
             case PRIVILEGED_STATE_UNDEFINED:
             default:
-                final ActivityManagerInternal activityManagerInternal =
-                        LocalServices.getService(ActivityManagerInternal.class);
-                final int procState = activityManagerInternal.getUidProcessState(uid);
+                final int procState = mActivityManagerInternal.getUidProcessState(uid);
                 if (procState == ActivityManager.PROCESS_STATE_TOP) {
                     cachedPrivilegedState.put(uid, PRIVILEGED_STATE_TOP);
                     return true;
@@ -1266,7 +1269,7 @@ class JobConcurrencyManager {
                 }
 
                 final BackgroundStartPrivileges bsp =
-                        activityManagerInternal.getBackgroundStartPrivileges(uid);
+                        mActivityManagerInternal.getBackgroundStartPrivileges(uid);
                 if (DEBUG) {
                     Slog.d(TAG, "Job " + job.toShortString() + " bsp state: " + bsp);
                 }
@@ -1515,8 +1518,8 @@ class JobConcurrencyManager {
             @WorkType final int workType) {
         final List<StateController> controllers = mService.mControllers;
         final int numControllers = controllers.size();
-        final PowerManager.WakeLock wl =
-                mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, jobStatus.getTag());
+        final PowerManager.WakeLock wl = mPowerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, jobStatus.getWakelockTag());
         wl.setWorkSource(mService.deriveWorkSource(
                 jobStatus.getSourceUid(), jobStatus.getSourcePackageName()));
         wl.setReferenceCounted(false);
@@ -2213,19 +2216,17 @@ class JobConcurrencyManager {
     boolean shouldRunAsFgUserJob(JobStatus job) {
         if (!mShouldRestrictBgUser) return true;
         int userId = job.getSourceUserId();
-        UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
-        UserInfo userInfo = um.getUserInfo(userId);
+        UserInfo userInfo = mUserManagerInternal.getUserInfo(userId);
 
         // If the user has a parent user (e.g. a work profile of another user), the user should be
         // treated equivalent as its parent user.
         if (userInfo.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
                 && userInfo.profileGroupId != userId) {
             userId = userInfo.profileGroupId;
-            userInfo = um.getUserInfo(userId);
+            userInfo = mUserManagerInternal.getUserInfo(userId);
         }
 
-        int currentUser = LocalServices.getService(ActivityManagerInternal.class)
-                .getCurrentUserId();
+        int currentUser = mActivityManagerInternal.getCurrentUserId();
         // A user is treated as foreground user if any of the followings is true:
         // 1. The user is current user
         // 2. The user is primary user

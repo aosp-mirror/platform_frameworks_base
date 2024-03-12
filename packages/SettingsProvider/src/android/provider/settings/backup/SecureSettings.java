@@ -73,6 +73,7 @@ public class SecureSettings {
         Settings.Secure.TTS_ENABLED_PLUGINS,
         Settings.Secure.TTS_DEFAULT_LOCALE,
         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
+        Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS,
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
         Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
@@ -83,6 +84,8 @@ public class SecureSettings {
         Settings.Secure.DOUBLE_TAP_TO_WAKE,
         Settings.Secure.WAKE_GESTURE_ENABLED,
         Settings.Secure.LONG_PRESS_TIMEOUT,
+        Settings.Secure.KEY_REPEAT_TIMEOUT_MS,
+        Settings.Secure.KEY_REPEAT_DELAY_MS,
         Settings.Secure.CAMERA_GESTURE_DISABLED,
         Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED,
         Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
@@ -103,6 +106,9 @@ public class SecureSettings {
         Settings.Secure.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
         Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
         Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
+        // ACCESSIBILITY_QS_TARGETS needs to be restored after ENABLED_ACCESSIBILITY_SERVICES
+        // but before QS_TILES
+        Settings.Secure.ACCESSIBILITY_QS_TARGETS,
         Settings.Secure.QS_TILES,
         Settings.Secure.QS_AUTO_ADDED_TILES,
         Settings.Secure.CONTROLS_ENABLED,
@@ -141,6 +147,7 @@ public class SecureSettings {
         Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
         Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+        Settings.Secure.VOLUME_DIALOG_DISMISS_TIMEOUT,
         Settings.Secure.VOLUME_HUSH_GESTURE,
         Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT,
         Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
@@ -213,8 +220,10 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+        Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
         Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
+        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP_ENABLED,
         Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
         Settings.Secure.NOTIFICATION_BUBBLES,
         Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
@@ -240,6 +249,14 @@ public class SecureSettings {
         Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED,
-        Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+        Settings.Secure.SEARCH_LONG_PRESS_HOME_ENABLED,
+        Settings.Secure.HUB_MODE_TUTORIAL_STATE,
+        Settings.Secure.STYLUS_BUTTONS_ENABLED,
+        Settings.Secure.STYLUS_HANDWRITING_ENABLED,
+        Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
+        Settings.Secure.CREDENTIAL_SERVICE,
+        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+        Settings.Secure.EVEN_DIMMER_ACTIVATED,
+        Settings.Secure.EVEN_DIMMER_MIN_NITS
     };
 }

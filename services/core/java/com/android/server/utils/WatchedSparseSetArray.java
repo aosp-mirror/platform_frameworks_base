@@ -142,6 +142,20 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
         return (T) mStorage.valueAt(intIndex, valueIndex);
     }
 
+    /**
+     * Copy from another SparseSetArray.
+     */
+    public void copyFrom(@NonNull SparseSetArray<T> c) {
+        clear();
+        final int end = c.size();
+        for (int i = 0; i < end; i++) {
+            final int key = c.keyAt(i);
+            final ArraySet<T> set = c.get(key);
+            mStorage.addAll(key, set);
+        }
+        onChanged();
+    }
+
     @NonNull
     @Override
     public Object snapshot() {

@@ -16,26 +16,37 @@
 
 package android.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
+import android.util.ArrayMap;
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.WireTypeMismatchException;
 
-import java.lang.annotation.ElementType;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provide information related to a processes startup.
- *
- * @hide
  */
+@FlaggedApi(Flags.FLAG_APP_START_INFO)
 public final class ApplicationStartInfo implements Parcelable {
 
     /**
@@ -78,14 +89,14 @@ public final class ApplicationStartInfo implements Parcelable {
     /** Process started due to click app icon or widget from launcher. */
     public static final int START_REASON_LAUNCHER = 6;
 
+    /** Process started from launcher recents. */
+    public static final int START_REASON_LAUNCHER_RECENTS = 7;
+
     /** Process started not for any of the listed reasons. */
-    public static final int START_REASON_OTHER = 7;
+    public static final int START_REASON_OTHER = 8;
 
     /** Process started due to push message. */
-    public static final int START_REASON_PUSH = 8;
-
-    /** Process started to resume activity. */
-    public static final int START_REASON_RESUMED_ACTIVITY = 9;
+    public static final int START_REASON_PUSH = 9;
 
     /** Process service started. */
     public static final int START_REASON_SERVICE = 10;
@@ -93,14 +104,17 @@ public final class ApplicationStartInfo implements Parcelable {
     /** Process started due to Activity started for any reason not explicitly listed. */
     public static final int START_REASON_START_ACTIVITY = 11;
 
+    /** Start type not yet set. */
+    public static final int START_TYPE_UNSET = 0;
+
     /** Process started from scratch. */
-    public static final int START_TYPE_COLD = 0;
+    public static final int START_TYPE_COLD = 1;
 
     /** Process retained minimally SavedInstanceState. */
-    public static final int START_TYPE_WARM = 1;
+    public static final int START_TYPE_WARM = 2;
 
     /** Process brought back to foreground. */
-    public static final int START_TYPE_HOT = 2;
+    public static final int START_TYPE_HOT = 3;
 
     /**
      * Default. The system always creates a new instance of the activity in the target task and
@@ -136,11 +150,21 @@ public final class ApplicationStartInfo implements Parcelable {
      */
     public static final int LAUNCH_MODE_SINGLE_INSTANCE_PER_TASK = 4;
 
+    /** The end of the range, beginning with 0, reserved for system timestamps.*/
+    public static final int START_TIMESTAMP_RESERVED_RANGE_SYSTEM = 20;
+
+    /** The beginning of the range reserved for developer supplied timestamps.*/
+    public static final int START_TIMESTAMP_RESERVED_RANGE_DEVELOPER_START =
+            START_TIMESTAMP_RESERVED_RANGE_SYSTEM + 1;
+
+    /** The end of the range reserved for developer supplied timestamps.*/
+    public static final int START_TIMESTAMP_RESERVED_RANGE_DEVELOPER = 30;
+
     /** Clock monotonic timestamp of launch started. */
     public static final int START_TIMESTAMP_LAUNCH = 0;
 
-    /** Clock monotonic timestamp of finish java classloading. */
-    public static final int START_TIMESTAMP_JAVA_CLASSLOADING_COMPLETE = 1;
+    /** Clock monotonic timestamp of process fork. */
+    public static final int START_TIMESTAMP_FORK = 1;
 
     /** Clock monotonic timestamp of Application onCreate called. */
     public static final int START_TIMESTAMP_APPLICATION_ONCREATE = 2;
@@ -153,6 +177,12 @@ public final class ApplicationStartInfo implements Parcelable {
 
     /** Clock monotonic timestamp of reportFullyDrawn called by application. */
     public static final int START_TIMESTAMP_FULLY_DRAWN = 5;
+
+    /** Clock monotonic timestamp of initial renderthread frame. */
+    public static final int START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME = 6;
+
+    /** Clock monotonic timestamp of surfaceflinger composition complete. */
+    public static final int START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE = 7;
 
     /**
      * @see #getStartupState
@@ -192,7 +222,7 @@ public final class ApplicationStartInfo implements Parcelable {
     /**
      * @see #getStartupTimestamps
      */
-    private Map<@StartupTimestamp Integer, Long> mStartupTimestampsNs;
+    private ArrayMap<Integer, Long> mStartupTimestampsNs;
 
     /**
      * @see #getStartType
@@ -235,9 +265,9 @@ public final class ApplicationStartInfo implements Parcelable {
                 START_REASON_CONTENT_PROVIDER,
                 START_REASON_JOB,
                 START_REASON_LAUNCHER,
+                START_REASON_LAUNCHER_RECENTS,
                 START_REASON_OTHER,
                 START_REASON_PUSH,
-                START_REASON_RESUMED_ACTIVITY,
                 START_REASON_SERVICE,
                 START_REASON_START_ACTIVITY,
             })
@@ -250,6 +280,7 @@ public final class ApplicationStartInfo implements Parcelable {
     @IntDef(
             prefix = {"START_TYPE_"},
             value = {
+                START_TYPE_UNSET,
                 START_TYPE_COLD,
                 START_TYPE_WARM,
                 START_TYPE_HOT,
@@ -271,22 +302,6 @@ public final class ApplicationStartInfo implements Parcelable {
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LaunchMode {}
-
-    /**
-     * @hide *
-     */
-    @IntDef(
-            prefix = {"START_TIMESTAMP_"},
-            value = {
-                START_TIMESTAMP_LAUNCH,
-                START_TIMESTAMP_JAVA_CLASSLOADING_COMPLETE,
-                START_TIMESTAMP_APPLICATION_ONCREATE,
-                START_TIMESTAMP_BIND_APPLICATION,
-                START_TIMESTAMP_FULLY_DRAWN,
-            })
-    @Retention(RetentionPolicy.SOURCE)
-    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-    public @interface StartupTimestamp {}
 
     /**
      * @see #getStartupState
@@ -348,9 +363,12 @@ public final class ApplicationStartInfo implements Parcelable {
      * @see #getStartupTimestamps
      * @hide
      */
-    public void addStartupTimestamp(@StartupTimestamp int key, long timestampNs) {
+    public void addStartupTimestamp(int key, long timestampNs) {
+        if (key < 0 || key > START_TIMESTAMP_RESERVED_RANGE_DEVELOPER) {
+            return;
+        }
         if (mStartupTimestampsNs == null) {
-            mStartupTimestampsNs = new HashMap<@StartupTimestamp Integer, Long>();
+            mStartupTimestampsNs = new ArrayMap<Integer, Long>();
         }
         mStartupTimestampsNs.put(key, timestampNs);
     }
@@ -467,17 +485,16 @@ public final class ApplicationStartInfo implements Parcelable {
      * available.
      * For {@link #STARTUP_STATE_ERROR}, no additional timestamps are guaranteed available.
      * For {@link #STARTUP_STATE_FIRST_FRAME_DRAWN}, timestamps
-     * {@link #START_TIMESTAMP_JAVA_CLASSLOADING_COMPLETE}, {@link #START_TIMESTAMP_APPLICATION_ONCREATE},
-     * {@link #START_TIMESTAMP_BIND_APPLICATION}, and {@link #START_TIMESTAMP_FIRST_FRAME} will
-     * additionally be available.
+     * {@link #START_TIMESTAMP_APPLICATION_ONCREATE}, {@link #START_TIMESTAMP_BIND_APPLICATION},
+     * and {@link #START_TIMESTAMP_FIRST_FRAME} will additionally be available.
      *
      * Timestamp {@link #START_TIMESTAMP_FULLY_DRAWN} is never guaranteed to be available as it is
      * dependant on devloper calling {@link Activity#reportFullyDrawn}.
      * </p>
      */
-    public @NonNull Map<@StartupTimestamp Integer, Long> getStartupTimestamps() {
+    public @NonNull Map<Integer, Long> getStartupTimestamps() {
         if (mStartupTimestampsNs == null) {
-            mStartupTimestampsNs = new HashMap<@StartupTimestamp Integer, Long>();
+            mStartupTimestampsNs = new ArrayMap<Integer, Long>();
         }
         return mStartupTimestampsNs;
     }
@@ -536,9 +553,12 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeString(mProcessName);
         dest.writeInt(mReason);
         dest.writeInt(mStartupTimestampsNs.size());
-        for (@StartupTimestamp int key : mStartupTimestampsNs.keySet()) {
-            dest.writeInt(key);
-            dest.writeLong(mStartupTimestampsNs.get(key));
+        Set<Map.Entry<Integer, Long>> timestampEntrySet = mStartupTimestampsNs.entrySet();
+        Iterator<Map.Entry<Integer, Long>> iter = timestampEntrySet.iterator();
+        while (iter.hasNext()) {
+            Map.Entry<Integer, Long> entry = iter.next();
+            dest.writeInt(entry.getKey());
+            dest.writeLong(entry.getValue());
         }
         dest.writeInt(mStartType);
         dest.writeParcelable(mStartIntent, flags);
@@ -599,4 +619,165 @@ public final class ApplicationStartInfo implements Parcelable {
                     return new ApplicationStartInfo[size];
                 }
             };
+
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition at {@link
+     * android.app.ApplicationStartInfoProto}
+     *
+     * @param proto Stream to write the ApplicationStartInfo object to.
+     * @param fieldId Field Id of the ApplicationStartInfo as defined in the parent message
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) throws IOException {
+        final long token = proto.start(fieldId);
+        proto.write(ApplicationStartInfoProto.PID, mPid);
+        proto.write(ApplicationStartInfoProto.REAL_UID, mRealUid);
+        proto.write(ApplicationStartInfoProto.PACKAGE_UID, mPackageUid);
+        proto.write(ApplicationStartInfoProto.DEFINING_UID, mDefiningUid);
+        proto.write(ApplicationStartInfoProto.PROCESS_NAME, mProcessName);
+        proto.write(ApplicationStartInfoProto.STARTUP_STATE, mStartupState);
+        proto.write(ApplicationStartInfoProto.REASON, mReason);
+        if (mStartupTimestampsNs != null && mStartupTimestampsNs.size() > 0) {
+            ByteArrayOutputStream timestampsBytes = new ByteArrayOutputStream();
+            ObjectOutputStream timestampsOut = new ObjectOutputStream(timestampsBytes);
+            timestampsOut.writeObject(mStartupTimestampsNs);
+            proto.write(ApplicationStartInfoProto.STARTUP_TIMESTAMPS,
+                    timestampsBytes.toByteArray());
+        }
+        proto.write(ApplicationStartInfoProto.START_TYPE, mStartType);
+        if (mStartIntent != null) {
+            Parcel parcel = Parcel.obtain();
+            mStartIntent.writeToParcel(parcel, 0);
+            proto.write(ApplicationStartInfoProto.START_INTENT, parcel.marshall());
+            parcel.recycle();
+        }
+        proto.write(ApplicationStartInfoProto.LAUNCH_MODE, mLaunchMode);
+        proto.end(token);
+    }
+
+    /**
+     * Read from a protocol buffer input stream. Protocol buffer message definition at {@link
+     * android.app.ApplicationStartInfoProto}
+     *
+     * @param proto Stream to read the ApplicationStartInfo object from.
+     * @param fieldId Field Id of the ApplicationStartInfo as defined in the parent message
+     * @hide
+     */
+    public void readFromProto(ProtoInputStream proto, long fieldId)
+            throws IOException, WireTypeMismatchException, ClassNotFoundException {
+        final long token = proto.start(fieldId);
+        while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (proto.getFieldNumber()) {
+                case (int) ApplicationStartInfoProto.PID:
+                    mPid = proto.readInt(ApplicationStartInfoProto.PID);
+                    break;
+                case (int) ApplicationStartInfoProto.REAL_UID:
+                    mRealUid = proto.readInt(ApplicationStartInfoProto.REAL_UID);
+                    break;
+                case (int) ApplicationStartInfoProto.PACKAGE_UID:
+                    mPackageUid = proto.readInt(ApplicationStartInfoProto.PACKAGE_UID);
+                    break;
+                case (int) ApplicationStartInfoProto.DEFINING_UID:
+                    mDefiningUid = proto.readInt(ApplicationStartInfoProto.DEFINING_UID);
+                    break;
+                case (int) ApplicationStartInfoProto.PROCESS_NAME:
+                    mProcessName = intern(proto.readString(ApplicationStartInfoProto.PROCESS_NAME));
+                    break;
+                case (int) ApplicationStartInfoProto.STARTUP_STATE:
+                    mStartupState = proto.readInt(ApplicationStartInfoProto.STARTUP_STATE);
+                    break;
+                case (int) ApplicationStartInfoProto.REASON:
+                    mReason = proto.readInt(ApplicationStartInfoProto.REASON);
+                    break;
+                case (int) ApplicationStartInfoProto.STARTUP_TIMESTAMPS:
+                    ByteArrayInputStream timestampsBytes = new ByteArrayInputStream(proto.readBytes(
+                            ApplicationStartInfoProto.STARTUP_TIMESTAMPS));
+                    ObjectInputStream timestampsIn = new ObjectInputStream(timestampsBytes);
+                    mStartupTimestampsNs = (ArrayMap<Integer, Long>) timestampsIn.readObject();
+                    break;
+                case (int) ApplicationStartInfoProto.START_TYPE:
+                    mStartType = proto.readInt(ApplicationStartInfoProto.START_TYPE);
+                    break;
+                case (int) ApplicationStartInfoProto.START_INTENT:
+                    byte[] startIntentBytes = proto.readBytes(
+                        ApplicationStartInfoProto.START_INTENT);
+                    if (startIntentBytes.length > 0) {
+                        Parcel parcel = Parcel.obtain();
+                        parcel.unmarshall(startIntentBytes, 0, startIntentBytes.length);
+                        parcel.setDataPosition(0);
+                        mStartIntent = Intent.CREATOR.createFromParcel(parcel);
+                        parcel.recycle();
+                    }
+                    break;
+                case (int) ApplicationStartInfoProto.LAUNCH_MODE:
+                    mLaunchMode = proto.readInt(ApplicationStartInfoProto.LAUNCH_MODE);
+                    break;
+            }
+        }
+        proto.end(token);
+    }
+
+    /** @hide */
+    public void dump(@NonNull PrintWriter pw, @Nullable String prefix, @Nullable String seqSuffix,
+            @NonNull SimpleDateFormat sdf) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(prefix)
+                .append("ApplicationStartInfo ").append(seqSuffix).append(':')
+                .append('\n')
+                .append(" pid=").append(mPid)
+                .append(" realUid=").append(mRealUid)
+                .append(" packageUid=").append(mPackageUid)
+                .append(" definingUid=").append(mDefiningUid)
+                .append(" user=").append(UserHandle.getUserId(mPackageUid))
+                .append('\n')
+                .append(" process=").append(mProcessName)
+                .append(" startupState=").append(mStartupState)
+                .append(" reason=").append(reasonToString(mReason))
+                .append(" startType=").append(startTypeToString(mStartType))
+                .append(" launchMode=").append(mLaunchMode)
+                .append('\n');
+        if (mStartIntent != null) {
+            sb.append(" intent=").append(mStartIntent.toString())
+                .append('\n');
+        }
+        if (mStartupTimestampsNs.size() > 0) {
+            sb.append(" timestamps: ");
+            Set<Map.Entry<Integer, Long>> timestampEntrySet = mStartupTimestampsNs.entrySet();
+            Iterator<Map.Entry<Integer, Long>> iter = timestampEntrySet.iterator();
+            while (iter.hasNext()) {
+                Map.Entry<Integer, Long> entry = iter.next();
+                sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" ");
+            }
+            sb.append('\n');
+        }
+        pw.print(sb.toString());
+    }
+
+    private static String reasonToString(@StartReason int reason) {
+        return switch (reason) {
+            case START_REASON_ALARM -> "ALARM";
+            case START_REASON_BACKUP -> "BACKUP";
+            case START_REASON_BOOT_COMPLETE -> "BOOT COMPLETE";
+            case START_REASON_BROADCAST -> "BROADCAST";
+            case START_REASON_CONTENT_PROVIDER -> "CONTENT PROVIDER";
+            case START_REASON_JOB -> "JOB";
+            case START_REASON_LAUNCHER -> "LAUNCHER";
+            case START_REASON_LAUNCHER_RECENTS -> "LAUNCHER RECENTS";
+            case START_REASON_OTHER -> "OTHER";
+            case START_REASON_PUSH -> "PUSH";
+            case START_REASON_SERVICE -> "SERVICE";
+            case START_REASON_START_ACTIVITY -> "START ACTIVITY";
+            default -> "";
+        };
+    }
+
+    private static String startTypeToString(@StartType int startType) {
+        return switch (startType) {
+            case START_TYPE_UNSET -> "UNSET";
+            case START_TYPE_COLD -> "COLD";
+            case START_TYPE_WARM -> "WARM";
+            case START_TYPE_HOT -> "HOT";
+            default -> "";
+        };
+    }
 }

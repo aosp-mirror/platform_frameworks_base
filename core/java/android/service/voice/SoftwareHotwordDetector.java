@@ -18,6 +18,7 @@ package android.service.voice;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -57,12 +58,14 @@ class SoftwareHotwordDetector extends AbstractDetector {
     private final HotwordDetector.Callback mCallback;
     private final AudioFormat mAudioFormat;
     private final Executor mExecutor;
+    private final String mAttributionTag;
 
     SoftwareHotwordDetector(
             IVoiceInteractionManagerService managerService,
             AudioFormat audioFormat,
             Executor executor,
-            HotwordDetector.Callback callback) {
+            HotwordDetector.Callback callback,
+            String attributionTag) {
         super(managerService, executor, callback);
 
         mManagerService = managerService;
@@ -70,13 +73,14 @@ class SoftwareHotwordDetector extends AbstractDetector {
         mCallback = callback;
         mExecutor = executor != null ? executor : new HandlerExecutor(
                 new Handler(Looper.getMainLooper()));
+        mAttributionTag = attributionTag;
     }
 
     @Override
     void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
         initAndVerifyDetector(options, sharedMemory,
                 new InitializationStateListener(mExecutor, mCallback),
-                DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
+                DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE, mAttributionTag);
     }
 
     void onDetectorRemoteException() {
@@ -198,6 +202,13 @@ class SoftwareHotwordDetector extends AbstractDetector {
                         result != null ? result : new HotwordRejectedResult.Builder().build());
             }));
         }
+
+        @Override
+        public void onTrainingData(@NonNull HotwordTrainingData result) {
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onTrainingData(result);
+            }));
+        }
     }
 
     private static class InitializationStateListener
@@ -231,6 +242,13 @@ class SoftwareHotwordDetector extends AbstractDetector {
         public void onRejected(HotwordRejectedResult result) throws RemoteException {
             if (DEBUG) {
                 Slog.i(TAG, "Ignored #onRejected event");
+            }
+        }
+
+        @Override
+        public void onTrainingData(@NonNull HotwordTrainingData data) {
+            if (DEBUG) {
+                Slog.i(TAG, "Ignored #onTrainingData event");
             }
         }
 

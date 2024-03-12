@@ -18,9 +18,14 @@ import android.os.Bundle;
 
 import androidx.preference.PreferenceFragment;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
 
 public class OtherPrefs extends PreferenceFragment {
+    // aapt doesn't generate keep rules for android:fragment references in <Preference> tags, so
+    // explicitly declare references per usage in `R.xml.other_settings`. See b/120445169.
+    @UsesReflection(@KeepTarget(classConstant = PowerNotificationControlsFragment.class))
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.other_settings);

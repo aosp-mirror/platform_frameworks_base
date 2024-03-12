@@ -67,7 +67,6 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     @Overridable
     private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER = 244637991;
-
     public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
     public static final int FLAG_SERVICE_SENDER = 1 << 2;

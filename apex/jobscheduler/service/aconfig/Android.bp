@@ -1,0 +1,29 @@
+// Device Idle
+aconfig_declarations {
+    name: "service-deviceidle.flags-aconfig",
+    package: "com.android.server.deviceidle",
+    srcs: [
+        "device_idle.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "service-jobscheduler-deviceidle.flags-aconfig-java",
+    aconfig_declarations: "service-deviceidle.flags-aconfig",
+    visibility: ["//frameworks/base:__subpackages__"],
+}
+
+// JobScheduler
+aconfig_declarations {
+    name: "service-job.flags-aconfig",
+    package: "com.android.server.job",
+    srcs: [
+        "job.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "service-jobscheduler-job.flags-aconfig-java",
+    aconfig_declarations: "service-job.flags-aconfig",
+    visibility: ["//frameworks/base:__subpackages__"],
+}

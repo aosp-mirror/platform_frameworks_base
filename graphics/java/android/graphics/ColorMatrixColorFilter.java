@@ -81,12 +81,12 @@ public class ColorMatrixColorFilter extends ColorFilter {
      */
     @UnsupportedAppUsage
     public void setColorMatrix(@Nullable ColorMatrix matrix) {
-        discardNativeInstance();
         if (matrix == null) {
             mMatrix.reset();
         } else {
             mMatrix.set(matrix);
         }
+        nativeSetColorMatrix(getNativeInstance(), mMatrix.getArray());
     }
 
     /**
@@ -111,7 +111,6 @@ public class ColorMatrixColorFilter extends ColorFilter {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setColorMatrixArray(@Nullable float[] array) {
         // called '...Array' so that passing null isn't ambiguous
-        discardNativeInstance();
         if (array == null) {
             mMatrix.reset();
         } else {
@@ -120,6 +119,7 @@ public class ColorMatrixColorFilter extends ColorFilter {
             }
             mMatrix.set(array);
         }
+        nativeSetColorMatrix(getNativeInstance(), mMatrix.getArray());
     }
 
     @Override
@@ -128,4 +128,6 @@ public class ColorMatrixColorFilter extends ColorFilter {
     }
 
     private static native long nativeColorMatrixFilter(float[] array);
+
+    private static native void nativeSetColorMatrix(long colorMatrixColorFilter, float[] array);
 }

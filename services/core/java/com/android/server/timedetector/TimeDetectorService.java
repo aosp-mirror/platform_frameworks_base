@@ -19,7 +19,6 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.time.ExternalTimeSuggestion;
 import android.app.time.ITimeDetectorListener;
 import android.app.time.TimeCapabilitiesAndConfig;
@@ -30,7 +29,6 @@ import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelableException;
@@ -166,8 +164,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
      */
     boolean updateConfiguration(@UserIdInt int userId, @NonNull TimeConfiguration configuration) {
         // Resolve constants like USER_CURRENT to the true user ID as needed.
-        int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, false, "updateConfiguration", null);
+        int resolvedUserId = mCallerIdentityInjector.resolveUserId(userId, "updateConfiguration");
 
         enforceManageTimeDetectorPermission();
 
@@ -280,11 +277,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     public TimeState getTimeState() {
         enforceManageTimeDetectorPermission();
 
-        final long token = Binder.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             return mTimeDetectorStrategy.getTimeState();
         } finally {
-            Binder.restoreCallingIdentity(token);
+            mCallerIdentityInjector.restoreCallingIdentity(token);
         }
     }
 
@@ -295,11 +292,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     void setTimeState(@NonNull TimeState timeState) {
         enforceManageTimeDetectorPermission();
 
-        final long token = Binder.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             mTimeDetectorStrategy.setTimeState(timeState);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            mCallerIdentityInjector.restoreCallingIdentity(token);
         }
     }
 
@@ -308,11 +305,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         enforceManageTimeDetectorPermission();
         Objects.requireNonNull(time);
 
-        final long token = Binder.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             return mTimeDetectorStrategy.confirmTime(time);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            mCallerIdentityInjector.restoreCallingIdentity(token);
         }
     }
 
@@ -324,13 +321,13 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         // This calls suggestManualTime() as the logic is identical, it only differs in the
         // permission required, which is handled on the line above.
         int userId = mCallerIdentityInjector.getCallingUserId();
-        final long token = Binder.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             final boolean bypassUserPolicyChecks = false;
             return mTimeDetectorStrategy.suggestManualTime(
                     userId, suggestion, bypassUserPolicyChecks);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            mCallerIdentityInjector.restoreCallingIdentity(token);
         }
     }
 
@@ -377,11 +374,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     void clearLatestNetworkTime() {
         enforceSuggestNetworkTimePermission();
 
-        final long token = Binder.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             mTimeDetectorStrategy.clearLatestNetworkSuggestion();
         } finally {
-            Binder.restoreCallingIdentity(token);
+            mCallerIdentityInjector.restoreCallingIdentity(token);
         }
     }
 
@@ -473,7 +470,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     void clearNetworkTimeForSystemClockForTests() {
         enforceSuggestNetworkTimePermission();
 
-        final long token = Binder.clearCallingIdentity();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             // TODO(b/222295093): Remove this condition once we can be sure that all uses of
             //  NtpTrustedTime result in a suggestion being made to the time detector.
@@ -485,7 +482,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
                 mNtpTrustedTime.clearCachedTimeResult();
             }
         } finally {
-            Binder.restoreCallingIdentity(token);
+            mCallerIdentityInjector.restoreCallingIdentity(token);
         }
     }
 

@@ -88,6 +88,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.BroadcastProcessQueue.BroadcastConsumer;
 import com.android.server.am.BroadcastProcessQueue.BroadcastPredicate;
 import com.android.server.am.BroadcastRecord.DeliveryState;
+import com.android.server.utils.AnrTimer;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -149,6 +150,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // We configure runnable size only once at boot; it'd be too complex to
         // try resizing dynamically at runtime
         mRunning = new BroadcastProcessQueue[mConstants.getMaxRunningQueues()];
+
+        mAnrTimer = new BroadcastAnrTimer(mLocalHandler);
     }
 
     /**
@@ -191,6 +194,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private @Nullable BroadcastProcessQueue mRunningColdStart;
 
     /**
+     * Indicates whether we have queued a message to check pending cold start validity.
+     */
+    @GuardedBy("mService")
+    private boolean mCheckPendingColdStartQueued;
+
+    /**
      * Collection of latches waiting for device to reach specific state. The
      * first argument is a function to test for the desired state, and the
      * second argument is the latch to release once that state is reached.
@@ -222,6 +231,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             new AtomicReference<>();
 
     /**
+     * Container for holding the set of broadcast records that matches an enqueueing record.
+     * @see BroadcastRecord#isMatchingRecord(BroadcastRecord)
+     */
+    @GuardedBy("mService")
+    private final AtomicReference<ArrayMap<BroadcastRecord, Boolean>> mMatchingRecordsCache =
+            new AtomicReference<>();
+
+    /**
      * Map from UID to its last known "foreground" state. A UID is considered to be in
      * "foreground" state when it's procState is {@link ActivityManager#PROCESS_STATE_TOP}.
      * <p>
@@ -242,14 +259,23 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     private @UptimeMillisLong long mLastTestFailureTime;
 
+    /**
+     * The ANR timer service for broadcasts.
+     */
+    @GuardedBy("mService")
+    private final BroadcastAnrTimer mAnrTimer;
+
     private static final int MSG_UPDATE_RUNNING_LIST = 1;
-    private static final int MSG_DELIVERY_TIMEOUT_SOFT = 2;
-    private static final int MSG_DELIVERY_TIMEOUT_HARD = 3;
-    private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 4;
-    private static final int MSG_CHECK_HEALTH = 5;
-    private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 6;
-    private static final int MSG_PROCESS_FREEZABLE_CHANGED = 7;
-    private static final int MSG_UID_STATE_CHANGED = 8;
+    private static final int MSG_DELIVERY_TIMEOUT = 2;
+    private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 3;
+    private static final int MSG_CHECK_HEALTH = 4;
+    private static final int MSG_CHECK_PENDING_COLD_START_VALIDITY = 5;
+    private static final int MSG_PROCESS_FREEZABLE_CHANGED = 6;
+    private static final int MSG_UID_STATE_CHANGED = 7;
+
+    // Required when Flags.anrTimerServiceEnabled is false.  This constant should be deleted if and
+    // when the flag is fused on.
+    private static final int MSG_DELIVERY_TIMEOUT_SOFT = 8;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
@@ -264,12 +290,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 updateRunningList();
                 return true;
             }
+            // Required when Flags.anrTimerServiceEnabled is false.  This case should be deleted if
+            // and when the flag is fused on.
             case MSG_DELIVERY_TIMEOUT_SOFT: {
-                deliveryTimeoutSoft((BroadcastProcessQueue) msg.obj, msg.arg1);
-                return true;
+                synchronized (mService) {
+                    deliveryTimeoutSoftLocked((BroadcastProcessQueue) msg.obj, msg.arg1);
+                    return true;
+                }
             }
-            case MSG_DELIVERY_TIMEOUT_HARD: {
-                deliveryTimeoutHard((BroadcastProcessQueue) msg.obj);
+            case MSG_DELIVERY_TIMEOUT: {
+                deliveryTimeout((BroadcastProcessQueue) msg.obj);
                 return true;
             }
             case MSG_BG_ACTIVITY_START_TIMEOUT: {
@@ -287,7 +317,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return true;
             }
             case MSG_CHECK_PENDING_COLD_START_VALIDITY: {
-                checkPendingColdStartValidity();
+                synchronized (mService) {
+                    /* Clear this as we have just received the broadcast. */
+                    mCheckPendingColdStartQueued = false;
+                    checkPendingColdStartValidityLocked();
+                }
                 return true;
             }
             case MSG_PROCESS_FREEZABLE_CHANGED: {
@@ -534,7 +568,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_START_RECEIVER);
         }
 
-        checkPendingColdStartValidity();
+        checkPendingColdStartValidityLocked();
         checkAndRemoveWaitingFor();
 
         traceEnd(cookie);
@@ -558,22 +592,24 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         enqueueUpdateRunningList();
     }
 
-    private void checkPendingColdStartValidity() {
+    @GuardedBy("mService")
+    private void checkPendingColdStartValidityLocked() {
         // There are a few cases where a starting process gets killed but AMS doesn't report
         // this event. So, once we start waiting for a pending cold start, periodically check
         // if the pending start is still valid and if not, clear it so that the queue doesn't
         // keep waiting for the process start forever.
-        synchronized (mService) {
-            // If there is no pending cold start, then nothing to do.
-            if (mRunningColdStart == null) {
-                return;
-            }
-            if (isPendingColdStartValid()) {
+        // If there is no pending cold start, then nothing to do.
+        if (mRunningColdStart == null) {
+            return;
+        }
+        if (isPendingColdStartValid()) {
+            if (!mCheckPendingColdStartQueued) {
                 mLocalHandler.sendEmptyMessageDelayed(MSG_CHECK_PENDING_COLD_START_VALIDITY,
                         mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
-            } else {
-                clearInvalidPendingColdStart();
+                mCheckPendingColdStartQueued = true;
             }
+        } else {
+            clearInvalidPendingColdStart();
         }
     }
 
@@ -720,6 +756,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (replacedBroadcasts == null) {
             replacedBroadcasts = new ArraySet<>();
         }
+        ArrayMap<BroadcastRecord, Boolean> matchingBroadcasts =
+                mMatchingRecordsCache.getAndSet(null);
+        if (matchingBroadcasts == null) {
+            matchingBroadcasts = new ArrayMap<>();
+        }
+        r.setMatchingRecordsCache(matchingBroadcasts);
         boolean enqueuedBroadcast = false;
 
         for (int i = 0; i < r.receivers.size(); i++) {
@@ -753,6 +795,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         skipAndCancelReplacedBroadcasts(replacedBroadcasts);
         replacedBroadcasts.clear();
         mReplacedBroadcastsCache.compareAndSet(null, replacedBroadcasts);
+        matchingBroadcasts.clear();
+        r.clearMatchingRecordsCache();
+        mMatchingRecordsCache.compareAndSet(null, matchingBroadcasts);
 
         // If nothing to dispatch, send any pending result immediately
         if (r.receivers.isEmpty() || !enqueuedBroadcast) {
@@ -1028,12 +1073,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // immediately assume delivery success
         final boolean assumeDelivered = r.isAssumedDelivered(index);
         if (mService.mProcessesReady && !r.timeoutExempt && !assumeDelivered) {
-            queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
-
+            queue.setTimeoutScheduled(true);
             final int softTimeoutMillis = (int) (r.isForeground() ? mFgConstants.TIMEOUT
                     : mBgConstants.TIMEOUT);
-            mLocalHandler.sendMessageDelayed(Message.obtain(mLocalHandler,
-                    MSG_DELIVERY_TIMEOUT_SOFT, softTimeoutMillis, 0, queue), softTimeoutMillis);
+            startDeliveryTimeoutLocked(queue, softTimeoutMillis);
+        } else {
+            queue.setTimeoutScheduled(false);
         }
 
         if (r.mBackgroundStartPrivileges.allowsAny()) {
@@ -1111,7 +1156,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 // If we were trying to deliver a manifest broadcast, throw the error as we need
                 // to try redelivering the broadcast to this receiver.
                 if (receiver instanceof ResolveInfo) {
-                    mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
+                    cancelDeliveryTimeoutLocked(queue);
                     throw new BroadcastDeliveryFailedException(e);
                 }
                 finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
@@ -1160,13 +1205,30 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.resultTo = null;
     }
 
-    private void deliveryTimeoutSoft(@NonNull BroadcastProcessQueue queue,
+    // Required when Flags.anrTimerServiceEnabled is false.  This function can be replaced with a
+    // single call to {@code mAnrTimer.start()} if and when the flag is fused on.
+    private void startDeliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue,
             int softTimeoutMillis) {
-        synchronized (mService) {
-            deliveryTimeoutSoftLocked(queue, softTimeoutMillis);
+        if (mAnrTimer.serviceEnabled()) {
+            mAnrTimer.start(queue, softTimeoutMillis);
+        } else {
+            queue.lastCpuDelayTime = queue.app.getCpuDelayTime();
+            mLocalHandler.sendMessageDelayed(Message.obtain(mLocalHandler,
+                    MSG_DELIVERY_TIMEOUT_SOFT, softTimeoutMillis, 0, queue), softTimeoutMillis);
         }
     }
 
+    // Required when Flags.anrTimerServiceEnabled is false. This function can be replaced with a
+    // single call to {@code mAnrTimer.cancel()} if and when the flag is fused on.
+    private void cancelDeliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
+        mAnrTimer.cancel(queue);
+        if (!mAnrTimer.serviceEnabled()) {
+            mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
+        }
+    }
+
+    // Required when Flags.anrTimerServiceEnabled is false.  This function can be deleted entirely
+    // if and when the flag is fused on.
     private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
             int softTimeoutMillis) {
         if (queue.app != null) {
@@ -1175,24 +1237,33 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // only willing to do this once before triggering an hard ANR
             final long cpuDelayTime = queue.app.getCpuDelayTime() - queue.lastCpuDelayTime;
             final long hardTimeoutMillis = MathUtils.constrain(cpuDelayTime, 0, softTimeoutMillis);
-            mLocalHandler.sendMessageDelayed(
-                    Message.obtain(mLocalHandler, MSG_DELIVERY_TIMEOUT_HARD, queue),
-                    hardTimeoutMillis);
+            mAnrTimer.start(queue, hardTimeoutMillis);
         } else {
-            deliveryTimeoutHardLocked(queue);
+            deliveryTimeoutLocked(queue);
         }
     }
 
-    private void deliveryTimeoutHard(@NonNull BroadcastProcessQueue queue) {
+    private void deliveryTimeout(@NonNull BroadcastProcessQueue queue) {
         synchronized (mService) {
-            deliveryTimeoutHardLocked(queue);
+            deliveryTimeoutLocked(queue);
         }
     }
 
-    private void deliveryTimeoutHardLocked(@NonNull BroadcastProcessQueue queue) {
+    private void deliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
         finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_TIMEOUT,
-                "deliveryTimeoutHardLocked");
+                "deliveryTimeoutLocked");
         demoteFromRunningLocked(queue);
+    }
+
+    private class BroadcastAnrTimer extends AnrTimer<BroadcastProcessQueue> {
+        BroadcastAnrTimer(@NonNull Handler handler) {
+            super(Objects.requireNonNull(handler),
+                    MSG_DELIVERY_TIMEOUT, "BROADCAST_TIMEOUT", true);
+        }
+
+        void start(@NonNull BroadcastProcessQueue queue, long timeoutMillis) {
+            start(queue, queue.app.getPid(), queue.app.uid, timeoutMillis);
+        }
     }
 
     @Override
@@ -1296,14 +1367,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
             r.anrCount++;
             if (app != null && !app.isDebugging()) {
+                mAnrTimer.accept(queue);
                 final String packageName = getReceiverPackageName(receiver);
                 final String className = getReceiverClassName(receiver);
                 mService.appNotResponding(queue.app,
                         TimeoutRecord.forBroadcastReceiver(r.intent, packageName, className));
+            } else {
+                mAnrTimer.discard(queue);
             }
-        } else {
-            mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
-            mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_HARD, queue);
+        } else if (queue.timeoutScheduled()) {
+            cancelDeliveryTimeoutLocked(queue);
         }
 
         // Given that a receiver just finished, check if the "waitingFor" conditions are met.
@@ -1731,13 +1804,15 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public boolean isDelayBehindServices() {
-        // TODO: implement
+        // Modern queue does not alter the broadcasts delivery behavior based on background
+        // services, so ignore.
         return false;
     }
 
     @Override
     public void backgroundServicesFinishedLocked(int userId) {
-        // TODO: implement
+        // Modern queue does not alter the broadcasts delivery behavior based on background
+        // services, so ignore.
     }
 
     private void checkHealth() {
@@ -1943,8 +2018,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mService.notifyPackageUse(receiverPackageName,
                 PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
 
-        mService.mPackageManagerInt.setPackageStoppedState(
-                receiverPackageName, false, r.userId);
+        mService.mPackageManagerInt.notifyComponentUsed(
+                receiverPackageName, r.userId, r.callerPackage, r.toString());
     }
 
     private void reportUsageStatsBroadcastDispatched(@NonNull ProcessRecord app,

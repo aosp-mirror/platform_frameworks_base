@@ -36,7 +36,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.DebugLogger.debugLog
@@ -162,6 +162,7 @@ constructor(
                 .setContentText(context.getString(R.string.stylus_battery_low_subtitle))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setLocalOnly(true)
+                .setOnlyAlertOnce(true)
                 .setAutoCancel(true)
                 .build()
 

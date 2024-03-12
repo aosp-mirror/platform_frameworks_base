@@ -1,0 +1,40 @@
+package: "android.view.inputmethod"
+
+flag {
+    name: "refactor_insets_controller"
+    namespace: "input_method"
+    description: "Feature flag for refactoring InsetsController and removing ImeInsetsSourceConsumer"
+    bug: "298172246"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "editorinfo_handwriting_enabled"
+    namespace: "input_method"
+    description: "Feature flag for adding EditorInfo#mStylusHandwritingEnabled"
+    bug: "293898187"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "imm_userhandle_hostsidetests"
+    namespace: "input_method"
+    description: "Feature flag for replacing UserIdInt with UserHandle in some helper IMM functions"
+    bug: "301713309"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "concurrent_input_methods"
+    namespace: "input_method"
+    description: "Feature flag for concurrent multi-session IME"
+    bug: "284527000"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "home_screen_handwriting_delegator"
+    namespace: "input_method"
+    description: "Feature flag for supporting stylus handwriting delegation from RemoteViews on the home screen"
+    bug: "279959705"
+}

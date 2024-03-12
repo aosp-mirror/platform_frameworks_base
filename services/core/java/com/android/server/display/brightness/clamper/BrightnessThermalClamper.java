@@ -54,10 +54,6 @@ class BrightnessThermalClamper extends
     private final IThermalService mThermalService;
     @NonNull
     private final DeviceConfigParameterProvider mConfigParameterProvider;
-    @NonNull
-    private final Handler mHandler;
-    @NonNull
-    private final ClamperChangeListener mChangelistener;
     // data from DeviceConfig, for all displays, for all dataSets
     // mapOf(uniqueDisplayId to mapOf(dataSetId to ThermalBrightnessThrottlingData))
     @NonNull
@@ -108,10 +104,9 @@ class BrightnessThermalClamper extends
     @VisibleForTesting
     BrightnessThermalClamper(Injector injector, Handler handler,
             ClamperChangeListener listener, ThermalData thermalData) {
+        super(handler, listener);
         mThermalService = injector.getThermalService();
         mConfigParameterProvider = injector.getDeviceConfigParameterProvider();
-        mHandler = handler;
-        mChangelistener = listener;
         mHandler.post(() -> {
             setDisplayData(thermalData);
             loadOverrideData();
@@ -220,7 +215,7 @@ class BrightnessThermalClamper extends
         if (brightnessCap  != mBrightnessCap || mIsActive != isActive) {
             mBrightnessCap = brightnessCap;
             mIsActive = isActive;
-            mChangelistener.onChanged();
+            mChangeListener.onChanged();
         }
     }
 

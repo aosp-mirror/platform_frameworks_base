@@ -18,7 +18,6 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.res.Resources;
 import android.os.LocaleList;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -86,8 +85,7 @@ final class SubtypeUtils {
                     continue;
                 }
             }
-            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode)
-                    || mode.equalsIgnoreCase(subtype.getMode())) {
+            if (TextUtils.isEmpty(mode) || mode.equalsIgnoreCase(subtype.getMode())) {
                 return true;
             }
         }
@@ -126,9 +124,7 @@ final class SubtypeUtils {
     @VisibleForTesting
     @NonNull
     static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
-            Resources res, InputMethodInfo imi) {
-        final LocaleList systemLocales = res.getConfiguration().getLocales();
-
+            @NonNull LocaleList systemLocales, InputMethodInfo imi) {
         synchronized (sCacheLock) {
             // We intentionally do not use InputMethodInfo#equals(InputMethodInfo) here because
             // it does not check if subtypes are also identical.
@@ -141,7 +137,7 @@ final class SubtypeUtils {
         // TODO: Refactor getImplicitlyApplicableSubtypesLockedImpl() so that it can receive
         // LocaleList rather than Resource.
         final ArrayList<InputMethodSubtype> result =
-                getImplicitlyApplicableSubtypesLockedImpl(res, imi);
+                getImplicitlyApplicableSubtypesLockedImpl(systemLocales, imi);
         synchronized (sCacheLock) {
             // Both LocaleList and InputMethodInfo are immutable. No need to copy them here.
             sCachedSystemLocales = systemLocales;
@@ -152,9 +148,8 @@ final class SubtypeUtils {
     }
 
     private static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLockedImpl(
-            Resources res, InputMethodInfo imi) {
+            @NonNull LocaleList systemLocales, InputMethodInfo imi) {
         final List<InputMethodSubtype> subtypes = getSubtypes(imi);
-        final LocaleList systemLocales = res.getConfiguration().getLocales();
         final String systemLocale = systemLocales.get(0).toString();
         if (TextUtils.isEmpty(systemLocale)) return new ArrayList<>();
         final int numSubtypes = subtypes.size();
@@ -221,7 +216,7 @@ final class SubtypeUtils {
 
         if (applicableSubtypes.isEmpty()) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
-                    res, subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
+                    subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
             if (lastResortKeyboardSubtype != null) {
                 applicableSubtypes.add(lastResortKeyboardSubtype);
             }
@@ -250,13 +245,10 @@ final class SubtypeUtils {
      * @return the most applicable subtypeId
      */
     static InputMethodSubtype findLastResortApplicableSubtypeLocked(
-            Resources res, List<InputMethodSubtype> subtypes, String mode, String locale,
+            List<InputMethodSubtype> subtypes, String mode, @NonNull String locale,
             boolean canIgnoreLocaleAsLastResort) {
         if (subtypes == null || subtypes.isEmpty()) {
             return null;
-        }
-        if (TextUtils.isEmpty(locale)) {
-            locale = res.getConfiguration().locale.toString();
         }
         final String language = LocaleUtils.getLanguageFromLocaleString(locale);
         boolean partialMatchFound = false;

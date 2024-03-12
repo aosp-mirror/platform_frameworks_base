@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "GraphicsJNI.h"
+#include <hwui/Paint.h>
 
+#include "ColorFilter.h"
+#include "GraphicsJNI.h"
 #include "PathParser.h"
 #include "VectorDrawable.h"
-
-#include <hwui/Paint.h>
 
 namespace android {
 using namespace uirenderer;
@@ -108,8 +108,9 @@ static jint draw(JNIEnv* env, jobject, jlong treePtr, jlong canvasPtr,
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     SkRect rect;
     GraphicsJNI::jrect_to_rect(env, jrect, &rect);
-    SkColorFilter* colorFilter = reinterpret_cast<SkColorFilter*>(colorFilterPtr);
-    return tree->draw(canvas, colorFilter, rect, needsMirroring, canReuseCache);
+    auto colorFilter = ColorFilter::fromJava(colorFilterPtr);
+    auto skColorFilter = colorFilter != nullptr ? colorFilter->getInstance() : nullptr;
+    return tree->draw(canvas, skColorFilter.get(), rect, needsMirroring, canReuseCache);
 }
 
 /**

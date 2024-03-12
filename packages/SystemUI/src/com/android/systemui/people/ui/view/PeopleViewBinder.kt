@@ -31,10 +31,10 @@ import androidx.lifecycle.Lifecycle.State.CREATED
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
 import com.android.systemui.people.PeopleSpaceTileView
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
+import com.android.systemui.res.R
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -101,10 +101,10 @@ object PeopleViewBinder {
                                 view,
                                 priorityTiles,
                                 recentTiles,
-                                viewModel::onTileClicked,
+                                viewModel.onTileClicked,
                             )
                         } else {
-                            setNoConversationsContent(view, viewModel::onUserJourneyCancelled)
+                            setNoConversationsContent(view, viewModel.onUserJourneyCancelled)
                         }
                     }
             }

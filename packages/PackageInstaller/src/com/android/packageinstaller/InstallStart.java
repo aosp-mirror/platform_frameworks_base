@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller;
 
+import static android.content.pm.Flags.usePiaV2;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
@@ -37,10 +38,9 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import com.android.packageinstaller.v2.ui.InstallLaunch;
 import java.util.Arrays;
 
 /**
@@ -49,8 +49,6 @@ import java.util.Arrays;
  */
 public class InstallStart extends Activity {
     private static final String TAG = InstallStart.class.getSimpleName();
-
-    private static final String DOWNLOADS_AUTHORITY = "downloads";
 
     private PackageManager mPackageManager;
     private UserManager mUserManager;
@@ -62,6 +60,20 @@ public class InstallStart extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        if (usePiaV2()) {
+            Log.i(TAG, "Using Pia V2");
+
+            Intent piaV2 = new Intent(getIntent());
+            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getCallingPackage());
+            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
+            piaV2.setClass(this, InstallLaunch.class);
+            piaV2.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            startActivity(piaV2);
+            finish();
+            return;
+        }
         mPackageManager = getPackageManager();
         mUserManager = getSystemService(UserManager.class);
 
@@ -101,6 +113,8 @@ public class InstallStart extends Activity {
 
         boolean isDocumentsManager = checkPermission(Manifest.permission.MANAGE_DOCUMENTS,
                 -1, callingUid) == PackageManager.PERMISSION_GRANTED;
+        boolean isSystemDownloadsProvider = PackageUtil.getSystemDownloadsProviderInfo(
+                                                mPackageManager, callingUid) != null;
         boolean isTrustedSource = false;
         if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
             isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
@@ -109,7 +123,7 @@ public class InstallStart extends Activity {
                             == PackageManager.PERMISSION_GRANTED);
         }
 
-        if (!isTrustedSource && !isSystemDownloadsProvider(callingUid) && !isDocumentsManager
+        if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager
                 && originatingUid != Process.INVALID_UID) {
             final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, originatingUid);
             if (targetSdkVersion < 0) {
@@ -241,17 +255,6 @@ public class InstallStart extends Activity {
         return null;
     }
 
-    private boolean isSystemDownloadsProvider(int uid) {
-        final ProviderInfo downloadProviderPackage = getPackageManager().resolveContentProvider(
-                DOWNLOADS_AUTHORITY, 0);
-        if (downloadProviderPackage == null) {
-            // There seems to be no currently enabled downloads provider on the system.
-            return false;
-        }
-        final ApplicationInfo appInfo = downloadProviderPackage.applicationInfo;
-        return ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-                && uid == appInfo.uid);
-    }
 
     @NonNull
     private boolean canPackageQuery(int callingUid, Uri packageUri) {
@@ -266,7 +269,7 @@ public class InstallStart extends Activity {
         if (callingPackages == null) {
             return false;
         }
-        for (String callingPackage: callingPackages) {
+        for (String callingPackage : callingPackages) {
             try {
                 if (mPackageManager.canPackageQuery(callingPackage, targetPackage)) {
                     return true;

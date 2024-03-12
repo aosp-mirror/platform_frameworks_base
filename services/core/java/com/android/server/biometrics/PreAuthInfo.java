@@ -108,7 +108,7 @@ class PreAuthInfo {
         final boolean credentialRequested = Utils.isCredentialRequested(promptInfo);
 
         final boolean credentialAvailable = trustManager.isDeviceSecure(userId,
-                context.getAssociatedDisplayId());
+                context.getDeviceId());
 
         // Assuming that biometric authenticators are listed in priority-order, the rest of this
         // function will attempt to find the first authenticator that's as strong or stronger than
@@ -273,13 +273,17 @@ class PreAuthInfo {
     private Pair<BiometricSensor, Integer> calculateErrorByPriority() {
         Pair<BiometricSensor, Integer> sensorNotEnrolled = null;
         Pair<BiometricSensor, Integer> sensorLockout = null;
+        Pair<BiometricSensor, Integer> hardwareNotDetected = null;
         for (Pair<BiometricSensor, Integer> pair : ineligibleSensors) {
-            int status = pair.second;
+            final int status = pair.second;
             if (status == BIOMETRIC_LOCKOUT_TIMED || status == BIOMETRIC_LOCKOUT_PERMANENT) {
                 sensorLockout = pair;
             }
-            if (pair.second == BIOMETRIC_NOT_ENROLLED) {
+            if (status == BIOMETRIC_NOT_ENROLLED) {
                 sensorNotEnrolled = pair;
+            }
+            if (status == BIOMETRIC_HARDWARE_NOT_DETECTED) {
+                hardwareNotDetected = pair;
             }
         }
 
@@ -287,6 +291,10 @@ class PreAuthInfo {
         // See b/286923477.
         if (sensorLockout != null) {
             return sensorLockout;
+        }
+
+        if (hardwareNotDetected != null) {
+            return hardwareNotDetected;
         }
 
         // If the caller requested STRONG, and the device contains both STRONG and non-STRONG

@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -29,6 +28,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.LocaleList;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -50,8 +50,9 @@ import com.android.server.textservices.TextServicesManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -210,37 +211,13 @@ final class InputMethodUtils {
      */
     @UserHandleAware
     public static class InputMethodSettings {
-        private final TextUtils.SimpleStringSplitter mInputMethodSplitter =
-                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
-
-        private final TextUtils.SimpleStringSplitter mSubtypeSplitter =
-                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
-
-        @NonNull
-        private Context mUserAwareContext;
-        private Resources mRes;
-        private ContentResolver mResolver;
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
-
-        /**
-         * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
-         */
-        private final ArrayMap<String, String> mCopyOnWriteDataStore = new ArrayMap<>();
-
-        private static final ArraySet<String> CLONE_TO_MANAGED_PROFILE = new ArraySet<>();
-        static {
-            Settings.Secure.getCloneToManagedProfileSettings(CLONE_TO_MANAGED_PROFILE);
-        }
-
-        private static final UserManagerInternal sUserManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
 
         private boolean mCopyOnWrite = false;
         @NonNull
         private String mEnabledInputMethodsStrCache = "";
         @UserIdInt
         private int mCurrentUserId;
-        private int[] mCurrentProfileIds = new int[0];
 
         private static void buildEnabledInputMethodsSettingString(
                 StringBuilder builder, Pair<String, ArrayList<String>> ime) {
@@ -277,19 +254,9 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        private void initContentWithUserContext(@NonNull Context context, @UserIdInt int userId) {
-            mUserAwareContext = context.getUserId() == userId
-                    ? context
-                    : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
-            mRes = mUserAwareContext.getResources();
-            mResolver = mUserAwareContext.getContentResolver();
-        }
-
-        InputMethodSettings(@NonNull Context context,
-                ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
+        InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
                 boolean copyOnWrite) {
             mMethodMap = methodMap;
-            initContentWithUserContext(context, userId);
             switchCurrentUser(userId, copyOnWrite);
         }
 
@@ -306,85 +273,35 @@ final class InputMethodUtils {
                 Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
             }
             if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
-                mCopyOnWriteDataStore.clear();
                 mEnabledInputMethodsStrCache = "";
-                // TODO: mCurrentProfileIds should be cleared here.
-            }
-            if (mUserAwareContext.getUserId() != userId) {
-                initContentWithUserContext(mUserAwareContext, userId);
             }
             mCurrentUserId = userId;
             mCopyOnWrite = copyOnWrite;
-            // TODO: mCurrentProfileIds should be updated here.
         }
 
         private void putString(@NonNull String key, @Nullable String str) {
-            if (mCopyOnWrite) {
-                mCopyOnWriteDataStore.put(key, str);
-            } else {
-                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
-                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
-                Settings.Secure.putStringForUser(mResolver, key, str, userId);
-            }
+            SecureSettingsWrapper.putString(key, str, mCurrentUserId);
         }
 
         @Nullable
         private String getString(@NonNull String key, @Nullable String defaultValue) {
-            return getStringForUser(key, defaultValue, mCurrentUserId);
-        }
-
-        @Nullable
-        private String getStringForUser(
-                @NonNull String key, @Nullable String defaultValue, @UserIdInt int userId) {
-            final String result;
-            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                result = mCopyOnWriteDataStore.get(key);
-            } else {
-                result = Settings.Secure.getStringForUser(mResolver, key, userId);
-            }
-            return result != null ? result : defaultValue;
+            return SecureSettingsWrapper.getString(key, defaultValue, mCurrentUserId);
         }
 
         private void putInt(String key, int value) {
-            if (mCopyOnWrite) {
-                mCopyOnWriteDataStore.put(key, String.valueOf(value));
-            } else {
-                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
-                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
-                Settings.Secure.putIntForUser(mResolver, key, value, userId);
-            }
+            SecureSettingsWrapper.putInt(key, value, mCurrentUserId);
         }
 
         private int getInt(String key, int defaultValue) {
-            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? Integer.parseInt(result) : defaultValue;
-            }
-            return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
+            return SecureSettingsWrapper.getInt(key, defaultValue, mCurrentUserId);
         }
 
         private void putBoolean(String key, boolean value) {
-            putInt(key, value ? 1 : 0);
+            SecureSettingsWrapper.putBoolean(key, value, mCurrentUserId);
         }
 
         private boolean getBoolean(String key, boolean defaultValue) {
-            return getInt(key, defaultValue ? 1 : 0) == 1;
-        }
-
-        public void setCurrentProfileIds(int[] currentProfileIds) {
-            synchronized (this) {
-                mCurrentProfileIds = currentProfileIds;
-            }
-        }
-
-        public boolean isCurrentProfile(int userId) {
-            synchronized (this) {
-                if (userId == mCurrentUserId) return true;
-                for (int i = 0; i < mCurrentProfileIds.length; i++) {
-                    if (userId == mCurrentProfileIds[i]) return true;
-                }
-                return false;
-            }
+            return SecureSettingsWrapper.getBoolean(key, defaultValue, mCurrentUserId);
         }
 
         ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
@@ -403,7 +320,8 @@ final class InputMethodUtils {
             List<InputMethodSubtype> enabledSubtypes =
                     getEnabledInputMethodSubtypeListLocked(imi);
             if (allowsImplicitlyEnabledSubtypes && enabledSubtypes.isEmpty()) {
-                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
+                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                        SystemLocaleWrapper.get(mCurrentUserId), imi);
             }
             return InputMethodSubtype.sort(imi, enabledSubtypes);
         }
@@ -434,8 +352,8 @@ final class InputMethodUtils {
 
         List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
             return buildInputMethodsAndSubtypeList(getEnabledInputMethodsStr(),
-                    mInputMethodSplitter,
-                    mSubtypeSplitter);
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR),
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR));
         }
 
         List<String> getEnabledInputMethodNames() {
@@ -447,10 +365,7 @@ final class InputMethodUtils {
             return result;
         }
 
-        void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {
-            if (reloadInputMethodStr) {
-                getEnabledInputMethodsStr();
-            }
+        void appendAndPutEnabledInputMethodLocked(String id) {
             if (TextUtils.isEmpty(mEnabledInputMethodsStrCache)) {
                 // Add in the newly enabled input method.
                 putEnabledInputMethodsStr(id);
@@ -652,6 +567,7 @@ final class InputMethodUtils {
 
         private String getEnabledSubtypeHashCodeForInputMethodAndSubtypeLocked(List<Pair<String,
                 ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
+            final LocaleList localeList = SystemLocaleWrapper.get(mCurrentUserId);
             for (Pair<String, ArrayList<String>> enabledIme: enabledImes) {
                 if (enabledIme.first.equals(imeId)) {
                     final ArrayList<String> explicitlyEnabledSubtypes = enabledIme.second;
@@ -663,7 +579,8 @@ final class InputMethodUtils {
                         // are enabled implicitly, so needs to treat them to be enabled.
                         if (imi != null && imi.getSubtypeCount() > 0) {
                             List<InputMethodSubtype> implicitlyEnabledSubtypes =
-                                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
+                                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(localeList,
+                                            imi);
                             final int numSubtypes = implicitlyEnabledSubtypes.size();
                             for (int i = 0; i < numSubtypes; ++i) {
                                 final InputMethodSubtype st = implicitlyEnabledSubtypes.get(i);
@@ -704,16 +621,20 @@ final class InputMethodUtils {
             if (TextUtils.isEmpty(subtypeHistoryStr)) {
                 return imsList;
             }
-            mInputMethodSplitter.setString(subtypeHistoryStr);
-            while (mInputMethodSplitter.hasNext()) {
-                String nextImsStr = mInputMethodSplitter.next();
-                mSubtypeSplitter.setString(nextImsStr);
-                if (mSubtypeSplitter.hasNext()) {
+            final TextUtils.SimpleStringSplitter inputMethodSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+            final TextUtils.SimpleStringSplitter subtypeSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+            inputMethodSplitter.setString(subtypeHistoryStr);
+            while (inputMethodSplitter.hasNext()) {
+                String nextImsStr = inputMethodSplitter.next();
+                subtypeSplitter.setString(nextImsStr);
+                if (subtypeSplitter.hasNext()) {
                     String subtypeId = NOT_A_SUBTYPE_ID_STR;
                     // The first element is ime id.
-                    String imeId = mSubtypeSplitter.next();
-                    while (mSubtypeSplitter.hasNext()) {
-                        subtypeId = mSubtypeSplitter.next();
+                    String imeId = subtypeSplitter.next();
+                    while (subtypeSplitter.hasNext()) {
+                        subtypeId = subtypeSplitter.next();
                         break;
                     }
                     imsList.add(new Pair<>(imeId, subtypeId));
@@ -752,16 +673,6 @@ final class InputMethodUtils {
             final String imi = getString(Settings.Secure.DEFAULT_INPUT_METHOD, null);
             if (DEBUG) {
                 Slog.d(TAG, "getSelectedInputMethodStr: " + imi);
-            }
-            return imi;
-        }
-
-        @Nullable
-        String getSelectedInputMethodForUser(@UserIdInt int userId) {
-            final String imi =
-                    getStringForUser(Settings.Secure.DEFAULT_INPUT_METHOD, null, userId);
-            if (DEBUG) {
-                Slog.d(TAG, "getSelectedInputMethodForUserStr: " + imi);
             }
             return imi;
         }
@@ -863,14 +774,15 @@ final class InputMethodUtils {
             if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
                 return explicitlyOrImplicitlyEnabledSubtypes.get(0);
             }
+            final String locale = SystemLocaleWrapper.get(mCurrentUserId).get(0).toString();
             final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
-                    mRes, explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
-                    null, true);
+                    explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
+                    locale, true);
             if (subtype != null) {
                 return subtype;
             }
-            return SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
-                    explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
+            return SubtypeUtils.findLastResortApplicableSubtypeLocked(
+                    explicitlyOrImplicitlyEnabledSubtypes, null, locale, true);
         }
 
         boolean setAdditionalInputMethodSubtypes(@NonNull String imeId,
@@ -963,7 +875,6 @@ final class InputMethodUtils {
 
         public void dumpLocked(final Printer pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
-            pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
             pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
             pw.println(prefix + "mEnabledInputMethodsStrCache=" + mEnabledInputMethodsStrCache);
         }
@@ -1026,6 +937,82 @@ final class InputMethodUtils {
             return new int[]{};
         }
         return new int[]{sourceUserId};
+    }
+
+    /**
+     * Returns a list of enabled IME IDs to address Bug 261723412.
+     *
+     * <p>This is a temporary workaround until we come up with a better solution. Do not use this
+     * for anything other than Bug 261723412.</p>
+     *
+     * @param context {@link Context} object to query secure settings.
+     * @param userId User ID to query about.
+     * @return A list of enabled IME IDs.
+     */
+    @NonNull
+    static List<String> getEnabledInputMethodIdsForFiltering(@NonNull Context context,
+            @UserIdInt int userId) {
+        final String enabledInputMethodsStr = TextUtils.nullIfEmpty(
+                SecureSettingsWrapper.getString(Settings.Secure.ENABLED_INPUT_METHODS, null,
+                        userId));
+        final ArrayList<String> result = new ArrayList<>();
+        splitEnabledImeStr(enabledInputMethodsStr, result::add);
+        return result;
+    }
+
+    /**
+     * Split enabled IME string ({@link Settings.Secure#ENABLED_INPUT_METHODS}) into IME IDs.
+     *
+     * @param text a text formatted with {@link Settings.Secure#ENABLED_INPUT_METHODS}.
+     * @param consumer {@link Consumer} called back when a new IME ID is found.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    static void splitEnabledImeStr(@Nullable String text, @NonNull Consumer<String> consumer) {
+        if (TextUtils.isEmpty(text)) {
+            return;
+        }
+        final TextUtils.SimpleStringSplitter inputMethodSplitter =
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+        final TextUtils.SimpleStringSplitter subtypeSplitter =
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+        inputMethodSplitter.setString(text);
+        while (inputMethodSplitter.hasNext()) {
+            String nextImsStr = inputMethodSplitter.next();
+            subtypeSplitter.setString(nextImsStr);
+            if (subtypeSplitter.hasNext()) {
+                // The first element is ime id.
+                consumer.accept(subtypeSplitter.next());
+            }
+        }
+    }
+
+    /**
+     * Concat given IME IDs with an existing enabled IME
+     * ({@link Settings.Secure#ENABLED_INPUT_METHODS}).
+     *
+     * @param existingEnabledImeId an existing {@link Settings.Secure#ENABLED_INPUT_METHODS} to
+     *                             which {@code imeIDs} will be added.
+     * @param imeIds an array of IME IDs to be added. For IME IDs that are already seen in
+     *               {@code existingEnabledImeId} will be skipped.
+     * @return a new enabled IME ID string that can be stored in
+     *         {@link Settings.Secure#ENABLED_INPUT_METHODS}.
+     */
+    @NonNull
+    static String concatEnabledImeIds(@NonNull String existingEnabledImeId,
+            @NonNull String... imeIds) {
+        final ArraySet<String> alreadyEnabledIds = new ArraySet<>();
+        final StringJoiner joiner = new StringJoiner(Character.toString(INPUT_METHOD_SEPARATOR));
+        if (!TextUtils.isEmpty(existingEnabledImeId)) {
+            splitEnabledImeStr(existingEnabledImeId, alreadyEnabledIds::add);
+            joiner.add(existingEnabledImeId);
+        }
+        for (String id : imeIds) {
+            if (!alreadyEnabledIds.contains(id)) {
+                joiner.add(id);
+                alreadyEnabledIds.add(id);
+            }
+        }
+        return joiner.toString();
     }
 
     /**

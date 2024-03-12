@@ -32,6 +32,9 @@ import android.content.res.Resources;
 import android.os.VibrationAttributes;
 import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
+import android.util.IndentingPrintWriter;
+
+import java.io.PrintWriter;
 
 /**
  * List of device-specific internal vibration configuration loaded from platform config.xml.
@@ -49,6 +52,8 @@ public class VibrationConfig {
     private final int mRampStepDurationMs;
     private final int mRampDownDurationMs;
 
+    private final boolean mIgnoreVibrationsOnWirelessCharger;
+
     @VibrationIntensity
     private final int mDefaultAlarmVibrationIntensity;
     @VibrationIntensity
@@ -60,6 +65,8 @@ public class VibrationConfig {
     @VibrationIntensity
     private final int mDefaultRingVibrationIntensity;
 
+    private final boolean mDefaultKeyboardVibrationEnabled;
+
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
         mHapticChannelMaxVibrationAmplitude = loadFloat(resources,
@@ -68,6 +75,11 @@ public class VibrationConfig {
                 com.android.internal.R.integer.config_vibrationWaveformRampDownDuration, 0);
         mRampStepDurationMs = loadInteger(resources,
                 com.android.internal.R.integer.config_vibrationWaveformRampStepDuration, 0);
+
+        mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
+                com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
+        mDefaultKeyboardVibrationEnabled = loadBoolean(resources,
+                com.android.internal.R.bool.config_defaultKeyboardVibrationEnabled, true);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -97,6 +109,10 @@ public class VibrationConfig {
 
     private static int loadInteger(@Nullable Resources res, int resId, int defaultValue) {
         return res != null ? res.getInteger(resId) : defaultValue;
+    }
+
+    private static boolean loadBoolean(@Nullable Resources res, int resId, boolean defaultValue) {
+        return res != null ? res.getBoolean(resId) : defaultValue;
     }
 
     /**
@@ -135,6 +151,24 @@ public class VibrationConfig {
         return mRampStepDurationMs;
     }
 
+    /**
+     * Whether or not vibrations are ignored if the device is on a wireless charger.
+     *
+     * <p>This may be the case if vibration during wireless charging causes unwanted results, like
+     * moving the device out of alignment with the charging pad.
+     */
+    public boolean ignoreVibrationsOnWirelessCharger() {
+        return mIgnoreVibrationsOnWirelessCharger;
+    }
+
+    /**
+     * Whether keyboard vibration settings is enabled by default.
+     * @hide
+     */
+    public boolean isDefaultKeyboardVibrationEnabled() {
+        return mDefaultKeyboardVibrationEnabled;
+    }
+
     /** Get the default vibration intensity for given usage. */
     @VibrationIntensity
     public int getDefaultVibrationIntensity(@VibrationAttributes.Usage int usage) {
@@ -171,5 +205,19 @@ public class VibrationConfig {
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
                 + "}";
+    }
+
+    /**
+     * Write current settings into given {@link PrintWriter}, skipping the default settings.
+     *
+     * @hide
+     */
+    public void dumpWithoutDefaultSettings(IndentingPrintWriter pw) {
+        pw.println("VibrationConfig:");
+        pw.increaseIndent();
+        pw.println("hapticChannelMaxAmplitude = " + mHapticChannelMaxVibrationAmplitude);
+        pw.println("rampStepDurationMs = " + mRampStepDurationMs);
+        pw.println("rampDownDurationMs = " + mRampDownDurationMs);
+        pw.decreaseIndent();
     }
 }

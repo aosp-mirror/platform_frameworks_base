@@ -1,0 +1,22 @@
+package: "android.hardware.usb.flags"
+
+flag {
+    name: "enable_usb_data_compliance_warning"
+    namespace: "system_sw_usb"
+    description: "Enable USB data compliance warnings when set"
+    bug: "296119135"
+}
+
+flag {
+    name: "enable_input_power_limited_warning"
+    namespace: "system_sw_usb"
+    description: "Flag incompatible charging on COMPLIANCE_WARNING_INPUT_POWER_LIMITED instead of COMPLIANCE_WARNING_OTHER when enabled"
+    bug: "308700954"
+}
+
+flag {
+    name: "enable_report_usb_data_compliance_warning"
+    namespace: "system_sw_usb"
+    description: "Enable reporting USB data compliance warnings from HAL when set"
+    bug: "296119135"
+}

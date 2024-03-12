@@ -16,7 +16,6 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
-import android.hardware.biometrics.BiometricSourceType
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
@@ -25,7 +24,6 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.DejankUtils
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
@@ -34,12 +32,14 @@ import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.bouncer.ui.BouncerViewDelegate
 import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
+import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.utils.os.FakeHandler
@@ -72,11 +72,12 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
+    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
     private lateinit var mainHandler: FakeHandler
     private lateinit var underTest: PrimaryBouncerInteractor
     private lateinit var resources: TestableResources
     private lateinit var trustRepository: FakeTrustRepository
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var testScope: TestScope
 
     @Before
@@ -89,7 +90,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         testScope = TestScope()
         mainHandler = FakeHandler(android.os.Looper.getMainLooper())
         trustRepository = FakeTrustRepository()
-        featureFlags = FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) }
         underTest =
             PrimaryBouncerInteractor(
                 repository,
@@ -103,8 +103,9 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 context,
                 keyguardUpdateMonitor,
                 trustRepository,
-                featureFlags,
                 testScope.backgroundScope,
+                mSelectedUserInteractor,
+                faceAuthInteractor,
             )
         whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         whenever(repository.primaryBouncerShow.value).thenReturn(false)
@@ -113,9 +114,30 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun show_nullDelegate() {
+        testScope.run {
+            whenever(bouncerView.delegate).thenReturn(null)
+            mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+
+            // WHEN bouncer show is requested
+            underTest.show(true)
+
+            // WHEN all queued messages are dispatched
+            mainHandler.dispatchQueuedMessages()
+
+            // THEN primary bouncer state doesn't update to show since delegate was null
+            verify(repository, never()).setPrimaryShow(true)
+            verify(repository, never()).setPrimaryShowingSoon(false)
+            verify(mPrimaryBouncerCallbackInteractor, never()).dispatchStartingToShow()
+            verify(mPrimaryBouncerCallbackInteractor, never())
+                .dispatchVisibilityChanged(View.VISIBLE)
+        }
+    }
+
+    @Test
     fun testShow_isScrimmed() {
         underTest.show(true)
-        verify(repository).setKeyguardAuthenticated(null)
+        verify(repository).setKeyguardAuthenticatedBiometrics(null)
         verify(repository).setPrimaryStartingToHide(false)
         verify(repository).setPrimaryScrimmed(true)
         verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
@@ -222,8 +244,8 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testNotifyKeyguardAuthenticated() {
-        underTest.notifyKeyguardAuthenticated(true)
-        verify(repository).setKeyguardAuthenticated(true)
+        underTest.notifyKeyguardAuthenticatedBiometrics(true)
+        verify(repository).setKeyguardAuthenticatedBiometrics(true)
     }
 
     @Test
@@ -241,7 +263,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testNotifyKeyguardAuthenticatedHandled() {
         underTest.notifyKeyguardAuthenticatedHandled()
-        verify(repository).setKeyguardAuthenticated(null)
+        verify(repository).setKeyguardAuthenticatedBiometrics(null)
     }
 
     @Test
@@ -321,6 +343,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         assertThat(underTest.willDismissWithAction()).isFalse()
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility() {
         updateSideFpsVisibilityParameters(
@@ -334,6 +357,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(true)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_notVisible() {
         updateSideFpsVisibilityParameters(
@@ -347,6 +371,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_sfpsNotEnabled() {
         updateSideFpsVisibilityParameters(
@@ -360,6 +385,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_fpsDetectionNotRunning() {
         updateSideFpsVisibilityParameters(
@@ -373,6 +399,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_UnlockingWithFpNotAllowed() {
         updateSideFpsVisibilityParameters(
@@ -386,6 +413,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
     @Test
     fun testSideFpsVisibility_AnimatingAway() {
         updateSideFpsVisibilityParameters(
@@ -404,10 +432,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         mainHandler.setMode(FakeHandler.Mode.QUEUEING)
 
         // GIVEN bouncer should be delayed due to face auth
-        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
-        whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
-            .thenReturn(true)
-        whenever(keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()).thenReturn(true)
+        whenever(faceAuthInteractor.canFaceAuthRun()).thenReturn(true)
 
         // WHEN bouncer show is requested
         underTest.show(true)
@@ -425,15 +450,12 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun noDelayBouncer_biometricsAllowed_postureDoesNotAllowFaceAuth() {
+    fun noDelayBouncer_faceAuthNotAllowed() {
         mainHandler.setMode(FakeHandler.Mode.QUEUEING)
 
         // GIVEN bouncer should not be delayed because device isn't in the right posture for
         // face auth
-        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
-        whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
-            .thenReturn(true)
-        whenever(keyguardUpdateMonitor.doesCurrentPostureAllowFaceAuth()).thenReturn(false)
+        whenever(faceAuthInteractor.canFaceAuthRun()).thenReturn(false)
 
         // WHEN bouncer show is requested
         underTest.show(true)
@@ -477,6 +499,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         isUnlockingWithFpAllowed: Boolean,
         isAnimatingAway: Boolean
     ) {
+        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
         whenever(repository.primaryBouncerShow.value).thenReturn(isVisible)
         resources.addOverride(R.bool.config_show_sidefps_hint_on_bouncer, sfpsEnabled)
         whenever(keyguardUpdateMonitor.isFingerprintDetectionRunning)

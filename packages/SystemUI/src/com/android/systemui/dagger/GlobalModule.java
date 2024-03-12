@@ -64,6 +64,7 @@ public class GlobalModule {
      * @deprecated Deprecdated because {@link Display#getMetrics} is deprecated.
      */
     @Provides
+    @Deprecated
     public DisplayMetrics provideDisplayMetrics(Context context) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         context.getDisplay().getMetrics(displayMetrics);

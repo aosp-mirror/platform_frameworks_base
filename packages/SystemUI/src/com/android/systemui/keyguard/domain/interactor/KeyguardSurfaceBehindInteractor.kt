@@ -20,13 +20,14 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardSurfaceBehindRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 @SysUISingleton
 class KeyguardSurfaceBehindInteractor
@@ -53,6 +54,7 @@ constructor(
                     }
                 }
             }
+            .distinctUntilChanged()
 
     val isAnimatingSurface = repository.isAnimatingSurface
 
@@ -85,5 +87,9 @@ constructor(
 
     fun setAnimatingSurface(animating: Boolean) {
         repository.setAnimatingSurface(animating)
+    }
+
+    fun setSurfaceRemoteAnimationTargetAvailable(available: Boolean) {
+        repository.setSurfaceRemoteAnimationTargetAvailable(available)
     }
 }

@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"திரைப் பிரிப்புப் பயன்முறையில் ஆப்ஸ் செயல்படாமல் போகக்கூடும்"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"திரைப் பிரிப்புப் பயன்முறையை ஆப்ஸ் ஆதரிக்காது"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"இந்த ஆப்ஸை 1 சாளரத்தில் மட்டுமே திறக்க முடியும்."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"இந்த ஆப்ஸை 1 சாளரத்தில் மட்டுமே திறக்க முடியும்"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"இரண்டாம்நிலைத் திரையில் ஆப்ஸ் வேலை செய்யாமல் போகக்கூடும்."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"இரண்டாம்நிலைத் திரைகளில் பயன்பாட்டைத் தொடங்க முடியாது."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"திரைப் பிரிப்பான்"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"மேலே வலப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"கீழே வலதுபுறமாக நகர்த்து"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ஐ விரிவாக்கும்"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ஐச் சுருக்கும்"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> அமைப்புகள்"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"குமிழை அகற்று"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"உரையாடலைக் குமிழாக்காதே"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"சரி"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"சமீபத்திய குமிழ்கள் இல்லை"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"சமீபத்திய குமிழ்களும் நிராகரிக்கப்பட்ட குமிழ்களும் இங்கே தோன்றும்"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"குமிழ்களைப் பயன்படுத்தி உரையாடுங்கள்"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"புதிய உரையாடல்கள் உங்கள் திரையின் கீழ் மூலையில் ஐகான்களாகத் தோன்றும். அவற்றை விரிவாக்க தட்டவும் அல்லது நிராகரிக்க இழுக்கவும்."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"எப்போது வேண்டுமானாலும் குமிழ்களைக் கட்டுப்படுத்துங்கள்"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"எந்தெந்த ஆப்ஸும் உரையாடல்களும் குமிழியாகலாம் என்பதை நிர்வகிக்க இங்கே தட்டுங்கள்"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"பபிள்"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"நிர்வகி"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"குமிழ் நிராகரிக்கப்பட்டது."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"இங்கு தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கி, ஆப்ஸ் காட்டப்படும் விதத்தை இன்னும் சிறப்பாக்கலாம்."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"இங்கு தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கி, ஆப்ஸ் காட்டப்படும் விதத்தை இன்னும் சிறப்பாக்கலாம்"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"அமைப்புகளில் இந்த ஆப்ஸின் தோற்ற விகிதத்தை மாற்றும்"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"தோற்ற விகிதத்தை மாற்றும்"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"கேமரா தொடர்பான சிக்கல்களா?\nமீண்டும் பொருத்த தட்டவும்"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"சிக்கல்கள் சரிசெய்யப்படவில்லையா?\nமாற்றியமைக்க தட்டவும்"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"கேமரா தொடர்பான சிக்கல்கள் எதுவும் இல்லையா? நிராகரிக்க தட்டவும்."</string>

@@ -32,6 +32,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.List;
+
 /**
  * Unit test for {@link ContentCaptureOptions}.
  *
@@ -44,6 +46,9 @@ public class ContentCaptureOptionsTest {
     private static final ComponentName CONTEXT_COMPONENT = new ComponentName("marco", "polo");
     private static final ComponentName COMPONENT1 = new ComponentName("comp", "one");
     private static final ComponentName COMPONENT2 = new ComponentName("two", "comp");
+    private static final List<List<String>> CONTENT_PROTECTION_REQUIRED_GROUPS =
+            List.of(List.of("first"), List.of("second", "third"), List.of());
+    private static final List<List<String>> CONTENT_PROTECTION_OPTIONAL_GROUPS = List.of();
     private static final ContentCaptureOptions CONTENT_CAPTURE_OPTIONS =
             new ContentCaptureOptions(
                     /* loggingLevel= */ 1000,
@@ -55,7 +60,10 @@ public class ContentCaptureOptionsTest {
                     /* enableReceiver= */ false,
                     new ContentCaptureOptions.ContentProtectionOptions(
                             /* enableReceiver= */ true,
-                            /* bufferSize= */ 2001),
+                            /* bufferSize= */ 2001,
+                            CONTENT_PROTECTION_REQUIRED_GROUPS,
+                            CONTENT_PROTECTION_OPTIONAL_GROUPS,
+                            /* optionalGroupsThreshold= */ 2002),
                     /* whitelistedComponents= */ toSet(COMPONENT1, COMPONENT2));
 
     @Mock private Context mContext;
@@ -134,6 +142,19 @@ public class ContentCaptureOptionsTest {
                         .append(CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.enableReceiver)
                         .append(", bufferSize=")
                         .append(CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.bufferSize)
+                        .append(", requiredGroupsSize=")
+                        .append(
+                                CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.requiredGroups
+                                        .size())
+                        .append(", optionalGroupsSize=")
+                        .append(
+                                CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.optionalGroups
+                                        .size())
+                        .append(", optionalGroupsThreshold=")
+                        .append(
+                                CONTENT_CAPTURE_OPTIONS
+                                        .contentProtectionOptions
+                                        .optionalGroupsThreshold)
                         .append("], whitelisted=")
                         .append(CONTENT_CAPTURE_OPTIONS.whitelistedComponents)
                         .append(']')
@@ -166,6 +187,15 @@ public class ContentCaptureOptionsTest {
                 .isEqualTo(CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.enableReceiver);
         assertThat(actual.contentProtectionOptions.bufferSize)
                 .isEqualTo(CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.bufferSize);
+        assertThat(actual.contentProtectionOptions.requiredGroups)
+                .containsExactlyElementsIn(
+                        CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.requiredGroups);
+        assertThat(actual.contentProtectionOptions.optionalGroups)
+                .containsExactlyElementsIn(
+                        CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.optionalGroups);
+        assertThat(actual.contentProtectionOptions.optionalGroupsThreshold)
+                .isEqualTo(
+                        CONTENT_CAPTURE_OPTIONS.contentProtectionOptions.optionalGroupsThreshold);
         assertThat(actual.whitelistedComponents)
                 .containsExactlyElementsIn(CONTENT_CAPTURE_OPTIONS.whitelistedComponents);
     }

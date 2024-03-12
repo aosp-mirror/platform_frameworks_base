@@ -28,20 +28,16 @@
     <string name="keyguard_enter_password" msgid="6483623792371009758">"Fut fjalëkalimin"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Karta e pavlefshme."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"I karikuar"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me valë"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet në mënyrë wireless"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me shpejtësi"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet ngadalë"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Karikimi u optimizua për të mbrojtur baterinë"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem me aksesorin e karikimit"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Shtyp \"Meny\" për të shkyçur."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Rrjeti është i kyçur"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Nuk ka kartë SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Shto një kartë SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"Karta SIM mungon ose është e palexueshme. Shto një kartë SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Kartë SIM e papërdorshme."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Karta jote SIM është çaktivizuar përgjithmonë.\n Kontakto me ofruesin e shërbimit me valë për një kartë tjetër SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Karta SIM është e kyçur."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Karta SIM është e kyçur me PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Karta SIM po shkyçet…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pas bllokimit kërkohet kodi PIN"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Pas bllokimit kërkohet fjalëkalimi"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Pas bllokimit kërkohet motivi"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Përditësimi do të instalohet gjatë kohës joaktive"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Përditësimi do të instalohet kur pajisja të mos përdoret"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Kërkohet një siguri më e lartë. Kodi PIN nuk është përdorur për njëfarë kohe."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Kërkohet një siguri më e lartë. Fjalëkalimi nuk është përdorur për njëfarë kohe."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Kërkohet një siguri më e lartë. Motivi nuk është përdorur për njëfarë kohe."</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Flluskë"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoge"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Shkyç pajisjen tënde për të vazhduar"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Fut kodin PIN për ta instaluar përditësimin më vonë"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Fut fjalëkalimin për ta instaluar përditësimin më vonë"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Vizato motivin për ta instaluar përditësimin më vonë"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Pajisja u përditësua. Fut kodin PIN për të vazhduar."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Pajisja u përditësua. Fut fjalëkalimin për të vazhduar."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Pajisja u përditësua. Vizato motivin për të vazhduar."</string>
 </resources>

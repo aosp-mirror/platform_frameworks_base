@@ -21,12 +21,12 @@ import android.content.pm.ApplicationInfo
 import android.os.Build
 import android.os.PatternMatcher
 import android.util.ArraySet
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.SystemConfig
 import com.android.server.compat.PlatformCompat
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.pkg.AndroidPackage
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationCollector
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever

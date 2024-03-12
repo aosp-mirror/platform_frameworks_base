@@ -39,10 +39,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
 
 import org.junit.Before;
@@ -78,7 +77,7 @@ public class TileLayoutTest extends SysuiTestCase {
     private QSPanelControllerBase.TileRecord createTileRecord() {
         return new QSPanelControllerBase.TileRecord(
                 mock(QSTile.class),
-                spy(new QSTileViewImpl(mSpyContext, new QSIconViewImpl(mSpyContext))));
+                spy(new QSTileViewImpl(mSpyContext)));
     }
 
     @Test
@@ -272,7 +271,7 @@ public class TileLayoutTest extends SysuiTestCase {
 
     private static class FakeTileView extends QSTileViewImpl {
         FakeTileView(Context context) {
-            super(context, new QSIconViewImpl(context), /* collapsed= */ false);
+            super(context, /* collapsed= */ false);
         }
 
         void changeState(QSTile.State state) {

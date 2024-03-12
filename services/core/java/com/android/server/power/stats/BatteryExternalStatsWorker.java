@@ -44,16 +44,14 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.power.EnergyConsumerStats;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
-
-import libcore.util.EmptyArray;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -125,9 +123,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
     @GuardedBy("this")
     private boolean mUseLatestStates = true;
-
-    @GuardedBy("this")
-    private final IntArray mUidsToRemove = new IntArray();
 
     @GuardedBy("this")
     private Future<?> mWakelockChangesUpdate;
@@ -259,7 +254,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
     @Override
     public synchronized Future<?> scheduleCpuSyncDueToRemovedUid(int uid) {
-        mUidsToRemove.add(uid);
         return scheduleSyncLocked("remove-uid", UPDATE_CPU);
     }
 
@@ -341,20 +335,24 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
     @Override
     public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
         synchronized (BatteryExternalStatsWorker.this) {
-            // Initial quick clean-up after a user removal
-            mExecutorService.schedule(() -> {
-                synchronized (mStats) {
-                    mStats.clearRemovedUserUidsLocked(userId);
-                }
-            }, UID_QUICK_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
+            try {
+                // Initial quick clean-up after a user removal
+                mExecutorService.schedule(() -> {
+                    synchronized (mStats) {
+                        mStats.clearRemovedUserUidsLocked(userId);
+                    }
+                }, UID_QUICK_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
 
-            // Final clean-up after a user removal, to take care of UIDs that were running longer
-            // than expected
-            return mExecutorService.schedule(() -> {
-                synchronized (mStats) {
-                    mStats.clearRemovedUserUidsLocked(userId);
-                }
-            }, UID_FINAL_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
+                // Final clean-up after a user removal, to take care of UIDs that were running
+                // longer than expected
+                return mExecutorService.schedule(() -> {
+                    synchronized (mStats) {
+                        mStats.clearRemovedUserUidsLocked(userId);
+                    }
+                }, UID_FINAL_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
+            } catch (RejectedExecutionException e) {
+                return CompletableFuture.failedFuture(e);
+            }
         }
     }
 
@@ -385,7 +383,11 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             }
         }
 
-        return mExecutorService.schedule(syncRunnable, delayMillis, TimeUnit.MILLISECONDS);
+        try {
+            return mExecutorService.schedule(syncRunnable, delayMillis, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     public synchronized Future<?> scheduleWrite() {
@@ -396,7 +398,11 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         scheduleSyncLocked("write", UPDATE_ALL);
         // Since we use a single threaded executor, we can assume the next scheduled task's
         // Future finishes after the sync.
-        return mExecutorService.submit(mWriteTask);
+        try {
+            return mExecutorService.submit(mWriteTask);
+        } catch (RejectedExecutionException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     /**
@@ -404,8 +410,10 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
      * within the task, never wait on the resulting Future. This will result in a deadlock.
      */
     public synchronized void scheduleRunnable(Runnable runnable) {
-        if (!mExecutorService.isShutdown()) {
+        try {
             mExecutorService.submit(runnable);
+        } catch (RejectedExecutionException e) {
+            Slog.e(TAG, "Couldn't schedule " + runnable, e);
         }
     }
 
@@ -422,7 +430,11 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         if (mCurrentFuture == null) {
             mUpdateFlags = flags;
             mCurrentReason = reason;
-            mCurrentFuture = mExecutorService.submit(mSyncTask);
+            try {
+                mCurrentFuture = mExecutorService.submit(mSyncTask);
+            } catch (RejectedExecutionException e) {
+                return CompletableFuture.failedFuture(e);
+            }
         }
         mUpdateFlags |= flags;
         return mCurrentFuture;
@@ -440,7 +452,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             // Capture a snapshot of the state we are meant to process.
             final int updateFlags;
             final String reason;
-            final int[] uidsToRemove;
             final boolean onBattery;
             final boolean onBatteryScreenOff;
             final int screenState;
@@ -449,7 +460,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             synchronized (BatteryExternalStatsWorker.this) {
                 updateFlags = mUpdateFlags;
                 reason = mCurrentReason;
-                uidsToRemove = mUidsToRemove.size() > 0 ? mUidsToRemove.toArray() : EmptyArray.INT;
                 onBattery = mOnBattery;
                 onBatteryScreenOff = mOnBatteryScreenOff;
                 screenState = mScreenState;
@@ -457,7 +467,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 useLatestStates = mUseLatestStates;
                 mUpdateFlags = 0;
                 mCurrentReason = null;
-                mUidsToRemove.clear();
                 mCurrentFuture = null;
                 mUseLatestStates = true;
                 if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
@@ -493,12 +502,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
                 // Clean up any UIDs if necessary.
                 synchronized (mStats) {
-                    for (int uid : uidsToRemove) {
-                        FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, -1, uid,
-                                FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
-                        mStats.maybeRemoveIsolatedUidLocked(uid, SystemClock.elapsedRealtime(),
-                                SystemClock.uptimeMillis());
-                    }
                     mStats.clearPendingRemovedUidsLocked();
                 }
             } catch (Exception e) {
@@ -679,12 +682,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                     uptime,
                     BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS,
                     reason, 0);
-
-            if (energyConsumerDeltas != null && !energyConsumerDeltas.isEmpty()
-                    && mStats.isUsageHistoryEnabled()) {
-                mStats.recordEnergyConsumerDetailsLocked(elapsedRealtime, uptime,
-                        mEnergyConsumerSnapshot.getEnergyConsumerDetails(energyConsumerDeltas));
-            }
 
             if ((updateFlags & UPDATE_CPU) != 0) {
                 if (useLatestStates) {

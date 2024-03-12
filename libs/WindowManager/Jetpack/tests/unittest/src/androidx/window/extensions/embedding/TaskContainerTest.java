@@ -48,6 +48,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 /**
  * Test class for {@link TaskContainer}.
  *
@@ -77,14 +79,16 @@ public class TaskContainerTest {
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */));
 
         assertEquals(WINDOWING_MODE_MULTI_WINDOW,
                 taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */));
 
         assertEquals(WINDOWING_MODE_FREEFORM,
                 taskContainer.getWindowingModeForSplitTaskFragment(splitBounds));
@@ -104,13 +108,15 @@ public class TaskContainerTest {
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */));
 
         assertFalse(taskContainer.isInPictureInPicture());
 
         configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(configuration,
-                DEFAULT_DISPLAY, true /* visible */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */));
 
         assertTrue(taskContainer.isInPictureInPicture());
     }
@@ -149,20 +155,54 @@ public class TaskContainerTest {
     @Test
     public void testGetTopNonFinishingActivity() {
         final TaskContainer taskContainer = createTestTaskContainer();
-        assertNull(taskContainer.getTopNonFinishingActivity());
+        assertNull(taskContainer.getTopNonFinishingActivity(true /* includeOverlay */));
 
         final TaskFragmentContainer tf0 = mock(TaskFragmentContainer.class);
         taskContainer.addTaskFragmentContainer(tf0);
         final Activity activity0 = mock(Activity.class);
         doReturn(activity0).when(tf0).getTopNonFinishingActivity();
-        assertEquals(activity0, taskContainer.getTopNonFinishingActivity());
+        assertEquals(activity0, taskContainer.getTopNonFinishingActivity(
+                true /* includeOverlay */));
 
         final TaskFragmentContainer tf1 = mock(TaskFragmentContainer.class);
         taskContainer.addTaskFragmentContainer(tf1);
-        assertEquals(activity0, taskContainer.getTopNonFinishingActivity());
+        assertEquals(activity0, taskContainer.getTopNonFinishingActivity(
+                true /* includeOverlay */));
 
         final Activity activity1 = mock(Activity.class);
         doReturn(activity1).when(tf1).getTopNonFinishingActivity();
-        assertEquals(activity1, taskContainer.getTopNonFinishingActivity());
+        assertEquals(activity1, taskContainer.getTopNonFinishingActivity(
+                true /* includeOverlay */));
+    }
+
+    @Test
+    public void testGetSplitStatesIfStable() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+
+        final SplitContainer splitContainer0 = mock(SplitContainer.class);
+        final SplitContainer splitContainer1 = mock(SplitContainer.class);
+        final SplitInfo splitInfo0 = mock(SplitInfo.class);
+        final SplitInfo splitInfo1 = mock(SplitInfo.class);
+        taskContainer.addSplitContainer(splitContainer0);
+        taskContainer.addSplitContainer(splitContainer1);
+
+        // When all the SplitContainers are stable, getSplitStatesIfStable() returns the list of
+        // SplitInfo representing the SplitContainers.
+        doReturn(splitInfo0).when(splitContainer0).toSplitInfoIfStable();
+        doReturn(splitInfo1).when(splitContainer1).toSplitInfoIfStable();
+
+        List<SplitInfo> splitInfoList = taskContainer.getSplitStatesIfStable();
+
+        assertEquals(2, splitInfoList.size());
+        assertEquals(splitInfo0, splitInfoList.get(0));
+        assertEquals(splitInfo1, splitInfoList.get(1));
+
+        // When any SplitContainer is in an intermediate state, getSplitStatesIfStable() returns
+        // null.
+        doReturn(null).when(splitContainer0).toSplitInfoIfStable();
+
+        splitInfoList = taskContainer.getSplitStatesIfStable();
+
+        assertNull(splitInfoList);
     }
 }

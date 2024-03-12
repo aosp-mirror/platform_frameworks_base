@@ -23,6 +23,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -146,6 +147,28 @@ public class SurfaceControlRegistryTests {
         SurfaceControl sc8 = buildTestSurface();
         reporter.assertMaxThresholdExceededCallCount(2);
         reporter.assertLastReportedSetEquals(sc5, sc6, sc7, sc8);
+    }
+
+    @Test
+    public void testCallStackDebugging_matchesFilters() {
+        SurfaceControlRegistry registry = SurfaceControlRegistry.getProcessInstance();
+
+        // Specific name, any call
+        registry.setCallStackDebuggingParams("com.android.app1", "");
+        assertFalse(registry.matchesForCallStackDebugging("com.android.noMatchApp", "setAlpha"));
+        assertTrue(registry.matchesForCallStackDebugging("com.android.app1", "setAlpha"));
+
+        // Any name, specific call
+        registry.setCallStackDebuggingParams("", "setAlpha");
+        assertFalse(registry.matchesForCallStackDebugging("com.android.app1", "setLayer"));
+        assertTrue(registry.matchesForCallStackDebugging("com.android.app1", "setAlpha"));
+        assertTrue(registry.matchesForCallStackDebugging("com.android.app2", "setAlpha"));
+
+        // Specific name, specific call
+        registry.setCallStackDebuggingParams("com.android.app1", "setAlpha");
+        assertFalse(registry.matchesForCallStackDebugging("com.android.app1", "setLayer"));
+        assertFalse(registry.matchesForCallStackDebugging("com.android.app2", "setAlpha"));
+        assertTrue(registry.matchesForCallStackDebugging("com.android.app1", "setAlpha"));
     }
 
     private SurfaceControl buildTestSurface() {

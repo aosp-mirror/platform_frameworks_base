@@ -1,0 +1,16 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_library {
+    name: "foldable-device-state-provider",
+    srcs: [
+        "src/**/*.java",
+    ],
+    libs: [
+        "services",
+    ],
+    static_libs: [
+        "device_state_flags_lib",
+    ],
+}

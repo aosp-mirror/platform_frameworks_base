@@ -18,6 +18,7 @@ package com.android.systemui.util
 
 import android.util.IndentingPrintWriter
 import android.view.View
+import com.android.systemui.Dumpable
 import java.io.PrintWriter
 
 /**
@@ -56,13 +57,28 @@ fun IndentingPrintWriter.withIncreasedIndent(runnable: Runnable) {
 }
 
 /** Print a line which is '$label=$value' */
-fun IndentingPrintWriter.println(label: String, value: Any) =
+fun IndentingPrintWriter.println(label: String, value: Any?) =
     append(label).append('=').println(value)
 
-/** Return a readable string for the visibility */
-fun visibilityString(@View.Visibility visibility: Int): String = when (visibility) {
-    View.GONE -> "gone"
-    View.VISIBLE -> "visible"
-    View.INVISIBLE -> "invisible"
-    else -> "unknown:$visibility"
+@JvmOverloads
+inline fun <T> IndentingPrintWriter.printCollection(
+    label: String,
+    collection: Collection<T>,
+    printer: IndentingPrintWriter.(T) -> Unit = IndentingPrintWriter::println,
+) {
+    append(label).append(": ").println(collection.size)
+    withIncreasedIndent { collection.forEach { printer(it) } }
 }
+
+fun <T : Dumpable> IndentingPrintWriter.dumpCollection(label: String, collection: Collection<T>) {
+    printCollection(label, collection) { it.dump(this, emptyArray()) }
+}
+
+/** Return a readable string for the visibility */
+fun visibilityString(@View.Visibility visibility: Int): String =
+    when (visibility) {
+        View.GONE -> "gone"
+        View.VISIBLE -> "visible"
+        View.INVISIBLE -> "invisible"
+        else -> "unknown:$visibility"
+    }

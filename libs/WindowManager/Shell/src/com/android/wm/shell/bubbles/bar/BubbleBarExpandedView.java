@@ -386,4 +386,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             setContentVisibility(mIsContentVisible);
         }
     }
+
+    /**
+     * Check whether the view is animating
+     */
+    public boolean isAnimating() {
+        return mIsAnimating;
+    }
 }

@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.onehanded;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_ONE_HANDED_ENTER_TRANSITION;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_ONE_HANDED_EXIT_TRANSITION;
+import static com.android.internal.jank.Cuj.CUJ_ONE_HANDED_ENTER_TRANSITION;
+import static com.android.internal.jank.Cuj.CUJ_ONE_HANDED_EXIT_TRANSITION;
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_EXIT;
 import static com.android.wm.shell.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
 
@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.jank.Cuj.CujType;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
@@ -327,7 +328,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         mTransitionCallbacks.add(callback);
     }
 
-    void beginCUJTracing(@InteractionJankMonitor.CujType int cujType, @Nullable String tag) {
+    void beginCUJTracing(@CujType int cujType, @Nullable String tag) {
         final Map.Entry<WindowContainerToken, SurfaceControl> firstEntry =
                 getDisplayAreaTokenMap().entrySet().iterator().next();
         final InteractionJankMonitor.Configuration.Builder builder =
@@ -339,11 +340,11 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         mJankMonitor.begin(builder);
     }
 
-    void endCUJTracing(@InteractionJankMonitor.CujType int cujType) {
+    void endCUJTracing(@CujType int cujType) {
         mJankMonitor.end(cujType);
     }
 
-    void cancelCUJTracing(@InteractionJankMonitor.CujType int cujType) {
+    void cancelCUJTracing(@CujType int cujType) {
         mJankMonitor.cancel(cujType);
     }
 

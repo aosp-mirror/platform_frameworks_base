@@ -116,8 +116,10 @@ public final class BiometricContextProvider implements BiometricContext {
             service.setBiometicContextListener(new IBiometricContextListener.Stub() {
                 @Override
                 public void onFoldChanged(int foldState) {
-                    mFoldState = foldState;
-                    // no need to notify, not sent to HAL
+                    if (mFoldState != foldState) {
+                        mFoldState = foldState;
+                        notifyChanged();
+                    }
                 }
 
                 @Override
@@ -254,6 +256,7 @@ public final class BiometricContextProvider implements BiometricContext {
                 + "isAwake: " + isAwake() +  ", "
                 + "isDisplayOn: " + isDisplayOn() +  ", "
                 + "dock: " + getDockedState() + ", "
-                + "rotation: " + getCurrentRotation() + "]";
+                + "rotation: " + getCurrentRotation() + ", "
+                + "foldState: " + mFoldState + "]";
     }
 }

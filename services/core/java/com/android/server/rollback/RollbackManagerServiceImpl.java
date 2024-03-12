@@ -1345,6 +1345,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
             rollback.setRollbackLifetimeMillis(parentSession.rollbackLifetimeMillis);
         }
 
+
         mRollbacks.add(rollback);
         return rollback;
     }

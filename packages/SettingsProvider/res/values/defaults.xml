@@ -286,7 +286,7 @@
     <bool name="def_wearable_sideButtonPresent">true</bool>
 
     <!-- Android wear version. This value is a string due to no long type in resources -->
-    <string name="def_wearable_androidWearVersion" translatable="false">2</string>
+    <string name="def_wearable_androidWearVersion" translatable="false">4</string>
 
     <!-- This value is the decimal representation of the capabilities bitmask as defined below:
         0000001 - WIFI
@@ -321,4 +321,18 @@
 
     <!-- Whether vibrate icon is shown in the status bar by default. -->
     <integer name="def_statusBarVibrateIconEnabled">0</integer>
+
+    <!-- Whether predictive back animation is enabled by default. -->
+    <bool name="def_enable_back_animation">false</bool>
+
+    <!-- Whether wifi is always requested by default. -->
+    <bool name="def_enable_wifi_always_requested">false</bool>
+
+    <!-- Default for Settings.BATTERY_CHARGING_STATE_UPDATE_DELAY in millisecond.
+        -1 means system internal default value is used. -->
+    <integer name="def_battery_charging_state_update_delay_ms">-1</integer>
+
+    <!-- Default for Settings.BATTERY_CHARGING_STATE_ENFORCE_LEVEL.
+        -1 means system internal default value is used. -->
+    <integer name="def_battery_charging_state_enforce_level">-1</integer>
 </resources>

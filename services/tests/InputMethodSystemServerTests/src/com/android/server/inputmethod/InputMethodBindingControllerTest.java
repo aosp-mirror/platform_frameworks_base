@@ -133,10 +133,11 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
     }
 
     private void testBindCurrentMethodWithMainConnection() throws Exception {
+        final InputMethodInfo info;
         synchronized (ImfLock.class) {
             mBindingController.setSelectedMethodId(TEST_IME_ID);
+            info = mInputMethodManagerService.queryInputMethodForCurrentUserLocked(TEST_IME_ID);
         }
-        InputMethodInfo info = mInputMethodManagerService.mMethodMap.get(TEST_IME_ID);
         assertThat(info).isNotNull();
         assertThat(info.getId()).isEqualTo(TEST_IME_ID);
         assertThat(info.getServiceName()).isEqualTo(TEST_SERVICE_NAME);
@@ -158,7 +159,7 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
         assertThat(result.result).isEqualTo(InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING);
         assertThat(result.id).isEqualTo(info.getId());
         synchronized (ImfLock.class) {
-            assertThat(mBindingController.hasConnection()).isTrue();
+            assertThat(mBindingController.hasMainConnection()).isTrue();
             assertThat(mBindingController.getCurId()).isEqualTo(info.getId());
             assertThat(mBindingController.getCurToken()).isNotNull();
         }
@@ -202,7 +203,7 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
 
         synchronized (ImfLock.class) {
             // Unbind both main connection and visible connection
-            assertThat(mBindingController.hasConnection()).isFalse();
+            assertThat(mBindingController.hasMainConnection()).isFalse();
             assertThat(mBindingController.isVisibleBound()).isFalse();
             verify(mContext, times(2)).unbindService(any(ServiceConnection.class));
             assertThat(mBindingController.getCurToken()).isNull();

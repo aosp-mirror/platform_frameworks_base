@@ -56,6 +56,14 @@ class NotificationInterruptLogger @Inject constructor(
         }
     }
 
+    fun logSuspendedAppBubble(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "No bubble up: notification: app $str1 is suspended"
+        })
+    }
+
     fun logNoBubbleNoMetadata(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
@@ -239,11 +247,11 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
-    fun logNoPulsingNotificationHidden(entry: NotificationEntry) {
+    fun logNoPulsingNotificationHiddenOverride(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "No pulsing: notification hidden on lock screen: $str1"
+            "No pulsing: notification hidden on lock screen by override: $str1"
         })
     }
 
@@ -290,11 +298,11 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
-    fun keyguardHideNotification(entry: NotificationEntry) {
+    fun logNoAlertingNotificationHidden(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey
         }, {
-            "Keyguard Hide Notification: $str1"
+            "No alerting: notification hidden on lock screen: $str1"
         })
     }
 }

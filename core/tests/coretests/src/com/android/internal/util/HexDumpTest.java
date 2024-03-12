@@ -19,14 +19,22 @@ package com.android.internal.util;
 import static com.android.internal.util.HexDump.hexStringToByteArray;
 import static com.android.internal.util.HexDump.toHexString;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Random;
 
-public final class HexDumpTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public final class HexDumpTest {
+    @Test
     public void testBytesToHexString() {
         assertEquals("abcdef", HexDump.toHexString(
                 new byte[] { (byte) 0xab, (byte) 0xcd, (byte) 0xef }, false));
@@ -34,12 +42,14 @@ public final class HexDumpTest extends TestCase {
                 new byte[] { (byte) 0xab, (byte) 0xcd, (byte) 0xef }, true));
     }
 
+    @Test
     public void testNullByteArray() {
         assertThrows(
                 NullPointerException.class,
                 () -> HexDump.toHexString(null));
     }
 
+    @Test
     public void testBytesToHexString_allByteValues() {
         byte[] bytes = new byte[256];
         for (int i = 0; i < bytes.length; i++) {
@@ -57,6 +67,7 @@ public final class HexDumpTest extends TestCase {
         assertEquals(expected, HexDump.toHexString(bytes));
     }
 
+    @Test
     public void testRoundTrip_fromBytes() {
         Random deterministicRandom = new Random(31337); // arbitrary but deterministic
         for (int length = 0; length < 100; length++) {
@@ -68,6 +79,7 @@ public final class HexDumpTest extends TestCase {
         }
     }
 
+    @Test
     public void testRoundTrip_fromString() {
         String hexString = "0123456789ABCDEF72f9a3438934c378d34f32a8b932";
         for (int length = 0; length < hexString.length(); length += 2) {
@@ -77,6 +89,7 @@ public final class HexDumpTest extends TestCase {
         }
     }
 
+    @Test
     public void testToHexString_offsetLength() {
         byte[] bytes = new byte[32];
         for (int i = 0; i < 16; i++) {
@@ -97,6 +110,7 @@ public final class HexDumpTest extends TestCase {
         }
     }
 
+    @Test
     public void testToHexString_case() {
         byte[] bytes = new byte[32];
         for (int i = 0; i < 16; i++) {
@@ -113,16 +127,19 @@ public final class HexDumpTest extends TestCase {
         assertEquals(expected.toUpperCase(), toHexString(bytes));
     }
 
+    @Test
     public void testHexStringToByteArray_empty() {
         assertBytesEqual(new byte[0], HexDump.hexStringToByteArray(""));
     }
 
+    @Test
     public void testHexStringToByteArray_null() {
         assertThrows(
                 NullPointerException.class,
                 () -> HexDump.hexStringToByteArray((String) null));
     }
 
+    @Test
     public void testHexStringToByteArray_invalidCharacters() {
         // IllegalArgumentException would probably have been better than RuntimeException, but it
         // might be too late to change now.
@@ -137,6 +154,7 @@ public final class HexDumpTest extends TestCase {
                 () -> HexDump.hexStringToByteArray("abcdefgh"));
     }
 
+    @Test
     public void testHexStringToByteArray_oddLength() {
         // IllegalArgumentException would probably have been better than
         // StringIndexOutOfBoundsException, but it might be too late to change now.

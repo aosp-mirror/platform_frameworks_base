@@ -249,14 +249,15 @@ ASystemFontIterator* ASystemFontIterator_open() {
                         locale.emplace(minikin::getLocaleString(localeId));
                     }
                     std::vector<std::pair<uint32_t, float>> axes;
-                    for (const auto& [tag, value] : font->typeface()->GetAxes()) {
+                    for (const auto& [tag, value] : font->baseTypeface()->GetAxes()) {
                         axes.push_back(std::make_pair(tag, value));
                     }
 
-                    fonts.insert({font->typeface()->GetFontPath(), std::move(locale),
+                    fonts.insert({font->baseTypeface()->GetFontPath(), std::move(locale),
                                   font->style().weight(),
                                   font->style().slant() == minikin::FontStyle::Slant::ITALIC,
-                                  static_cast<uint32_t>(font->typeface()->GetFontIndex()), axes});
+                                  static_cast<uint32_t>(font->baseTypeface()->GetFontIndex()),
+                                  axes});
                 }
             });
 
@@ -321,7 +322,7 @@ AFont* _Nonnull AFontMatcher_match(
                     .font;
     std::unique_ptr<AFont> result = std::make_unique<AFont>();
     const android::MinikinFontSkia* minikinFontSkia =
-            reinterpret_cast<android::MinikinFontSkia*>(font->typeface().get());
+            reinterpret_cast<android::MinikinFontSkia*>(font->baseTypeface().get());
     result->mFilePath = minikinFontSkia->getFilePath();
     result->mWeight = font->style().weight();
     result->mItalic = font->style().slant() == minikin::FontStyle::Slant::ITALIC;

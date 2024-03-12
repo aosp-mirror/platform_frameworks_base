@@ -59,7 +59,10 @@ message CriticalEventProto {
     AppNotResponding anr = 4;
     JavaCrash java_crash = 5;
     NativeCrash native_crash = 6;
+    SystemServerStarted system_server_started = 7;
   }
+
+  message SystemServerStarted {}
 
   message Watchdog {
     // The watchdog subject.

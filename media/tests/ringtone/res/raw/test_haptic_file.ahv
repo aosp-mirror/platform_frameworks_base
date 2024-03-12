@@ -1,0 +1,17 @@
+<vibration-effect>
+  <waveform-effect>
+    <waveform-entry durationMs="63" amplitude="255"/>
+    <waveform-entry durationMs="63" amplitude="231"/>
+    <waveform-entry durationMs="63" amplitude="208"/>
+    <waveform-entry durationMs="63" amplitude="185"/>
+    <waveform-entry durationMs="63" amplitude="162"/>
+    <waveform-entry durationMs="63" amplitude="139"/>
+    <waveform-entry durationMs="63" amplitude="115"/>
+    <waveform-entry durationMs="63" amplitude="92"/>
+    <waveform-entry durationMs="63" amplitude="69"/>
+    <waveform-entry durationMs="63" amplitude="46"/>
+    <waveform-entry durationMs="63" amplitude="23"/>
+    <waveform-entry durationMs="63" amplitude="0"/>
+    <waveform-entry durationMs="1250" amplitude="0"/>
+  </waveform-effect>
+</vibration-effect>

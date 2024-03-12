@@ -19,6 +19,10 @@ package com.android.wm.shell.common.split;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -130,7 +134,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     public void testSetDivideRatio() {
         mSplitLayout.setDividePosition(200, false /* applyLayoutChange */);
-        mSplitLayout.setDivideRatio(0.5f);
+        mSplitLayout.setDivideRatio(SNAP_TO_50_50);
         assertThat(mSplitLayout.getDividePosition()).isEqualTo(
                 mSplitLayout.mDividerSnapAlgorithm.getMiddleTarget().position);
     }
@@ -146,7 +150,7 @@ public class SplitLayoutTests extends ShellTestCase {
     public void testSnapToDismissStart() {
         // verify it callbacks properly when the snap target indicates dismissing split.
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
+                SNAP_TO_START_AND_DISMISS);
 
         mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
         waitDividerFlingFinished();
@@ -158,7 +162,7 @@ public class SplitLayoutTests extends ShellTestCase {
     public void testSnapToDismissEnd() {
         // verify it callbacks properly when the snap target indicates dismissing split.
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
+                SNAP_TO_END_AND_DISMISS);
 
         mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
         waitDividerFlingFinished();

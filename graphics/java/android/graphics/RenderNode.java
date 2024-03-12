@@ -272,6 +272,17 @@ public final class RenderNode {
         void positionChanged(long frameNumber, int left, int top, int right, int bottom);
 
         /**
+         * Called by native by a Rendering Worker thread to update window position; includes
+         * the local rect that represents the clipped area of the RenderNode's bounds.
+         *
+         * @hide
+         */
+        default void positionChanged(long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            positionChanged(frameNumber, left, top, right, bottom);
+        }
+
+        /**
          * Called by JNI
          *
          * @hide */
@@ -280,6 +291,23 @@ public final class RenderNode {
             final PositionUpdateListener listener = weakListener.get();
             if (listener != null) {
                 listener.positionChanged(frameNumber, left, top, right, bottom);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * Called by JNI
+         *
+         * @hide */
+        static boolean callPositionChanged2(WeakReference<PositionUpdateListener> weakListener,
+                long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            final PositionUpdateListener listener = weakListener.get();
+            if (listener != null) {
+                listener.positionChanged(frameNumber, left, top, right, bottom, clipLeft,
+                        clipTop, clipRight, clipBottom);
                 return true;
             } else {
                 return false;
@@ -367,6 +395,15 @@ public final class RenderNode {
         public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
             for (PositionUpdateListener pul : mListeners) {
                 pul.positionChanged(frameNumber, left, top, right, bottom);
+            }
+        }
+
+        @Override
+        public void positionChanged(long frameNumber, int left, int top, int right, int bottom,
+                int clipLeft, int clipTop, int clipRight, int clipBottom) {
+            for (PositionUpdateListener pul : mListeners) {
+                pul.positionChanged(frameNumber, left, top, right, bottom, clipLeft, clipTop,
+                        clipRight, clipBottom);
             }
         }
 

@@ -426,7 +426,7 @@ public class NotificationListenersTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testOnPackageChanged_removingDisallowedPackage() {
+    public void testOnPackageChanged_removingPackage_removeFromDisallowed() {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
         VersionedPackage a1 = new VersionedPackage("pkg1", 243);
         NotificationListenerFilter nlf2 =
@@ -440,6 +440,25 @@ public class NotificationListenersTest extends UiServiceTestCase {
 
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0))
                 .getDisallowedPackages()).isEmpty();
+        assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 0))
+                .getDisallowedPackages()).isEmpty();
+    }
+
+    @Test
+    public void testOnPackageChanged_notRemovingPackage_staysInDisallowed() {
+        NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
+        VersionedPackage a1 = new VersionedPackage("pkg1", 243);
+        NotificationListenerFilter nlf2 =
+                new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
+        mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
+        mListeners.setNotificationListenerFilter(Pair.create(mCn2, 0), nlf2);
+
+        String[] pkgs = new String[] {"pkg1"};
+        int[] uids = new int[] {243};
+        mListeners.onPackagesChanged(false, pkgs, uids);
+
+        assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 0))
+                .getDisallowedPackages()).contains(a1);
     }
 
     @Test

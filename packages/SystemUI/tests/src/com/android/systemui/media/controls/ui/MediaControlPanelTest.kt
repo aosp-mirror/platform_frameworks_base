@@ -61,7 +61,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.ActivityIntentHelper
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bluetooth.BroadcastDialogController
 import com.android.systemui.broadcast.BroadcastSender
@@ -81,12 +80,14 @@ import com.android.systemui.media.controls.models.recommendation.RecommendationV
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
@@ -232,6 +233,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             this.set(Flags.UMO_TURBULENCE_NOISE, false)
         }
     @Mock private lateinit var globalSettings: GlobalSettings
+    @Mock private lateinit var mediaFlags: MediaFlags
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -251,6 +253,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             .thenReturn(applicationInfo)
         whenever(packageManager.getApplicationLabel(any())).thenReturn(PACKAGE)
         context.setMockPackageManager(packageManager)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
 
         player =
             object :
@@ -273,7 +276,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     lockscreenUserManager,
                     broadcastDialogController,
                     fakeFeatureFlag,
-                    globalSettings
+                    globalSettings,
+                    mediaFlags,
                 ) {
                 override fun loadAnimator(
                     animId: Int,
@@ -1884,7 +1888,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindRecommendation_listHasTooFewRecs_notDisplayed() {
         player.attachRecommendation(recommendationViewHolder)
-        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val icon =
+            Icon.createWithResource(context, com.android.settingslib.R.drawable.ic_1x_mobiledata)
         val data =
             smartspaceData.copy(
                 recommendations =
@@ -1911,7 +1916,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindRecommendation_listHasTooFewRecsWithIcons_notDisplayed() {
         player.attachRecommendation(recommendationViewHolder)
-        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val icon =
+            Icon.createWithResource(context, com.android.settingslib.R.drawable.ic_1x_mobiledata)
         val data =
             smartspaceData.copy(
                 recommendations =
@@ -1955,7 +1961,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val subtitle1 = "Subtitle1"
         val subtitle2 = "Subtitle2"
         val subtitle3 = "Subtitle3"
-        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val icon =
+            Icon.createWithResource(context, com.android.settingslib.R.drawable.ic_1x_mobiledata)
 
         val data =
             smartspaceData.copy(
@@ -1998,7 +2005,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     listOf(
                         SmartspaceAction.Builder("id1", "")
                             .setSubtitle("fake subtitle")
-                            .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                            .setIcon(
+                                Icon.createWithResource(
+                                    context,
+                                    com.android.settingslib.R.drawable.ic_1x_mobiledata
+                                )
+                            )
                             .setExtras(Bundle.EMPTY)
                             .build()
                     )
@@ -2013,7 +2025,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         useRealConstraintSets()
         player.attachRecommendation(recommendationViewHolder)
 
-        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val icon =
+            Icon.createWithResource(context, com.android.settingslib.R.drawable.ic_1x_mobiledata)
         val data =
             smartspaceData.copy(
                 recommendations =
@@ -2047,7 +2060,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         useRealConstraintSets()
         player.attachRecommendation(recommendationViewHolder)
 
-        val icon = Icon.createWithResource(context, R.drawable.ic_1x_mobiledata)
+        val icon =
+            Icon.createWithResource(context, com.android.settingslib.R.drawable.ic_1x_mobiledata)
         val data =
             smartspaceData.copy(
                 recommendations =
@@ -2086,7 +2100,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     listOf(
                         SmartspaceAction.Builder("id1", "title1")
                             .setSubtitle("")
-                            .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                            .setIcon(
+                                Icon.createWithResource(
+                                    context,
+                                    com.android.settingslib.R.drawable.ic_1x_mobiledata
+                                )
+                            )
                             .setExtras(Bundle.EMPTY)
                             .build(),
                         SmartspaceAction.Builder("id2", "title2")
@@ -2096,7 +2115,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .build(),
                         SmartspaceAction.Builder("id3", "title3")
                             .setSubtitle("")
-                            .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                            .setIcon(
+                                Icon.createWithResource(
+                                    context,
+                                    com.android.settingslib.R.drawable.ic_3g_mobiledata
+                                )
+                            )
                             .setExtras(Bundle.EMPTY)
                             .build()
                     )
@@ -2119,7 +2143,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
                     listOf(
                         SmartspaceAction.Builder("id1", "")
                             .setSubtitle("subtitle1")
-                            .setIcon(Icon.createWithResource(context, R.drawable.ic_1x_mobiledata))
+                            .setIcon(
+                                Icon.createWithResource(
+                                    context,
+                                    com.android.settingslib.R.drawable.ic_1x_mobiledata
+                                )
+                            )
                             .setExtras(Bundle.EMPTY)
                             .build(),
                         SmartspaceAction.Builder("id2", "")
@@ -2129,7 +2158,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
                             .build(),
                         SmartspaceAction.Builder("id3", "")
                             .setSubtitle("subtitle3")
-                            .setIcon(Icon.createWithResource(context, R.drawable.ic_3g_mobiledata))
+                            .setIcon(
+                                Icon.createWithResource(
+                                    context,
+                                    com.android.settingslib.R.drawable.ic_3g_mobiledata
+                                )
+                            )
                             .setExtras(Bundle.EMPTY)
                             .build()
                     )

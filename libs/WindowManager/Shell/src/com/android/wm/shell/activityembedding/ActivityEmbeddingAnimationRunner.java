@@ -255,8 +255,13 @@ class ActivityEmbeddingAnimationRunner {
         int offsetLayer = TYPE_LAYER_OFFSET;
         final List<ActivityEmbeddingAnimationAdapter> adapters = new ArrayList<>();
         for (TransitionInfo.Change change : openingChanges) {
+            final Animation animation =
+                    animationProvider.get(info, change, openingWholeScreenBounds);
+            if (animation.getDuration() == 0) {
+                continue;
+            }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
-                    info, change, animationProvider, openingWholeScreenBounds);
+                    info, change, animation, openingWholeScreenBounds);
             if (isOpening) {
                 adapter.overrideLayer(offsetLayer++);
             }
@@ -275,8 +280,13 @@ class ActivityEmbeddingAnimationRunner {
                     adapters.add(snapshotAdapter);
                 }
             }
+            final Animation animation =
+                    animationProvider.get(info, change, closingWholeScreenBounds);
+            if (animation.getDuration() == 0) {
+                continue;
+            }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
-                    info, change, animationProvider, closingWholeScreenBounds);
+                    info, change, animation, closingWholeScreenBounds);
             if (!isOpening) {
                 adapter.overrideLayer(offsetLayer++);
             }
@@ -353,8 +363,7 @@ class ActivityEmbeddingAnimationRunner {
     @NonNull
     private ActivityEmbeddingAnimationAdapter createOpenCloseAnimationAdapter(
             @NonNull TransitionInfo info, @NonNull TransitionInfo.Change change,
-            @NonNull AnimationProvider animationProvider, @NonNull Rect wholeAnimationBounds) {
-        final Animation animation = animationProvider.get(info, change, wholeAnimationBounds);
+            @NonNull Animation animation, @NonNull Rect wholeAnimationBounds) {
         return new ActivityEmbeddingAnimationAdapter(animation, change, change.getLeash(),
                 wholeAnimationBounds, TransitionUtil.getRootFor(change, info));
     }

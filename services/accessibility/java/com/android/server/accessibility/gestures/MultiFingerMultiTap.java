@@ -31,7 +31,7 @@ import java.util.Arrays;
  * This class matches multi-finger multi-tap gestures. The number of fingers and the number of taps
  * for each instance is specified in the constructor.
  */
-class MultiFingerMultiTap extends GestureMatcher {
+public class MultiFingerMultiTap extends GestureMatcher {
 
     // The target number of taps.
     final int mTargetTapCount;
@@ -56,7 +56,7 @@ class MultiFingerMultiTap extends GestureMatcher {
      * @throws IllegalArgumentException if <code>fingers<code/> is less than 2
      *                                  or <code>taps<code/> is not positive.
      */
-    MultiFingerMultiTap(
+    public MultiFingerMultiTap(
             Context context,
             int fingers,
             int taps,

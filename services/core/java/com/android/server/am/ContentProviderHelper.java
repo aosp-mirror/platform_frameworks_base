@@ -96,7 +96,9 @@ import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -115,6 +117,8 @@ public class ContentProviderHelper {
     private final ArrayList<ContentProviderRecord> mLaunchingProviders = new ArrayList<>();
     private final ProviderMap mProviderMap;
     private boolean mSystemProvidersInstalled;
+
+    private final Map<String, Boolean> mCloneProfileAuthorityRedirectionCache = new HashMap<>();
 
     ContentProviderHelper(ActivityManagerService service, boolean createProviderMap) {
         mService = service;
@@ -201,9 +205,24 @@ public class ContentProviderHelper {
             final UserProperties userProps = umInternal.getUserProperties(userId);
             final boolean isMediaSharedWithParent =
                     userProps != null && userProps.isMediaSharedWithParent();
-            if (!isAuthorityRedirectedForCloneProfile(name) || !isMediaSharedWithParent) {
+            if (!isAuthorityRedirectedForCloneProfileCached(name) || !isMediaSharedWithParent) {
                 // First check if this content provider has been published...
                 cpr = mProviderMap.getProviderByName(name, userId);
+                // In case we are on media authority and callingUid is cloned app asking to access
+                // the contentProvider of user 0 by specifying content as
+                // content://<parent-id>@media/external/file, we skip checkUser.
+                if (isAuthorityRedirectedForCloneProfileCached(name)) {
+                    final int callingUserId = UserHandle.getUserId(callingUid);
+                    final UserProperties userPropsCallingUser =
+                            umInternal.getUserProperties(callingUserId);
+                    final boolean isMediaSharedWithParentForCallingUser =
+                            userPropsCallingUser != null
+                                    && userPropsCallingUser.isMediaSharedWithParent();
+                    if (isMediaSharedWithParentForCallingUser
+                            && umInternal.getProfileParentId(callingUserId) == userId) {
+                        checkCrossUser = false;
+                    }
+                }
             }
             // If that didn't work, check if it exists for user 0 and then
             // verify that it's a singleton provider before using it.
@@ -218,7 +237,7 @@ public class ContentProviderHelper {
                                         r == null ? callingUid : r.uid, cpi.applicationInfo.uid)) {
                         userId = UserHandle.USER_SYSTEM;
                         checkCrossUser = false;
-                    } else if (isAuthorityRedirectedForCloneProfile(name)) {
+                    } else if (isAuthorityRedirectedForCloneProfileCached(name)) {
                         if (isMediaSharedWithParent) {
                             userId = umInternal.getProfileParentId(userId);
                             checkCrossUser = false;
@@ -256,7 +275,6 @@ public class ContentProviderHelper {
                 if (r != null && cpr.canRunHere(r)) {
                     checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
                             cpr.name.flattenToShortString(), startTime);
-                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
 
                     // This provider has been published or is in the process
                     // of being published...  but it is also allowed to run
@@ -275,7 +293,8 @@ public class ContentProviderHelper {
                     return holder;
                 }
 
-                // Don't expose providers between normal apps and instant apps
+                // Don't expose providers between normal apps and instant apps; enforce limited
+                // package visibility (introduced in Android 11); etc.
                 try {
                     if (AppGlobals.getPackageManager()
                             .resolveContentProvider(name, /*flags=*/ 0, userId) == null) {
@@ -457,7 +476,6 @@ public class ContentProviderHelper {
                     // info and allow the caller to instantiate it.  Only do
                     // this if the provider is the same user as the caller's
                     // process, or can run as root (so can be in any process).
-                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
                     return cpr.newHolder(null, true);
                 }
 
@@ -488,12 +506,12 @@ public class ContentProviderHelper {
                                     cpr.appInfo.packageName, userId, Event.APP_COMPONENT_USED);
                         }
 
-                        // Content provider is now in use, its package can't be stopped.
                         try {
                             checkTime(startTime,
                                     "getContentProviderImpl: before set stopped state");
-                            mService.mPackageManagerInt.setPackageStoppedState(
-                                    cpr.appInfo.packageName, false, userId);
+                            mService.mPackageManagerInt.notifyComponentUsed(
+                                    cpr.appInfo.packageName, userId, callingPackage,
+                                    cpr.toString());
                             checkTime(startTime, "getContentProviderImpl: after set stopped state");
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "
@@ -609,8 +627,6 @@ public class ContentProviderHelper {
                 // Return a holder instance even if we are waiting for the publishing of the
                 // provider, client will check for the holder.provider to see if it needs to wait
                 // for it.
-                //todo(b/265965249) Need to perform cleanup before calling enforce method here
-                enforceContentProviderRestrictionsForSdkSandbox(cpi);
                 return cpr.newHolder(conn, false);
             }
         }
@@ -672,7 +688,6 @@ public class ContentProviderHelper {
                     + " caller=" + callerName + "/" + Binder.getCallingUid());
             return null;
         }
-        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return cpr.newHolder(conn, false);
     }
 
@@ -1078,7 +1093,7 @@ public class ContentProviderHelper {
             return false;
         }
 
-        if (isAuthorityRedirectedForCloneProfile(holder.info.authority)
+        if (isAuthorityRedirectedForCloneProfileCached(holder.info.authority)
                 && resolveParentUserIdForCloneProfile(userId) != userId) {
             // Since clone profile shares certain providers with its parent and the access is
             // re-directed as well, the holder may not actually be installed on the clone profile.
@@ -1113,7 +1128,7 @@ public class ContentProviderHelper {
             userId = UserHandle.getCallingUserId();
         }
 
-        if (isAuthorityRedirectedForCloneProfile(authority)) {
+        if (isAuthorityRedirectedForCloneProfileCached(authority)) {
             UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
             UserInfo userInfo = umInternal.getUserInfo(userId);
 
@@ -1150,7 +1165,6 @@ public class ContentProviderHelper {
             appName = r.toString();
         }
 
-        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return checkContentProviderPermission(cpi, callingPid, Binder.getCallingUid(),
                 userId, checkUser, appName);
     }
@@ -1524,11 +1538,17 @@ public class ContentProviderHelper {
 
     /**
      * Check if {@link ProcessRecord} has a possible chance at accessing the
-     * given {@link ProviderInfo}. Final permission checking is always done
+     * given {@link ProviderInfo}. First permission checking is for enforcing
+     * ContentProvider Restrictions from SdkSandboxManager.
+     * Final permission checking is always done
      * in {@link ContentProvider}.
      */
     private String checkContentProviderPermission(ProviderInfo cpi, int callingPid, int callingUid,
             int userId, boolean checkUser, String appName) {
+        if (!canAccessContentProviderFromSdkSandbox(cpi, callingUid)) {
+            return "ContentProvider access not allowed from sdk sandbox UID. "
+                    + "ProviderInfo: " + cpi.toString();
+        }
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
@@ -1918,11 +1938,10 @@ public class ContentProviderHelper {
         }
     }
 
-    // Binder.clearCallingIdentity() shouldn't be called before this method
-    // as Binder should have its original callingUid for the check
-    private void enforceContentProviderRestrictionsForSdkSandbox(ProviderInfo cpi) {
-        if (!Process.isSdkSandboxUid(Binder.getCallingUid())) {
-            return;
+    private boolean canAccessContentProviderFromSdkSandbox(ProviderInfo cpi,
+                                                                    int callingUid) {
+        if (!Process.isSdkSandboxUid(callingUid)) {
+            return true;
         }
         final SdkSandboxManagerLocal sdkSandboxManagerLocal =
                 LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
@@ -1931,11 +1950,7 @@ public class ContentProviderHelper {
                     + "when checking whether SDK sandbox uid may "
                     + "access the contentprovider.");
         }
-        if (!sdkSandboxManagerLocal
-                .canAccessContentProviderFromSdkSandbox(cpi)) {
-            throw new SecurityException(
-                    "SDK sandbox uid may not access contentprovider " + cpi.name);
-        }
+        return sdkSandboxManagerLocal.canAccessContentProviderFromSdkSandbox(cpi);
     }
 
     /**
@@ -1958,5 +1973,16 @@ public class ContentProviderHelper {
     protected boolean dumpProviderProto(FileDescriptor fd, PrintWriter pw, String name,
             String[] args) {
         return mProviderMap.dumpProviderProto(fd, pw, name, args);
+    }
+
+    private boolean isAuthorityRedirectedForCloneProfileCached(String auth) {
+        if (mCloneProfileAuthorityRedirectionCache.containsKey(auth)) {
+            final Boolean retVal = mCloneProfileAuthorityRedirectionCache.get(auth);
+            return retVal == null ? false : retVal.booleanValue();
+        } else {
+            boolean isAuthRedirected = isAuthorityRedirectedForCloneProfile(auth);
+            mCloneProfileAuthorityRedirectionCache.put(auth, isAuthRedirected);
+            return isAuthRedirected;
+        }
     }
 }

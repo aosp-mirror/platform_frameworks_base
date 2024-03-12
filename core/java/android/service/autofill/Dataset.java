@@ -18,6 +18,7 @@ package android.service.autofill;
 
 import static android.view.autofill.Helper.sDebug;
 
+import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -26,6 +27,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.ClipData;
 import android.content.IntentSender;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -115,6 +117,8 @@ import java.util.regex.Pattern;
  * with the lower case value of the view's text are shown.
  *   <li>All other datasets are hidden.
  * </ol>
+ * <p>Note: If user enters four or more characters, all datasets will be hidden</p>
+ *
  */
 public final class Dataset implements Parcelable {
     /**
@@ -185,6 +189,9 @@ public final class Dataset implements Parcelable {
     @Nullable private final InlinePresentation mInlinePresentation;
     @Nullable private final InlinePresentation mInlineTooltipPresentation;
     private final IntentSender mAuthentication;
+
+    @Nullable private final Bundle mAuthenticationExtras;
+
     @Nullable String mId;
 
     /**
@@ -222,6 +229,7 @@ public final class Dataset implements Parcelable {
         mInlinePresentation = inlinePresentation;
         mInlineTooltipPresentation = inlineTooltipPresentation;
         mAuthentication = authentication;
+        mAuthenticationExtras = null;
         mId = id;
     }
 
@@ -244,6 +252,7 @@ public final class Dataset implements Parcelable {
         mInlinePresentation = dataset.mInlinePresentation;
         mInlineTooltipPresentation = dataset.mInlineTooltipPresentation;
         mAuthentication = dataset.mAuthentication;
+        mAuthenticationExtras = dataset.mAuthenticationExtras;
         mId = dataset.mId;
         mAutofillDatatypes = dataset.mAutofillDatatypes;
     }
@@ -262,6 +271,7 @@ public final class Dataset implements Parcelable {
         mInlinePresentation = builder.mInlinePresentation;
         mInlineTooltipPresentation = builder.mInlineTooltipPresentation;
         mAuthentication = builder.mAuthentication;
+        mAuthenticationExtras = builder.mAuthenticationExtras;
         mId = builder.mId;
         mAutofillDatatypes = builder.mAutofillDatatypes;
     }
@@ -343,6 +353,12 @@ public final class Dataset implements Parcelable {
     }
 
     /** @hide */
+    @Hide
+    public @Nullable Bundle getAuthenticationExtras() {
+        return mAuthenticationExtras;
+    }
+
+    /** @hide */
     @TestApi
     public boolean isEmpty() {
         return mFieldIds == null || mFieldIds.isEmpty();
@@ -399,6 +415,9 @@ public final class Dataset implements Parcelable {
         if (mAuthentication != null) {
             builder.append(", hasAuthentication");
         }
+        if (mAuthenticationExtras != null) {
+            builder.append(", hasAuthenticationExtras");
+        }
         if (mAutofillDatatypes != null) {
             builder.append(", autofillDatatypes=").append(mAutofillDatatypes);
         }
@@ -452,6 +471,8 @@ public final class Dataset implements Parcelable {
         @Nullable private InlinePresentation mInlinePresentation;
         @Nullable private InlinePresentation mInlineTooltipPresentation;
         private IntentSender mAuthentication;
+
+        private Bundle mAuthenticationExtras;
         private boolean mDestroyed;
         @Nullable private String mId;
 
@@ -618,6 +639,25 @@ public final class Dataset implements Parcelable {
         public @NonNull Builder setAuthentication(@Nullable IntentSender authentication) {
             throwIfDestroyed();
             mAuthentication = authentication;
+            return this;
+        }
+
+        /**
+         * Sets extras to be associated with the {@code authentication} intent sender, to be
+         * set on the intent that is fired through the intent sender.
+         *
+         * Autofill providers can set any extras they wish to receive directly on the intent
+         * that is used to create the {@code authentication}. This is an internal API, to be
+         * used by the platform to associate data with a given dataset. These extras will be
+         * merged with the {@code clientState} and sent as part of the fill in intent when
+         * the {@code authentication} intentSender is invoked.
+         *
+         * @hide
+         */
+        @Hide
+        public @NonNull Builder setAuthenticationExtras(@Nullable Bundle authenticationExtra) {
+            throwIfDestroyed();
+            mAuthenticationExtras = authenticationExtra;
             return this;
         }
 
@@ -1361,6 +1401,7 @@ public final class Dataset implements Parcelable {
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
         parcel.writeInt(mEligibleReason);
+        parcel.writeTypedObject(mAuthenticationExtras, flags);
     }
 
     public static final @NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
@@ -1396,6 +1437,7 @@ public final class Dataset implements Parcelable {
                     android.content.IntentSender.class);
             final String datasetId = parcel.readString();
             final int eligibleReason = parcel.readInt();
+            final Bundle authenticationExtras = parcel.readTypedObject(Bundle.CREATOR);
 
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
@@ -1440,6 +1482,7 @@ public final class Dataset implements Parcelable {
                         fieldDialogPresentation);
             }
             builder.setAuthentication(authentication);
+            builder.setAuthenticationExtras(authenticationExtras);
             builder.setId(datasetId);
             Dataset dataset = builder.build();
             dataset.mEligibleReason = eligibleReason;

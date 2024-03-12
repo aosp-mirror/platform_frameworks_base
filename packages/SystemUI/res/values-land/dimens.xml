@@ -88,4 +88,10 @@
          overlaid -->
     <dimen name="global_actions_button_size">72dp</dimen>
     <dimen name="global_actions_button_padding">26dp</dimen>
+
+    <!-- scroll view the size of 2 channel rows -->
+    <dimen name="notification_blocker_channel_list_height">128dp</dimen>
+
+    <dimen name="keyguard_indication_margin_bottom">8dp</dimen>
+    <dimen name="lock_icon_margin_bottom">24dp</dimen>
 </resources>

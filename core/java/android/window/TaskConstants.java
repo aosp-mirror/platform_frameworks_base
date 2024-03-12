@@ -81,6 +81,12 @@ public class TaskConstants {
     public static final int TASK_CHILD_LAYER_RESIZE_VEIL = 6 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
+     * Floating menus belonging to a task (e.g. maximize menu).
+     * @hide
+     */
+    public  static final int TASK_CHILD_LAYER_FLOATING_MENU = 7 * TASK_CHILD_LAYER_REGION_SIZE;
+
+    /**
      * Z-orders of task child layers other than activities, task fragments and layers interleaved
      * with them, e.g. IME windows. [-10000, 10000) is reserved for these layers.
      * @hide

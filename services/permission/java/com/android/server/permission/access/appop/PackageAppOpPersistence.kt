@@ -16,12 +16,16 @@
 
 package com.android.server.permission.access.appop
 
-import android.util.Log
+import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
-import com.android.server.permission.access.UserState
+import com.android.server.permission.access.MutableAccessState
+import com.android.server.permission.access.MutablePackageAppOpModes
+import com.android.server.permission.access.PackageAppOpModes
+import com.android.server.permission.access.WriteMode
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.attributeInterned
 import com.android.server.permission.access.util.forEachTag
 import com.android.server.permission.access.util.getAttributeValueOrThrow
@@ -29,44 +33,45 @@ import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
 class PackageAppOpPersistence : BaseAppOpPersistence() {
-    override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
+    override fun BinaryXmlPullParser.parseUserState(state: MutableAccessState, userId: Int) {
         when (tagName) {
             TAG_PACKAGE_APP_OPS -> parsePackageAppOps(state, userId)
             else -> {}
         }
     }
 
-    private fun BinaryXmlPullParser.parsePackageAppOps(state: AccessState, userId: Int) {
-        val userState = state.userStates[userId]
+    private fun BinaryXmlPullParser.parsePackageAppOps(state: MutableAccessState, userId: Int) {
+        val userState = state.mutateUserState(userId, WriteMode.NONE)!!
+        val packageAppOpModes = userState.mutatePackageAppOpModes()
         forEachTag {
             when (tagName) {
-                TAG_PACKAGE -> parsePackage(userState)
-                else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
+                TAG_PACKAGE -> parsePackage(packageAppOpModes)
+                else -> Slog.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
         }
-        userState.packageAppOpModes.retainAllIndexed { _, packageName, _ ->
-            val hasPackage = packageName in state.systemState.packageStates
-            if (!hasPackage) {
-                Log.w(LOG_TAG, "Dropping unknown package $packageName when parsing app-op state")
+        packageAppOpModes.forEachReversedIndexed { packageNameIndex, packageName, _ ->
+            if (packageName !in state.externalState.packageStates) {
+                Slog.w(LOG_TAG, "Dropping unknown package $packageName when parsing app-op state")
+                packageAppOpModes.removeAt(packageNameIndex)
+                userState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }
-            hasPackage
         }
     }
 
-    private fun BinaryXmlPullParser.parsePackage(userState: UserState) {
+    private fun BinaryXmlPullParser.parsePackage(packageAppOpModes: MutablePackageAppOpModes) {
         val packageName = getAttributeValueOrThrow(ATTR_NAME).intern()
-        val appOpModes = IndexedMap<String, Int>()
-        userState.packageAppOpModes[packageName] = appOpModes
+        val appOpModes = MutableIndexedMap<String, Int>()
+        packageAppOpModes[packageName] = appOpModes
         parseAppOps(appOpModes)
     }
 
     override fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
-        serializePackageAppOps(state.userStates[userId])
+        serializePackageAppOps(state.userStates[userId]!!.packageAppOpModes)
     }
 
-    private fun BinaryXmlSerializer.serializePackageAppOps(userState: UserState) {
+    private fun BinaryXmlSerializer.serializePackageAppOps(packageAppOpModes: PackageAppOpModes) {
         tag(TAG_PACKAGE_APP_OPS) {
-            userState.packageAppOpModes.forEachIndexed { _, packageName, appOpModes ->
+            packageAppOpModes.forEachIndexed { _, packageName, appOpModes ->
                 serializePackage(packageName, appOpModes)
             }
         }

@@ -19,17 +19,22 @@ package com.android.systemui.user.data.repository
 
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
+import dagger.Binds
+import dagger.Module
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.yield
 
-class FakeUserRepository : UserRepository {
+@SysUISingleton
+class FakeUserRepository @Inject constructor() : UserRepository {
     companion object {
         // User id to represent a non system (human) user id. We presume this is the main user.
         private const val MAIN_USER_ID = 10
@@ -55,10 +60,6 @@ class FakeUserRepository : UserRepository {
             SelectedUserModel(DEFAULT_SELECTED_USER_INFO, SelectionStatus.SELECTION_COMPLETE)
         )
     override val selectedUserInfo: Flow<UserInfo> = selectedUser.map { it.userInfo }
-
-    private val _userSwitchingInProgress = MutableStateFlow(false)
-    override val userSwitchingInProgress: Flow<Boolean>
-        get() = _userSwitchingInProgress
 
     override var mainUserId: Int = MAIN_USER_ID
     override var lastSelectedNonGuestUserId: Int = mainUserId
@@ -120,8 +121,9 @@ class FakeUserRepository : UserRepository {
     fun setGuestUserAutoCreated(value: Boolean) {
         _isGuestUserAutoCreated = value
     }
+}
 
-    fun setUserSwitching(value: Boolean) {
-        _userSwitchingInProgress.value = value
-    }
+@Module
+interface FakeUserRepositoryModule {
+    @Binds fun bindFake(fake: FakeUserRepository): UserRepository
 }

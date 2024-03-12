@@ -60,6 +60,12 @@ prebuilt_etc {
     src: "preinstalled-packages-asl-files.xml",
 }
 
+prebuilt_etc {
+    name: "preinstalled-packages-strict-signature.xml",
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-strict-signature.xml",
+}
+
 // Privapp permission whitelist files
 
 prebuilt_etc {

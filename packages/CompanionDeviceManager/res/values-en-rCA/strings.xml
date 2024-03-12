@@ -17,15 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
-    <string name="confirmation_title" msgid="4593465730772390351">"Allow &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; to access &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="confirmation_title" msgid="2244241995958340998">"Allow the app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; to access &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"watch"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Choose a <xliff:g id="PROFILE_NAME">%1$s</xliff:g> to be managed by &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="898569637110705523">"This app is needed to manage your <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> will be allowed to sync info, like the name of someone calling, interact with your notifications and access your Phone, SMS, Contacts, Calendar, Call logs and Nearby devices permissions."</string>
-    <string name="summary_watch_single_device" msgid="3173948915947011333">"This app will be allowed to sync info, like the name of someone calling, and access these permissions on your <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="chooser_title_non_profile" msgid="6035023914517087400">"Choose a device to be managed by &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2235819929238267637">"Choose a <xliff:g id="PROFILE_NAME">%1$s</xliff:g> to set up"</string>
+    <string name="summary_watch" msgid="7962014927042971830">"This app will be allowed to sync info, like the name of someone calling, and access these permissions on your <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Allow &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; to manage &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
-    <string name="profile_name_glasses" msgid="8488394059007275998">"glasses"</string>
-    <string name="summary_glasses_multi_device" msgid="615259525961937348">"This app is needed to manage <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> will be allowed to interact with your notifications and access your Phone, SMS, Contacts, Microphone and Nearby devices permissions."</string>
-    <string name="summary_glasses_single_device" msgid="3000909894067413398">"This app will be allowed to access these permissions on your <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="profile_name_glasses" msgid="3506504967216601277">"device"</string>
+    <string name="summary_glasses" msgid="2872254734959842579">"This app will be allowed to access these permissions on your <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Allow &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Cross-device services"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> to stream apps between your devices"</string>
@@ -38,15 +37,16 @@
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Allow &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; to take this action?"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="DEVICE_NAME">%2$s</xliff:g> to stream apps and other system features to nearby devices"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"device"</string>
-    <string name="summary_generic_single_device" msgid="4181180669689590417">"This app will be able to sync info, like the name of someone calling, between your phone and <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_generic" msgid="1761976003668044801">"This app will be able to sync info, like the name of someone calling, between your phone and the chosen device"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Allow"</string>
     <string name="consent_no" msgid="2640796915611404382">"Don\'t allow"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Cancel"</string>
     <string name="consent_back" msgid="2560683030046918882">"Back"</string>
+    <string name="permission_expand" msgid="893185038020887411">"Expand <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"Collapse <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Give apps on &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; the same permissions as on &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"This may include &lt;strong&gt;Microphone&lt;/strong&gt;, &lt;strong&gt;Camera&lt;/strong&gt;, and &lt;strong&gt;Location access&lt;/strong&gt;, and other sensitive permissions on &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;You can change these permissions any time in your Settings on &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"App Icon"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"More Information Button"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"More Information"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Phone"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>

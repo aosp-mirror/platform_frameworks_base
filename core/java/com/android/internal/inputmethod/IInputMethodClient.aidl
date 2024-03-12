@@ -31,7 +31,6 @@ oneway interface IInputMethodClient {
     void setInteractive(boolean active, boolean fullscreen);
     void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
-    void updateVirtualDisplayToScreenMatrix(int bindSequence, in float[] matrixValues);
     void setImeTraceEnabled(boolean enabled);
     void throwExceptionFromSystem(String message);
 }

@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Κατάργηση απόκρυψης"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Η εφαρμογή ενδέχεται να μην λειτουργεί με διαχωρισμό οθόνης."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Η εφαρμογή δεν υποστηρίζει διαχωρισμό οθόνης."</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Αυτή η εφαρμογή μπορεί να ανοιχθεί μόνο σε 1 παράθυρο."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Αυτή η εφαρμογή μπορεί να ανοίξει μόνο σε ένα παράθυρο"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Η εφαρμογή ίσως να μην λειτουργήσει σε δευτερεύουσα οθόνη."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Η εφαρμογή δεν υποστηρίζει την εκκίνηση σε δευτερεύουσες οθόνες."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Διαχωριστικό οθόνης"</string>
@@ -66,20 +66,28 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Μετακίνηση επάνω δεξιά"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Μετακίνηση κάτω αριστερά"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Μετακίνηση κάτω δεξιά"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"ανάπτυξη <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"σύμπτυξη <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Ρυθμίσεις <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Παράβλ. για συννεφ."</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Να μην γίνει προβολή της συζήτησης σε συννεφάκια."</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Συζητήστε χρησιμοποιώντας συννεφάκια."</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Οι νέες συζητήσεις εμφανίζονται ως κινούμενα εικονίδια ή συννεφάκια. Πατήστε για να ανοίξετε το συννεφάκι. Σύρετε για να το μετακινήσετε."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Ελέγξτε τα συννεφάκια ανά πάσα στιγμή."</string>
-    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Πατήστε Διαχείριση για να απενεργοποιήσετε τα συννεφάκια από αυτήν την εφαρμογή."</string>
+    <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Πατήστε Διαχείριση για να απενεργοποιήσετε τα συννεφάκια από αυτή την εφαρμογή."</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Το κατάλαβα"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Δεν υπάρχουν πρόσφατα συννεφάκια"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Τα πρόσφατα συννεφάκια και τα συννεφάκια που παραβλέψατε θα εμφανίζονται εδώ."</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Συζητήστε χρησιμοποιώντας συννεφάκια"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Οι νέες συζητήσεις εμφανίζονται ως εικονίδια σε μια από τις κάτω γωνίες της οθόνης. Πατήστε για να τις αναπτύξετε ή σύρετε για να τις παραβλέψετε."</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Ελέγξτε τα συννεφάκια ανά πάσα στιγμή."</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Πατήστε εδώ για τη διαχείριση εφαρμογών και συζητήσεων που προβάλλουν συννεφάκια"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Συννεφάκι"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Διαχείριση"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Το συννεφάκι παραβλέφθηκε."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Πατήστε για να επανεκκινήσετε αυτή την εφαρμογή για καλύτερη προβολή."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Πατήστε για να επανεκκινήσετε αυτή την εφαρμογή για καλύτερη προβολή"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Αλλάξτε τον λόγο διαστάσεων αυτής της εφαρμογής στις Ρυθμίσεις"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Αλλαγή λόγου διαστάσεων"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Προβλήματα με την κάμερα;\nΠατήστε για επιδιόρθωση."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Δεν διορθώθηκε;\nΠατήστε για επαναφορά."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Δεν αντιμετωπίζετε προβλήματα με την κάμερα; Πατήστε για παράβλεψη."</string>

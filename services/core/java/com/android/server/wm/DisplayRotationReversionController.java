@@ -116,7 +116,8 @@ final class DisplayRotationReversionController {
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
         if (mUserRotationOverridden != ROTATION_UNDEFINED
                 && displayRotation.getUserRotationMode() == USER_ROTATION_LOCKED) {
-            displayRotation.setUserRotation(USER_ROTATION_LOCKED, mUserRotationOverridden);
+            displayRotation.setUserRotation(USER_ROTATION_LOCKED, mUserRotationOverridden,
+                /* caller= */ "DisplayRotationReversionController#revertOverride");
             mUserRotationOverridden = ROTATION_UNDEFINED;
             return true;
         } else {

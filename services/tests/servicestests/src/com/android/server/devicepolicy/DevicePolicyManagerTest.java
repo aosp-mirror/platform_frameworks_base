@@ -63,7 +63,6 @@ import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.devicepolicy.DevicePolicyManagerService.ACTION_PROFILE_OFF_DEADLINE;
 import static com.android.server.devicepolicy.DevicePolicyManagerService.ACTION_TURN_PROFILE_ON_NOTIFICATION;
 import static com.android.server.devicepolicy.DpmMockContext.CALLER_USER_HANDLE;
-import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -1144,6 +1143,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(UserManager.DISALLOW_ADD_CLONE_PROFILE),
                 eq(true), eq(UserHandle.SYSTEM));
 
+        verify(getServices().userManager, times(1)).setUserRestriction(
+                eq(UserManager.DISALLOW_ADD_PRIVATE_PROFILE),
+                eq(true), eq(UserHandle.SYSTEM));
+
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
@@ -1420,6 +1423,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(getServices().userManager)
                 .setUserRestriction(eq(UserManager.DISALLOW_ADD_CLONE_PROFILE), eq(false),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+
+        verify(getServices().userManager)
+                .setUserRestriction(eq(UserManager.DISALLOW_ADD_PRIVATE_PROFILE), eq(false),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
 
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
@@ -5072,7 +5079,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().iwindowManager).refreshScreenCaptureDisabled();
         // Unsuspend personal apps
         verify(getServices().packageManagerInternal)
-                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);
+                .unsuspendAdminSuspendedPackages(UserHandle.USER_SYSTEM);
         verify(getServices().subscriptionManager).setSubscriptionUserHandle(0, null);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
                 FLAG_ENABLE_WORK_PROFILE_TELEPHONY, "false", false);
@@ -7527,7 +7534,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .cancel(eq(SystemMessageProto.SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED));
         // Verify that the apps are NOT unsuspeded.
         verify(getServices().ipackageManager, never()).setPackagesSuspendedAsUser(
-                any(), eq(false), any(), any(), any(), any(), anyInt());
+                any(), eq(false), any(), any(), any(), anyInt(), any(), anyInt(), anyInt());
         // Verify that DPC is invoked to check policy compliance.
         verify(mContext.spiedContext).startActivityAsUser(
                 MockUtils.checkIntentAction(ACTION_CHECK_POLICY_COMPLIANCE),
@@ -8120,14 +8127,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testIsUsbDataSignalingEnabledForUser_systemUser() throws Exception {
+    public void testIsUsbDataSignalingEnabledForUser() throws Exception {
         when(getServices().usbManager.enableUsbDataSignal(false)).thenReturn(true);
         when(getServices().usbManager.getUsbHalVersion()).thenReturn(UsbManager.USB_HAL_V1_3);
         setDeviceOwner();
         dpm.setUsbDataSignalingEnabled(false);
-        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
 
-        assertThat(dpm.isUsbDataSignalingEnabledForUser(UserHandle.myUserId())).isFalse();
+        assertThat(dpm.isUsbDataSignalingEnabled()).isFalse();
     }
 
     @Test

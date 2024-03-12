@@ -43,7 +43,7 @@
   </string-array>
   <string-array name="tile_states_cell">
     <item msgid="1235899788959500719">"Indisponibles"</item>
-    <item msgid="2074416252859094119">"Désactivées"</item>
+    <item msgid="2074416252859094119">"Désactivé"</item>
     <item msgid="287997784730044767">"Activées"</item>
   </string-array>
   <string-array name="tile_states_battery">
@@ -64,7 +64,7 @@
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Indisponible"</item>
     <item msgid="5776427577477729185">"Désactivée"</item>
-    <item msgid="7105052717007227415">"Activée"</item>
+    <item msgid="7105052717007227415">"Activé"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"Indisponible"</item>
@@ -89,12 +89,12 @@
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"Indisponible"</item>
     <item msgid="1909756493418256167">"Désactivé"</item>
-    <item msgid="4531508423703413340">"Activée"</item>
+    <item msgid="4531508423703413340">"Activé"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Indisponible"</item>
     <item msgid="9103697205127645916">"Désactivé"</item>
-    <item msgid="8067744885820618230">"Activée"</item>
+    <item msgid="8067744885820618230">"Activé"</item>
   </string-array>
   <string-array name="tile_states_saver">
     <item msgid="39714521631367660">"Indisponible"</item>
@@ -134,7 +134,7 @@
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Indisponible"</item>
     <item msgid="4572245614982283078">"Désactivé"</item>
-    <item msgid="6536448410252185664">"Activée"</item>
+    <item msgid="6536448410252185664">"Activé"</item>
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"Indisponible"</item>
@@ -148,7 +148,7 @@
   </string-array>
   <string-array name="tile_states_controls">
     <item msgid="8199009425335668294">"Indisponibles"</item>
-    <item msgid="4544919905196727508">"Désactivées"</item>
+    <item msgid="4544919905196727508">"Désactivé"</item>
     <item msgid="3422023746567004609">"Activées"</item>
   </string-array>
   <string-array name="tile_states_wallet">

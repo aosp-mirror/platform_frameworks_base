@@ -17,12 +17,22 @@
 package com.android.systemui.compose
 
 import android.content.Context
+import android.graphics.Point
 import android.view.View
+import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
+import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
+import com.android.systemui.common.ui.compose.windowinsets.DisplayCutoutProvider
+import com.android.systemui.communal.ui.compose.CommunalContainer
+import com.android.systemui.communal.ui.compose.CommunalHub
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -32,6 +42,11 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** The Compose facade, when Compose is available. */
 object ComposeFacade : BaseComposeFacade {
@@ -47,6 +62,23 @@ object ComposeFacade : BaseComposeFacade {
         activity.setContent { PlatformTheme { PeopleScreen(viewModel, onResult) } }
     }
 
+    override fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        onOpenWidgetPicker: () -> Unit,
+        onEditDone: () -> Unit,
+    ) {
+        activity.setContent {
+            PlatformTheme {
+                CommunalHub(
+                    viewModel = viewModel,
+                    onOpenWidgetPicker = onOpenWidgetPicker,
+                    onEditDone = onEditDone,
+                )
+            }
+        }
+    }
+
     override fun createFooterActionsView(
         context: Context,
         viewModel: FooterActionsViewModel,
@@ -58,20 +90,84 @@ object ComposeFacade : BaseComposeFacade {
     }
 
     override fun createSceneContainerView(
+        scope: CoroutineScope,
         context: Context,
         viewModel: SceneContainerViewModel,
+        windowInsets: StateFlow<WindowInsets?>,
         sceneByKey: Map<SceneKey, Scene>,
     ): View {
         return ComposeView(context).apply {
             setContent {
                 PlatformTheme {
-                    SceneContainer(
-                        viewModel = viewModel,
-                        sceneByKey =
-                            sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
-                    )
+                    DisplayCutoutProvider(
+                        displayCutout = displayCutoutFromWindowInsets(scope, context, windowInsets)
+                    ) {
+                        SceneContainer(
+                            viewModel = viewModel,
+                            sceneByKey =
+                                sceneByKey.mapValues { (_, scene) -> scene as ComposableScene },
+                        )
+                    }
                 }
             }
         }
+    }
+
+    override fun createCommunalView(
+        context: Context,
+        viewModel: BaseCommunalViewModel,
+    ): View {
+        return ComposeView(context).apply {
+            setContent { PlatformTheme { CommunalHub(viewModel = viewModel) } }
+        }
+    }
+
+    override fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View {
+        return ComposeView(context).apply {
+            setContent { PlatformTheme { CommunalContainer(viewModel = viewModel) } }
+        }
+    }
+
+    // TODO(b/298525212): remove once Compose exposes window inset bounds.
+    private fun displayCutoutFromWindowInsets(
+        scope: CoroutineScope,
+        context: Context,
+        windowInsets: StateFlow<WindowInsets?>,
+    ): StateFlow<DisplayCutout> =
+        windowInsets
+            .map {
+                val boundingRect = it?.displayCutout?.boundingRectTop
+                val width = boundingRect?.let { boundingRect.right - boundingRect.left } ?: 0
+                val left = boundingRect?.left?.toDp(context) ?: 0.dp
+                val top = boundingRect?.top?.toDp(context) ?: 0.dp
+                val right = boundingRect?.right?.toDp(context) ?: 0.dp
+                val bottom = boundingRect?.bottom?.toDp(context) ?: 0.dp
+                val location =
+                    when {
+                        width <= 0f -> CutoutLocation.NONE
+                        left <= 0.dp -> CutoutLocation.LEFT
+                        right >= getDisplayWidth(context) -> CutoutLocation.RIGHT
+                        else -> CutoutLocation.CENTER
+                    }
+                DisplayCutout(
+                    left,
+                    top,
+                    right,
+                    bottom,
+                    location,
+                )
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), DisplayCutout())
+
+    // TODO(b/298525212): remove once Compose exposes window inset bounds.
+    private fun getDisplayWidth(context: Context): Dp {
+        val point = Point()
+        checkNotNull(context.display).getRealSize(point)
+        return point.x.dp
+    }
+
+    // TODO(b/298525212): remove once Compose exposes window inset bounds.
+    private fun Int.toDp(context: Context): Dp {
+        return (this.toFloat() / context.resources.displayMetrics.density).dp
     }
 }

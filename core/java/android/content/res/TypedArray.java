@@ -35,6 +35,8 @@ import com.android.internal.util.XmlUtils;
 
 import dalvik.system.VMRuntime;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.util.Arrays;
 
 /**
@@ -1391,13 +1393,22 @@ public class TypedArray implements AutoCloseable {
     private CharSequence loadStringValueAt(int index) {
         final int[] data = mData;
         final int cookie = data[index + STYLE_ASSET_COOKIE];
+        CharSequence value = null;
         if (cookie < 0) {
             if (mXml != null) {
-                return mXml.getPooledString(data[index + STYLE_DATA]);
+                value = mXml.getPooledString(data[index + STYLE_DATA]);
             }
-            return null;
+        } else {
+            value = mAssets.getPooledStringForCookie(cookie, data[index + STYLE_DATA]);
         }
-        return mAssets.getPooledStringForCookie(cookie, data[index + STYLE_DATA]);
+        if (value != null && mXml != null && mXml.mValidator != null) {
+            try {
+                mXml.mValidator.validateResStrAttr(mXml, index / STYLE_NUM_ENTRIES, value);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException("Failed to validate resource string: " + e.getMessage());
+            }
+        }
+        return value;
     }
 
     /** @hide */

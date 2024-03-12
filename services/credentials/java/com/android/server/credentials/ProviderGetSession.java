@@ -31,6 +31,7 @@ import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
+import android.service.autofill.Flags;
 import android.service.credentials.Action;
 import android.service.credentials.BeginGetCredentialOption;
 import android.service.credentials.BeginGetCredentialRequest;
@@ -42,6 +43,7 @@ import android.service.credentials.GetCredentialRequest;
 import android.service.credentials.RemoteEntry;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.autofill.AutofillId;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +92,42 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
             GetRequestSession getRequestSession,
+            RemoteCredentialService remoteCredentialService) {
+        android.credentials.GetCredentialRequest filteredRequest =
+                filterOptions(providerInfo.getCapabilities(),
+                        getRequestSession.mClientRequest,
+                        providerInfo);
+        if (filteredRequest != null) {
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
+                    new HashMap<>();
+            return new ProviderGetSession(
+                    context,
+                    providerInfo,
+                    getRequestSession,
+                    userId,
+                    remoteCredentialService,
+                    constructQueryPhaseRequest(
+                            filteredRequest, getRequestSession.mClientAppInfo,
+                            getRequestSession.mClientRequest.alwaysSendAppInfoToProvider(),
+                            beginGetOptionToCredentialOptionMap),
+                    filteredRequest,
+                    getRequestSession.mClientAppInfo,
+                    beginGetOptionToCredentialOptionMap,
+                    getRequestSession.mHybridService
+            );
+        }
+        Slog.i(TAG, "Unable to create provider session for: "
+                + providerInfo.getComponentName());
+        return null;
+    }
+
+    /** Creates a new provider session to be used by the request session. */
+    @Nullable
+    public static ProviderGetSession createNewSession(
+            Context context,
+            @UserIdInt int userId,
+            CredentialProviderInfo providerInfo,
+            GetCandidateRequestSession getRequestSession,
             RemoteCredentialService remoteCredentialService) {
         android.credentials.GetCredentialRequest filteredRequest =
                 filterOptions(providerInfo.getCapabilities(),
@@ -192,7 +230,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     public ProviderGetSession(Context context,
             CredentialProviderInfo info,
-            ProviderInternalCallback<GetCredentialResponse> callbacks,
+            ProviderInternalCallback callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             BeginGetCredentialRequest beginGetRequest,
             android.credentials.GetCredentialRequest completeGetRequest,
@@ -343,13 +381,23 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         // but does not resolve to a valid option. For now, not skipping it because
         // it may be possible that the provider adds their own extras and expects to receive
         // those and complete the flow.
-        if (mBeginGetOptionToCredentialOptionMap.get(id) == null) {
+        Intent intent = new Intent();
+        CredentialOption credentialOption = mBeginGetOptionToCredentialOptionMap.get(id);
+        if (credentialOption == null) {
             Slog.w(TAG, "Id from Credential Entry does not resolve to a valid option");
-            return new Intent();
+            return intent;
         }
-        return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
+        AutofillId autofillId = credentialOption
+                .getCandidateQueryData()
+                .getParcelable(CredentialProviderService.EXTRA_AUTOFILL_ID, AutofillId.class);
+        if (autofillId != null && Flags.autofillCredmanIntegration()) {
+            intent.putExtra(CredentialProviderService.EXTRA_AUTOFILL_ID, autofillId);
+        }
+        return intent.putExtra(
+                CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
                 new GetCredentialRequest(
-                        mCallingAppInfo, List.of(mBeginGetOptionToCredentialOptionMap.get(id))));
+                        mCallingAppInfo,
+                        List.of(credentialOption)));
     }
 
     private Intent setUpFillInIntentWithQueryRequest() {

@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -218,8 +219,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     }
 
     @Test
-    public void startIntent_multiInstancesSupported_startTaskInBackgroundBeforeSplitActivated() {
-        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
+    public void startIntent_multiInstancesNotSupported_startTaskInBackgroundBeforeSplitActivated() {
         doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
@@ -235,13 +235,14 @@ public class SplitScreenControllerTests extends ShellTestCase {
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null);
 
-        verify(mSplitScreenController).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
+        verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull());
+        verify(mSplitScreenController, never()).supportMultiInstancesSplit(any());
+        verify(mStageCoordinator, never()).switchSplitPosition(any());
     }
 
     @Test
     public void startIntent_multiInstancesSupported_startTaskInBackgroundAfterSplitActivated() {
-        doReturn(true).when(mSplitScreenController).supportMultiInstancesSplit(any());
         doNothing().when(mSplitScreenController).startTask(anyInt(), anyInt(), any());
         Intent startIntent = createStartIntent("startActivity");
         PendingIntent pendingIntent =
@@ -258,8 +259,8 @@ public class SplitScreenControllerTests extends ShellTestCase {
 
         mSplitScreenController.startIntent(pendingIntent, mContext.getUserId(), null,
                 SPLIT_POSITION_TOP_OR_LEFT, null);
-
-        verify(mSplitScreenController).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
+        verify(mSplitScreenController, never()).supportMultiInstancesSplit(any());
+        verify(mStageCoordinator).startTask(anyInt(), eq(SPLIT_POSITION_TOP_OR_LEFT),
                 isNull());
     }
 

@@ -16,13 +16,21 @@
 
 package android.telephony.satellite;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.telephony.flags.Flags;
+
 /**
+ * SatelliteDatagram is used to store data that is to be sent or received over satellite.
+ * Data is stored in byte array format.
  * @hide
  */
+@SystemApi
+@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public final class SatelliteDatagram implements Parcelable {
     /**
      * Datagram to be sent or received over satellite.
@@ -41,15 +49,18 @@ public final class SatelliteDatagram implements Parcelable {
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public int describeContents() {
         return 0;
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeByteArray(mData);
     }
 
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @NonNull public static final Creator<SatelliteDatagram> CREATOR =
             new Creator<>() {
                 @Override
@@ -63,6 +74,13 @@ public final class SatelliteDatagram implements Parcelable {
                 }
             };
 
+    /**
+     * Get satellite datagram.
+     * @return byte array. The format of the byte array is determined by the corresponding
+     * satellite provider. Client application should be aware of how to encode the datagram based
+     * upon the satellite provider.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
     @NonNull public byte[] getSatelliteDatagram() {
         return mData;
     }

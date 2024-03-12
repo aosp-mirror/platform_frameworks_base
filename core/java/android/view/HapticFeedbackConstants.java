@@ -129,27 +129,25 @@ public class HapticFeedbackConstants {
     public static final int REJECT = 17;
 
     /**
-     * A haptic effect to provide texture while a rotary input device is being scrolled.
+     * A haptic effect to provide texture while scrolling.
      *
      * @hide
      */
-    public static final int ROTARY_SCROLL_TICK = 18;
+    public static final int SCROLL_TICK = 18;
 
     /**
-     * A haptic effect to signal that a list element has been focused while scrolling using a rotary
-     * input device.
+     * A haptic effect to signal that a list element has been focused while scrolling.
      *
      * @hide
      */
-    public static final int ROTARY_SCROLL_ITEM_FOCUS = 19;
+    public static final int SCROLL_ITEM_FOCUS = 19;
 
     /**
-     * A haptic effect to signal reaching the scrolling limits of a list while scrolling using a
-     * rotary input device.
+     * A haptic effect to signal reaching the scrolling limits of a list while scrolling.
      *
      * @hide
      */
-    public static final int ROTARY_SCROLL_LIMIT = 20;
+    public static final int SCROLL_LIMIT = 20;
 
     /**
      * The user has toggled a switch or button into the on position.

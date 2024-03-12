@@ -16,12 +16,14 @@
 
 package android.service.voice;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.voice.flags.Flags;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
@@ -79,6 +81,19 @@ public final class HotwordDetectionServiceFailure implements Parcelable {
      */
     public static final int ERROR_CODE_REMOTE_EXCEPTION = 7;
 
+    /** Indicates failure to egress training data due to limit being exceeded. */
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+    public static final int ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED = 8;
+
+    /** Indicates failure to egress training data due to security exception. */
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+    public static final int ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION = 9;
+
+    /** Indicates shutdown of {@link HotwordDetectionService} due to voice activation op being
+     * disabled. */
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+    public static final int ERROR_CODE_SHUTDOWN_HDS_ON_VOICE_ACTIVATION_OP_DISABLED = 10;
+
     /**
      * @hide
      */
@@ -90,7 +105,10 @@ public final class HotwordDetectionServiceFailure implements Parcelable {
             ERROR_CODE_DETECT_TIMEOUT,
             ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION,
             ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE,
-            ERROR_CODE_REMOTE_EXCEPTION
+            ERROR_CODE_REMOTE_EXCEPTION,
+            ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED,
+            ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION,
+            ERROR_CODE_SHUTDOWN_HDS_ON_VOICE_ACTIVATION_OP_DISABLED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface HotwordDetectionServiceErrorCode {}

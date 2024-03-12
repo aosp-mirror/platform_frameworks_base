@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.media.audio.common.AidlConversion;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Build;
 import android.os.IBinder;
@@ -317,11 +318,12 @@ public class AudioSystem
 
     /**
      * @hide
-     * Convert a Bluetooth codec to an audio format enum
+     * Convert an A2DP Bluetooth codec to an audio format enum
      * @param btCodec the codec to convert.
      * @return the audio format, or {@link #AUDIO_FORMAT_DEFAULT} if unknown
      */
-    public static @AudioFormatNativeEnumForBtCodec int bluetoothCodecToAudioFormat(int btCodec) {
+    public static @AudioFormatNativeEnumForBtCodec int bluetoothA2dpCodecToAudioFormat(
+            int btCodec) {
         switch (btCodec) {
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC:
                 return AudioSystem.AUDIO_FORMAT_SBC;
@@ -338,7 +340,25 @@ public class AudioSystem
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS:
                 return AudioSystem.AUDIO_FORMAT_OPUS;
             default:
-                Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
+                Log.e(TAG, "Unknown A2DP BT codec 0x" + Integer.toHexString(btCodec)
+                        + " for conversion to audio format");
+                // TODO returning DEFAULT is the current behavior, should this return INVALID?
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
+        }
+    }
+
+    /**
+     * @hide
+     * Convert a LE Audio Bluetooth codec to an audio format enum
+     * @param btCodec the codec to convert.
+     * @return the audio format, or {@link #AUDIO_FORMAT_DEFAULT} if unknown
+     */
+    public static @AudioFormatNativeEnumForBtCodec int bluetoothLeCodecToAudioFormat(int btCodec) {
+        switch (btCodec) {
+            case BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_LC3:
+                return AudioSystem.AUDIO_FORMAT_LC3;
+            default:
+                Log.e(TAG, "Unknown LE Audio BT codec 0x" + Integer.toHexString(btCodec)
                         + " for conversion to audio format");
                 // TODO returning DEFAULT is the current behavior, should this return INVALID?
                 return AudioSystem.AUDIO_FORMAT_DEFAULT;
@@ -1285,6 +1305,11 @@ public class AudioSystem
     }
 
     /** @hide */
+    public static boolean isInputDevice(int deviceType) {
+        return (deviceType & DEVICE_BIT_IN) == DEVICE_BIT_IN;
+    }
+
+    /** @hide */
     public static boolean isBluetoothDevice(int deviceType) {
         return isBluetoothA2dpOutDevice(deviceType)
                 || isBluetoothScoDevice(deviceType)
@@ -1339,6 +1364,11 @@ public class AudioSystem
     public static boolean isBluetoothLeDevice(int deviceType) {
         return isBluetoothLeOutDevice(deviceType)
                 || isBluetoothLeInDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isRemoteSubmixDevice(int deviceType) {
+        return deviceType == DEVICE_IN_REMOTE_SUBMIX || deviceType == DEVICE_OUT_REMOTE_SUBMIX;
     }
 
     /** @hide */
@@ -1577,7 +1607,7 @@ public class AudioSystem
      * @return a string describing the device type
      */
     public static @NonNull String getDeviceName(int device) {
-        if ((device & DEVICE_BIT_IN) != 0) {
+        if (isInputDevice(device)) {
             return getInputDeviceName(device);
         }
         return getOutputDeviceName(device);
@@ -1949,6 +1979,11 @@ public class AudioSystem
 
     /** @hide */
     public static native int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register);
+
+    /** @hide */
+    public static native int updatePolicyMixes(
+            AudioMix[] mixes,
+            AudioMixingRule[] updatedMixingRules);
 
     /** @hide see AudioPolicy.setUidDeviceAffinities() */
     public static native int setUidDeviceAffinities(int uid, @NonNull int[] types,
@@ -2451,6 +2486,8 @@ public class AudioSystem
     public static final int PLATFORM_VOICE = 1;
     /** @hide The platform is a television or a set-top box */
     public static final int PLATFORM_TELEVISION = 2;
+    /** @hide The platform is automotive */
+    public static final int PLATFORM_AUTOMOTIVE = 3;
 
     /**
      * @hide
@@ -2467,6 +2504,9 @@ public class AudioSystem
             return PLATFORM_VOICE;
         } else if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
             return PLATFORM_TELEVISION;
+        } else if (context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE)) {
+            return PLATFORM_AUTOMOTIVE;
         } else {
             return PLATFORM_DEFAULT;
         }

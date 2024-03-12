@@ -77,6 +77,7 @@ public class BubbleData {
         boolean orderChanged;
         boolean suppressedSummaryChanged;
         boolean expanded;
+        boolean shouldShowEducation;
         @Nullable BubbleViewProvider selectedBubble;
         @Nullable Bubble addedBubble;
         @Nullable Bubble updatedBubble;
@@ -126,6 +127,7 @@ public class BubbleData {
 
             bubbleBarUpdate.expandedChanged = expandedChanged;
             bubbleBarUpdate.expanded = expanded;
+            bubbleBarUpdate.shouldShowEducation = shouldShowEducation;
             if (selectionChanged) {
                 bubbleBarUpdate.selectedBubbleKey = selectedBubble != null
                         ? selectedBubble.getKey()
@@ -165,6 +167,7 @@ public class BubbleData {
          */
         BubbleBarUpdate getInitialState() {
             BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
+            bubbleBarUpdate.shouldShowEducation = shouldShowEducation;
             for (int i = 0; i < bubbles.size(); i++) {
                 bubbleBarUpdate.currentBubbleList.add(bubbles.get(i).asBubbleBarBubble());
             }
@@ -187,6 +190,7 @@ public class BubbleData {
 
     private final Context mContext;
     private final BubblePositioner mPositioner;
+    private final BubbleEducationController mEducationController;
     private final Executor mMainExecutor;
     /** Bubbles that are actively in the stack. */
     private final List<Bubble> mBubbles;
@@ -233,10 +237,11 @@ public class BubbleData {
     private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
 
     public BubbleData(Context context, BubbleLogger bubbleLogger, BubblePositioner positioner,
-            Executor mainExecutor) {
+            BubbleEducationController educationController, Executor mainExecutor) {
         mContext = context;
         mLogger = bubbleLogger;
         mPositioner = positioner;
+        mEducationController = educationController;
         mMainExecutor = mainExecutor;
         mOverflow = new BubbleOverflow(context, positioner);
         mBubbles = new ArrayList<>();
@@ -447,6 +452,7 @@ public class BubbleData {
         if (bubble.shouldAutoExpand()) {
             bubble.setShouldAutoExpand(false);
             setSelectedBubbleInternal(bubble);
+
             if (!mExpanded) {
                 setExpandedInternal(true);
             }
@@ -778,8 +784,7 @@ public class BubbleData {
         if (bubble.getPendingIntentCanceled()
                 || !(reason == Bubbles.DISMISS_AGED
                 || reason == Bubbles.DISMISS_USER_GESTURE
-                || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)
-                || bubble.isAppBubble()) {
+                || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)) {
             return;
         }
         if (DEBUG_BUBBLE_DATA) {
@@ -877,6 +882,9 @@ public class BubbleData {
 
     private void dispatchPendingChanges() {
         if (mListener != null && mStateChange.anythingChanged()) {
+            mStateChange.shouldShowEducation = mSelectedBubble != null
+                    && mEducationController.shouldShowStackEducation(mSelectedBubble)
+                    && !mExpanded;
             mListener.applyUpdate(mStateChange);
         }
         mStateChange = new Update(mBubbles, mOverflowBubbles);
@@ -1231,29 +1239,30 @@ public class BubbleData {
      * Description of current bubble data state.
      */
     public void dump(PrintWriter pw) {
-        pw.print("selected: ");
+        pw.println("BubbleData state:");
+        pw.print("  selected: ");
         pw.println(mSelectedBubble != null
                 ? mSelectedBubble.getKey()
                 : "null");
-        pw.print("expanded: ");
+        pw.print("  expanded: ");
         pw.println(mExpanded);
 
-        pw.print("stack bubble count:    ");
+        pw.print("Stack bubble count: ");
         pw.println(mBubbles.size());
         for (Bubble bubble : mBubbles) {
             bubble.dump(pw);
         }
 
-        pw.print("overflow bubble count:    ");
+        pw.print("Overflow bubble count: ");
         pw.println(mOverflowBubbles.size());
         for (Bubble bubble : mOverflowBubbles) {
             bubble.dump(pw);
         }
 
-        pw.print("summaryKeys: ");
+        pw.print("SummaryKeys: ");
         pw.println(mSuppressedGroupKeys.size());
         for (String key : mSuppressedGroupKeys.keySet()) {
-            pw.println("   suppressing: " + key);
+            pw.println("     suppressing: " + key);
         }
     }
 }

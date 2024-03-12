@@ -229,7 +229,7 @@ public final class CredentialProviderInfoFactory {
 
         // 4. Extract the XML metadata.
         try {
-            builder = extractXmlMetadata(context, builder, serviceInfo, pm, resources);
+            builder = extractXmlMetadata(context, serviceInfo, pm, resources);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to get XML metadata", e);
         }
@@ -239,10 +239,11 @@ public final class CredentialProviderInfoFactory {
 
     private static CredentialProviderInfo.Builder extractXmlMetadata(
             @NonNull Context context,
-            @NonNull CredentialProviderInfo.Builder builder,
             @NonNull ServiceInfo serviceInfo,
             @NonNull PackageManager pm,
             @NonNull Resources resources) {
+        final CredentialProviderInfo.Builder builder =
+                new CredentialProviderInfo.Builder(serviceInfo);
         final XmlResourceParser parser =
                 serviceInfo.loadXmlMetaData(pm, CredentialProviderService.SERVICE_META_DATA);
         if (parser == null) {
@@ -265,15 +266,21 @@ public final class CredentialProviderInfoFactory {
                                     allAttributes,
                                     com.android.internal.R.styleable.CredentialProvider);
                     builder.setSettingsSubtitle(
-                            afsAttributes.getString(
+                            getAfsAttributeSafe(
+                                    afsAttributes,
                                     R.styleable.CredentialProvider_settingsSubtitle));
+                    builder.setSettingsActivity(
+                            getAfsAttributeSafe(
+                                    afsAttributes,
+                                    R.styleable.CredentialProvider_settingsActivity));
                 } catch (Exception e) {
-                    Slog.e(TAG, "Failed to get XML attr", e);
+                    Slog.w(TAG, "Failed to get XML attr for metadata", e);
                 } finally {
                     if (afsAttributes != null) {
                         afsAttributes.recycle();
                     }
                 }
+
                 builder.addCapabilities(parseXmlProviderOuterCapabilities(parser, resources));
             } else {
                 Slog.w(TAG, "Meta-data does not start with credential-provider-service tag");
@@ -285,9 +292,24 @@ public final class CredentialProviderInfoFactory {
         return builder;
     }
 
-    private static Set<String> parseXmlProviderOuterCapabilities(
+    private static @Nullable String getAfsAttributeSafe(
+            @Nullable TypedArray afsAttributes, int resId) {
+        if (afsAttributes == null) {
+            return null;
+        }
+
+        try {
+            return afsAttributes.getString(resId);
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to get XML attr from afs attributes", e);
+        }
+
+        return null;
+    }
+
+    private static List<String> parseXmlProviderOuterCapabilities(
             XmlPullParser parser, Resources resources) throws IOException, XmlPullParserException {
-        final Set<String> capabilities = new HashSet<>();
+        final List<String> capabilities = new ArrayList<>();
         final int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT

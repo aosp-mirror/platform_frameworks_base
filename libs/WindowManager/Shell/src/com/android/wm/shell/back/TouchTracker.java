@@ -51,16 +51,15 @@ class TouchTracker {
     private float mLatestVelocityY;
     private float mStartThresholdX;
     private int mSwipeEdge;
-    private boolean mCancelled;
+    private TouchTrackerState mState = TouchTrackerState.INITIAL;
 
     void update(float touchX, float touchY, float velocityX, float velocityY) {
         /**
          * If back was previously cancelled but the user has started swiping in the forward
          * direction again, restart back.
          */
-        if (mCancelled && ((touchX > mLatestTouchX && mSwipeEdge == BackEvent.EDGE_LEFT)
-                || touchX < mLatestTouchX && mSwipeEdge == BackEvent.EDGE_RIGHT)) {
-            mCancelled = false;
+        if ((touchX < mStartThresholdX && mSwipeEdge == BackEvent.EDGE_LEFT)
+                || (touchX > mStartThresholdX && mSwipeEdge == BackEvent.EDGE_RIGHT)) {
             mStartThresholdX = touchX;
         }
         mLatestTouchX = touchX;
@@ -71,15 +70,46 @@ class TouchTracker {
 
     void setTriggerBack(boolean triggerBack) {
         if (mTriggerBack != triggerBack && !triggerBack) {
-            mCancelled = true;
+            mStartThresholdX = mLatestTouchX;
         }
         mTriggerBack = triggerBack;
+    }
+
+    boolean getTriggerBack() {
+        return mTriggerBack;
+    }
+
+    void setState(TouchTrackerState state) {
+        mState = state;
+    }
+
+    boolean isInInitialState() {
+        return mState == TouchTrackerState.INITIAL;
+    }
+
+    boolean isActive() {
+        return mState == TouchTrackerState.ACTIVE;
+    }
+
+    boolean isFinished() {
+        return mState == TouchTrackerState.FINISHED;
     }
 
     void setGestureStartLocation(float touchX, float touchY, int swipeEdge) {
         mInitTouchX = touchX;
         mInitTouchY = touchY;
+        mLatestTouchX = touchX;
+        mLatestTouchY = touchY;
         mSwipeEdge = swipeEdge;
+        mStartThresholdX = mInitTouchX;
+    }
+
+    /** Update the start location used to compute the progress
+     * to the latest touch location.
+     */
+    void updateStartLocation() {
+        mInitTouchX = mLatestTouchX;
+        mInitTouchY = mLatestTouchY;
         mStartThresholdX = mInitTouchX;
     }
 
@@ -87,8 +117,8 @@ class TouchTracker {
         mInitTouchX = 0;
         mInitTouchY = 0;
         mStartThresholdX = 0;
-        mCancelled = false;
         mTriggerBack = false;
+        mState = TouchTrackerState.INITIAL;
         mSwipeEdge = BackEvent.EDGE_LEFT;
     }
 
@@ -104,11 +134,7 @@ class TouchTracker {
     }
 
     BackMotionEvent createProgressEvent() {
-        float progress = 0;
-        // Progress is always 0 when back is cancelled and not restarted.
-        if (!mCancelled) {
-            progress = getProgress(mLatestTouchX);
-        }
+        float progress = getProgress(mLatestTouchX);
         return createProgressEvent(progress);
     }
 
@@ -126,7 +152,13 @@ class TouchTracker {
         // The starting threshold is initially the first touch location, and updated to
         // the location everytime back is restarted after being cancelled.
         float startX = mTriggerBack ? mInitTouchX : mStartThresholdX;
-        float deltaX = Math.abs(startX - touchX);
+        float distance;
+        if (mSwipeEdge == BackEvent.EDGE_LEFT) {
+            distance = touchX - startX;
+        } else {
+            distance = startX - touchX;
+        }
+        float deltaX = Math.max(0f, distance);
         float linearDistance = mLinearDistance;
         float maxDistance = getMaxDistance();
         maxDistance = maxDistance == 0 ? 1 : maxDistance;
@@ -186,4 +218,9 @@ class TouchTracker {
         mMaxDistance = maxDistance;
         mNonLinearFactor = nonLinearFactor;
     }
+
+    enum TouchTrackerState {
+        INITIAL, ACTIVE, FINISHED
+    }
+
 }

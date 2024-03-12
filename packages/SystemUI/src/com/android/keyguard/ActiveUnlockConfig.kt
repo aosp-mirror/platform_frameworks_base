@@ -33,11 +33,11 @@ import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_WAKE
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD
 import android.util.Log
-import com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.settings.SecureSettings
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -50,6 +50,7 @@ class ActiveUnlockConfig @Inject constructor(
     @Main private val handler: Handler,
     private val secureSettings: SecureSettings,
     private val contentResolver: ContentResolver,
+    private val selectedUserInteractor: SelectedUserInteractor,
     dumpManager: DumpManager
 ) : Dumpable {
 
@@ -134,7 +135,7 @@ class ActiveUnlockConfig @Inject constructor(
                     )
             )
 
-            onChange(true, ArrayList(), 0, getCurrentUser())
+            onChange(true, ArrayList(), 0, selectedUserInteractor.getSelectedUserId())
         }
 
         private fun registerUri(uris: Collection<Uri>) {
@@ -153,29 +154,31 @@ class ActiveUnlockConfig @Inject constructor(
             flags: Int,
             userId: Int
         ) {
-            if (getCurrentUser() != userId) {
+            if (selectedUserInteractor.getSelectedUserId() != userId) {
                 return
             }
 
             if (selfChange || uris.contains(wakeUri)) {
                 requestActiveUnlockOnWakeup = secureSettings.getIntForUser(
-                        ACTIVE_UNLOCK_ON_WAKE, 0, getCurrentUser()) == 1
+                        ACTIVE_UNLOCK_ON_WAKE, 0, selectedUserInteractor.getSelectedUserId()) == 1
             }
 
             if (selfChange || uris.contains(unlockIntentUri)) {
                 requestActiveUnlockOnUnlockIntent = secureSettings.getIntForUser(
-                        ACTIVE_UNLOCK_ON_UNLOCK_INTENT, 0, getCurrentUser()) == 1
+                        ACTIVE_UNLOCK_ON_UNLOCK_INTENT, 0,
+                        selectedUserInteractor.getSelectedUserId()) == 1
             }
 
             if (selfChange || uris.contains(bioFailUri)) {
                 requestActiveUnlockOnBioFail = secureSettings.getIntForUser(
-                        ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, 0, getCurrentUser()) == 1
+                        ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, 0,
+                        selectedUserInteractor.getSelectedUserId()) == 1
             }
 
             if (selfChange || uris.contains(faceErrorsUri)) {
                 processStringArray(
                         secureSettings.getStringForUser(ACTIVE_UNLOCK_ON_FACE_ERRORS,
-                                getCurrentUser()),
+                                selectedUserInteractor.getSelectedUserId()),
                         faceErrorsToTriggerBiometricFailOn,
                         setOf(FACE_ERROR_TIMEOUT))
             }
@@ -183,7 +186,7 @@ class ActiveUnlockConfig @Inject constructor(
             if (selfChange || uris.contains(faceAcquireInfoUri)) {
                 processStringArray(
                         secureSettings.getStringForUser(ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
-                                getCurrentUser()),
+                                selectedUserInteractor.getSelectedUserId()),
                         faceAcquireInfoToTriggerBiometricFailOn,
                         emptySet())
             }
@@ -192,7 +195,7 @@ class ActiveUnlockConfig @Inject constructor(
                 processStringArray(
                         secureSettings.getStringForUser(
                                 ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
-                                getCurrentUser()),
+                                selectedUserInteractor.getSelectedUserId()),
                         onUnlockIntentWhenBiometricEnrolled,
                         setOf(BiometricType.NONE.intValue))
             }
@@ -201,7 +204,7 @@ class ActiveUnlockConfig @Inject constructor(
                 processStringArray(
                     secureSettings.getStringForUser(
                         ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
-                        getCurrentUser()),
+                        selectedUserInteractor.getSelectedUserId()),
                     wakeupsConsideredUnlockIntents,
                     setOf(WAKE_REASON_UNFOLD_DEVICE))
             }
@@ -210,7 +213,7 @@ class ActiveUnlockConfig @Inject constructor(
                 processStringArray(
                     secureSettings.getStringForUser(
                         ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD,
-                        getCurrentUser()),
+                        selectedUserInteractor.getSelectedUserId()),
                     wakeupsToForceDismissKeyguard,
                     setOf(WAKE_REASON_UNFOLD_DEVICE))
             }
@@ -314,9 +317,9 @@ class ActiveUnlockConfig @Inject constructor(
         }
 
         keyguardUpdateMonitor?.let {
-            val anyFaceEnrolled = it.isFaceEnrolled
-            val anyFingerprintEnrolled =
-                    it.getCachedIsUnlockWithFingerprintPossible(getCurrentUser())
+            val anyFaceEnrolled = it.isFaceEnabledAndEnrolled
+            val anyFingerprintEnrolled = it.isUnlockWithFingerprintPossible(
+                    selectedUserInteractor.getSelectedUserId())
             val udfpsEnrolled = it.isUdfpsEnrolled
 
             if (!anyFaceEnrolled && !anyFingerprintEnrolled) {
@@ -369,9 +372,9 @@ class ActiveUnlockConfig @Inject constructor(
         keyguardUpdateMonitor?.let {
             pw.println("   shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment=" +
                     "${shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment()}")
-            pw.println("   faceEnrolled=${it.isFaceEnrolled}")
-            pw.println("   fpEnrolled=${
-                    it.getCachedIsUnlockWithFingerprintPossible(getCurrentUser())}")
+            pw.println("   isFaceEnabledAndEnrolled=${it.isFaceEnabledAndEnrolled}")
+            pw.println("   fpUnlockPossible=${
+                it.isUnlockWithFingerprintPossible(selectedUserInteractor.getSelectedUserId())}")
             pw.println("   udfpsEnrolled=${it.isUdfpsEnrolled}")
         } ?: pw.println("   keyguardUpdateMonitor is uninitialized")
     }

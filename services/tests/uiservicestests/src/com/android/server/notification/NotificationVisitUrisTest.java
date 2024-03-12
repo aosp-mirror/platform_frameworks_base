@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.Flags;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
@@ -33,6 +34,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +44,7 @@ import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.server.UiServiceTestCase;
 
 import com.google.common.base.Strings;
@@ -54,6 +57,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.truth.Expect;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -72,6 +76,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -83,16 +88,16 @@ import javax.annotation.Nullable;
 
 @RunWith(AndroidJUnit4.class)
 public class NotificationVisitUrisTest extends UiServiceTestCase {
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final String TAG = "VisitUrisTest";
 
     // Methods that are known to add Uris that are *NOT* verified.
-    // This list should be emptied! Items can be removed as bugs are fixed.
+    // This list should only be used temporarily if needed, and any element in this list should
+    // have a tracking bug associated.
     private static final Multimap<Class<?>, String> KNOWN_BAD =
-            ImmutableMultimap.<Class<?>, String>builder()
-                    .put(Person.Builder.class, "setUri") // TODO: b/281044385
-                    .put(RemoteViews.class, "setRemoteAdapter") // TODO: b/281044385
-                    .build();
+            ImmutableMultimap.<Class<?>, String>builder().build();
 
     // Types that we can't really produce. No methods receiving these parameters will be invoked.
     private static final ImmutableSet<Class<?>> UNUSABLE_TYPES =
@@ -156,6 +161,12 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getInstrumentation().getContext();
+        mSetFlagsRule.enableFlags(Flags.FLAG_VISIT_RISKY_URIS);
+    }
+
+    @After
+    public void tearDown() {
+        SystemUiSystemPropertiesFlags.TEST_RESOLVER = null;
     }
 
     @Test // This is a meta-test, checks that the generators are not broken.
@@ -230,13 +241,12 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
         notification.visitUris(visitor);
 
         Mockito.verify(visitor, Mockito.atLeastOnce()).accept(visitedUriCaptor.capture());
-        List<Uri> visitedUris = new ArrayList<>(visitedUriCaptor.getAllValues());
+        Set<Uri> visitedUris = new HashSet<>(visitedUriCaptor.getAllValues());
         visitedUris.remove(null);
 
         expect.withMessage(notificationTypeMessage)
                 .that(visitedUris)
-                .containsAtLeastElementsIn(includedUris);
-        expect.that(KNOWN_BAD).isNotEmpty(); // Once empty, switch to containsExactlyElementsIn()
+                .containsExactlyElementsIn(includedUris);
     }
 
     private static Generated<Notification> buildNotification(Context context,
@@ -521,7 +531,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                         && !EXCLUDED_SETTERS.containsEntry(clazz, method.getName())
                         && !EXCLUDED_SETTERS_OVERLOADS.containsEntry(clazz, method)
                         && Arrays.stream(method.getParameterTypes())
-                            .noneMatch(excludingParameterTypes::contains)) {
+                        .noneMatch(excludingParameterTypes::contains)) {
                     methods.put(method.getName(), method);
                 }
             }
@@ -536,14 +546,14 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
             List<Method> excludedSetters = setters.stream().filter(
                     m1 -> m1.getName().startsWith("set")
                             && setters.stream().anyMatch(
-                                    m2 -> {
-                                            Class<?> param1 = m1.getParameterTypes()[0];
-                                            Class<?> param2 = m2.getParameterTypes()[0];
-                                            return m2.getName().startsWith("add")
-                                                    && param1.isArray()
-                                                    && !param2.isArray() && !param2.isPrimitive()
-                                                    && param1.getComponentType().equals(param2);
-                                    })).toList();
+                                m2 -> {
+                                    Class<?> param1 = m1.getParameterTypes()[0];
+                                    Class<?> param2 = m2.getParameterTypes()[0];
+                                    return m2.getName().startsWith("add")
+                                            && param1.isArray()
+                                            && !param2.isArray() && !param2.isPrimitive()
+                                            && param1.getComponentType().equals(param2);
+                                })).toList();
 
             setters.removeAll(excludedSetters);
             return setters;
@@ -598,9 +608,8 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
 
     private static class SpecialParameterGenerator {
         private static final ImmutableSet<Class<?>> INTERESTING_CLASSES =
-                ImmutableSet.of(
-                        Person.class, Uri.class, Icon.class, Intent.class, PendingIntent.class,
-                        RemoteViews.class);
+                ImmutableSet.of(Person.class, Uri.class, Icon.class, Intent.class,
+                        PendingIntent.class, RemoteViews.class);
         private static final ImmutableSet<Class<?>> MOCKED_CLASSES = ImmutableSet.of();
 
         private static final ImmutableMap<Class<?>, Object> PRIMITIVE_VALUES =
@@ -624,7 +633,7 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
         }
 
         static boolean canGenerate(Class<?> clazz) {
-            return (INTERESTING_CLASSES.contains(clazz) && !clazz.equals(Person.class))
+            return INTERESTING_CLASSES.contains(clazz)
                     || MOCKED_CLASSES.contains(clazz)
                     || clazz.equals(Context.class)
                     || clazz.equals(Bundle.class)
@@ -657,6 +666,17 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                 Uri iconUri = generateUri(
                         where.plus(Icon.class).plus("createWithContentUri", Uri.class));
                 return Icon.createWithContentUri(iconUri);
+            }
+
+            if (clazz == Person.class) {
+                // TODO(b/310189261): Person.setUri takes a string instead of a URI. We should
+                //  find a way to use the SpecialParameterGenerator instead of this custom one.
+                Uri personUri = generateUri(
+                        where.plus(Person.Builder.class).plus("setUri", String.class));
+                Uri iconUri = generateUri(where.plus(Person.Builder.class).plus("setIcon",
+                        Icon.class).plus(Icon.class).plus("createWithContentUri", Uri.class));
+                return new Person.Builder().setUri(personUri.toString()).setIcon(
+                        Icon.createWithContentUri(iconUri)).setName("John Doe").build();
             }
 
             if (clazz == Intent.class) {
@@ -718,9 +738,12 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
     private static class Location {
 
         private static class Item {
-            @Nullable private final Class<?> mMaybeClass;
-            @Nullable private final Executable mMaybeMethod;
-            @Nullable private final String mExtra;
+            @Nullable
+            private final Class<?> mMaybeClass;
+            @Nullable
+            private final Executable mMaybeMethod;
+            @Nullable
+            private final String mExtra;
 
             Item(@NonNull Class<?> clazz) {
                 mMaybeClass = checkNotNull(clazz);

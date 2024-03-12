@@ -16,6 +16,7 @@
 
 package android.media.audiopolicy;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,6 +45,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -404,6 +406,40 @@ public class AudioPolicy {
                 Log.e(TAG, "Dead object in detachMixes", e);
                 return AudioManager.ERROR;
             }
+        }
+    }
+
+    /**
+     * Update {@link AudioMixingRule}-s of already registered {@link AudioMix}-es.
+     *
+     * @param mixingRuleUpdates - {@link List} of {@link Pair}-s, each pair containing
+     *  {@link AudioMix} to update and its new corresponding {@link AudioMixingRule}.
+     *
+     * @return {@link AudioManager#SUCCESS} if the update was successful,
+     *  {@link AudioManager#ERROR} otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_AUDIO_POLICY_UPDATE_MIXING_RULES_API)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int updateMixingRules(
+            @NonNull List<Pair<AudioMix, AudioMixingRule>> mixingRuleUpdates) {
+        Objects.requireNonNull(mixingRuleUpdates);
+
+        IAudioService service = getService();
+        try {
+            synchronized (mLock) {
+                final int status = service.updateMixingRulesForPolicy(
+                        mixingRuleUpdates.stream().map(p -> p.first).toArray(AudioMix[]::new),
+                        mixingRuleUpdates.stream().map(p -> p.second).toArray(
+                                AudioMixingRule[]::new),
+                        cb());
+                if (status == AudioManager.SUCCESS) {
+                    mConfig.updateMixingRules(mixingRuleUpdates);
+                }
+                return status;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Received remote exeception in updateMixingRules call: ", e);
+            return AudioManager.ERROR;
         }
     }
 
@@ -865,7 +901,7 @@ public class AudioPolicy {
                 for (final WeakReference<AudioTrack> weakTrack : mInjectors) {
                     final AudioTrack track = weakTrack.get();
                     if (track == null) {
-                        break;
+                        continue;
                     }
                     try {
                         // TODO: add synchronous versions
@@ -876,12 +912,13 @@ public class AudioPolicy {
                         // released by the user of the AudioPolicy
                     }
                 }
+                mInjectors.clear();
             }
             if (mCaptors != null) {
                 for (final WeakReference<AudioRecord> weakRecord : mCaptors) {
                     final AudioRecord record = weakRecord.get();
                     if (record == null) {
-                        break;
+                        continue;
                     }
                     try {
                         // TODO: if needed: implement an invalidate method
@@ -891,6 +928,7 @@ public class AudioPolicy {
                         // released by the user of the AudioPolicy
                     }
                 }
+                mCaptors.clear();
             }
         }
     }

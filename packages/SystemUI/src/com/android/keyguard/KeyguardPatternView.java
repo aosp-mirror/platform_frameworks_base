@@ -15,9 +15,14 @@
  */
 package com.android.keyguard;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
+import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -29,6 +34,7 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
@@ -37,7 +43,7 @@ import com.android.internal.widget.LockPatternView;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 
 public class KeyguardPatternView extends KeyguardInputView
@@ -75,7 +81,12 @@ public class KeyguardPatternView extends KeyguardInputView
 
     BouncerKeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
-    private ConstraintLayout mContainer;
+    @Nullable private MotionLayout mContainerMotionLayout;
+    // TODO (b/293252410) - usage of mContainerConstraintLayout should be removed
+    //  when the flag is enabled/removed
+    @Nullable private ConstraintLayout mContainerConstraintLayout;
+    private boolean mAlreadyUsingSplitBouncer = false;
+    private boolean mIsSmallLockScreenLandscapeEnabled = false;
     @DevicePostureInt private int mLastDevicePosture = DEVICE_POSTURE_UNKNOWN;
 
     public KeyguardPatternView(Context context) {
@@ -98,29 +109,117 @@ public class KeyguardPatternView extends KeyguardInputView
                 mContext, android.R.interpolator.fast_out_linear_in));
     }
 
+    /**
+     * Use motion layout (new bouncer implementation) if LOCKSCREEN_ENABLE_LANDSCAPE flag is
+     * enabled, instead of constraint layout (old bouncer implementation)
+     */
+    public void setIsLockScreenLandscapeEnabled(boolean isLockScreenLandscapeEnabled) {
+        mIsSmallLockScreenLandscapeEnabled = isLockScreenLandscapeEnabled;
+        findContainerLayout();
+    }
+
+    private void findContainerLayout() {
+        if (mIsSmallLockScreenLandscapeEnabled) {
+            mContainerMotionLayout = findViewById(R.id.pattern_container);
+        } else {
+            mContainerConstraintLayout = findViewById(R.id.pattern_container);
+        }
+    }
+
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         updateMargins();
     }
 
     void onDevicePostureChanged(@DevicePostureInt int posture) {
-        if (mLastDevicePosture != posture) {
-            mLastDevicePosture = posture;
-            updateMargins();
+        if (mLastDevicePosture == posture) return;
+        mLastDevicePosture = posture;
+
+        if (mIsSmallLockScreenLandscapeEnabled) {
+            boolean useSplitBouncerAfterFold =
+                    mLastDevicePosture == DEVICE_POSTURE_CLOSED
+                    && getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE
+                    && getResources().getBoolean(R.bool.update_bouncer_constraints);
+
+            if (mAlreadyUsingSplitBouncer != useSplitBouncerAfterFold) {
+                updateConstraints(useSplitBouncerAfterFold);
+            }
         }
+
+        updateMargins();
     }
 
     private void updateMargins() {
+        if (mIsSmallLockScreenLandscapeEnabled) {
+            updateHalfFoldedConstraints();
+        } else {
+            updateHalfFoldedGuideline();
+        }
+    }
+
+    private void updateHalfFoldedConstraints() {
+        // Update the constraints based on the device posture...
+        if (mAlreadyUsingSplitBouncer) return;
+
+        boolean shouldCollapsePattern =
+                mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED
+                        && mContext.getResources().getConfiguration().orientation
+                        == ORIENTATION_PORTRAIT;
+
+        int expectedMotionLayoutState = shouldCollapsePattern
+                ? R.id.half_folded_single_constraints
+                : R.id.single_constraints;
+
+        transitionToMotionLayoutState(expectedMotionLayoutState);
+    }
+
+    // TODO (b/293252410) - this method can be removed when the flag is enabled/removed
+    private void updateHalfFoldedGuideline() {
         // Update the guideline based on the device posture...
         float halfOpenPercentage =
                 mContext.getResources().getFloat(R.dimen.half_opened_bouncer_height_ratio);
 
         ConstraintSet cs = new ConstraintSet();
-        cs.clone(mContainer);
+        cs.clone(mContainerConstraintLayout);
         cs.setGuidelinePercent(R.id.pattern_top_guideline,
-                mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED
-                ? halfOpenPercentage : 0.0f);
-        cs.applyTo(mContainer);
+                mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED ? halfOpenPercentage : 0.0f);
+        cs.applyTo(mContainerConstraintLayout);
+    }
+
+    private void transitionToMotionLayoutState(int state) {
+        if (mContainerMotionLayout.getCurrentState() != state) {
+            mContainerMotionLayout.transitionToState(state);
+        }
+    }
+
+    /**
+     * Updates the keyguard view's constraints (single or split constraints).
+     * Split constraints are only used for small landscape screens.
+     * Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled.
+     */
+    @Override
+    protected void updateConstraints(boolean useSplitBouncer) {
+        if (!mIsSmallLockScreenLandscapeEnabled) return;
+
+        mAlreadyUsingSplitBouncer = useSplitBouncer;
+
+        if (useSplitBouncer) {
+            mContainerMotionLayout.jumpToState(R.id.split_constraints);
+            mContainerMotionLayout.setMaxWidth(Integer.MAX_VALUE);
+        } else {
+            boolean useHalfFoldedConstraints =
+                    mLastDevicePosture == DEVICE_POSTURE_HALF_OPENED
+                            && mContext.getResources().getConfiguration().orientation
+                            == ORIENTATION_PORTRAIT;
+
+            if (useHalfFoldedConstraints) {
+                mContainerMotionLayout.jumpToState(R.id.half_folded_single_constraints);
+            } else {
+                mContainerMotionLayout.jumpToState(R.id.single_constraints);
+            }
+            mContainerMotionLayout.setMaxWidth(getResources()
+                    .getDimensionPixelSize(R.dimen.biometric_auth_pattern_view_max_size));
+        }
     }
 
     @Override
@@ -130,7 +229,6 @@ public class KeyguardPatternView extends KeyguardInputView
         mLockPatternView = findViewById(R.id.lockPatternView);
 
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
-        mContainer = findViewById(R.id.pattern_container);
     }
 
     @Override
@@ -209,7 +307,7 @@ public class KeyguardPatternView extends KeyguardInputView
                 getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PATTERN_DISAPPEAR));
 
         DisappearAnimationUtils disappearAnimationUtils = needsSlowUnlockTransition
-                        ? mDisappearAnimationUtilsLocked : mDisappearAnimationUtils;
+                ? mDisappearAnimationUtilsLocked : mDisappearAnimationUtils;
         disappearAnimationUtils.startAnimation2d(mLockPatternView.getCellStates(),
                 () -> {
                     enableClipping(true);
@@ -220,7 +318,7 @@ public class KeyguardPatternView extends KeyguardInputView
         if (!TextUtils.isEmpty(mSecurityMessageDisplay.getText())) {
             mDisappearAnimationUtils.createAnimation(mSecurityMessageDisplay, 0,
                     (long) (200 * durationMultiplier),
-                    - mDisappearAnimationUtils.getStartTranslation() * 3,
+                    -mDisappearAnimationUtils.getStartTranslation() * 3,
                     false /* appearing */,
                     mDisappearAnimationUtils.getInterpolator(),
                     null /* finishRunnable */);
@@ -229,9 +327,16 @@ public class KeyguardPatternView extends KeyguardInputView
     }
 
     private void enableClipping(boolean enable) {
-        setClipChildren(enable);
-        mContainer.setClipToPadding(enable);
-        mContainer.setClipChildren(enable);
+        if (mContainerConstraintLayout != null) {
+            setClipChildren(enable);
+            mContainerConstraintLayout.setClipToPadding(enable);
+            mContainerConstraintLayout.setClipChildren(enable);
+        }
+        if (mContainerMotionLayout != null) {
+            setClipChildren(enable);
+            mContainerMotionLayout.setClipToPadding(enable);
+            mContainerMotionLayout.setClipChildren(enable);
+        }
     }
 
     @Override

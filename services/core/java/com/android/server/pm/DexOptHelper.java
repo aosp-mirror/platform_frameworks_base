@@ -45,11 +45,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApexStagedEvent;
+import android.content.pm.IPackageManagerNative;
+import android.content.pm.IStagedApexObserver;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -221,11 +225,6 @@ public final class DexOptHelper {
                 // Use background dexopt mode to try and use the profile. Note that this does not
                 // guarantee usage of the profile.
                 pkgCompilationReason = PackageManagerService.REASON_BACKGROUND_DEXOPT;
-            }
-
-            // TODO(b/251903639): Do this when ART Service is used, or remove it from here.
-            if (SystemProperties.getBoolean(mPm.PRECOMPILE_LAYOUTS, false)) {
-                mPm.mArtManagerService.compileLayouts(packageState, pkg);
             }
 
             int dexoptFlags = bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0;
@@ -1051,6 +1050,8 @@ public final class DexOptHelper {
                 artManager.scheduleBackgroundDexoptJob();
             }
         }, new IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED));
+
+        StagedApexObserver.registerForStagedApexUpdates(artManager);
     }
 
     /**
@@ -1094,6 +1095,34 @@ public final class DexOptHelper {
                 throw new IllegalArgumentException("DexoptResult for "
                         + result.getPackageDexoptResults().get(0).getPackageName()
                         + " has unsupported status " + status);
+        }
+    }
+
+    private static class StagedApexObserver extends IStagedApexObserver.Stub {
+        private final @NonNull ArtManagerLocal mArtManager;
+
+        static void registerForStagedApexUpdates(@NonNull ArtManagerLocal artManager) {
+            IPackageManagerNative packageNative = IPackageManagerNative.Stub.asInterface(
+                    ServiceManager.getService("package_native"));
+            if (packageNative == null) {
+                Log.e(TAG, "No IPackageManagerNative");
+                return;
+            }
+
+            try {
+                packageNative.registerStagedApexObserver(new StagedApexObserver(artManager));
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register staged apex observer", e);
+            }
+        }
+
+        private StagedApexObserver(@NonNull ArtManagerLocal artManager) {
+            mArtManager = artManager;
+        }
+
+        @Override
+        public void onApexStaged(@NonNull ApexStagedEvent event) {
+            mArtManager.onApexStaged(event.stagedApexModuleNames);
         }
     }
 }

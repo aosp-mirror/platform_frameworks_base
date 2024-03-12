@@ -287,7 +287,8 @@ public class SurfaceControlViewHost {
         }
 
         /**
-         * Returns an input token used which can be used to request focus on the embedded surface.
+         * Returns an input token used which can be used to request focus on the embedded surface
+         * or to transfer touch gesture to the embedded surface.
          *
          * @hide
          */
@@ -407,7 +408,7 @@ public class SurfaceControlViewHost {
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
             return new SurfacePackage(new SurfaceControl(mSurfaceControl, "getSurfacePackage"),
-                mAccessibilityEmbeddedConnection, getFocusGrantToken(), mRemoteInterface);
+                mAccessibilityEmbeddedConnection, getInputTransferToken(), mRemoteInterface);
         } else {
             return null;
         }
@@ -446,6 +447,7 @@ public class SurfaceControlViewHost {
         addWindowToken(attrs);
         view.setLayoutParams(attrs);
         mViewRoot.setView(view, attrs, null);
+        mViewRoot.setBackKeyCallbackForWindowlessWindow(mWm::forwardBackKeyToParent);
     }
 
     /**
@@ -526,10 +528,13 @@ public class SurfaceControlViewHost {
     }
 
     /**
+     * Returns an input token used which can be used to request focus on the embedded surface
+     * or to transfer touch gesture to the embedded surface.
+     *
      * @hide
      */
-    public IBinder getFocusGrantToken() {
-        return mWm.getFocusGrantToken(getWindowToken().asBinder());
+    public IBinder getInputTransferToken() {
+        return mWm.getInputTransferToken(getWindowToken().asBinder());
     }
 
     private void addWindowToken(WindowManager.LayoutParams attrs) {

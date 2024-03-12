@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.face.FaceEnrollOptions;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -83,7 +84,7 @@ public class FaceEnrollClientTest {
     @Mock
     private ClientMonitorCallback mCallback;
     @Mock
-    private Sensor.HalSessionCallback mHalSessionCallback;
+    private AidlResponseHandler mAidlResponseHandler;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
@@ -123,7 +124,7 @@ public class FaceEnrollClientTest {
 
     @Test
     public void notifyHalWhenContextChanges() throws RemoteException {
-        final FaceEnrollClient client = createClient();
+        final FaceEnrollClient client = createClient(3);
         client.start(mCallback);
 
         final ArgumentCaptor<OperationContext> captor =
@@ -143,6 +144,14 @@ public class FaceEnrollClientTest {
         verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
     }
 
+    @Test
+    public void enrollWithFaceOptions() throws RemoteException {
+        final FaceEnrollClient client = createClient(4);
+        client.start(mCallback);
+
+        verify(mHal).enrollWithOptions(any());
+    }
+
     private FaceEnrollClient createClient() throws RemoteException {
         return createClient(200 /* version */);
     }
@@ -150,7 +159,7 @@ public class FaceEnrollClientTest {
     private FaceEnrollClient createClient(int version) throws RemoteException {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
-        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mAidlResponseHandler);
         return new FaceEnrollClient(mContext, () -> aidl, mToken, mClientMonitorCallbackConverter,
                 USER_ID, HAT, "com.foo.bar", 44 /* requestId */,
                 mUtils, new int[0] /* disabledFeatures */, 6 /* timeoutSec */,

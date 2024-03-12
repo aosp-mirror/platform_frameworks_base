@@ -26,6 +26,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import android.os.Trace;
 import android.view.WindowManager;
+import android.window.TaskSnapshot;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -83,9 +84,10 @@ class SnapshotController {
             Transition.ChangeInfo info = changeInfos.get(i);
             // Intentionally skip record snapshot for changes originated from PiP.
             if (info.mWindowingMode == WINDOWING_MODE_PINNED) continue;
-            if (info.mContainer.asTask() != null && !info.mContainer.isVisibleRequested()) {
-                mTaskSnapshotController.recordSnapshot(info.mContainer.asTask(),
-                        false /* allowSnapshotHome */);
+            if (info.mContainer.isActivityTypeHome()) continue;
+            final Task task = info.mContainer.asTask();
+            if (task != null && !task.mCreatedByOrganizer && !task.isVisibleRequested()) {
+                mTaskSnapshotController.recordSnapshot(task, info);
             }
             // Won't need to capture activity snapshot in close transition.
             if (isTransitionClose) {
@@ -96,9 +98,14 @@ class SnapshotController {
                 final TaskFragment tf = info.mContainer.asTaskFragment();
                 final ActivityRecord ar = tf != null ? tf.getTopMostActivity()
                         : info.mContainer.asActivityRecord();
-                final boolean taskVis = ar != null && ar.getTask().isVisibleRequested();
-                if (ar != null && !ar.isVisibleRequested() && taskVis) {
-                    mActivitySnapshotController.recordSnapshot(ar);
+                if (ar != null && !ar.isVisibleRequested() && ar.getTask().isVisibleRequested()) {
+                    final WindowState mainWindow = ar.findMainWindow(false);
+                    // Only capture activity snapshot if this app has adapted to back predict
+                    if (mainWindow != null
+                            && mainWindow.getOnBackInvokedCallbackInfo() != null
+                            && mainWindow.getOnBackInvokedCallbackInfo().isSystemCallback()) {
+                        mActivitySnapshotController.recordSnapshot(ar);
+                    }
                 }
             }
         }
@@ -125,6 +132,18 @@ class SnapshotController {
         }
         mActivitySnapshotController.handleTransitionFinish(windows);
         mActivitySnapshotController.endSnapshotProcess();
+        // Remove task snapshot if it is visible at the end of transition.
+        for (int i = changeInfos.size() - 1; i >= 0; --i) {
+            final WindowContainer wc = changeInfos.get(i).mContainer;
+            final Task task = wc.asTask();
+            if (task != null && wc.isVisibleRequested()) {
+                final TaskSnapshot snapshot = mTaskSnapshotController.getSnapshot(task.mTaskId,
+                        task.mUserId, false /* restoreFromDisk */, false /* isLowResolution */);
+                if (snapshot != null) {
+                    mTaskSnapshotController.removeAndDeleteSnapshot(task.mTaskId, task.mUserId);
+                }
+            }
+        }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 

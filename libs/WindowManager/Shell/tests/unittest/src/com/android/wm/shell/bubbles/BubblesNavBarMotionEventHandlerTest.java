@@ -55,8 +55,6 @@ public class BubblesNavBarMotionEventHandlerTest extends ShellTestCase {
 
     private BubblesNavBarMotionEventHandler mMotionEventHandler;
     @Mock
-    private WindowManager mWindowManager;
-    @Mock
     private Runnable mInterceptTouchRunnable;
     @Mock
     private MotionEventListener mMotionEventListener;
@@ -66,7 +64,7 @@ public class BubblesNavBarMotionEventHandlerTest extends ShellTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         TestableBubblePositioner positioner = new TestableBubblePositioner(getContext(),
-                mWindowManager);
+                getContext().getSystemService(WindowManager.class));
         mMotionEventHandler = new BubblesNavBarMotionEventHandler(getContext(), positioner,
                 mInterceptTouchRunnable, mMotionEventListener);
         mMotionEventTime = SystemClock.uptimeMillis();

@@ -42,10 +42,10 @@ interface IPermissionManager {
 
     void removePermission(String permissionName);
 
-    int getPermissionFlags(String packageName, String permissionName, int userId);
+    int getPermissionFlags(String packageName, String permissionName, int deviceId, int userId);
 
     void updatePermissionFlags(String packageName, String permissionName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId);
 
     void updatePermissionFlagsForAllApps(int flagMask, int flagValues, int userId);
 
@@ -62,21 +62,23 @@ interface IPermissionManager {
     boolean removeAllowlistedRestrictedPermission(String packageName, String permissionName,
             int flags, int userId);
 
-    void grantRuntimePermission(String packageName, String permissionName, int userId);
+    void grantRuntimePermission(String packageName, String permissionName, int deviceId, int userId);
 
-    void revokeRuntimePermission(String packageName, String permissionName, int userId,
-            String reason);
+    void revokeRuntimePermission(String packageName, String permissionName, int deviceId,
+            int userId, String reason);
 
     void revokePostNotificationPermissionWithoutKillForTest(String packageName, int userId);
 
     boolean shouldShowRequestPermissionRationale(String packageName, String permissionName,
-            int userId);
+            int deviceId, int userId);
 
-    boolean isPermissionRevokedByPolicy(String packageName, String permissionName, int userId);
+    boolean isPermissionRevokedByPolicy(String packageName, String permissionName, int deviceId,
+            int userId);
 
     List<SplitPermissionInfoParcelable> getSplitPermissions();
 
-    void startOneTimePermissionSession(String packageName, int userId, long timeout,
+    @EnforcePermission("MANAGE_ONE_TIME_PERMISSION_SESSIONS")
+    void startOneTimePermissionSession(String packageName, int deviceId, int userId, long timeout,
             long revokeAfterKilledDelay);
 
     @EnforcePermission("MANAGE_ONE_TIME_PERMISSION_SESSIONS")
@@ -93,4 +95,8 @@ interface IPermissionManager {
     void registerAttributionSource(in AttributionSourceState source);
 
     boolean isRegisteredAttributionSource(in AttributionSourceState source);
+
+    int checkPermission(String packageName, String permissionName, int deviceId, int userId);
+
+    int checkUidPermission(int uid, String permissionName, int deviceId);
 }

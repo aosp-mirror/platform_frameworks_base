@@ -1,0 +1,15 @@
+package: "android.service.voice.flags"
+
+flag {
+    name: "allow_training_data_egress_from_hds"
+    namespace: "machine_learning"
+    description: "This flag allows the hotword detection service to egress training data to the default assistant."
+    bug: "296074924"
+}
+
+flag {
+    name: "allow_hotword_bump_egress"
+    namespace: "machine_learning"
+    description: "This flag allows hotword detection service to egress reason code for hotword bump."
+    bug: "290951024"
+}

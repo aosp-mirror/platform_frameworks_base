@@ -35,7 +35,7 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
@@ -83,6 +83,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import android.graphics.Insets
 import org.mockito.junit.MockitoJUnit
 
 private val EMPTY_CHANGES = ConstraintsChanges()
@@ -130,7 +131,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     var viewVisibility = View.GONE
     var viewAlpha = 1f
 
-    private val systemIcons = LinearLayout(context)
+    private val systemIconsHoverContainer = LinearLayout(context)
     private lateinit var shadeHeaderController: ShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
     private val configurationController = FakeConfigurationController()
@@ -150,7 +151,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
             .thenReturn(batteryMeterView)
 
         whenever<StatusIconContainer>(view.requireViewById(R.id.statusIcons)).thenReturn(statusIcons)
-        whenever<View>(view.requireViewById(R.id.shade_header_system_icons)).thenReturn(systemIcons)
+        whenever<View>(view.requireViewById(R.id.hover_system_icons_container))
+            .thenReturn(systemIconsHoverContainer)
 
         viewContext = Mockito.spy(context)
         whenever(view.context).thenReturn(viewContext)
@@ -457,12 +459,12 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLargeScreenActive_collapseActionRun_onSystemIconsClick() {
+    fun testLargeScreenActive_collapseActionRun_onSystemIconsHoverContainerClick() {
         shadeHeaderController.largeScreenActive = true
         var wasRun = false
         shadeHeaderController.shadeCollapseAction = Runnable { wasRun = true }
 
-        systemIcons.performClick()
+        systemIconsHoverContainer.performClick()
 
         assertThat(wasRun).isTrue()
     }
@@ -929,12 +931,16 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         return windowInsets
     }
 
-    private fun mockInsetsProvider(
-        insets: Pair<Int, Int> = 0 to 0,
-        cornerCutout: Boolean = false,
-    ) {
+    private fun mockInsetsProvider(insets: Pair<Int, Int> = 0 to 0, cornerCutout: Boolean = false) {
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(insets.toAndroidPair())
+                .thenReturn(
+                        Insets.of(
+                                /* left= */ insets.first,
+                                /* top= */ 0,
+                                /* right= */ insets.second,
+                                /* bottom= */ 0
+                        )
+                )
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(cornerCutout)
     }
 
@@ -979,7 +985,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
             )
             .thenReturn(EMPTY_CHANGES)
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(Pair(0, 0).toAndroidPair())
+            .thenReturn(Insets.NONE)
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(false)
         setupCurrentInsets(null)
     }

@@ -10,10 +10,10 @@
       "file_patterns": ["Toast\\.java"]
     },
     {
-      "name": "CtsWindowManagerDeviceTestCases",
+      "name": "CtsWindowManagerDeviceWindow",
       "options": [
         {
-          "include-filter": "android.server.wm.ToastWindowTest"
+          "include-filter": "android.server.wm.window.ToastWindowTest"
         }
       ],
       "file_patterns": ["Toast\\.java"]
@@ -43,6 +43,17 @@
         },
         {
           "exclude-annotation": "android.platform.test.annotations.AppModeFull"
+        }
+      ]
+    },
+    {
+      "name": "CtsTextTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
         }
       ]
     }

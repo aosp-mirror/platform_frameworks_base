@@ -66,5 +66,6 @@ oneway interface IAccessibilityInteractionConnection {
     void takeScreenshotOfWindow(int interactionId,
         in ScreenCapture.ScreenCaptureListener listener,
         IAccessibilityInteractionConnectionCallback callback);
-    void attachAccessibilityOverlayToWindow(in SurfaceControl sc);
+
+    void attachAccessibilityOverlayToWindow(in SurfaceControl sc, int interactionId, in IAccessibilityInteractionConnectionCallback callback);
 }

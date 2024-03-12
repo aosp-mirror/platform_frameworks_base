@@ -17,8 +17,10 @@
 package com.android.internal.security;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Build;
 import android.os.SystemProperties;
+import android.os.incremental.V4Signature;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Slog;
@@ -40,6 +42,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -192,9 +197,9 @@ public abstract class VerityUtils {
      *
      * @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#file-digest-computation">
      *      File digest computation in Linux kernel documentation</a>
-     * @return Bytes of fs-verity digest
+     * @return Bytes of fs-verity digest, or null if the file does not have fs-verity enabled
      */
-    public static byte[] getFsverityDigest(@NonNull String filePath) {
+    public static @Nullable byte[] getFsverityDigest(@NonNull String filePath) {
         byte[] result = new byte[HASH_SIZE_BYTES];
         int retval = measureFsverityNative(filePath, result);
         if (retval < 0) {
@@ -204,6 +209,34 @@ public abstract class VerityUtils {
             return null;
         }
         return result;
+    }
+
+    /**
+     * Generates an fs-verity digest from a V4Signature.HashingInfo and the file's size.
+     */
+    public static @NonNull byte[] generateFsVerityDigest(long fileSize,
+            @NonNull V4Signature.HashingInfo hashingInfo)
+            throws DigestException, NoSuchAlgorithmException {
+        if (hashingInfo.rawRootHash == null || hashingInfo.rawRootHash.length != 32) {
+            throw new IllegalArgumentException("Expect a 32-byte rootHash for SHA256");
+        }
+        if (hashingInfo.log2BlockSize != 12) {
+            throw new IllegalArgumentException(
+                    "Unsupported log2BlockSize: " + hashingInfo.log2BlockSize);
+        }
+
+        var buffer = ByteBuffer.allocate(256);  // sizeof(fsverity_descriptor)
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.put((byte) 1);                   // version
+        buffer.put((byte) 1);                   // Merkle tree hash algorithm, 1 for SHA256
+        buffer.put(hashingInfo.log2BlockSize);  // log2(block-size), only log2(4096) is supported
+        buffer.put((byte) 0);                   // size of salt in bytes; 0 if none
+        buffer.putInt(0);                       // reserved, must be 0
+        buffer.putLong(fileSize);               // size of file the Merkle tree is built over
+        buffer.put(hashingInfo.rawRootHash);    // Merkle tree root hash
+        // The rest are zeros, including the latter half of root hash unused for SHA256.
+
+        return MessageDigest.getInstance("SHA-256").digest(buffer.array());
     }
 
     /** @hide */

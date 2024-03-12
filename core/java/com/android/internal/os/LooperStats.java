@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @hide Only for use within the system server.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LooperStats implements Looper.Observer {
     public static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
     private static final int SESSION_POOL_SIZE = 50;

@@ -57,6 +57,16 @@ public interface ActivityStarter {
             @Nullable ActivityLaunchAnimator.Controller animationController);
 
     /**
+     * Similar to {@link #startPendingIntentDismissingKeyguard}, except that it supports launching
+     * activities on top of the keyguard. If the activity supports {@code showOverLockscreen}, it
+     * will show over keyguard without first dimissing it. If it doesn't support it, calling this
+     * method is exactly the same as calling {@link #startPendingIntentDismissingKeyguard}.
+     */
+    void startPendingIntentMaybeDismissingKeyguard(PendingIntent intent,
+            @Nullable Runnable intentSentUiThreadCallback,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
+
+    /**
      * The intent flag can be specified in startActivity().
      */
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade, int flags);
@@ -122,16 +132,6 @@ public interface ActivityStarter {
             boolean dismissShade,
             boolean afterKeyguardGone,
             boolean deferred);
-
-    /** Execute a runnable after dismissing keyguard. */
-    void executeRunnableDismissingKeyguard(
-            Runnable runnable,
-            Runnable cancelAction,
-            boolean dismissShade,
-            boolean afterKeyguardGone,
-            boolean deferred,
-            boolean willAnimateOnKeyguard,
-            @Nullable String customMessage);
 
     /** Whether we should animate an activity launch. */
     boolean shouldAnimateLaunch(boolean isActivityIntent);

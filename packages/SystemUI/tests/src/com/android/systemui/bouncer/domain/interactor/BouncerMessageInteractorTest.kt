@@ -17,187 +17,222 @@
 package com.android.systemui.bouncer.domain.interactor
 
 import android.content.pm.UserInfo
+import android.os.Handler
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
-import com.android.systemui.R.string.kg_too_many_failed_attempts_countdown
-import com.android.systemui.R.string.kg_unlock_with_pin_or_fp
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.data.factory.BouncerMessageFactory
-import com.android.systemui.bouncer.data.repository.FakeBouncerMessageRepository
+import com.android.systemui.biometrics.data.repository.FaceSensorInfo
+import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
+import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
-import com.android.systemui.bouncer.shared.model.Message
-import com.android.systemui.coroutines.FlowValue
+import com.android.systemui.bouncer.ui.BouncerView
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.SystemPropertiesHelper
+import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
+import com.android.systemui.keyguard.shared.model.AuthenticationFlags
+import com.android.systemui.res.R.string.kg_too_many_failed_attempts_countdown
+import com.android.systemui.res.R.string.kg_trust_agent_disabled
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
 class BouncerMessageInteractorTest : SysuiTestCase() {
 
+    private val countDownTimerCallback = KotlinArgumentCaptor(CountDownTimerCallback::class.java)
+    private val repository = BouncerMessageRepositoryImpl()
+    private val userRepository = FakeUserRepository()
+    private val fakeTrustRepository = FakeTrustRepository()
+    private val fakeFacePropertyRepository = FakeFacePropertyRepository()
+    private val bouncerRepository = FakeKeyguardBouncerRepository()
+    private val fakeDeviceEntryFingerprintAuthRepository =
+        FakeDeviceEntryFingerprintAuthRepository()
+    private val fakeDeviceEntryFaceAuthRepository = FakeDeviceEntryFaceAuthRepository()
+    private val biometricSettingsRepository: FakeBiometricSettingsRepository =
+        FakeBiometricSettingsRepository()
+    @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var securityModel: KeyguardSecurityModel
-    @Mock private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
     @Mock private lateinit var countDownTimerUtil: CountDownTimerUtil
-    private lateinit var countDownTimerCallback: KotlinArgumentCaptor<CountDownTimerCallback>
-    private lateinit var underTest: BouncerMessageInteractor
-    private lateinit var repository: FakeBouncerMessageRepository
-    private lateinit var userRepository: FakeUserRepository
+    @Mock private lateinit var systemPropertiesHelper: SystemPropertiesHelper
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
+
+    private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     private lateinit var testScope: TestScope
-    private lateinit var bouncerMessage: FlowValue<BouncerMessageModel?>
+    private lateinit var underTest: BouncerMessageInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        repository = FakeBouncerMessageRepository()
-        userRepository = FakeUserRepository()
         userRepository.setUserInfos(listOf(PRIMARY_USER))
         testScope = TestScope()
-        countDownTimerCallback = KotlinArgumentCaptor(CountDownTimerCallback::class.java)
-        biometricSettingsRepository = FakeBiometricSettingsRepository()
-
         allowTestableLooperAsMainThread()
         whenever(securityModel.getSecurityMode(PRIMARY_USER_ID)).thenReturn(PIN)
         biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
+        overrideResource(kg_trust_agent_disabled, "Trust agent is unavailable")
     }
 
     suspend fun TestScope.init() {
         userRepository.setSelectedUserInfo(PRIMARY_USER)
-        val featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
+        val featureFlags =
+            FakeFeatureFlagsClassic().apply { set(Flags.REVAMPED_BOUNCER_MESSAGES, true) }
+        primaryBouncerInteractor =
+            PrimaryBouncerInteractor(
+                bouncerRepository,
+                mock(BouncerView::class.java),
+                mock(Handler::class.java),
+                mock(KeyguardStateController::class.java),
+                mock(KeyguardSecurityModel::class.java),
+                mock(PrimaryBouncerCallbackInteractor::class.java),
+                mock(FalsingCollector::class.java),
+                mock(DismissCallbackRegistry::class.java),
+                context,
+                keyguardUpdateMonitor,
+                fakeTrustRepository,
+                testScope.backgroundScope,
+                mSelectedUserInteractor,
+                mock(KeyguardFaceAuthInteractor::class.java),
+            )
         underTest =
             BouncerMessageInteractor(
                 repository = repository,
-                factory = BouncerMessageFactory(biometricSettingsRepository, securityModel),
                 userRepository = userRepository,
                 countDownTimerUtil = countDownTimerUtil,
-                featureFlags = featureFlags
+                featureFlags = featureFlags,
+                updateMonitor = updateMonitor,
+                biometricSettingsRepository = biometricSettingsRepository,
+                applicationScope = this.backgroundScope,
+                trustRepository = fakeTrustRepository,
+                systemPropertiesHelper = systemPropertiesHelper,
+                primaryBouncerInteractor = primaryBouncerInteractor,
+                facePropertyRepository = fakeFacePropertyRepository,
+                deviceEntryFingerprintAuthRepository = fakeDeviceEntryFingerprintAuthRepository,
+                faceAuthRepository = fakeDeviceEntryFaceAuthRepository,
+                securityModel = securityModel
             )
-        bouncerMessage = collectLastValue(underTest.bouncerMessage)
+        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
+        fakeDeviceEntryFingerprintAuthRepository.setLockedOut(false)
+        bouncerRepository.setPrimaryShow(true)
+        runCurrent()
     }
 
     @Test
-    fun onIncorrectSecurityInput_setsTheBouncerModelInTheRepository() =
+    fun onIncorrectSecurityInput_providesTheAppropriateValueForBouncerMessage() =
         testScope.runTest {
             init()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
             underTest.onPrimaryAuthIncorrectAttempt()
 
-            assertThat(repository.primaryAuthMessage).isNotNull()
-            assertThat(
-                    context.resources.getString(
-                        repository.primaryAuthMessage.value!!.message!!.messageResId!!
-                    )
-                )
-                .isEqualTo("Wrong PIN. Try again.")
+            assertThat(bouncerMessage).isNotNull()
+            assertThat(primaryResMessage(bouncerMessage)).isEqualTo("Wrong PIN. Try again.")
         }
 
     @Test
     fun onUserStartsPrimaryAuthInput_clearsAllSetBouncerMessages() =
         testScope.runTest {
             init()
-            repository.setCustomMessage(message("not empty"))
-            repository.setFaceAcquisitionMessage(message("not empty"))
-            repository.setFingerprintAcquisitionMessage(message("not empty"))
-            repository.setPrimaryAuthMessage(message("not empty"))
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
+            underTest.onPrimaryAuthIncorrectAttempt()
+            assertThat(primaryResMessage(bouncerMessage)).isEqualTo("Wrong PIN. Try again.")
 
             underTest.onPrimaryBouncerUserInput()
 
-            assertThat(repository.customMessage.value).isNull()
-            assertThat(repository.faceAcquisitionMessage.value).isNull()
-            assertThat(repository.fingerprintAcquisitionMessage.value).isNull()
-            assertThat(repository.primaryAuthMessage.value).isNull()
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
         }
 
     @Test
-    fun onBouncerBeingHidden_clearsAllSetBouncerMessages() =
+    fun setCustomMessage_propagateValue() =
         testScope.runTest {
             init()
-            repository.setCustomMessage(message("not empty"))
-            repository.setFaceAcquisitionMessage(message("not empty"))
-            repository.setFingerprintAcquisitionMessage(message("not empty"))
-            repository.setPrimaryAuthMessage(message("not empty"))
-
-            underTest.onBouncerBeingHidden()
-
-            assertThat(repository.customMessage.value).isNull()
-            assertThat(repository.faceAcquisitionMessage.value).isNull()
-            assertThat(repository.fingerprintAcquisitionMessage.value).isNull()
-            assertThat(repository.primaryAuthMessage.value).isNull()
-        }
-
-    @Test
-    fun setCustomMessage_setsRepositoryValue() =
-        testScope.runTest {
-            init()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
 
             underTest.setCustomMessage("not empty")
 
-            val customMessage = repository.customMessage
-            assertThat(customMessage.value!!.message!!.messageResId)
-                .isEqualTo(kg_unlock_with_pin_or_fp)
-            assertThat(customMessage.value!!.secondaryMessage!!.message).isEqualTo("not empty")
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isEqualTo("not empty")
 
             underTest.setCustomMessage(null)
-            assertThat(customMessage.value).isNull()
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isNull()
         }
 
     @Test
-    fun setFaceMessage_setsRepositoryValue() =
+    fun setFaceMessage_propagateValue() =
         testScope.runTest {
             init()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
 
             underTest.setFaceAcquisitionMessage("not empty")
 
-            val faceAcquisitionMessage = repository.faceAcquisitionMessage
-
-            assertThat(faceAcquisitionMessage.value!!.message!!.messageResId)
-                .isEqualTo(kg_unlock_with_pin_or_fp)
-            assertThat(faceAcquisitionMessage.value!!.secondaryMessage!!.message)
-                .isEqualTo("not empty")
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isEqualTo("not empty")
 
             underTest.setFaceAcquisitionMessage(null)
-            assertThat(faceAcquisitionMessage.value).isNull()
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isNull()
         }
 
     @Test
-    fun setFingerprintMessage_setsRepositoryValue() =
+    fun setFingerprintMessage_propagateValue() =
         testScope.runTest {
             init()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
 
             underTest.setFingerprintAcquisitionMessage("not empty")
 
-            val fingerprintAcquisitionMessage = repository.fingerprintAcquisitionMessage
-
-            assertThat(fingerprintAcquisitionMessage.value!!.message!!.messageResId)
-                .isEqualTo(kg_unlock_with_pin_or_fp)
-            assertThat(fingerprintAcquisitionMessage.value!!.secondaryMessage!!.message)
-                .isEqualTo("not empty")
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isEqualTo("not empty")
 
             underTest.setFingerprintAcquisitionMessage(null)
-            assertThat(fingerprintAcquisitionMessage.value).isNull()
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isNull()
         }
 
     @Test
     fun onPrimaryAuthLockout_startsTimerForSpecifiedNumberOfSeconds() =
         testScope.runTest {
             init()
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
 
             underTest.onPrimaryAuthLockedOut(3)
 
@@ -206,7 +241,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
             countDownTimerCallback.value.onTick(2000L)
 
-            val primaryMessage = repository.primaryAuthMessage.value!!.message!!
+            val primaryMessage = bouncerMessage!!.message!!
             assertThat(primaryMessage.messageResId!!)
                 .isEqualTo(kg_too_many_failed_attempts_countdown)
             assertThat(primaryMessage.formatterArgs).isEqualTo(mapOf(Pair("count", 2)))
@@ -216,10 +251,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
     fun onPrimaryAuthLockout_timerComplete_resetsRepositoryMessages() =
         testScope.runTest {
             init()
-            repository.setCustomMessage(message("not empty"))
-            repository.setFaceAcquisitionMessage(message("not empty"))
-            repository.setFingerprintAcquisitionMessage(message("not empty"))
-            repository.setPrimaryAuthMessage(message("not empty"))
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
 
             underTest.onPrimaryAuthLockedOut(3)
 
@@ -228,59 +260,269 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
             countDownTimerCallback.value.onFinish()
 
-            assertThat(repository.customMessage.value).isNull()
-            assertThat(repository.faceAcquisitionMessage.value).isNull()
-            assertThat(repository.fingerprintAcquisitionMessage.value).isNull()
-            assertThat(repository.primaryAuthMessage.value).isNull()
+            assertThat(primaryResMessage(bouncerMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessage?.secondaryMessage?.message).isNull()
         }
 
     @Test
-    fun bouncerMessage_hasPriorityOrderOfMessages() =
+    fun onFaceLockout_propagatesState() =
         testScope.runTest {
             init()
-            repository.setBiometricAuthMessage(message("biometric message"))
-            repository.setFaceAcquisitionMessage(message("face acquisition message"))
-            repository.setFingerprintAcquisitionMessage(message("fingerprint acquisition message"))
-            repository.setPrimaryAuthMessage(message("primary auth message"))
-            repository.setAuthFlagsMessage(message("auth flags message"))
-            repository.setBiometricLockedOutMessage(message("biometrics locked out"))
-            repository.setCustomMessage(message("custom message"))
+            val lockoutMessage by collectLastValue(underTest.bouncerMessage)
 
-            assertThat(bouncerMessage()).isEqualTo(message("primary auth message"))
+            fakeDeviceEntryFaceAuthRepository.setLockedOut(true)
+            runCurrent()
 
-            repository.setPrimaryAuthMessage(null)
+            assertThat(primaryResMessage(lockoutMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(secondaryResMessage(lockoutMessage))
+                .isEqualTo("Can’t unlock with face. Too many attempts.")
 
-            assertThat(bouncerMessage()).isEqualTo(message("biometric message"))
+            fakeDeviceEntryFaceAuthRepository.setLockedOut(false)
+            runCurrent()
 
-            repository.setBiometricAuthMessage(null)
-
-            assertThat(bouncerMessage()).isEqualTo(message("fingerprint acquisition message"))
-
-            repository.setFingerprintAcquisitionMessage(null)
-
-            assertThat(bouncerMessage()).isEqualTo(message("face acquisition message"))
-
-            repository.setFaceAcquisitionMessage(null)
-
-            assertThat(bouncerMessage()).isEqualTo(message("custom message"))
-
-            repository.setCustomMessage(null)
-
-            assertThat(bouncerMessage()).isEqualTo(message("auth flags message"))
-
-            repository.setAuthFlagsMessage(null)
-
-            assertThat(bouncerMessage()).isEqualTo(message("biometrics locked out"))
-
-            repository.setBiometricLockedOutMessage(null)
-
-            // sets the default message if everything else is null
-            assertThat(bouncerMessage()!!.message!!.messageResId)
-                .isEqualTo(kg_unlock_with_pin_or_fp)
+            assertThat(primaryResMessage(lockoutMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(lockoutMessage?.secondaryMessage?.message).isNull()
         }
 
-    private fun message(value: String): BouncerMessageModel {
-        return BouncerMessageModel(message = Message(message = value))
+    @Test
+    fun onFaceLockout_whenItIsClass3_propagatesState() =
+        testScope.runTest {
+            init()
+            val lockoutMessage by collectLastValue(underTest.bouncerMessage)
+            fakeFacePropertyRepository.setSensorInfo(FaceSensorInfo(1, SensorStrength.STRONG))
+            fakeDeviceEntryFaceAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(primaryResMessage(lockoutMessage)).isEqualTo("Enter PIN")
+            assertThat(secondaryResMessage(lockoutMessage))
+                .isEqualTo("PIN is required after too many attempts")
+
+            fakeDeviceEntryFaceAuthRepository.setLockedOut(false)
+            runCurrent()
+
+            assertThat(primaryResMessage(lockoutMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(lockoutMessage?.secondaryMessage?.message).isNull()
+        }
+
+    @Test
+    fun onFingerprintLockout_propagatesState() =
+        testScope.runTest {
+            init()
+            val lockedOutMessage by collectLastValue(underTest.bouncerMessage)
+
+            fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+            runCurrent()
+
+            assertThat(primaryResMessage(lockedOutMessage)).isEqualTo("Enter PIN")
+            assertThat(secondaryResMessage(lockedOutMessage))
+                .isEqualTo("PIN is required after too many attempts")
+
+            fakeDeviceEntryFingerprintAuthRepository.setLockedOut(false)
+            runCurrent()
+
+            assertThat(primaryResMessage(lockedOutMessage))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(lockedOutMessage?.secondaryMessage?.message).isNull()
+        }
+
+    @Test
+    fun onRestartForMainlineUpdate_shouldProvideRelevantMessage() =
+        testScope.runTest {
+            init()
+            whenever(systemPropertiesHelper.get("sys.boot.reason.last"))
+                .thenReturn("reboot,mainline_update")
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+
+            verifyMessagesForAuthFlag(
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
+                    Pair("Enter PIN", "Device updated. Enter PIN to continue.")
+            )
+        }
+
+    @Test
+    fun onAuthFlagsChanged_withTrustNotManagedAndNoBiometrics_isANoop() =
+        testScope.runTest {
+            init()
+            fakeTrustRepository.setTrustUsuallyManaged(false)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+
+            val defaultMessage = Pair("Enter PIN", null)
+
+            verifyMessagesForAuthFlag(
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker
+                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to defaultMessage,
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
+                    Pair("Enter PIN", "For added security, device was locked by work policy")
+            )
+        }
+
+    @Test
+    fun authFlagsChanges_withTrustManaged_providesDifferentMessages() =
+        testScope.runTest {
+            init()
+
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+
+            fakeTrustRepository.setCurrentUserTrustManaged(true)
+            fakeTrustRepository.setTrustUsuallyManaged(true)
+
+            val defaultMessage = Pair("Enter PIN", null)
+
+            verifyMessagesForAuthFlag(
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED to defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
+                    Pair("Enter PIN", "PIN is required after device restarts"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
+                    Pair("Enter PIN", "Added security required. PIN not used for a while."),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
+                    Pair("Enter PIN", "For added security, device was locked by work policy"),
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to
+                    Pair("Enter PIN", "Trust agent is unavailable"),
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
+                    Pair("Enter PIN", "Trust agent is unavailable"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
+                    Pair("Enter PIN", "PIN is required after lockdown"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
+                    Pair("Enter PIN", "Update will install when device not in use"),
+                LockPatternUtils.StrongAuthTracker
+                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
+                    Pair(
+                        "Enter PIN",
+                        "Added security required. Device wasn’t unlocked for a while."
+                    ),
+            )
+        }
+
+    @Test
+    fun authFlagsChanges_withFaceEnrolled_providesDifferentMessages() =
+        testScope.runTest {
+            init()
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            fakeTrustRepository.setTrustUsuallyManaged(false)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
+
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
+            val defaultMessage = Pair("Enter PIN", null)
+
+            verifyMessagesForAuthFlag(
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED to defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
+                    defaultMessage,
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
+                    Pair("Enter PIN", "PIN is required after device restarts"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
+                    Pair("Enter PIN", "Added security required. PIN not used for a while."),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
+                    Pair("Enter PIN", "For added security, device was locked by work policy"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
+                    Pair("Enter PIN", "PIN is required after lockdown"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
+                    Pair("Enter PIN", "Update will install when device not in use"),
+                LockPatternUtils.StrongAuthTracker
+                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
+                    Pair(
+                        "Enter PIN",
+                        "Added security required. Device wasn’t unlocked for a while."
+                    ),
+            )
+        }
+
+    @Test
+    fun authFlagsChanges_withFingerprintEnrolled_providesDifferentMessages() =
+        testScope.runTest {
+            init()
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            fakeTrustRepository.setCurrentUserTrustManaged(false)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
+
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+            biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
+
+            verifyMessagesForAuthFlag(
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED to
+                    Pair("Unlock with PIN or fingerprint", null)
+            )
+
+            biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(false)
+
+            verifyMessagesForAuthFlag(
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST to
+                    Pair("Enter PIN", null),
+                LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED to
+                    Pair("Enter PIN", null),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT to
+                    Pair("Enter PIN", "PIN is required after device restarts"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
+                    Pair("Enter PIN", "Added security required. PIN not used for a while."),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW to
+                    Pair("Enter PIN", "For added security, device was locked by work policy"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
+                    Pair("Enter PIN", "PIN is required after lockdown"),
+                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE to
+                    Pair("Enter PIN", "Update will install when device not in use"),
+                LockPatternUtils.StrongAuthTracker
+                    .STRONG_AUTH_REQUIRED_AFTER_NON_STRONG_BIOMETRICS_TIMEOUT to
+                    Pair(
+                        "Enter PIN",
+                        "Added security required. Device wasn’t unlocked for a while."
+                    ),
+            )
+        }
+
+    private fun primaryResMessage(bouncerMessage: BouncerMessageModel?) =
+        resString(bouncerMessage?.message?.messageResId)
+
+    private fun secondaryResMessage(bouncerMessage: BouncerMessageModel?) =
+        resString(bouncerMessage?.secondaryMessage?.messageResId)
+
+    private fun resString(msgResId: Int?): String? =
+        msgResId?.let { context.resources.getString(it) }
+
+    private fun TestScope.verifyMessagesForAuthFlag(
+        vararg authFlagToExpectedMessages: Pair<Int, Pair<String, String?>>
+    ) {
+        val authFlagsMessage by collectLastValue(underTest.bouncerMessage)
+
+        authFlagToExpectedMessages.forEach { (flag, messagePair) ->
+            biometricSettingsRepository.setAuthenticationFlags(
+                AuthenticationFlags(PRIMARY_USER_ID, flag)
+            )
+            runCurrent()
+
+            assertThat(primaryResMessage(authFlagsMessage)).isEqualTo(messagePair.first)
+            if (messagePair.second == null) {
+                assertThat(authFlagsMessage?.secondaryMessage?.messageResId).isEqualTo(0)
+                assertThat(authFlagsMessage?.secondaryMessage?.message).isNull()
+            } else {
+                assertThat(authFlagsMessage?.secondaryMessage?.messageResId).isNotEqualTo(0)
+                assertThat(secondaryResMessage(authFlagsMessage)).isEqualTo(messagePair.second)
+            }
+        }
     }
 
     companion object {

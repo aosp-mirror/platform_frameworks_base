@@ -21,7 +21,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextClock
 import com.android.internal.util.Preconditions
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.complication.DreamClockTimeComplication
 import com.android.systemui.complication.DreamClockTimeComplication.DreamClockTimeViewHolder
 import dagger.Module

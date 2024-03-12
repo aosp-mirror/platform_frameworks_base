@@ -35,13 +35,9 @@
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Langzaam opladen"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladen geoptimaliseerd om de batterij te beschermen"</string>
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Probleem met oplaadaccessoire"</string>
-    <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Druk op Menu om te ontgrendelen."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netwerk vergrendeld"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Geen simkaart"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Voeg een simkaart toe."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"De simkaart ontbreekt of kan niet worden gelezen. Voeg een simkaart toe."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"Onbruikbare simkaart."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Je simkaart is permanent gedeactiveerd.\n Neem contact op met je mobiele serviceprovider voor een nieuwe simkaart."</string>
     <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"Simkaart is vergrendeld."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"Simkaart is vergrendeld met pukcode."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Simkaart ontgrendelen…"</string>
@@ -76,7 +72,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Na lockdown is de pincode vereist"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Na lockdown is het wachtwoord vereist"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Na lockdown is het patroon vereist"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Update wordt geïnstalleerd tijdens inactieve uren"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Update wordt geïnstalleerd als het apparaat niet wordt gebruikt"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Extra beveiliging. Pincode is lang niet gebruikt."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Extra beveiliging. Wachtwoord is lang niet gebruikt."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Extra beveiliging. Patroon is lang niet gebruikt."</string>
@@ -113,7 +109,7 @@
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Pincode is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Wachtwoord is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik in plaats daarvan het patroon voor extra beveiliging"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Gebruik in plaats daarvan de pincode voor extra beveiliging"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Gebruik de pincode voor extra beveiliging"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik in plaats daarvan het wachtwoord voor extra beveiliging"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Apparaat vergrendeld door beheerder"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Apparaat is handmatig vergrendeld"</string>
@@ -125,4 +121,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bel"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoog"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Ontgrendel je apparaat om door te gaan"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Voer de pincode in om de update later te installeren"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Voer het wachtwoord in om de update later te installeren"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Teken het patroon om de update later te installeren"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Apparaat geüpdatet. Voer de pincode in om door te gaan."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Apparaat geüpdatet. Voer het wachtwoord in om door te gaan."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Apparaat geüpdatet. Teken patroon om door te gaan."</string>
 </resources>

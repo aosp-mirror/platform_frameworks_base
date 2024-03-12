@@ -31,9 +31,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when` as whenever
 
-/**
- * Tests for {@link NotificationIconContainer}.
- */
+/** Tests for {@link NotificationIconContainer}. */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -43,8 +41,10 @@ class NotificationIconContainerTest : SysuiTestCase() {
 
     @Test
     fun calculateWidthFor_zeroIcons_widthIsZero() {
-        assertEquals(/* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 0f),
-                /* actual= */ 0f)
+        assertEquals(
+            /* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 0f),
+            /* actual= */ 0f
+        )
     }
 
     @Test
@@ -53,8 +53,10 @@ class NotificationIconContainerTest : SysuiTestCase() {
         iconContainer.setActualPaddingEnd(10f)
         iconContainer.setIconSize(10)
 
-        assertEquals(/* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 1f),
-                /* actual= */ 30f)
+        assertEquals(
+            /* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 1f),
+            /* actual= */ 30f
+        )
     }
 
     @Test
@@ -63,8 +65,10 @@ class NotificationIconContainerTest : SysuiTestCase() {
         iconContainer.setActualPaddingEnd(10f)
         iconContainer.setIconSize(10)
 
-        assertEquals(/* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 4f),
-                /* actual= */ 60f)
+        assertEquals(
+            /* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 4f),
+            /* actual= */ 60f
+        )
     }
 
     @Test
@@ -72,8 +76,10 @@ class NotificationIconContainerTest : SysuiTestCase() {
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
         iconContainer.setIconSize(10)
-        assertEquals(/* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 5f),
-                /* actual= */ 60f)
+        assertEquals(
+            /* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 5f),
+            /* actual= */ 60f
+        )
     }
 
     @Test
@@ -206,112 +212,121 @@ class NotificationIconContainerTest : SysuiTestCase() {
 
     @Test
     fun shouldForceOverflow_appearingAboveSpeedBump_true() {
-        val forceOverflow = iconContainer.shouldForceOverflow(
+        val forceOverflow =
+            iconContainer.shouldForceOverflow(
                 /* i= */ 1,
                 /* speedBumpIndex= */ 0,
                 /* iconAppearAmount= */ 1f,
                 /* maxVisibleIcons= */ 5
-        )
+            )
         assertTrue(forceOverflow)
     }
 
     @Test
     fun shouldForceOverflow_moreThanMaxVisible_true() {
-        val forceOverflow = iconContainer.shouldForceOverflow(
+        val forceOverflow =
+            iconContainer.shouldForceOverflow(
                 /* i= */ 10,
                 /* speedBumpIndex= */ 11,
                 /* iconAppearAmount= */ 0f,
                 /* maxVisibleIcons= */ 5
-        )
+            )
         assertTrue(forceOverflow)
     }
 
     @Test
     fun shouldForceOverflow_belowSpeedBumpAndLessThanMaxVisible_false() {
-        val forceOverflow = iconContainer.shouldForceOverflow(
+        val forceOverflow =
+            iconContainer.shouldForceOverflow(
                 /* i= */ 0,
                 /* speedBumpIndex= */ 11,
                 /* iconAppearAmount= */ 0f,
                 /* maxVisibleIcons= */ 5
-        )
+            )
         assertFalse(forceOverflow)
     }
 
     @Test
     fun isOverflowing_lastChildXLessThanLayoutEnd_false() {
-        val isOverflowing = iconContainer.isOverflowing(
+        val isOverflowing =
+            iconContainer.isOverflowing(
                 /* isLastChild= */ true,
                 /* translationX= */ 0f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
-        )
+            )
         assertFalse(isOverflowing)
     }
 
-
     @Test
     fun isOverflowing_lastChildXEqualToLayoutEnd_true() {
-        val isOverflowing = iconContainer.isOverflowing(
+        val isOverflowing =
+            iconContainer.isOverflowing(
                 /* isLastChild= */ true,
                 /* translationX= */ 10f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
-        )
+            )
         assertTrue(isOverflowing)
     }
 
     @Test
     fun isOverflowing_lastChildXGreaterThanDotX_true() {
-        val isOverflowing = iconContainer.isOverflowing(
+        val isOverflowing =
+            iconContainer.isOverflowing(
                 /* isLastChild= */ true,
                 /* translationX= */ 9f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
-        )
+            )
         assertTrue(isOverflowing)
     }
 
     @Test
     fun isOverflowing_lastChildXGreaterThanLayoutEnd_true() {
-        val isOverflowing = iconContainer.isOverflowing(
+        val isOverflowing =
+            iconContainer.isOverflowing(
                 /* isLastChild= */ true,
                 /* translationX= */ 20f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
-        )
+            )
         assertTrue(isOverflowing)
     }
 
     @Test
     fun isOverflowing_notLastChildXLessThanDotX_false() {
-        val isOverflowing = iconContainer.isOverflowing(
+        val isOverflowing =
+            iconContainer.isOverflowing(
                 /* isLastChild= */ false,
                 /* translationX= */ 0f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
-        )
+            )
         assertFalse(isOverflowing)
     }
 
     @Test
     fun isOverflowing_notLastChildXGreaterThanDotX_true() {
-        val isOverflowing = iconContainer.isOverflowing(
+        val isOverflowing =
+            iconContainer.isOverflowing(
                 /* isLastChild= */ false,
                 /* translationX= */ 20f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
-        )
+            )
         assertTrue(isOverflowing)
     }
 
     @Test
     fun isOverflowing_notLastChildXEqualToDotX_true() {
-        val isOverflowing = iconContainer.isOverflowing(
+        val isOverflowing =
+            iconContainer.isOverflowing(
                 /* isLastChild= */ false,
                 /* translationX= */ 8f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
-        )
+            )
         assertTrue(isOverflowing)
     }
 

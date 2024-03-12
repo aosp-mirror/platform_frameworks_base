@@ -98,7 +98,7 @@ class ServiceWatcherImpl<TBoundServiceInfo extends BoundServiceInfo> implements 
         Preconditions.checkState(!mRegistered);
 
         mRegistered = true;
-        mPackageMonitor.register(mContext, UserHandle.ALL, /*externalStorage=*/ true, mHandler);
+        mPackageMonitor.register(mContext, UserHandle.ALL, mHandler);
         mServiceSupplier.register(this);
 
         onServiceChanged(false);

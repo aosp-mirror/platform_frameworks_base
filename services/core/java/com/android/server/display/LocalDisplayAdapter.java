@@ -19,9 +19,11 @@ package com.android.server.display;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
@@ -47,7 +49,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.mode.DisplayModeDirector;
+import com.android.server.display.notifications.DisplayNotificationManager;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 
@@ -70,7 +74,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private static final String UNIQUE_ID_PREFIX = "local:";
 
-    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
+    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
@@ -80,18 +84,25 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final boolean mIsBootDisplayModeSupported;
 
+    private final DisplayNotificationManager mDisplayNotificationManager;
+
     private Context mOverlayContext;
 
     // Called with SyncRoot lock held.
-    public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener) {
-        this(syncRoot, context, handler, listener, new Injector());
+    LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
+            Handler handler, Listener listener, DisplayManagerFlags flags,
+            DisplayNotificationManager displayNotificationManager) {
+        this(syncRoot, context, handler, listener, flags, displayNotificationManager,
+                new Injector());
     }
 
     @VisibleForTesting
-    LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener, Injector injector) {
-        super(syncRoot, context, handler, listener, TAG);
+    LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context, Handler handler,
+            Listener listener, DisplayManagerFlags flags,
+            DisplayNotificationManager displayNotificationManager,
+            Injector injector) {
+        super(syncRoot, context, handler, listener, TAG, flags);
+        mDisplayNotificationManager = displayNotificationManager;
         mInjector = injector;
         mSurfaceControlProxy = mInjector.getSurfaceControlProxy();
         mIsBootDisplayModeSupported = mSurfaceControlProxy.getBootDisplayModeSupport();
@@ -231,7 +242,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private SurfaceControl.DisplayMode mActiveSfDisplayMode;
         // The active display vsync period in SurfaceFlinger
         private float mActiveRenderFrameRate;
-
         private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                 new DisplayEventReceiver.FrameRateOverride[0];
 
@@ -305,10 +315,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     SurfaceControl.DisplayMode other = displayModes[j];
                     boolean isAlternative = j != i && other.width == mode.width
                             && other.height == mode.height
-                            && other.refreshRate != mode.refreshRate
+                            && other.peakRefreshRate != mode.peakRefreshRate
                             && other.group == mode.group;
                     if (isAlternative) {
-                        alternativeRefreshRates.add(displayModes[j].refreshRate);
+                        alternativeRefreshRates.add(displayModes[j].peakRefreshRate);
                     }
                 }
                 Collections.sort(alternativeRefreshRates);
@@ -497,7 +507,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             // Load display device config
             final Context context = getOverlayContext();
             mDisplayDeviceConfig = mInjector.createDisplayDeviceConfig(context, mPhysicalDisplayId,
-                    mIsFirstDisplay);
+                    mIsFirstDisplay, getFeatureFlags());
 
             // Load brightness HWC quirk
             mBacklightAdapter.setForceSurfaceControl(mDisplayDeviceConfig.hasQuirk(
@@ -641,6 +651,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.modeId = mActiveModeId;
                 mInfo.renderFrameRate = mActiveRenderFrameRate;
                 mInfo.defaultModeId = getPreferredModeId();
+                mInfo.userPreferredModeId = mUserPreferredModeId;
                 mInfo.supportedModes = getDisplayModes(mSupportedModes);
                 mInfo.colorMode = mActiveColorMode;
                 mInfo.allmSupported = mAllmSupported;
@@ -746,8 +757,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(final int state, final float brightnessState,
-                final float sdrBrightnessState) {
+        public Runnable requestDisplayStateLocked(
+                final int state,
+                final float brightnessState,
+                final float sdrBrightnessState,
+                @Nullable DisplayOffloadSessionImpl displayOffloadSession) {
+
             // Assume that the brightness is off if the display is being turned off.
             assert state != Display.STATE_OFF
                     || brightnessState == PowerManager.BRIGHTNESS_OFF_FLOAT;
@@ -813,18 +828,28 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     + ", state=" + Display.stateToString(state) + ")");
                         }
 
-                        // We must tell sidekick to stop controlling the display before we
-                        // can change its power mode, so do that first.
-                        if (mSidekickActive) {
-                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
-                                    "SidekickInternal#endDisplayControl");
-                            try {
-                                mSidekickInternal.endDisplayControl();
-                            } finally {
-                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        boolean isDisplayOffloadEnabled =
+                                getFeatureFlags().isDisplayOffloadEnabled();
+
+                        // We must tell sidekick/displayoffload to stop controlling the display
+                        // before we can change its power mode, so do that first.
+                        if (isDisplayOffloadEnabled) {
+                            if (displayOffloadSession != null) {
+                                displayOffloadSession.stopOffload();
                             }
-                            mSidekickActive = false;
+                        } else {
+                            if (mSidekickActive) {
+                                Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                        "SidekickInternal#endDisplayControl");
+                                try {
+                                    mSidekickInternal.endDisplayControl();
+                                } finally {
+                                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                                }
+                                mSidekickActive = false;
+                            }
                         }
+
                         final int mode = getPowerModeForState(state);
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayState("
                                 + "id=" + physicalDisplayId
@@ -836,16 +861,25 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
                         setCommittedState(state);
+
                         // If we're entering a suspended (but not OFF) power state and we
-                        // have a sidekick available, tell it now that it can take control.
-                        if (Display.isSuspendedState(state) && state != Display.STATE_OFF
-                                && mSidekickInternal != null && !mSidekickActive) {
-                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
-                                    "SidekickInternal#startDisplayControl");
-                            try {
-                                mSidekickActive = mSidekickInternal.startDisplayControl(state);
-                            } finally {
-                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        // have a sidekick/displayoffload available, tell it now that it can take
+                        // control.
+                        if (isDisplayOffloadEnabled) {
+                            if (DisplayOffloadSession.isSupportedOffloadState(state)
+                                    && displayOffloadSession != null) {
+                                displayOffloadSession.startOffload();
+                            }
+                        } else {
+                            if (Display.isSuspendedState(state) && state != Display.STATE_OFF
+                                    && mSidekickInternal != null && !mSidekickActive) {
+                                Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                        "SidekickInternal#startDisplayControl");
+                                try {
+                                    mSidekickActive = mSidekickInternal.startDisplayControl(state);
+                                } finally {
+                                    Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                                }
                             }
                         }
                     }
@@ -857,6 +891,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             updateDeviceInfoLocked();
                         }
                     }
+
 
                     private void setDisplayBrightness(float brightnessState,
                             float sdrBrightnessState) {
@@ -1303,7 +1338,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
         DisplayModeRecord(SurfaceControl.DisplayMode mode,
                 float[] alternativeRefreshRates) {
-            mMode = createMode(mode.width, mode.height, mode.refreshRate,
+            mMode = createMode(mode.width, mode.height, mode.peakRefreshRate, mode.vsyncRate,
                     alternativeRefreshRates, mode.supportedHdrTypes);
         }
 
@@ -1318,7 +1353,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return mMode.getPhysicalWidth() == mode.width
                     && mMode.getPhysicalHeight() == mode.height
                     && Float.floatToIntBits(mMode.getRefreshRate())
-                    == Float.floatToIntBits(mode.refreshRate);
+                            == Float.floatToIntBits(mode.peakRefreshRate)
+                    && Float.floatToIntBits(mMode.getVsyncRate())
+                            == Float.floatToIntBits(mode.vsyncRate);
         }
 
         public String toString() {
@@ -1338,13 +1375,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         public DisplayDeviceConfig createDisplayDeviceConfig(Context context,
-                long physicalDisplayId, boolean isFirstDisplay) {
-            return DisplayDeviceConfig.create(context, physicalDisplayId, isFirstDisplay);
+                long physicalDisplayId, boolean isFirstDisplay, DisplayManagerFlags flags) {
+            return DisplayDeviceConfig.create(context, physicalDisplayId, isFirstDisplay, flags);
         }
     }
 
     public interface DisplayEventListener {
         void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected);
+        void onHotplugConnectionError(long timestampNanos, int connectionError);
         void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId,
                 long renderPeriod);
         void onFrameRateOverridesChanged(long timestampNanos, long physicalDisplayId,
@@ -1364,6 +1402,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public void onHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
             mListener.onHotplug(timestampNanos, physicalDisplayId, connected);
+        }
+
+        @Override
+        public void onHotplugConnectionError(long timestampNanos, int errorCode) {
+            mListener.onHotplugConnectionError(timestampNanos, errorCode);
         }
 
         @Override
@@ -1389,6 +1432,17 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     tryDisconnectDisplayLocked(physicalDisplayId);
                 }
             }
+        }
+
+        @Override
+        public void onHotplugConnectionError(long timestampNanos, int connectionError) {
+            if (DEBUG) {
+                Slog.d(TAG, "onHotplugConnectionError("
+                        + "timestampNanos=" + timestampNanos
+                        + ", connectionError=" + connectionError + ")");
+            }
+
+            mDisplayNotificationManager.onHotplugConnectionError();
         }
 
         @Override

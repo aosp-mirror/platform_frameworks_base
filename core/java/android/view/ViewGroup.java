@@ -73,6 +73,7 @@ import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.translation.TranslationCapability;
 import android.view.translation.TranslationSpec.DataFormat;
 import android.view.translation.ViewTranslationRequest;
+import android.webkit.WebView;
 import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -3720,9 +3721,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return afm.shouldIncludeAllChildrenViewsWithAutofillTypeNotNoneInAssistStructure();
     }
 
-    private boolean shouldIncludeAllChildrenViews(AutofillManager afm){
+    private boolean shouldIncludeAllChildrenViews(AutofillManager afm) {
         if (afm == null) return false;
         return afm.shouldIncludeAllChildrenViewInAssistStructure();
+    }
+
+    private boolean shouldAlwaysIncludeWebview(AutofillManager afm) {
+        if (afm == null) return false;
+        return afm.shouldAlwaysIncludeWebviewInAssistStructure();
     }
 
     /** @hide */
@@ -3741,6 +3747,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     ? mChildren[childIndex] : preorderedList.get(childIndex);
             if ((flags & AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
                     || child.isImportantForAutofill()
+                    || (child instanceof WebView && shouldAlwaysIncludeWebview(afm))
                     || (child.isMatchingAutofillableHeuristics()
                         && !child.isActivityDeniedForAutofillForUnimportantView())
                     || (shouldIncludeAllChildrenViewWithAutofillTypeNotNone(afm)

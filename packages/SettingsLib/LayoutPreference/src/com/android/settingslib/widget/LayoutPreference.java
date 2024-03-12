@@ -102,16 +102,16 @@ public class LayoutPreference extends Preference {
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.Preference);
-        mAllowDividerAbove = TypedArrayUtils.getBoolean(a, R.styleable.Preference_allowDividerAbove,
-                R.styleable.Preference_allowDividerAbove, false);
-        mAllowDividerBelow = TypedArrayUtils.getBoolean(a, R.styleable.Preference_allowDividerBelow,
-                R.styleable.Preference_allowDividerBelow, false);
+        TypedArray a = context.obtainStyledAttributes(attrs, androidx.preference.R.styleable.Preference);
+        mAllowDividerAbove = TypedArrayUtils.getBoolean(a, androidx.preference.R.styleable.Preference_allowDividerAbove,
+                androidx.preference.R.styleable.Preference_allowDividerAbove, false);
+        mAllowDividerBelow = TypedArrayUtils.getBoolean(a, androidx.preference.R.styleable.Preference_allowDividerBelow,
+                androidx.preference.R.styleable.Preference_allowDividerBelow, false);
         a.recycle();
 
         a = context.obtainStyledAttributes(
-                attrs, R.styleable.Preference, defStyleAttr, 0);
-        int layoutResource = a.getResourceId(R.styleable.Preference_android_layout, 0);
+                attrs, androidx.preference.R.styleable.Preference, defStyleAttr, 0);
+        int layoutResource = a.getResourceId(androidx.preference.R.styleable.Preference_android_layout, 0);
         if (layoutResource == 0) {
             throw new IllegalArgumentException("LayoutPreference requires a layout to be defined");
         }
@@ -124,7 +124,7 @@ public class LayoutPreference extends Preference {
     }
 
     private void setView(View view) {
-        setLayoutResource(R.layout.layout_preference_frame);
+        setLayoutResource(com.android.settingslib.widget.preference.layout.R.layout.layout_preference_frame);
         mRootView = view;
         setShouldDisableView(false);
     }

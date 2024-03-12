@@ -55,15 +55,23 @@ public final class RoutingSessionInfo implements Parcelable {
     private static final String KEY_GROUP_ROUTE = "androidx.mediarouter.media.KEY_GROUP_ROUTE";
     private static final String KEY_VOLUME_HANDLING = "volumeHandling";
 
+    @NonNull
     final String mId;
+    @Nullable
     final CharSequence mName;
+    @Nullable
     final String mOwnerPackageName;
+    @NonNull
     final String mClientPackageName;
     @Nullable
     final String mProviderId;
+    @NonNull
     final List<String> mSelectedRoutes;
+    @NonNull
     final List<String> mSelectableRoutes;
+    @NonNull
     final List<String> mDeselectableRoutes;
+    @NonNull
     final List<String> mTransferableRoutes;
 
     final int mVolumeHandling;
@@ -100,8 +108,12 @@ public final class RoutingSessionInfo implements Parcelable {
 
         boolean volumeAdjustmentForRemoteGroupSessions = Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
-        mVolumeHandling = defineVolumeHandling(builder.mVolumeHandling, mSelectedRoutes,
-                volumeAdjustmentForRemoteGroupSessions);
+        mVolumeHandling =
+                defineVolumeHandling(
+                        mIsSystemSession,
+                        builder.mVolumeHandling,
+                        mSelectedRoutes,
+                        volumeAdjustmentForRemoteGroupSessions);
 
         mControlHints = updateVolumeHandlingInHints(builder.mControlHints, mVolumeHandling);
     }
@@ -130,7 +142,9 @@ public final class RoutingSessionInfo implements Parcelable {
         mIsSystemSession = src.readBoolean();
     }
 
-    private static Bundle updateVolumeHandlingInHints(Bundle controlHints, int volumeHandling) {
+    @Nullable
+    private static Bundle updateVolumeHandlingInHints(@Nullable Bundle controlHints,
+            int volumeHandling) {
         // Workaround to preserve retro-compatibility with androidx.
         // See b/228021646 for more details.
         if (controlHints != null && controlHints.containsKey(KEY_GROUP_ROUTE)) {
@@ -150,19 +164,26 @@ public final class RoutingSessionInfo implements Parcelable {
         return controlHints;
     }
 
-    private static int defineVolumeHandling(int volumeHandling, List<String> selectedRoutes,
+    private static int defineVolumeHandling(
+            boolean isSystemSession,
+            int volumeHandling,
+            List<String> selectedRoutes,
             boolean volumeAdjustmentForRemoteGroupSessions) {
-        if (!volumeAdjustmentForRemoteGroupSessions && selectedRoutes.size() > 1) {
+        if (!isSystemSession
+                && !volumeAdjustmentForRemoteGroupSessions
+                && selectedRoutes.size() > 1) {
             return MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
         }
         return volumeHandling;
     }
 
-    private static String ensureString(String str) {
+    @NonNull
+    private static String ensureString(@Nullable String str) {
         return str != null ? str : "";
     }
 
-    private static <T> List<T> ensureList(List<? extends T> list) {
+    @NonNull
+    private static <T> List<T> ensureList(@Nullable List<? extends T> list) {
         if (list != null) {
             return Collections.unmodifiableList(list);
         }
@@ -361,11 +382,15 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof RoutingSessionInfo)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
@@ -445,21 +470,30 @@ public final class RoutingSessionInfo implements Parcelable {
      * Builder class for {@link RoutingSessionInfo}.
      */
     public static final class Builder {
-        // TODO: Reorder these (important ones first)
-        final String mId;
-        CharSequence mName;
-        String mOwnerPackageName;
-        String mClientPackageName;
-        String mProviderId;
-        final List<String> mSelectedRoutes;
-        final List<String> mSelectableRoutes;
-        final List<String> mDeselectableRoutes;
-        final List<String> mTransferableRoutes;
-        int mVolumeHandling = MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
-        int mVolumeMax;
-        int mVolume;
-        Bundle mControlHints;
-        boolean mIsSystemSession;
+        @NonNull
+        private final String mId;
+        @Nullable
+        private CharSequence mName;
+        @Nullable
+        private String mOwnerPackageName;
+        @NonNull
+        private String mClientPackageName;
+        @Nullable
+        private String mProviderId;
+        @NonNull
+        private final List<String> mSelectedRoutes;
+        @NonNull
+        private final List<String> mSelectableRoutes;
+        @NonNull
+        private final List<String> mDeselectableRoutes;
+        @NonNull
+        private final List<String> mTransferableRoutes;
+        private int mVolumeHandling = MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+        private int mVolumeMax;
+        private int mVolume;
+        @Nullable
+        private Bundle mControlHints;
+        private boolean mIsSystemSession;
 
         /**
          * Constructor for builder to create {@link RoutingSessionInfo}.

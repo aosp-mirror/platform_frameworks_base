@@ -18,11 +18,13 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.os.Trace
+import android.transition.TransitionManager
 import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.launch
@@ -36,15 +38,34 @@ class KeyguardBlueprintViewBinder {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
                         viewModel.blueprint.collect { blueprint ->
-                            Trace.beginSection("KeyguardBlueprintController#applyBlueprint")
+                            val prevBluePrint = viewModel.currentBluePrint
+                            Trace.beginSection("KeyguardBlueprint#applyBlueprint")
                             Log.d(TAG, "applying blueprint: $blueprint")
-                            ConstraintSet().apply {
-                                clone(constraintLayout)
-                                val emptyLayout = ConstraintSet.Layout()
-                                knownIds.forEach { getConstraint(it).layout.copyFrom(emptyLayout) }
-                                blueprint?.apply(this)
-                                applyTo(constraintLayout)
+
+                            val cs =
+                                ConstraintSet().apply {
+                                    clone(constraintLayout)
+                                    val emptyLayout = ConstraintSet.Layout()
+                                    knownIds.forEach {
+                                        getConstraint(it).layout.copyFrom(emptyLayout)
+                                    }
+                                    blueprint.applyConstraints(this)
+                                }
+
+                            // Apply transition.
+                            if (prevBluePrint != null && prevBluePrint != blueprint) {
+                                TransitionManager.beginDelayedTransition(
+                                    constraintLayout,
+                                    BaseBlueprintTransition()
+                                )
                             }
+
+                            // Add and remove views of sections that are not contained by the
+                            // other.
+                            blueprint.replaceViews(prevBluePrint, constraintLayout)
+                            cs.applyTo(constraintLayout)
+
+                            viewModel.currentBluePrint = blueprint
                             Trace.endSection()
                         }
                     }

@@ -22,10 +22,11 @@ import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.LayerDrawable
 import android.view.View
 import android.service.controls.Control
+import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ThumbnailTemplate
 import android.util.TypedValue
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
 
@@ -68,7 +69,9 @@ class ThumbnailBehavior(currentUserId: Int) : Behavior {
     override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
         cvh.setStatusText(control.getStatusText())
-        template = control.getControlTemplate() as ThumbnailTemplate
+        template = control.controlTemplate as? ThumbnailTemplate
+                ?: (control.controlTemplate as TemperatureControlTemplate).template
+                        as ThumbnailTemplate
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         val clipLayer = ld.findDrawableByLayerId(R.id.clip_layer) as ClipDrawable

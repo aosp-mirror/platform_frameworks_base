@@ -47,7 +47,6 @@ import static org.mockito.Mockito.verify;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -65,9 +64,9 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalMatchers;
 
 import java.util.List;
 
@@ -84,14 +83,6 @@ public class WallpaperControllerTests extends WindowTestsBase {
     private static final int INITIAL_WIDTH = 600;
     private static final int INITIAL_HEIGHT = 900;
     private static final int SECOND_WIDTH = 300;
-
-    @Before
-    public void setup() {
-        Resources resources = mWm.mContext.getResources();
-        spyOn(resources);
-        doReturn(false).when(resources).getBoolean(
-                com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
-    }
 
     @Test
     public void testWallpaperScreenshot() {
@@ -125,10 +116,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testWallpaperSizeWithFixedTransform() {
         // No wallpaper
         final DisplayContent dc = mDisplayContent;
-        if (dc.mBaseDisplayHeight == dc.mBaseDisplayWidth) {
-            // Make sure the size is different when changing orientation.
-            resizeDisplay(dc, 500, 1000);
-        }
+        makeDisplayPortrait(dc);
 
         // No wallpaper WSA Surface
         final WindowState wallpaperWindow = createWallpaperWindow(dc);
@@ -190,16 +178,24 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         spyOn(dc.mWallpaperController);
         doReturn(true).when(dc.mWallpaperController).isWallpaperVisible();
-
+        dc.mWallpaperController.setMinWallpaperScale(.6f);
+        dc.mWallpaperController.setMaxWallpaperScale(1.2f);
         dc.mWallpaperController.adjustWallpaperWindows();
 
+        spyOn(wallpaperWindow);
         spyOn(wallpaperWindow.mClient);
 
         float zoom = .5f;
+        float zoomScale = .9f;
+        wallpaperWindow.mShouldScaleWallpaper = true;
+
         dc.mWallpaperController.setWallpaperZoomOut(homeWindow, zoom);
         assertEquals(zoom, wallpaperWindow.mWallpaperZoomOut, .01f);
-        verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
-                anyFloat(), eq(zoom), anyBoolean());
+        verify(wallpaperWindow.mClient)
+                .dispatchWallpaperOffsets(
+                        anyFloat(), anyFloat(), anyFloat(), anyFloat(), eq(zoom), anyBoolean());
+        verify(wallpaperWindow)
+                .setWallpaperOffset(anyInt(), anyInt(), AdditionalMatchers.eq(zoomScale, .01f));
     }
 
     @Test
@@ -213,9 +209,12 @@ public class WallpaperControllerTests extends WindowTestsBase {
 
         spyOn(dc.mWallpaperController);
         doReturn(true).when(dc.mWallpaperController).isWallpaperVisible();
+        dc.mWallpaperController.setMinWallpaperScale(.6f);
+        dc.mWallpaperController.setMaxWallpaperScale(1.2f);
 
         dc.mWallpaperController.adjustWallpaperWindows();
 
+        spyOn(wallpaperWindow);
         spyOn(wallpaperWindow.mClient);
 
         float newZoom = .5f;
@@ -227,6 +226,9 @@ public class WallpaperControllerTests extends WindowTestsBase {
         assertEquals(1f, wallpaperWindow.mWallpaperScale, .01f);
         verify(wallpaperWindow.mClient).dispatchWallpaperOffsets(anyFloat(), anyFloat(), anyFloat(),
                 anyFloat(), eq(newZoom), anyBoolean());
+        // As the expected scale is .9 with a zoom of .5f and min and max scale of .6 and 1.2,
+        // if it's passing a scale of 1 it's not scaling the wallpaper.
+        verify(wallpaperWindow).setWallpaperOffset(anyInt(), anyInt(), eq(1f));
     }
 
     @Test

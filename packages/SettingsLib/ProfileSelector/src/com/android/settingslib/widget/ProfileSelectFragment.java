@@ -27,6 +27,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.android.settingslib.widget.profileselector.R;
 
 /**
  * Base fragment class for profile settings.

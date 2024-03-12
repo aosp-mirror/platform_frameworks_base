@@ -83,7 +83,8 @@ import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegateImpl;
 import com.android.systemui.decor.ScreenDecorCommand;
 import com.android.systemui.log.ScreenDecorationsLogger;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
@@ -91,6 +92,8 @@ import com.android.systemui.statusbar.events.PrivacyDotViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.ThreadFactory;
 import com.android.systemui.util.settings.SecureSettings;
+
+import dalvik.annotation.optimization.NeverCompile;
 
 import kotlin.Pair;
 
@@ -162,7 +165,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
     ScreenDecorHwcLayer mScreenDecorHwcLayer;
     private WindowManager mWindowManager;
     private int mRotation;
-    private SettingObserver mColorInversionSetting;
+    private UserSettingObserver mColorInversionSetting;
     @Nullable
     private DelayableExecutor mExecutor;
     private Handler mHandler;
@@ -334,7 +337,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mThreadFactory = threadFactory;
         mDotFactory = dotFactory;
         mFaceScanningFactory = faceScanningFactory;
-        mFaceScanningViewId = com.android.systemui.R.id.face_scanning_anim;
+        mFaceScanningViewId = com.android.systemui.res.R.id.face_scanning_anim;
         mLogger = logger;
         mAuthController = authController;
     }
@@ -683,7 +686,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
 
             // Watch color inversion and invert the overlay as needed.
             if (mColorInversionSetting == null) {
-                mColorInversionSetting = new SettingObserver(mSecureSettings, mHandler,
+                mColorInversionSetting = new UserSettingObserver(mSecureSettings, mHandler,
                         Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
                         mUserTracker.getUserId()) {
                     @Override
@@ -1087,6 +1090,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         }
     }
 
+    @NeverCompile
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ScreenDecorations state:");
@@ -1195,7 +1199,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         if (faceScanningOverlay != null) {
             faceScanningOverlay.setFaceScanningAnimColor(
                     Utils.getColorAttrDefaultColor(faceScanningOverlay.getContext(),
-                            com.android.systemui.R.attr.wallpaperTextColorAccent));
+                            com.android.systemui.res.R.attr.wallpaperTextColorAccent));
         }
     }
 

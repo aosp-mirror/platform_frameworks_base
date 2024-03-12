@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public enum DataUnit {
     KILOBYTES { @Override public long toBytes(long v) { return v * 1_000; } },
     MEGABYTES { @Override public long toBytes(long v) { return v * 1_000_000; } },

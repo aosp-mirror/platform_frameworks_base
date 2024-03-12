@@ -16,29 +16,23 @@
 
 #include "Canvas.h"
 
+#include <SkFontMetrics.h>
+#include <SkRRect.h>
+
+#include "FeatureFlags.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
 #include "Properties.h"
 #include "RenderNode.h"
 #include "Typeface.h"
-#include "pipeline/skia/SkiaRecordingCanvas.h"
-
+#include "hwui/DrawTextFunctor.h"
 #include "hwui/PaintFilter.h"
-
-#include <SkFontMetrics.h>
-#include <SkRRect.h>
+#include "pipeline/skia/SkiaRecordingCanvas.h"
 
 namespace android {
 
 Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::RenderNode* renderNode) {
     return new uirenderer::skiapipeline::SkiaRecordingCanvas(renderNode, width, height);
-}
-
-static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
-                              const Paint& paint, Canvas* canvas) {
-    const SkScalar strokeWidth = fmax(thickness, 1.0f);
-    const SkScalar bottom = top + strokeWidth;
-    canvas->drawRect(left, top, right, bottom, paint);
 }
 
 void Canvas::drawTextDecorations(float x, float y, float length, const Paint& paint) {
@@ -72,73 +66,6 @@ void Canvas::drawTextDecorations(float x, float y, float length, const Paint& pa
     }
 }
 
-static void simplifyPaint(int color, Paint* paint) {
-    paint->setColor(color);
-    paint->setShader(nullptr);
-    paint->setColorFilter(nullptr);
-    paint->setLooper(nullptr);
-    paint->setStrokeWidth(4 + 0.04 * paint->getSkFont().getSize());
-    paint->setStrokeJoin(SkPaint::kRound_Join);
-    paint->setLooper(nullptr);
-}
-
-class DrawTextFunctor {
-public:
-    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const Paint& paint, float x,
-                    float y, float totalAdvance)
-            : layout(layout)
-            , canvas(canvas)
-            , paint(paint)
-            , x(x)
-            , y(y)
-            , totalAdvance(totalAdvance) {}
-
-    void operator()(size_t start, size_t end) {
-        auto glyphFunc = [&](uint16_t* text, float* positions) {
-            for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
-                text[textIndex++] = layout.getGlyphId(i);
-                positions[posIndex++] = x + layout.getX(i);
-                positions[posIndex++] = y + layout.getY(i);
-            }
-        };
-
-        size_t glyphCount = end - start;
-
-        if (CC_UNLIKELY(canvas->isHighContrastText() && paint.getAlpha() != 0)) {
-            // high contrast draw path
-            int color = paint.getColor();
-            int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
-            bool darken = channelSum < (128 * 3);
-
-            // outline
-            gDrawTextBlobMode = DrawTextBlobMode::HctOutline;
-            Paint outlinePaint(paint);
-            simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
-            outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
-            canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, totalAdvance);
-
-            // inner
-            gDrawTextBlobMode = DrawTextBlobMode::HctInner;
-            Paint innerPaint(paint);
-            simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
-            innerPaint.setStyle(SkPaint::kFill_Style);
-            canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, totalAdvance);
-            gDrawTextBlobMode = DrawTextBlobMode::Normal;
-        } else {
-            // standard draw path
-            canvas->drawGlyphs(glyphFunc, glyphCount, paint, x, y, totalAdvance);
-        }
-    }
-
-private:
-    const minikin::Layout& layout;
-    Canvas* canvas;
-    const Paint& paint;
-    float x;
-    float y;
-    float totalAdvance;
-};
-
 void Canvas::drawGlyphs(const minikin::Font& font, const int* glyphIds, const float* positions,
                         int glyphCount, const Paint& paint) {
     // Minikin modify skFont for auto-fakebold/auto-fakeitalic.
@@ -151,7 +78,7 @@ void Canvas::drawGlyphs(const minikin::Font& font, const int* glyphIds, const fl
         memcpy(outPositions, positions, sizeof(float) * 2 * glyphCount);
     };
 
-    const minikin::MinikinFont* minikinFont = font.typeface().get();
+    const minikin::MinikinFont* minikinFont = font.baseTypeface().get();
     SkFont* skfont = &copied.getSkFont();
     MinikinFontSkia::populateSkFont(skfont, minikinFont, minikin::FontFakery());
 
@@ -182,6 +109,31 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
 
     DrawTextFunctor f(layout, this, paint, x, y, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);
+
+    if (text_feature::fix_double_underline()) {
+        Paint copied(paint);
+        PaintFilter* filter = getPaintFilter();
+        if (filter != nullptr) {
+            filter->filterFullPaint(&copied);
+        }
+        const bool isUnderline = copied.isUnderline();
+        const bool isStrikeThru = copied.isStrikeThru();
+        if (isUnderline || isStrikeThru) {
+            const SkScalar left = x;
+            const SkScalar right = x + layout.getAdvance();
+            if (isUnderline) {
+                const SkScalar top = y + f.getUnderlinePosition();
+                drawStroke(left, right, top, f.getUnderlineThickness(), copied, this);
+            }
+            if (isStrikeThru) {
+                float textSize = paint.getSkFont().getSize();
+                const float position = textSize * Paint::kStdStrikeThru_Top;
+                const SkScalar thickness = textSize * Paint::kStdStrikeThru_Thickness;
+                const SkScalar top = y + position;
+                drawStroke(left, right, top, thickness, copied, this);
+            }
+        }
+    }
 }
 
 void Canvas::drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,

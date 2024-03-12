@@ -21,7 +21,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.text.TextUtils;
 
-import com.android.server.display.DisplayDeviceConfig;
+import com.android.server.display.config.SensorData;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class SensorUtils {
      */
     @Nullable
     public static Sensor findSensor(@Nullable SensorManager sensorManager,
-            @Nullable DisplayDeviceConfig.SensorData sensorData, int fallbackType) {
+            @Nullable SensorData sensorData, int fallbackType) {
         if (sensorData == null) {
             return null;
         } else {

@@ -34,7 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"မသိုဝှက်ရန်"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းဖြင့် အက်ပ်သည် အလုပ်မလုပ်ပါ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"အက်ပ်တွင် မျက်နှာပြင် ခွဲ၍ပြသခြင်းကို မပံ့ပိုးပါ"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ဤအက်ပ်ကို ဝင်းဒိုး ၁ ခုတွင်သာ ဖွင့်နိုင်သည်။"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ဤအက်ပ်ကို ဝင်းဒိုး ၁ ခုတွင်သာ ဖွင့်နိုင်သည်"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ဤအက်ပ်အနေဖြင့် ဒုတိယဖန်သားပြင်ပေါ်တွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ဤအက်ပ်အနေဖြင့် ဖွင့်ရန်စနစ်ကို ဒုတိယဖန်သားပြင်မှ အသုံးပြုရန် ပံ့ပိုးမထားပါ။"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"မျက်နှာပြင် ခွဲ၍ပြသခြင်း ပိုင်းခြားစနစ်"</string>
@@ -66,6 +66,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"ညာဘက်ထိပ်သို့ ရွှေ့ပါ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"ဘယ်အောက်ခြေသို့ ရွှေ့ရန်"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ညာအောက်ခြေသို့ ရွှေ့ပါ"</string>
+    <string name="bubble_accessibility_announce_expand" msgid="5388792092888203776">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ကို ချဲ့ရန်"</string>
+    <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"<xliff:g id="BUBBLE_TITLE">%1$s</xliff:g> ကို ချုံ့ရန်"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ဆက်တင်များ"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ပူဖောင်းကွက် ပယ်ရန်"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"စကားဝိုင်းကို ပူဖောင်းကွက် မပြုလုပ်ပါနှင့်"</string>
@@ -76,10 +78,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"နားလည်ပြီ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"လတ်တလော ပူဖောင်းကွက်များ မရှိပါ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"လတ်တလော ပူဖောင်းကွက်များနှင့် ပိတ်လိုက်သော ပူဖောင်းကွက်များကို ဤနေရာတွင် မြင်ရပါမည်"</string>
+    <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"ပူဖောင်းကွက်သုံး၍ ချတ်လုပ်ခြင်း"</string>
+    <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"စကားဝိုင်းအသစ်များကို သင့်ဖန်သားပြင် အောက်ခြေထောင့်တွင် သင်္ကေတများအဖြစ် မြင်ရပါမည်။ ၎င်းတို့ကို ဖြန့်ရန်တို့ပါ (သို့) ပယ်ရန်ဖိဆွဲပါ။"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ပူဖောင်းကွက်ကို အချိန်မရွေး ထိန်းချုပ်ရန်"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ပူဖောင်းကွက်သုံးနိုင်သည့် အက်ပ်နှင့် စကားဝိုင်းများ စီမံရန် ဤနေရာကို တို့ပါ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ပူဖောင်းဖောက်သံ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"စီမံရန်"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ပူဖောင်းကွက် ဖယ်လိုက်သည်။"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဤအက်ပ်ပြန်စရန် တို့နိုင်သည်။"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဤအက်ပ်ပြန်စရန် တို့ပါ"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ဆက်တင်များတွင် ဤအက်ပ်၏အချိုးအစားကို ပြောင်းရန်"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"အချိုးစား ပြောင်းရန်"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ကင်မရာပြဿနာလား။\nပြင်ဆင်ရန် တို့ပါ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ကောင်းမသွားဘူးလား။\nပြန်ပြောင်းရန် တို့ပါ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ကင်မရာပြဿနာ မရှိဘူးလား။ ပယ်ရန် တို့ပါ။"</string>

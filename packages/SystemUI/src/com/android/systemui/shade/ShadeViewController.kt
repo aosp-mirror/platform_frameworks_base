@@ -18,7 +18,7 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.power.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView
@@ -155,8 +155,8 @@ interface ShadeViewController {
     /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
     fun onBackPressed()
 
-    /** Sets whether the status bar launch animation is currently running. */
-    fun setIsLaunchAnimationRunning(running: Boolean)
+    /** Sets progress of the predictive back animation. */
+    fun onBackProgressed(progressFraction: Float)
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
     fun setAlpha(alpha: Int, animate: Boolean)
@@ -195,12 +195,6 @@ interface ShadeViewController {
     // ******* Begin Keyguard Section *********
     /** Animate to expanded shade after a delay in ms. Used for lockscreen to shade transition. */
     fun transitionToExpandedShade(delay: Long)
-
-    /**
-     * Returns whether the unlock hint animation is running. The unlock hint animation is when the
-     * user taps the lock screen, causing the contents of the lock screen visually bounce.
-     */
-    val isUnlockHintRunning: Boolean
 
     /** @see ViewGroupFadeHelper.reset */
     fun resetViewGroupFade()
@@ -242,11 +236,33 @@ interface ShadeViewController {
     )
     fun isFullyExpanded(): Boolean
 
-    /** Sends an external (e.g. Status Bar) touch event to the Shade touch handler. */
+    /**
+     * Sends an external (e.g. Status Bar) touch event to the Shade touch handler.
+     *
+     * This is different from [startInputFocusTransfer] as it doesn't rely on setting the launcher
+     * window slippery to allow the frameworks to route those events after passing the initial
+     * threshold.
+     */
     fun handleExternalTouch(event: MotionEvent): Boolean
 
-    /** Starts tracking a shade expansion gesture that originated from the status bar. */
-    fun startTrackingExpansionFromStatusBar()
+    /**
+     * Triggered when an input focus transfer gesture has started.
+     *
+     * Used to dispatch initial touch events before crossing the threshold to pull down the
+     * notification shade. After that, since the launcher window is set to slippery, input
+     * frameworks take care of routing the events to the notification shade.
+     */
+    fun startInputFocusTransfer()
+
+    /** Triggered when the input focus transfer was cancelled. */
+    fun cancelInputFocusTransfer()
+
+    /**
+     * Triggered when the input focus transfer has finished successfully.
+     *
+     * @param velocity unit is in px / millis
+     */
+    fun finishInputFocusTransfer(velocity: Float)
 
     /**
      * Performs haptic feedback from a view with a haptic feedback constant.
@@ -274,7 +290,7 @@ interface ShadeViewController {
          */
         @JvmStatic
         fun getFalsingThresholdFactor(wakefulness: WakefulnessModel): Float {
-            return if (wakefulness.isDeviceInteractiveFromTapOrGesture()) 1.5f else 1.0f
+            return if (wakefulness.isAwakeFromTapOrGesture()) 1.5f else 1.0f
         }
 
         const val WAKEUP_ANIMATION_DELAY_MS = 250

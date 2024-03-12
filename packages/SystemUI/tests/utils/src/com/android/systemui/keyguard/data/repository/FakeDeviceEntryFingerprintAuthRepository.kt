@@ -17,14 +17,20 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
-class FakeDeviceEntryFingerprintAuthRepository : DeviceEntryFingerprintAuthRepository {
+@SysUISingleton
+class FakeDeviceEntryFingerprintAuthRepository @Inject constructor() :
+    DeviceEntryFingerprintAuthRepository {
     private val _isLockedOut = MutableStateFlow(false)
     override val isLockedOut: StateFlow<Boolean> = _isLockedOut.asStateFlow()
     fun setLockedOut(lockedOut: Boolean) {
@@ -48,7 +54,20 @@ class FakeDeviceEntryFingerprintAuthRepository : DeviceEntryFingerprintAuthRepos
     private var _authenticationStatus = MutableStateFlow<FingerprintAuthenticationStatus?>(null)
     override val authenticationStatus: Flow<FingerprintAuthenticationStatus>
         get() = _authenticationStatus.filterNotNull()
+
+    private var _shouldUpdateIndicatorVisibility = MutableStateFlow(false)
+    override val shouldUpdateIndicatorVisibility: Flow<Boolean>
+        get() = _shouldUpdateIndicatorVisibility
+
     fun setAuthenticationStatus(status: FingerprintAuthenticationStatus) {
         _authenticationStatus.value = status
     }
+}
+
+@Module
+interface FakeDeviceEntryFingerprintAuthRepositoryModule {
+    @Binds
+    fun bindFake(
+        fake: FakeDeviceEntryFingerprintAuthRepository
+    ): DeviceEntryFingerprintAuthRepository
 }

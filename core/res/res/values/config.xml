@@ -194,6 +194,13 @@
          available on some devices. -->
     <bool name="config_enableHapticTextHandle">false</bool>
 
+    <!-- Enables or disables proximity service that approximates proximity with aiai attention
+         service. Off by default, since the service may not be available on some devices. -->
+    <bool name="config_enableProximityService">false</bool>
+
+    <!-- Enable or disable android.companion.virtual.VirtualDeviceManager. Enabled by default. -->
+    <bool name="config_enableVirtualDeviceManager">true</bool>
+
     <!-- Whether dialogs should close automatically when the user touches outside
          of them.  This should not normally be modified. -->
     <bool name="config_closeDialogWhenTouchOutside">true</bool>
@@ -535,6 +542,9 @@
     <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
+    <!-- If this is true, short press on power button will be available whenever the default display
+         is on even if the device is non-interactive (dreaming). -->
+    <bool name="config_supportShortPressPowerWhenDefaultDisplayOn">false</bool>
 
     <!-- If this is true, then keep dreaming when unplugging.
          This config was formerly known as config_keepDreamingWhenUndocking.
@@ -683,6 +693,16 @@
         -->
     </integer-array>
 
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as concurrent
+    display state. Default is empty. -->
+    <integer-array name="config_concurrentDisplayDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
     <!-- Indicates whether the window manager reacts to half-fold device states by overriding
      rotation. -->
     <bool name="config_windowManagerHalfFoldAutoRotateOverride">false</bool>
@@ -821,6 +841,13 @@
          This configuration will only apply when config_remoteInsetsControllerControlsSystemBars.
          is set to true. -->
     <bool name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction">false</bool>
+
+    <!-- To change the default behavior of how the insets get involved when calculating
+         configuration. This will no longer consider status bar and display cutout, and only
+         exclude navigation bars from the screen sizes. This is useful when the display is close to
+         square and the system bars may cause the orientation with non-preferred value.
+         -->
+    <bool name="config_decoupleStatusBarAndDisplayCutoutFromScreenSize">false</bool>
 
     <!-- HDMI behavior -->
 
@@ -1016,6 +1043,12 @@
     <!-- Duration, in milliseconds, of the display white balance animated transitions. -->
     <integer name="config_displayWhiteBalanceTransitionTime">3000</integer>
 
+    <!-- Duration, in milliseconds, of the display white balance animated transitions when increasing cct. -->
+    <integer name="config_displayWhiteBalanceTransitionTimeIncrease">1000</integer>
+
+    <!-- Duration, in milliseconds, of the display white balance animated transitions when decreasing cct. -->
+    <integer name="config_displayWhiteBalanceTransitionTimeDecrease">40000</integer>
+
     <!-- Device states where the sensor based rotation values should be reversed around the Z axis
          for the default display.
          TODO(b/265312193): Remove this workaround when this bug is fixed.-->
@@ -1141,6 +1174,14 @@
     <!-- Allows activities to be launched on a long press on power during device setup. -->
     <bool name="config_allowStartActivityForLongPressOnPowerInSetup">false</bool>
 
+    <!-- Control the behavior when the user short presses the settings button.
+            0 - Nothing
+            1 - Launch notification panel
+         This needs to match the constants in
+         com/android/server/policy/PhoneWindowManager.java
+    -->
+    <integer name="config_shortPressOnSettingsBehavior">0</integer>
+
     <!-- Control the behavior when the user short presses the power button.
             0 - Nothing
             1 - Go to sleep (doze)
@@ -1178,6 +1219,9 @@
     -->
     <integer name="config_shortPressOnSleepBehavior">0</integer>
 
+    <!-- Whether to silence telephony ringer on sleep key event -->
+    <bool name="config_silenceRingerOnSleepKey">false</bool>
+
     <!-- Control the behavior when the user long presses the stem primary button.
          Stem primary button is only used on watch form factor. If a device is not
          a watch, setting this config is no-op.
@@ -1203,13 +1247,36 @@
     <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the stem primary button.
-         Stem primary button is only used on watch form factor. If a device is not
-         a watch, setting this config is no-op.
-            0 - Nothing
-            1 - Go to launch all apps
+        Stem primary button is only used on watch form factor. If a device is not
+        a watch, setting this config is no-op.
+           0 - Nothing
+           1 - Go to launch all apps
+           2 - Launch target activity defined by config_primaryShortPressTargetActivity if available
     -->
     <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
 
+   <!-- Activity name for the default target activity to be launched. [DO NOT TRANSLATE] -->
+   <string name="config_primaryShortPressTargetActivity" translatable="false"></string>
+
+    <!-- Whether a single short press on POWER should be launched without multi-press delay.
+        When this value is set to true, POWER button's single short press behavior will execute
+        immediately upon key-up regardless of whether this press will be part of a multi-press
+        gesture in the future(therefore, not waiting for a multi-press detecting delay).
+
+       For Example, let's say a power button single press launches the app menu and power button
+       double press launches the camera. By configuring this variable to true, user will observe 2
+       things in order upon a double press:
+          1. App menu pops up immediately upon the first key up.
+          2. Camera starts as the double press behavior.
+
+        Note that this config has no effect on long press behavior.
+    -->
+    <bool name="config_shortPressEarlyOnPower">false</bool>
+
+    <!-- Whether a single short press on STEM_PRIMARY should be launched without multi-press delay.
+        This works similarly as config_shortPressEarlyOnPower but for STEM_PRIMARY.
+    -->
+    <bool name="config_shortPressEarlyOnStemPrimary">false</bool>
 
     <!-- Control the behavior of the search key.
             0 - Launch default search activity
@@ -1336,6 +1403,9 @@
 
     <!-- Shutdown if the battery temperature exceeds (this value * 0.1) Celsius. -->
     <integer name="config_shutdownBatteryTemperature">680</integer>
+
+    <!-- Shutdown if battery is critically low and the device is not powered. -->
+    <bool name="config_shutdownIfNoPower">true</bool>
 
     <!-- Display low battery warning when battery level dips to this value -->
     <integer name="config_lowBatteryWarningLevel">20</integer>
@@ -1464,6 +1534,10 @@
     <!-- Note: This setting is deprecated, please use
     config_screenBrightnessSettingDefaultFloat instead -->
     <integer name="config_screenBrightnessSettingDefault">102</integer>
+
+    <!-- Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
+    The value must be in the range [0, 255]. -->
+    <integer name="config_screenBrightnessCapForWearBedtimeMode">20</integer>
 
     <!-- Minimum screen brightness setting allowed by power manager.
          -2 is invalid so setting will resort to int value specified above.
@@ -1808,9 +1882,6 @@
     <array name="config_screenThresholdLevels">
     </array>
 
-    <!-- Allow normal brightness controller feature. -->
-    <bool name="config_allowNormalBrightnessControllerFeature">false</bool>
-
     <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than
          config_screenThresholdLevels. The brightening threshold is calculated as
@@ -1903,6 +1974,11 @@
         <item>network</item>
         <item>telephony</item>
     </string-array>
+
+    <!-- The difference in millis that has to exist between a time suggestion under
+         consideration by the time_detector and the system clock before the system clock will be
+         changed. -->
+    <integer name="config_timeDetectorAutoUpdateDiffMillis">2000</integer>
 
     <!-- Enables the GnssTimeUpdate service. This is the global switch for enabling Gnss time based
          suggestions to TimeDetector service. See also config_autoTimeSourcesPriority. -->
@@ -2166,7 +2242,10 @@
     <bool name="config_single_volume">false</bool>
 
     <!-- Volume policy -->
+    <!-- Strongly consider keeping these 2 values in sync - otherwise vol up/vol down have confusing
+    asymmetric behavior, as in b/279645379 -->
     <bool name="config_volume_down_to_enter_silent">false</bool>
+    <bool name="config_volume_up_to_exit_silent">false</bool>
 
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
@@ -2179,6 +2258,9 @@
 
     <!-- The default volume for the ring stream -->
     <integer name="config_audio_ring_vol_default">5</integer>
+
+    <!-- The default min volume for the alarm stream -->
+    <integer name="config_audio_alarm_min_vol">1</integer>
 
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
@@ -2311,6 +2393,8 @@
     <string name="config_systemFinancedDeviceController" translatable="false">com.android.devicelockcontroller</string>
     <!-- The name of the package that will hold the call streaming role. -->
     <string name="config_systemCallStreaming" translatable="false"></string>
+    <!-- The name of the package that will hold the default retail demo role. -->
+    <string name="config_defaultRetailDemo" translatable="false"></string>
 
     <!-- The component name of the wear service class that will be started by the system server. -->
     <string name="config_wearServiceComponent" translatable="false"></string>
@@ -2655,6 +2739,12 @@
          turned off and the screen off animation has been performed. -->
     <bool name="config_dozeAfterScreenOffByDefault">false</bool>
 
+    <!-- If true, bright policy will be applied when we have entered dozing wakefulness but haven't
+         started doze component. This can be used to suppress the temporary dim state before
+         starting a dream service. This is typically used together with
+         config_maximumScreenDimDuration set to 0 to completely suppress dim effect. -->
+    <bool name="config_brightWhenDozing">false</bool>
+
     <!-- Doze: should the TYPE_PICK_UP_GESTURE sensor be used as a pulse signal. -->
     <bool name="config_dozePulsePickup">false</bool>
 
@@ -2825,6 +2915,11 @@
          measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
     <dimen name="config_viewMaxRotaryEncoderFlingVelocity">-1dp</dimen>
 
+    <!-- Tick intervals in dp for rotary encoder scrolls on {@link MotionEvent#AXIS_SCROLL}
+         generated by {@link InputDevice#SOURCE_ROTARY_ENCODER} devices. A valid tick interval value
+         is a positive value. Setting this to 0dp disables scroll tick. -->
+    <dimen name="config_rotaryEncoderAxisScrollTickInterval">21dp</dimen>
+
     <!-- Amount of time in ms the user needs to press the relevant key to bring up the
          global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
@@ -2932,6 +3027,10 @@
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
      with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
+
+    <!-- Whether there is a communal profile which should always be running.
+         Only relevant for Headless System User Mode (HSUM) devices. -->
+    <bool name="config_omnipresentCommunalUser">false</bool>
 
     <!-- Whether the new Auto Selection Network UI should be shown -->
     <bool name="config_enableNewAutoSelectNetworkUI">false</bool>
@@ -3201,8 +3300,9 @@
 
     <!-- Component name of the activity used to ask a user to confirm system language change after
          receiving <Set Menu Language> CEC message. -->
-    <string name="config_hdmiCecSetMenuLanguageActivity"
-            >com.android.systemui/com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity</string>
+    <string name="config_hdmiCecSetMenuLanguageActivity">
+        com.android.systemui/com.android.systemui.tv.hdmi.HdmiCecSetMenuLanguageActivity
+    </string>
 
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"
@@ -3474,7 +3574,7 @@
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
 
-    <!-- default value for whether circular emulators (ro.emulator.circular)
+    <!-- default value for whether circular emulators (ro.boot.emulator.circular)
          should show a display overlay on the screen -->
     <bool name="config_windowEnableCircularEmulatorDisplayOverlay">false</bool>
 
@@ -3928,8 +4028,14 @@
     <!-- Flag indicating device support for EAP SIM, AKA, AKA' -->
     <bool name="config_eap_sim_based_auth_supported">true</bool>
 
+    <!-- How long history of recent vibrations should be kept for the dumpsys. -->
+    <integer name="config_recentVibrationsDumpSizeLimit">20</integer>
+
     <!-- How long history of previous vibrations should be kept for the dumpsys. -->
-    <integer name="config_previousVibrationsDumpLimit">50</integer>
+    <integer name="config_previousVibrationsDumpSizeLimit">50</integer>
+
+    <!-- How close vibration request should be when they're aggregated for dumpsys, in ms. -->
+    <integer name="config_previousVibrationsDumpAggregationTimeMillisLimit">1000</integer>
 
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>
@@ -3937,6 +4043,13 @@
     <!-- The max vibration strength allowed in audio haptic channels, must be positive or zero if
          limit is unknown. -->
     <item name="config_hapticChannelMaxVibrationAmplitude" format="float" type="dimen">0</item>
+
+    <!-- The fixed keyboard vibration strength in [0,1], or -1 to indicate the strength not fixed
+         and should depend on the touch feedback intensity user setting -->
+    <item name="config_keyboardHapticFeedbackFixedAmplitude" format="float" type="dimen">-1</item>
+
+    <!-- The default value for keyboard vibration toggle in settings. -->
+    <bool name="config_defaultKeyboardVibrationEnabled">true</bool>
 
     <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
      (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
@@ -3949,6 +4062,10 @@
     <!-- The duration (in milliseconds) that should be applied to waveform vibrations that ends in
          non-zero amplitudes, to bring the vibrator amplitude down to zero using this timing. -->
     <integer name="config_vibrationWaveformRampDownDuration">0</integer>
+
+    <!-- Ignores vibrations when the device is on a wireless charger.
+         A vibrating device may move out of alignment with the charging pad. -->
+    <bool name="config_ignoreVibrationsOnWirelessCharger">false</bool>
 
     <!-- Number of retries Cell Data should attempt for a given error code before
          restarting the modem.
@@ -4098,6 +4215,10 @@
     <!-- Inactivity threshold (in milliseconds) used in JobScheduler. JobScheduler will consider
          the device to be "idle" after being inactive for this long. -->
     <integer name="config_jobSchedulerInactivityIdleThreshold">1860000</integer>
+    <!-- Inactivity threshold (in milliseconds) used in JobScheduler. JobScheduler will consider
+         the device to be "idle" after being inactive for this long if the device is on stable
+         power. Stable power is defined as "charging + battery not low". -->
+    <integer name="config_jobSchedulerInactivityIdleThresholdOnStablePower">1860000</integer>
     <!-- The alarm window (in milliseconds) that JobScheduler uses to enter the idle state -->
     <integer name="config_jobSchedulerIdleWindowSlop">300000</integer>
 
@@ -4129,6 +4250,10 @@
          handle wallpaper cropping.
     -->
     <string name="config_wallpaperCropperPackage" translatable="false">com.android.wallpapercropper</string>
+
+    <!-- Wallpaper will get top app scheduling priority if this is set to true.
+    -->
+    <bool name="config_wallpaperTopApp">false</bool>
 
     <!-- True if the device supports at least one form of multi-window.
          E.g. freeform, split-screen, picture-in-picture. -->
@@ -4231,6 +4356,9 @@
     <!-- True if assistant app should be pinned via Pinner Service -->
     <bool name="config_pinnerAssistantApp">false</bool>
 
+    <!-- Bytes that the PinnerService will pin for WebView -->
+    <integer name="config_pinnerWebviewPinBytes">0</integer>
+
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
     <integer name="config_keepPreloadsMinDays">7</integer>
@@ -4263,6 +4391,9 @@
     <!-- Colon separated list of package names that should be granted DND access -->
     <string name="config_defaultDndAccessPackages" translatable="false">com.android.camera2</string>
 
+    <!-- Colon separated list of package names that should be removed from DND access packages -->
+    <string name="config_defaultDndDeniedPackages" translatable="false"></string>
+
     <!-- User restrictions set on the SYSTEM user when it is first created.
          Note: Also update appropriate overlay files. -->
     <string-array translatable="false" name="config_defaultFirstUserRestrictions">
@@ -4285,6 +4416,15 @@
     <!-- Flag specifying whether user-switch operations have custom UI. When false, user-switch
          UI is handled by ActivityManagerService -->
     <bool name="config_customUserSwitchUi">false</bool>
+
+    <!-- Flag specifying whether the first account added can be removed or renamed. By default,
+    this ability is enabled. When false, user will not be able to remove the first account. -->
+    <bool name="config_canRemoveFirstAccount">true</bool>
+
+    <!-- Used together with config_canRemoveOrRenameFirstAccount when set to false. By default, this
+    is blank. Check if the first account is of this account type. If it is, then disable
+    remove/rename. -->
+    <string name="config_accountTypeToKeepFirstAccount"></string>
 
     <!-- A array of regex to treat a SMS as VVM SMS if the message body matches.
          Each item represents an entry, which consists of two parts:
@@ -4389,12 +4529,12 @@
          Example: "com.android.companiondevicemanager"
          See android.companion.CompanionDeviceManager.
     -->
-    <string name="config_companionDeviceManagerPackage" translatable="false"></string>
+    <string name="config_companionDeviceManagerPackage" translatable="false">com.android.companiondevicemanager</string>
 
     <!-- A list of packages managing companion device(s) by the same manufacturers as the main
          device. It will fall back to showing a prompt if the association has been called multiple
          times in a short period.
-         Note that config_companionDeviceManagerPackage and config_companionDeviceCerts are
+         Note that config_companionDevicePackages and config_companionDeviceCerts are
          parallel arrays.
      -->
     <string-array name="config_companionDevicePackages" translatable="false"></string-array>
@@ -4402,7 +4542,7 @@
     <!-- A list of SHA256 Certificates managing companion device(s) by the same manufacturers as
          the main device. It will fall back to showing a prompt if the association has been called
          multiple times in a short period.
-         Note that config_companionDeviceCerts and config_companionDeviceManagerPackage are parallel
+         Note that config_companionDeviceCerts and config_companionDevicePackages are parallel
          arrays.
          Example: "1A:2B:3C:4D"
      -->
@@ -4788,7 +4928,7 @@
     <string translatable="false" name="config_deviceSpecificInputMethodManagerService"></string>
 
     <!-- Component name of media projection permission dialog -->
-    <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
+    <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.mediaprojection.permission.MediaProjectionPermissionActivity</string>
 
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">28dp</dimen>
@@ -4812,8 +4952,6 @@
 
     <!-- Size of icon shown beside a preference locked by admin -->
     <dimen name="config_restrictedIconSize">@dimen/restricted_icon_size_material</dimen>
-
-    <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 
     <!-- Component name that should be granted Notification Assistant access -->
     <string name="config_defaultAssistantAccessComponent" translatable="false">android.ext.services/android.ext.services.notification.Assistant</string>
@@ -4844,12 +4982,6 @@
     <!-- Default value set for battery percentage in status bar false = disabled, true = enabled -->
     <bool name="config_defaultBatteryPercentageSetting">false</bool>
 
-    <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
-    <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
-
-    <!-- Config flag to track default disable threshold for Dynamic power savings enabled battery saver. -->
-    <integer name="config_dynamicPowerSavingsDefaultDisableThreshold">80</integer>
-
     <!-- Model of potentially misprovisioned devices. If none is specified in an overlay, an
          empty string is passed in. -->
     <string name="config_misprovisionedDeviceModel" translatable="false"></string>
@@ -4876,6 +5008,11 @@
 
     <!-- Component name for the default module metadata provider on this device -->
     <string name="config_defaultModuleMetadataProvider" translatable="false">com.android.modulemetadata</string>
+
+    <!-- Packages that contain a security state.
+         {@link SecurityStateManager#getGlobalSecurityState} will read and report the state/version
+          of these packages. -->
+    <string-array name="config_securityStatePackages" translatable="false" />
 
     <!-- Package name for the default Health Connect app.
          OEMs can set this with their own health app package name to define a default app with high
@@ -5020,6 +5157,21 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         A float array containing a list of ambient brightnesses, in Lux. This array,
+         together with config_displayWhiteBalanceLowLightAmbientBiasesStrong, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient brightness readings to a bias, where the bias is used to linearly interpolate
+         between ambient color temperature and
+         config_displayWhiteBalanceLowLightAmbientColorTemperatureIdle.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceLowLightAmbientBiasesStrong. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBrightnessesStrong">
+        <item>10.0</item>
+        <item>10.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          An array containing a list of biases. See
          config_displayWhiteBalanceLowLightAmbientBrightnesses for additional details.
          This array must be in the range of [0.0, 1.0]. -->
@@ -5029,10 +5181,26 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         An array containing a list of biases. See
+         config_displayWhiteBalanceLowLightAmbientBrightnessesStrong for additional details.
+         This array must be in the range of [0.0, 1.0]. -->
+    <array name ="config_displayWhiteBalanceLowLightAmbientBiasesStrong">
+        <item>0.0</item>
+        <item>1.0</item>
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          The ambient color temperature (in cct) to which we interpolate towards using the
          the look up table generated by config_displayWhiteBalanceLowLightAmbientBrightnesses
          and config_displayWhiteBalanceLowLightAmbientBiases. -->
     <item name="config_displayWhiteBalanceLowLightAmbientColorTemperature" format="float" type="dimen">6500.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we interpolate towards using the
+         the look up table generated by config_displayWhiteBalanceLowLightAmbientBrightnessesStrong
+         and config_displayWhiteBalanceLowLightAmbientBiasesStrong. Used when device is in Idle Screen
+         Brightness mode. -->
+    <item name="config_displayWhiteBalanceLowLightAmbientColorTemperatureStrong" format="float" type="dimen">6500.0</item>
 
     <!-- See DisplayWhiteBalanceController.
          A float array containing a list of ambient brightnesses, in Lux. This array,
@@ -5048,6 +5216,19 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         A float array containing a list of ambient brightnesses, in Lux. This array,
+         together with config_displayWhiteBalanceHighLightAmbientBiasesStrong, is used to generate a
+         lookup table used in DisplayWhiteBalanceController. This lookup table is used to map
+         ambient brightness readings to a bias, where the bias is used to linearly interpolate
+         between ambient color temperature and
+         config_displayWhiteBalanceHighLightAmbientColorTemperatureStrong.
+         This table is optional. If used, this array must,
+         1) Contain at least two entries
+         2) Be the same length as config_displayWhiteBalanceHighLightAmbientBiasesStrong. -->
+    <array name ="config_displayWhiteBalanceHighLightAmbientBrightnessesStrong">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          An array containing a list of biases. See
          config_displayWhiteBalanceHighLightAmbientBrightnesses for additional details.
          This array must be in the range of [0.0, 1.0]. -->
@@ -5055,10 +5236,24 @@
     </array>
 
     <!-- See DisplayWhiteBalanceController.
+         An array containing a list of biases. See
+         config_displayWhiteBalanceHighLightAmbientBrightnessesStrong for additional details.
+         This array must be in the range of [0.0, 1.0]. -->
+    <array name ="config_displayWhiteBalanceHighLightAmbientBiasesStrong">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
          The ambient color temperature (in cct) to which we interpolate towards using the
          the look up table generated by config_displayWhiteBalanceHighLightAmbientBrightnesses
          and config_displayWhiteBalanceHighLightAmbientBiases. -->
     <item name="config_displayWhiteBalanceHighLightAmbientColorTemperature" format="float" type="dimen">8000.0</item>
+
+    <!-- See DisplayWhiteBalanceController.
+         The ambient color temperature (in cct) to which we interpolate towards using the
+         the look up table generated by config_displayWhiteBalanceHighLightAmbientBrightnessesStrong
+         and config_displayWhiteBalanceHighLightAmbientBiasesStrong. Used when device is in Idle
+         Screen Brightness mode. -->
+    <item name="config_displayWhiteBalanceHighLightAmbientColorTemperatureStrong" format="float" type="dimen">8000.0</item>
 
     <!-- See DisplayWhiteBalanceController.
          A float array containing a list of ambient color temperatures, in Kelvin. This array,
@@ -5134,6 +5329,28 @@
          rates are available from hardware composer. Only has an effect if the value is
          non-zero. -->
     <integer name="config_defaultPeakRefreshRate">0</integer>
+
+    <!-- External display peak refresh rate for the given device. Change this value if you want to
+         prevent the framework from using higher refresh rates, even if display modes with higher
+         refresh rates are available from hardware composer. Only has an effect if this value and
+         config_externalDisplayPeakWidth and config_externalDisplayPeakHeight are non-zero. -->
+    <integer name="config_externalDisplayPeakRefreshRate">0</integer>
+
+    <!-- External display peak width for the given device. Change this value if you want
+         to prevent the framework from using higher resolution, even if display modes with higher
+         resolutions are available from hardware composer. Only has an effect if this value and
+         config_externalDisplayPeakRefreshRate and config_externalDisplayPeakHeight are non-zero.-->
+    <integer name="config_externalDisplayPeakWidth">0</integer>
+
+    <!-- External display peak height for the given device. Change this value if you want
+         to prevent the framework from using higher resolution, even if display modes with higher
+         resolutions are available from hardware composer. Only has an effect if this value and
+         config_externalDisplayPeakRefreshRate and config_externalDisplayPeakWidth are non-zero. -->
+    <integer name="config_externalDisplayPeakHeight">0</integer>
+
+    <!-- Enable synchronization of the displays refresh rates by applying the default low refresh
+         rate. -->
+    <bool name="config_refreshRateSynchronizationEnabled">false</bool>
 
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
          vendors to tune the curves to have exact same brightness for different refresh rate. So
@@ -5276,6 +5493,7 @@
         <item>1,1,1.0,.15,15</item>
         <item>0,0,0.7,0,1</item>
         <item>0,0,0.83333,0,1</item>
+        <item>0,0,1.1667,0,1</item>
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
@@ -5405,6 +5623,14 @@
 
     <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
     <string-array name="config_forceSlowJpegModeList" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
+
+    <!-- Enable pause wallpaper rendering upon state change such as app launch -->
+    <bool name="config_pauseWallpaperRenderWhenStateChangeEnabled">false</bool>
+
+    <!-- The list of packages to pause wallpaper rendering upon state change such as app launch -->
+    <string-array name="pause_wallpaper_render_when_state_change" translatable="false">
         <!-- Add packages here -->
     </string-array>
 
@@ -5567,10 +5793,6 @@
     <bool name="config_pdp_reject_enable_retry">false</bool>
     <!-- pdp data reject retry delay in ms -->
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
-
-    <!-- Duration in milliseconds for device to vibrate on mash press on power
-         button. -->
-    <integer name="config_mashPressVibrateTimeOnPowerButton">0</integer>
 
     <!-- Whether or not to enable the binder heavy hitter watcher by default -->
     <bool name="config_defaultBinderHeavyHitterWatcherEnabled">false</bool>
@@ -5873,9 +6095,9 @@
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">false</bool>
     <bool name="config_cecPowerControlModeTvAndAudioSystem_allowed">true</bool>
-    <bool name="config_cecPowerControlModeTvAndAudioSystem_default">true</bool>
+    <bool name="config_cecPowerControlModeTvAndAudioSystem_default">false</bool>
     <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>
-    <bool name="config_cecPowerControlModeBroadcast_default">false</bool>
+    <bool name="config_cecPowerControlModeBroadcast_default">true</bool>
     <bool name="config_cecPowerControlModeNone_allowed">true</bool>
     <bool name="config_cecPowerControlModeNone_default">false</bool>
 
@@ -6104,9 +6326,6 @@
     <bool name="config_launchCameraOnCameraLensCoverToggle">true</bool>
     <!-- Whether changing sensor privacy SW setting requires device to be unlocked -->
     <bool name="config_sensorPrivacyRequiresAuthentication">true</bool>
-
-    <!-- List containing the allowed install sources for accessibility service. -->
-    <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
 
     <!-- Default value for Settings.ASSIST_LONG_PRESS_HOME_ENABLED -->
     <bool name="config_assistLongPressHomeEnabledDefault">true</bool>
@@ -6575,11 +6794,6 @@
     <!-- Whether to show weather on the lock screen by default. -->
     <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 
-    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
-    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
-    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
-    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
-
     <!-- Whether we should persist the brightness value in nits for the default display even if
          the underlying display device changes. -->
     <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
@@ -6590,18 +6804,59 @@
          device. -->
     <bool name="config_enableAppCloningBuildingBlocks">true</bool>
 
-    <!-- Whether the variable refresh rate when typing feature is enabled for the device. -->
-    <bool name="config_variableRefreshRateTypingSupported">false</bool>
-
     <!-- Enables or disables support for repair mode. The feature creates a secure
          environment to protect the user's privacy when the device is being repaired.
          Off by default, since OEMs may have had a similar feature on their devices. -->
     <bool name="config_repairModeSupported">false</bool>
 
-    <!-- Whether unlocking and waking a device are sequenced -->
-    <bool name="config_orderUnlockAndWake">false</bool>
+    <!-- The file path in which the default shutdown vibration effect should be serialized. If the
+         device does not specify any such file path here, if the file path specified here does not
+         exist, or if the contents of the file does not make up a valid VibrationEffect
+         serialization, a default vibration will be used.
+         Note that, indefinitely repeating vibrations are not allowed as shutdown vibrations. -->
+    <string name="config_defaultShutdownVibrationFile" />
+
+    <!-- Whether single finger panning is enabled when magnification is on -->
+    <bool name="config_enable_a11y_magnification_single_panning">false</bool>
+
+    <!-- The file path in which custom vibrations are provided for haptic feedbacks.
+         If the device does not specify any such file path here, if the file path specified here
+         does not exist, or if the contents of the file does not make up a valid customization
+         serialization, the system default vibrations for haptic feedback will be used.
+         If the content of the customization file is valid, the system will use the provided
+         vibrations for the customized haptic feedback IDs, and continue to use the system defaults
+         for the non-customized ones. -->
+    <string name="config_hapticFeedbackCustomizationFile" />
 
     <!-- Enables or disables the "Share" action item shown in the context menu that appears upon
         long-pressing on selected text. Enabled by default. -->
     <bool name="config_textShareSupported">true</bool>
+
+    <!-- Whether or not ActivityManager PSS profiling is disabled. -->
+    <bool name="config_am_disablePssProfiling">false</bool>
+
+    <!-- The modifier used to adjust AM's PSS threshold for downgrading services to service B if
+         RSS is being collected instead. -->
+    <item name="config_am_pssToRssThresholdModifier" format="float" type="dimen">1.5</item>
+
+    <!-- Whether unlocking and waking a device are sequenced -->
+    <bool name="config_orderUnlockAndWake">false</bool>
+
+    <!-- Floating windows can be fullscreen (i.e. windowIsFloating can still have fullscreen
+     window that does not wrap content). -->
+    <bool name="config_allowFloatingWindowsFillScreen">false</bool>
+
+    <!-- Whether to enable left-right split in portrait on this device -->
+    <bool name="config_leftRightSplitInPortrait">false</bool>
+
+    <!-- Whether scroll haptic feedback is enabled for rotary encoder scrolls on
+         {@link MotionEvent#AXIS_SCROLL} generated by {@link InputDevice#SOURCE_ROTARY_ENCODER}
+         devices. -->
+    <bool name="config_viewRotaryEncoderHapticScrollFedbackEnabled">false</bool>
+    <!-- Whether the View-based scroll haptic feedback implementation is enabled for
+         {@link InputDevice#SOURCE_ROTARY_ENCODER}s. -->
+    <bool name="config_viewBasedRotaryEncoderHapticsEnabled">false</bool>
+
+    <!-- Whether the media player is shown on the quick settings -->
+    <bool name="config_quickSettingsShowMediaPlayer">true</bool>
 </resources>

@@ -3,8 +3,6 @@
         {
             "name": "CtsJobSchedulerTestCases",
             "options": [
-                {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-                {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
                 {"exclude-annotation": "androidx.test.filters.FlakyTest"},
                 {"exclude-annotation": "androidx.test.filters.LargeTest"}
             ]
@@ -13,18 +11,16 @@
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {"include-filter": "com.android.server.job"},
-                {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-                {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+                {"exclude-annotation": "androidx.test.filters.LargeTest"}
             ]
         },
         {
             "name": "FrameworksServicesTests",
             "options": [
                 {"include-filter": "com.android.server.job"},
-                {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-                {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"}
+                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+                {"exclude-annotation": "androidx.test.filters.LargeTest"}
             ]
         }
     ],

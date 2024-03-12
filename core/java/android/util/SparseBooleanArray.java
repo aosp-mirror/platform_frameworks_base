@@ -22,8 +22,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
-import libcore.util.EmptyArray;
-
 /**
  * SparseBooleanArrays map integers to booleans.
  * Unlike a normal array of booleans

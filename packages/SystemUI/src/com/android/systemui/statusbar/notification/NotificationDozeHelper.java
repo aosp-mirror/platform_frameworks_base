@@ -24,8 +24,10 @@ import android.graphics.ColorMatrixColorFilter;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
 import com.android.app.animation.Interpolators;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.util.function.Consumer;
@@ -33,26 +35,6 @@ import java.util.function.Consumer;
 public class NotificationDozeHelper {
     private static final int DOZE_ANIMATOR_TAG = R.id.doze_intensity_tag;
     private final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
-
-    public void fadeGrayscale(final ImageView target, final boolean dark, long delay) {
-        startIntensityAnimation(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                updateGrayscale(target, (float) animation.getAnimatedValue());
-            }
-        }, dark, delay, new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!dark) {
-                    target.setColorFilter(null);
-                }
-            }
-        });
-    }
-
-    public void updateGrayscale(ImageView target, boolean dark) {
-        updateGrayscale(target, dark ? 1 : 0);
-    }
 
     public void updateGrayscale(ImageView target, float darkAmount) {
         if (darkAmount > 0) {
@@ -64,7 +46,7 @@ public class NotificationDozeHelper {
     }
 
     // TODO: this should be using StatusBarStateController#getDozeAmount
-    public void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
+    private void startIntensityAnimation(ValueAnimator.AnimatorUpdateListener updateListener,
             boolean dark, long delay, Animator.AnimatorListener listener) {
         float startIntensity = dark ? 0f : 1f;
         float endIntensity = dark ? 1f : 0f;
@@ -80,7 +62,7 @@ public class NotificationDozeHelper {
     }
 
     public void setDozing(Consumer<Float> listener, boolean dozing,
-            boolean animate, long delay, View view) {
+            boolean animate, long delay, View view, @Nullable Runnable endRunnable) {
         if (animate) {
             startIntensityAnimation(a -> listener.accept((Float) a.getAnimatedValue()), dozing,
                     delay,
@@ -89,6 +71,9 @@ public class NotificationDozeHelper {
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             view.setTag(DOZE_ANIMATOR_TAG, null);
+                            if (endRunnable != null) {
+                                endRunnable.run();
+                            }
                         }
 
                         @Override
@@ -102,14 +87,13 @@ public class NotificationDozeHelper {
                 animator.cancel();
             }
             listener.accept(dozing ? 1f : 0f);
+            if (endRunnable != null) {
+                endRunnable.run();
+            }
         }
     }
 
-    public void updateGrayscaleMatrix(float intensity) {
+    private void updateGrayscaleMatrix(float intensity) {
         mGrayscaleColorMatrix.setSaturation(1 - intensity);
-    }
-
-    public ColorMatrix getGrayscaleColorMatrix() {
-        return mGrayscaleColorMatrix;
     }
 }

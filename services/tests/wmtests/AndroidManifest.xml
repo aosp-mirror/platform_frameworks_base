@@ -47,6 +47,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION"/>
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
+    <uses-permission android:name="android.permission.MONITOR_INPUT"/>
 
     <!-- TODO: Remove largeHeap hack when memory leak is fixed (b/123984854) -->
     <application android:debuggable="true"
@@ -58,11 +60,14 @@
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityA" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityB" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
-        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks"
+                  android:showWhenLocked="true"
+                  android:turnScreenOn="true" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityInVirtualDisplay"
                   android:resizeableActivity="true" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$LandscapeActivity"
+                  android:configChanges="screenLayout|screenSize|smallestScreenSize|orientation"
                   android:screenOrientation="sensorLandscape"
                   android:showWhenLocked="true"
                   android:turnScreenOn="true" />
@@ -88,15 +93,13 @@
                   android:showWhenLocked="true"/>
         <activity android:name="android.view.cts.surfacevalidator.CapturedActivity"/>
 
-        <activity android:name="com.android.server.wm.SurfaceControlViewHostTests$TestActivity" />
-
-        <activity android:name="android.server.wm.scvh.SurfaceSyncGroupActivity"
+        <activity android:name="com.android.server.wm.SurfaceSyncGroupTests$TestActivity"
             android:screenOrientation="locked"
             android:turnScreenOn="true"
             android:theme="@style/WhiteBackgroundTheme"
             android:exported="true"/>
 
-        <activity android:name="com.android.server.wm.TrustedPresentationCallbackTest$TestActivity"
+        <activity android:name="android.app.Activity"
             android:exported="true"
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
@@ -109,10 +112,16 @@
             </intent-filter>
         </activity>
 
-        <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
-            android:foregroundServiceType="mediaProjection"
-            android:enabled="true">
-        </service>
+        <activity android:name="com.android.server.wm.ActivityRecordInputSinkTests$TestActivity"
+                  android:exported="true">
+        </activity>
+
+        <activity android:name="com.android.server.wm.utils.TestActivity"
+            android:screenOrientation="locked"
+            android:turnScreenOn="true"
+            android:showWhenLocked="true"
+            android:theme="@style/WhiteBackgroundTheme"
+            android:exported="true" />
     </application>
 
     <instrumentation

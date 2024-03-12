@@ -444,7 +444,8 @@ public final class Trace {
      * these characters they will be replaced with a space character in the trace.
      *
      * @param sectionName The name of the code section to appear in the trace.  This may be at
-     * most 127 Unicode code units long.
+     *                    most 127 Unicode code units long.
+     * @throws IllegalArgumentException if {@code sectionName} is too long.
      */
     public static void beginSection(@NonNull String sectionName) {
         if (isTagEnabled(TRACE_TAG_APP)) {

@@ -24,5 +24,11 @@
       ],
       "file_patterns": ["Xml"]
     }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    }
   ]
 }

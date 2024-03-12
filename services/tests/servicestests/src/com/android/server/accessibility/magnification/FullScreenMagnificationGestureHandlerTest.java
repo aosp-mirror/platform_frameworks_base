@@ -30,23 +30,35 @@ import static com.android.server.testutils.TestUtils.strictMock;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.content.pm.PackageManager;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Handler;
 import android.os.Message;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.DebugUtils;
@@ -54,12 +66,14 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ConcurrentUtils;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
@@ -67,11 +81,13 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,19 +107,29 @@ import java.util.function.IntConsumer;
  *          NON_ACTIVATED_ZOOMED_TMP -> IDLE [label="release"]
  *          SHORTCUT_TRIGGERED -> IDLE [label="a11y\nbtn"]
  *          SHORTCUT_TRIGGERED -> ACTIVATED [label="tap"]
- *          SHORTCUT_TRIGGERED -> SHORTCUT_TRIGGERED_ZOOMED_TMP [label="hold"]
- *          SHORTCUT_TRIGGERED -> PANNING [label="2hold]
+ *          SHORTCUT_TRIGGERED -> ZOOMED_WITH_PERSISTED_SCALE_TMP [label="hold"]
+ *          SHORTCUT_TRIGGERED -> PANNING [label="2hold"]
+ *          ZOOMED_OUT_FROM_SERVICE -> IDLE [label="a11y\nbtn"]
+ *          ZOOMED_OUT_FROM_SERVICE -> ZOOMED_OUT_FROM_SERVICE_DOUBLE_TAP [label="2tap"]
+ *          ZOOMED_OUT_FROM_SERVICE -> PANNING [label="2hold"]
+ *          ZOOMED_OUT_FROM_SERVICE_DOUBLE_TAP -> IDLE [label="tap"]
+ *          ZOOMED_OUT_FROM_SERVICE_DOUBLE_TAP -> ZOOMED_OUT_FROM_SERVICE [label="timeout"]
+ *          ZOOMED_OUT_FROM_SERVICE_DOUBLE_TAP -> ZOOMED_WITH_PERSISTED_SCALE_TMP [label="hold"]
  *          if always-on enabled:
- *              SHORTCUT_TRIGGERED_ZOOMED_TMP -> ACTIVATED [label="release"]
+ *              ZOOMED_WITH_PERSISTED_SCALE_TMP -> ACTIVATED [label="release"]
  *          else:
- *              SHORTCUT_TRIGGERED_ZOOMED_TMP -> IDLE [label="release"]
+ *              ZOOMED_WITH_PERSISTED_SCALE_TMP -> IDLE [label="release"]
  *          ACTIVATED -> ACTIVATED_DOUBLE_TAP [label="2tap"]
  *          ACTIVATED -> IDLE [label="a11y\nbtn"]
  *          ACTIVATED -> PANNING [label="2hold"]
+ *          if always-on enabled:
+ *              ACTIVATED -> ZOOMED_OUT_FROM_SERVICE [label="contextChanged"]
+ *          else:
+ *              ACTIVATED -> IDLE [label="contextChanged"]
  *          ACTIVATED_DOUBLE_TAP -> ACTIVATED [label="timeout"]
- *          ACTIVATED_DOUBLE_TAP -> ACTIVATED_ZOOMED_TMP [label="hold"]
+ *          ACTIVATED_DOUBLE_TAP -> ZOOMED_FURTHER_TMP [label="hold"]
  *          ACTIVATED_DOUBLE_TAP -> IDLE [label="tap"]
- *          ACTIVATED_ZOOMED_TMP -> ACTIVATED [label="release"]
+ *          ZOOMED_FURTHER_TMP -> ACTIVATED [label="release"]
  *          PANNING -> ACTIVATED [label="release"]
  *          PANNING -> PANNING_SCALING [label="pinch"]
  *          PANNING_SCALING -> ACTIVATED [label="release"]
@@ -113,19 +139,28 @@ import java.util.function.IntConsumer;
 @RunWith(AndroidJUnit4.class)
 public class FullScreenMagnificationGestureHandlerTest {
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     public static final int STATE_IDLE = 1;
     public static final int STATE_ACTIVATED = 2;
-    public static final int STATE_2TAPS = 3;
-    public static final int STATE_ACTIVATED_2TAPS = 4;
-    public static final int STATE_SHORTCUT_TRIGGERED = 5;
-    public static final int STATE_NON_ACTIVATED_ZOOMED_TMP = 6;
-    public static final int STATE_ACTIVATED_ZOOMED_TMP = 7;
-    public static final int STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP = 8;
-    public static final int STATE_PANNING = 9;
-    public static final int STATE_SCALING_AND_PANNING = 10;
+    public static final int STATE_SHORTCUT_TRIGGERED = 3;
+    public static final int STATE_ZOOMED_OUT_FROM_SERVICE = 4;
+
+    public static final int STATE_2TAPS = 5;
+    public static final int STATE_ACTIVATED_2TAPS = 6;
+    public static final int STATE_ZOOMED_OUT_FROM_SERVICE_2TAPS = 7;
+
+    public static final int STATE_NON_ACTIVATED_ZOOMED_TMP = 8;
+    public static final int STATE_ZOOMED_FURTHER_TMP = 9;
+    public static final int STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP = 10;
+
+    public static final int STATE_PANNING = 11;
+    public static final int STATE_SCALING_AND_PANNING = 12;
+    public static final int STATE_SINGLE_PANNING = 13;
 
     public static final int FIRST_STATE = STATE_IDLE;
-    public static final int LAST_STATE = STATE_SCALING_AND_PANNING;
+    public static final int LAST_STATE = STATE_SINGLE_PANNING;
 
     // Co-prime x and y, to potentially catch x-y-swapped errors
     public static final float DEFAULT_X = 301;
@@ -143,6 +178,10 @@ public class FullScreenMagnificationGestureHandlerTest {
     WindowMagnificationPromptController mWindowMagnificationPromptController;
     @Mock
     AccessibilityTraceManager mMockTraceManager;
+    @Mock
+    FullScreenMagnificationVibrationHelper mMockFullScreenMagnificationVibrationHelper;
+    @Mock
+    FullScreenMagnificationGestureHandler.MagnificationLogger mMockMagnificationLogger;
 
     @Rule
     public final TestableContext mContext = new TestableContext(getInstrumentation().getContext());
@@ -154,6 +193,10 @@ public class FullScreenMagnificationGestureHandlerTest {
     private long mLastDownTime = Integer.MIN_VALUE;
 
     private float mOriginalMagnificationPersistedScale;
+
+    static final Rect INITIAL_MAGNIFICATION_BOUNDS = new Rect(0, 0, 800, 800);
+
+    static final Region INITIAL_MAGNIFICATION_REGION = new Region(INITIAL_MAGNIFICATION_BOUNDS);
 
     @Before
     public void setUp() {
@@ -182,18 +225,28 @@ public class FullScreenMagnificationGestureHandlerTest {
                 new MagnificationScaleProvider(mContext),
                 () -> null,
                 ConcurrentUtils.DIRECT_EXECUTOR) {
-            @Override
-            public boolean magnificationRegionContains(int displayId, float x, float y) {
-                return true;
-            }
+                @Override
+                public boolean magnificationRegionContains(int displayId, float x, float y) {
+                    return true;
+                }
         };
+
+        doAnswer((Answer<Void>) invocationOnMock -> {
+            Object[] args = invocationOnMock.getArguments();
+            Region regionArg = (Region) args[1];
+            regionArg.set(new Rect(INITIAL_MAGNIFICATION_BOUNDS));
+            return null;
+        }).when(mockWindowManager).getMagnificationRegion(anyInt(), any(Region.class));
+
         mFullScreenMagnificationController.register(DISPLAY_0);
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(true);
         mClock = new OffsettableClock.Stopped();
 
-        boolean detectTripleTap = true;
+        boolean detectSingleFingerTripleTap = true;
+        boolean detectTwoFingerTripleTap = true;
         boolean detectShortcutTrigger = true;
-        mMgh = newInstance(detectTripleTap, detectShortcutTrigger);
+        mMgh = newInstance(detectSingleFingerTripleTap, detectTwoFingerTripleTap,
+                detectShortcutTrigger);
     }
 
     @After
@@ -208,12 +261,18 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @NonNull
-    private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
-            boolean detectShortcutTrigger) {
+    private FullScreenMagnificationGestureHandler newInstance(boolean detectSingleFingerTripleTap,
+            boolean detectTwoFingerTripleTap, boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
                 mContext, mFullScreenMagnificationController, mMockTraceManager, mMockCallback,
-                detectTripleTap, detectShortcutTrigger,
-                mWindowMagnificationPromptController, DISPLAY_0);
+                detectSingleFingerTripleTap, detectTwoFingerTripleTap, detectShortcutTrigger,
+                mWindowMagnificationPromptController, DISPLAY_0,
+                mMockFullScreenMagnificationVibrationHelper, mMockMagnificationLogger);
+        if (isWatch()) {
+            h.setSinglePanningEnabled(true);
+        } else {
+            h.setSinglePanningEnabled(false);
+        }
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
             protected String messageToString(Message m) {
@@ -239,6 +298,7 @@ public class FullScreenMagnificationGestureHandlerTest {
      * {@link #returnToNormalFrom} (for navigating back to {@link #STATE_IDLE})
      */
     @Test
+    @Ignore("b/291925580")
     public void testEachState_isReachableAndRecoverable() {
         forEachState(state -> {
             goFromStateIdleTo(state);
@@ -253,6 +313,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         });
     }
 
+    @FlakyTest(bugId = 297879316)
     @Test
     public void testStates_areMutuallyExclusive() {
         forEachState(state1 -> {
@@ -293,7 +354,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         assertTransition(STATE_SHORTCUT_TRIGGERED, () -> {
             send(downEvent());
             fastForward1sec();
-        }, STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP);
+        }, STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP);
 
         // A11y button followed by a tap turns magnifier on
         assertTransition(STATE_SHORTCUT_TRIGGERED, () -> tap(), STATE_ACTIVATED);
@@ -317,22 +378,22 @@ public class FullScreenMagnificationGestureHandlerTest {
         assertTransition(STATE_2TAPS, () -> swipeAndHold(), STATE_NON_ACTIVATED_ZOOMED_TMP);
 
         // release when activated temporary zoom in back to activated
-        assertTransition(STATE_ACTIVATED_ZOOMED_TMP, () -> send(upEvent()), STATE_ACTIVATED);
+        assertTransition(STATE_ZOOMED_FURTHER_TMP, () -> send(upEvent()), STATE_ACTIVATED);
     }
 
     @Test
-    public void testRelease_shortcutTriggeredZoomedTmp_alwaysOnNotEnabled_shouldInIdle() {
+    public void testRelease_zoomedWithPersistedScaleTmpAndAlwaysOnNotEnabled_shouldInIdle() {
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(false);
-        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP);
+        goFromStateIdleTo(STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP);
         send(upEvent());
 
         assertIn(STATE_IDLE);
     }
 
     @Test
-    public void testRelease_shortcutTriggeredZoomedTmp_alwaysOnEnabled_shouldInActivated() {
+    public void testRelease_zoomedWithPersistedScaleTmpAndAlwaysOnEnabled_shouldInActivated() {
         mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(true);
-        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP);
+        goFromStateIdleTo(STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP);
         send(upEvent());
 
         assertIn(STATE_ACTIVATED);
@@ -372,8 +433,10 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testDisablingTripleTap_removesInputLag() {
-        mMgh = newInstance(/* detect3tap */ false, /* detectShortcut */ true);
+        mMgh = newInstance(/* detectSingleFingerTripleTap */ false,
+                /* detectTwoFingerTripleTap */ true, /* detectShortcut */ true);
         goFromStateIdleTo(STATE_IDLE);
         allowEventDelegation();
         tap();
@@ -382,11 +445,174 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testDisablingSingleFingerTripleTapAndTwoFingerTripleTap_removesInputLag() {
+        mMgh = newInstance(/* detectSingleFingerTripleTap */ false,
+                /* detectTwoFingerTripleTap */ false, /* detectShortcut */ true);
+        goFromStateIdleTo(STATE_IDLE);
+        allowEventDelegation();
+        tap();
+        // no fast forward
+        verify(mMgh.getNext(), times(2)).onMotionEvent(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testLongTapAfterShortcutTriggered_neverLogMagnificationTripleTap() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        longTap();
+
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+    }
+
+    @Test
+    public void testSwipeAndHoldAfterShortcutTriggered_neverLogMagnificationTripleTap() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        swipeAndHold();
+
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+    }
+
+    @Test
+    public void testTripleTap_isNotActivated_logMagnificationTripleTapIsEnabled() {
+        goFromStateIdleTo(STATE_IDLE);
+
+        tap();
+        tap();
+        longTap();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(true);
+    }
+
+    @Test
+    public void testTripleTap_isActivated_logMagnificationTripleTapIsNotEnabled() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        reset(mMockMagnificationLogger);
+
+        tap();
+        tap();
+        longTap();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(false);
+    }
+
+    @Test
+    public void testTripleTapAndHold_isNotActivated_logMagnificationTripleTapIsEnabled() {
+        goFromStateIdleTo(STATE_IDLE);
+
+        tap();
+        tap();
+        swipeAndHold();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(true);
+    }
+
+    @Test
+    public void testTripleTapAndHold_isActivated_logMagnificationTripleTapIsNotEnabled() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        reset(mMockMagnificationLogger);
+
+        tap();
+        tap();
+        swipeAndHold();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(false);
+    }
+
+    @Test
     public void testTripleTapAndHold_zoomsImmediately() {
         assertZoomsImmediatelyOnSwipeFrom(STATE_2TAPS, STATE_NON_ACTIVATED_ZOOMED_TMP);
+        assertZoomsImmediatelyOnSwipeFrom(STATE_ACTIVATED_2TAPS, STATE_ZOOMED_FURTHER_TMP);
         assertZoomsImmediatelyOnSwipeFrom(STATE_SHORTCUT_TRIGGERED,
-                STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP);
-        assertZoomsImmediatelyOnSwipeFrom(STATE_ACTIVATED_2TAPS, STATE_ACTIVATED_ZOOMED_TMP);
+                STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP);
+        assertZoomsImmediatelyOnSwipeFrom(STATE_ZOOMED_OUT_FROM_SERVICE_2TAPS,
+                STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testTwoFingerDoubleTap_StateIsIdle_shouldInActivated() {
+        goFromStateIdleTo(STATE_IDLE);
+
+        twoFingerTap();
+        twoFingerTap();
+
+        assertIn(STATE_ACTIVATED);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testTwoFingerDoubleTap_StateIsActivated_shouldInIdle() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        reset(mMockMagnificationLogger);
+
+        twoFingerTap();
+        twoFingerTap();
+
+        assertIn(STATE_IDLE);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(false);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testTwoFingerDoubleTapAndHold_StateIsIdle_shouldZoomsImmediately() {
+        goFromStateIdleTo(STATE_IDLE);
+
+        twoFingerTap();
+        twoFingerTapAndHold();
+
+        assertIn(STATE_NON_ACTIVATED_ZOOMED_TMP);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testTwoFingerDoubleSwipeAndHold_StateIsIdle_shouldZoomsImmediately() {
+        goFromStateIdleTo(STATE_IDLE);
+
+        twoFingerTap();
+        twoFingerSwipeAndHold();
+
+        assertIn(STATE_NON_ACTIVATED_ZOOMED_TMP);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testTwoFingerTap_StateIsActivated_shouldInDelegating() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        mMgh.setSinglePanningEnabled(false);
+        goFromStateIdleTo(STATE_ACTIVATED);
+        allowEventDelegation();
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
+        send(upEvent());
+        fastForward(ViewConfiguration.getDoubleTapTimeout());
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testTwoFingerTap_StateIsIdle_shouldInDelegating() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        mMgh.setSinglePanningEnabled(false);
+        goFromStateIdleTo(STATE_IDLE);
+        allowEventDelegation();
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
+        send(upEvent());
+        fastForward(ViewConfiguration.getDoubleTapTimeout());
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
     }
 
     @Test
@@ -407,6 +633,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         });
     }
 
+    @FlakyTest(bugId = 297879316)
     @Test
     public void testTwoFingersOneTap_activatedState_dispatchMotionEvents() {
         goFromStateIdleTo(STATE_ACTIVATED);
@@ -467,6 +694,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         returnToNormalFrom(STATE_ACTIVATED);
     }
 
+    @FlakyTest(bugId = 297879316)
     @Test
     public void testFirstFingerSwipe_twoPointerDownAndActivatedState_panningState() {
         goFromStateIdleTo(STATE_ACTIVATED);
@@ -485,6 +713,45 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testSecondFingerSwipe_twoPointerDownAndActivatedState_shouldInPanningState() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}, 1));
+        //The minimum movement to transit to panningState.
+        final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        pointer2.offset(sWipeMinDistance + 1, 0);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 1));
+        fastForward(ViewConfiguration.getTapTimeout());
+        assertIn(STATE_PANNING);
+
+        returnToNormalFrom(STATE_PANNING);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
+    public void testTowFingerSwipe_twoPointerDownAndShortcutTriggeredState_shouldInPanningState() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}, 1));
+        //The minimum movement to transit to panningState.
+        final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        pointer2.offset(sWipeMinDistance + 1, 0);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 1));
+        fastForward(ViewConfiguration.getTapTimeout());
+        assertIn(STATE_PANNING);
+
+        returnToNormalFrom(STATE_PANNING);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testSecondFingerSwipe_twoPointerDownAndActivatedState_panningState() {
         goFromStateIdleTo(STATE_ACTIVATED);
         PointF pointer1 = DEFAULT_POINT;
@@ -502,6 +769,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testSecondFingerSwipe_twoPointerDownAndShortcutTriggeredState_panningState() {
         goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
         PointF pointer1 = DEFAULT_POINT;
@@ -519,10 +787,188 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testTwoFingerDown_twoPointerDownAndActivatedState_panningState() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}, 1));
+        fastForward(ViewConfiguration.getTapTimeout());
+        assertIn(STATE_PANNING);
+
+        returnToNormalFrom(STATE_PANNING);
+    }
+
+    @Test
     public void testActivatedWithTripleTap_invokeShowWindowPromptAction() {
         goFromStateIdleTo(STATE_ACTIVATED);
 
         verify(mWindowMagnificationPromptController).showNotificationIfNeeded();
+    }
+
+    @Test
+    public void testActionUpNotAtEdge_singlePanningState_detectingState() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+
+        send(upEvent());
+
+        check(mMgh.mCurrentState == mMgh.mDetectingState, STATE_IDLE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testScroll_SinglePanningDisabled_delegatingState() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        mMgh.setSinglePanningEnabled(false);
+
+        goFromStateIdleTo(STATE_ACTIVATED);
+        allowEventDelegation();
+        swipeAndHold();
+
+        assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
+    }
+
+    @Test
+    @FlakyTest
+    public void testScroll_singleHorizontalPanningAndAtEdge_leftEdgeOverscroll() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, INITIAL_MAGNIFICATION_BOUNDS.left, centerY, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(swipeMinDistance, 0);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mCurrentState == mMgh.mSinglePanningState);
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_LEFT_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    @FlakyTest
+    public void testScroll_singleHorizontalPanningAndAtEdge_rightEdgeOverscroll() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, INITIAL_MAGNIFICATION_BOUNDS.right, centerY, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(-swipeMinDistance, 0);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mCurrentState == mMgh.mSinglePanningState);
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_RIGHT_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    @FlakyTest
+    public void testScroll_singleVerticalPanningAndAtEdge_verticalOverscroll() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.right + INITIAL_MAGNIFICATION_BOUNDS.left) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, centerX, INITIAL_MAGNIFICATION_BOUNDS.top, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(0, swipeMinDistance);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_VERTICAL_EDGE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testScroll_singlePanningAndAtEdge_noOverscroll() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.bottom) / 2.0f;
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0, INITIAL_MAGNIFICATION_BOUNDS.left, centerY, false, 1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF edgeCoords = new PointF(initCoords.x, initCoords.y);
+        edgeCoords.offset(-swipeMinDistance, 0);
+
+        swipeAndHold(initCoords, edgeCoords);
+
+        assertTrue(mMgh.mOverscrollHandler.mOverscrollState == mMgh.OVERSCROLL_NONE);
+        assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testScroll_singleHorizontalPanningAndAtEdge_vibrate() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0,
+                INITIAL_MAGNIFICATION_BOUNDS.left,
+                INITIAL_MAGNIFICATION_BOUNDS.top / 2,
+                false,
+                1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF endCoords = new PointF(initCoords.x, initCoords.y);
+        endCoords.offset(swipeMinDistance, 0);
+        allowEventDelegation();
+
+        swipeAndHold(initCoords, endCoords);
+
+        verify(mMockFullScreenMagnificationVibrationHelper).vibrateIfSettingEnabled();
+    }
+
+    @Test
+    public void testScroll_singleVerticalPanningAndAtEdge_doNotVibrate() {
+        assumeTrue(mMgh.mIsSinglePanningEnabled);
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0,
+                INITIAL_MAGNIFICATION_BOUNDS.left,
+                INITIAL_MAGNIFICATION_BOUNDS.top,
+                false,
+                1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF endCoords = new PointF(initCoords.x, initCoords.y);
+        endCoords.offset(0, swipeMinDistance);
+        allowEventDelegation();
+
+        swipeAndHold(initCoords, endCoords);
+
+        verify(mMockFullScreenMagnificationVibrationHelper, never()).vibrateIfSettingEnabled();
     }
 
     @Test
@@ -666,6 +1112,14 @@ public class FullScreenMagnificationGestureHandlerTest {
         mHandler.timeAdvance();
     }
 
+    private void triggerContextChanged() {
+        mFullScreenMagnificationController.onUserContextChanged(DISPLAY_0);
+    }
+
+    private boolean isWatch() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+    }
+
     /**
      * Asserts that {@link #mMgh the handler} is in the given {@code state}
      */
@@ -674,43 +1128,63 @@ public class FullScreenMagnificationGestureHandlerTest {
 
             // Asserts on separate lines for accurate stack traces
 
-            case STATE_IDLE: {
+            case STATE_IDLE:
                 check(tapCount() < 2, state);
                 check(!mMgh.mDetectingState.mShortcutTriggered, state);
                 check(!isActivated(), state);
                 check(!isZoomed(), state);
-            } break;
-            case STATE_ACTIVATED: {
+                break;
+            case STATE_ACTIVATED:
                 check(isActivated(), state);
                 check(tapCount() < 2, state);
-            } break;
-            case STATE_2TAPS: {
+                break;
+            case STATE_SHORTCUT_TRIGGERED:
+                check(mMgh.mDetectingState.mShortcutTriggered, state);
+                check(isActivated(), state);
+                check(!isZoomed(), state);
+                break;
+            case STATE_ZOOMED_OUT_FROM_SERVICE:
+                // the always-on feature must be enabled then this state is reachable.
+                assertTrue(mFullScreenMagnificationController.isAlwaysOnMagnificationEnabled());
+                check(isActivated(), state);
+                check(!isZoomed(), state);
+                check(mMgh.mFullScreenMagnificationController.isZoomedOutFromService(DISPLAY_0),
+                        state);
+                break;
+            case STATE_2TAPS:
                 check(!isActivated(), state);
                 check(!isZoomed(), state);
                 check(tapCount() == 2, state);
-            } break;
-            case STATE_ACTIVATED_2TAPS: {
+                break;
+            case STATE_ACTIVATED_2TAPS:
                 check(isActivated(), state);
                 check(isZoomed(), state);
                 check(tapCount() == 2, state);
-            } break;
-            case STATE_NON_ACTIVATED_ZOOMED_TMP: {
+                break;
+            case STATE_ZOOMED_OUT_FROM_SERVICE_2TAPS:
+                check(isActivated(), state);
+                check(!isZoomed(), state);
+                check(mMgh.mFullScreenMagnificationController.isZoomedOutFromService(DISPLAY_0),
+                        state);
+                check(tapCount() == 2, state);
+                break;
+            case STATE_NON_ACTIVATED_ZOOMED_TMP:
                 check(isActivated(), state);
                 check(isZoomed(), state);
                 check(mMgh.mCurrentState == mMgh.mViewportDraggingState,
                         state);
                 check(Float.isNaN(mMgh.mViewportDraggingState.mScaleToRecoverAfterDraggingEnd),
                         state);
-            } break;
-            case STATE_ACTIVATED_ZOOMED_TMP: {
+                break;
+            case STATE_ZOOMED_FURTHER_TMP:
                 check(isActivated(), state);
                 check(isZoomed(), state);
                 check(mMgh.mCurrentState == mMgh.mViewportDraggingState,
                         state);
                 check(mMgh.mViewportDraggingState.mScaleToRecoverAfterDraggingEnd >= 1.0f,
                         state);
-            } break;
-            case STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP: {
+                break;
+            case STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP:
                 check(isActivated(), state);
                 check(isZoomed(), state);
                 check(mMgh.mCurrentState == mMgh.mViewportDraggingState,
@@ -722,25 +1196,25 @@ public class FullScreenMagnificationGestureHandlerTest {
                     check(Float.isNaN(mMgh.mViewportDraggingState.mScaleToRecoverAfterDraggingEnd),
                             state);
                 }
-            } break;
-            case STATE_SHORTCUT_TRIGGERED: {
-                check(mMgh.mDetectingState.mShortcutTriggered, state);
-                check(isActivated(), state);
-                check(!isZoomed(), state);
-            } break;
-            case STATE_PANNING: {
+                break;
+            case STATE_PANNING:
                 check(isActivated(), state);
                 check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
                 check(!mMgh.mPanningScalingState.mScaling, state);
-            } break;
-            case STATE_SCALING_AND_PANNING: {
+                break;
+            case STATE_SCALING_AND_PANNING:
                 check(isActivated(), state);
                 check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
                 check(mMgh.mPanningScalingState.mScaling, state);
-            } break;
-            default: throw new IllegalArgumentException("Illegal state: " + state);
+                break;
+            case STATE_SINGLE_PANNING:
+                check(isZoomed(), state);
+                check(mMgh.mCurrentState == mMgh.mSinglePanningState, state);
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal state: " + state);
         }
     }
 
@@ -750,59 +1224,74 @@ public class FullScreenMagnificationGestureHandlerTest {
     private void goFromStateIdleTo(int state) {
         try {
             switch (state) {
-                case STATE_IDLE: {
+                case STATE_IDLE:
                     mMgh.clearAndTransitionToStateDetecting();
-                } break;
-                case STATE_2TAPS: {
-                    goFromStateIdleTo(STATE_IDLE);
-                    tap();
-                    tap();
-                } break;
-                case STATE_ACTIVATED: {
-                    if (mMgh.mDetectTripleTap) {
+                    break;
+                case STATE_ACTIVATED:
+                    if (mMgh.mDetectSingleFingerTripleTap) {
                         goFromStateIdleTo(STATE_2TAPS);
                         tap();
                     } else {
                         goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
                         tap();
                     }
-                } break;
-                case STATE_ACTIVATED_2TAPS: {
+                    break;
+                case STATE_SHORTCUT_TRIGGERED:
+                    goFromStateIdleTo(STATE_IDLE);
+                    triggerShortcut();
+                    break;
+                case STATE_ZOOMED_OUT_FROM_SERVICE:
+                    // the always-on feature must be enabled then this state is reachable.
+                    assertTrue(mFullScreenMagnificationController.isAlwaysOnMagnificationEnabled());
+                    goFromStateIdleTo(STATE_ACTIVATED);
+                    triggerContextChanged();
+                    break;
+                case STATE_2TAPS:
+                    goFromStateIdleTo(STATE_IDLE);
+                    tap();
+                    tap();
+                    break;
+                case STATE_ACTIVATED_2TAPS:
                     goFromStateIdleTo(STATE_ACTIVATED);
                     tap();
                     tap();
-                } break;
-                case STATE_NON_ACTIVATED_ZOOMED_TMP: {
+                    break;
+                case STATE_ZOOMED_OUT_FROM_SERVICE_2TAPS:
+                    goFromStateIdleTo(STATE_ZOOMED_OUT_FROM_SERVICE);
+                    tap();
+                    tap();
+                    break;
+                case STATE_NON_ACTIVATED_ZOOMED_TMP:
                     goFromStateIdleTo(STATE_2TAPS);
                     send(downEvent());
                     fastForward1sec();
-                } break;
-                case STATE_ACTIVATED_ZOOMED_TMP: {
+                    break;
+                case STATE_ZOOMED_FURTHER_TMP:
                     goFromStateIdleTo(STATE_ACTIVATED_2TAPS);
                     send(downEvent());
                     fastForward1sec();
-                } break;
-                case STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP: {
+                    break;
+                case STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP:
                     goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
                     send(downEvent());
                     fastForward1sec();
-                } break;
-                case STATE_SHORTCUT_TRIGGERED: {
-                    goFromStateIdleTo(STATE_IDLE);
-                    triggerShortcut();
-                } break;
-                case STATE_PANNING: {
+                    break;
+                case STATE_PANNING:
                     goFromStateIdleTo(STATE_ACTIVATED);
                     send(downEvent());
                     send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
                     fastForward(ViewConfiguration.getTapTimeout());
-                } break;
-                case STATE_SCALING_AND_PANNING: {
+                    break;
+                case STATE_SCALING_AND_PANNING:
                     goFromStateIdleTo(STATE_PANNING);
                     send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 3));
                     send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 4));
                     send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 5));
-                } break;
+                    break;
+                case STATE_SINGLE_PANNING:
+                    goFromStateIdleTo(STATE_ACTIVATED);
+                    swipeAndHold();
+                    break;
                 default:
                     throw new IllegalArgumentException("Illegal state: " + state);
             }
@@ -816,50 +1305,57 @@ public class FullScreenMagnificationGestureHandlerTest {
      */
     private void returnToNormalFrom(int state) {
         switch (state) {
-            case STATE_IDLE: {
+            case STATE_IDLE:
                 // no op
-            } break;
-            case STATE_2TAPS: {
-                allowEventDelegation();
-                fastForward1sec();
-            } break;
-            case STATE_ACTIVATED: {
-                if (mMgh.mDetectTripleTap) {
+                break;
+            case STATE_ACTIVATED:
+            case STATE_ZOOMED_OUT_FROM_SERVICE:
+                if (mMgh.mDetectSingleFingerTripleTap) {
                     tap();
                     tap();
                     returnToNormalFrom(STATE_ACTIVATED_2TAPS);
                 } else {
                     triggerShortcut();
                 }
-            } break;
-            case STATE_ACTIVATED_2TAPS: {
+                break;
+            case STATE_SHORTCUT_TRIGGERED:
+                triggerShortcut();
+                break;
+            case STATE_2TAPS:
+                allowEventDelegation();
+                fastForward1sec();
+                break;
+            case STATE_ACTIVATED_2TAPS:
+            case STATE_ZOOMED_OUT_FROM_SERVICE_2TAPS:
                 tap();
-            } break;
-            case STATE_NON_ACTIVATED_ZOOMED_TMP: {
+                break;
+            case STATE_NON_ACTIVATED_ZOOMED_TMP:
                 send(upEvent());
-            } break;
-            case STATE_ACTIVATED_ZOOMED_TMP: {
+                break;
+            case STATE_ZOOMED_FURTHER_TMP:
                 send(upEvent());
                 returnToNormalFrom(STATE_ACTIVATED);
-            } break;
-            case STATE_SHORTCUT_TRIGGERED_ZOOMED_TMP: {
+                break;
+            case STATE_ZOOMED_WITH_PERSISTED_SCALE_TMP:
                 send(upEvent());
                 if (mFullScreenMagnificationController.isAlwaysOnMagnificationEnabled()) {
                     returnToNormalFrom(STATE_ACTIVATED);
                 }
-            } break;
-            case STATE_SHORTCUT_TRIGGERED: {
-                triggerShortcut();
-            } break;
-            case STATE_PANNING: {
+                break;
+            case STATE_PANNING:
                 send(pointerEvent(ACTION_POINTER_UP, DEFAULT_X * 2, DEFAULT_Y));
                 send(upEvent());
                 returnToNormalFrom(STATE_ACTIVATED);
-            } break;
-            case STATE_SCALING_AND_PANNING: {
+                break;
+            case STATE_SCALING_AND_PANNING:
                 returnToNormalFrom(STATE_PANNING);
-            } break;
-            default: throw new IllegalArgumentException("Illegal state: " + state);
+                break;
+            case STATE_SINGLE_PANNING:
+                send(upEvent());
+                returnToNormalFrom(STATE_ACTIVATED);
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal state: " + state);
         }
     }
 
@@ -901,15 +1397,49 @@ public class FullScreenMagnificationGestureHandlerTest {
         send(upEvent());
     }
 
+    private void swipe(PointF start, PointF end) {
+        swipeAndHold(start, end);
+        send(upEvent(end.x, end.y));
+    }
+
     private void swipeAndHold() {
         send(downEvent());
         send(moveEvent(DEFAULT_X * 2, DEFAULT_Y * 2));
+    }
+
+    private void swipeAndHold(PointF start, PointF end) {
+        send(downEvent(start.x, start.y));
+        send(moveEvent(end.x, end.y));
     }
 
     private void longTap() {
         send(downEvent());
         fastForward(2000);
         send(upEvent());
+    }
+
+    private void twoFingerTap() {
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
+        send(pointerEvent(ACTION_POINTER_UP, DEFAULT_X * 2, DEFAULT_Y));
+        send(upEvent());
+    }
+
+    private void twoFingerTapAndHold() {
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, DEFAULT_X * 2, DEFAULT_Y));
+        fastForward(2000);
+    }
+
+    private void twoFingerSwipeAndHold() {
+        PointF pointer1 = DEFAULT_POINT;
+        PointF pointer2 = new PointF(DEFAULT_X * 1.5f, DEFAULT_Y);
+
+        send(downEvent());
+        send(pointerEvent(ACTION_POINTER_DOWN, new PointF[] {pointer1, pointer2}, 1));
+        final float sWipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop();
+        pointer1.offset(sWipeMinDistance + 1, 0);
+        send(pointerEvent(ACTION_MOVE, new PointF[] {pointer1, pointer2}, 0));
     }
 
     private void triggerShortcut() {

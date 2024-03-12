@@ -5,6 +5,10 @@ import android.util.ArrayMap
 import android.util.Log
 import com.android.systemui.Dumpable
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printCollection
+import com.android.systemui.util.println
+import com.android.systemui.util.withIncreasedIndent
 import java.io.PrintWriter
 
 /**
@@ -104,9 +108,10 @@ abstract class SelfTrackingLifetimeExtender(
         mCallback = callback
     }
 
-    final override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("LifetimeExtender: $name:")
-        pw.println("  mEntriesExtended: ${mEntriesExtended.size}")
-        mEntriesExtended.forEach { pw.println("  * ${it.key}") }
+    final override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
+        println("LifetimeExtender", name)
+        withIncreasedIndent {
+            printCollection("mEntriesExtended", mEntriesExtended.keys)
+        }
     }
 }

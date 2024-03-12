@@ -70,6 +70,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
@@ -141,6 +142,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
+    @Mock private AlternateBouncerToGoneTransitionViewModel
+            mAlternateBouncerToGoneTransitionViewModel;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
     @Mock private CoroutineDispatcher mMainDispatcher;
@@ -264,9 +267,11 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDelayedWakeLockBuilder.build()).thenReturn(mWakeLock);
         when(mDockManager.isDocked()).thenReturn(false);
 
-        when(mKeyguardTransitionInteractor.getPrimaryBouncerToGoneTransition())
+        when(mKeyguardTransitionInteractor.transition(any(), any()))
                 .thenReturn(emptyFlow());
         when(mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha())
+                .thenReturn(emptyFlow());
+        when(mAlternateBouncerToGoneTransitionViewModel.getScrimAlpha())
                 .thenReturn(emptyFlow());
 
         mScrimController = new ScrimController(
@@ -285,6 +290,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
+                mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mWallpaperRepository,
                 mMainDispatcher,
@@ -992,6 +998,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
+                mAlternateBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mWallpaperRepository,
                 mMainDispatcher,
@@ -1178,14 +1185,11 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testScrimFocus() {
-        mScrimController.transitionTo(ScrimState.AOD);
-        assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
-        assertFalse("Should not be focusable on AOD", mScrimInFront.isFocusable());
-
-        mScrimController.transitionTo(ScrimState.KEYGUARD);
-        Assert.assertTrue("Should be focusable on keyguard", mScrimBehind.isFocusable());
-        Assert.assertTrue("Should be focusable on keyguard", mScrimInFront.isFocusable());
+    public void testScrimsAreNotFocusable() {
+        assertFalse("Behind scrim should not be focusable", mScrimBehind.isFocusable());
+        assertFalse("Front scrim should not be focusable", mScrimInFront.isFocusable());
+        assertFalse("Notifications scrim should not be focusable",
+                mNotificationsScrim.isFocusable());
     }
 
     @Test
@@ -1253,14 +1257,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         ScrimState.AOD.prepare(ScrimState.KEYGUARD);
         Assert.assertTrue("Animate scrims when ColorFade won't be triggered",
                 ScrimState.AOD.getAnimateChange());
-    }
-
-    @Test
-    public void testViewsDontHaveFocusHighlight() {
-        assertFalse("Scrim shouldn't have focus highlight",
-                mScrimInFront.getDefaultFocusHighlightEnabled());
-        assertFalse("Scrim shouldn't have focus highlight",
-                mScrimBehind.getDefaultFocusHighlightEnabled());
     }
 
     @Test
@@ -1775,7 +1771,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void ignoreTransitionRequestWhileKeyguardTransitionRunning() {
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.mPrimaryBouncerToGoneTransition.accept(
+        mScrimController.mBouncerToGoneTransition.accept(
                 new TransitionStep(KeyguardState.PRIMARY_BOUNCER, KeyguardState.GONE, 0f,
                         TransitionState.RUNNING, "ScrimControllerTest"));
 
@@ -1787,7 +1783,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void primaryBouncerToGoneOnFinishCallsKeyguardFadedAway() {
         when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
-        mScrimController.mPrimaryBouncerToGoneTransition.accept(
+        mScrimController.mBouncerToGoneTransition.accept(
                 new TransitionStep(KeyguardState.PRIMARY_BOUNCER, KeyguardState.GONE, 0f,
                         TransitionState.FINISHED, "ScrimControllerTest"));
 

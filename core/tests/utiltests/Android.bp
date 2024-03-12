@@ -35,6 +35,7 @@ android_test {
         "androidx.test.ext.junit",
         "truth",
         "servicestests-utils",
+        "ravenwood-junit",
     ],
 
     libs: [
@@ -49,4 +50,24 @@ android_test {
 
     test_suites: ["device-tests"],
 
+}
+
+android_ravenwood_test {
+    name: "FrameworksUtilTestsRavenwood",
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "mockito_ravenwood",
+        "frameworks-base-testutils",
+        "servicestests-utils",
+    ],
+    srcs: [
+        "src/android/util/IRemoteMemoryIntArray.aidl",
+        "src/android/util/**/*.java",
+        "src/com/android/internal/util/**/*.java",
+    ],
+    auto_gen_config: true,
 }

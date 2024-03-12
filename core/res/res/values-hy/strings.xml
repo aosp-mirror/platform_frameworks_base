@@ -290,6 +290,7 @@
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Մարտկոցի լիցքը ծախսող հավելվածներ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Խոշորացում"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Հատուկ գործառույթների օգտագործում"</string>
+    <string name="notification_channel_display" msgid="6905032605735615090">"Էկրան"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"«<xliff:g id="APP_NAME">%1$s</xliff:g>» հավելվածը ծախսում է մարտկոցի լիցքը"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g> հավելված ծախսում է մարտկոցի լիցքը"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"Հպեք՝ մարտկոցի և թրաֆիկի մանրամասները տեսնելու համար"</string>
@@ -298,9 +299,11 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android համակարգ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Բացել անձնական պրոֆիլը"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Բացել աշխատանքային պրոֆիլը"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Անցնել անձնական <xliff:g id="APP_NAME">%1$s</xliff:g> պրոֆիլին"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Անցնել աշխատանքային <xliff:g id="APP_NAME">%1$s</xliff:g> պրոֆիլին"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"օգտագործել ձեր կոնտակտները"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղորոշում"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղադրություն"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"տեղորոշել այս սարքը"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
@@ -499,11 +502,13 @@
     <string name="permdesc_systemCamera" msgid="5938360914419175986">"Այս արտոնյալ կամ համակարգային հավելվածը կարող է ցանկացած պահի լուսանկարել և տեսագրել՝ օգտագործելով համակարգի տեսախցիկները։ Հավելվածին նաև անհրաժեշտ է android.permission.CAMERA թույլտվությունը։"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Թույլատրել հավելվածին կամ ծառայությանը հետզանգեր ստանալ՝ տեսախցիկների բացվելու և փակվելու դեպքում։"</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Այս հավելվածը կարող է հետզանգեր ստանալ՝ ցանկացած տեսախցիկի բացվելու (կնշվի բացող հավելվածը) և փակվելու դեպքում։"</string>
+    <string name="permlab_cameraHeadlessSystemUser" msgid="680194666834500050">"Թույլատրել հավելվածին կամ ծառայությանը օգտագործել որպես միջերեսի համակարգային օգտատեր։"</string>
+    <string name="permdesc_cameraHeadlessSystemUser" msgid="6963163319710996412">"Այս հավելվածին ձեր տեսախցիկը հասանելի է որպես առանց միջերեսի համակարգային օգտատեր։"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"կառավարել թրթռումը"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Հավելվածին թույլ է տալիս օգտագործել սարքի թրթռալու ռեժիմը։"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Թույլ է տալիս հավելվածին զանգել հեռախոսահամարներին առանց ձեր միջամտության: Սա կարող է հանգեցնել անկանխատեսելի գանձումների կամ զանգերի: Նկատի ունեցեք, որ սա թույլ չի տալիս հավելվածին զանգել արտակարգ իրավիճակների համարներին: Վնասարար հավելվածները կարող են ձեր հաշվից զանգեր կատարել` առանց ձեր հաստատման:"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Թույլ է տալիս հավելվածին զանգել հեռախոսահամարների՝ առանց ձեր միջամտության։ Սա կարող է հանգեցնել անկանխատեսելի գանձումների կամ զանգերի: Նկատի ունեցեք, որ սա թույլ չի տալիս հավելվածին զանգել արտակարգ իրավիճակների համարներին: Վնասակար հավելվածները կարող են գումար կորզել՝ կատարելով զանգեր առանց ձեր հաստատման կամ հավաքել համարներ, որոնց արդյունքում ստանում եք մուտքային զանգեր՝ այլ համարի ավտոմատ փոխանցելու համար։"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"օգտվել IMS զանգերի ծառայությունից"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Թույլ է տալիս հավելվածին IMS ծառայության միջոցով կատարել զանգեր՝ առանց ձեր միջամտության:"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"կարդալ հեռախոսի կարգավիճակը և ինքնությունը"</string>
@@ -588,6 +593,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Թույլ է տալիս հավելվածին ստանալ նախընտրելի NFC վճարային ծառայության մասին տեղեկություններ (օր․՝ գրանցված լրացուցիչ սարքերի և երթուղու նպատակակետի մասին տվյալներ)։"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"վերահսկել Մոտ Տարածությամբ Հաղորդակցումը"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Թույլ է տալիս հավելվածին հաղորդակցվել Մոտ տարածությամբ հաղորդակցման (NFC) պիտակների, քարտերի և ընթերցիչների հետ:"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element գործարքի իրադարձություն"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Թույլ է տալիս հավելվածին ստանալ տեղեկություններ Secure Element-ում կատարվող գործարքների մասին։"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"անջատել ձեր էկրանի կողպեքը"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Թույլ է տալիս հավելվածին անջատել ստեղնաշարի կողպումը և ցանկացած կապված գաղտնաբառի պաշտպանվածությունը: Սրա ճիշտ օրինակն է, երբ հեռախոսը անջատում է ստեղնաշարի կողպումը մուտքային զանգ ստանալիս, հետո այն կրկին միացնում է, երբ զանգը ավարտվում է:"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"հարցում էկրանի կողպման բարդության մակարդակի մասին"</string>
@@ -618,6 +625,7 @@
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Կենսաչափական սարքը հասանելի չէ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Չհաջողվեց ճանաչել"</string>
+    <string name="biometric_face_not_recognized" msgid="5535599455744525200">"Դեմքը չի ճանաչվել"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ավելացրեք PIN կոդ, նախշ կամ գաղտնաբառ։"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Չհաջողվեց նույնականացնել"</string>
@@ -633,11 +641,12 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Շատ լուսավոր է"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Հայտնաբերվել է սնուցման կոճակի սեղմում"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Փորձեք փոխել մատի դիրքը"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևակի փոխեք մատի դիրքը"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Թեթևակի փոխեք մատի դիրքն ամեն անգամ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Մատնահետքը չի ճանաչվել"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Դեմքը չի հաջողվում ճանաչել։ Օգտագործեք մատնահետքը։"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Մատնահետքը նույնականացվեց"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Դեմքը ճանաչվեց"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Դեմքը ճանաչվեց: Սեղմեք «Հաստատել»:"</string>
@@ -663,14 +672,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Սխալ առաջացավ։ Նորից փորձեք։"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Մատնահետքի պատկերակ"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Սարքի ապակողպում"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Ընտրեք ապակողպման այլ եղանակ"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Օգտագործեք դեմքով ապակողպումը, երբ ձեր մատնահետքը չի հաջողվում ճանաչել, օրինակ՝ երբ ձեր ձեռքերը թաց են"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Օգտագործեք մատնահետքով ապակողպումը, երբ ձեր դեմքը չի հաջողվում ճանաչել, օրինակ՝ երբ լուսավորությունը թույլ է"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Դեմքով ապակողպում"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Դեմքով ապակողպման հետ կապված խնդիր"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Հպեք՝ ձեր դեմքի նմուշը ջնջելու համար, այնուհետև նորից ավելացրեք այն:"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Կարգավորեք դեմքով ապակողպումը"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Ապակողպելու համար պարզապես նայեք հեռախոսին"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Դեմքով ապակողպումն օգտագործելու համար անցեք Կարգավորումներ &gt; Գաղտնիություն և տրամադրեք "<b>"տեսախցիկն օգտագործելու թույլտվություն"</b>"։"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Կարգավորեք ապակողպելու այլ եղանակներ"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Հպեք՝ մատնահետք ավելացնելու համար"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Մատնահետքով ապակողպում"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Մատնահետքերի սկաները հնարավոր չէ օգտագործել"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Այցելեք սպասարկման կենտրոն։"</string>
@@ -679,12 +688,12 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Թույլ լուսավորություն"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Փոքր-ինչ հեռու պահեք հեռախոսը"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Մոտեցրեք հեռախոսը"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Բարձրացրեք հեռախոսը"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Իջեցրեք հեռախոսը"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Տեղափոխեք հեռախոսը ձախ"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Տեղափոխեք հեռախոսը աջ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Պահեք հեռախոսն ավելի վերև"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Պահեք հեռախոսն ավելի ներքև"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Հեռախոսը շարժեք դեպի ձախ"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Հեռախոսը շարժեք դեպի աջ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Նայեք ուղիղ էկրանին։"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ձեր դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մակարդակում։"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մա­­կարդակում։"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Նորից փորձեք։"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Դեմքը չի հաջողվում ճանաչել։ Նորից փորձեք։"</string>
@@ -692,7 +701,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Նայեք ուղիղ էկրանին"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Նայեք ուղիղ էկրանին"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Նայեք ուղիղ էկրանին"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը թաքցնում է ձեր երեսը:"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը փակում է ձեր դեմքը։"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Մաքրեք էկրանի վերևի մասը, ներառյալ սև գոտին"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -700,7 +709,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Չհաջողվեց ստեղծել ձեր դեմքի մոդելը։ Նորից փորձեք։"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Հանեք ակնոցը։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքի մի մասը ծածկված է։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքը մասամբ ծածկված է։ Պետք է լրիվ տեսանելի լինի։"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Չհաջողվեց հաստատել դեմքը։ Սարքն անհասանելի է:"</string>
@@ -709,8 +718,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Դեմքի ճանաչումը չեղարկվել է։"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Դեմքով ապակողմումը չեղարկվել է օգտատիրոջ կողմից"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Չափից շատ փորձեր եք կատարել: Փորձեք ավելի ուշ:"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Չափազանց շատ փորձեր են արվել։ Դեմքով ապակողպումն անհասանելի է։"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Չափազանց շատ փորձեր են արվել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Չհաջողվեց հաստատել դեմքը։ Նորից փորձեք։"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Դուք չեք կարգավորել դեմքով ապակողպումը։"</string>
@@ -1255,7 +1263,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Բեռնումն ավարտվում է:"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը ավելացնելու համար թեթևակի հպեք կոճակին։"</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Ավարտեք կարգավորումը՝ անջատելով էկրանը"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Անջատեք էկրանը և ավարտեք"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Անջատել"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Շարունակե՞լ մատնահետքի սկանավորումը"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Դուք սեղմել եք սնուցման կոճակը։ Սովորաբար դրա արդյունքում էկրանն անջատվում է։\n\nՄատնահետքը սկանավորելու համար թեթևակի հպեք կոճակին։"</string>
@@ -1369,7 +1377,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Հայտնաբերված է անալոգային աուդիո լրասարք"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Կցված սարքը համատեղելի չէ այս հեռախոսի հետ: Հպեք` ավելին իմանալու համար:"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-ով վրիպազերծումը միացված է"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Հպեք՝ USB-ով վրիպազերծումն անջատելու համար"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Հպեք անջատելու համար"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Սեղմեք՝ USB-ով վրիպազերծումն անջատելու համար:"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Անլար վրիպազերծումը միացված է"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Հպեք՝ անլար վրիպազերծումն անջատելու համար"</string>
@@ -1392,7 +1400,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ՄԵՐԺԵԼ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Ընտրեք ներածման եղանակը"</string>
     <string name="show_ime" msgid="6406112007347443383">"Պահել էկրանին, երբ ֆիզիկական ստեղնաշարն ակտիվ է"</string>
-    <string name="hardware" msgid="1800597768237606953">"Ցույց տալ վիրտուալ ստեղնաշարը"</string>
+    <string name="hardware" msgid="3611039921284836033">"Օգտագործել էկրանային ստեղնաշար"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Կարգավորեք <xliff:g id="DEVICE_NAME">%s</xliff:g> սարքը"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Կարգավորեք ֆիզիկական ստեղնաշարերը"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
@@ -1681,10 +1689,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Հեռացնել"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ձայնը բարձրացնե՞լ խորհուրդ տրվող մակարդակից ավել:\n\nԵրկարատև բարձրաձայն լսելը կարող է վնասել ձեր լսողությունը:"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Ուշադրություն.\nդուք գերազանցել եք բարձր ձայնային ազդանշանների քանակը, որն անվտանգ է համարվում մեկ շաբաթվա ընթացքում ականջակալներով լսելու համար։\n\nԱյս սահմանաչափն անցնելու դեպքում ձեր լսողությանն անդառնալի վնաս կհասցվի։"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Ուշադրություն.\nդուք 5 անգամ գերազանցել եք բարձր ձայնային ազդանշանների քանակը, որն անվտանգ է համարվում մեկ շաբաթվա ընթացքում ականջակալներով լսելու համար։\n\nՁայնն իջեցվել է՝ ձեր լսողությունը պաշտպանելու համար։"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Երկար ժամանակ ձայնի ուժգնության այս մակարդակով մեդիա բովանդակություն լսելը կարող է վնասել ձեր լսողությունը։\n\nԵթե ձայնը չիջեցնեք, ձեր լսողությունը ժամանակի ընթացքում կարող է վատանալ։"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Ուշադրություն․\nդուք չափազանց բարձր ձայնով եք մեդիա բովանդակություն լսում, ինչը կարող է վտանագավոր լինել։\n\nԵթե չիջեցնեք ձայնը, ձեր լսողությանն անդառնալի վնաս կհասցվի։"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Բարձր պահե՞լ ձայնը\n\nԱկանջակալների ձայնի ուժգնությունը տևական ժամանակ ավելի բարձր է եղել առաջարկվող մակարդակից, ինչը կարող է վնասել ձեր լսողությունը"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Հայտնաբերվել է ձայնի բարձր ուժգնություն\n\nԱկանջակալների ձայնի ուժգնությունը բարձր է առաջարկվող մակարդակից, ինչը կարող է վնասել ձեր լսողությունը"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Օգտագործե՞լ Մատչելիության դյուրանցումը։"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Հատուկ գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է:"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Միացնե՞լ հատուկ գործառույթների դյուրանցումը"</string>
@@ -1704,6 +1710,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Կարող է հետագծել ձեր գործողությունները հավելվածներում և սարքակազմի սենսորների վրա, ինչպես նաև հավելվածներում կատարել գործողություններ ձեր անունից։"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Թույլատրել"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Մերժել"</string>
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Ապատեղադրել"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Հավելվածը թաքցնում է թույլտվության հայտը, ուստի ձեր պատասխանը հնարավոր չէ ստուգել։"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ընտրեք՝ որ գործառույթն օգտագործել"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Ընտրեք գործառույթները, որոնք կբացվեն «Հատուկ գործառույթներ» կոճակի միջոցով"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Ընտրեք գործառույթները, որոնք կբացվեն ձայնի կարգավորման կոճակի միջոցով"</string>
@@ -1728,7 +1736,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Մի գործառույթից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Անցում հետևյալ պրոֆիլին՝ <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Անցում <xliff:g id="NAME">%1$s</xliff:g> պրոֆիլին..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Ելք <xliff:g id="NAME">%1$s</xliff:g>-ից…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Սեփականատեր"</string>
     <string name="guest_name" msgid="8502103277839834324">"Հյուր"</string>
@@ -1851,7 +1859,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Դուրս գալու համար վերևից սահահարվածեք դեպի ներքև:"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Պարզ է"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Պտտեք՝ դիտակերպը լավացնելու համար"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Դուրս եկեք կիսված էկրանի ռեժիմից՝ դիտակերպը լավացնելու համար"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Բացեք <xliff:g id="NAME">%s</xliff:g> հավելվածը լիաէկրան ռեժիմում՝ դիտակերպը լավացնելու համար"</string>
     <string name="done_label" msgid="7283767013231718521">"Պատրաստ է"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ժամերի ընտրություն թվատախտակից"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Րոպեների ընտրություն թվատախտակից"</string>
@@ -1864,6 +1872,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g>-ի կլոն"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Անձնական <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Հարցնել PIN կոդը"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Հարցնել ապակողպող նախշը"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Հարցնել գաղտնաբառը"</string>
@@ -1897,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Շաբաթ-կիրակի"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Միջոցառում"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Քնի ժամանակ"</string>
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Միացված է"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Անջատված է"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ն անջատում է որոշ ձայներ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Սարքում ներքին խնդիր է առաջացել և այն կարող է կրկնվել, մինչև չվերականգնեք գործարանային կարգավորումները:"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Սարքում ներքին խնդիր է առաջացել: Մանրամասների համար կապվեք արտադրողի հետ:"</string>
@@ -1957,7 +1968,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Անհրաժեշտ է թույլտվություն"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Թույլտվության հայտն արգելափակվել է"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Տեսախցիկն անհասանելի է"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Շարու­նակեք հեռախոսով"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Խոսափողն անհասանելի է"</string>
@@ -1968,6 +1979,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք Android TV սարքում։"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք ձեր պլանշետում։"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Այս պահին հնարավոր չէ բացել հավելվածը <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Փորձեք ձեր հեռախոսում։"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Այս հավելվածը պահանջում է լրացուցիչ թույլտվություններ, սակայն դրանք հնարավոր չէ տրամադրել հեռարձակման ժամանակ։ Նախ տրամադրեք թույլտվությունը ձեր Android TV սարքում։"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Այս հավելվածը պահանջում է լրացուցիչ թույլտվություններ, սակայն դրանք հնարավոր չէ տրամադրել հեռարձակման ժամանակ։ Նախ տրամադրեք թույլտվությունը ձեր պլանշետում։"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Այս հավելվածը պահանջում է լրացուցիչ թույլտվություններ, սակայն դրանք հնարավոր չէ տրամադրել հեռարձակման ժամանակ։ Նախ տրամադրեք թույլտվությունը ձեր հեռախոսում։"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Այս հավելվածը պահանջում է անվտանգության լրացուցիչ միջոցներ։ Օգտագործեք ձեր Android TV սարքը։"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Այս հավելվածը պահանջում է անվտանգության լրացուցիչ միջոցներ։ Օգտագործեք ձեր պլանշետը։"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Այս հավելվածը պահանջում է անվտանգության լրացուցիչ միջոցներ։ Օգտագործեք ձեր հեռախոսը։"</string>
@@ -1976,6 +1990,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Այս գործառույթը հասանելի չէ <xliff:g id="DEVICE">%1$s</xliff:g> սարքում։ Օգտագործեք ձեր հեռախոսը։"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Այս հավելվածը մշակված է Android-ի ավելի հին տարբերակի համար։ Այն չի համապատասխանում անվտանգության և գաղտնիության ապահովման վերջին պահանջներին և կարող է պատշաճ կերպով չաշխատել։ Ստուգեք թարմացումների առկայությունը կամ դիմեք հավելվածի մշակողին։"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Ստուգել նոր տարբերակի առկայությունը"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Այս հավելվածը համատեղելի չէ Android-ի վերջին տարբերակի հետ։ Ստուգեք թարմացումների առկայությունը կամ դիմեք հավելվածը մշակողին։"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Դուք ունեք նոր հաղորդագրություններ"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Դիտելու համար բացել SMS-ների փոխանակման հավելվածը"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Որոշ գործառույթներ կարող են չաշխատել"</string>
@@ -2024,7 +2039,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Թարմացնե՞լ "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ծառայությունում"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Թարմացնե՞լ տվյալները (<xliff:g id="TYPE">%1$s</xliff:g>) "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ծառայությունում"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Թարմացնե՞լ տվյալները (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>) "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ծառայությունում"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Թարմացնե՞լ տվյալները (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>) "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ծառայությունում"</string>
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Թարմացնե՞լ տվյալները (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>) "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ծառայությունում"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Պահել"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Ոչ"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Ոչ հիմա"</string>
@@ -2159,16 +2174,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Այս բովանդակությունը հնարավոր չէ բացել աշխատանքային հավելվածներով"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Այս բովանդակությունը հնարավոր չէ ուղարկել անձնական հավելվածներով"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Այս բովանդակությունը հնարավոր չէ բացել անձնական հավելվածներով"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Աշխատանքային պրոֆիլի ծառայությունը դադարեցված է"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Հպեք միացնելու համար"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Աշխատանքային հավելվածները դադարեցված են"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Վերսկսել"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Աշխատանքային հավելվածներ չկան"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Անձնական հավելվածներ չկան"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Բացե՞լ աշխատանքային <xliff:g id="APP">%s</xliff:g> հավելվածը"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Բացե՞լ անձնական <xliff:g id="APP">%s</xliff:g> հավելվածում"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Բացե՞լ աշխատանքային <xliff:g id="APP">%s</xliff:g> հավելվածում"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Զանգե՞լ աշխատանքային հավելվածից"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Անցնե՞լ աշխատանքային հավելվածի"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Ձեր կազմակերպությունը թույլատրում է ձեզ զանգեր կատարել միայն աշխատանքային հավելվածներից"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Ձեր կազմակերպությունը թույլատրում է ձեզ հաղորդագրություններ ուղարկել միայն աշխատանքային հավելվածներից"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Օգտագործել անձնական դիտարկիչը"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Օգտագործել աշխատանքային դիտարկիչը"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Զանգել"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Անցնել"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM Network քարտի ապակողպման PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM Network Subset քարտի ապակողպման PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM Corporate քարտի ապակողպման PIN"</string>
@@ -2305,6 +2325,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Հնարավոր չէ օգտագործել հեռախոսի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Հնարավոր չէ օգտագործել պլանշետի տեսախցիկը ձեր <xliff:g id="DEVICE">%1$s</xliff:g> սարքից"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Այս բովանդակությունը հասանելի չէ հեռարձակման ընթացքում։ Օգտագործեք ձեր հեռախոսը։"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Հեռարձակման ժամանակ հնարավոր չէ դիտել նկարը նկարի մեջ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Կանխադրված"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ՔԱՐՏ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Ժամացույցները կառավարելու թույլտվություն ուղեկցող հավելվածի համար"</string>
@@ -2317,20 +2338,32 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Թույլատրում է ուղեկցող հավելվածին ակտիվ ծառայություններ գործարկել ֆոնային ռեժիմից։"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Խոսափողը հասանելի է"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Խոսափողն արգելափակված է"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Կրկնակի էկրան"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Կրկնակի էկրանը միացված է"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը երկու էկրաններն էլ օգտագործում է բովանդակություն ցուցադրելու համար"</string>
+    <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Չհաջողվեց հայելապատճենել էկրանին"</string>
+    <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Օգտագործեք այլ մալուխ և նորից փորձեք"</string>
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Ձեր սարքը գերտաքացել է և չի կարող հայելապատճենել էկրանը, մինչև ջերմաստիճանը չնվազի"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Մալուխը կարող է համատեղելի չլինել էկրանների հետ"</string>
+    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Հնարավոր է՝ USB-C մալուխը սխալ է միացված էկրանին"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen-ը միացված է"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն օգտագործում է երկու էկրանները"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Սարքը գերտաքացել է"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Կրկնակի էկրանն անհասանելի է, քանի որ ձեր հեռախոսը գերտաքանում է"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen-ն անհասանելի է, քանի որ ձեր հեռախոսը գերտաքանում է"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen-ը հասանելի չէ"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen-ն անհասանելի է, քանի որ Մարտկոցի տնտեսումը միացված է։ Դուք կարող եք անջատել այս գործառույթը Կարգավորումներում։"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Անցնել Կարգավորումներ"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Անջատել"</string>
-    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> սարքը կարգավորված է"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> – կարգավորված է"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Ստեղնաշարի համար կարգավորված է <xliff:g id="LAYOUT_1">%s</xliff:g> դասավորությունը։ Հպեք փոփոխելու համար։"</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Ստեղնաշարի համար կարգավորված են <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> դասավորությունները։ Հպեք փոփոխելու համար։"</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Ստեղնաշարի համար կարգավորված են <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> դասավորությունները։ Հպեք փոփոխելու համար։"</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Ստեղնաշարի համար կարգավորված են <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> դասավորությունները։ Հպեք փոխելու համար։"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Ֆիզիկական ստեղնաշարերը կարգավորված են"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Հպեք՝ ստեղնաշարերը դիտելու համար"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Անձնական"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Կլոն"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Աշխատանքային"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Աշխատանքային 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Աշխատանքային 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Փորձնական"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Ընդհանուր"</string>
 </resources>

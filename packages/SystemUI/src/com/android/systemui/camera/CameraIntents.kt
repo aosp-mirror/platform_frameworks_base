@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.MediaStore
 import android.text.TextUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 class CameraIntents {
     companion object {

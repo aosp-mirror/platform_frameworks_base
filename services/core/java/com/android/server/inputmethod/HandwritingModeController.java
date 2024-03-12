@@ -16,14 +16,16 @@
 
 package com.android.server.inputmethod;
 
-import static android.view.InputDevice.SOURCE_STYLUS;
-
 import android.Manifest;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManagerInternal;
+import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -64,10 +66,12 @@ final class HandwritingModeController {
     private static final int LONG_EVENT_BUFFER_SIZE = EVENT_BUFFER_SIZE * 20;
     private static final long HANDWRITING_DELEGATION_IDLE_TIMEOUT_MS = 3000;
 
+    private final Context mContext;
     // This must be the looper for the UiThread.
     private final Looper mLooper;
     private final InputManagerInternal mInputManagerInternal;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final PackageManagerInternal mPackageManagerInternal;
 
     private ArrayList<MotionEvent> mHandwritingBuffer;
     private InputEventReceiver mHandwritingEventReceiver;
@@ -77,6 +81,7 @@ final class HandwritingModeController {
     // when set, package names are used for handwriting delegation.
     private @Nullable String mDelegatePackageName;
     private @Nullable String mDelegatorPackageName;
+    private boolean mDelegatorFromDefaultHomePackage;
     private Runnable mDelegationIdleTimeoutRunnable;
     private Handler mDelegationIdleTimeoutHandler;
 
@@ -85,22 +90,16 @@ final class HandwritingModeController {
     private int mCurrentRequestId;
 
     @AnyThread
-    HandwritingModeController(Looper uiThreadLooper, Runnable inkWindowInitRunnable) {
+    HandwritingModeController(Context context, Looper uiThreadLooper,
+            Runnable inkWindowInitRunnable) {
+        mContext = context;
         mLooper = uiThreadLooper;
         mCurrentDisplayId = Display.INVALID_DISPLAY;
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mCurrentRequestId = 0;
         mInkWindowInitRunnable = inkWindowInitRunnable;
-    }
-
-    // TODO(b/210039666): Consider moving this to MotionEvent
-    private static boolean isStylusEvent(MotionEvent event) {
-        if (!event.isFromSource(SOURCE_STYLUS)) {
-            return false;
-        }
-        final int tool = event.getToolType(0);
-        return tool == MotionEvent.TOOL_TYPE_STYLUS || tool == MotionEvent.TOOL_TYPE_ERASER;
     }
 
     /**
@@ -162,9 +161,20 @@ final class HandwritingModeController {
      * @see InputMethodManager#prepareStylusHandwritingDelegation(View, String)
      */
     void prepareStylusHandwritingDelegation(
-            @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
+            int userId, @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
         mDelegatePackageName = delegatePackageName;
         mDelegatorPackageName = delegatorPackageName;
+        mDelegatorFromDefaultHomePackage = false;
+        // mDelegatorFromDefaultHomeActivity is only used in the cross-package delegation case.
+        // For same-package delegation, it doesn't need to be checked.
+        if (!delegatorPackageName.equals(delegatePackageName)) {
+            ComponentName defaultHomeActivity =
+                    mPackageManagerInternal.getDefaultHomeActivity(userId);
+            if (defaultHomeActivity != null) {
+                mDelegatorFromDefaultHomePackage =
+                        delegatorPackageName.equals(defaultHomeActivity.getPackageName());
+            }
+        }
         if (mHandwritingBuffer == null) {
             mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
         } else {
@@ -179,6 +189,10 @@ final class HandwritingModeController {
 
     @Nullable String getDelegatorPackageName() {
         return mDelegatorPackageName;
+    }
+
+    boolean isDelegatorFromDefaultHomePackage() {
+        return mDelegatorFromDefaultHomePackage;
     }
 
     private void scheduleHandwritingDelegationTimeout() {
@@ -221,6 +235,7 @@ final class HandwritingModeController {
         mDelegationIdleTimeoutRunnable = null;
         mDelegatorPackageName = null;
         mDelegatePackageName = null;
+        mDelegatorFromDefaultHomePackage = false;
     }
 
     /**
@@ -275,7 +290,14 @@ final class HandwritingModeController {
         mHandwritingSurface.startIntercepting(imePid, imeUid);
 
         // Unset the pointer icon for the stylus in case the app had set it.
-        InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            Objects.requireNonNull(mContext.getSystemService(InputManager.class)).setPointerIcon(
+                    PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED),
+                    downEvent.getDisplayId(), downEvent.getDeviceId(), downEvent.getPointerId(0),
+                    mHandwritingSurface.getInputChannel().getToken());
+        } else {
+            InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
+        }
 
         return new HandwritingSession(mCurrentRequestId, mHandwritingSurface.getInputChannel(),
                 mHandwritingBuffer);
@@ -333,7 +355,7 @@ final class HandwritingModeController {
             return false;
         }
         final MotionEvent event = (MotionEvent) ev;
-        if (!isStylusEvent(event)) {
+        if (!event.isStylusPointer()) {
             return false;
         }
         if (event.getDisplayId() != mCurrentDisplayId) {
@@ -353,6 +375,10 @@ final class HandwritingModeController {
             // Ask IMMS to make ink window ready.
             mInkWindowInitRunnable.run();
             mInkWindowInitRunnable = null;
+            return;
+        } else if (event.isHoverEvent()) {
+            // Hover events need not be recorded to buffer.
+            return;
         }
 
         // If handwriting delegation is ongoing, don't clear the buffer so that multiple strokes

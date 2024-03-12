@@ -36,7 +36,7 @@ void AConfiguration_delete(AConfiguration* config) {
 
 void AConfiguration_fromAssetManager(AConfiguration* out, AAssetManager* am) {
     ScopedLock<AssetManager2> locked_mgr(*AssetManagerForNdkAssetManager(am));
-    ResTable_config config = locked_mgr->GetConfiguration();
+    ResTable_config config = locked_mgr->GetConfigurations()[0];
 
     // AConfiguration is not a virtual subclass, so we can memcpy.
     memcpy(out, &config, sizeof(config));

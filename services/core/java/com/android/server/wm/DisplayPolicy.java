@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCRE
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_CONSUME_IME_INSETS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IMMERSIVE_CONFIRMATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -99,6 +100,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
@@ -270,6 +272,8 @@ public class DisplayPolicy {
     private boolean mIsFreeformWindowOverlappingWithNavBar;
 
     private @InsetsType int mForciblyShownTypes;
+
+    private boolean mImeInsetsConsumed;
 
     private boolean mIsImmersiveMode;
 
@@ -781,6 +785,12 @@ public class DisplayPolicy {
             if (!mDisplayContent.isDefaultDisplay) {
                 return;
             }
+            if (awake) {
+                mService.mAtmService.mVisibleDozeUiProcess = null;
+            } else if (mScreenOnFully && mNotificationShade != null) {
+                // Screen is still on, so it may be showing an always-on UI.
+                mService.mAtmService.mVisibleDozeUiProcess = mNotificationShade.getProcess();
+            }
             mService.mAtmService.mKeyguardController.updateDeferTransitionForAod(
                     mAwake /* waiting */);
         }
@@ -826,12 +836,24 @@ public class DisplayPolicy {
     }
 
     public void screenTurnedOn(ScreenOnListener screenOnListener) {
+        WindowProcessController visibleDozeUiProcess = null;
         synchronized (mLock) {
             mScreenOnEarly = true;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = screenOnListener;
+            if (!mAwake && mNotificationShade != null) {
+                // The screen is turned on without awake state. It is usually triggered by an
+                // adding notification, so make the UI process have a higher priority.
+                visibleDozeUiProcess = mNotificationShade.getProcess();
+                mService.mAtmService.mVisibleDozeUiProcess = visibleDozeUiProcess;
+            }
+        }
+        // The method calls AM directly, so invoke it outside the lock.
+        if (visibleDozeUiProcess != null) {
+            Trace.instant(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurnedOnWhileDozing");
+            mService.mAtmService.setProcessAnimatingWhileDozing(visibleDozeUiProcess);
         }
     }
 
@@ -842,6 +864,7 @@ public class DisplayPolicy {
             mKeyguardDrawComplete = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = null;
+            mService.mAtmService.mVisibleDozeUiProcess = null;
         }
     }
 
@@ -954,7 +977,7 @@ public class DisplayPolicy {
             float maxOpacity = mService.mMaximumObscuringOpacityForTouch;
             if (attrs.alpha > maxOpacity
                     && (attrs.flags & FLAG_NOT_TOUCHABLE) != 0
-                    && (attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) == 0) {
+                    && !win.isTrustedOverlay()) {
                 // The app is posting a SAW with the intent of letting touches pass through, but
                 // they are going to be deemed untrusted and will be blocked. Try to honor the
                 // intent of letting touches pass through at the cost of 0.2 opacity for app
@@ -1034,20 +1057,15 @@ public class DisplayPolicy {
                 }
                 break;
             case TYPE_NAVIGATION_BAR:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
-                        "DisplayPolicy");
+                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                        callingPid, callingUid, "DisplayPolicy");
                 if (mNavigationBar != null && mNavigationBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
-                // Check for permission if the caller is not the recents component.
-                if (!mService.mAtmService.isCallerRecents(callingUid)) {
-                    mContext.enforcePermission(
-                            android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
-                            "DisplayPolicy");
-                }
+                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
+                        callingPid, callingUid, "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_ADDITIONAL:
             case TYPE_STATUS_BAR_SUB_PANEL:
@@ -1405,6 +1423,7 @@ public class DisplayPolicy {
         mShowingDream = false;
         mIsFreeformWindowOverlappingWithNavBar = false;
         mForciblyShownTypes = 0;
+        mImeInsetsConsumed = false;
     }
 
     /**
@@ -1464,6 +1483,17 @@ public class DisplayPolicy {
 
         if (win.mSession.mCanForceShowingInsets) {
             mForciblyShownTypes |= win.mAttrs.forciblyShownTypes;
+        }
+
+        if (win.mImeInsetsConsumed != mImeInsetsConsumed) {
+            win.mImeInsetsConsumed = mImeInsetsConsumed;
+            final WindowState imeWin = mDisplayContent.mInputMethodWindow;
+            if (win.isReadyToDispatchInsetsState() && imeWin != null && imeWin.isVisible()) {
+                win.notifyInsetsChanged();
+            }
+        }
+        if ((attrs.privateFlags & PRIVATE_FLAG_CONSUME_IME_INSETS) != 0 && win.isVisible()) {
+            mImeInsetsConsumed = true;
         }
 
         if (!affectsSystemUi) {
@@ -1722,11 +1752,12 @@ public class DisplayPolicy {
     void onOverlayChanged() {
         updateCurrentUserResources();
         // Update the latest display size, cutout.
-        mDisplayContent.updateDisplayInfo();
-        onConfigurationChanged();
-        if (!CLIENT_TRANSIENT) {
-            mSystemGestures.onConfigurationChanged();
-        }
+        mDisplayContent.requestDisplayUpdate(() -> {
+            onConfigurationChanged();
+            if (!CLIENT_TRANSIENT) {
+                mSystemGestures.onConfigurationChanged();
+            }
+        });
     }
 
     /**
@@ -1881,15 +1912,13 @@ public class DisplayPolicy {
                 dc.getDisplayPolicy().simulateLayoutDisplay(df);
                 final InsetsState insetsState = df.mInsetsState;
                 final Rect displayFrame = insetsState.getDisplayFrame();
-                final Insets decor = insetsState.calculateInsets(displayFrame, DECOR_TYPES,
-                        true /* ignoreVisibility */);
-                final Insets statusBar = insetsState.calculateInsets(displayFrame,
-                        Type.statusBars(), true /* ignoreVisibility */);
+                final Insets decor = insetsState.calculateInsets(displayFrame,
+                        dc.mWmService.mDecorTypes, true /* ignoreVisibility */);
+                final Insets configInsets = insetsState.calculateInsets(displayFrame,
+                        dc.mWmService.mConfigTypes, true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
-                mConfigInsets.set(Math.max(statusBar.left, decor.left),
-                        Math.max(statusBar.top, decor.top),
-                        Math.max(statusBar.right, decor.right),
-                        Math.max(statusBar.bottom, decor.bottom));
+                mConfigInsets.set(configInsets.left, configInsets.top, configInsets.right,
+                        configInsets.bottom);
                 mNonDecorFrame.set(displayFrame);
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
@@ -1916,15 +1945,6 @@ public class DisplayPolicy {
                         + ", configFrame=" + mConfigFrame.toShortString(tmpSb) + '}';
             }
         }
-
-
-        static final int DECOR_TYPES = Type.displayCutout() | Type.navigationBars();
-
-        /**
-         * The types that may affect display configuration. This excludes cutout because it is
-         * known from display info.
-         */
-        static final int CONFIG_TYPES = Type.statusBars() | Type.navigationBars();
 
         private final DisplayContent mDisplayContent;
         private final Info[] mInfoForRotation = new Info[4];
@@ -2823,6 +2843,7 @@ public class DisplayPolicy {
             }
         }
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.println(mTopIsFullscreen);
+        pw.print(prefix); pw.print("mImeInsetsConsumed="); pw.println(mImeInsetsConsumed);
         pw.print(prefix); pw.print("mForceShowNavigationBarEnabled=");
         pw.print(mForceShowNavigationBarEnabled);
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);

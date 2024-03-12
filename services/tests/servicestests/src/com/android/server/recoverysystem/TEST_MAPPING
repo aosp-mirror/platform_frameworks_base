@@ -7,7 +7,7 @@
                     "include-filter": "com.android.server.recoverysystem."
                 },
                 {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ]
         }

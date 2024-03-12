@@ -36,24 +36,24 @@ import com.android.systemui.qs.FgsManagerController
 import com.android.systemui.qs.QSSecurityFooterUtils
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepository
 import com.android.systemui.qs.footer.data.repository.ForegroundServicesRepositoryImpl
-import com.android.systemui.qs.footer.data.repository.UserSwitcherRepository
-import com.android.systemui.qs.footer.data.repository.UserSwitcherRepositoryImpl
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractor
 import com.android.systemui.qs.footer.domain.interactor.FooterActionsInteractorImpl
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.security.data.repository.SecurityRepository
 import com.android.systemui.security.data.repository.SecurityRepositoryImpl
-import com.android.systemui.settings.FakeUserTracker
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.FakeSecurityController
 import com.android.systemui.statusbar.policy.FakeUserInfoController
 import com.android.systemui.statusbar.policy.SecurityController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserSwitcherController
-import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.user.data.repository.UserSwitcherRepository
+import com.android.systemui.user.data.repository.UserSwitcherRepositoryImpl
+import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.settings.FakeGlobalSettings
 import com.android.systemui.util.settings.GlobalSettings
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -69,8 +69,8 @@ class FooterActionsTestUtils(
     private val scheduler: TestCoroutineScheduler,
 ) {
     /** Enable or disable the user switcher in the settings. */
-    fun setUserSwitcherEnabled(settings: GlobalSettings, enabled: Boolean, userId: Int) {
-        settings.putBoolForUser(Settings.Global.USER_SWITCHER_ENABLED, enabled, userId)
+    fun setUserSwitcherEnabled(settings: GlobalSettings, enabled: Boolean) {
+        settings.putBool(Settings.Global.USER_SWITCHER_ENABLED, enabled)
 
         // The settings listener is processing messages on the bgHandler (usually backed by a
         // testableLooper in tests), so let's make sure we process the callback before continuing.
@@ -102,7 +102,7 @@ class FooterActionsTestUtils(
         deviceProvisionedController: DeviceProvisionedController = mock(),
         qsSecurityFooterUtils: QSSecurityFooterUtils = mock(),
         fgsManagerController: FgsManagerController = mock(),
-        userInteractor: UserInteractor = mock(),
+        userSwitcherInteractor: UserSwitcherInteractor = mock(),
         securityRepository: SecurityRepository = securityRepository(),
         foregroundServicesRepository: ForegroundServicesRepository = foregroundServicesRepository(),
         userSwitcherRepository: UserSwitcherRepository = userSwitcherRepository(),
@@ -116,7 +116,7 @@ class FooterActionsTestUtils(
             deviceProvisionedController,
             qsSecurityFooterUtils,
             fgsManagerController,
-            userInteractor,
+            userSwitcherInteractor,
             securityRepository,
             foregroundServicesRepository,
             userSwitcherRepository,
@@ -149,20 +149,20 @@ class FooterActionsTestUtils(
         bgHandler: Handler = Handler(testableLooper.looper),
         bgDispatcher: CoroutineDispatcher = StandardTestDispatcher(scheduler),
         userManager: UserManager = mock(),
-        userTracker: UserTracker = FakeUserTracker(),
+        userRepository: UserRepository = FakeUserRepository(),
         userSwitcherController: UserSwitcherController = mock(),
         userInfoController: UserInfoController = FakeUserInfoController(),
-        settings: GlobalSettings = FakeSettings(),
+        settings: GlobalSettings = FakeGlobalSettings(),
     ): UserSwitcherRepository {
         return UserSwitcherRepositoryImpl(
             context,
             bgHandler,
             bgDispatcher,
             userManager,
-            userTracker,
             userSwitcherController,
             userInfoController,
             settings,
+            userRepository,
         )
     }
 }

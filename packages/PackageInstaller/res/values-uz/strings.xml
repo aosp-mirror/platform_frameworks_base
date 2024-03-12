@@ -26,7 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Ilova o‘rnatildi."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Bu ilovani oʻrnatmoqchimisiz?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Bu ilova yangilansinmi?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Bu ilova <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> orqali yangilansinmi?\n\nBu ilova odatda <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> orqali yangilanishlar oladi. Boshqa manbadan yangilash orqali siz kelajakdagi yangilanishlarni telefoningizda istalgan manbadan olishingiz mumkin. Ilova funksiyalari oʻzgarishi mumkin."</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Bu ilovani bundan yangilash: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Bu ilova odatda yangilanishlarni bundan oladi: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Boshqa manbadan yangilash orqali kelgusi yangilanishlarni planshetda istalgan manbadan olishingiz mumkin. Ilova funksiyalari oʻzgarishi mumkin.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Bu ilovani bundan yangilash: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Bu ilova odatda yangilanishlarni bundan oladi: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Boshqa manbadan yangilash orqali kelgusi yangilanishlarni televizorda istalgan manbadan olishingiz mumkin. Ilova funksiyalari oʻzgarishi mumkin.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Bu ilovani bundan yangilash: &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Bu ilova odatda yangilanishlarni bundan oladi: &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Boshqa manbadan yangilash orqali kelgusi yangilanishlarni telefonda istalgan manbadan olishingiz mumkin. Ilova funksiyalari oʻzgarishi mumkin.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"Ilova o‘rnatilmadi."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paket o‘rnatilishga qarshi bloklangan."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Paket mavjud paket bilan zid kelganligi uchun ilovani o‘rnatib bo‘lmadi."</string>
@@ -64,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> hajmdagi ilova axborotlari saqlab qolinsin"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Bu ilova oʻchirilsinmi?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Bu ilovani oʻchirib tashlamoqchimisiz? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nusxasi ham oʻchib ketadi."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Bu ilovani maxfiy joydan olib tashlamoqchimisiz?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Davom etayotganlar"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Amalga oshmaganlar"</string>
     <string name="uninstalling" msgid="8709566347688966845">"O‘chirilmoqda…"</string>
@@ -101,4 +104,24 @@
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Ilova oʻrnatilgani haqida bildirishnoma"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"O‘rnatildi"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” o‘rnatildi"</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> ilovasi <xliff:g id="INSTALLERNAME">%1$s</xliff:g> orqali tiklansinmi?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Bu ilova orqa fonda yuklab olinishi boshlanadi"</string>
+    <string name="restore" msgid="8460854736328970444">"Tiklash"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"Siz internetga ulanmagansiz"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Internetga ulanganingizda bu ilova avtomatik ravishda tiklanadi"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Nimadir xato ketdi"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Bu ilovani tiklashda muammo chiqdi"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"Xotirada yetarli boʻsh joy yoʻq"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Bu ilovani tiklash uchun ushbu qurilmada joy ochishingiz mumkin. Kerakli joy: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Amal bajarish zarur"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Bu ilovani tiklash uchun keyingi qadamlarga rioya qiling"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> faolsizlantirilgan"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> oʻchirib tashlandi"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Bu ilovani tiklash uchun <xliff:g id="INSTALLERNAME">%1$s</xliff:g> oʻrnatilishi kerak"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Davom etish"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Xotirani tozalash"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Sozlamalar"</string>
+    <string name="close" msgid="5214897374055647996">"Yopish"</string>
 </resources>
