@@ -523,8 +523,8 @@ class ActivityEmbeddingAnimationRunner {
     /**
      * Whether we should use jump cut for the change transition.
      * This normally happens when opening a new secondary with the existing primary using a
-     * different split layout. This can be complicated, like from horizontal to vertical split with
-     * new split pairs.
+     * different split layout (ratio or direction). This can be complicated, like from horizontal to
+     * vertical split with new split pairs.
      * Uses a jump cut animation to simplify.
      */
     private boolean shouldUseJumpCutForChangeTransition(@NonNull TransitionInfo info) {
@@ -553,8 +553,8 @@ class ActivityEmbeddingAnimationRunner {
         }
 
         // Check if the transition contains both opening and closing windows.
-        boolean hasOpeningWindow = false;
-        boolean hasClosingWindow = false;
+        final List<TransitionInfo.Change> openChanges = new ArrayList<>();
+        final List<TransitionInfo.Change> closeChanges = new ArrayList<>();
         for (TransitionInfo.Change change : info.getChanges()) {
             if (changingChanges.contains(change)) {
                 continue;
@@ -564,10 +564,30 @@ class ActivityEmbeddingAnimationRunner {
                 // No-op if it will be covered by the changing parent window.
                 continue;
             }
-            hasOpeningWindow |= TransitionUtil.isOpeningType(change.getMode());
-            hasClosingWindow |= TransitionUtil.isClosingType(change.getMode());
+            if (TransitionUtil.isOpeningType(change.getMode())) {
+                openChanges.add(change);
+            } else if (TransitionUtil.isClosingType(change.getMode())) {
+                closeChanges.add(change);
+            }
         }
-        return hasOpeningWindow && hasClosingWindow;
+        if (openChanges.isEmpty() || closeChanges.isEmpty()) {
+            // Only skip if the transition contains both open and close.
+            return false;
+        }
+        if (changingChanges.size() != 1 || openChanges.size() != 1 || closeChanges.size() != 1) {
+            // Skip when there are too many windows involved.
+            return true;
+        }
+        final TransitionInfo.Change changingChange = changingChanges.get(0);
+        final TransitionInfo.Change openChange = openChanges.get(0);
+        final TransitionInfo.Change closeChange = closeChanges.get(0);
+        if (changingChange.getStartAbsBounds().equals(openChange.getEndAbsBounds())
+                && changingChange.getEndAbsBounds().equals(closeChange.getStartAbsBounds())) {
+            // Don't skip if the transition is a simple shifting without split direction or ratio
+            // change. For example, A|B -> B|C.
+            return false;
+        }
+        return true;
     }
 
     /** Updates the changes to end states in {@code startTransaction} for jump cut animation. */
