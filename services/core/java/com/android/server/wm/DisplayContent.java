@@ -6210,7 +6210,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param onDisplayChangeApplied callback that is called when the changes are applied
      */
     void requestDisplayUpdate(@NonNull Runnable onDisplayChangeApplied) {
-        mDisplayUpdater.updateDisplayInfo(onDisplayChangeApplied);
+        mAtmService.deferWindowLayout();
+        try {
+            mDisplayUpdater.updateDisplayInfo(onDisplayChangeApplied);
+        } finally {
+            mAtmService.continueWindowLayout();
+        }
     }
 
     void onDisplayInfoUpdated(@NonNull DisplayInfo newDisplayInfo) {
