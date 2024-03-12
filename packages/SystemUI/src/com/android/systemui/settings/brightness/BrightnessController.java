@@ -47,6 +47,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -369,10 +370,18 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                mControl.setEnforcedAdmin(
-                        RestrictedLockUtilsInternal.checkIfRestrictionEnforced(mContext,
+                int userId = mUserTracker.getUserId();
+                RestrictedLockUtils.EnforcedAdmin enforcedAdmin =
+                        RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
+                                mContext,
                                 UserManager.DISALLOW_CONFIG_BRIGHTNESS,
-                                mUserTracker.getUserId()));
+                                userId);
+                if (enforcedAdmin == null && UserManager.get(mContext).hasBaseUserRestriction(
+                        UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+                        UserHandle.of(userId))) {
+                    enforcedAdmin = new RestrictedLockUtils.EnforcedAdmin();
+                }
+                mControl.setEnforcedAdmin(enforcedAdmin);
             }
         });
     }
