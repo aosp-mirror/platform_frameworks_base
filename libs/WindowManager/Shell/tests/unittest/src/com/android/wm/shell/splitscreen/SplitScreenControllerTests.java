@@ -123,7 +123,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
         assumeTrue(ActivityTaskManager.supportsSplitScreenMultiWindow(mContext));
         MockitoAnnotations.initMocks(this);
         mShellController = spy(new ShellController(mContext, mShellInit, mShellCommandHandler,
-                mMainExecutor));
+                mDisplayInsetsController, mMainExecutor));
         mSplitScreenController = spy(new SplitScreenController(mContext, mShellInit,
                 mShellCommandHandler, mShellController, mTaskOrganizer, mSyncQueue,
                 mRootTDAOrganizer, mDisplayController, mDisplayImeController,

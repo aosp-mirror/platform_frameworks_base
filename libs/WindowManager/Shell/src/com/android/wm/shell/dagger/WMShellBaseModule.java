@@ -846,8 +846,10 @@ public abstract class WMShellBaseModule {
     static ShellController provideShellController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
+            DisplayInsetsController displayInsetsController,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new ShellController(context, shellInit, shellCommandHandler, mainExecutor);
+        return new ShellController(context, shellInit, shellCommandHandler,
+                displayInsetsController, mainExecutor);
     }
 
     //
