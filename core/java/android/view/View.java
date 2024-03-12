@@ -2372,6 +2372,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
     /**
+     * This indicates that the frame rate category was chosen for an unknown reason.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_UNKNOWN = 0x0000_0000;
+
+    /**
      * This indicates that the frame rate category was chosen because it was a small area update.
      * @hide
      */
@@ -2402,9 +2408,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public static final int FRAME_RATE_CATEGORY_REASON_INVALID = 0x0500_0000;
 
+    /**
+     * This indicates that the frame rate category was chosen because the view has a velocity
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_VELOCITY = 0x0600_0000;
+
+    /**
+     * This indicates that the frame rate category was chosen because it is idle.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_REASON_IDLE = 0x0700_0000;
+
     private static final int FRAME_RATE_CATEGORY_REASON_MASK = 0xFFFF_0000;
 
-    private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
+    /**
+     * @hide
+     */
+    protected static boolean sToolkitSetFrameRateReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -33738,6 +33759,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return;
                 }
             }
+            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
+                float sizePercentage = getSizePercentage();
+                viewRootImpl.recordViewPercentage(sizePercentage);
+            }
             int frameRateCategory;
             if (Float.isNaN(mPreferredFrameRate)) {
                 frameRateCategory = calculateFrameRateCategory(width, height);
@@ -33766,11 +33791,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
-            if (sToolkitMetricsForFrameRateDecisionFlagValue) {
-                int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
-                viewRootImpl.recordCategory(category, reason, this);
-            }
-            viewRootImpl.votePreferredFrameRateCategory(category);
+            int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
+            viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
             mLastFrameRateCategory = frameRateCategory;
         }
     }
@@ -33866,9 +33888,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * This function is mainly used for migrating infrequent layer lagic
+     * This function is mainly used for migrating infrequent layer logic
      * from SurfaceFlinger to Toolkit.
-     * The infrequent layter logic includes:
+     * The infrequent layer logic includes:
      * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
      * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.
      * - otherwise, use the previous category value.
