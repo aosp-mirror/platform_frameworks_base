@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.view.View
 import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
@@ -118,13 +116,6 @@ object SharedNotificationContainerBinder {
                                             "SharedNotificationContainerVB (collapseFadeIn)"
                                         )
                                     }
-                                    addListener(
-                                        object : AnimatorListenerAdapter() {
-                                            override fun onAnimationEnd(animation: Animator) {
-                                                viewModel.setShadeCollapseFadeInComplete(true)
-                                            }
-                                        }
-                                    )
                                     start()
                                 }
                             }

@@ -46,7 +46,10 @@ constructor(
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) : BaseShadeInteractor {
-    /** The amount [0-1] that the shade has been opened */
+    /**
+     * The amount [0-1] that the shade has been opened. Uses stateIn to avoid redundant calculations
+     * in downstream flows.
+     */
     override val shadeExpansion: Flow<Float> =
         combine(
                 repository.lockscreenShadeExpansion,
@@ -71,6 +74,7 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override val qsExpansion: StateFlow<Float> = repository.qsExpansion
 
