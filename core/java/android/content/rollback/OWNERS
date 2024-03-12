@@ -1,5 +1,3 @@
 # Bug component: 819107
 
-ancr@google.com
-harshitmahajan@google.com
-robertogil@google.com
+include /services/core/java/com/android/server/crashrecovery/OWNERS
