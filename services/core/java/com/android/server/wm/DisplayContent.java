@@ -1950,6 +1950,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mFixedRotationLaunchingApp != mFixedRotationTransitionListener.mAnimatingRecents;
     }
 
+    /** It usually means whether the recents activity is launching with a different rotation. */
+    boolean hasFixedRotationTransientLaunch() {
+        return mFixedRotationLaunchingApp != null
+                && mTransitionController.isTransientLaunch(mFixedRotationLaunchingApp);
+    }
+
     boolean isFixedRotationLaunchingApp(ActivityRecord r) {
         return mFixedRotationLaunchingApp == r;
     }
@@ -7008,9 +7014,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         boolean shouldDeferRotation() {
             ActivityRecord source = null;
             if (mTransitionController.isShellTransitionsEnabled()) {
-                final ActivityRecord r = mFixedRotationLaunchingApp;
-                if (r != null && mTransitionController.isTransientLaunch(r)) {
-                    source = r;
+                if (hasFixedRotationTransientLaunch()) {
+                    source = mFixedRotationLaunchingApp;
                 }
             } else if (mAnimatingRecents != null && !hasTopFixedRotationLaunchingApp()) {
                 source = mAnimatingRecents;
