@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel.component.anc.ui.composable
 
 import android.content.Context
+import android.view.ContextThemeWrapper
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -73,15 +74,16 @@ constructor(
         AndroidView<SliceView>(
             modifier = Modifier.fillMaxWidth(),
             factory = { context: Context ->
-                SliceView(context).apply {
-                    mode = SliceView.MODE_LARGE
-                    isScrollable = false
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                    setShowTitleItems(true)
-                    addOnLayoutChangeListener(
-                        OnWidthChangedLayoutListener(viewModel::changeSliceWidth)
-                    )
-                }
+                SliceView(ContextThemeWrapper(context, R.style.Widget_SliceView_VolumePanel))
+                    .apply {
+                        mode = SliceView.MODE_LARGE
+                        isScrollable = false
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        setShowTitleItems(true)
+                        addOnLayoutChangeListener(
+                            OnWidthChangedLayoutListener(viewModel::changeSliceWidth)
+                        )
+                    }
             },
             update = { sliceView: SliceView -> sliceView.slice = slice }
         )
