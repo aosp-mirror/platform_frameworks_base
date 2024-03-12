@@ -93,4 +93,22 @@ public final class DeviceStateTest {
 
         Assert.assertEquals(originalState, new DeviceState(stateConfiguration));
     }
+
+    @Test
+    public void writeToParcel_noPhysicalProperties() {
+        final DeviceState originalState = new DeviceState(
+                new DeviceState.Configuration.Builder(0, "TEST_STATE")
+                        .setSystemProperties(Set.of(PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+                                PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST))
+                        .build());
+
+        final Parcel parcel = Parcel.obtain();
+        originalState.getConfiguration().writeToParcel(parcel, 0 /* flags */);
+        parcel.setDataPosition(0);
+
+        final DeviceState.Configuration stateConfiguration =
+                DeviceState.Configuration.CREATOR.createFromParcel(parcel);
+
+        Assert.assertEquals(originalState, new DeviceState(stateConfiguration));
+    }
 }
