@@ -3598,7 +3598,8 @@ final class InstallPackageHelper {
                 continue;
             }
             if ((scanFlags & SCAN_DROP_CACHE) != 0) {
-                final PackageCacher cacher = new PackageCacher(mPm.getCacheDir());
+                final PackageCacher cacher = new PackageCacher(mPm.getCacheDir(),
+                        mPm.mPackageParserCallback);
                 Log.w(TAG, "Dropping cache of " + file.getAbsolutePath());
                 cacher.cleanCachedResult(file);
             }
