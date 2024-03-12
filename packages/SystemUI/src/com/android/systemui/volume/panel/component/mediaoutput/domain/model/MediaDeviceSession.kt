@@ -36,3 +36,7 @@ sealed interface MediaDeviceSession {
     /** Current media state is unknown yet. */
     data object Unknown : MediaDeviceSession
 }
+
+/** Returns true when the audio is playing for the [MediaDeviceSession]. */
+fun MediaDeviceSession.isPlaying(): Boolean =
+    this is MediaDeviceSession.Active && playbackState?.isActive == true
