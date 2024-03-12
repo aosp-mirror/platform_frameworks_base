@@ -463,6 +463,13 @@ flag {
 }
 
 flag {
+   name: "enable_contextual_tips_frequency_cap"
+   description: "Enables frequency capping for contextual tips, e.g. 1x/day, 2x/week, 3x/lifetime."
+   namespace: "systemui"
+   bug: "322891421"
+}
+
+flag {
    name: "enable_contextual_tips"
    description: "Enables showing contextual tips."
    namespace: "systemui"
