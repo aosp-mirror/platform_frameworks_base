@@ -17,8 +17,7 @@ android_test {
         "java/**/*.java",
         "java/**/*.kt",
     ],
-
-    defaults: ["framework-connectivity-test-defaults"],
+    sdk_version: "core_platform", // tests can use @CorePlatformApi's
     test_suites: ["device-tests"],
     static_libs: [
         "androidx.test.rules",
@@ -32,6 +31,13 @@ android_test {
         "service-connectivity-tiramisu-pre-jarjar",
     ],
     libs: [
+        // order matters: classes in framework-connectivity are resolved before framework,
+        // meaning @hide APIs in framework-connectivity are resolved before @SystemApi
+        // stubs in framework
+        "framework-connectivity.impl",
+        "framework-connectivity-t.impl",
+        "framework",
+        "framework-res",
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
