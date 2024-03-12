@@ -18,7 +18,6 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
-import static com.android.media.flags.Flags.FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2;
 import static com.android.media.flags.Flags.FLAG_ENABLE_GET_TRANSFERABLE_ROUTES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL;
 import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
@@ -33,7 +32,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -133,6 +134,8 @@ public final class MediaRouter2 {
     private static final long MANAGER_REQUEST_ID_NONE = MediaRoute2ProviderService.REQUEST_ID_NONE;
 
     private record PackageNameUserHandlePair(String packageName, UserHandle user) {}
+
+    private record InstanceInvalidatedCallbackRecord(Executor executor, Runnable runnable) {}
 
     @GuardedBy("sSystemRouterLock")
     private static final Map<PackageNameUserHandlePair, MediaRouter2> sAppToProxyRouterMap =
@@ -247,26 +250,104 @@ public final class MediaRouter2 {
      *       <p>Calls to {@link #setOnGetControllerHintsListener} are ignored.
      * </ul>
      *
+     * <p>Callers that only hold the revocable form of {@link
+     * Manifest.permission#MEDIA_ROUTING_CONTROL} must use {@link #getInstance(Context, String,
+     * Executor, Runnable)} instead of this method.
+     *
      * @param clientPackageName the package name of the app to control
      * @return a proxy MediaRouter2 instance if {@code clientPackageName} exists or {@code null}.
+     * @throws IllegalStateException if the caller only holds a revocable version of {@link
+     *     Manifest.permission#MEDIA_ROUTING_CONTROL}.
+     * @hide
      */
-    @FlaggedApi(FLAG_ENABLE_CROSS_USER_ROUTING_IN_MEDIA_ROUTER2)
+    @SuppressWarnings("RequiresPermission")
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.MEDIA_CONTENT_CONTROL,
                 Manifest.permission.MEDIA_ROUTING_CONTROL
             })
+    @SystemApi
     @Nullable
     public static MediaRouter2 getInstance(
             @NonNull Context context, @NonNull String clientPackageName) {
         // Capturing the IAE here to not break nullability.
         try {
             return findOrCreateProxyInstanceForCallingUser(
-                    context, clientPackageName, context.getUser());
+                    context,
+                    clientPackageName,
+                    context.getUser(),
+                    /* executor */ null,
+                    /* onInstanceInvalidatedListener */ null);
         } catch (IllegalArgumentException ex) {
             Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
             return null;
         }
+    }
+
+    /**
+     * Returns a proxy MediaRouter2 instance that allows you to control the routing of an app
+     * specified by {@code clientPackageName}. Returns {@code null} if the specified package name
+     * does not exist.
+     *
+     * <p>Proxy MediaRouter2 instances operate differently than regular MediaRouter2 instances:
+     *
+     * <ul>
+     *   <li>
+     *       <p>{@link #registerRouteCallback} ignores any {@link RouteDiscoveryPreference discovery
+     *       preference} passed by a proxy router. Use {@link RouteDiscoveryPreference#EMPTY} when
+     *       setting a route callback.
+     *   <li>
+     *       <p>Methods returning non-system {@link RoutingController controllers} always return new
+     *       instances with the latest data. Do not attempt to compare or store them. Instead, use
+     *       {@link #getController(String)} or {@link #getControllers()} to query the most
+     *       up-to-date state.
+     *   <li>
+     *       <p>Calls to {@link #setOnGetControllerHintsListener} are ignored.
+     * </ul>
+     *
+     * <p>Use this method when you only hold a revocable version of {@link
+     * Manifest.permission#MEDIA_ROUTING_CONTROL} (e.g. acquired via the {@link AppOpsManager}).
+     * Otherwise, use {@link #getInstance(Context, String)}.
+     *
+     * <p>{@code onInstanceInvalidatedListener} is called when the instance is invalidated because
+     * the calling app has lost {@link Manifest.permission#MEDIA_ROUTING_CONTROL} and does not hold
+     * {@link Manifest.permission#MEDIA_CONTENT_CONTROL}. Do not use the invalidated instance after
+     * receiving this callback, as the system will ignore all operations. Call {@link
+     * #getInstance(Context, String, Executor, Runnable)} again after reacquiring the relevant
+     * permissions.
+     *
+     * @param context The {@link Context} of the caller.
+     * @param clientPackageName The package name of the app you want to control the routing of.
+     * @param executor The {@link Executor} on which to invoke {@code
+     *     onInstanceInvalidatedListener}.
+     * @param onInstanceInvalidatedListener Callback for when the {@link MediaRouter2} instance is
+     *     invalidated due to lost permissions.
+     * @throws IllegalArgumentException if {@code clientPackageName} does not exist in the calling
+     *     user.
+     */
+    @SuppressWarnings("RequiresPermission")
+    @FlaggedApi(FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL)
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_CONTENT_CONTROL,
+                Manifest.permission.MEDIA_ROUTING_CONTROL
+            })
+    @NonNull
+    public static MediaRouter2 getInstance(
+            @NonNull Context context,
+            @NonNull String clientPackageName,
+            @NonNull Executor executor,
+            @NonNull Runnable onInstanceInvalidatedListener) {
+        Objects.requireNonNull(executor, "Executor must not be null");
+        Objects.requireNonNull(
+                onInstanceInvalidatedListener, "onInstanceInvalidatedListener must not be null.");
+
+        return findOrCreateProxyInstanceForCallingUser(
+                context,
+                clientPackageName,
+                context.getUser(),
+                executor,
+                onInstanceInvalidatedListener);
     }
 
     /**
@@ -308,7 +389,12 @@ public final class MediaRouter2 {
     @NonNull
     public static MediaRouter2 getInstance(
             @NonNull Context context, @NonNull String clientPackageName, @NonNull UserHandle user) {
-        return findOrCreateProxyInstanceForCallingUser(context, clientPackageName, user);
+        return findOrCreateProxyInstanceForCallingUser(
+                context,
+                clientPackageName,
+                user,
+                /* executor */ null,
+                /* onInstanceInvalidatedListener */ null);
     }
 
     /**
@@ -320,12 +406,24 @@ public final class MediaRouter2 {
      */
     @NonNull
     private static MediaRouter2 findOrCreateProxyInstanceForCallingUser(
-            Context context, String clientPackageName, UserHandle user) {
+            Context context,
+            String clientPackageName,
+            UserHandle user,
+            @Nullable Executor executor,
+            @Nullable Runnable onInstanceInvalidatedListener) {
         Objects.requireNonNull(context, "context must not be null");
         Objects.requireNonNull(user, "user must not be null");
 
         if (TextUtils.isEmpty(clientPackageName)) {
             throw new IllegalArgumentException("clientPackageName must not be null or empty");
+        }
+
+        if (executor == null || onInstanceInvalidatedListener == null) {
+            if (checkCallerHasOnlyRevocablePermissions(context)) {
+                throw new IllegalStateException(
+                        "Use getInstance(Context, String, Executor, Runnable) to obtain a proxy"
+                                + " MediaRouter2 instance.");
+            }
         }
 
         PackageNameUserHandlePair key = new PackageNameUserHandlePair(clientPackageName, user);
@@ -339,8 +437,30 @@ public final class MediaRouter2 {
                 ((ProxyMediaRouter2Impl) instance.mImpl).registerProxyRouter();
                 sAppToProxyRouterMap.put(key, instance);
             }
+            ((ProxyMediaRouter2Impl) instance.mImpl)
+                    .registerInstanceInvalidatedCallback(executor, onInstanceInvalidatedListener);
             return instance;
         }
+    }
+
+    private static boolean checkCallerHasOnlyRevocablePermissions(@NonNull Context context) {
+        boolean hasMediaContentControl =
+                context.checkSelfPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+                        == PackageManager.PERMISSION_GRANTED;
+        boolean hasRegularMediaRoutingControl =
+                context.checkSelfPermission(Manifest.permission.MEDIA_ROUTING_CONTROL)
+                        == PackageManager.PERMISSION_GRANTED;
+        AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+        boolean hasAppOpMediaRoutingControl =
+                appOpsManager.unsafeCheckOp(
+                                AppOpsManager.OPSTR_MEDIA_ROUTING_CONTROL,
+                                context.getApplicationInfo().uid,
+                                context.getOpPackageName())
+                        == AppOpsManager.MODE_ALLOWED;
+
+        return !hasMediaContentControl
+                && !hasRegularMediaRoutingControl
+                && hasAppOpMediaRoutingControl;
     }
 
     /**
@@ -2425,6 +2545,10 @@ public final class MediaRouter2 {
         @NonNull private final UserHandle mClientUser;
         private final AtomicBoolean mIsScanning = new AtomicBoolean(/* initialValue= */ false);
 
+        @GuardedBy("mLock")
+        private final List<InstanceInvalidatedCallbackRecord> mInstanceInvalidatedCallbackRecords =
+                new ArrayList<>();
+
         ProxyMediaRouter2Impl(
                 @NonNull Context context,
                 @NonNull String clientPackageName,
@@ -2444,6 +2568,21 @@ public final class MediaRouter2 {
                         mClientUser);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
+            }
+        }
+
+        public void registerInstanceInvalidatedCallback(
+                @Nullable Executor executor, @Nullable Runnable onInstanceInvalidatedListener) {
+            if (executor == null || onInstanceInvalidatedListener == null) {
+                return;
+            }
+
+            InstanceInvalidatedCallbackRecord record =
+                    new InstanceInvalidatedCallbackRecord(executor, onInstanceInvalidatedListener);
+            synchronized (mLock) {
+                if (!mInstanceInvalidatedCallbackRecords.contains(record)) {
+                    mInstanceInvalidatedCallbackRecords.add(record);
+                }
             }
         }
 
@@ -3176,6 +3315,30 @@ public final class MediaRouter2 {
             }
         }
 
+        private void onInvalidateInstanceOnHandler() {
+            Log.w(
+                    TAG,
+                    "MEDIA_ROUTING_CONTROL has been revoked for this package. Invalidating"
+                            + " instance.");
+            // After this block, all following getInstance() calls should throw a SecurityException,
+            // so no new onInstanceInvalidatedListeners can be registered to this instance.
+            synchronized (sSystemRouterLock) {
+                PackageNameUserHandlePair key =
+                        new PackageNameUserHandlePair(mClientPackageName, mClientUser);
+                sAppToProxyRouterMap.remove(key);
+            }
+
+            synchronized (mLock) {
+                for (InstanceInvalidatedCallbackRecord record :
+                        mInstanceInvalidatedCallbackRecords) {
+                    record.executor.execute(record.runnable);
+                }
+            }
+            mRouteCallbackRecords.clear();
+            mControllerCallbackRecords.clear();
+            mTransferCallbackRecords.clear();
+        }
+
         private class Client extends IMediaRouter2Manager.Stub {
 
             @Override
@@ -3243,6 +3406,14 @@ public final class MediaRouter2 {
                                 ProxyMediaRouter2Impl.this,
                                 requestId,
                                 reason));
+            }
+
+            @Override
+            public void invalidateInstance() {
+                mHandler.sendMessage(
+                        obtainMessage(
+                                ProxyMediaRouter2Impl::onInvalidateInstanceOnHandler,
+                                ProxyMediaRouter2Impl.this));
             }
         }
     }
