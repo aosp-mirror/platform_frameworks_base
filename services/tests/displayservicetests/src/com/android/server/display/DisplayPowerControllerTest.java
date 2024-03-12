@@ -1850,6 +1850,8 @@ public final class DisplayPowerControllerTest {
                 mock(ScreenOffBrightnessSensorController.class);
         final HighBrightnessModeController hbmController = mock(HighBrightnessModeController.class);
         final HdrClamper hdrClamper = mock(HdrClamper.class);
+        final NormalBrightnessModeController normalBrightnessModeController = mock(
+                NormalBrightnessModeController.class);
         BrightnessClamperController clamperController = mock(BrightnessClamperController.class);
 
         when(hbmController.getCurrentBrightnessMax()).thenReturn(PowerManager.BRIGHTNESS_MAX);
@@ -1862,7 +1864,8 @@ public final class DisplayPowerControllerTest {
 
         TestInjector injector = spy(new TestInjector(displayPowerState, animator,
                 automaticBrightnessController, wakelockController, brightnessMappingStrategy,
-                hysteresisLevels, screenOffBrightnessSensorController, hbmController, hdrClamper,
+                hysteresisLevels, screenOffBrightnessSensorController,
+                hbmController, normalBrightnessModeController, hdrClamper,
                 clamperController, mDisplayManagerFlagsMock));
 
         final LogicalDisplay display = mock(LogicalDisplay.class);
@@ -1950,6 +1953,8 @@ public final class DisplayPowerControllerTest {
         private final ScreenOffBrightnessSensorController mScreenOffBrightnessSensorController;
         private final HighBrightnessModeController mHighBrightnessModeController;
 
+        private final NormalBrightnessModeController mNormalBrightnessModeController;
+
         private final HdrClamper mHdrClamper;
 
         private final BrightnessClamperController mClamperController;
@@ -1963,6 +1968,7 @@ public final class DisplayPowerControllerTest {
                 HysteresisLevels hysteresisLevels,
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
                 HighBrightnessModeController highBrightnessModeController,
+                NormalBrightnessModeController normalBrightnessModeController,
                 HdrClamper hdrClamper,
                 BrightnessClamperController clamperController,
                 DisplayManagerFlags flags) {
@@ -1974,6 +1980,7 @@ public final class DisplayPowerControllerTest {
             mHysteresisLevels = hysteresisLevels;
             mScreenOffBrightnessSensorController = screenOffBrightnessSensorController;
             mHighBrightnessModeController = highBrightnessModeController;
+            mNormalBrightnessModeController = normalBrightnessModeController;
             mHdrClamper = hdrClamper;
             mClamperController = clamperController;
             mFlags = flags;
@@ -2086,7 +2093,8 @@ public final class DisplayPowerControllerTest {
                 DisplayDeviceConfig displayDeviceConfig, Handler handler,
                 DisplayManagerFlags flags, IBinder displayToken, DisplayDeviceInfo info) {
             return new BrightnessRangeController(hbmController, modeChangeCallback,
-                    displayDeviceConfig, mHdrClamper, mFlags, displayToken, info);
+                    displayDeviceConfig, mNormalBrightnessModeController, mHdrClamper,
+                    mFlags, displayToken, info);
         }
 
         @Override
