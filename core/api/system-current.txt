@@ -4912,7 +4912,6 @@ package android.hardware.camera2.extension {
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") public int getImageFormat();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.util.Size getSize();
     method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public android.view.Surface getSurface();
-    method @FlaggedApi("com.android.internal.camera.flags.extension_10_bit") public void setColorSpace(int);
     method @FlaggedApi("com.android.internal.camera.flags.extension_10_bit") public void setDynamicRangeProfile(long);
   }
 
@@ -4923,6 +4922,7 @@ package android.hardware.camera2.extension {
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public class ExtensionConfiguration {
     ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public ExtensionConfiguration(int, int, @NonNull java.util.List<android.hardware.camera2.extension.ExtensionOutputConfiguration>, @Nullable android.hardware.camera2.CaptureRequest);
+    method @FlaggedApi("com.android.internal.camera.flags.extension_10_bit") public void setColorSpace(int);
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public class ExtensionOutputConfiguration {
