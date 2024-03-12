@@ -17,7 +17,6 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -38,5 +37,5 @@ abstract class ShadeAnimationInteractor(
      * completes the close. Important: if QS is collapsing back to shade, this will be false because
      * that is not considered "closing".
      */
-    abstract val isAnyCloseAnimationRunning: Flow<Boolean>
+    abstract val isAnyCloseAnimationRunning: StateFlow<Boolean>
 }

@@ -41,4 +41,20 @@ interface PanelExpansionInteractor {
      * backwards-compatibility and should not be consumed by newer code.
      */
     @Deprecated("Use SceneInteractor.currentScene instead.") val legacyPanelExpansion: Flow<Float>
+
+    /**
+     * This method should not be used anymore, you should probably use [.isShadeFullyOpen] instead.
+     * It was overused as indicating if shade is open or we're on keyguard/AOD. Moving forward we
+     * should be explicit about the what state we're checking.
+     *
+     * @return if panel is covering the screen, which means we're in expanded shade or keyguard/AOD
+     */
+    @Deprecated(
+        "depends on the state you check, use {@link #isShadeFullyExpanded()},\n" +
+            "{@link #isOnAod()}, {@link #isOnKeyguard()} instead."
+    )
+    val isFullyExpanded: Boolean
+
+    /** Returns whether the shade is in the process of collapsing. */
+    @Deprecated("Use ShadeAnimationInteractor instead") val isCollapsing: Boolean
 }
