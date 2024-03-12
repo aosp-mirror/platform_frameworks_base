@@ -38,6 +38,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
+import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
@@ -696,6 +697,25 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             val bottom = 456f
             keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
             assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
+        }
+
+    @Test
+    fun alphaOnFullQsExpansion() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor()
+            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+
+            showLockscreenWithQSExpanded()
+
+            // Alpha fades out as QS expands
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isWithin(0.01f).of(0.5f)
+            shadeRepository.setQsExpansion(0.9f)
+            assertThat(alpha).isWithin(0.01f).of(0.1f)
+
+            // Ensure that alpha is set back to 1f when QS is fully expanded
+            shadeRepository.setQsExpansion(1f)
+            assertThat(alpha).isEqualTo(1f)
         }
 
     @Test
