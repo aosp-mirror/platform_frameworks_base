@@ -3281,6 +3281,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     public PackageImpl(Parcel in) {
+        this(in, /* callback */ null);
+    }
+
+    public PackageImpl(@NonNull Parcel in, @Nullable ParsingPackageUtils.Callback callback) {
+        mCallback = callback;
         // We use the boot classloader for all classes that we load.
         final ClassLoader boot = Object.class.getClassLoader();
         this.supportsSmallScreens = sForBoolean.unparcel(in);
