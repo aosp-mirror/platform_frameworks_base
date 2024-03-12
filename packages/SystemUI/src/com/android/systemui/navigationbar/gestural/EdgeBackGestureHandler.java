@@ -19,6 +19,7 @@ import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHPAD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
+import static com.android.systemui.Flags.edgebackGestureHandlerGetRunningTasksBackground;
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
@@ -54,7 +55,6 @@ import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.InputMonitor;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -104,6 +104,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -151,7 +152,12 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
         public void onTaskStackChanged() {
-            mGestureBlockingActivityRunning = isGestureBlockingActivityRunning();
+            if (edgebackGestureHandlerGetRunningTasksBackground()) {
+                mBackgroundExecutor.execute(() -> mGestureBlockingActivityRunning.set(
+                        isGestureBlockingActivityRunning()));
+            } else {
+                mGestureBlockingActivityRunning.set(isGestureBlockingActivityRunning());
+            }
         }
         @Override
         public void onTaskCreated(int taskId, ComponentName componentName) {
@@ -241,6 +247,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     private final PointF mDownPoint = new PointF();
     private final PointF mEndPoint = new PointF();
+    private AtomicBoolean mGestureBlockingActivityRunning = new AtomicBoolean();
+
     private boolean mThresholdCrossed = false;
     private boolean mAllowGesture = false;
     private boolean mLogGesture = false;
@@ -256,7 +264,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mIsEnabled;
     private boolean mIsNavBarShownTransiently;
     private boolean mIsBackGestureAllowed;
-    private boolean mGestureBlockingActivityRunning;
     private boolean mIsNewBackAffordanceEnabled;
     private boolean mIsTrackpadGestureFeaturesEnabled;
     private boolean mIsTrackpadThreeFingerSwipe;
@@ -1017,7 +1024,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mInRejectedExclusion = false;
             boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
             boolean isBackAllowedCommon = !mDisabledForQuickstep && mIsBackGestureAllowed
-                    && !mGestureBlockingActivityRunning
+                    && !mGestureBlockingActivityRunning.get()
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags,
                             mIsTrackpadThreeFingerSwipe)
                     && !isTrackpadScroll(mIsTrackpadGestureFeaturesEnabled, ev);
@@ -1053,8 +1060,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     curTime, curTimeStr, mAllowGesture, mIsTrackpadThreeFingerSwipe,
                     mIsOnLeftEdge, mDeferSetIsOnLeftEdge, mIsBackGestureAllowed,
                     QuickStepContract.isBackGestureDisabled(mSysUiFlags,
-                            mIsTrackpadThreeFingerSwipe),
-                    mDisabledForQuickstep, mGestureBlockingActivityRunning, mIsInPip, mDisplaySize,
+                            mIsTrackpadThreeFingerSwipe), mDisabledForQuickstep,
+                    mGestureBlockingActivityRunning.get(), mIsInPip, mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
         } else if (mAllowGesture || mLogGesture) {
             if (!mThresholdCrossed) {
@@ -1236,7 +1243,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         pw.println("  mIsBackGestureAllowed=" + mIsBackGestureAllowed);
         pw.println("  mIsGestureHandlingEnabled=" + mIsGestureHandlingEnabled);
         pw.println("  mIsNavBarShownTransiently=" + mIsNavBarShownTransiently);
-        pw.println("  mGestureBlockingActivityRunning=" + mGestureBlockingActivityRunning);
+        pw.println("  mGestureBlockingActivityRunning=" + mGestureBlockingActivityRunning.get());
         pw.println("  mAllowGesture=" + mAllowGesture);
         pw.println("  mUseMLModel=" + mUseMLModel);
         pw.println("  mDisabledForQuickstep=" + mDisabledForQuickstep);
