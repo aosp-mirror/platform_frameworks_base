@@ -24,8 +24,7 @@ import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -57,19 +56,19 @@ public final class DeviceStateInfo implements Parcelable {
      * The list of states supported by the device.
      */
     @NonNull
-    public final ArrayList<DeviceState> supportedStates;
+    public final int[] supportedStates;
 
     /**
      * The base (non-override) state of the device. The base state is the state of the device
      * ignoring any override requests made through a call to {@link DeviceStateManager#requestState(
      * DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
      */
-    public final DeviceState baseState;
+    public final int baseState;
 
     /**
      * The state of the device.
      */
-    public final DeviceState currentState;
+    public final int currentState;
 
     /**
      * Creates a new instance of {@link DeviceStateInfo}.
@@ -77,9 +76,8 @@ public final class DeviceStateInfo implements Parcelable {
      * NOTE: Unlike {@link #DeviceStateInfo(DeviceStateInfo)}, this constructor does not copy the
      * supplied parameters.
      */
-    public DeviceStateInfo(@NonNull List<DeviceState> supportedStates, DeviceState baseState,
-            DeviceState state) {
-        this.supportedStates = new ArrayList<>(supportedStates);
+    public DeviceStateInfo(@NonNull int[] supportedStates, int baseState, int state) {
+        this.supportedStates = supportedStates;
         this.baseState = baseState;
         this.currentState = state;
     }
@@ -89,7 +87,8 @@ public final class DeviceStateInfo implements Parcelable {
      * the fields of the returned instance.
      */
     public DeviceStateInfo(@NonNull DeviceStateInfo info) {
-        this(List.copyOf(info.supportedStates), info.baseState, info.currentState);
+        this(Arrays.copyOf(info.supportedStates, info.supportedStates.length),
+                info.baseState, info.currentState);
     }
 
     @Override
@@ -97,15 +96,15 @@ public final class DeviceStateInfo implements Parcelable {
         if (this == other) return true;
         if (other == null || getClass() != other.getClass()) return false;
         DeviceStateInfo that = (DeviceStateInfo) other;
-        return baseState.equals(that.baseState)
-                &&  currentState.equals(that.currentState)
-                && Objects.equals(supportedStates, that.supportedStates);
+        return baseState == that.baseState
+                &&  currentState == that.currentState
+                && Arrays.equals(supportedStates, that.supportedStates);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(baseState, currentState);
-        result = 31 * result + supportedStates.hashCode();
+        result = 31 * result + Arrays.hashCode(supportedStates);
         return result;
     }
 
@@ -113,13 +112,13 @@ public final class DeviceStateInfo implements Parcelable {
     @ChangeFlags
     public int diff(@NonNull DeviceStateInfo other) {
         int diff = 0;
-        if (!supportedStates.equals(other.supportedStates)) {
+        if (!Arrays.equals(supportedStates, other.supportedStates)) {
             diff |= CHANGED_SUPPORTED_STATES;
         }
-        if (!baseState.equals(other.baseState)) {
+        if (baseState != other.baseState) {
             diff |= CHANGED_BASE_STATE;
         }
-        if (!currentState.equals(other.currentState)) {
+        if (currentState != other.currentState) {
             diff |= CHANGED_CURRENT_STATE;
         }
         return diff;
@@ -127,13 +126,13 @@ public final class DeviceStateInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(supportedStates.size());
-        for (int i = 0; i < supportedStates.size(); i++) {
-            dest.writeTypedObject(supportedStates.get(i).getConfiguration(), flags);
+        dest.writeInt(supportedStates.length);
+        for (int i = 0; i < supportedStates.length; i++) {
+            dest.writeInt(supportedStates[i]);
         }
 
-        dest.writeTypedObject(baseState.getConfiguration(), flags);
-        dest.writeTypedObject(currentState.getConfiguration(), flags);
+        dest.writeInt(baseState);
+        dest.writeInt(currentState);
     }
 
     @Override
@@ -141,21 +140,16 @@ public final class DeviceStateInfo implements Parcelable {
         return 0;
     }
 
-    public static final @NonNull Creator<DeviceStateInfo> CREATOR = new Creator<>() {
+    public static final @NonNull Creator<DeviceStateInfo> CREATOR = new Creator<DeviceStateInfo>() {
         @Override
         public DeviceStateInfo createFromParcel(Parcel source) {
             final int numberOfSupportedStates = source.readInt();
-            final ArrayList<DeviceState> supportedStates = new ArrayList<>(numberOfSupportedStates);
+            final int[] supportedStates = new int[numberOfSupportedStates];
             for (int i = 0; i < numberOfSupportedStates; i++) {
-                DeviceState.Configuration configuration = source.readTypedObject(
-                        DeviceState.Configuration.CREATOR);
-                supportedStates.add(i, new DeviceState(configuration));
+                supportedStates[i] = source.readInt();
             }
-
-            final DeviceState baseState = new DeviceState(
-                    source.readTypedObject(DeviceState.Configuration.CREATOR));
-            final DeviceState currentState = new DeviceState(
-                    source.readTypedObject(DeviceState.Configuration.CREATOR));
+            final int baseState = source.readInt();
+            final int currentState = source.readInt();
 
             return new DeviceStateInfo(supportedStates, baseState, currentState);
         }
