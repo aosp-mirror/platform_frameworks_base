@@ -568,7 +568,10 @@ public class MetricUtilities {
                     /* clicked_entries */ browsedClickedEntries,
                     /* provider_of_clicked_entry */ browsedProviderUid,
                     /* api_status */ apiStatus,
-                    /* primary_indicated */ finalPhaseMetric.isPrimary()
+                    /* primary_indicated */ finalPhaseMetric.isPrimary(),
+                    /* oem_credential_manager_ui_uid */ finalPhaseMetric.getOemUiUid(),
+                    /* fallback_credential_manager_ui_uid */ finalPhaseMetric.getFallbackUiUid(),
+                    /* oem_ui_usage_status */ finalPhaseMetric.getOemUiUsageStatus()
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during final no uid metric logging: " + e);
