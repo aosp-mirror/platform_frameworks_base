@@ -227,14 +227,18 @@ public final class CameraExtensionCharacteristics {
     private static List<Size> generateSupportedSizes(List<SizeList> sizesList,
                                                      Integer format,
                                                      StreamConfigurationMap streamMap) {
-        // Per API contract it is assumed that the extension is able to support all
-        // camera advertised sizes for a given format in case it doesn't return
-        // a valid non-empty size list.
         ArrayList<Size> ret = getSupportedSizes(sizesList, format);
-        Size[] supportedSizes = streamMap.getOutputSizes(format);
-        if ((ret.isEmpty()) && (supportedSizes != null)) {
-            ret.addAll(Arrays.asList(supportedSizes));
+
+        if (format == ImageFormat.JPEG || format == ImageFormat.YUV_420_888) {
+            // Per API contract it is assumed that the extension is able to support all
+            // camera advertised sizes for JPEG and YUV_420_888 in case it doesn't return
+            // a valid non-empty size list.
+            Size[] supportedSizes = streamMap.getOutputSizes(format);
+            if ((ret.isEmpty()) && (supportedSizes != null)) {
+                ret.addAll(Arrays.asList(supportedSizes));
+            }
         }
+
         return ret;
     }
 
