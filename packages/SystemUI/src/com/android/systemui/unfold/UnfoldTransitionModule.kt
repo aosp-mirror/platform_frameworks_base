@@ -170,14 +170,17 @@ class UnfoldTransitionModule {
 
     @Module
     interface Bindings {
+        @Binds fun bindRepository(impl: UnfoldTransitionRepositoryImpl): UnfoldTransitionRepository
+
+        @Binds fun bindInteractor(impl: UnfoldTransitionInteractorImpl): UnfoldTransitionInteractor
+    }
+
+    @Module
+    interface Startables {
         @Binds
         @IntoMap
         @ClassKey(UnfoldTraceLogger::class)
         fun bindUnfoldTraceLogger(impl: UnfoldTraceLogger): CoreStartable
-
-        @Binds fun bindRepository(impl: UnfoldTransitionRepositoryImpl): UnfoldTransitionRepository
-
-        @Binds fun bindInteractor(impl: UnfoldTransitionInteractorImpl): UnfoldTransitionInteractor
     }
 }
 
