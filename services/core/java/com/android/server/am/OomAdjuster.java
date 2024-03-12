@@ -401,6 +401,14 @@ public class OomAdjuster {
     @GuardedBy("mService")
     private boolean mPendingFullOomAdjUpdate = false;
 
+    /**
+     * Most recent reason string. We update it in sync with the trace.
+     */
+    @OomAdjReason
+    protected int mLastReason;
+
+    private final OomAdjusterDebugLogger mLogger;
+
     /** Overrideable by a test */
     @VisibleForTesting
     protected boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
@@ -432,6 +440,8 @@ public class OomAdjuster {
         mConstants = mService.mConstants;
         mCachedAppOptimizer = new CachedAppOptimizer(mService);
         mCacheOomRanker = new CacheOomRanker(service);
+
+        mLogger = new OomAdjusterDebugLogger(this, mService.mConstants);
 
         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
             final int pid = msg.arg1;
@@ -636,6 +646,7 @@ public class OomAdjuster {
     protected boolean performUpdateOomAdjLSP(ProcessRecord app, @OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
 
+        mLastReason = oomAdjReason;
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
         mService.mOomAdjProfiler.oomAdjStarted();
         mAdjSeq++;
@@ -916,6 +927,7 @@ public class OomAdjuster {
     protected void performUpdateOomAdjPendingTargetsLocked(@OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
 
+        mLastReason = oomAdjReason;
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
         mService.mOomAdjProfiler.oomAdjStarted();
 
@@ -958,6 +970,7 @@ public class OomAdjuster {
             }
         }
 
+        mLastReason = oomAdjReason;
         if (startProfiling) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
             mService.mOomAdjProfiler.oomAdjStarted();
@@ -1490,6 +1503,7 @@ public class OomAdjuster {
                         || uidRec.isSetAllowListed() != uidRec.isCurAllowListed()
                         || uidRec.getProcAdjChanged()) {
                     int uidChange = 0;
+                    final boolean shouldLog = mLogger.shouldLog(uidRec.getUid());
                     if (DEBUG_UID_OBSERVERS) {
                         Slog.i(TAG_UID_OBSERVERS, "Changes in " + uidRec
                                 + ": proc state from " + uidRec.getSetProcState() + " to "
@@ -1510,14 +1524,21 @@ public class OomAdjuster {
                                 || uidRec.isSetAllowListed()
                                 || uidRec.getLastBackgroundTime() == 0) {
                             uidRec.setLastBackgroundTime(nowElapsed);
+                            if (shouldLog) {
+                                mLogger.logSetLastBackgroundTime(uidRec.getUid(), nowElapsed);
+                            }
                             if (mService.mDeterministicUidIdle
                                     || !mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
                                 // Note: the background settle time is in elapsed realtime, while
                                 // the handler time base is uptime.  All this means is that we may
                                 // stop background uids later than we had intended, but that only
                                 // happens because the device was sleeping so we are okay anyway.
+                                if (shouldLog) {
+                                    mLogger.logScheduleUidIdle1(uidRec.getUid(),
+                                            mConstants.BACKGROUND_SETTLE_TIME);
+                                }
                                 mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
-                                        mConstants.BACKGROUND_SETTLE_TIME);
+                                        mConstants.BACKGROUND_SETTLE_TIME); // XXX
                             }
                         }
                         if (uidRec.isIdle() && !uidRec.isSetIdle()) {
@@ -1535,6 +1556,9 @@ public class OomAdjuster {
                         }
                         uidRec.setLastBackgroundTime(0);
                         uidRec.setLastIdleTime(0);
+                        if (shouldLog) {
+                            mLogger.logClearLastBackgroundTime(uidRec.getUid());
+                        }
                     }
                     final boolean wasCached = uidRec.getSetProcState()
                             > ActivityManager.PROCESS_STATE_RECEIVER;
@@ -1554,11 +1578,25 @@ public class OomAdjuster {
                     if (uidRec.getProcAdjChanged()) {
                         uidChange |= UidRecord.CHANGE_PROCADJ;
                     }
+                    int oldProcState = uidRec.getSetProcState();
+                    int oldCapability = uidRec.getSetCapability();
                     uidRec.setSetProcState(uidRec.getCurProcState());
                     uidRec.setSetCapability(uidRec.getCurCapability());
                     uidRec.setSetAllowListed(uidRec.isCurAllowListed());
                     uidRec.setSetIdle(uidRec.isIdle());
                     uidRec.clearProcAdjChanged();
+                    if (shouldLog
+                            && ((uidRec.getSetProcState() != oldProcState)
+                            || (uidRec.getSetCapability() != oldCapability))) {
+                        int flags = 0;
+                        if (uidRec.isSetAllowListed()) {
+                            flags |= 1;
+                        }
+                        mLogger.logUidStateChanged(uidRec.getUid(),
+                                uidRec.getSetProcState(), oldProcState,
+                                uidRec.getSetCapability(), oldCapability,
+                                flags);
+                    }
                     if ((uidChange & UidRecord.CHANGE_PROCSTATE) != 0
                             || (uidChange & UidRecord.CHANGE_CAPABILITY) != 0) {
                         mService.mAtmInternal.onUidProcStateChanged(
@@ -3299,6 +3337,7 @@ public class OomAdjuster {
             mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
         }
 
+        final int oldOomAdj = state.getSetAdj();
         if (state.getCurAdj() != state.getSetAdj()) {
             ProcessList.setOomAdj(app.getPid(), app.uid, state.getCurAdj());
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mService.mCurOomAdjUid == app.info.uid) {
@@ -3456,6 +3495,7 @@ public class OomAdjuster {
             mService.mAppProfiler.updateNextPssTimeLPf(
                     state.getCurProcState(), app.mProfile, now, forceUpdatePssTime);
         }
+        int oldProcState = state.getSetProcState();
         if (state.getSetProcState() != state.getCurProcState()) {
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mService.mCurOomAdjUid == app.uid) {
                 String msg = "Proc state change of " + app.processName
@@ -3555,6 +3595,11 @@ public class OomAdjuster {
                 // Kick off the delayed checkup message if needed.
                 if (mService.mDeterministicUidIdle
                         || !mService.mHandler.hasMessages(IDLE_UIDS_MSG)) {
+                    if (mLogger.shouldLog(app.uid)) {
+                        mLogger.logScheduleUidIdle2(
+                                uidRec.getUid(), app.getPid(),
+                                mConstants.mKillBgRestrictedAndCachedIdleSettleTimeMs);
+                    }
                     mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
                             mConstants.mKillBgRestrictedAndCachedIdleSettleTimeMs);
                 }
@@ -3562,6 +3607,12 @@ public class OomAdjuster {
         }
         state.setSetCached(state.isCached());
         state.setSetNoKillOnBgRestrictedAndIdle(state.shouldNotKillOnBgRestrictedAndIdle());
+        if (((oldProcState != state.getSetProcState()) || (oldOomAdj != state.getSetAdj()))
+                && mLogger.shouldLog(app.uid)) {
+            mLogger.logProcStateChanged(app.uid, app.getPid(),
+                    state.getSetProcState(), oldProcState,
+                    state.getSetAdj(), oldOomAdj);
+        }
 
         return success;
     }
@@ -3703,6 +3754,7 @@ public class OomAdjuster {
         if (mService.mLocalPowerManager != null) {
             mService.mLocalPowerManager.startUidChanges();
         }
+        boolean shouldLogMisc = false;
         for (int i = N - 1; i >= 0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             final long bgTime = uidRec.getLastBackgroundTime();
@@ -3719,6 +3771,9 @@ public class OomAdjuster {
                 } else {
                     if (nextTime == 0 || nextTime > bgTime) {
                         nextTime = bgTime;
+                    }
+                    if (mLogger.shouldLog(uidRec.getUid())) {
+                        shouldLogMisc = true;
                     }
                 }
             }
@@ -3741,8 +3796,11 @@ public class OomAdjuster {
             }
         }
         if (nextTime > 0) {
-            mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG,
-                    nextTime + mConstants.BACKGROUND_SETTLE_TIME - nowElapsed);
+            long delay = nextTime + mConstants.BACKGROUND_SETTLE_TIME - nowElapsed;
+            if (shouldLogMisc) {
+                mLogger.logScheduleUidIdle3(delay);
+            }
+            mService.mHandler.sendEmptyMessageDelayed(IDLE_UIDS_MSG, delay);
         }
     }
 

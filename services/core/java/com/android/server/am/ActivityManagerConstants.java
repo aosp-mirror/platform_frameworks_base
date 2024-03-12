@@ -51,6 +51,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -435,6 +436,18 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final String KEY_MAX_SERVICE_CONNECTIONS_PER_PROCESS =
             "max_service_connections_per_process";
+
+    private static final String KEY_PROC_STATE_DEBUG_UIDS = "proc_state_debug_uids";
+
+    /**
+     * UIDs we want to print detailed info in OomAdjuster.
+     * It's only used for debugging, and it's almost never updated, so we just create a new
+     * array when it's changed to avoid synchronization.
+     */
+    volatile SparseBooleanArray mProcStateDebugUids = new SparseBooleanArray(0);
+    volatile boolean mEnableProcStateStacktrace = false;
+    volatile int mProcStateDebugSetProcStateDelay = 0;
+    volatile int mProcStateDebugSetUidStateDelay = 0;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -1339,6 +1352,9 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_PSS_TO_RSS_THRESHOLD_MODIFIER:
                                 updatePssToRssThresholdModifier();
                                 break;
+                            case KEY_PROC_STATE_DEBUG_UIDS:
+                                updateProcStateDebugUids();
+                                break;
                             default:
                                 updateFGSPermissionEnforcementFlagsIfNecessary(name);
                                 break;
@@ -2039,6 +2055,76 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_MAX_PREVIOUS_TIME);
     }
 
+    private void updateProcStateDebugUids() {
+        final String val = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_PROC_STATE_DEBUG_UIDS,
+                "").trim();
+
+        // Parse KEY_PROC_STATE_DEBUG_UIDS as comma-separated values. Each values can be:
+        // Number:  Enable debugging on the given UID.
+        // "stack": Enable stack trace when updating proc/uid-states.s
+        // "u" + delay-ms: Enable sleep when updating uid-state
+        // "p" + delay-ms: Enable sleep when updating procstate
+        //
+        // Example:
+        //   device_config put activity_manager proc_state_debug_uids '10177,10202,stack,p500,u100'
+        // means:
+        // - Monitor UID 10177 and 10202
+        // - Also enable stack trace
+        // - Sleep 500 ms when updating the procstate.
+        // - Sleep 100 ms when updating the UID state.
+
+        mEnableProcStateStacktrace = false;
+        mProcStateDebugSetProcStateDelay = 0;
+        mProcStateDebugSetUidStateDelay = 0;
+        if (val.length() == 0) {
+            mProcStateDebugUids = new SparseBooleanArray(0);
+            return;
+        }
+        final String[] uids = val.split(",");
+
+        final SparseBooleanArray newArray = new SparseBooleanArray(0);
+
+        for (String token : uids) {
+            if (token.length() == 0) {
+                continue;
+            }
+            // "stack" -> enable stacktrace.
+            if ("stack".equals(token)) {
+                mEnableProcStateStacktrace = true;
+                continue;
+            }
+            boolean isUid = true;
+            char prefix = token.charAt(0);
+            if ('a' <= prefix && prefix <= 'z') {
+                // If the token starts with an alphabet, it's not a UID.
+                isUid = false;
+                token = token.substring(1);
+            }
+
+            int value = -1;
+            try {
+                value = Integer.parseInt(token.trim());
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Invalid number " + token + " in " + val);
+                continue;
+            }
+            if (isUid) {
+                newArray.put(value, true);
+            } else if (prefix == 'p') {
+                // Enable delay in set-proc-state
+                mProcStateDebugSetProcStateDelay = value;
+            } else if (prefix == 'u') {
+                // Enable delay in set-uid-state
+                mProcStateDebugSetUidStateDelay = value;
+            } else {
+                Slog.w(TAG, "Invalid prefix " + prefix + " in " + val);
+            }
+        }
+        mProcStateDebugUids = newArray;
+    }
+
     private void updateMinAssocLogDuration() {
         MIN_ASSOC_LOG_DURATION = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_MIN_ASSOC_LOG_DURATION,
@@ -2176,6 +2262,28 @@ final class ActivityManagerConstants extends ContentObserver {
         PSS_TO_RSS_THRESHOLD_MODIFIER = DeviceConfig.getFloat(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER, KEY_PSS_TO_RSS_THRESHOLD_MODIFIER,
                 mDefaultPssToRssThresholdModifier);
+    }
+
+    boolean shouldDebugUidForProcState(int uid) {
+        SparseBooleanArray ar = mProcStateDebugUids;
+        final var size = ar.size();
+        if (size == 0) { // Most common case.
+            return false;
+        }
+        // If the array is small (also common), avoid the binary search.
+        if (size <= 8) {
+            for (int i = 0; i < size; i++) {
+                if (ar.keyAt(i) == uid) {
+                    return ar.valueAt(i);
+                }
+            }
+            return false;
+        }
+        return ar.get(uid, false);
+    }
+
+    boolean shouldEnableProcStateDebug() {
+        return mProcStateDebugUids.size() > 0;
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -2393,5 +2501,12 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
         pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
         pw.println(mEnableWaitForFinishAttachApplication);
+
+        synchronized (mProcStateDebugUids) {
+            pw.print("  "); pw.print(KEY_PROC_STATE_DEBUG_UIDS);
+            pw.print("="); pw.println(mProcStateDebugUids);
+            pw.print("    uid-state-delay="); pw.println(mProcStateDebugSetUidStateDelay);
+            pw.print("    proc-state-delay="); pw.println(mProcStateDebugSetProcStateDelay);
+        }
     }
 }
