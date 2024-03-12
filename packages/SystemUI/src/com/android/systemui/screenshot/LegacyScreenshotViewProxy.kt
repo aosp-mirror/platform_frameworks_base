@@ -22,7 +22,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
-import android.view.Display
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.ScrollCaptureResponse
@@ -37,30 +36,33 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 /**
  * Legacy implementation of screenshot view methods. Just proxies the calls down into the original
  * ScreenshotView.
  */
-class LegacyScreenshotViewProxy(private val context: Context, private val logger: UiEventLogger) :
-    ScreenshotViewProxy {
+class LegacyScreenshotViewProxy
+@AssistedInject
+constructor(
+    private val logger: UiEventLogger,
+    flags: FeatureFlags,
+    @Assisted private val context: Context,
+    @Assisted private val displayId: Int
+) : ScreenshotViewProxy {
     override val view: ScreenshotView =
         LayoutInflater.from(context).inflate(R.layout.screenshot, null) as ScreenshotView
     override val screenshotPreview: View
-    override var defaultDisplay: Int = Display.DEFAULT_DISPLAY
-        set(value) {
-            view.setDefaultDisplay(value)
-        }
-    override var flags: FeatureFlags? = null
-        set(value) {
-            view.setFlags(value)
-        }
     override var packageName: String = ""
         set(value) {
+            field = value
             view.setPackageName(value)
         }
     override var callbacks: ScreenshotView.ScreenshotViewCallback? = null
         set(value) {
+            field = value
             view.setCallbacks(value)
         }
     override var screenshot: ScreenshotData? = null
@@ -86,6 +88,8 @@ class LegacyScreenshotViewProxy(private val context: Context, private val logger
 
     init {
         view.setUiEventLogger(logger)
+        view.setDefaultDisplay(displayId)
+        view.setFlags(flags)
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         if (LogConfig.DEBUG_WINDOW) {
@@ -180,7 +184,7 @@ class LegacyScreenshotViewProxy(private val context: Context, private val logger
             if (LogConfig.DEBUG_INPUT) {
                 Log.d(TAG, "Predictive Back callback dispatched")
             }
-            onDismissRequested.invoke(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
+            onDismissRequested.invoke(SCREENSHOT_DISMISSED_OTHER)
         }
         view.addOnAttachStateChangeListener(
             object : View.OnAttachStateChangeListener {
@@ -215,7 +219,7 @@ class LegacyScreenshotViewProxy(private val context: Context, private val logger
                         if (LogConfig.DEBUG_INPUT) {
                             Log.d(TAG, "onKeyEvent: $keyCode")
                         }
-                        onDismissRequested.invoke(ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER)
+                        onDismissRequested.invoke(SCREENSHOT_DISMISSED_OTHER)
                         return true
                     }
                     return false
@@ -224,10 +228,9 @@ class LegacyScreenshotViewProxy(private val context: Context, private val logger
         )
     }
 
-    class Factory : ScreenshotViewProxy.Factory {
-        override fun getProxy(context: Context, logger: UiEventLogger): ScreenshotViewProxy {
-            return LegacyScreenshotViewProxy(context, logger)
-        }
+    @AssistedFactory
+    interface Factory : ScreenshotViewProxy.Factory {
+        override fun getProxy(context: Context, displayId: Int): LegacyScreenshotViewProxy
     }
 
     companion object {
