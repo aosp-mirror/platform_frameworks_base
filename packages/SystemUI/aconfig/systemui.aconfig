@@ -628,3 +628,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "qs_ui_refactor"
+    namespace: "systemui"
+    description: "Enables the new QS UI pipeline that follows recommended architecture and uses"
+      " Compose for the UI."
+    bug: "325099249"
+}
