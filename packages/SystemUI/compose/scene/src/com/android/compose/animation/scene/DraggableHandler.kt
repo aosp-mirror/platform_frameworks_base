@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
+import com.android.compose.animation.scene.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
@@ -353,10 +354,7 @@ private class DragControllerImpl(
 
         // If the swipe was not committed or if the swipe distance is not computed yet, don't do
         // anything.
-        if (
-            swipeTransition._currentScene != toScene ||
-                distance == SwipeTransition.DistanceUnspecified
-        ) {
+        if (swipeTransition._currentScene != toScene || distance == DistanceUnspecified) {
             return fromScene to 0f
         }
 
@@ -418,7 +416,7 @@ private class DragControllerImpl(
             var targetScene: Scene
             var targetOffset: Float
             if (
-                distance != SwipeTransition.DistanceUnspecified &&
+                distance != DistanceUnspecified &&
                     shouldCommitSwipe(
                         offset,
                         distance,
@@ -444,8 +442,8 @@ private class DragControllerImpl(
                     if (targetScene == fromScene) {
                         0f
                     } else {
-                        check(distance != SwipeTransition.DistanceUnspecified) {
-                            "distance is equal to ${SwipeTransition.DistanceUnspecified}"
+                        check(distance != DistanceUnspecified) {
+                            "distance is equal to $DistanceUnspecified"
                         }
                         distance
                     }
@@ -628,6 +626,12 @@ private class SwipeTransition(
     /** The spec to use when animating this transition to either [fromScene] or [toScene]. */
     lateinit var swipeSpec: SpringSpec<Float>
 
+    override val overscrollScope: OverscrollScope =
+        object : OverscrollScope {
+            override val absoluteDistance: Float
+                get() = distance().absoluteValue
+        }
+
     private var lastDistance = DistanceUnspecified
 
     /** Whether [TransitionState.Transition.finish] was called on this transition. */
@@ -753,10 +757,6 @@ private class SwipeTransition(
         /** The job in which [animatable] is animated. */
         val job: Job,
     )
-
-    companion object {
-        const val DistanceUnspecified = 0f
-    }
 }
 
 private object DefaultSwipeDistance : UserActionDistance {
