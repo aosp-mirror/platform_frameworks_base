@@ -7379,6 +7379,15 @@ public class Notification implements Parcelable
     public static abstract class Style {
 
         /**
+         * @deprecated public access to the constructor of Style() is only useful for creating
+         * custom subclasses, but that has actually been impossible due to hidden abstract
+         * methods, so this constructor is now officially deprecated to clarify that this is
+         * intended to be disallowed.
+         */
+        @Deprecated
+        public Style() {}
+
+        /**
          * The number of items allowed simulatanously in the remote input history.
          * @hide
          */
