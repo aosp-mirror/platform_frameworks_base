@@ -121,6 +121,13 @@ flag {
 }
 
 flag {
+  name: "handwriting_end_of_line_tap"
+  namespace: "text"
+  description: "Initiate handwriting when stylus taps at the end of a line in a focused non-empty TextView with the cursor at the end of that line"
+  bug: "323376217"
+}
+
+flag {
   name: "handwriting_cursor_position"
   namespace: "text"
   description: "When handwriting is initiated in an unfocused TextView, cursor is placed at the end of the closest paragraph."
