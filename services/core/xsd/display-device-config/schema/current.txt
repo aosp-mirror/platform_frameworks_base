@@ -111,6 +111,7 @@ package com.android.server.display.config {
     method public final com.android.server.display.config.Thresholds getDisplayBrightnessChangeThresholdsIdle();
     method @Nullable public final com.android.server.display.config.HdrBrightnessConfig getHdrBrightnessConfig();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
+    method public final com.android.server.display.config.IdleScreenRefreshRateTimeout getIdleScreenRefreshRateTimeout();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
     method public com.android.server.display.config.LuxThrottling getLuxThrottling();
     method @Nullable public final String getName();
@@ -146,6 +147,7 @@ package com.android.server.display.config {
     method public final void setDisplayBrightnessChangeThresholdsIdle(com.android.server.display.config.Thresholds);
     method public final void setHdrBrightnessConfig(@Nullable com.android.server.display.config.HdrBrightnessConfig);
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
+    method public final void setIdleScreenRefreshRateTimeout(com.android.server.display.config.IdleScreenRefreshRateTimeout);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
     method public void setLuxThrottling(com.android.server.display.config.LuxThrottling);
     method public final void setName(@Nullable String);
@@ -220,6 +222,25 @@ package com.android.server.display.config {
     method public final void setSdrHdrRatioMap_all(@Nullable com.android.server.display.config.SdrHdrRatioMap);
     method public void setTiming_all(com.android.server.display.config.HbmTiming);
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
+  }
+
+  public class IdleScreenRefreshRateTimeout {
+    ctor public IdleScreenRefreshRateTimeout();
+    method public final com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholds getLuxThresholds();
+    method public final void setLuxThresholds(com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholds);
+  }
+
+  public class IdleScreenRefreshRateTimeoutLuxThresholdPoint {
+    ctor public IdleScreenRefreshRateTimeoutLuxThresholdPoint();
+    method public final java.math.BigInteger getLux();
+    method public final java.math.BigInteger getTimeout();
+    method public final void setLux(java.math.BigInteger);
+    method public final void setTimeout(java.math.BigInteger);
+  }
+
+  public class IdleScreenRefreshRateTimeoutLuxThresholds {
+    ctor public IdleScreenRefreshRateTimeoutLuxThresholds();
+    method public java.util.List<com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint> getPoint();
   }
 
   public class IntegerArray {
