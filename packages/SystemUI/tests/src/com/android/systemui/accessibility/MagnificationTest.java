@@ -121,7 +121,8 @@ public class MagnificationTest extends SysuiTestCase {
 
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
         mMagnification = new Magnification(getContext(),
-                getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
+                getContext().getMainThreadHandler(), getContext().getMainExecutor(),
+                mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
                 getContext().getSystemService(DisplayManager.class), mA11yLogger);
         mMagnification.mWindowMagnificationControllerSupplier = new FakeControllerSupplier(
