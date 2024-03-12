@@ -39,6 +39,7 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun animateCollapseQs(fullyCollapse: Boolean) {}
     override fun canBeCollapsed(): Boolean = false
     @Deprecated("Use ShadeAnimationInteractor instead") override val isCollapsing: Boolean = false
+    @Deprecated("Use !ShadeInteractor.isAnyExpanded instead")
     override val isFullyCollapsed: Boolean = false
     override val isTracking: Boolean = false
     override val isViewEnabled: Boolean = false

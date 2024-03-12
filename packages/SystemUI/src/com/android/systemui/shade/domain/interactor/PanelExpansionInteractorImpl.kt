@@ -101,6 +101,9 @@ constructor(
     )
     override val isFullyExpanded = shadeInteractor.isAnyFullyExpanded.value
 
+    @Deprecated("Use !ShadeInteractor.isAnyExpanded instead")
+    override val isFullyCollapsed = !shadeInteractor.isAnyExpanded.value
+
     @Deprecated("Use ShadeAnimationInteractor instead")
     override val isCollapsing =
         shadeAnimationInteractor.isAnyCloseAnimationRunning.value ||
