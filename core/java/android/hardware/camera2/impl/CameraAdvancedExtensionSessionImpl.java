@@ -348,7 +348,23 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             cameraOutput.setTimestampBase(OutputConfiguration.TIMESTAMP_BASE_SENSOR);
             cameraOutput.setReadoutTimestampEnabled(false);
             cameraOutput.setPhysicalCameraId(output.physicalCameraId);
-            cameraOutput.setDynamicRangeProfile(output.dynamicRangeProfile);
+            if (Flags.extension10Bit()) {
+                boolean validDynamicRangeProfile = false;
+                for (long profile = DynamicRangeProfiles.STANDARD;
+                        profile < DynamicRangeProfiles.PUBLIC_MAX; profile <<= 1) {
+                    if (output.dynamicRangeProfile == profile) {
+                        validDynamicRangeProfile = true;
+                        break;
+                    }
+                }
+                if (validDynamicRangeProfile) {
+                    cameraOutput.setDynamicRangeProfile(output.dynamicRangeProfile);
+                } else {
+                    Log.e(TAG, "Extension configured dynamic range profile "
+                            + output.dynamicRangeProfile
+                            + " is not valid, using default DynamicRangeProfile.STANDARD");
+                }
+            }
             outputList.add(cameraOutput);
             mCameraConfigMap.put(cameraOutput.getSurface(), output);
         }
@@ -363,9 +379,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         SessionConfiguration sessionConfiguration = new SessionConfiguration(sessionType,
                 outputList, new CameraExtensionUtils.HandlerExecutor(mHandler),
                 new SessionStateHandler());
-        if (sessionConfig.colorSpace != ColorSpaceProfiles.UNSPECIFIED) {
-            sessionConfiguration.setColorSpace(
-                    ColorSpace.Named.values()[sessionConfig.colorSpace]);
+        if (Flags.extension10Bit()) {
+            if (sessionConfig.colorSpace >= 0
+                    && sessionConfig.colorSpace < ColorSpace.Named.values().length) {
+                sessionConfiguration.setColorSpace(
+                        ColorSpace.Named.values()[sessionConfig.colorSpace]);
+            } else {
+                Log.e(TAG, "Extension configured color space " + sessionConfig.colorSpace
+                        + " is not valid, using default unspecified color space");
+            }
         }
         if ((sessionConfig.sessionParameter != null) &&
                 (!sessionConfig.sessionParameter.isEmpty())) {
