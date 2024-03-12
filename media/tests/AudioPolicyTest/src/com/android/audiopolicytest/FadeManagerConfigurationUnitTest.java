@@ -758,6 +758,87 @@ public final class FadeManagerConfigurationUnitTest {
                 .isEqualTo(FadeManagerConfiguration.CREATOR.createFromParcel(parcel));
     }
 
+    @Test
+    public void testGetFadeOutVolumeShaperConfigForUsage_withInvalidUsage_fails() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
+                mFmc.getFadeOutVolumeShaperConfigForUsage(TEST_INVALID_USAGE)
+        );
+
+        expect.withMessage("Fade out volume shaper config for invalid usage exception")
+                .that(thrown).hasMessageThat().contains("Invalid usage");
+    }
+
+    @Test
+    public void testGetFadeInVolumeShaperConfigForUsage_withInvalidUsage_fails() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
+                mFmc.getFadeInVolumeShaperConfigForUsage(TEST_INVALID_USAGE)
+        );
+
+        expect.withMessage("Fade in volume shaper config for invalid usage exception")
+                .that(thrown).hasMessageThat().contains("Invalid usage");
+    }
+
+    @Test
+    public void testGetFadeVolumeShaperConfigForUsage_forSdkUsages() {
+        FadeManagerConfiguration.Builder builder = new FadeManagerConfiguration.Builder();
+        for (int usage : AudioAttributes.getSdkUsages()) {
+            builder.addFadeableUsage(usage);
+            builder.setFadeOutVolumeShaperConfigForUsage(usage, TEST_FADE_OUT_VOLUME_SHAPER_CONFIG);
+            builder.setFadeInVolumeShaperConfigForUsage(usage, TEST_FADE_IN_VOLUME_SHAPER_CONFIG);
+        }
+        FadeManagerConfiguration fmc = builder.build();
+
+        for (int usage : AudioAttributes.getSdkUsages()) {
+            expect.withMessage("Fade out volume shaper config for sdk usage")
+                    .that(fmc.getFadeOutVolumeShaperConfigForUsage(usage))
+                    .isEqualTo(TEST_FADE_OUT_VOLUME_SHAPER_CONFIG);
+            expect.withMessage("Fade in volume shaper config for sdk usage")
+                    .that(fmc.getFadeInVolumeShaperConfigForUsage(usage))
+                    .isEqualTo(TEST_FADE_IN_VOLUME_SHAPER_CONFIG);
+        }
+    }
+
+    @Test
+    public void testGetFadeVolumeShaperConfigForUsage_forSystemUsages() {
+        int[] systemUsages = {AudioAttributes.USAGE_CALL_ASSISTANT, AudioAttributes.USAGE_EMERGENCY,
+                AudioAttributes.USAGE_SAFETY, AudioAttributes.USAGE_VEHICLE_STATUS,
+                AudioAttributes.USAGE_ANNOUNCEMENT};
+        FadeManagerConfiguration.Builder builder = new FadeManagerConfiguration.Builder();
+        for (int usage : systemUsages) {
+            builder.addFadeableUsage(usage);
+            builder.setFadeOutVolumeShaperConfigForUsage(usage, TEST_FADE_OUT_VOLUME_SHAPER_CONFIG);
+            builder.setFadeInVolumeShaperConfigForUsage(usage, TEST_FADE_IN_VOLUME_SHAPER_CONFIG);
+        }
+        FadeManagerConfiguration fmc = builder.build();
+
+        for (int usage : systemUsages) {
+            expect.withMessage("Fade out volume shaper config for system usage")
+                    .that(fmc.getFadeOutVolumeShaperConfigForUsage(usage))
+                    .isEqualTo(TEST_FADE_OUT_VOLUME_SHAPER_CONFIG);
+            expect.withMessage("Fade in volume shaper config for system usage")
+                    .that(fmc.getFadeInVolumeShaperConfigForUsage(usage))
+                    .isEqualTo(TEST_FADE_IN_VOLUME_SHAPER_CONFIG);
+        }
+    }
+
+    @Test
+    public void testGetFadeVolumeShaperConfigForUsage_forHiddenUsage() {
+        int hiddenUsage = AudioAttributes.USAGE_VIRTUAL_SOURCE;
+        FadeManagerConfiguration fmc = new FadeManagerConfiguration.Builder()
+                .addFadeableUsage(hiddenUsage)
+                .setFadeOutVolumeShaperConfigForUsage(hiddenUsage,
+                        TEST_FADE_OUT_VOLUME_SHAPER_CONFIG)
+                .setFadeInVolumeShaperConfigForUsage(hiddenUsage,
+                        TEST_FADE_IN_VOLUME_SHAPER_CONFIG).build();
+
+        expect.withMessage("Fade out volume shaper config for hidden usage")
+                .that(fmc.getFadeOutVolumeShaperConfigForUsage(hiddenUsage))
+                .isEqualTo(TEST_FADE_OUT_VOLUME_SHAPER_CONFIG);
+        expect.withMessage("Fade in volume shaper config for hidden usage")
+                .that(fmc.getFadeInVolumeShaperConfigForUsage(hiddenUsage))
+                .isEqualTo(TEST_FADE_IN_VOLUME_SHAPER_CONFIG);
+    }
+
     private static AudioAttributes createAudioAttributesForUsage(int usage) {
         if (AudioAttributes.isSystemUsage(usage)) {
             return new AudioAttributes.Builder().setSystemUsage(usage).build();
