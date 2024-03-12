@@ -74,6 +74,7 @@ constructor(
             transitions =
                 transitions { sceneKeyByBlueprintId.values.forEach { sceneKey -> to(sceneKey) } },
             modifier = modifier,
+            enableInterruptions = false,
         ) {
             sceneKeyByBlueprint.entries.forEach { (blueprint, sceneKey) ->
                 scene(sceneKey) { with(blueprint) { Content(Modifier.fillMaxSize()) } }

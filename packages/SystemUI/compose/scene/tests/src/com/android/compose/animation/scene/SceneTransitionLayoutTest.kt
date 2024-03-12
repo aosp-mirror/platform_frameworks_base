@@ -299,6 +299,11 @@ class SceneTransitionLayoutTest {
             .isWithin(DpOffsetSubject.DefaultTolerance)
             .of(DpOffset(expectedOffset, expectedOffset))
 
+        // Wait for the transition to C to finish.
+        rule.mainClock.advanceTimeBy(TestTransitionDuration)
+        assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
+        assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneC)
+
         // Go back to scene A. This should happen instantly (once the animation started, i.e. after
         // 2 frames) given that we use a snap() animation spec.
         currentScene = TestScenes.SceneA

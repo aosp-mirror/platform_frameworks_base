@@ -79,6 +79,7 @@ fun SceneContainer(
             initialScene = currentSceneKey,
             canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
             transitions = SceneContainerTransitions,
+            enableInterruptions = false,
         )
     }
 

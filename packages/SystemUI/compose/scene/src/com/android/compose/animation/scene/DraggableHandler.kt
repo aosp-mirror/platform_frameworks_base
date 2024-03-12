@@ -18,7 +18,6 @@
 
 package com.android.compose.animation.scene
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.gestures.Orientation
@@ -144,16 +143,6 @@ internal class DraggableHandlerImpl(
         }
 
         val transitionState = layoutImpl.state.transitionState
-        if (transitionState is TransitionState.Transition) {
-            // TODO(b/290184746): Better handle interruptions here if state != idle.
-            Log.w(
-                TAG,
-                "start from TransitionState.Transition is not fully supported: from" +
-                    " ${transitionState.fromScene} to ${transitionState.toScene} " +
-                    "(progress ${transitionState.progress})"
-            )
-        }
-
         val fromScene = layoutImpl.scene(transitionState.currentScene)
         val swipes = computeSwipes(fromScene, startedPosition, pointersDown)
         val result =

@@ -96,9 +96,17 @@ fun SceneTransitionLayout(
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
+    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
-    val state = updateSceneTransitionLayoutState(currentScene, onChangeScene, transitions)
+    val state =
+        updateSceneTransitionLayoutState(
+            currentScene,
+            onChangeScene,
+            transitions,
+            enableInterruptions = enableInterruptions,
+        )
+
     SceneTransitionLayout(
         state,
         modifier,

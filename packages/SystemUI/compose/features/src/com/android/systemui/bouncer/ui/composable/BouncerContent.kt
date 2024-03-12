@@ -480,6 +480,7 @@ private fun FoldAware(
         onChangeScene = {},
         transitions = SceneTransitions,
         modifier = modifier,
+        enableInterruptions = false,
     ) {
         scene(SceneKeys.ContiguousSceneKey) {
             FoldableScene(
