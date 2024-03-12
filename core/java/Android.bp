@@ -167,6 +167,9 @@ java_library {
         "com/android/internal/logging/UiEventLoggerImpl.java",
         ":statslog-framework-java-gen",
     ],
+    libs: [
+        "androidx.annotation_annotation",
+    ],
     static_libs: ["modules-utils-uieventlogger-interface"],
 }
 
