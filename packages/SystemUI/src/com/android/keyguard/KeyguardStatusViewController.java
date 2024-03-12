@@ -250,6 +250,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     @Override
     protected void onViewAttached() {
         mStatusArea = mView.findViewById(R.id.keyguard_status_area);
+        if (migrateClocksToBlueprint()) {
+            return;
+        }
+
         mStatusArea.addOnLayoutChangeListener(mStatusAreaLayoutChangeListener);
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mConfigurationController.addCallback(mConfigurationListener);
@@ -257,6 +261,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     @Override
     protected void onViewDetached() {
+        if (migrateClocksToBlueprint()) {
+            return;
+        }
+
         mStatusArea.removeOnLayoutChangeListener(mStatusAreaLayoutChangeListener);
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
