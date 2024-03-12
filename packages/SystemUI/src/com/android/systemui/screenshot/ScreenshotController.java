@@ -228,7 +228,7 @@ public class ScreenshotController {
     // From WizardManagerHelper.java
     private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
-    private static final int SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS = 6000;
+    static final int SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS = 6000;
 
     private final WindowContext mContext;
     private final FeatureFlags mFlags;
@@ -460,7 +460,7 @@ public class ScreenshotController {
 
         attachWindow();
 
-        boolean showFlash = true;
+        boolean showFlash;
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
             if (screenshot.getScreenBounds() != null
                     && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getInsets(),
@@ -472,15 +472,14 @@ public class ScreenshotController {
                 screenshot.setScreenBounds(new Rect(0, 0, screenshot.getBitmap().getWidth(),
                         screenshot.getBitmap().getHeight()));
             }
+        } else {
+            showFlash = true;
         }
 
-        prepareAnimation(screenshot.getScreenBounds(), showFlash, () -> {
-            mMessageContainerController.onScreenshotTaken(screenshot);
-        });
+        mViewProxy.prepareEntranceAnimation(
+                () -> startAnimation(screenshot.getScreenBounds(), showFlash,
+                        () -> mMessageContainerController.onScreenshotTaken(screenshot)));
 
-        mViewProxy.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
-                mContext.getDrawable(R.drawable.overlay_badge_background),
-                screenshot.getUserHandle()));
         mViewProxy.setScreenshot(screenshot);
 
         // ignore system bar insets for the purpose of window layout
@@ -598,28 +597,11 @@ public class ScreenshotController {
         });
         mViewProxy.setFlags(mFlags);
         mViewProxy.setDefaultDisplay(mDisplayId);
-        mViewProxy.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         if (DEBUG_WINDOW) {
             Log.d(TAG, "setContentView: " + mViewProxy.getView());
         }
         setContentView(mViewProxy.getView());
-    }
-
-    private void prepareAnimation(Rect screenRect, boolean showFlash,
-            Runnable onAnimationComplete) {
-        mViewProxy.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        if (DEBUG_WINDOW) {
-                            Log.d(TAG, "onPreDraw: startAnimation");
-                        }
-                        mViewProxy.getViewTreeObserver().removeOnPreDrawListener(this);
-                        startAnimation(screenRect, showFlash, onAnimationComplete);
-                        return true;
-                    }
-                });
     }
 
     private void enqueueScrollCaptureRequest(UserHandle owner) {
@@ -706,10 +688,14 @@ public class ScreenshotController {
                 Bitmap newScreenshot = mImageCapture.captureDisplay(mDisplayId,
                         new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
-                mViewProxy.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
-                        mScreenshotTakenInPortrait);
-                // delay starting scroll capture to make sure the scrim is up before the app moves
-                mViewProxy.post(() -> runBatchScrollCapture(response, owner));
+                if (newScreenshot != null) {
+                    // delay starting scroll capture to make sure scrim is up before the app moves
+                    mViewProxy.prepareScrollingTransition(
+                            response, mScreenBitmap, newScreenshot, mScreenshotTakenInPortrait,
+                            () -> runBatchScrollCapture(response, owner));
+                } else {
+                    Log.wtf(TAG, "failed to capture current screenshot for scroll transition");
+                }
             });
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "requestScrollCapture failed", e);
