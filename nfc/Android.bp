@@ -69,6 +69,9 @@ java_sdk_library {
     lint: {
         strict_updatability_linting: true,
     },
+    aconfig_declarations: [
+        "android.nfc.flags-aconfig",
+    ],
 }
 
 filegroup {
