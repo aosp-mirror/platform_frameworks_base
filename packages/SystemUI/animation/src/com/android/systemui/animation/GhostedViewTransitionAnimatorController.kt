@@ -337,6 +337,7 @@ constructor(
         if (ghostedView is LaunchableView) {
             // Restore the ghosted view visibility.
             ghostedView.setShouldBlockVisibilityChanges(false)
+            ghostedView.onActivityLaunchAnimationEnd()
         } else {
             // Make the ghosted view visible. We ensure that the view is considered VISIBLE by
             // accessibility by first making it INVISIBLE then VISIBLE (see b/204944038#comment17

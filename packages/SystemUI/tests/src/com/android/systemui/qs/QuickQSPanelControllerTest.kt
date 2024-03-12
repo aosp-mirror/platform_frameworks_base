@@ -30,6 +30,7 @@ import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.leak.RotationUtils
 import org.junit.After
@@ -59,6 +60,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var tileLayout: TileLayout
     @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
+    @Mock private lateinit var vibratorHelper: VibratorHelper
 
     private val uiEventLogger = UiEventLoggerFake()
     private val dumpManager = DumpManager()
@@ -89,7 +91,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager
+                dumpManager,
+                vibratorHelper,
             )
 
         controller.init()
@@ -157,7 +160,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         metricsLogger: MetricsLogger,
         uiEventLogger: UiEventLoggerFake,
         qsLogger: QSLogger,
-        dumpManager: DumpManager
+        dumpManager: DumpManager,
+        vibratorHelper: VibratorHelper,
     ) :
         QuickQSPanelController(
             view,
@@ -170,7 +174,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
             uiEventLogger,
             qsLogger,
             dumpManager,
-            ResourcesSplitShadeStateController()
+            ResourcesSplitShadeStateController(),
+            vibratorHelper,
         ) {
 
         private var rotation = RotationUtils.ROTATION_NONE
