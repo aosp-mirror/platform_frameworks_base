@@ -6203,8 +6203,6 @@ package android.hardware.location {
     method public long getNanoAppId();
     method public boolean isBroadcastMessage();
     method @FlaggedApi("android.chre.flags.reliable_message") public boolean isReliable();
-    method @FlaggedApi("android.chre.flags.reliable_message") public void setIsReliable(boolean);
-    method @FlaggedApi("android.chre.flags.reliable_message") public void setMessageSequenceNumber(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
