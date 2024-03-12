@@ -247,7 +247,7 @@ public class RequestSessionMetric {
      *
      * @param exceptionBitFinalPhase represents if the final phase provider had an exception
      */
-    private void setHasExceptionFinalPhase(boolean exceptionBitFinalPhase) {
+    public void setHasExceptionFinalPhase(boolean exceptionBitFinalPhase) {
         try {
             mChosenProviderFinalPhaseMetric.setHasException(exceptionBitFinalPhase);
         } catch (Exception e) {

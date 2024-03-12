@@ -304,14 +304,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         if (!isPinned) {
             headsUpEntry.mWasUnpinned = true;
         }
-        if (entry.isRowPinned() != isPinned) {
-            entry.setRowPinned(isPinned);
+        if (headsUpEntry.isPinned() != isPinned) {
+            headsUpEntry.setPinned(isPinned);
             updatePinnedMode();
             if (isPinned && entry.getSbn() != null) {
-                mUiEventLogger.logWithInstanceId(
+               mUiEventLogger.logWithInstanceId(
                         NotificationPeekEvent.NOTIFICATION_PEEK, entry.getSbn().getUid(),
                         entry.getSbn().getPackageName(), entry.getSbn().getInstanceId());
             }
+            // TODO(b/325936094) convert these listeners to collecting a flow
             for (OnHeadsUpChangedListener listener : mListeners) {
                 if (isPinned) {
                     listener.onHeadsUpPinned(entry);
@@ -660,6 +661,14 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
             mPostTime = calculatePostTime();
             updateEntry(true /* updatePostTime */, "setEntry");
+        }
+
+        public boolean isPinned() {
+            return mEntry != null && mEntry.isRowPinned();
+        }
+
+        public void setPinned(boolean pinned) {
+            if (mEntry != null) mEntry.setRowPinned(pinned);
         }
 
         /**

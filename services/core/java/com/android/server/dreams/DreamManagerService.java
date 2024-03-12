@@ -982,6 +982,18 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public boolean canStartDreaming(boolean isScreenOn) {
+            checkPermission(android.Manifest.permission.READ_DREAM_STATE);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return canStartDreamingInternal(isScreenOn);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
         public void testDream(int userId, ComponentName dream) {
             if (dream == null) {
                 throw new IllegalArgumentException("dream must not be null");

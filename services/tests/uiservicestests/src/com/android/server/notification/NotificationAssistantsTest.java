@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,9 +49,12 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Xml;
+import android.Manifest;
 
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.function.TriPredicate;
 import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 
@@ -59,7 +64,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,11 +96,15 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     UserInfo mZero = new UserInfo(0, "zero", 0);
     UserInfo mTen = new UserInfo(10, "ten", 0);
 
+    ComponentName mCn = new ComponentName("a", "b");
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mContext.setMockPackageManager(mPm);
         mContext.addMockSystemService(Context.USER_SERVICE, mUm);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent, "a/a");
         mAssistants = spy(mNm.new NotificationAssistants(mContext, mLock, mUserProfiles, miPm));
         when(mNm.getBinderService()).thenReturn(mINm);
         mContext.ensureTestableResources();
@@ -102,8 +113,9 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         ResolveInfo resolve = new ResolveInfo();
         approved.add(resolve);
         ServiceInfo info = new ServiceInfo();
-        info.packageName = "a";
-        info.name="a";
+        info.packageName = mCn.getPackageName();
+        info.name = mCn.getClassName();
+        info.permission = Manifest.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE;
         resolve.serviceInfo = info;
         when(mPm.queryIntentServicesAsUser(any(), anyInt(), anyInt()))
                 .thenReturn(approved);
@@ -137,6 +149,51 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testWriteXml_userTurnedOffNAS() throws Exception {
+        int userId = ActivityManager.getCurrentUser();
+
+        mAssistants.loadDefaultsFromConfig(true);
+
+        mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
+               true, true);
+
+        ComponentName current = CollectionUtils.firstOrNull(
+                mAssistants.getAllowedComponents(userId));
+        assertNotNull(current);
+        mAssistants.setUserSet(userId, true);
+        mAssistants.setPackageOrComponentEnabled(current.flattenToString(), userId, true, false,
+                true);
+
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        mAssistants.writeXml(serializer, true, userId);
+        serializer.endDocument();
+        serializer.flush();
+
+        //fail(baos.toString("UTF-8"));
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants = spy(mNm.new NotificationAssistants(mContext, mLock, mUserProfiles, miPm));
+        mAssistants.readXml(parser, allowedManagedServicePackages, false, UserHandle.USER_ALL);
+
+        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(0);
+        // approved should not be null
+        assertNotNull(approved);
+        assertEquals(new ArraySet<>(), approved.get(true));
+
+        // user set is maintained
+        assertTrue(mAssistants.mIsUserChanged.get(ActivityManager.getCurrentUser()));
+    }
+
+    @Test
     public void testReadXml_userDisabled() throws Exception {
         String xml = "<enabled_assistants version=\"4\" defaults=\"b/b\">"
                 + "<service_listing approved=\"\" user=\"0\" primary=\"true\""
@@ -157,6 +214,33 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         // approved should not be null
         assertNotNull(approved);
         assertEquals(new ArraySet<>(), approved.get(true));
+    }
+
+    @Test
+    public void testReadXml_userDisabled_restore() throws Exception {
+        String xml = "<enabled_assistants version=\"4\" defaults=\"b/b\">"
+                + "<service_listing approved=\"\" user=\"0\" primary=\"true\""
+                + "user_changed=\"true\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants.readXml(parser, allowedManagedServicePackages, true,
+                ActivityManager.getCurrentUser());
+
+        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(0);
+
+        // approved should not be null
+        assertNotNull(approved);
+        assertEquals(new ArraySet<>(), approved.get(true));
+
+        // user set is maintained
+        assertTrue(mAssistants.mIsUserChanged.get(ActivityManager.getCurrentUser()));
     }
 
     @Test

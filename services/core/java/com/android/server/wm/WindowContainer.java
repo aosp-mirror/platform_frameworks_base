@@ -716,7 +716,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         // If parent is null, the layer should be placed offscreen so reparent to null. Otherwise,
         // set to the available parent.
-        t.reparent(mSurfaceControl, mParent == null ? null : mParent.getSurfaceControl());
+        t.reparent(mSurfaceControl, mParent == null ? null : mParent.getParentingSurfaceControl());
 
         if (mLastRelativeToLayer != null) {
             t.setRelativeLayer(mSurfaceControl, mLastRelativeToLayer, mLastLayer);
@@ -2904,6 +2904,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public SurfaceControl getSurfaceControl() {
         return mSurfaceControl;
+    }
+
+    /**
+     * Returns the {@link SurfaceControl} where all the children should be parented on.
+     *
+     * A {@link WindowContainer} might insert intermediate leashes in the hierarchy and hence
+     * {@link #getSurfaceControl} won't return the correct surface where the children should be
+     * re-parented on.
+     */
+    SurfaceControl getParentingSurfaceControl() {
+        return getSurfaceControl();
     }
 
     /**

@@ -39,6 +39,7 @@ object SubtitleArrayMapping {
         subtitleIdsMap["cast"] = R.array.tile_states_cast
         subtitleIdsMap["night"] = R.array.tile_states_night
         subtitleIdsMap["screenrecord"] = R.array.tile_states_screenrecord
+        subtitleIdsMap["record_issue"] = R.array.tile_states_record_issue
         subtitleIdsMap["reverse"] = R.array.tile_states_reverse
         subtitleIdsMap["reduce_brightness"] = R.array.tile_states_reduce_brightness
         subtitleIdsMap["cameratoggle"] = R.array.tile_states_cameratoggle

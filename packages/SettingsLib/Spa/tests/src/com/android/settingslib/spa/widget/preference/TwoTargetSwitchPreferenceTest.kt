@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.isToggleable
@@ -46,7 +47,7 @@ class TwoTargetSwitchPreferenceTest {
             TestTwoTargetSwitchPreference(changeable = true)
         }
 
-        composeTestRule.onNodeWithText("TwoTargetSwitchPreference").assertIsDisplayed()
+        composeTestRule.onNodeWithText(TITLE).assertIsDisplayed()
     }
 
     @Test
@@ -79,7 +80,7 @@ class TwoTargetSwitchPreferenceTest {
     }
 
     @Test
-    fun clickable_canBeClick() {
+    fun clickable_primaryEnabled_canBeClick() {
         var clicked = false
         composeTestRule.setContent {
             TestTwoTargetSwitchPreference(changeable = false) {
@@ -87,26 +88,54 @@ class TwoTargetSwitchPreferenceTest {
             }
         }
 
-        composeTestRule.onNodeWithText("TwoTargetSwitchPreference").performClick()
+        composeTestRule.onNodeWithText(TITLE).performClick()
         assertThat(clicked).isTrue()
     }
-}
 
-@Composable
-private fun TestTwoTargetSwitchPreference(
-    changeable: Boolean,
-    onClick: () -> Unit = {},
-) {
-    var checked by rememberSaveable { mutableStateOf(false) }
-    TwoTargetSwitchPreference(
-        model = remember {
-            object : SwitchPreferenceModel {
-                override val title = "TwoTargetSwitchPreference"
-                override val checked = { checked }
-                override val changeable = { changeable }
-                override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
+    @Test
+    fun clickable_primaryNotEnabled_assertIsNotEnabled() {
+        composeTestRule.setContent {
+            TestTwoTargetSwitchPreference(changeable = false, primaryEnabled = false)
+        }
+
+        composeTestRule.onNodeWithText(TITLE).assertIsNotEnabled()
+    }
+
+    @Test
+    fun clickable_primaryNotEnabled_canNotBeClick() {
+        var clicked = false
+        composeTestRule.setContent {
+            TestTwoTargetSwitchPreference(changeable = false, primaryEnabled = false) {
+                clicked = true
             }
-        },
-        onClick = onClick,
-    )
+        }
+
+        composeTestRule.onNodeWithText(TITLE).performClick()
+        assertThat(clicked).isFalse()
+    }
+
+    @Composable
+    private fun TestTwoTargetSwitchPreference(
+        changeable: Boolean,
+        primaryEnabled: Boolean = true,
+        primaryOnClick: () -> Unit = {},
+    ) {
+        var checked by rememberSaveable { mutableStateOf(false) }
+        TwoTargetSwitchPreference(
+            model = remember {
+                object : SwitchPreferenceModel {
+                    override val title = TITLE
+                    override val checked = { checked }
+                    override val changeable = { changeable }
+                    override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
+                }
+            },
+            primaryEnabled = { primaryEnabled },
+            primaryOnClick = primaryOnClick,
+        )
+    }
+
+    private companion object {
+        const val TITLE = "Title"
+    }
 }

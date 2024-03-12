@@ -27,6 +27,7 @@ import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.TypedArray;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
@@ -46,6 +47,7 @@ import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -71,6 +73,7 @@ import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
+import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
@@ -380,6 +383,17 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             scheduleLoadAuthenticatorIds(sensorId);
             scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser(),
                     null /* callback */);
+        }
+
+        if (Build.isDebuggable()) {
+            BiometricUtils<Fingerprint> utils = FingerprintUtils.getInstance(
+                    mFingerprintSensors.keyAt(0));
+            for (UserInfo user : UserManager.get(mContext).getAliveUsers()) {
+                List<Fingerprint> enrollments = utils.getBiometricsForUser(mContext, user.id);
+                Slog.d(getTag(), "Expecting enrollments for user " + user.id + ": "
+                        + enrollments.stream().map(
+                                BiometricAuthenticator.Identifier::getBiometricId).toList());
+            }
         }
 
         return mDaemon;

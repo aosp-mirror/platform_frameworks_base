@@ -455,7 +455,7 @@ applications that come with the platform
         <permission name="android.permission.USE_BIOMETRIC" />
         <permission name="android.permission.TEST_BIOMETRIC" />
         <permission name="android.permission.SET_BIOMETRIC_DIALOG_LOGO" />
-        <permission name="android.permission.USE_BACKGROUND_FACE_AUTHENTICATION" />
+        <permission name="android.permission.MANAGE_BIOMETRIC_DIALOG" />
         <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
         <permission name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
         <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
@@ -584,6 +584,8 @@ applications that come with the platform
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
         <!-- Permission required for CTS test CtsInputTestCases -->
         <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
+        <!-- Permission required for CTS test - PackageManagerShellCommandInstallTest -->
+        <permission name="android.permission.EMERGENCY_INSTALL_PACKAGES" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

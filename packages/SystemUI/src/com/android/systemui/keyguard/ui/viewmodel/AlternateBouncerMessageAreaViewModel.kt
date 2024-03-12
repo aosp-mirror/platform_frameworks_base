@@ -23,13 +23,19 @@ import com.android.systemui.deviceentry.shared.model.FaceMessage
 import com.android.systemui.deviceentry.shared.model.FaceTimeoutMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintMessage
+import com.android.systemui.statusbar.KeyguardIndicationController.DEFAULT_MESSAGE_TIME
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 
 /** View model for the alternate bouncer message area. */
 @ExperimentalCoroutinesApi
@@ -38,19 +44,32 @@ class AlternateBouncerMessageAreaViewModel
 constructor(
     biometricMessageInteractor: BiometricMessageInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
+    systemClock: com.android.systemui.util.time.SystemClock,
 ) {
-
-    private val faceMessage: Flow<FaceMessage> =
-        biometricMessageInteractor.faceMessage.filterNot { it is FaceTimeoutMessage }
+    private val fingerprintMessageWithTimestamp: Flow<Pair<FingerprintMessage?, Long>> =
+        biometricMessageInteractor.fingerprintMessage
+            .filterNot { it is FingerprintLockoutMessage }
+            .map { Pair(it, systemClock.uptimeMillis()) }
+            .filterIsInstance<Pair<FingerprintMessage?, Long>>()
+            .onStart { emit(Pair(null, -3500L)) }
     private val fingerprintMessage: Flow<FingerprintMessage> =
-        biometricMessageInteractor.fingerprintMessage.filterNot { it is FingerprintLockoutMessage }
+        fingerprintMessageWithTimestamp.filter { it.first != null }.map { it.first!! }
+    private val faceMessage: Flow<FaceMessage> =
+        biometricMessageInteractor.faceMessage
+            .filterNot { it is FaceTimeoutMessage }
+            // Don't show face messages if within the default message time for fp messages to show
+            .sample(fingerprintMessageWithTimestamp, ::Pair)
+            .filter { (_, fpMessage) ->
+                (systemClock.uptimeMillis() - fpMessage.second) >= DEFAULT_MESSAGE_TIME
+            }
+            .map { (faceMsg, _) -> faceMsg }
 
     val message: Flow<BiometricMessage?> =
         alternateBouncerInteractor.isVisible.flatMapLatest { isVisible ->
             if (isVisible) {
                 merge(
-                    faceMessage,
                     fingerprintMessage,
+                    faceMessage,
                 )
             } else {
                 flowOf(null)

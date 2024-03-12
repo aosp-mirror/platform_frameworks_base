@@ -18,6 +18,7 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -31,7 +32,7 @@ import com.android.systemui.keyguard.data.repository.fakeTrustRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -120,7 +121,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
             setupSwipeDeviceEntryMethod()
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
 
             assertThat(isDeviceEntered).isFalse()
         }
@@ -130,9 +131,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
             setupSwipeDeviceEntryMethod()
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
             runCurrent()
-            switchToScene(SceneKey.Shade)
+            switchToScene(Scenes.Shade)
 
             assertThat(isDeviceEntered).isFalse()
         }
@@ -142,9 +143,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
             setupSwipeDeviceEntryMethod()
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
             runCurrent()
-            switchToScene(SceneKey.Gone)
+            switchToScene(Scenes.Gone)
 
             assertThat(isDeviceEntered).isTrue()
         }
@@ -154,11 +155,11 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
             setupSwipeDeviceEntryMethod()
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
             runCurrent()
-            switchToScene(SceneKey.Gone)
+            switchToScene(Scenes.Gone)
             runCurrent()
-            switchToScene(SceneKey.Shade)
+            switchToScene(Scenes.Shade)
 
             assertThat(isDeviceEntered).isTrue()
         }
@@ -170,9 +171,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pattern
             )
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
             runCurrent()
-            switchToScene(SceneKey.Bouncer)
+            switchToScene(Scenes.Bouncer)
 
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
             assertThat(isDeviceEntered).isFalse()
@@ -182,7 +183,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun canSwipeToEnter_onLockscreenWithSwipe_isTrue() =
         testScope.runTest {
             setupSwipeDeviceEntryMethod()
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
 
             val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
             assertThat(canSwipeToEnter).isTrue()
@@ -195,7 +196,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pin
             )
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
 
             val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
             assertThat(canSwipeToEnter).isFalse()
@@ -205,9 +206,9 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun canSwipeToEnter_afterLockscreenDismissedInSwipeMode_isFalse() =
         testScope.runTest {
             setupSwipeDeviceEntryMethod()
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
             runCurrent()
-            switchToScene(SceneKey.Gone)
+            switchToScene(Scenes.Gone)
 
             val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
             assertThat(canSwipeToEnter).isFalse()
@@ -225,7 +226,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
             assertThat(canSwipeToEnter).isFalse()
 
             trustRepository.setCurrentUserTrusted(true)
@@ -242,7 +243,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            switchToScene(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
             assertThat(canSwipeToEnter).isFalse()
 
             faceAuthRepository.isAuthenticated.value = true
@@ -311,8 +312,8 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun showOrUnlockDevice_notLocked_switchesToGoneScene() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            switchToScene(SceneKey.Lockscreen)
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
@@ -322,15 +323,15 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
             underTest.attemptDeviceEntry()
 
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun showOrUnlockDevice_authMethodNotSecure_switchesToGoneScene() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            switchToScene(SceneKey.Lockscreen)
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
@@ -339,15 +340,15 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
             underTest.attemptDeviceEntry()
 
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 
     @Test
     fun showOrUnlockDevice_authMethodSwipe_switchesToGoneScene() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            switchToScene(SceneKey.Lockscreen)
-            assertThat(currentScene).isEqualTo(SceneKey.Lockscreen)
+            switchToScene(Scenes.Lockscreen)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
@@ -357,7 +358,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
 
             underTest.attemptDeviceEntry()
 
-            assertThat(currentScene).isEqualTo(SceneKey.Gone)
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
         }
 
     @Test

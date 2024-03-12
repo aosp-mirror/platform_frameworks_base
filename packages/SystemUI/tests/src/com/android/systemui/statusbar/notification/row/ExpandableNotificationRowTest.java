@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
+import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
@@ -327,6 +328,61 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         group.setUserLocked(false);
         assertFalse("The childrencontainer should not be userlocked but is, the state "
                 + "seems out of sync.", group.getChildrenContainer().isUserLocked());
+    }
+
+    @Test
+    @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
+    public void setHideSensitive_shouldNotDisturbAnimation() throws Exception {
+        //Given: A row that is during alpha animation
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        assertEquals(row.getPrivateLayout(), row.getContentView());
+        row.setContentAlpha(0.5f);
+
+        //When: Set its hideSensitive without changing the content view to show
+        row.setHideSensitive(
+                /* hideSensitive= */ false,
+                /* animated= */ false,
+                /* delay=  */ 0L,
+                /* duration=  */ 0L
+        );
+        assertEquals(row.getPrivateLayout(), row.getContentView());
+
+        //Then: The alpha value should not be reset
+        assertEquals(0.5f, row.getPrivateLayout().getAlpha(), 0);
+    }
+
+    @Test
+    @EnableFlags(NotificationContentAlphaOptimization.FLAG_NAME)
+    public void setHideSensitive_changeContent_shouldNotDisturbAnimation() throws Exception {
+
+        // Given: A sensitive row that has public version but is not hiding sensitive,
+        // and is during an animation that sets its alpha value to be 0.5f
+        Notification publicNotif = mNotificationTestHelper.createNotification();
+        publicNotif.publicVersion = mNotificationTestHelper.createNotification();
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(publicNotif);
+        row.setSensitive(true, false);
+        row.setContentAlpha(0.5f);
+
+        assertEquals(0.5f, row.getPrivateLayout().getAlpha(), 0);
+        assertEquals(View.VISIBLE, row.getPrivateLayout().getVisibility());
+
+        // When: Change its hideSensitive and changes the content view to show the public version
+        row.setHideSensitive(
+                /* hideSensitive= */ true,
+                /* animated= */ false,
+                /* delay=  */ 0L,
+                /* duration=  */ 0L
+        );
+
+        // Then: The alpha value of private layout should be reset to 1, private layout be
+        // INVISIBLE;
+        // The alpha value of public layout should be 0.5 to preserve the animation state, public
+        // layout should be VISIBLE
+        assertEquals(View.INVISIBLE, row.getPrivateLayout().getVisibility());
+        assertEquals(1f, row.getPrivateLayout().getAlpha(), 0);
+        assertEquals(View.VISIBLE, row.getPublicLayout().getVisibility());
+        assertEquals(0.5f, row.getPublicLayout().getAlpha(), 0);
     }
 
     @Test

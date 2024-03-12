@@ -411,7 +411,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     // If the previous frame was dropped we don't need to hold onto it, so
     // just keep using the previous frame's structure instead
-    if (const auto reason = wasSkipped(mCurrentFrameInfo)) {
+    const auto reason = wasSkipped(mCurrentFrameInfo);
+    if (reason.has_value()) {
         // Use the oldest skipped frame in case we skip more than a single frame
         if (!mSkippedFrameInfo) {
             switch (*reason) {

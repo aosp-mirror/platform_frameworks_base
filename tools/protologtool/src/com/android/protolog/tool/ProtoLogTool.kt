@@ -24,11 +24,17 @@ import com.github.javaparser.ParseProblemException
 import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.InitializerDeclaration
+import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
+import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.NullLiteralExpr
+import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.ast.expr.StringLiteralExpr
+import com.github.javaparser.ast.stmt.BlockStmt
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -39,8 +45,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
-import kotlin.math.abs
-import kotlin.random.Random
+import kotlin.math.absoluteValue
 import kotlin.system.exitProcess
 
 object ProtoLogTool {
@@ -72,7 +77,11 @@ object ProtoLogTool {
     }
 
     private fun processClasses(command: CommandOptions) {
-        val generationHash = abs(Random.nextInt())
+        // A deterministic hash based on the group jar path and the source files we are processing.
+        // The hash is required to make sure different ProtoLogImpls don't conflict.
+        val generationHash = (command.javaSourceArgs.toTypedArray() + command.protoLogGroupsJarArg)
+                .contentHashCode().absoluteValue
+
         // Need to generate a new impl class to inject static constants into the class.
         val generatedProtoLogImplClass =
             "com.android.internal.protolog.ProtoLogImpl_$generationHash"
@@ -93,7 +102,8 @@ object ProtoLogTool {
         outJar.putNextEntry(zipEntry(protologImplPath))
 
         outJar.write(generateProtoLogImpl(protologImplName, command.viewerConfigFilePathArg,
-            command.legacyViewerConfigFilePathArg, command.legacyOutputFilePath).toByteArray())
+            command.legacyViewerConfigFilePathArg, command.legacyOutputFilePath,
+            groups, command.protoLogGroupsClassNameArg).toByteArray())
 
         val executor = newThreadPool()
 
@@ -137,6 +147,8 @@ object ProtoLogTool {
         viewerConfigFilePath: String,
         legacyViewerConfigFilePath: String?,
         legacyOutputFilePath: String?,
+        groups: Map<String, LogGroup>,
+        protoLogGroupsClassName: String,
     ): String {
         val file = File(PROTOLOG_IMPL_SRC_PATH)
 
@@ -157,7 +169,8 @@ object ProtoLogTool {
         classNameNode.setId(protoLogImplGenName)
 
         injectConstants(classDeclaration,
-            viewerConfigFilePath, legacyViewerConfigFilePath, legacyOutputFilePath)
+            viewerConfigFilePath, legacyViewerConfigFilePath, legacyOutputFilePath, groups,
+            protoLogGroupsClassName)
 
         return code.toString()
     }
@@ -166,7 +179,9 @@ object ProtoLogTool {
         classDeclaration: ClassOrInterfaceDeclaration,
         viewerConfigFilePath: String,
         legacyViewerConfigFilePath: String?,
-        legacyOutputFilePath: String?
+        legacyOutputFilePath: String?,
+        groups: Map<String, LogGroup>,
+        protoLogGroupsClassName: String
     ) {
         classDeclaration.fields.forEach { field ->
             field.getAnnotationByClass(ProtoLogToolInjected::class.java)
@@ -193,6 +208,35 @@ object ProtoLogTool {
                                             .setInitializer(legacyViewerConfigFilePath?.let {
                                                 StringLiteralExpr(it)
                                             } ?: NullLiteralExpr())
+                                }
+                                ProtoLogToolInjected.Value.LOG_GROUPS.name -> {
+                                    val initializerBlockStmt = BlockStmt()
+                                    for (group in groups) {
+                                        initializerBlockStmt.addStatement(
+                                            MethodCallExpr()
+                                                    .setName("put")
+                                                    .setArguments(
+                                                        NodeList(StringLiteralExpr(group.key),
+                                                            FieldAccessExpr()
+                                                                    .setScope(
+                                                                        NameExpr(
+                                                                            protoLogGroupsClassName
+                                                                        ))
+                                                                    .setName(group.value.name)))
+                                        )
+                                        group.key
+                                    }
+
+                                    val treeMapCreation = ObjectCreationExpr()
+                                            .setType("TreeMap<String, IProtoLogGroup>")
+                                            .setAnonymousClassBody(NodeList(
+                                                InitializerDeclaration().setBody(
+                                                    initializerBlockStmt
+                                                )
+                                            ))
+
+                                    field.setFinal(true)
+                                    field.variables.first().setInitializer(treeMapCreation)
                                 }
                                 else -> error("Unhandled ProtoLogToolInjected value: $valueName.")
                             }

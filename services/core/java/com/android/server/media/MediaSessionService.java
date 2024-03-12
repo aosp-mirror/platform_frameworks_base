@@ -106,7 +106,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * System implementation of MediaSessionManager
@@ -127,6 +126,22 @@ public class MediaSessionService extends SystemService implements Monitor {
      * Copied from Settings.System.MEDIA_BUTTON_RECEIVER
      */
     private static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
+
+    /**
+     * Action reported to UsageStatsManager when a media session becomes active and user engaged
+     * for a given app. App is expected to show an ongoing notification after this.
+     */
+    private static final String USAGE_STATS_ACTION_START = "start";
+
+    /**
+     * Action reported to UsageStatsManager when a media session is no longer active and user
+     * engaged for a given app. If media session only pauses for a brief time the event will not
+     * necessarily be reported in case user is still "engaging" and will restart it momentarily.
+     * In such case, action may be reported after a short delay to ensure user is truly no longer
+     * engaging. Afterwards, the app is no longer expected to show an ongoing notification.
+     */
+    private static final String USAGE_STATS_ACTION_STOP = "stop";
+    private static final String USAGE_STATS_CATEGORY = "android.media";
 
     private final Context mContext;
     private final SessionManagerImpl mSessionManagerImpl;
@@ -154,9 +169,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     /* Maps uid with all user engaging session tokens associated to it */
-    private final SparseArray<Set<MediaSession.Token>> mUserEngagingSessions = new SparseArray<>();
-
-    private final AtomicInteger mNextMediaSessionRecordId = new AtomicInteger(1);
+    private final SparseArray<Set<MediaSessionRecordImpl>> mUserEngagingSessions =
+            new SparseArray<>();
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -196,8 +210,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     MediaSessionService.this,
                                     mRecordThread.getLooper(),
                                     pid,
-                                    /* policies= */ 0,
-                                    /* uniqueId= */ mNextMediaSessionRecordId.getAndIncrement());
+                                    /* policies= */ 0);
                     synchronized (mLock) {
                         FullUserRecord user = getFullUserRecordLocked(record.getUserId());
                         if (user != null) {
@@ -613,9 +626,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
         ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
                 record.getForegroundServiceDelegationOptions();
-        if (foregroundServiceDelegationOptions == null
-                || foregroundServiceDelegationOptions.mClientPid == Process.INVALID_PID) {
-            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
+        if (foregroundServiceDelegationOptions == null) {
             return;
         }
         if (allowRunningInForeground) {
@@ -628,24 +639,24 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void reportMediaInteractionEvent(MediaSessionRecordImpl record, boolean userEngaged) {
-        if (!android.app.usage.Flags.userInteractionTypeApi()
-                || !(record instanceof MediaSessionRecord)) {
+        if (!android.app.usage.Flags.userInteractionTypeApi()) {
             return;
         }
 
         String packageName = record.getPackageName();
         int sessionUid = record.getUid();
-        MediaSession.Token token = ((MediaSessionRecord) record).getSessionToken();
         if (userEngaged) {
             if (!mUserEngagingSessions.contains(sessionUid)) {
                 mUserEngagingSessions.put(sessionUid, new HashSet<>());
-                reportUserInteractionEvent(/* action= */ "start", record.getUserId(), packageName);
+                reportUserInteractionEvent(
+                    USAGE_STATS_ACTION_START, record.getUserId(), packageName);
             }
-            mUserEngagingSessions.get(sessionUid).add(token);
+            mUserEngagingSessions.get(sessionUid).add(record);
         } else if (mUserEngagingSessions.contains(sessionUid)) {
-            mUserEngagingSessions.get(sessionUid).remove(token);
+            mUserEngagingSessions.get(sessionUid).remove(record);
             if (mUserEngagingSessions.get(sessionUid).isEmpty()) {
-                reportUserInteractionEvent(/* action= */ "stop", record.getUserId(), packageName);
+                reportUserInteractionEvent(
+                    USAGE_STATS_ACTION_STOP, record.getUserId(), packageName);
                 mUserEngagingSessions.remove(sessionUid);
             }
         }
@@ -653,7 +664,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private void reportUserInteractionEvent(String action, int userId, String packageName) {
         PersistableBundle extras = new PersistableBundle();
-        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, "android.media");
+        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, USAGE_STATS_CATEGORY);
         extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, action);
         mUsageStatsManagerInternal.reportUserInteractionEvent(packageName, userId, extras);
     }
@@ -806,7 +817,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                                 callerPackageName,
                                 cb,
                                 tag,
-                                /* uniqueId= */ mNextMediaSessionRecordId.getAndIncrement(),
                                 sessionInfo,
                                 this,
                                 mRecordThread.getLooper(),

@@ -37,7 +37,7 @@ import perfetto.protos.ProtologConfig;
 public class PerfettoDataSourceTest {
     @Before
     public void before() {
-        assumeTrue(android.tracing.Flags.perfettoProtolog());
+        assumeTrue(android.tracing.Flags.perfettoProtologTracing());
     }
 
     @Test

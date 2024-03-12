@@ -399,7 +399,8 @@ public class OverlayPresentationTest {
                         new ActivityStackAttributes.Builder().build()));
 
         assertThrows(NullPointerException.class, () ->
-                mSplitController.updateActivityStackAttributes(new Binder(), null));
+                mSplitController.updateActivityStackAttributes(
+                        ActivityStack.Token.createFromBinder(new Binder()), null));
 
         verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any(), any());
     }
@@ -408,7 +409,8 @@ public class OverlayPresentationTest {
     public void testUpdateActivityStackAttributes_nullContainer_earlyReturn() {
         final TaskFragmentContainer container = mSplitController.newContainer(mActivity,
                 mActivity.getTaskId());
-        mSplitController.updateActivityStackAttributes(container.getTaskFragmentToken(),
+        mSplitController.updateActivityStackAttributes(
+                ActivityStack.Token.createFromBinder(container.getTaskFragmentToken()),
                 new ActivityStackAttributes.Builder().build());
 
         verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any(), any());
@@ -418,7 +420,8 @@ public class OverlayPresentationTest {
     public void testUpdateActivityStackAttributes_notOverlay_earlyReturn() {
         final TaskFragmentContainer container = createMockTaskFragmentContainer(mActivity);
 
-        mSplitController.updateActivityStackAttributes(container.getTaskFragmentToken(),
+        mSplitController.updateActivityStackAttributes(
+                ActivityStack.Token.createFromBinder(container.getTaskFragmentToken()),
                 new ActivityStackAttributes.Builder().build());
 
         verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any(), any());
@@ -431,7 +434,8 @@ public class OverlayPresentationTest {
         final ActivityStackAttributes attrs = new ActivityStackAttributes.Builder().build();
         final IBinder token = container.getTaskFragmentToken();
 
-        mSplitController.updateActivityStackAttributes(token, attrs);
+        mSplitController.updateActivityStackAttributes(ActivityStack.Token.createFromBinder(token),
+                attrs);
 
         verify(mSplitPresenter).applyActivityStackAttributes(any(), eq(container), eq(attrs),
                 any());

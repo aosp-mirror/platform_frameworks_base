@@ -697,8 +697,9 @@ public class LauncherApps {
     public List<UserHandle> getProfiles() {
         if (mUserManager.isManagedProfile()
                 || (android.multiuser.Flags.enableLauncherAppsHiddenProfileChecks()
-                        && android.os.Flags.allowPrivateProfile()
-                        && mUserManager.isPrivateProfile())) {
+                    && android.os.Flags.allowPrivateProfile()
+                    && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                    && mUserManager.isPrivateProfile())) {
             // If it's a managed or private profile, only return the current profile.
             final List result = new ArrayList(1);
             result.add(android.os.Process.myUserHandle());
@@ -893,6 +894,28 @@ public class LauncherApps {
         }
         try {
             return mService.getPreInstalledSystemPackages(userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@link IntentSender} which can be used to start the Private Space Settings Activity.
+     *
+     * <p> Caller should have {@link android.app.role.RoleManager.ROLE_HOME} and either of the
+     * permissions required.</p>
+     *
+     * @return {@link IntentSender} object which launches the Private Space Settings Activity, if
+     * successful, null otherwise.
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    @RequiresPermission(conditional = true,
+            anyOf = {ACCESS_HIDDEN_PROFILES_FULL, ACCESS_HIDDEN_PROFILES})
+    public IntentSender getPrivateSpaceSettingsIntent() {
+        try {
+            return mService.getPrivateSpaceSettingsIntent();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

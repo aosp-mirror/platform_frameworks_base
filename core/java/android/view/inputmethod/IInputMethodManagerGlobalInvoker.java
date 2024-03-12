@@ -25,7 +25,6 @@ import android.annotation.RequiresNoPermission;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.content.Context;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -298,7 +297,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     static boolean showSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
-            @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
+            @NonNull ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
             int lastClickToolType, @Nullable ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason) {
         final IInputMethodManager service = getService();
@@ -315,7 +314,7 @@ final class IInputMethodManagerGlobalInvoker {
 
     @AnyThread
     static boolean hideSoftInput(@NonNull IInputMethodClient client, @Nullable IBinder windowToken,
-            @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
+            @NonNull ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
             @Nullable ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         final IInputMethodManager service = getService();
         if (service == null) {
@@ -330,6 +329,20 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     // TODO(b/293640003): Remove method once Flags.useZeroJankProxy() is enabled.
+    @AnyThread
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    static void hideSoftInputFromServerForTest() {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.hideSoftInputFromServerForTest();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @AnyThread
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
@@ -654,35 +667,18 @@ final class IInputMethodManagerGlobalInvoker {
         }
     }
 
-    /** @see com.android.server.inputmethod.ImeTrackerService#onRequestShow */
+    /** @see com.android.server.inputmethod.ImeTrackerService#onStart */
     @AnyThread
     @NonNull
-    static ImeTracker.Token onRequestShow(@NonNull String tag, int uid,
+    static ImeTracker.Token onStart(@NonNull String tag, int uid, @ImeTracker.Type int type,
             @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason, boolean fromUser) {
-        final IImeTracker service = getImeTrackerService();
+        final var service = getImeTrackerService();
         if (service == null) {
-            // Create token with "fake" binder if the service was not found.
-            return new ImeTracker.Token(new Binder(), tag);
+            // Create token with "empty" binder if the service was not found.
+            return ImeTracker.Token.empty(tag);
         }
         try {
-            return service.onRequestShow(tag, uid, origin, reason, fromUser);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @see com.android.server.inputmethod.ImeTrackerService#onRequestHide */
-    @AnyThread
-    @NonNull
-    static ImeTracker.Token onRequestHide(@NonNull String tag, int uid,
-            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason, boolean fromUser) {
-        final IImeTracker service = getImeTrackerService();
-        if (service == null) {
-            // Create token with "fake" binder if the service was not found.
-            return new ImeTracker.Token(new Binder(), tag);
-        }
-        try {
-            return service.onRequestHide(tag, uid, origin, reason, fromUser);
+            return service.onStart(tag, uid, type, origin, reason, fromUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

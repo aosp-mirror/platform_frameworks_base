@@ -616,8 +616,8 @@ package android.location.provider {
   @FlaggedApi(Flags.FLAG_NEW_GEOCODER) public abstract class GeocodeProviderBase {
     ctor public GeocodeProviderBase(@NonNull android.content.Context, @NonNull String);
     method @NonNull public final android.os.IBinder getBinder();
-    method public abstract void onForwardGeocode(@NonNull android.location.provider.ForwardGeocodeRequest, @NonNull android.os.OutcomeReceiver<java.util.List<android.location.Address>,java.lang.Exception>);
-    method public abstract void onReverseGeocode(@NonNull android.location.provider.ReverseGeocodeRequest, @NonNull android.os.OutcomeReceiver<java.util.List<android.location.Address>,java.lang.Exception>);
+    method public abstract void onForwardGeocode(@NonNull android.location.provider.ForwardGeocodeRequest, @NonNull android.os.OutcomeReceiver<java.util.List<android.location.Address>,java.lang.Throwable>);
+    method public abstract void onReverseGeocode(@NonNull android.location.provider.ReverseGeocodeRequest, @NonNull android.os.OutcomeReceiver<java.util.List<android.location.Address>,java.lang.Throwable>);
     field public static final String ACTION_GEOCODE_PROVIDER = "com.android.location.service.GeocodeProvider";
   }
 

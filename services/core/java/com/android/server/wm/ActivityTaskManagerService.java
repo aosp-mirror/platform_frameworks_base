@@ -3665,7 +3665,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Prepare to enter PiP mode after {@link TransitionController#requestStartTransition}.
+     * Prepare to enter PiP mode after {@link TransitionController#requestStartDisplayTransition}.
      *
      * @param r activity auto entering pip
      * @return true if the activity is about to auto-enter pip or is already in pip mode.
@@ -4163,19 +4163,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void onPictureInPictureUiStateChanged(PictureInPictureUiState pipState) {
         enforceTaskPermission("onPictureInPictureUiStateChanged");
-        // The PictureInPictureUiState is sent to current pip task if there is any
-        // -or- the top standard task (state like entering PiP does not require a pinned task).
-        final Task task;
-        if (mRootWindowContainer.getDefaultTaskDisplayArea().hasPinnedTask()) {
-            task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootPinnedTask();
-        } else {
-            task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootTask(
-                    t -> t.isActivityTypeStandard());
-        }
-        if (task != null && task.getTopMostActivity() != null
-                && !task.getTopMostActivity().isState(FINISHING, DESTROYING, DESTROYED)) {
-            mWindowManager.mAtmService.mActivityClientController.onPictureInPictureUiStateChanged(
-                    task.getTopMostActivity(), pipState);
+        synchronized (mGlobalLock) {
+            // The PictureInPictureUiState is sent to current pip task if there is any
+            // -or- the top standard task (state like entering PiP does not require a pinned task).
+            final Task task;
+            if (mRootWindowContainer.getDefaultTaskDisplayArea().hasPinnedTask()) {
+                task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootPinnedTask();
+            } else {
+                task = mRootWindowContainer.getDefaultTaskDisplayArea().getRootTask(
+                        t -> t.isActivityTypeStandard());
+            }
+            if (task != null && task.getTopMostActivity() != null
+                    && !task.getTopMostActivity().isState(FINISHING, DESTROYING, DESTROYED)) {
+                mWindowManager.mAtmService.mActivityClientController
+                        .onPictureInPictureUiStateChanged(task.getTopMostActivity(), pipState);
+            }
         }
     }
 

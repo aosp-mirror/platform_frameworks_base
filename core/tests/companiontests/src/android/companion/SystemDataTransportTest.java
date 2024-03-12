@@ -220,6 +220,36 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         assertEquals(0, out.toByteArray().length);
     }
 
+    public void testDisassociationCleanup() throws InterruptedException {
+        // Create a new association
+        final int associationId = createAssociation();
+
+        // Subscribe to transport updates for new association
+        final CountDownLatch attached = new CountDownLatch(1);
+        final CountDownLatch detached = new CountDownLatch(1);
+        mCdm.addOnTransportsChangedListener(Runnable::run, associations -> {
+            if (associations.stream()
+                    .anyMatch(association -> associationId == association.getId())) {
+                attached.countDown();
+            } else if (attached.getCount() == 0) {
+                detached.countDown();
+            }
+        });
+
+        final ByteArrayInputStream in = new ByteArrayInputStream(new byte[0]);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        mCdm.attachSystemDataTransport(associationId, in, out);
+
+        // Assert that the transport is attached
+        assertTrue(attached.await(1, TimeUnit.SECONDS));
+
+        // When CDM disassociates, any transport attached to that associated device should detach
+        mCdm.disassociate(associationId);
+
+        // Assert that the transport is detached
+        assertTrue(detached.await(1, TimeUnit.SECONDS));
+    }
+
     public static byte[] concat(byte[]... blobs) {
         int length = 0;
         for (byte[] blob : blobs) {
@@ -250,12 +280,14 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
     }
 
     private int createAssociation() {
+        List<AssociationInfo> before = mCdm.getMyAssociations();
         getInstrumentation().getUiAutomation().executeShellCommand("cmd companiondevice associate "
                 + mContext.getUserId() + " " + mContext.getPackageName() + " AA:BB:CC:DD:EE:FF");
         List<AssociationInfo> infos;
         for (int i = 0; i < 100; i++) {
             infos = mCdm.getMyAssociations();
-            if (!infos.isEmpty()) {
+            if (infos.size() != before.size()) {
+                infos.removeAll(before);
                 return infos.get(0).getId();
             } else {
                 SystemClock.sleep(100);

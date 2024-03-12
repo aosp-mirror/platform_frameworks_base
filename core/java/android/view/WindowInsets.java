@@ -528,28 +528,7 @@ public final class WindowInsets {
     @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
     @NonNull
     public List<Rect> getBoundingRects(@InsetsType int typeMask) {
-        Rect[] allRects = null;
-        for (int i = FIRST; i <= LAST; i = i << 1) {
-            if ((typeMask & i) == 0) {
-                continue;
-            }
-            final Rect[] rects = mTypeBoundingRectsMap[indexOf(i)];
-            if (rects == null) {
-                continue;
-            }
-            if (allRects == null) {
-                allRects = rects;
-            } else {
-                final Rect[] concat = new Rect[allRects.length + rects.length];
-                System.arraycopy(allRects, 0, concat, 0, allRects.length);
-                System.arraycopy(rects, 0, concat, allRects.length, rects.length);
-                allRects = concat;
-            }
-        }
-        if (allRects == null) {
-            return Collections.emptyList();
-        }
-        return Arrays.asList(allRects);
+        return getBoundingRects(mTypeBoundingRectsMap, typeMask);
     }
 
     /**
@@ -577,16 +556,28 @@ public final class WindowInsets {
      *
      * @param typeMask the insets type for which to obtain the bounding rectangles
      * @return the bounding rectangles
+     * @throws IllegalArgumentException If the caller tries to query {@link Type#ime()}. Bounding
+     *                                  rects are not available if the IME isn't visible as the
+     *                                  height of the IME is dynamic depending on the
+     *                                  {@link EditorInfo} of the currently focused view, as well
+     *                                  as the UI state of the IME.
      */
     @FlaggedApi(Flags.FLAG_CUSTOMIZABLE_WINDOW_HEADERS)
     @NonNull
     public List<Rect> getBoundingRectsIgnoringVisibility(@InsetsType int typeMask) {
+        if ((typeMask & IME) != 0) {
+            throw new IllegalArgumentException("Unable to query the bounding rects for IME");
+        }
+        return getBoundingRects(mTypeMaxBoundingRectsMap, typeMask);
+    }
+
+    private List<Rect> getBoundingRects(Rect[][] typeBoundingRectsMap, @InsetsType int typeMask) {
         Rect[] allRects = null;
         for (int i = FIRST; i <= LAST; i = i << 1) {
             if ((typeMask & i) == 0) {
                 continue;
             }
-            final Rect[] rects = mTypeMaxBoundingRectsMap[indexOf(i)];
+            final Rect[] rects = typeBoundingRectsMap[indexOf(i)];
             if (rects == null) {
                 continue;
             }

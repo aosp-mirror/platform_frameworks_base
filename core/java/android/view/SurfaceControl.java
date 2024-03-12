@@ -4099,7 +4099,7 @@ public final class SurfaceControl implements Parcelable {
          * whose dataspace has RANGE_EXTENDED.
          *
          * @param sc The layer whose extended range brightness is being specified
-         * @param currentBufferRatio The current hdr/sdr ratio of the current buffer. For example
+         * @param currentBufferRatio The current HDR/SDR ratio of the current buffer. For example
          *                           if the buffer was rendered with a target SDR whitepoint of
          *                           100 nits and a max display brightness of 200 nits, this should
          *                           be set to 2.0f.
@@ -4113,7 +4113,7 @@ public final class SurfaceControl implements Parcelable {
          *
          *                           <p>Must be finite && >= 1.0f
          *
-         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
+         * @param desiredRatio The desired HDR/SDR ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
          *                     value in other HDR metadata formats, but represented as a ratio of
          *                     the target SDR whitepoint to the max display brightness. The system
@@ -4150,15 +4150,15 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Sets the desired hdr headroom for the layer.
+         * Sets the desired HDR headroom for the layer.
          *
          * <p>Prefer using this API over {@link #setExtendedRangeBrightness} for formats that
          *. conform to HDR video standards like HLG or HDR10 which do not communicate a HDR/SDR
          * ratio as part of generating the buffer.
          *
-         * @param sc The layer whose desired hdr headroom is being specified
+         * @param sc The layer whose desired HDR headroom is being specified
          *
-         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
+         * @param desiredRatio The desired HDR/SDR ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
          *                     value in other HDR metadata formats, but represented as a ratio of
          *                     the target SDR whitepoint to the max display brightness. The system

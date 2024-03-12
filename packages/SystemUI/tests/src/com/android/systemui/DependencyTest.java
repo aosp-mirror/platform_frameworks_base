@@ -15,13 +15,10 @@
 package com.android.systemui;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 import android.os.Looper;
 
 import androidx.test.filters.SmallTest;
-
-import com.android.systemui.statusbar.policy.FlashlightController;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,9 +30,9 @@ public class DependencyTest extends SysuiTestCase {
 
     @Test
     public void testClassDependency() {
-        FlashlightController f = mock(FlashlightController.class);
-        mDependency.injectTestDependency(FlashlightController.class, f);
-        Assert.assertEquals(f, Dependency.get(FlashlightController.class));
+        FakeClass f = new FakeClass();
+        mDependency.injectTestDependency(FakeClass.class, f);
+        Assert.assertEquals(f, Dependency.get(FakeClass.class));
     }
 
     @Test
@@ -52,5 +49,9 @@ public class DependencyTest extends SysuiTestCase {
         initializer.init(true);
         Dependency dependency = initializer.getSysUIComponent().createDependency();
         dependency.start();
+    }
+
+    private static class FakeClass {
+
     }
 }

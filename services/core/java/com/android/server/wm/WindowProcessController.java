@@ -114,6 +114,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final long RAPID_ACTIVITY_LAUNCH_MS = 300;
     private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 5 * RAPID_ACTIVITY_LAUNCH_MS;
 
+    public static final int STOPPED_STATE_NOT_STOPPED = 0;
+    public static final int STOPPED_STATE_FIRST_LAUNCH = 1;
+    public static final int STOPPED_STATE_FORCE_STOPPED = 2;
+
     private int mRapidActivityLaunchCount;
 
     // all about the first app in the process
@@ -280,6 +284,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     @AnimatingReason
     private int mAnimatingReasons;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            STOPPED_STATE_NOT_STOPPED,
+            STOPPED_STATE_FIRST_LAUNCH,
+            STOPPED_STATE_FORCE_STOPPED
+    })
+    public @interface StoppedState {}
+
+    private volatile @StoppedState int mStoppedState;
+
+    /**
+     * Whether the stopped state was logged for an activity start, as we don't want to log
+     * multiple times.
+     */
+    private volatile boolean mWasStoppedLogged;
 
     // The bits used for mActivityStateFlags.
     private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
@@ -1926,6 +1946,29 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         return factoryTestMode == FactoryTest.FACTORY_TEST_HIGH_LEVEL
                 && (mInfo.flags & ApplicationInfo.FLAG_FACTORY_TEST) != 0;
+    }
+
+    /** Sets the current stopped state of the app, which is reset as soon as metrics are logged */
+    public void setStoppedState(@StoppedState int stoppedState) {
+        mStoppedState = stoppedState;
+    }
+
+    boolean getWasStoppedLogged() {
+        return mWasStoppedLogged;
+    }
+
+    void setWasStoppedLogged(boolean logged) {
+        mWasStoppedLogged = logged;
+    }
+
+    /** Returns whether the app had been force-stopped before this launch */
+    public boolean wasForceStopped() {
+        return mStoppedState == STOPPED_STATE_FORCE_STOPPED;
+    }
+
+    /** Returns whether this app is being launched for the first time since install */
+    boolean wasFirstLaunch() {
+        return mStoppedState == STOPPED_STATE_FIRST_LAUNCH;
     }
 
     void setRunningRecentsAnimation(boolean running) {

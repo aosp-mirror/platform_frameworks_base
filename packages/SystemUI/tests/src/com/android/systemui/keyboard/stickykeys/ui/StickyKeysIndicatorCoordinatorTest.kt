@@ -19,7 +19,6 @@ package com.android.systemui.keyboard.stickykeys.ui
 import android.app.Dialog
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.keyboard.data.repository.FakeStickyKeysRepository
 import com.android.systemui.keyboard.data.repository.keyboardRepository
 import com.android.systemui.keyboard.stickykeys.StickyKeysLogger
@@ -34,7 +33,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
-import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,19 +52,22 @@ class StickyKeysIndicatorCoordinatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        Assume.assumeTrue(ComposeFacade.isComposeAvailable())
         val dialogFactory = mock<StickyKeyDialogFactory>()
         whenever(dialogFactory.create(any())).thenReturn(dialog)
         val keyboardRepository = Kosmos().keyboardRepository
-        val viewModel = StickyKeysIndicatorViewModel(
+        val viewModel =
+            StickyKeysIndicatorViewModel(
                 stickyKeysRepository,
                 keyboardRepository,
-                testScope.backgroundScope)
-        coordinator = StickyKeysIndicatorCoordinator(
+                testScope.backgroundScope
+            )
+        coordinator =
+            StickyKeysIndicatorCoordinator(
                 testScope.backgroundScope,
                 dialogFactory,
                 viewModel,
-                mock<StickyKeysLogger>())
+                mock<StickyKeysLogger>()
+            )
         coordinator.startListening()
         keyboardRepository.setIsAnyKeyboardConnected(true)
     }

@@ -20,6 +20,7 @@ import android.app.Notification
 import android.app.RemoteInput
 import android.graphics.drawable.Icon
 import android.text.TextUtils
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
 
 /**
@@ -36,6 +37,7 @@ class NotifUiAdjustment internal constructor(
     val isMinimized: Boolean,
     val needsRedaction: Boolean,
     val isChildInGroup: Boolean,
+    val isGroupSummary: Boolean,
 ) {
     companion object {
         @JvmStatic
@@ -55,6 +57,8 @@ class NotifUiAdjustment internal constructor(
             //  !oldAdjustment.isChildInGroup && newAdjustment.isChildInGroup -> true
             AsyncHybridViewInflation.isEnabled &&
                     oldAdjustment.isChildInGroup != newAdjustment.isChildInGroup -> true
+            AsyncGroupHeaderViewInflation.isEnabled &&
+                !oldAdjustment.isGroupSummary && newAdjustment.isGroupSummary -> true
             else -> false
         }
 

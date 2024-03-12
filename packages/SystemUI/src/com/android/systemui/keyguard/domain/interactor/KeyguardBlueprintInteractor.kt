@@ -20,6 +20,8 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
+import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
@@ -34,7 +36,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -47,6 +51,8 @@ constructor(
     private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
     private val clockInteractor: KeyguardClockInteractor,
+    configurationInteractor: ConfigurationInteractor,
+    fingerprintPropertyInteractor: FingerprintPropertyInteractor,
 ) {
 
     /** The current blueprint for the lockscreen. */
@@ -58,11 +64,14 @@ constructor(
      */
     val refreshTransition = keyguardBlueprintRepository.refreshTransition
 
+    private val configOrPropertyChange =
+        merge(
+            configurationInteractor.onAnyConfigurationChange,
+            fingerprintPropertyInteractor.propertiesInitialized.filter { it }.map {}, // map to Unit
+        )
     init {
         applicationScope.launch {
-            keyguardBlueprintRepository.configurationChange
-                .onStart { emit(Unit) }
-                .collect { updateBlueprint() }
+            configOrPropertyChange.onStart { emit(Unit) }.collect { updateBlueprint() }
         }
         applicationScope.launch { clockInteractor.currentClock.collect { updateBlueprint() } }
     }

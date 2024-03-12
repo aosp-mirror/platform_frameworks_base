@@ -220,6 +220,19 @@ public class AutofillFeatureFlags {
             DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE =
             "always_include_webview_in_assist_structure";
 
+    /**
+     * Whether to include invisible views in the assist structure. Including invisible views can fix
+     * some cases in which Session is destroyed earlier than it is suppose to.
+     *
+     * <p>See
+     * frameworks/base/services/autofill/bugfixes.aconfig#include_invisible_view_group_in_assist_structure
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE =
+            "include_invisible_view_group_in_assist_structure";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -473,6 +486,13 @@ public class AutofillFeatureFlags {
                 DEVICE_CONFIG_ALWAYS_INCLUDE_WEBVIEW_IN_ASSIST_STRUCTURE, true);
     }
 
+    /** @hide */
+    public static boolean shouldIncludeInvisibleViewInAssistStructure() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE,
+                false);
+    }
 
     /**
      * Whether should enable multi-line filter

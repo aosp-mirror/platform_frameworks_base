@@ -165,7 +165,7 @@ public class BubbleData {
          * used when {@link BubbleController#isShowingAsBubbleBar()} is true.
          */
         BubbleBarUpdate getInitialState() {
-            BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
+            BubbleBarUpdate bubbleBarUpdate = BubbleBarUpdate.createInitialState();
             bubbleBarUpdate.shouldShowEducation = shouldShowEducation;
             for (int i = 0; i < bubbles.size(); i++) {
                 bubbleBarUpdate.currentBubbleList.add(bubbles.get(i).asBubbleBarBubble());
@@ -255,7 +255,9 @@ public class BubbleData {
      * Returns a bubble bar update populated with the current list of active bubbles.
      */
     public BubbleBarUpdate getInitialStateForBubbleBar() {
-        return mStateChange.getInitialState();
+        BubbleBarUpdate initialState = mStateChange.getInitialState();
+        initialState.bubbleBarLocation = mPositioner.getBubbleBarLocation();
+        return initialState;
     }
 
     public void setSuppressionChangedListener(Bubbles.BubbleMetadataFlagListener listener) {

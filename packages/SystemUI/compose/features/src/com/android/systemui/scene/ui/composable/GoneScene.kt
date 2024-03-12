@@ -19,22 +19,17 @@ package com.android.systemui.scene.ui.composable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.ui.composable.QuickSettings
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.Edge
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionResult
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.ui.viewmodel.GoneSceneViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
@@ -44,23 +39,12 @@ import kotlinx.coroutines.flow.asStateFlow
 class GoneScene
 @Inject
 constructor(
-    private val notificationsViewModel: NotificationsPlaceholderViewModel,
+    private val viewModel: GoneSceneViewModel,
 ) : ComposableScene {
-    override val key = SceneKey.Gone
+    override val key = Scenes.Gone
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow<Map<UserAction, UserActionResult>>(
-                mapOf(
-                    UserAction.Swipe(
-                        pointerCount = 2,
-                        fromEdge = Edge.TOP,
-                        direction = Direction.DOWN,
-                    ) to UserActionResult(SceneKey.QuickSettings),
-                    UserAction.Swipe(direction = Direction.DOWN) to
-                        UserActionResult(SceneKey.Shade),
-                )
-            )
-            .asStateFlow()
+        viewModel.destinationScenes
 
     @Composable
     override fun SceneScope.Content(

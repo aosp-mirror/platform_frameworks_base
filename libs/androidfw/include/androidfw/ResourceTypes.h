@@ -59,8 +59,8 @@ constexpr const uint32_t kFabricatedOverlayMagic = 0x4f525246; // FRRO (big endi
 constexpr const uint32_t kFabricatedOverlayCurrentVersion = 3;
 
 // Returns whether or not the path represents a fabricated overlay.
-bool IsFabricatedOverlay(const std::string& path);
-bool IsFabricatedOverlay(const char* path);
+bool IsFabricatedOverlayName(std::string_view path);
+bool IsFabricatedOverlay(std::string_view path);
 bool IsFabricatedOverlay(android::base::borrowed_fd fd);
 
 /**

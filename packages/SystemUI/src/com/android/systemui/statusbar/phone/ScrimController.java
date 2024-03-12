@@ -207,8 +207,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private ScrimView mNotificationsScrim;
     private ScrimView mScrimBehind;
 
-    private Runnable mScrimBehindChangeRunnable;
-
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
@@ -415,11 +413,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         behindScrim.enableBottomEdgeConcave(mClipsQsScrim);
         mNotificationsScrim.enableRoundedCorners(true);
 
-        if (mScrimBehindChangeRunnable != null) {
-            mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable, mMainExecutor);
-            mScrimBehindChangeRunnable = null;
-        }
-
         final ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
             states[i].init(mScrimInFront, mScrimBehind, mDozeParameters, mDockManager);
@@ -542,6 +535,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mBlankScreen = state.getBlanksScreen();
         mAnimateChange = state.getAnimateChange();
         mAnimationDuration = state.getAnimationDuration();
+
+        if (mState == ScrimState.GLANCEABLE_HUB_OVER_DREAM) {
+            // When the device is docked while on GLANCEABLE_HUB, the dream starts underneath the
+            // hub and the ScrimState transitions to GLANCEABLE_HUB_OVER_DREAM. To prevent the
+            // scrims from flickering in during this transition, we set the panel expansion
+            // fraction, which is 1 when idle on GLANCEABLE_HUB, to 0. This only occurs when the hub
+            // is open because the hub lives in the same window as the shade, which is not visible
+            // when transitioning from KEYGUARD to DREAMING.
+            mPanelExpansionFraction = 0f;
+        }
 
         applyState();
 
@@ -745,6 +748,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             boolean relevantState = (mState == ScrimState.UNLOCKED
                     || mState == ScrimState.KEYGUARD
                     || mState == ScrimState.DREAMING
+                    || mState == ScrimState.GLANCEABLE_HUB_OVER_DREAM
                     || mState == ScrimState.SHADE_LOCKED
                     || mState == ScrimState.PULSING);
             if (!(relevantState && mExpansionAffectsAlpha) || mAnimatingPanelExpansionOnUnlock) {
@@ -851,7 +855,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return;
         }
         mBouncerHiddenFraction = bouncerHiddenAmount;
-        if (mState == ScrimState.DREAMING || mState == ScrimState.GLANCEABLE_HUB) {
+        if (mState == ScrimState.DREAMING || mState == ScrimState.GLANCEABLE_HUB
+                || mState == ScrimState.GLANCEABLE_HUB_OVER_DREAM) {
             // The dreaming and glanceable hub states requires this for the scrim calculation, so we
             // should only trigger an update in those states.
             applyAndDispatchState();
@@ -933,7 +938,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             return;
         }
 
-        if (mState == ScrimState.UNLOCKED || mState == ScrimState.DREAMING) {
+        if (mState == ScrimState.UNLOCKED || mState == ScrimState.DREAMING
+                || mState == ScrimState.GLANCEABLE_HUB_OVER_DREAM) {
             final boolean occluding =
                     mOccludeAnimationPlaying || mState.mLaunchingAffordanceWithPreview;
             // Darken scrim as it's pulled down while unlocked. If we're unlocked but playing the
@@ -961,8 +967,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 mInFrontAlpha = 0;
             }
 
-            if (mState == ScrimState.DREAMING
+            if ((mState == ScrimState.DREAMING || mState == ScrimState.GLANCEABLE_HUB_OVER_DREAM)
                     && mBouncerHiddenFraction != KeyguardBouncerConstants.EXPANSION_HIDDEN) {
+                // Bouncer is opening over dream or glanceable hub over dream.
                 final float interpolatedFraction =
                         BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(
                                 mBouncerHiddenFraction);
@@ -1540,16 +1547,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         // Just calling View#postOnAnimation isn't enough because the frame might not have reached
         // the display yet. A timeout is the safest solution.
         mScrimBehind.postOnAnimationDelayed(callback, 32 /* delayMillis */);
-    }
-
-    public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
-        // TODO: remove this. This is necessary because of an order-of-operations limitation.
-        // The fix is to move more of these class into @SysUISingleton.
-        if (mScrimBehind == null) {
-            mScrimBehindChangeRunnable = changeRunnable;
-        } else {
-            mScrimBehind.setChangeRunnable(changeRunnable, mMainExecutor);
-        }
     }
 
     private void updateThemeColors() {

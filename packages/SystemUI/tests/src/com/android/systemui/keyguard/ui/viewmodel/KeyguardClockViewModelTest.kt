@@ -130,6 +130,24 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
             assertThat(value()).isEqualTo(LARGE)
         }
 
+    @Test
+    fun isLargeClockVisible_whenLargeClockSize_isTrue() =
+        scope.runTest {
+            fakeSettings.putInt(LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1)
+            keyguardClockRepository.setClockSize(LARGE)
+            var value = collectLastValue(underTest.isLargeClockVisible)
+            assertThat(value()).isEqualTo(true)
+        }
+
+    @Test
+    fun isLargeClockVisible_whenSmallClockSize_isFalse() =
+        scope.runTest {
+            fakeSettings.putInt(LOCKSCREEN_USE_DOUBLE_LINE_CLOCK, 1)
+            keyguardClockRepository.setClockSize(SMALL)
+            var value = collectLastValue(underTest.isLargeClockVisible)
+            assertThat(value()).isEqualTo(false)
+        }
+
     private fun setupMockClock() {
         whenever(clock.largeClock).thenReturn(largeClock)
         whenever(largeClock.config).thenReturn(clockFaceConfig)

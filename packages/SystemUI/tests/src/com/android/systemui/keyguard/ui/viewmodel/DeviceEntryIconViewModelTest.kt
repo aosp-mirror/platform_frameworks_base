@@ -27,11 +27,14 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel.Companion.UNLOCKED_DELAY_MS
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -71,7 +74,10 @@ class DeviceEntryIconViewModelTest : SysuiTestCase() {
     fun isLongPressEnabled_unlocked() =
         testScope.runTest {
             val isLongPressEnabled by collectLastValue(underTest.isLongPressEnabled)
+            fingerprintPropertyRepository.supportsUdfps()
             keyguardRepository.setKeyguardDismissible(true)
+            advanceTimeBy(UNLOCKED_DELAY_MS * 2) // wait for unlocked delay
+            runCurrent()
             assertThat(isLongPressEnabled).isTrue()
         }
 

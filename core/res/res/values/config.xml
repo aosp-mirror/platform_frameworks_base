@@ -1608,7 +1608,10 @@
     <fraction name="config_autoBrightnessAdjustmentMaxGamma">300%</fraction>
 
     <!-- If we allow automatic adjustment of screen brightness while dozing, how many times we want
-         to reduce it to preserve the battery. Value of 100% means no scaling. -->
+         to reduce it to preserve the battery. Value of 100% means no scaling. Not used if there is
+         a designated auto-brightness doze mapping defined in Display Device Config.
+         Also used to scale the brightness for the doze mode when auto-brightness is disabled if
+         there is an offload session present. -->
     <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
 
     <!-- When the screen is turned on, the previous estimate of the ambient light level at the time
@@ -3129,6 +3132,10 @@
     -->
     <bool name="config_enableWifiDisplay">false</bool>
 
+    <!-- Whether the default HDR conversion mode should be passthrough instead of system.
+    -->
+    <bool name="config_enableDefaultHdrConversionPassthrough">false</bool>
+
     <!-- When true, local displays that do not contain any of their own content will automatically
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
@@ -3348,26 +3355,23 @@
     <string name="config_carrierAppInstallDialogComponent" translatable="false"
             >com.android.simappdialog/com.android.simappdialog.InstallCarrierAppActivity</string>
 
-    <!-- Name of the default framework dialog that is used to get or save an app credential.
+    <!-- Name of the fallback CredentialManager dialog that is used to get or save an app
+     credential.
 
-    This UI should be always launch-able and is used as a fallback when an oem replacement activity
-    (defined at config_oemCredentialManagerDialogComponent) is undefined / not found. -->
-    <string name="config_credentialManagerDialogComponent" translatable="false"
+     If empty, no fallback will be used. IMPORTANT: In that case the OEM dialog value specified in
+     config_oemCredentialManagerDialogComponent must always launch-able. Otherwise, the
+     CredentialManager API contract is broken.
+
+     If specified, this UI should be always launch-able. It will be used as a fallback when the OEM
+     dialog value specified in config_oemCredentialManagerDialogComponent) is undefined / not
+     found. -->
+    <string name="config_fallbackCredentialManagerDialogComponent" translatable="false"
             >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
-    <!-- Whether to allow the credential selector activity to be replaced by an activity at
-     run-time (restricted to the privileged activity specified by
-     config_credentialSelectorActivityName).
-
-     When disabled, the fallback activity defined at
-     config_credentialManagerDialogComponent will be used instead. -->
-    <bool name="config_enableOemCredentialManagerDialogComponent" translatable="false">true</bool>
     <!-- Fully qualified activity name providing the credential selector UI, that serves the
-     CredentialManager APIs.
+     CredentialManager APIs. Must be a system app component.
 
-     Used only when config_enableOemCredentialManagerDialogComponent is true.
-
-     If the activity specified cannot be found or launched, then the fallback activity defined at
-     config_credentialManagerDialogComponent will be used instead. -->
+     If empty, or if this activity specified cannot be found or launched, then the fallback activity
+     defined at config_fallbackCredentialManagerDialogComponent will be used instead. -->
     <string name="config_oemCredentialManagerDialogComponent" translatable="false"></string>
 
     <!-- Name of the broadcast receiver that is used to receive provider change events -->
@@ -3554,10 +3558,6 @@
     <string name="config_keyguardComponent" translatable="false"
             >com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
 
-    <!-- Screen record dialog component -->
-    <string name="config_screenRecorderComponent" translatable="false"
-            >com.android.systemui/com.android.systemui.screenrecord.ScreenRecordDialog</string>
-
     <!-- The component name of a special dock app that merely launches a dream.
          We don't want to launch this app when docked because it causes an unnecessary
          activity transition.  We just want to start the dream. -->
@@ -3614,8 +3614,7 @@
     <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
          When set true, there will create windowless starting surface for the preview target, so it
          won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
-    <!-- TODO(b/268563842) enable once activity snapshot is ready -->
-    <bool name="config_predictShowStartingSurface">false</bool>
+    <bool name="config_predictShowStartingSurface">true</bool>
 
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
@@ -4100,6 +4099,13 @@
 
     <!-- How close vibration request should be when they're aggregated for dumpsys, in ms. -->
     <integer name="config_previousVibrationsDumpAggregationTimeMillisLimit">1000</integer>
+
+    <!-- How long history of vibration control service should be kept for the dumpsys. -->
+    <integer name="config_vibratorControlServiceDumpSizeLimit">50</integer>
+
+    <!-- How close requests to vibration control service should be when they're aggregated for
+         dumpsys, in ms. -->
+    <integer name="config_vibratorControlServiceDumpAggregationTimeMillisLimit">60000</integer>
 
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>
@@ -4674,8 +4680,8 @@
     <!-- The component name for the default system on-device intelligence service, -->
     <string name="config_defaultOnDeviceIntelligenceService" translatable="false"></string>
 
-    <!-- The component name for the default system on-device trusted inference service. -->
-    <string name="config_defaultOnDeviceTrustedInferenceService" translatable="false"></string>
+    <!-- The component name for the default system on-device sandboxed inference service. -->
+    <string name="config_defaultOnDeviceSandboxedInferenceService" translatable="false"></string>
 
     <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent for
          wearable sensing. -->

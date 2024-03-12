@@ -109,6 +109,9 @@ class WindowTracing {
             return;
         }
         synchronized (mEnabledLock) {
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
+                ((LegacyProtoLogImpl) ProtoLog.getSingleInstance()).startProtoLog(pw);
+            }
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
@@ -136,6 +139,9 @@ class WindowTracing {
             writeTraceToFileLocked();
             logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
         }
+        if (!android.tracing.Flags.perfettoProtologTracing()) {
+            ((LegacyProtoLogImpl) ProtoLog.getSingleInstance()).stopProtoLog(pw, true);
+        }
     }
 
     /**
@@ -155,13 +161,13 @@ class WindowTracing {
             logAndPrintln(pw, "Stop tracing to " + mTraceFile + ". Waiting for traces to flush.");
             writeTraceToFileLocked();
             logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
-            if (!android.tracing.Flags.perfettoProtolog()) {
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
                 ((LegacyProtoLogImpl) mProtoLog).stopProtoLog(pw, true);
             }
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
-            if (!android.tracing.Flags.perfettoProtolog()) {
+            if (!android.tracing.Flags.perfettoProtologTracing()) {
                 ((LegacyProtoLogImpl) mProtoLog).startProtoLog(pw);
             }
         }

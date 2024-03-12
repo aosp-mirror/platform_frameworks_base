@@ -19,43 +19,38 @@ package com.android.systemui.shade
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import java.util.function.Consumer
 import javax.inject.Inject
+import kotlinx.coroutines.flow.flowOf
 
 /** Empty implementation of ShadeViewController for variants with no shade. */
 class ShadeViewControllerEmptyImpl @Inject constructor() :
-    ShadeViewController, ShadeBackActionInteractor, ShadeLockscreenInteractor {
-    override fun expand(animate: Boolean) {}
-    override fun expandToQs() {}
+    ShadeViewController,
+    ShadeBackActionInteractor,
+    ShadeLockscreenInteractor,
+    PanelExpansionInteractor {
     override fun expandToNotifications() {}
     override val isExpandingOrCollapsing: Boolean = false
     override val isExpanded: Boolean = false
     override val isPanelExpanded: Boolean = false
-    override val isShadeFullyExpanded: Boolean = false
-    override fun collapse(delayed: Boolean, speedUpFactor: Float) {}
-    override fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float) {}
-    override fun collapseWithDuration(animationDuration: Int) {}
-    override fun instantCollapse() {}
     override fun animateCollapseQs(fullyCollapse: Boolean) {}
     override fun canBeCollapsed(): Boolean = false
     override val isCollapsing: Boolean = false
     override val isFullyCollapsed: Boolean = false
     override val isTracking: Boolean = false
     override val isViewEnabled: Boolean = false
-    override fun setOpenCloseListener(openCloseListener: OpenCloseListener) {}
     override fun shouldHideStatusBarIconsWhenExpanded() = false
     override fun blockExpansionForCurrentTouch() {}
-    override fun setTrackingStartedListener(trackingStartedListener: TrackingStartedListener) {}
     override fun disableHeader(state1: Int, state2: Int, animated: Boolean) {}
     override fun startExpandLatencyTracking() {}
     override fun startBouncerPreHideAnimation() {}
     override fun dozeTimeTick() {}
     override fun resetViews(animate: Boolean) {}
     override val barState: Int = 0
-    override fun applyLaunchAnimationProgress(linearProgress: Float) {}
     override fun closeUserSwitcherIfOpen(): Boolean {
         return false
     }
@@ -90,6 +85,7 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
 
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
+    override val legacyPanelExpansion = flowOf(0f)
 }
 
 class ShadeHeadsUpTrackerEmptyImpl : ShadeHeadsUpTracker {

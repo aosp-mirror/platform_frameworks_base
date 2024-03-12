@@ -119,6 +119,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE_EXECUTING;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
@@ -371,6 +372,15 @@ public final class ActiveServices {
     @EnabledSince(targetSdkVersion = VERSION_CODES.VANILLA_ICE_CREAM)
     @Overridable
     public static final long FGS_BOOT_COMPLETED_RESTRICTIONS = 296558535L;
+
+    /**
+     * Disables foreground service background starts in System Alert Window for all types
+     * unless it already has a System Overlay Window.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = VERSION_CODES.VANILLA_ICE_CREAM)
+    @Overridable
+    public static final long FGS_SAW_RESTRICTIONS = 319471980L;
 
     final ActivityManagerService mAm;
 
@@ -1488,6 +1498,11 @@ public final class ActiveServices {
         FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
                 serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
         mAm.mBatteryStatsService.noteServiceStartRunning(uid, packageName, serviceName);
+        final ProcessRecord hostApp = r.app;
+        final boolean wasStopped = hostApp == null ? wasStopped(r) : false;
+        final boolean firstLaunch =
+                hostApp == null ? !mAm.wasPackageEverLaunched(r.packageName, r.userId) : false;
+
         String error = bringUpServiceLocked(r, service.getFlags(), callerFg,
                 false /* whileRestarting */,
                 false /* permissionsReviewRequired */,
@@ -1500,10 +1515,14 @@ public final class ActiveServices {
             return new ComponentName("!!", error);
         }
 
-        final boolean wasStopped = (r.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
         final int packageState = wasStopped
                 ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                 : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+        if (DEBUG_PROCESSES) {
+            Slog.d(TAG, "Logging startService for " + packageName + ", stopped="
+                    + wasStopped + ", firstLaunch=" + firstLaunch + ", intent=" + service
+                    + ", r.app=" + r.app);
+        }
         FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, uid, callingUid,
                 service.getAction(),
                 SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__START, false,
@@ -1518,7 +1537,9 @@ public final class ActiveServices {
                 packageName,
                 callingPackage,
                 callingProcessState,
-                r.mProcessStateOnRequest);
+                r.mProcessStateOnRequest,
+                firstLaunch,
+                0L /* TODO: stoppedDuration */);
 
         if (r.startRequested && addToStarting) {
             boolean first = smap.mStartingBackground.size() == 0;
@@ -4029,7 +4050,6 @@ public final class ActiveServices {
                 mAm.requireAllowedAssociationsLocked(s.appInfo.packageName);
             }
 
-            final boolean wasStopped = (s.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
             final boolean wasStartRequested = s.startRequested;
             final boolean hadConnections = !s.getConnections().isEmpty();
             mAm.startAssociationLocked(callerApp.uid, callerApp.processName,
@@ -4104,6 +4124,10 @@ public final class ActiveServices {
                         true);
             }
 
+            final boolean wasStopped = hostApp == null ? wasStopped(s) : false;
+            final boolean firstLaunch =
+                    hostApp == null ? !mAm.wasPackageEverLaunched(s.packageName, s.userId) : false;
+
             boolean needOomAdj = false;
             if (c.hasFlag(Context.BIND_AUTO_CREATE)) {
                 s.lastActivity = SystemClock.uptimeMillis();
@@ -4146,6 +4170,10 @@ public final class ActiveServices {
             final int packageState = wasStopped
                     ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
                     : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+            if (DEBUG_PROCESSES) {
+                Slog.d(TAG, "Logging bindService for " + s.packageName
+                        + ", stopped=" + wasStopped + ", firstLaunch=" + firstLaunch);
+            }
             FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, s.appInfo.uid, callingUid,
                     ActivityManagerService.getShortAction(service.getAction()),
                     SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__BIND, false,
@@ -4160,7 +4188,9 @@ public final class ActiveServices {
                     s.packageName,
                     callerApp.info.packageName,
                     callerApp.mState.getCurProcState(),
-                    s.mProcessStateOnRequest);
+                    s.mProcessStateOnRequest,
+                    firstLaunch,
+                    0L /* TODO */);
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
                     + ": received=" + b.intent.received
@@ -8526,10 +8556,31 @@ public final class ActiveServices {
             }
         }
 
+        // The flag being enabled isn't enough to deny background start: we need to also check
+        // if there is a system alert UI present.
         if (ret == REASON_DENIED) {
-            if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
-                    callingPackage)) {
-                ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+            // Flag check: are we disabling SAW FGS background starts?
+            final boolean shouldDisableSaw = Flags.fgsDisableSaw()
+                    && CompatChanges.isChangeEnabled(FGS_BOOT_COMPLETED_RESTRICTIONS, callingUid);
+            if (shouldDisableSaw) {
+                final ProcessRecord processRecord = mAm
+                        .getProcessRecordLocked(targetService.processName,
+                                targetService.appInfo.uid);
+                if (processRecord != null) {
+                    if (processRecord.mState.hasOverlayUi()) {
+                        if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
+                                callingPackage)) {
+                            ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+                        }
+                    }
+                } else {
+                    Slog.e(TAG, "Could not find process record for SAW check");
+                }
+            } else {
+                if (mAm.mAtmInternal.hasSystemAlertWindowPermission(callingUid, callingPid,
+                        callingPackage)) {
+                    ret = REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+                }
             }
         }
 
@@ -9081,5 +9132,9 @@ public final class ActiveServices {
         }
         return mCachedDeviceProvisioningPackage != null
                 && mCachedDeviceProvisioningPackage.equals(packageName);
+    }
+
+    private boolean wasStopped(ServiceRecord serviceRecord) {
+        return (serviceRecord.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
     }
 }

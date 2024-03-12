@@ -25,7 +25,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.core.view.updateMargins
-import com.android.systemui.compose.ComposeFacade
+import com.android.systemui.compose.ComposeInitializer
 import com.android.systemui.res.R
 
 /** A view that can serve as the root of the main SysUI window. */
@@ -45,16 +45,16 @@ open class WindowRootView(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        if (ComposeFacade.isComposeAvailable() && isRoot()) {
-            ComposeFacade.composeInitializer().onAttachedToWindow(this)
+        if (isRoot()) {
+            ComposeInitializer.onAttachedToWindow(this)
         }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        if (ComposeFacade.isComposeAvailable() && isRoot()) {
-            ComposeFacade.composeInitializer().onDetachedFromWindow(this)
+        if (isRoot()) {
+            ComposeInitializer.onDetachedFromWindow(this)
         }
     }
 
@@ -71,7 +71,6 @@ open class WindowRootView(
 
     override fun onApplyWindowInsets(windowInsets: WindowInsets): WindowInsets? {
         val insets = windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
-        val displayCutout = rootWindowInsets.displayCutout
         if (fitsSystemWindows) {
             val paddingChanged = insets.top != paddingTop || insets.bottom != paddingBottom
 
@@ -79,23 +78,22 @@ open class WindowRootView(
             if (paddingChanged) {
                 setPadding(0, 0, 0, 0)
             }
-
-            val pairInsets: Pair<Int, Int> =
-                layoutInsetsController.getinsets(windowInsets, displayCutout)
-            leftInset = pairInsets.first
-            rightInset = pairInsets.second
-            applyMargins()
         } else {
             val changed =
                 paddingLeft != 0 || paddingRight != 0 || paddingTop != 0 || paddingBottom != 0
             if (changed) {
                 setPadding(0, 0, 0, 0)
             }
-
-            leftInset = 0
-            rightInset = 0
         }
+        leftInset = 0
+        rightInset = 0
 
+        val displayCutout = rootWindowInsets.displayCutout
+        val pairInsets: Pair<Int, Int> =
+            layoutInsetsController.getinsets(windowInsets, displayCutout)
+        leftInset = pairInsets.first
+        rightInset = pairInsets.second
+        applyMargins()
         return windowInsets
     }
 

@@ -138,3 +138,11 @@ flag {
     bug: "325356776"
 }
 
+flag {
+    name: "runtime_permission_appops_mapping_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Use runtime permission state to determine appop state"
+    bug: "266164193"
+}
+

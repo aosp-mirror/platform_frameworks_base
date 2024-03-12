@@ -17,6 +17,7 @@
 package com.android.systemui.dreams.homecontrols
 
 import android.content.Intent
+import android.os.PowerManager
 import android.service.controls.ControlsProviderService
 import android.service.dreams.DreamService
 import android.window.TaskFragmentInfo
@@ -27,6 +28,8 @@ import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsCo
 import com.android.systemui.dreams.homecontrols.domain.interactor.HomeControlsComponentInteractor.Companion.MAX_UPDATE_CORRELATION_DELAY
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.DreamLog
+import com.android.systemui.util.wakelock.WakeLock
+import com.android.systemui.util.wakelock.WakeLock.Builder.NO_TIMEOUT
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -42,14 +45,23 @@ constructor(
     private val controlsSettingsRepository: ControlsSettingsRepository,
     private val taskFragmentFactory: TaskFragmentComponent.Factory,
     private val homeControlsComponentInteractor: HomeControlsComponentInteractor,
+    private val wakeLockBuilder: WakeLock.Builder,
     private val dreamActivityProvider: DreamActivityProvider,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @DreamLog logBuffer: LogBuffer
 ) : DreamService() {
+
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(bgDispatcher + serviceJob)
-    private val logger = DreamLogger(logBuffer, "HomeControlsDreamService")
+    private val logger = DreamLogger(logBuffer, TAG)
     private lateinit var taskFragmentComponent: TaskFragmentComponent
+    private val wakeLock: WakeLock by lazy {
+        wakeLockBuilder
+            .setMaxTimeout(NO_TIMEOUT)
+            .setTag(TAG)
+            .setLevelsAndFlags(PowerManager.SCREEN_BRIGHT_WAKE_LOCK)
+            .build()
+    }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -72,6 +84,8 @@ constructor(
                     hide = { finish() }
                 )
                 .apply { createTaskFragment() }
+
+        wakeLock.acquire(TAG)
     }
 
     private fun onTaskFragmentInfoChanged(taskFragmentInfo: TaskFragmentInfo) {
@@ -100,6 +114,7 @@ constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        wakeLock.release(TAG)
         taskFragmentComponent.destroy()
         serviceScope.launch {
             delay(CANCELLATION_DELAY_AFTER_DETACHED)
@@ -115,5 +130,6 @@ constructor(
          * complete.
          */
         val CANCELLATION_DELAY_AFTER_DETACHED = 5.seconds
+        const val TAG = "HomeControlsDreamService"
     }
 }

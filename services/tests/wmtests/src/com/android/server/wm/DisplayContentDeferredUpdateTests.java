@@ -70,6 +70,7 @@ public class DisplayContentDeferredUpdateTests extends WindowTestsBase {
 
     @Before
     public void before() {
+        doReturn(true).when(mDisplayContent).getLastHasContent();
         mockTransitionsController(/* enabled= */ true);
         mockRemoteDisplayChangeController();
     }

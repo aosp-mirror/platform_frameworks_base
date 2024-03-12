@@ -26,8 +26,6 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 
-import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -268,68 +266,87 @@ public final class DeviceState {
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface DeviceStateProperties {}
 
-    /** Unique identifier for the device state. */
-    @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to = MAXIMUM_DEVICE_STATE_IDENTIFIER)
-    private final int mIdentifier;
+    /** @hide */
+    @IntDef(prefix = {"PROPERTY_"}, flag = true, value = {
+            PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED,
+            PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN,
+            PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface PhysicalDeviceStateProperties {}
 
-    /** String description of the device state. */
+    /** @hide */
+    @IntDef(prefix = {"PROPERTY_"}, flag = true, value = {
+            PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
+            PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
+            PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
+            PROPERTY_POLICY_UNSUPPORTED_WHEN_POWER_SAVE_MODE,
+            PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST,
+            PROPERTY_APP_INACCESSIBLE,
+            PROPERTY_EMULATED_ONLY,
+            PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+            PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+            PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP,
+            PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE,
+            PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY,
+            PROPERTY_FEATURE_REAR_DISPLAY,
+            PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface SystemDeviceStateProperties {}
+
     @NonNull
-    private final String mName;
+    private DeviceState.Configuration mDeviceStateConfiguration;
 
     @DeviceStateFlags
     private final int mFlags;
 
-    private final Set<@DeviceStateProperties Integer> mProperties;
+    /** @hide */
+    public DeviceState(@NonNull DeviceState.Configuration deviceStateConfiguration) {
+        mDeviceStateConfiguration = deviceStateConfiguration;
+        mFlags = 0;
+    }
+
+    /** @hide */
+    public DeviceState(
+            @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
+                    MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
+            @NonNull String name,
+            @NonNull Set<@DeviceStateProperties Integer> properties) {
+        mDeviceStateConfiguration = new DeviceState.Configuration(identifier, name, properties,
+                Collections.emptySet());
+        mFlags = 0;
+    }
 
     /**
      * @deprecated Deprecated in favor of {@link #DeviceState(int, String, Set)}
      * @hide
      */
     // TODO(b/325124054): Make non-default and remove deprecated callback methods.
-    @TestApi
     @Deprecated
     public DeviceState(
             @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
                     MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
             @NonNull String name,
             @DeviceStateFlags int flags) {
-        Preconditions.checkArgumentInRange(identifier, MINIMUM_DEVICE_STATE_IDENTIFIER,
-                MAXIMUM_DEVICE_STATE_IDENTIFIER,
-                "identifier");
 
-        mIdentifier = identifier;
-        mName = name;
+        mDeviceStateConfiguration = new DeviceState.Configuration(identifier, name,
+                Collections.emptySet(), Collections.emptySet());
         mFlags = flags;
-        mProperties = Collections.emptySet();
-    }
-
-    /** @hide */
-    @TestApi
-    public DeviceState(
-            @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to =
-                    MAXIMUM_DEVICE_STATE_IDENTIFIER) int identifier,
-            @NonNull String name,
-            @NonNull Set<@DeviceStateProperties Integer> properties) {
-        Preconditions.checkArgumentInRange(identifier, MINIMUM_DEVICE_STATE_IDENTIFIER,
-                MAXIMUM_DEVICE_STATE_IDENTIFIER,
-                "identifier");
-
-        mIdentifier = identifier;
-        mName = name;
-        mProperties = Set.copyOf(properties);
-        mFlags = 0;
     }
 
     /** Returns the unique identifier for the device state. */
     @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER)
     public int getIdentifier() {
-        return mIdentifier;
+        return mDeviceStateConfiguration.getIdentifier();
     }
 
     /** Returns a string description of the device state. */
     @NonNull
     public String getName() {
-        return mName;
+        return mDeviceStateConfiguration.getName();
     }
 
     /**
@@ -345,10 +362,13 @@ public final class DeviceState {
 
     @Override
     public String toString() {
-        return "DeviceState{" + "identifier=" + mIdentifier + ", name='" + mName + '\''
-                + ", app_accessible=" + !hasProperty(PROPERTY_APP_INACCESSIBLE)
+        return "DeviceState{" + "identifier=" + mDeviceStateConfiguration.getIdentifier()
+                + ", name='" + mDeviceStateConfiguration.getName() + '\''
+                + ", app_accessible=" + !mDeviceStateConfiguration.getSystemProperties().contains(
+                PROPERTY_APP_INACCESSIBLE)
                 + ", cancel_when_requester_not_on_top="
-                + hasProperty(PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)
+                + mDeviceStateConfiguration.getSystemProperties().contains(
+                PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)
                 + "}";
     }
 
@@ -357,14 +377,12 @@ public final class DeviceState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DeviceState that = (DeviceState) o;
-        return mIdentifier == that.mIdentifier
-                && Objects.equals(mName, that.mName)
-                && Objects.equals(mProperties, that.mProperties);
+        return Objects.equals(mDeviceStateConfiguration, that.mDeviceStateConfiguration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mIdentifier, mName, mProperties);
+        return Objects.hash(mDeviceStateConfiguration);
     }
 
     /** Checks if a specific flag is set
@@ -381,7 +399,8 @@ public final class DeviceState {
      * Checks if a specific property is set on this state
      */
     public boolean hasProperty(@DeviceStateProperties int propertyToCheckFor) {
-        return mProperties.contains(propertyToCheckFor);
+        return mDeviceStateConfiguration.mSystemProperties.contains(propertyToCheckFor)
+                || mDeviceStateConfiguration.mPhysicalProperties.contains(propertyToCheckFor);
     }
 
     /**
@@ -389,10 +408,145 @@ public final class DeviceState {
      */
     public boolean hasProperties(@NonNull @DeviceStateProperties int... properties) {
         for (int i = 0; i < properties.length; i++) {
-            if (mProperties.contains(properties[i])) {
+            if (!mDeviceStateConfiguration.mSystemProperties.contains(properties[i])
+                    || !mDeviceStateConfiguration.mPhysicalProperties.contains(properties[i])) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Returns the underlying {@link DeviceState.Configuration} object used to model the
+     * device state.
+     * @hide
+     */
+    public Configuration getConfiguration() {
+        return mDeviceStateConfiguration;
+    }
+
+    /**
+     * Detailed description of a {@link DeviceState} that includes separated sets of
+     * {@link DeviceStateProperties} for properties that correspond to the state of the system when
+     * the device is in this state, as well as physical properties that describe this state.
+     *
+     * Instantiation of this class should only be done by the system server, and clients of
+     * {@link DeviceStateManager} will receive {@link DeviceState} objects.
+     *
+     * @see DeviceStateManager
+     * @hide
+     */
+    public static class Configuration {
+        /** Unique identifier for the device state. */
+        @IntRange(from = MINIMUM_DEVICE_STATE_IDENTIFIER, to = MAXIMUM_DEVICE_STATE_IDENTIFIER)
+        private final int mIdentifier;
+
+        /** String description of the device state. */
+        @NonNull
+        private final String mName;
+
+        /** {@link Set} of system properties that apply to this state. */
+        @NonNull
+        private final Set<@SystemDeviceStateProperties Integer> mSystemProperties;
+
+        /** {@link Set} of physical device properties that apply to this state. */
+        @NonNull
+        private final Set<@PhysicalDeviceStateProperties Integer> mPhysicalProperties;
+
+        private Configuration(int identifier, @NonNull String name,
+                @NonNull Set<@SystemDeviceStateProperties Integer> systemProperties,
+                @NonNull Set<@PhysicalDeviceStateProperties Integer> physicalProperties) {
+            mIdentifier = identifier;
+            mName = name;
+            mSystemProperties = systemProperties;
+            mPhysicalProperties = physicalProperties;
+        }
+
+        /** Returns the unique identifier for the device state. */
+        public int getIdentifier() {
+            return mIdentifier;
+        }
+
+        /** Returns a string description of the device state. */
+        @NonNull
+        public String getName() {
+            return mName;
+        }
+
+        /** Returns the {@link Set} of system properties that apply to this state. */
+        @NonNull
+        public Set<@SystemDeviceStateProperties Integer> getSystemProperties() {
+            return mSystemProperties;
+        }
+
+        /** Returns the {@link Set} of physical device properties that apply to this state. */
+        @NonNull
+        public Set<@DeviceStateProperties Integer> getPhysicalProperties() {
+            return mPhysicalProperties;
+        }
+
+        @Override
+        public String toString() {
+            return "DeviceState{" + "identifier=" + mIdentifier
+                    + ", name='" + mName + '\''
+                    + ", app_accessible=" + mSystemProperties.contains(PROPERTY_APP_INACCESSIBLE)
+                    + ", cancel_when_requester_not_on_top="
+                    + mSystemProperties.contains(PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)
+                    + "}";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DeviceState.Configuration that = (DeviceState.Configuration) o;
+            return mIdentifier == that.mIdentifier
+                    && Objects.equals(mName, that.mName)
+                    && Objects.equals(mSystemProperties, that.mSystemProperties)
+                    && Objects.equals(mPhysicalProperties, that.mPhysicalProperties);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mIdentifier, mName, mSystemProperties, mPhysicalProperties);
+        }
+
+        /** @hide */
+        public static class Builder {
+            private final int mIdentifier;
+            private final String mName;
+            private Set<@SystemDeviceStateProperties Integer> mSystemProperties =
+                    Collections.emptySet();
+            private Set<@PhysicalDeviceStateProperties Integer> mPhysicalProperties =
+                    Collections.emptySet();
+
+            public Builder(int identifier, String name) {
+                mIdentifier = identifier;
+                mName = name;
+            }
+
+            /** Sets the system properties for this {@link DeviceState.Configuration.Builder} */
+            public Builder setSystemProperties(
+                    Set<@SystemDeviceStateProperties Integer> systemProperties) {
+                mSystemProperties = systemProperties;
+                return this;
+            }
+
+            /** Sets the system properties for this {@link DeviceState.Configuration.Builder} */
+            public Builder setPhysicalProperties(
+                    Set<@PhysicalDeviceStateProperties Integer> physicalProperties) {
+                mPhysicalProperties = physicalProperties;
+                return this;
+            }
+
+            /**
+             * Returns a new {@link DeviceState.Configuration} whose values match the values set on
+             * the builder.
+             */
+            public DeviceState.Configuration build() {
+                return new DeviceState.Configuration(mIdentifier, mName, mSystemProperties,
+                        mPhysicalProperties);
+            }
+        }
     }
 }

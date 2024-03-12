@@ -43,6 +43,7 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
 import android.app.Application;
+import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -2854,6 +2855,11 @@ public class Resources {
     @FlaggedApi(android.content.res.Flags.FLAG_REGISTER_RESOURCE_PATHS)
     public static void registerResourcePaths(@NonNull String uniqueId,
             @NonNull ApplicationInfo appInfo) {
-        throw new UnsupportedOperationException("The implementation has not been done yet.");
+        if (Flags.registerResourcePaths()) {
+            ResourcesManager.getInstance().registerResourcePaths(uniqueId, appInfo);
+        } else {
+            throw new UnsupportedOperationException("Flag " + Flags.FLAG_REGISTER_RESOURCE_PATHS
+                    + " is disabled.");
+        }
     }
 }

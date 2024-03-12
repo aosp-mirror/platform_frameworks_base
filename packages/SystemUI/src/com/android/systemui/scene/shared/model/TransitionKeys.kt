@@ -16,6 +16,8 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.TransitionKey
+
 /**
  * Defines all known named transitions.
  *

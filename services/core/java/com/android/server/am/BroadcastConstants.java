@@ -128,14 +128,6 @@ public class BroadcastConstants {
     public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
 
     /**
-     * Flag indicating if we should use {@link BroadcastQueueModernImpl} instead
-     * of the default {@link BroadcastQueueImpl}.
-     */
-    public boolean MODERN_QUEUE_ENABLED = DEFAULT_MODERN_QUEUE_ENABLED;
-    private static final String KEY_MODERN_QUEUE_ENABLED = "modern_queue_enabled";
-    private static final boolean DEFAULT_MODERN_QUEUE_ENABLED = true;
-
-    /**
      * For {@link BroadcastQueueModernImpl}: Maximum dispatch parallelism
      * that we'll tolerate for ordinary broadcast dispatch.
      */
@@ -296,10 +288,20 @@ public class BroadcastConstants {
      * For {@link BroadcastQueueModernImpl}: How frequently we should check for the pending
      * cold start validity.
      */
-    public long PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30 * 1000;
+    public long PENDING_COLD_START_CHECK_INTERVAL_MILLIS =
+            DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS;
     private static final String KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS =
             "pending_cold_start_check_interval_millis";
     private static final long DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 30_000;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of outgoing broadcasts from a
+     * freezable process that will be allowed before killing the process.
+     */
+    public long MAX_FROZEN_OUTGOING_BROADCASTS = DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS;
+    private static final String KEY_MAX_FROZEN_OUTGOING_BROADCASTS =
+            "max_frozen_outgoing_broadcasts";
+    private static final int DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS = 32;
 
     // Settings override tracking for this instance
     private String mSettingsKey;
@@ -411,8 +413,6 @@ public class BroadcastConstants {
      */
     private void updateDeviceConfigConstants() {
         synchronized (this) {
-            MODERN_QUEUE_ENABLED = getDeviceConfigBoolean(KEY_MODERN_QUEUE_ENABLED,
-                    DEFAULT_MODERN_QUEUE_ENABLED);
             MAX_RUNNING_PROCESS_QUEUES = getDeviceConfigInt(KEY_MAX_RUNNING_PROCESS_QUEUES,
                     DEFAULT_MAX_RUNNING_PROCESS_QUEUES);
             EXTRA_RUNNING_URGENT_PROCESS_QUEUES = getDeviceConfigInt(
@@ -453,6 +453,9 @@ public class BroadcastConstants {
             PENDING_COLD_START_CHECK_INTERVAL_MILLIS = getDeviceConfigLong(
                     KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
                     DEFAULT_PENDING_COLD_START_CHECK_INTERVAL_MILLIS);
+            MAX_FROZEN_OUTGOING_BROADCASTS = getDeviceConfigInt(
+                    KEY_MAX_FROZEN_OUTGOING_BROADCASTS,
+                    DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS);
         }
 
         // TODO: migrate BroadcastRecord to accept a BroadcastConstants
@@ -485,7 +488,6 @@ public class BroadcastConstants {
             pw.print(NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT);
             pw.println("):");
             pw.increaseIndent();
-            pw.print(KEY_MODERN_QUEUE_ENABLED, MODERN_QUEUE_ENABLED).println();
             pw.print(KEY_MAX_RUNNING_PROCESS_QUEUES, MAX_RUNNING_PROCESS_QUEUES).println();
             pw.print(KEY_MAX_RUNNING_ACTIVE_BROADCASTS, MAX_RUNNING_ACTIVE_BROADCASTS).println();
             pw.print(KEY_CORE_MAX_RUNNING_BLOCKING_BROADCASTS,
@@ -513,6 +515,8 @@ public class BroadcastConstants {
                     CORE_DEFER_UNTIL_ACTIVE).println();
             pw.print(KEY_PENDING_COLD_START_CHECK_INTERVAL_MILLIS,
                     PENDING_COLD_START_CHECK_INTERVAL_MILLIS).println();
+            pw.print(KEY_MAX_FROZEN_OUTGOING_BROADCASTS,
+                    MAX_FROZEN_OUTGOING_BROADCASTS).println();
             pw.decreaseIndent();
             pw.println();
         }

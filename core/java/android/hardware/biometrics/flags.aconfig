@@ -2,6 +2,7 @@ package: "android.hardware.biometrics"
 
 flag {
     name: "last_authentication_time"
+    is_exported: true
     namespace: "wallet_integration"
     description: "Feature flag for adding getLastAuthenticationTime API to BiometricManager"
     bug: "301979982"
@@ -9,6 +10,7 @@ flag {
 
 flag {
   name: "add_key_agreement_crypto_object"
+  is_exported: true
   namespace: "biometrics"
   description: "Feature flag for adding KeyAgreement api to CryptoObject."
   bug: "282058146"
@@ -26,12 +28,5 @@ flag {
   namespace: "biometrics_framework"
   description: "Feature flag for adding a custom content view API to BiometricPrompt.Builder."
   bug: "302735104"
-}
-
-flag {
-  name: "face_background_authentication"
-  namespace: "biometrics_framework"
-  description: "Feature flag for allowing face background authentication with USE_BACKGROUND_FACE_AUTHENTICATION."
-  bug: "318584190"
 }
 

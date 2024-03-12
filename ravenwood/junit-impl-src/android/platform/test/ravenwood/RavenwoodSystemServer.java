@@ -19,12 +19,18 @@ package android.platform.test.ravenwood;
 import android.content.ClipboardManager;
 import android.hardware.SerialManager;
 import android.os.SystemClock;
+import android.ravenwood.example.BlueManager;
+import android.ravenwood.example.RedManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.utils.TimingsTraceAndSlog;
+
+import java.util.List;
+import java.util.Set;
 
 public class RavenwoodSystemServer {
     /**
@@ -37,16 +43,21 @@ public class RavenwoodSystemServer {
      */
     private static final ArrayMap<Class<?>, String> sKnownServices = new ArrayMap<>();
 
-    // TODO: expand SystemService API to support dependency expression, so we don't need test
-    // authors to exhaustively declare all transitive services
-
     static {
+        // Services provided by a typical shipping device
         sKnownServices.put(ClipboardManager.class,
                 "com.android.server.FakeClipboardService$Lifecycle");
         sKnownServices.put(SerialManager.class,
                 "com.android.server.SerialService$Lifecycle");
+
+        // Additional services we provide for testing purposes
+        sKnownServices.put(BlueManager.class,
+                "com.android.server.example.BlueManagerService$Lifecycle");
+        sKnownServices.put(RedManager.class,
+                "com.android.server.example.RedManagerService$Lifecycle");
     }
 
+    private static Set<Class<?>> sStartedServices;
     private static TimingsTraceAndSlog sTimings;
     private static SystemServiceManager sServiceManager;
 
@@ -54,6 +65,7 @@ public class RavenwoodSystemServer {
         // Avoid overhead if no services required
         if (rule.mServicesRequired.isEmpty()) return;
 
+        sStartedServices = new ArraySet<>();
         sTimings = new TimingsTraceAndSlog();
         sServiceManager = new SystemServiceManager(rule.mContext);
         sServiceManager.setStartInfo(false,
@@ -61,17 +73,7 @@ public class RavenwoodSystemServer {
                 SystemClock.uptimeMillis());
         LocalServices.addService(SystemServiceManager.class, sServiceManager);
 
-        for (Class<?> service : rule.mServicesRequired) {
-            final String target = sKnownServices.get(service);
-            if (target == null) {
-                throw new RuntimeException("The requested service " + service
-                        + " is not yet supported under the Ravenwood deviceless testing "
-                        + "environment; consider requesting support from the API owner or "
-                        + "consider using Mockito; more details at go/ravenwood-docs");
-            } else {
-                sServiceManager.startService(target);
-            }
-        }
+        startServices(rule.mServicesRequired);
         sServiceManager.sealStartedServices();
 
         // TODO: expand to include additional boot phases when relevant
@@ -85,5 +87,26 @@ public class RavenwoodSystemServer {
         LocalServices.removeServiceForTest(SystemServiceManager.class);
         sServiceManager = null;
         sTimings = null;
+        sStartedServices = null;
+    }
+
+    private static void startServices(List<Class<?>> serviceClasses) {
+        for (Class<?> serviceClass : serviceClasses) {
+            // Quietly ignore duplicate requests if service already started
+            if (sStartedServices.contains(serviceClass)) continue;
+            sStartedServices.add(serviceClass);
+
+            final String serviceName = sKnownServices.get(serviceClass);
+            if (serviceName == null) {
+                throw new RuntimeException("The requested service " + serviceClass
+                        + " is not yet supported under the Ravenwood deviceless testing "
+                        + "environment; consider requesting support from the API owner or "
+                        + "consider using Mockito; more details at go/ravenwood-docs");
+            }
+
+            // Start service and then depth-first traversal of any dependencies
+            final SystemService instance = sServiceManager.startService(serviceName);
+            startServices(instance.getDependencies());
+        }
     }
 }

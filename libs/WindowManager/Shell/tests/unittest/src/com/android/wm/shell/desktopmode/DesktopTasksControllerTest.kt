@@ -36,6 +36,7 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.never
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
@@ -51,6 +52,7 @@ import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.common.split.SplitScreenConstants
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createHomeTask
@@ -86,6 +88,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.quality.Strictness
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -123,7 +126,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Before
     fun setUp() {
-        mockitoSession = mockitoSession().mockStatic(DesktopModeStatus::class.java).startMocking()
+        mockitoSession = mockitoSession().strictness(Strictness.LENIENT)
+            .spyStatic(DesktopModeStatus::class.java).startMocking()
         whenever(DesktopModeStatus.isEnabled()).thenReturn(true)
 
         shellInit = Mockito.spy(ShellInit(testExecutor))
@@ -329,6 +333,45 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop_nonExistentTask_doesNothing() {
         controller.moveToDesktop(999)
         verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToDesktop_deviceNotSupported_doesNothing() {
+        val task = setUpFullscreenTask()
+
+        // Simulate non compatible device
+        doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+
+        controller.moveToDesktop(task)
+        verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToDesktop_deviceNotSupported_deviceRestrictionsOverridden_taskIsMovedToDesktop() {
+        val task = setUpFullscreenTask()
+
+        // Simulate non compatible device
+        doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+
+        // Simulate enforce device restrictions system property overridden to false
+        whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(false)
+
+        controller.moveToDesktop(task)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @Test
+    fun moveToDesktop_deviceSupported_taskIsMovedToDesktop() {
+        val task = setUpFullscreenTask()
+
+        controller.moveToDesktop(task)
+
+        val wct = getLatestMoveToDesktopWct()
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
     }
 
     @Test
@@ -798,6 +841,22 @@ class DesktopTasksControllerTest : ShellTestCase() {
                 .isEqualTo(WINDOWING_MODE_FULLSCREEN)
     }
 
+    fun enterSplit_freeformTaskIsMovedToSplit() {
+        val task1 = setUpFreeformTask()
+        val task2 = setUpFreeformTask()
+        val task3 = setUpFreeformTask()
+
+        task1.isFocused = false
+        task2.isFocused = true
+        task3.isFocused = false
+
+        controller.enterSplit(DEFAULT_DISPLAY, false)
+
+        verify(splitScreenController).requestEnterSplitSelect(task2, any(),
+            SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT,
+            task2.configuration.windowConfiguration.bounds)
+    }
+
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFreeformTask(displayId)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
@@ -816,6 +875,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     private fun setUpFullscreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFullscreenTask(displayId)
+        doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+        whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         runningTasks.add(task)
         return task
@@ -823,6 +884,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     private fun setUpSplitScreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createSplitScreenTask(displayId)
+        doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+        whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
         whenever(splitScreenController.isTaskInSplitScreen(task.taskId)).thenReturn(true)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         runningTasks.add(task)

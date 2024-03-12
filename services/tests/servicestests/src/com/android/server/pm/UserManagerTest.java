@@ -40,13 +40,13 @@ import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.provider.Settings;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -315,6 +315,10 @@ public final class UserManagerTest {
         assertWithMessage("No %s type on device", UserManager.USER_TYPE_PROFILE_PRIVATE)
                 .that(userTypeDetails).isNotNull();
         final UserProperties typeProps = userTypeDetails.getDefaultUserPropertiesReference();
+
+        // Only run the test if private profile creation is enabled on the device
+        assumeTrue("Private profile not enabled on the device",
+                mUserManager.canAddPrivateProfile());
 
         // Test that only one private profile  can be created
         final int mainUserId = mainUser.getIdentifier();
@@ -1226,6 +1230,20 @@ public final class UserManagerTest {
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, false,
                     mainUserHandle);
+        }
+    }
+
+    @MediumTest
+    @Test
+    public void testPrivateProfileCreationRestrictions() {
+        assumeTrue(mUserManager.canAddPrivateProfile());
+        final int mainUserId = ActivityManager.getCurrentUser();
+        try {
+            UserInfo privateProfileInfo = createProfileForUser("Private",
+                            UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+            assertThat(privateProfileInfo).isNotNull();
+        } catch (Exception e) {
+            fail("Creation of private profile failed due to " + e.getMessage());
         }
     }
 

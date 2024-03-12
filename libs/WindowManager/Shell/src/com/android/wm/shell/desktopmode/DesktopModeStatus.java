@@ -16,9 +16,13 @@
 
 package com.android.wm.shell.desktopmode;
 
+import android.annotation.NonNull;
+import android.content.Context;
 import android.os.SystemProperties;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
+import com.android.wm.shell.R;
 
 /**
  * Constants for desktop mode feature
@@ -67,6 +71,12 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_use_rounded_corners", true);
 
     /**
+     * Flag to indicate whether to restrict desktop mode to supported devices.
+     */
+    private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
+
+    /**
      * Return {@code true} if desktop windowing is enabled
      */
     public static boolean isEnabled() {
@@ -103,5 +113,28 @@ public class DesktopModeStatus {
      */
     public static boolean useRoundedCorners() {
         return USE_ROUNDED_CORNERS;
+    }
+
+    /**
+     * Return {@code true} if desktop mode should be restricted to supported devices.
+     */
+    @VisibleForTesting
+    public static boolean enforceDeviceRestrictions() {
+        return ENFORCE_DEVICE_RESTRICTIONS;
+    }
+
+    /**
+     * Return {@code true} if the current device supports desktop mode.
+     */
+    @VisibleForTesting
+    public static boolean isDesktopModeSupported(@NonNull Context context) {
+        return context.getResources().getBoolean(R.bool.config_isDesktopModeSupported);
+    }
+
+    /**
+     * Return {@code true} if desktop mode can be entered on the current device.
+     */
+    public static boolean canEnterDesktopMode(@NonNull Context context) {
+        return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
     }
 }

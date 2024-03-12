@@ -88,7 +88,6 @@ public class ExpandableViewState extends ViewState {
             | ExpandableViewState.LOCATION_MAIN_AREA;
 
     public int height;
-    public boolean dimmed;
     public boolean hideSensitive;
     public boolean belowSpeedBump;
     public boolean inShelf;
@@ -128,7 +127,6 @@ public class ExpandableViewState extends ViewState {
         if (viewState instanceof ExpandableViewState) {
             ExpandableViewState svs = (ExpandableViewState) viewState;
             height = svs.height;
-            dimmed = svs.dimmed;
             hideSensitive = svs.hideSensitive;
             belowSpeedBump = svs.belowSpeedBump;
             clipTopAmount = svs.clipTopAmount;
@@ -154,9 +152,6 @@ public class ExpandableViewState extends ViewState {
             if (height != newHeight) {
                 expandableView.setActualHeight(newHeight, false /* notifyListeners */);
             }
-
-            // apply dimming
-            expandableView.setDimmed(this.dimmed, false /* animate */);
 
             // apply hiding sensitive
             expandableView.setHideSensitive(
@@ -215,9 +210,6 @@ public class ExpandableViewState extends ViewState {
         } else {
             abortAnimation(child, TAG_ANIMATOR_BOTTOM_INSET);
         }
-
-        // start dimmed animation
-        expandableView.setDimmed(this.dimmed, animationFilter.animateDimmed);
 
         // apply below the speed bump
         if (!NotificationIconContainerRefactor.isEnabled()) {

@@ -16,6 +16,7 @@
 
 package com.android.keyguard.logging
 
+import android.hardware.biometrics.BiometricSourceType
 import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
 import com.android.systemui.log.LogBuffer
@@ -113,6 +114,26 @@ constructor(
             {
                 "updateLockScreenUserLockedMsg userId=$int1 " +
                     "userUnlocked:$bool1 encryptedOrLockdown:$bool2"
+            }
+        )
+    }
+
+    fun logDropNonFingerprintMessage(
+        message: CharSequence,
+        followUpMessage: CharSequence?,
+        biometricSourceType: BiometricSourceType?,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = message.toString()
+                str2 = followUpMessage?.toString()
+                str3 = biometricSourceType?.name
+            },
+            {
+                "droppingNonFingerprintMessage message=$str1 " +
+                    "followUpMessage:$str2 biometricSourceType:$str3"
             }
         )
     }

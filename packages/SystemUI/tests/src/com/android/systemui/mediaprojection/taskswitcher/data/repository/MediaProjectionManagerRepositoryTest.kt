@@ -17,55 +17,52 @@
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
 import android.os.Binder
-import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.view.ContentRecordingSession
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
 import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createToken
+import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.fakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.mediaProjectionManagerRepository
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
-    private val dispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(dispatcher)
+    private val kosmos = taskSwitcherKosmos()
+    private val testScope = kosmos.testScope
 
-    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
-    private val fakeActivityTaskManager = FakeActivityTaskManager()
+    private val fakeMediaProjectionManager = kosmos.fakeMediaProjectionManager
+    private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
 
-    private val tasksRepo =
-        ActivityTaskManagerTasksRepository(
-            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
-            applicationScope = testScope.backgroundScope,
-            backgroundDispatcher = dispatcher
-        )
+    private val repo = kosmos.mediaProjectionManagerRepository
 
-    private val repo =
-        MediaProjectionManagerRepository(
-            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
-            handler = Handler.getMain(),
-            applicationScope = testScope.backgroundScope,
-            tasksRepository = tasksRepo
-        )
+    @Test
+    fun switchProjectedTask_stateIsUpdatedWithNewTask() =
+        testScope.runTest {
+            val task = createTask(taskId = 1)
+            val state by collectLastValue(repo.mediaProjectionState)
+
+            fakeActivityTaskManager.addRunningTasks(task)
+            repo.switchProjectedTask(task)
+
+            assertThat(state).isEqualTo(MediaProjectionState.SingleTask(task))
+        }
 
     @Test
     fun mediaProjectionState_onStart_emitsNotProjecting() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnStart()
 
@@ -76,7 +73,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_onStop_emitsNotProjecting() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnStop()
 
@@ -87,7 +83,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_onSessionSet_sessionNull_emitsNotProjecting() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnSessionSet(session = null)
 
@@ -98,7 +93,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_onSessionSet_contentToRecordDisplay_emitsEntireScreen() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnSessionSet(
                 session = ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
@@ -111,7 +105,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     fun mediaProjectionState_sessionSet_taskWithToken_noMatchingRunningTask_emitsEntireScreen() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             val taskWindowContainerToken = Binder()
             fakeMediaProjectionManager.dispatchOnSessionSet(
@@ -128,7 +121,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             val task = createTask(taskId = 1, token = token)
             fakeActivityTaskManager.addRunningTasks(task)
             val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
 
             fakeMediaProjectionManager.dispatchOnSessionSet(
                 session = ContentRecordingSession.createTaskSession(token.asBinder())

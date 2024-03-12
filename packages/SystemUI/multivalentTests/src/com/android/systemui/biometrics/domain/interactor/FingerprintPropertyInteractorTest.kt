@@ -47,6 +47,17 @@ class FingerprintPropertyInteractorTest : SysuiTestCase() {
     private val displayRepository by lazy { kosmos.displayRepository }
 
     @Test
+    fun propertiesInitialized() =
+        testScope.runTest {
+            val propertiesInitialized by collectLastValue(underTest.propertiesInitialized)
+            assertThat(propertiesInitialized).isFalse()
+
+            repository.supportsUdfps()
+            runCurrent()
+            assertThat(propertiesInitialized).isTrue()
+        }
+
+    @Test
     fun sensorLocation_resolution1f() =
         testScope.runTest {
             val currSensorLocation by collectLastValue(underTest.sensorLocation)

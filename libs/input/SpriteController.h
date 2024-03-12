@@ -151,6 +151,7 @@ private:
         DIRTY_HOTSPOT = 1 << 6,
         DIRTY_DISPLAY_ID = 1 << 7,
         DIRTY_ICON_STYLE = 1 << 8,
+        DIRTY_DRAW_DROP_SHADOW = 1 << 9,
     };
 
     /* Describes the state of a sprite.

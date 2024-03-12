@@ -34,15 +34,15 @@ public class MediaOutputSwitcherDialogUI implements CoreStartable, CommandQueue.
     private static final String TAG = "MediaOutputSwitcherDialogUI";
 
     private final CommandQueue mCommandQueue;
-    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final MediaOutputDialogManager mMediaOutputDialogManager;
 
     @Inject
     public MediaOutputSwitcherDialogUI(
             Context context,
             CommandQueue commandQueue,
-            MediaOutputDialogFactory mediaOutputDialogFactory) {
+            MediaOutputDialogManager mediaOutputDialogManager) {
         mCommandQueue = commandQueue;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mMediaOutputDialogManager = mediaOutputDialogManager;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MediaOutputSwitcherDialogUI implements CoreStartable, CommandQueue.
     @MainThread
     public void showMediaOutputSwitcher(String packageName) {
         if (!TextUtils.isEmpty(packageName)) {
-            mMediaOutputDialogFactory.create(packageName, false, null);
+            mMediaOutputDialogManager.createAndShow(packageName, false, null);
         } else {
             Log.e(TAG, "Unable to launch media output dialog. Package name is empty.");
         }

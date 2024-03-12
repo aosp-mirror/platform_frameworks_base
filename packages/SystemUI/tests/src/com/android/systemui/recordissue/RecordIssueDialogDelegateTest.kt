@@ -33,26 +33,26 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate
 import com.android.systemui.model.SysUiState
 import com.android.systemui.qs.tiles.RecordIssueTile
 import com.android.systemui.res.R
-import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -70,16 +70,19 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyResolver: ScreenCaptureDevicePolicyResolver
     @Mock private lateinit var dprLazy: dagger.Lazy<ScreenCaptureDevicePolicyResolver>
     @Mock private lateinit var mediaProjectionMetricsLogger: MediaProjectionMetricsLogger
-    @Mock private lateinit var userContextProvider: UserContextProvider
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var userFileManager: UserFileManager
     @Mock private lateinit var sharedPreferences: SharedPreferences
+    @Mock
+    private lateinit var screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate
+    @Mock private lateinit var screenCaptureDisabledDialog: SystemUIDialog
 
     @Mock private lateinit var sysuiState: SysUiState
     @Mock private lateinit var systemUIDialogManager: SystemUIDialogManager
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock private lateinit var bgExecutor: Executor
-    @Mock private lateinit var mainExecutor: Executor
+    private val systemClock = FakeSystemClock()
+    private val bgExecutor = FakeExecutor(systemClock)
+    private val mainExecutor = FakeExecutor(systemClock)
     @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
 
     private lateinit var dialog: SystemUIDialog
@@ -91,7 +94,8 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(dprLazy.get()).thenReturn(devicePolicyResolver)
         whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
-        whenever(userContextProvider.userContext).thenReturn(mContext)
+        whenever(screenCaptureDisabledDialogDelegate.createDialog())
+            .thenReturn(screenCaptureDisabledDialog)
         whenever(
                 userFileManager.getSharedPreferences(
                     eq(RecordIssueTile.TILE_SPEC),
@@ -116,7 +120,6 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         dialog =
             RecordIssueDialogDelegate(
                     factory,
-                    userContextProvider,
                     userTracker,
                     flags,
                     bgExecutor,
@@ -124,6 +127,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     dprLazy,
                     mediaProjectionMetricsLogger,
                     userFileManager,
+                    screenCaptureDisabledDialogDelegate,
                 ) {
                     latch.countDown()
                 }
@@ -163,13 +167,8 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
         screenRecordSwitch.isChecked = true
 
-        val bgCaptor = ArgumentCaptor.forClass(Runnable::class.java)
-        verify(bgExecutor).execute(bgCaptor.capture())
-        bgCaptor.value.run()
-
-        val mainCaptor = ArgumentCaptor.forClass(Runnable::class.java)
-        verify(mainExecutor).execute(mainCaptor.capture())
-        mainCaptor.value.run()
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
 
         verify(mediaProjectionMetricsLogger, never())
             .notifyProjectionInitiated(
@@ -192,13 +191,8 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
         screenRecordSwitch.isChecked = true
 
-        val bgCaptor = ArgumentCaptor.forClass(Runnable::class.java)
-        verify(bgExecutor).execute(bgCaptor.capture())
-        bgCaptor.value.run()
-
-        val mainCaptor = ArgumentCaptor.forClass(Runnable::class.java)
-        verify(mainExecutor).execute(mainCaptor.capture())
-        mainCaptor.value.run()
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
 
         verify(mediaProjectionMetricsLogger)
             .notifyProjectionInitiated(
@@ -219,9 +213,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
         val screenRecordSwitch = dialog.requireViewById<Switch>(R.id.screenrecord_switch)
         screenRecordSwitch.isChecked = true
 
-        val bgCaptor = ArgumentCaptor.forClass(Runnable::class.java)
-        verify(bgExecutor).execute(bgCaptor.capture())
-        bgCaptor.value.run()
+        bgExecutor.runAllReady()
 
         verify(mediaProjectionMetricsLogger)
             .notifyProjectionInitiated(

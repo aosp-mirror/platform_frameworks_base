@@ -32,13 +32,16 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.BinderThread;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.pip.IPip;
 import com.android.wm.shell.common.pip.IPipAnimationListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -57,15 +60,40 @@ public class PipController implements ConfigurationChangeListener,
         DisplayController.OnDisplaysChangedListener, RemoteCallable<PipController> {
     private static final String TAG = PipController.class.getSimpleName();
 
-    private Context mContext;
-    private ShellController mShellController;
-    private DisplayController mDisplayController;
-    private DisplayInsetsController mDisplayInsetsController;
-    private PipBoundsState mPipBoundsState;
-    private PipBoundsAlgorithm mPipBoundsAlgorithm;
-    private PipDisplayLayoutState mPipDisplayLayoutState;
-    private PipScheduler mPipScheduler;
-    private ShellExecutor mMainExecutor;
+    private final Context mContext;
+    private final ShellController mShellController;
+    private final DisplayController mDisplayController;
+    private final DisplayInsetsController mDisplayInsetsController;
+    private final PipBoundsState mPipBoundsState;
+    private final PipBoundsAlgorithm mPipBoundsAlgorithm;
+    private final PipDisplayLayoutState mPipDisplayLayoutState;
+    private final PipScheduler mPipScheduler;
+    private final ShellExecutor mMainExecutor;
+
+    // Wrapper for making Binder calls into PiP animation listener hosted in launcher's Recents.
+    private PipAnimationListener mPipRecentsAnimationListener;
+
+    @VisibleForTesting
+    interface PipAnimationListener {
+        /**
+         * Notifies the listener that the Pip animation is started.
+         */
+        void onPipAnimationStarted();
+
+        /**
+         * Notifies the listener about PiP resource dimensions changed.
+         * Listener can expect an immediate callback the first time they attach.
+         *
+         * @param cornerRadius the pixel value of the corner radius, zero means it's disabled.
+         * @param shadowRadius the pixel value of the shadow radius, zero means it's disabled.
+         */
+        void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius);
+
+        /**
+         * Notifies the listener that user leaves PiP by tapping on the expand button.
+         */
+        void onExpandPip();
+    }
 
     private PipController(Context context,
             ShellInit shellInit,
@@ -92,39 +120,6 @@ public class PipController implements ConfigurationChangeListener,
         }
     }
 
-    @Override
-    public Context getContext() {
-        return mContext;
-    }
-
-    @Override
-    public ShellExecutor getRemoteCallExecutor() {
-        return mMainExecutor;
-    }
-
-    private void onInit() {
-        // Ensure that we have the display info in case we get calls to update the bounds before the
-        // listener calls back
-        mPipDisplayLayoutState.setDisplayId(mContext.getDisplayId());
-        DisplayLayout layout = new DisplayLayout(mContext, mContext.getDisplay());
-        mPipDisplayLayoutState.setDisplayLayout(layout);
-
-        mShellController.addConfigurationChangeListener(this);
-        mDisplayController.addDisplayWindowListener(this);
-        mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
-                new DisplayInsetsController.OnInsetsChangedListener() {
-                    @Override
-                    public void insetsChanged(InsetsState insetsState) {
-                        onDisplayChanged(mDisplayController
-                                        .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()));
-                    }
-                });
-
-        // Allow other outside processes to bind to PiP controller using the key below.
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_PIP,
-                this::createExternalInterface, this);
-    }
-
     /**
      * Instantiates {@link PipController}, returns {@code null} if the feature not supported.
      */
@@ -148,9 +143,50 @@ public class PipController implements ConfigurationChangeListener,
                 pipScheduler, mainExecutor);
     }
 
+    private void onInit() {
+        // Ensure that we have the display info in case we get calls to update the bounds before the
+        // listener calls back
+        mPipDisplayLayoutState.setDisplayId(mContext.getDisplayId());
+        DisplayLayout layout = new DisplayLayout(mContext, mContext.getDisplay());
+        mPipDisplayLayoutState.setDisplayLayout(layout);
+
+        mDisplayController.addDisplayWindowListener(this);
+        mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
+                new DisplayInsetsController.OnInsetsChangedListener() {
+                    @Override
+                    public void insetsChanged(InsetsState insetsState) {
+                        onDisplayChanged(mDisplayController
+                                        .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()));
+                    }
+                });
+
+        // Allow other outside processes to bind to PiP controller using the key below.
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_PIP,
+                this::createExternalInterface, this);
+        mShellController.addConfigurationChangeListener(this);
+    }
+
     private ExternalInterfaceBinder createExternalInterface() {
         return new IPipImpl(this);
     }
+
+    //
+    // RemoteCallable implementations
+    //
+
+    @Override
+    public Context getContext() {
+        return mContext;
+    }
+
+    @Override
+    public ShellExecutor getRemoteCallExecutor() {
+        return mMainExecutor;
+    }
+
+    //
+    // ConfigurationChangeListener implementations
+    //
 
     @Override
     public void onConfigurationChanged(Configuration newConfiguration) {
@@ -158,9 +194,18 @@ public class PipController implements ConfigurationChangeListener,
     }
 
     @Override
+    public void onDensityOrFontScaleChanged() {
+        onPipResourceDimensionsChanged();
+    }
+
+    @Override
     public void onThemeChanged() {
         onDisplayChanged(new DisplayLayout(mContext, mContext.getDisplay()));
     }
+
+    //
+    // DisplayController.OnDisplaysChangedListener implementations
+    //
 
     @Override
     public void onDisplayAdded(int displayId) {
@@ -182,6 +227,10 @@ public class PipController implements ConfigurationChangeListener,
         mPipDisplayLayoutState.setDisplayLayout(layout);
     }
 
+    //
+    // IPip Binder stub helpers
+    //
+
     private Rect getSwipePipToHomeBounds(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams,
             int launcherRotation, Rect hotseatKeepClearArea) {
@@ -197,7 +246,25 @@ public class PipController implements ConfigurationChangeListener,
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "onSwipePipToHomeAnimationStart: %s", componentName);
         mPipScheduler.setInSwipePipToHomeTransition(true);
+        mPipRecentsAnimationListener.onPipAnimationStarted();
         // TODO: cache the overlay if provided for reparenting later.
+    }
+
+    //
+    // IPipAnimationListener Binder proxy helpers
+    //
+
+    private void setPipRecentsAnimationListener(PipAnimationListener pipAnimationListener) {
+        mPipRecentsAnimationListener = pipAnimationListener;
+        onPipResourceDimensionsChanged();
+    }
+
+    private void onPipResourceDimensionsChanged() {
+        if (mPipRecentsAnimationListener != null) {
+            mPipRecentsAnimationListener.onPipResourceDimensionsChanged(
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius),
+                    mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius));
+        }
     }
 
     /**
@@ -206,9 +273,29 @@ public class PipController implements ConfigurationChangeListener,
     @BinderThread
     private static class IPipImpl extends IPip.Stub implements ExternalInterfaceBinder {
         private PipController mController;
+        private final SingleInstanceRemoteListener<PipController, IPipAnimationListener> mListener;
+        private final PipAnimationListener mPipAnimationListener = new PipAnimationListener() {
+            @Override
+            public void onPipAnimationStarted() {
+                mListener.call(l -> l.onPipAnimationStarted());
+            }
+
+            @Override
+            public void onPipResourceDimensionsChanged(int cornerRadius, int shadowRadius) {
+                mListener.call(l -> l.onPipResourceDimensionsChanged(cornerRadius, shadowRadius));
+            }
+
+            @Override
+            public void onExpandPip() {
+                mListener.call(l -> l.onExpandPip());
+            }
+        };
 
         IPipImpl(PipController controller) {
             mController = controller;
+            mListener = new SingleInstanceRemoteListener<>(mController,
+                    (cntrl) -> cntrl.setPipRecentsAnimationListener(mPipAnimationListener),
+                    (cntrl) -> cntrl.setPipRecentsAnimationListener(null));
         }
 
         /**
@@ -217,6 +304,7 @@ public class PipController implements ConfigurationChangeListener,
         @Override
         public void invalidate() {
             mController = null;
+            mListener.unregister();
         }
 
         @Override
@@ -257,7 +345,14 @@ public class PipController implements ConfigurationChangeListener,
 
         @Override
         public void setPipAnimationListener(IPipAnimationListener listener) {
-            // TODO: set a proper animation listener to update the Launcher state as needed.
+            executeRemoteCallWithTaskPermission(mController, "setPipAnimationListener",
+                    (controller) -> {
+                        if (listener != null) {
+                            mListener.register(listener);
+                        } else {
+                            mListener.unregister();
+                        }
+                    });
         }
 
         @Override

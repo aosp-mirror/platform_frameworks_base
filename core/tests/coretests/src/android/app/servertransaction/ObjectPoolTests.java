@@ -82,7 +82,8 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleActivityConfigurationChangeItem() {
-        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config()));
+        testRecycle(() -> ActivityConfigurationChangeItem.obtain(mActivityToken, config(),
+                new ActivityWindowInfo()));
     }
 
     @Test
@@ -97,7 +98,7 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleDestroyActivityItem() {
-        testRecycle(() -> DestroyActivityItem.obtain(mActivityToken, true, 117));
+        testRecycle(() -> DestroyActivityItem.obtain(mActivityToken, true));
     }
 
     @Test
@@ -168,7 +169,7 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecyclePauseActivityItemItem() {
-        testRecycle(() -> PauseActivityItem.obtain(mActivityToken, true, true, 5, true, true));
+        testRecycle(() -> PauseActivityItem.obtain(mActivityToken, true, true, true, true));
     }
 
     @Test
@@ -184,7 +185,7 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleStopItem() {
-        testRecycle(() -> StopActivityItem.obtain(mActivityToken, 4));
+        testRecycle(() -> StopActivityItem.obtain(mActivityToken));
     }
 
     @Test

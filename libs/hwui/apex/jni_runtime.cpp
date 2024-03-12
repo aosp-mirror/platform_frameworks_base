@@ -70,7 +70,6 @@ extern int register_android_graphics_fonts_Font(JNIEnv* env);
 extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfDocument(JNIEnv* env);
 extern int register_android_graphics_pdf_PdfEditor(JNIEnv* env);
-extern int register_android_graphics_pdf_PdfRenderer(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv *env);
 extern int register_android_graphics_text_TextShaper(JNIEnv *env);
@@ -142,7 +141,6 @@ extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
             REG_JNI(register_android_graphics_fonts_FontFamily),
             REG_JNI(register_android_graphics_pdf_PdfDocument),
             REG_JNI(register_android_graphics_pdf_PdfEditor),
-            REG_JNI(register_android_graphics_pdf_PdfRenderer),
             REG_JNI(register_android_graphics_text_MeasuredText),
             REG_JNI(register_android_graphics_text_LineBreaker),
             REG_JNI(register_android_graphics_text_TextShaper),

@@ -154,6 +154,7 @@ public class SecureSettings {
         Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT,
         Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
         Settings.Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED,
+        Settings.Secure.EMERGENCY_THERMAL_ALERT_DISABLED,
         Settings.Secure.HUSH_GESTURE_USED,
         Settings.Secure.IN_CALL_NOTIFICATION_ENABLED,
         Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
@@ -267,6 +268,7 @@ public class SecureSettings {
         Settings.Secure.EVEN_DIMMER_MIN_NITS,
         Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
         Settings.Secure.CAMERA_EXTENSIONS_FALLBACK,
-        Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED
+        Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
+        Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS
     };
 }

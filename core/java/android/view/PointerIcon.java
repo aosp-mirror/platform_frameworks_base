@@ -428,13 +428,11 @@ public final class PointerIcon implements Parcelable {
 
     private BitmapDrawable getBitmapDrawableFromVectorDrawable(Resources resources,
             VectorDrawable vectorDrawable) {
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
-                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        // BitmapDrawables and Bitmap have a default density of DisplayMetrics.DENSITY_DEVICE,
-        // (which is deprecated in favor of DENSITY_DEVICE_STABLE/resources.densityDpi). In
-        // rare cases when device density differs from the resource density, the bitmap will
-        // scale as the BitmapDrawable is created. Avoid by explicitly setting density here.
-        bitmap.setDensity(resources.getDisplayMetrics().densityDpi);
+        // Ensure we pass the display metrics into the Bitmap constructor so that it is initialized
+        // with the correct density.
+        Bitmap bitmap = Bitmap.createBitmap(resources.getDisplayMetrics(),
+                vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888, true /* hasAlpha */);
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         vectorDrawable.draw(canvas);

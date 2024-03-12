@@ -22,9 +22,9 @@ import static perfetto.protos.PerfettoTrace.InternedString.IID;
 import static perfetto.protos.PerfettoTrace.InternedString.STR;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.BOOLEAN_PARAMS;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.DOUBLE_PARAMS;
-import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STACKTRACE_IID;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.MESSAGE_ID;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.SINT64_PARAMS;
+import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STACKTRACE_IID;
 import static perfetto.protos.PerfettoTrace.ProtoLogMessage.STR_PARAM_IIDS;
 import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.GROUPS;
 import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.Group.ID;
@@ -70,6 +70,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData;
@@ -78,7 +80,6 @@ import perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData;
  * A service for the ProtoLog logging system.
  */
 public class PerfettoProtoLogImpl implements IProtoLog {
-    private final TreeMap<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
     private static final String LOG_TAG = "ProtoLog";
     private final AtomicInteger mTracingInstances = new AtomicInteger();
 
@@ -89,8 +90,12 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     );
     private final ProtoLogViewerConfigReader mViewerConfigReader;
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider;
+    private final TreeMap<String, IProtoLogGroup> mLogGroups;
 
-    public PerfettoProtoLogImpl(String viewerConfigFilePath) {
+    private final ExecutorService mBackgroundLoggingService = Executors.newCachedThreadPool();
+
+    public PerfettoProtoLogImpl(String viewerConfigFilePath,
+            TreeMap<String, IProtoLogGroup> logGroups) {
         this(() -> {
             try {
                 return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
@@ -98,23 +103,28 @@ public class PerfettoProtoLogImpl implements IProtoLog {
                 Slog.w(LOG_TAG, "Failed to load viewer config file " + viewerConfigFilePath, e);
                 return null;
             }
-        });
+        }, logGroups);
     }
 
-    public PerfettoProtoLogImpl(ViewerConfigInputStreamProvider viewerConfigInputStreamProvider) {
+    public PerfettoProtoLogImpl(
+            ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
+            TreeMap<String, IProtoLogGroup> logGroups
+    ) {
         this(viewerConfigInputStreamProvider,
-                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider));
+                new ProtoLogViewerConfigReader(viewerConfigInputStreamProvider), logGroups);
     }
 
     @VisibleForTesting
     public PerfettoProtoLogImpl(
             ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
-            ProtoLogViewerConfigReader viewerConfigReader
+            ProtoLogViewerConfigReader viewerConfigReader,
+            TreeMap<String, IProtoLogGroup> logGroups
     ) {
         Producer.init(InitArguments.DEFAULTS);
         mDataSource.register(DataSourceParams.DEFAULTS);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
+        this.mLogGroups = logGroups;
     }
 
     /**
@@ -128,7 +138,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
 
         long tsNanos = SystemClock.elapsedRealtimeNanos();
         try {
-            logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos);
+            mBackgroundLoggingService.submit(() ->
+                    logToProto(level, group.name(), messageHash, paramsMask, args, tsNanos));
             if (group.isLogToLogcat()) {
                 logToLogcat(group.getTag(), level, messageHash, messageString, args);
             }
@@ -456,40 +467,6 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     }
 
     /**
-     * Responds to a shell command.
-     */
-    public int onShellCommand(ShellCommand shell) {
-        PrintWriter pw = shell.getOutPrintWriter();
-        String cmd = shell.getNextArg();
-        if (cmd == null) {
-            return unknownCommand(pw);
-        }
-        ArrayList<String> args = new ArrayList<>();
-        String arg;
-        while ((arg = shell.getNextArg()) != null) {
-            args.add(arg);
-        }
-        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
-        String[] groups = args.toArray(new String[args.size()]);
-        switch (cmd) {
-            case "enable-text":
-                return this.startLoggingToLogcat(groups, logger);
-            case "disable-text":
-                return this.stopLoggingToLogcat(groups, logger);
-            default:
-                return unknownCommand(pw);
-        }
-    }
-
-    private int unknownCommand(PrintWriter pw) {
-        pw.println("Unknown command");
-        pw.println("Window manager logging options:");
-        pw.println("  enable-text [group...]: Enable logcat logging for given groups");
-        pw.println("  disable-text [group...]: Disable logcat logging for given groups");
-        return -1;
-    }
-
-    /**
      * Returns {@code true} iff logging to proto is enabled.
      */
     public boolean isProtoEnabled() {
@@ -546,6 +523,49 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             }
         }
         return 0;
+    }
+
+    /**
+     * Responds to a shell command.
+     */
+    public int onShellCommand(ShellCommand shell) {
+        PrintWriter pw = shell.getOutPrintWriter();
+        String cmd = shell.getNextArg();
+        if (cmd == null) {
+            return unknownCommand(pw);
+        }
+        ArrayList<String> args = new ArrayList<>();
+        String arg;
+        while ((arg = shell.getNextArg()) != null) {
+            args.add(arg);
+        }
+        final ILogger logger = (msg) -> logAndPrintln(pw, msg);
+        String[] groups = args.toArray(new String[0]);
+        switch (cmd) {
+            case "start", "stop" -> {
+                pw.println("Command not supported. "
+                        + "Please start and stop ProtoLog tracing with Perfetto.");
+                return -1;
+            }
+            case "enable-text" -> {
+                mViewerConfigReader.loadViewerConfig(logger);
+                return setTextLogging(true, logger, groups);
+            }
+            case "disable-text" -> {
+                return setTextLogging(false, logger, groups);
+            }
+            default -> {
+                return unknownCommand(pw);
+            }
+        }
+    }
+
+    private int unknownCommand(PrintWriter pw) {
+        pw.println("Unknown command");
+        pw.println("Window manager logging options:");
+        pw.println("  enable-text [group...]: Enable logcat logging for given groups");
+        pw.println("  disable-text [group...]: Disable logcat logging for given groups");
+        return -1;
     }
 
     static void logAndPrintln(@Nullable PrintWriter pw, String msg) {

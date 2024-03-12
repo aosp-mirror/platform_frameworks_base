@@ -35,6 +35,7 @@ import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_INFO_CHA
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED;
 import static android.window.TaskFragmentTransaction.TYPE_TASK_FRAGMENT_VANISHED;
 
+import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_ACTIVITY_STACK_TOKEN;
 import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_OVERLAY_TAG;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishPrimaryWithSecondaryBehavior;
 import static androidx.window.extensions.embedding.SplitContainer.getFinishSecondaryWithPrimaryBehavior;
@@ -55,6 +56,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.Instrumentation;
+import android.app.servertransaction.ClientTransactionListenerController;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -102,6 +104,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 
 /**
  * Main controller class that manages split states and presentation.
@@ -111,10 +114,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     static final String TAG = "SplitController";
     static final boolean ENABLE_SHELL_TRANSITIONS =
             SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
-
-    // TODO(b/295993745): remove after prebuilt library is updated.
-    private static final String KEY_ACTIVITY_STACK_TOKEN =
-            "androidx.window.extensions.embedding.ActivityStackToken";
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -180,6 +179,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             new ArrayMap<>();
 
     private final List<ActivityStack> mLastReportedActivityStacks = new ArrayList<>();
+
+    /** WM Jetpack set callback for {@link EmbeddedActivityWindowInfo}. */
+    @GuardedBy("mLock")
+    @Nullable
+    private Pair<Executor, Consumer<EmbeddedActivityWindowInfo>>
+            mEmbeddedActivityWindowInfoCallback;
+
+    /** Listener registered to {@link ClientTransactionListenerController}. */
+    @GuardedBy("mLock")
+    @Nullable
+    private final BiConsumer<IBinder, ActivityWindowInfo> mActivityWindowInfoListener =
+            Flags.activityWindowInfoFlag()
+                    ? this::onActivityWindowInfoChanged
+                    : null;
 
     private final Handler mHandler;
     final Object mLock = new Object();
@@ -554,7 +567,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Override
-    public void updateActivityStackAttributes(@NonNull IBinder activityStackToken,
+    public void updateActivityStackAttributes(@NonNull ActivityStack.Token activityStackToken,
                                               @NonNull ActivityStackAttributes attributes) {
         if (!Flags.activityEmbeddingOverlayPresentationFlag()) {
             return;
@@ -563,7 +576,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         Objects.requireNonNull(attributes);
 
         synchronized (mLock) {
-            final TaskFragmentContainer container = getContainer(activityStackToken);
+            final TaskFragmentContainer container = getContainer(activityStackToken.getRawToken());
             if (container == null) {
                 Log.w(TAG, "Cannot find TaskFragmentContainer for token:" + activityStackToken);
                 return;
@@ -583,13 +596,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     @Nullable
-    public ParentContainerInfo getParentContainerInfo(@NonNull IBinder activityStackToken) {
+    public ParentContainerInfo getParentContainerInfo(
+            @NonNull ActivityStack.Token activityStackToken) {
         if (!Flags.activityEmbeddingOverlayPresentationFlag()) {
             return null;
         }
         Objects.requireNonNull(activityStackToken);
         synchronized (mLock) {
-            final TaskFragmentContainer container = getContainer(activityStackToken);
+            final TaskFragmentContainer container = getContainer(activityStackToken.getRawToken());
             if (container == null) {
                 return null;
             }
@@ -601,7 +615,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     @Nullable
-    public IBinder getActivityStackToken(@NonNull String tag) {
+    public ActivityStack.Token getActivityStackToken(@NonNull String tag) {
         if (!Flags.activityEmbeddingOverlayPresentationFlag()) {
             return null;
         }
@@ -612,7 +626,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             if (taskFragmentContainer == null) {
                 return null;
             }
-            return taskFragmentContainer.getTaskFragmentToken();
+            return ActivityStack.Token.createFromBinder(taskFragmentContainer
+                    .getTaskFragmentToken());
         }
     }
 
@@ -2457,6 +2472,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @VisibleForTesting
+    @Nullable
+    ActivityThread.ActivityClientRecord getActivityClientRecord(@NonNull Activity activity) {
+        return ActivityThread.currentActivityThread()
+                .getActivityClient(activity.getActivityToken());
+    }
+
+    @VisibleForTesting
     ActivityStartMonitor getActivityStartMonitor() {
         return mActivityStartMonitor;
     }
@@ -2469,8 +2491,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @VisibleForTesting
     @Nullable
     IBinder getTaskFragmentTokenFromActivityClientRecord(@NonNull Activity activity) {
-        final ActivityThread.ActivityClientRecord record = ActivityThread.currentActivityThread()
-                .getActivityClient(activity.getActivityToken());
+        final ActivityThread.ActivityClientRecord record = getActivityClientRecord(activity);
         return record != null ? record.mTaskFragmentToken : null;
     }
 
@@ -2761,8 +2782,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // TODO(b/232042367): Consolidate the activity create handling so that we can handle
             // cross-process the same as normal.
 
-            IBinder activityStackToken = options.getBinder(KEY_ACTIVITY_STACK_TOKEN);
-            if (activityStackToken != null) {
+            final Bundle bundle = options.getBundle(KEY_ACTIVITY_STACK_TOKEN);
+            if (bundle != null) {
+                final IBinder activityStackToken = ActivityStack.Token.readFromBundle(bundle)
+                        .getRawToken();
                 // Put activityStack token to #KEY_LAUNCH_TASK_FRAGMENT_TOKEN to launch the activity
                 // into the taskFragment associated with the token.
                 options.putBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN, activityStackToken);
@@ -2875,15 +2898,100 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
     }
 
+    @Override
+    public void setEmbeddedActivityWindowInfoCallback(@NonNull Executor executor,
+            @NonNull Consumer<EmbeddedActivityWindowInfo> callback) {
+        if (!Flags.activityWindowInfoFlag()) {
+            return;
+        }
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        synchronized (mLock) {
+            if (mEmbeddedActivityWindowInfoCallback == null) {
+                ClientTransactionListenerController.getInstance()
+                        .registerActivityWindowInfoChangedListener(getActivityWindowInfoListener());
+            }
+            mEmbeddedActivityWindowInfoCallback = new Pair<>(executor, callback);
+        }
+    }
+
+    @Override
+    public void clearEmbeddedActivityWindowInfoCallback() {
+        if (!Flags.activityWindowInfoFlag()) {
+            return;
+        }
+        synchronized (mLock) {
+            if (mEmbeddedActivityWindowInfoCallback == null) {
+                return;
+            }
+            mEmbeddedActivityWindowInfoCallback = null;
+            ClientTransactionListenerController.getInstance()
+                    .unregisterActivityWindowInfoChangedListener(getActivityWindowInfoListener());
+        }
+    }
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
     @Nullable
-    private static ActivityWindowInfo getActivityWindowInfo(@NonNull Activity activity) {
+    BiConsumer<IBinder, ActivityWindowInfo> getActivityWindowInfoListener() {
+        return mActivityWindowInfoListener;
+    }
+
+    @Nullable
+    @Override
+    public EmbeddedActivityWindowInfo getEmbeddedActivityWindowInfo(@NonNull Activity activity) {
+        if (!Flags.activityWindowInfoFlag()) {
+            return null;
+        }
+        synchronized (mLock) {
+            final ActivityWindowInfo activityWindowInfo = getActivityWindowInfo(activity);
+            return activityWindowInfo != null
+                    ? translateActivityWindowInfo(activity, activityWindowInfo)
+                    : null;
+        }
+    }
+
+    @VisibleForTesting
+    void onActivityWindowInfoChanged(@NonNull IBinder activityToken,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
+        synchronized (mLock) {
+            if (mEmbeddedActivityWindowInfoCallback == null) {
+                return;
+            }
+            final Executor executor = mEmbeddedActivityWindowInfoCallback.first;
+            final Consumer<EmbeddedActivityWindowInfo> callback =
+                    mEmbeddedActivityWindowInfoCallback.second;
+
+            final Activity activity = getActivity(activityToken);
+            if (activity == null) {
+                return;
+            }
+            final EmbeddedActivityWindowInfo info = translateActivityWindowInfo(
+                    activity, activityWindowInfo);
+
+            executor.execute(() -> callback.accept(info));
+        }
+    }
+
+    @Nullable
+    private ActivityWindowInfo getActivityWindowInfo(@NonNull Activity activity) {
         if (activity.isFinishing()) {
             return null;
         }
-        final ActivityThread.ActivityClientRecord record =
-                ActivityThread.currentActivityThread()
-                        .getActivityClient(activity.getActivityToken());
+        final ActivityThread.ActivityClientRecord record = getActivityClientRecord(activity);
         return record != null ? record.getActivityWindowInfo() : null;
+    }
+
+    @NonNull
+    private static EmbeddedActivityWindowInfo translateActivityWindowInfo(
+            @NonNull Activity activity, @NonNull ActivityWindowInfo activityWindowInfo) {
+        final boolean isEmbedded = activityWindowInfo.isEmbedded();
+        final Rect activityBounds = new Rect(activity.getResources().getConfiguration()
+                .windowConfiguration.getBounds());
+        final Rect taskBounds = new Rect(activityWindowInfo.getTaskBounds());
+        final Rect activityStackBounds = new Rect(activityWindowInfo.getTaskFragmentBounds());
+        return new EmbeddedActivityWindowInfo(activity, isEmbedded, activityBounds, taskBounds,
+                activityStackBounds);
     }
 
     /**

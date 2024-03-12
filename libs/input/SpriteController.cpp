@@ -202,11 +202,13 @@ void SpriteController::doUpdateSprites() {
                 && update.state.surfaceDrawn;
         bool becomingVisible = wantSurfaceVisibleAndDrawn && !update.state.surfaceVisible;
         bool becomingHidden = !wantSurfaceVisibleAndDrawn && update.state.surfaceVisible;
-        if (update.state.surfaceControl != NULL && (becomingVisible || becomingHidden
-                || (wantSurfaceVisibleAndDrawn && (update.state.dirty & (DIRTY_ALPHA
-                        | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER
-                        | DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID
-                        | DIRTY_ICON_STYLE))))) {
+        if (update.state.surfaceControl != NULL &&
+            (becomingVisible || becomingHidden ||
+             (wantSurfaceVisibleAndDrawn &&
+              (update.state.dirty &
+               (DIRTY_ALPHA | DIRTY_POSITION | DIRTY_TRANSFORMATION_MATRIX | DIRTY_LAYER |
+                DIRTY_VISIBILITY | DIRTY_HOTSPOT | DIRTY_DISPLAY_ID | DIRTY_ICON_STYLE |
+                DIRTY_DRAW_DROP_SHADOW))))) {
             needApplyTransaction = true;
 
             if (wantSurfaceVisibleAndDrawn
@@ -235,13 +237,15 @@ void SpriteController::doUpdateSprites() {
                         update.state.transformationMatrix.dtdy);
             }
 
-            if (wantSurfaceVisibleAndDrawn
-                    && (becomingVisible
-                            || (update.state.dirty & (DIRTY_HOTSPOT | DIRTY_ICON_STYLE)))) {
+            if (wantSurfaceVisibleAndDrawn &&
+                (becomingVisible ||
+                 (update.state.dirty &
+                  (DIRTY_HOTSPOT | DIRTY_ICON_STYLE | DIRTY_DRAW_DROP_SHADOW)))) {
                 Parcel p;
                 p.writeInt32(static_cast<int32_t>(update.state.icon.style));
                 p.writeFloat(update.state.icon.hotSpotX);
                 p.writeFloat(update.state.icon.hotSpotY);
+                p.writeBool(update.state.icon.drawNativeDropShadow);
 
                 // Pass cursor metadata in the sprite surface so that when Android is running as a
                 // client OS (e.g. ARC++) the host OS can get the requested cursor metadata and
@@ -388,12 +392,13 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
     uint32_t dirty;
     if (icon.isValid()) {
         mLocked.state.icon.bitmap = icon.bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888);
-        if (!mLocked.state.icon.isValid()
-                || mLocked.state.icon.hotSpotX != icon.hotSpotX
-                || mLocked.state.icon.hotSpotY != icon.hotSpotY) {
+        if (!mLocked.state.icon.isValid() || mLocked.state.icon.hotSpotX != icon.hotSpotX ||
+            mLocked.state.icon.hotSpotY != icon.hotSpotY ||
+            mLocked.state.icon.drawNativeDropShadow != icon.drawNativeDropShadow) {
             mLocked.state.icon.hotSpotX = icon.hotSpotX;
             mLocked.state.icon.hotSpotY = icon.hotSpotY;
-            dirty = DIRTY_BITMAP | DIRTY_HOTSPOT;
+            mLocked.state.icon.drawNativeDropShadow = icon.drawNativeDropShadow;
+            dirty = DIRTY_BITMAP | DIRTY_HOTSPOT | DIRTY_DRAW_DROP_SHADOW;
         } else {
             dirty = DIRTY_BITMAP;
         }
@@ -404,7 +409,7 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
         }
     } else if (mLocked.state.icon.isValid()) {
         mLocked.state.icon.bitmap.reset();
-        dirty = DIRTY_BITMAP | DIRTY_HOTSPOT | DIRTY_ICON_STYLE;
+        dirty = DIRTY_BITMAP | DIRTY_HOTSPOT | DIRTY_ICON_STYLE | DIRTY_DRAW_DROP_SHADOW;
     } else {
         return; // setting to invalid icon and already invalid so nothing to do
     }

@@ -179,15 +179,18 @@ final class ALSProbe implements Probe {
             nextConsumer.consume(current);
         } else if (mNextConsumer != null) {
             mNextConsumer.add(nextConsumer);
-        } else {
+        } else if (mLightSensor != null) {
             mDestroyed = false;
             mNextConsumer = nextConsumer;
             enableLightSensorLoggingLocked();
+        } else {
+            Slog.w(TAG, "No light sensor - use current to consume");
+            nextConsumer.consume(current);
         }
     }
 
     private void enableLightSensorLoggingLocked() {
-        if (!mEnabled) {
+        if (!mEnabled && mLightSensor != null) {
             mEnabled = true;
             mLastAmbientLux = -1;
             mSensorManager.registerListener(mLightSensorListener, mLightSensor,
@@ -201,7 +204,7 @@ final class ALSProbe implements Probe {
     private void disableLightSensorLoggingLocked(boolean destroying) {
         resetTimerLocked(false /* start */);
 
-        if (mEnabled) {
+        if (mEnabled && mLightSensor != null) {
             mEnabled = false;
             if (!destroying) {
                 mLastAmbientLux = -1;

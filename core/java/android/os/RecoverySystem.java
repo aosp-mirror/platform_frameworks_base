@@ -1259,6 +1259,24 @@ public class RecoverySystem {
     }
 
     /**
+     * Reboot into recovery and wipe the data partition with ext4
+     *
+     * @throws IOException if something goes wrong.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.RECOVERY,
+            android.Manifest.permission.REBOOT
+    })
+    public void wipePartitionToExt4()
+            throws IOException {
+        // Reformat /data partition with ext4
+        String command = "--wipe_data\n--reformat_data=ext4";
+        rebootRecoveryWithCommand(command);
+    }
+
+    /**
      * Reboot into the recovery system with the supplied argument.
      * @param args to pass to the recovery utility.
      * @throws IOException if something goes wrong.

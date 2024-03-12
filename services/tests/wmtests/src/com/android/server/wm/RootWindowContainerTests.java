@@ -554,7 +554,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         mRootWindowContainer.applySleepTokens(true);
 
         // The display orientation should be changed by the activity so there is no relaunch.
-        verify(activity, never()).relaunchActivityLocked(anyBoolean());
+        verify(activity, never()).relaunchActivityLocked(anyBoolean(), anyInt());
         assertEquals(rotatedConfig.orientation, display.getConfiguration().orientation);
     }
 
@@ -835,8 +835,6 @@ public class RootWindowContainerTests extends WindowTestsBase {
                 new TestDisplayContent.Builder(mAtm, 1000, 1500)
                         .setSystemDecorations(true).build();
 
-        doReturn(true).when(mRootWindowContainer)
-                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean());
         doReturn(true).when(mRootWindowContainer).canStartHomeOnDisplayArea(any(), any(),
                 anyBoolean());
 

@@ -226,12 +226,6 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isSystemReady();
 
     /**
-     * @return {@code true} if system is using the "modern" broadcast queue,
-     *         {@code false} otherwise.
-     */
-    public abstract boolean isModernQueueEnabled();
-
-    /**
      * Enforce capability restrictions on use of the given BroadcastOptions
      */
     public abstract void enforceBroadcastOptionsPermissions(@Nullable Bundle options,

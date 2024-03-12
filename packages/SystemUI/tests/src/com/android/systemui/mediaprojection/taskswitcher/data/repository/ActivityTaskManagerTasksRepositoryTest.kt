@@ -21,32 +21,38 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createToken
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createToken
+import com.android.systemui.mediaprojection.taskswitcher.activityTaskManagerTasksRepository
+import com.android.systemui.mediaprojection.taskswitcher.fakeActivityTaskManager
+import com.android.systemui.mediaprojection.taskswitcher.taskSwitcherKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class ActivityTaskManagerTasksRepositoryTest : SysuiTestCase() {
 
-    private val fakeActivityTaskManager = FakeActivityTaskManager()
+    private val kosmos = taskSwitcherKosmos()
+    private val fakeActivityTaskManager = kosmos.fakeActivityTaskManager
+    private val testScope = kosmos.testScope
+    private val repo = kosmos.activityTaskManagerTasksRepository
 
-    private val dispatcher = UnconfinedTestDispatcher()
-    private val testScope = TestScope(dispatcher)
+    @Test
+    fun launchRecentTask_taskIsMovedToForeground() =
+        testScope.runTest {
+            val currentForegroundTask by collectLastValue(repo.foregroundTask)
+            val newForegroundTask = createTask(taskId = 1)
+            val backgroundTask = createTask(taskId = 2)
+            fakeActivityTaskManager.addRunningTasks(backgroundTask, newForegroundTask)
 
-    private val repo =
-        ActivityTaskManagerTasksRepository(
-            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
-            applicationScope = testScope.backgroundScope,
-            backgroundDispatcher = dispatcher
-        )
+            repo.launchRecentTask(newForegroundTask)
+
+            assertThat(currentForegroundTask).isEqualTo(newForegroundTask)
+        }
 
     @Test
     fun findRunningTaskFromWindowContainerToken_noMatch_returnsNull() {

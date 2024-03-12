@@ -352,10 +352,6 @@ constructor(
     /** Called by the touch helper when the drag down was aborted and should be reset. */
     internal fun onDragDownReset() {
         logger.logDragDownAborted()
-        nsslController.setDimmed(
-            /* dimmed= */ true,
-            /* animate= */ true,
-        )
         nsslController.resetScrollPosition()
         nsslController.resetCheckSnoozeLeavebehind()
         setDragDownAmountAnimated(0f)
@@ -366,12 +362,7 @@ constructor(
      *
      * @param above whether they dragged above it
      */
-    internal fun onCrossedThreshold(above: Boolean) {
-        nsslController.setDimmed(
-            /* dimmed= */ !above,
-            /* animate= */ true,
-        )
-    }
+    internal fun onCrossedThreshold(above: Boolean) {}
 
     /** Called by the touch helper when the drag down was started */
     internal fun onDragDownStarted(startingChild: ExpandableView?) {
@@ -603,6 +594,7 @@ constructor(
                 }
             }
             val cancelHandler = Runnable {
+                statusBarStateController.setLeaveOpenOnKeyguardHide(false)
                 draggedDownEntry?.apply {
                     setUserLocked(false)
                     notifyHeightChanged(

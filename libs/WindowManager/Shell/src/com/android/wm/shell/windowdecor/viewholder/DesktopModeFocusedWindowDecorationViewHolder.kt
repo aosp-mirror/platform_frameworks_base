@@ -65,7 +65,7 @@ internal class DesktopModeFocusedWindowDecorationViewHolder(
                     taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
                     Color.valueOf(taskDescription.statusBarColor).luminance() < 0.5
                 } else {
-                    taskDescription.statusBarAppearance and APPEARANCE_LIGHT_STATUS_BARS == 0
+                    taskDescription.systemBarsAppearance and APPEARANCE_LIGHT_STATUS_BARS == 0
                 }
             } ?: false
     }

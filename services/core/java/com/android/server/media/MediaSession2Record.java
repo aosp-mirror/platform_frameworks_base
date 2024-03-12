@@ -35,12 +35,11 @@ import java.io.PrintWriter;
  * Keeps the record of {@link Session2Token} to help send command to the corresponding session.
  */
 // TODO(jaewan): Do not call service method directly -- introduce listener instead.
-public class MediaSession2Record implements MediaSessionRecordImpl {
+public class MediaSession2Record extends MediaSessionRecordImpl {
     private static final String TAG = "MediaSession2Record";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final Object mLock = new Object();
 
-    private final int mUniqueId;
     @GuardedBy("mLock")
     private final Session2Token mSessionToken;
     @GuardedBy("mLock")
@@ -57,20 +56,18 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     private boolean mIsClosed;
 
     private final int mPid;
-    private final ForegroundServiceDelegationOptions mForegroundServiceDelegationOptions;
 
     public MediaSession2Record(
             Session2Token sessionToken,
             MediaSessionService service,
             Looper handlerLooper,
             int pid,
-            int policies,
-            int uniqueId) {
+            int policies) {
         // The lock is required to prevent `Controller2Callback` from using partially initialized
         // `MediaSession2Record.this`.
         synchronized (mLock) {
+            mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
             mSessionToken = sessionToken;
-            mUniqueId = uniqueId;
             mService = service;
             mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
             mController = new MediaController2.Builder(service.getContext(), sessionToken)
@@ -78,32 +75,6 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
                     .build();
             mPid = pid;
             mPolicies = policies;
-            mForegroundServiceDelegationOptions =
-                    new ForegroundServiceDelegationOptions.Builder()
-                            .setClientPid(mPid)
-                            .setClientUid(getUid())
-                            .setClientPackageName(getPackageName())
-                            .setClientAppThread(null)
-                            .setSticky(false)
-                            .setClientInstanceName(
-                                    "MediaSessionFgsDelegate_"
-                                            + getUid()
-                                            + "_"
-                                            + mPid
-                                            + "_"
-                                            + getPackageName())
-                            .setForegroundServiceTypes(0)
-                            .setDelegationService(
-                                    ForegroundServiceDelegationOptions
-                                            .DELEGATION_SERVICE_MEDIA_PLAYBACK)
-                            .build();
-        }
-    }
-
-    @Override
-    public int getUniqueId() {
-        synchronized (mLock) {
-            return mUniqueId;
         }
     }
 
@@ -128,7 +99,10 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public ForegroundServiceDelegationOptions getForegroundServiceDelegationOptions() {
-        return mForegroundServiceDelegationOptions;
+        // For an app to be eligible for FGS delegation, it needs a media session liked to a media
+        // notification. Currently, notifications cannot be linked to MediaSession2 so it is not
+        // supported.
+        return null;
     }
 
     @Override
@@ -210,7 +184,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "uniqueId=" + mUniqueId);
+        pw.println(prefix + "uniqueId=" + getUniqueId());
         pw.println(prefix + "token=" + mSessionToken);
         pw.println(prefix + "controller=" + mController);
 
@@ -220,7 +194,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public String toString() {
-        return getPackageName() + "/" + mUniqueId + " (userId=" + getUserId() + ")";
+        return getPackageName() + "/" + getUniqueId() + " (userId=" + getUserId() + ")";
     }
 
     private class Controller2Callback extends MediaController2.ControllerCallback {

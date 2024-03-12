@@ -379,7 +379,9 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                             + " was received. Deferring... Managed profile? " + isManagedProfile);
                     return;
                 }
-                if (android.os.Flags.allowPrivateProfile() && isPrivateProfile(newUserHandle)) {
+                if (android.os.Flags.allowPrivateProfile()
+                        && android.multiuser.Flags.enablePrivateSpaceFeatures()
+                        && isPrivateProfile(newUserHandle)) {
                     mDeferredThemeEvaluation = true;
                     Log.i(TAG, "Deferring theme for private profile till user setup is complete");
                     return;

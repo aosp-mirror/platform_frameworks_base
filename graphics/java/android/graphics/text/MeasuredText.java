@@ -29,11 +29,13 @@ import android.util.Log;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.NeverInline;
 
 import libcore.util.NativeAllocationRegistry;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -85,6 +87,30 @@ public class MeasuredText {
         return mChars;
     }
 
+    private void rangeCheck(int start, int end) {
+        if (start < 0 || start > end || end > mChars.length) {
+            throwRangeError(start, end);
+        }
+    }
+
+    @NeverInline
+    private void throwRangeError(int start, int end) {
+        throw new IllegalArgumentException(String.format(Locale.US,
+            "start(%d) end(%d) length(%d) out of bounds", start, end, mChars.length));
+    }
+
+    private void offsetCheck(int offset) {
+        if (offset < 0 || offset >= mChars.length) {
+            throwOffsetError(offset);
+        }
+    }
+
+    @NeverInline
+    private void throwOffsetError(int offset) {
+        throw new IllegalArgumentException(String.format(Locale.US,
+            "offset (%d) length(%d) out of bounds", offset, mChars.length));
+    }
+
     /**
      * Returns the width of a given range.
      *
@@ -93,12 +119,7 @@ public class MeasuredText {
      */
     public @FloatRange(from = 0.0) @Px float getWidth(
             @IntRange(from = 0) int start, @IntRange(from = 0) int end) {
-        Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(%d) must be 0 <= start <= %d", start, mChars.length);
-        Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(%d) must be 0 <= end <= %d", end, mChars.length);
-        Preconditions.checkArgument(start <= end,
-                "start(%d) is larger than end(%d)", start, end);
+        rangeCheck(start, end);
         return nGetWidth(mNativePtr, start, end);
     }
 
@@ -120,12 +141,7 @@ public class MeasuredText {
      */
     public void getBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull Rect rect) {
-        Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(%d) must be 0 <= start <= %d", start, mChars.length);
-        Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(%d) must be 0 <= end <= %d", end, mChars.length);
-        Preconditions.checkArgument(start <= end,
-                "start(%d) is larger than end(%d)", start, end);
+        rangeCheck(start, end);
         Preconditions.checkNotNull(rect);
         nGetBounds(mNativePtr, mChars, start, end, rect);
     }
@@ -139,12 +155,7 @@ public class MeasuredText {
      */
     public void getFontMetricsInt(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull Paint.FontMetricsInt outMetrics) {
-        Preconditions.checkArgument(0 <= start && start <= mChars.length,
-                "start(%d) must be 0 <= start <= %d", start, mChars.length);
-        Preconditions.checkArgument(0 <= end && end <= mChars.length,
-                "end(%d) must be 0 <= end <= %d", end, mChars.length);
-        Preconditions.checkArgument(start <= end,
-                "start(%d) is larger than end(%d)", start, end);
+        rangeCheck(start, end);
         Objects.requireNonNull(outMetrics);
 
         long packed = nGetExtent(mNativePtr, mChars, start, end);
@@ -160,8 +171,7 @@ public class MeasuredText {
      * @param offset an offset of the character.
      */
     public @FloatRange(from = 0.0f) @Px float getCharWidthAt(@IntRange(from = 0) int offset) {
-        Preconditions.checkArgument(0 <= offset && offset < mChars.length,
-                "offset(%d) is larger than text length %d" + offset, mChars.length);
+        offsetCheck(offset);
         return nGetCharWidthAt(mNativePtr, offset);
     }
 

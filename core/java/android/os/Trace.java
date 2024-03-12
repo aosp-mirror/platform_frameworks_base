@@ -164,6 +164,8 @@ public final class Trace {
     private static native void nativeInstant(long tag, String name);
     @FastNative
     private static native void nativeInstantForTrack(long tag, String trackName, String name);
+    @FastNative
+    private static native void nativeRegisterWithPerfetto();
 
     private Trace() {
     }
@@ -522,5 +524,16 @@ public final class Trace {
         if (isTagEnabled(TRACE_TAG_APP)) {
             nativeTraceCounter(TRACE_TAG_APP, counterName, counterValue);
         }
+    }
+
+    /**
+     * Initialize the perfetto SDK. This must be called before any tracing
+     * calls so that perfetto SDK can be used, otherwise libcutils would be
+     * used.
+     *
+     * @hide
+     */
+    public static void registerWithPerfetto() {
+        nativeRegisterWithPerfetto();
     }
 }

@@ -75,6 +75,11 @@
     <!-- Battery saver notification dismiss action: Do not turn on battery saver. [CHAR LIMIT=NONE]-->
     <string name="battery_saver_dismiss_action">No thanks</string>
 
+    <!-- Secondary label for Battery Saver tile when Battery Saver is enabled. [CHAR LIMIT=20] -->
+    <string name="standard_battery_saver_text">Standard</string>
+    <!-- Secondary label for Battery Saver tile when Extreme Battery Saver is enabled. [CHAR LIMIT=20] -->
+    <string name="extreme_battery_saver_text">Extreme</string>
+
     <!-- Name of the button that links to the Settings app. [CHAR LIMIT=NONE] -->
 
     <!-- Name of the button that links to the Wifi settings screen. [CHAR LIMIT=NONE] -->
@@ -675,8 +680,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate">activate</string>
     <!-- QuickSettings: Bluetooth auto on tomorrow [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on again tomorrow</string>
-    <!-- QuickSettings: Bluetooth auto on info text [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info">Features like Quick Share, Find My Device, and device location use Bluetooth</string>
+    <!-- QuickSettings: Bluetooth auto on info text when disabled [CHAR LIMIT=NONE]-->
+    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share, Find My Device, and device location use Bluetooth</string>
+    <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
+    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow at 5 AM</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -1128,6 +1135,14 @@
     <string name="hub_mode_add_widget_button_text">Add widget</string>
     <!-- Text for the button that exits the hub mode editing mode. [CHAR LIMIT=50] -->
     <string name="hub_mode_editing_exit_button_text">Done</string>
+    <!-- Title for the dialog that redirects users to change allowed widget category in settings. [CHAR LIMIT=NONE] -->
+    <string name="dialog_title_to_allow_any_widget">Allow any widget on lock screen?</string>
+    <!-- Text for the button in the dialog that opens when tapping on disabled widgets. [CHAR LIMIT=NONE] -->
+    <string name="button_text_to_open_settings">Open settings</string>
+    <!-- Title of a dialog. This text is confirming that the user wants to turn on access to their work apps, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=30] -->
+    <string name="work_mode_off_title">Unpause work apps?</string>
+    <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
+    <string name="work_mode_turn_on">Unpause</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1533,8 +1548,16 @@
     <string name="volume_stream_content_description_vibrate_a11y">%1$s. Tap to set to vibrate.</string>
     <string name="volume_stream_content_description_mute_a11y">%1$s. Tap to mute.</string>
 
-    <!-- Label for button to enabled/disable live caption [CHAR_LIMIT=30] -->
+    <!-- Label for button to enabled/disable active noise cancellation [CHAR_LIMIT=30] -->
     <string name="volume_panel_noise_control_title">Noise Control</string>
+    <!-- Label for button to enabled/disable spatial audio [CHAR_LIMIT=30] -->
+    <string name="volume_panel_spatial_audio_title">Spatial Audio</string>
+    <!-- Label for button to disable spatial audio [CHAR_LIMIT=20] -->
+    <string name="volume_panel_spatial_audio_off">Off</string>
+    <!-- Label for button to enabled spatial audio [CHAR_LIMIT=20] -->
+    <string name="volume_panel_spatial_audio_fixed">Fixed</string>
+    <!-- Label for button to enabled head tracking [CHAR_LIMIT=20] -->
+    <string name="volume_panel_spatial_audio_tracking">Head Tracking</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
 
@@ -3254,6 +3277,12 @@
     <!-- Text for education page content description for unfolded animation. [CHAR_LIMIT=NONE] -->
     <string name="rear_display_accessibility_unfolded_animation">Foldable device being flipped around</string>
 
+    <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the folded posture for a foldable device [CHAR LIMIT=32] -->
+    <string name="quick_settings_rotation_posture_folded">folded</string>
+    <!-- QuickSettings: Additional label for the auto-rotation quicksettings tile indicating that the setting corresponds to the unfolded posture for a foldable device [CHAR LIMIT=32] -->
+    <string name="quick_settings_rotation_posture_unfolded">unfolded</string>
+    <!-- QuickSettings: template for rotation tile foldable secondary label [CHAR LIMIT=64] !-->
+    <string name="rotation_tile_with_posture_secondary_label_template">%1$s / %2$s</string>
     <!-- Title for notification of low stylus battery with percentage. "percentage" is
         the value of the battery capacity remaining [CHAR LIMIT=none]-->
     <string name="stylus_battery_low_percentage"><xliff:g id="percentage" example="16%">%s</xliff:g> battery remaining</string>

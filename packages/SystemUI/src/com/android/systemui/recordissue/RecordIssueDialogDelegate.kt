@@ -17,8 +17,6 @@
 package com.android.systemui.recordissue
 
 import android.annotation.SuppressLint
-import android.app.BroadcastOptions
-import android.app.PendingIntent
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -40,11 +38,9 @@ import com.android.systemui.flags.Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPR
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
-import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate
 import com.android.systemui.qs.tiles.RecordIssueTile
 import com.android.systemui.res.R
-import com.android.systemui.screenrecord.RecordingService
-import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -52,12 +48,12 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
+import java.util.function.Consumer
 
 class RecordIssueDialogDelegate
 @AssistedInject
 constructor(
     private val factory: SystemUIDialog.Factory,
-    private val userContextProvider: UserContextProvider,
     private val userTracker: UserTracker,
     private val flags: FeatureFlagsClassic,
     @Background private val bgExecutor: Executor,
@@ -65,14 +61,15 @@ constructor(
     private val devicePolicyResolver: dagger.Lazy<ScreenCaptureDevicePolicyResolver>,
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     private val userFileManager: UserFileManager,
-    @Assisted private val onStarted: Runnable,
+    private val screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate,
+    @Assisted private val onStarted: Consumer<IssueRecordingConfig>,
 ) : SystemUIDialog.Delegate {
 
     /** To inject dependencies and allow for easier testing */
     @AssistedFactory
     interface Factory {
         /** Create a dialog object */
-        fun create(onStarted: Runnable): RecordIssueDialogDelegate
+        fun create(onStarted: Consumer<IssueRecordingConfig>): RecordIssueDialogDelegate
     }
 
     @SuppressLint("UseSwitchCompatOrMaterialCode") private lateinit var screenRecordSwitch: Switch
@@ -86,10 +83,12 @@ constructor(
             setIcon(R.drawable.qs_record_issue_icon_off)
             setNegativeButton(R.string.cancel) { _, _ -> dismiss() }
             setPositiveButton(R.string.qs_record_issue_start) { _, _ ->
-                onStarted.run()
-                if (screenRecordSwitch.isChecked) {
-                    requestScreenCapture()
-                }
+                onStarted.accept(
+                    IssueRecordingConfig(
+                        screenRecordSwitch.isChecked,
+                        true /* TODO: Base this on issueType selected */
+                    )
+                )
                 dismiss()
             }
         }
@@ -124,7 +123,7 @@ constructor(
                         .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
             ) {
                 mainExecutor.execute {
-                    ScreenCaptureDisabledDialog(context).show()
+                    screenCaptureDisabledDialogDelegate.createDialog().show()
                     screenRecordSwitch.isChecked = false
                 }
                 return@execute
@@ -176,13 +175,4 @@ constructor(
             show()
         }
     }
-
-    private fun requestScreenCapture() =
-        PendingIntent.getForegroundService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStartIntent(userContextProvider.userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
 }

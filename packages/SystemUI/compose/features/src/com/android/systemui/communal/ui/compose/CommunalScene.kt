@@ -19,13 +19,15 @@ package com.android.systemui.communal.ui.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.UserAction
+import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.scene.shared.model.Direction
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.UserAction
-import com.android.systemui.scene.shared.model.UserActionResult
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,19 +39,20 @@ class CommunalScene
 @Inject
 constructor(
     private val viewModel: CommunalViewModel,
+    private val dialogFactory: SystemUIDialogFactory,
 ) : ComposableScene {
-    override val key = SceneKey.Communal
+    override val key = Scenes.Communal
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         MutableStateFlow<Map<UserAction, UserActionResult>>(
                 mapOf(
-                    UserAction.Swipe(Direction.RIGHT) to UserActionResult(SceneKey.Lockscreen),
+                    Swipe(SwipeDirection.Right) to UserActionResult(Scenes.Lockscreen),
                 )
             )
             .asStateFlow()
 
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
-        CommunalHub(modifier, viewModel)
+        CommunalHub(modifier, viewModel, dialogFactory)
     }
 }

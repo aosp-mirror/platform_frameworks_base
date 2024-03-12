@@ -31,6 +31,7 @@ import static android.content.pm.PackageInstaller.UNARCHIVAL_STATUS_UNSET;
 import static android.content.pm.PackageManager.DELETE_ALL_USERS;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
+import static android.content.pm.PackageManager.INSTALL_UNARCHIVE;
 import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.graphics.drawable.AdaptiveIconDrawable.getExtraInsetFraction;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_UNARCHIVE;
@@ -556,6 +557,28 @@ public class PackageArchiver {
     }
 
     /**
+     * An extension of {@link BitmapDrawable} which returns the bitmap pixel size as intrinsic size.
+     * This allows the badging to be done based on the actual bitmap size rather than
+     * the scaled bitmap size.
+     */
+    private static class FixedSizeBitmapDrawable extends BitmapDrawable {
+
+        FixedSizeBitmapDrawable(@Nullable final Bitmap bitmap) {
+            super(null, bitmap);
+        }
+
+        @Override
+        public int getIntrinsicHeight() {
+            return getBitmap().getWidth();
+        }
+
+        @Override
+        public int getIntrinsicWidth() {
+            return getBitmap().getWidth();
+        }
+    }
+
+    /**
      * Create an <a
      * href="https://developer.android.com/develop/ui/views/launch/icon_design_adaptive">
      * adaptive icon</a> from an icon.
@@ -568,6 +591,11 @@ public class PackageArchiver {
         }
 
         // see BaseIconFactory#createShapedIconBitmap
+        if (iconDrawable instanceof BitmapDrawable) {
+            var icon = ((BitmapDrawable) iconDrawable).getBitmap();
+            iconDrawable = new FixedSizeBitmapDrawable(icon);
+        }
+
         float inset = getExtraInsetFraction();
         inset = inset / (1 + 2 * inset);
         Drawable d = new AdaptiveIconDrawable(new ColorDrawable(Color.BLACK),
@@ -754,8 +782,9 @@ public class PackageArchiver {
 
         int draftSessionId;
         try {
-            draftSessionId = Binder.withCleanCallingIdentity(() ->
-                    createDraftSession(packageName, installerPackage, statusReceiver, userId));
+            draftSessionId = Binder.withCleanCallingIdentity(
+                    () -> createDraftSession(packageName, installerPackage, callerPackageName,
+                            statusReceiver, userId));
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 throw ExceptionUtils.wrap((IOException) e.getCause());
@@ -795,11 +824,18 @@ public class PackageArchiver {
     }
 
     private int createDraftSession(String packageName, String installerPackage,
+            String callerPackageName,
             IntentSender statusReceiver, int userId) throws IOException {
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         sessionParams.setAppPackageName(packageName);
-        sessionParams.installFlags = INSTALL_UNARCHIVE_DRAFT;
+        sessionParams.setAppLabel(
+                mContext.getString(com.android.internal.R.string.unarchival_session_app_label));
+        sessionParams.setAppIcon(
+                getArchivedAppIcon(packageName, UserHandle.of(userId), callerPackageName));
+        // To make sure SessionInfo::isUnarchival returns true for draft sessions,
+        // INSTALL_UNARCHIVE is also set.
+        sessionParams.installFlags = (INSTALL_UNARCHIVE_DRAFT | INSTALL_UNARCHIVE);
 
         int installerUid = mPm.snapshotComputer().getPackageUid(installerPackage, 0, userId);
         // Handles case of repeated unarchival calls for the same package.

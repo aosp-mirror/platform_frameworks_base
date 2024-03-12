@@ -792,13 +792,9 @@
         </font>
     </family>
     <family lang="ja">
-        <font weight="400" style="normal">
-            NotoSerifHentaigana-EL.ttf
+        <font postScriptName="NotoSerifHentaigana-ExtraLight" supportedAxes="wght">
+            NotoSerifHentaigana.ttf
             <axis tag="wght" stylevalue="400"/>
-        </font>
-        <font weight="700" style="normal">
-            NotoSerifHentaigana-EL.ttf
-          <axis tag="wght" stylevalue="700"/>
         </font>
     </family>
     <family lang="ko">

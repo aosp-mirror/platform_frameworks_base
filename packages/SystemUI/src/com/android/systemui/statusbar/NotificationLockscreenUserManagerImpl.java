@@ -420,7 +420,7 @@ public class NotificationLockscreenUserManagerImpl implements
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        if (allowPrivateProfile()){
+        if (privateSpaceFlagsEnabled()) {
             filter.addAction(Intent.ACTION_PROFILE_AVAILABLE);
             filter.addAction(Intent.ACTION_PROFILE_UNAVAILABLE);
         }
@@ -813,11 +813,15 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private boolean profileAvailabilityActions(String action){
-        return allowPrivateProfile()?
+        return privateSpaceFlagsEnabled()?
                 Objects.equals(action,Intent.ACTION_PROFILE_AVAILABLE)||
                         Objects.equals(action,Intent.ACTION_PROFILE_UNAVAILABLE):
                 Objects.equals(action,Intent.ACTION_MANAGED_PROFILE_AVAILABLE)||
                         Objects.equals(action,Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+    }
+
+    private static boolean privateSpaceFlagsEnabled() {
+        return allowPrivateProfile() && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     @Override

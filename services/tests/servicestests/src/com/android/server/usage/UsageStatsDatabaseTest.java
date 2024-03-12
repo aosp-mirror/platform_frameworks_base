@@ -31,11 +31,11 @@ import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.PersistableBundle;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.AtomicFile;
 import android.util.LongSparseArray;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;

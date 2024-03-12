@@ -233,9 +233,9 @@ public interface StatusBarManagerInternal {
     /**
      * Enters stage split from a current running app.
      *
-     * @see com.android.internal.statusbar.IStatusBar#enterStageSplitFromRunningApp
+     * @see com.android.internal.statusbar.IStatusBar#moveFocusedTaskToStageSplit
      */
-    void enterStageSplitFromRunningApp(boolean leftOrTop);
+    void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
 
     /**
      * Shows the media output switcher dialog.

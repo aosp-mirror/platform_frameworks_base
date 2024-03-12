@@ -19,7 +19,6 @@ package com.android.wm.shell.flicker.service.splitscreen.scenarios
 import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
-import android.tools.AndroidLoggerSetupRule
 import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
@@ -30,7 +29,6 @@ import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
-import org.junit.ClassRule
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -87,9 +85,5 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
         tapl.enableBlockTimeout(false)
-    }
-
-    companion object {
-        @ClassRule @JvmField val setupLoggerRule = AndroidLoggerSetupRule()
     }
 }

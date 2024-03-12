@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
@@ -32,7 +31,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
-import com.android.server.LocalServices;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import java.io.BufferedInputStream;
@@ -49,16 +48,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
- * We back up the signatures of each package so that during a system restore,
- * we can verify that the app whose data we think we have matches the app
- * actually resident on the device.
+ * We back up the signatures of each package so that during a system restore, we can verify that the
+ * app whose data we think we have matches the app actually resident on the device.
  *
- * Since the Package Manager isn't a proper "application" we just provide a
- * direct IBackupAgent implementation and hand-construct it at need.
+ * <p>Since the Package Manager isn't a proper "application" we just provide a direct IBackupAgent
+ * implementation and hand-construct it at need.
  */
 public class PackageManagerBackupAgent extends BackupAgent {
     private static final String TAG = "PMBA";
@@ -66,7 +63,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     // key under which we store global metadata (individual app metadata
     // is stored using the package name as a key)
-    private static final String GLOBAL_METADATA_KEY = "@meta@";
+    @VisibleForTesting static final String GLOBAL_METADATA_KEY = "@meta@";
 
     // key under which we store the identity of the user's chosen default home app
     private static final String DEFAULT_HOME_KEY = "@home@";
@@ -76,19 +73,19 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // ANCESTRAL_RECORD_VERSION=1 (introduced Android P).
     // Should the ANCESTRAL_RECORD_VERSION be bumped up in the future, STATE_FILE_VERSION will also
     // need bumping up, assuming more data needs saving to the state file.
-    private static final String STATE_FILE_HEADER = "=state=";
-    private static final int STATE_FILE_VERSION = 2;
+    @VisibleForTesting static final String STATE_FILE_HEADER = "=state=";
+    @VisibleForTesting static final int STATE_FILE_VERSION = 2;
 
     // key under which we store the saved ancestral-dataset format (starting from Android P)
     // IMPORTANT: this key needs to come first in the restore data stream (to find out
     // whether this version of Android knows how to restore the incoming data set), so it needs
     // to be always the first one in alphabetical order of all the keys
-    private static final String ANCESTRAL_RECORD_KEY = "@ancestral_record@";
+    @VisibleForTesting static final String ANCESTRAL_RECORD_KEY = "@ancestral_record@";
 
     // Current version of the saved ancestral-dataset format
     // Note that this constant was not used until Android P, and started being used
     // to version @pm@ data for forwards-compatibility.
-    private static final int ANCESTRAL_RECORD_VERSION = 1;
+    @VisibleForTesting static final int ANCESTRAL_RECORD_VERSION = 1;
 
     // Undefined version of the saved ancestral-dataset file format means that the restore data
     // is coming from pre-Android P device.
@@ -134,8 +131,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
         init(packageMgr, packages, userId);
     }
 
-    public PackageManagerBackupAgent(PackageManager packageMgr, int userId,
-            BackupEligibilityRules backupEligibilityRules) {
+    public PackageManagerBackupAgent(
+            PackageManager packageMgr, int userId, BackupEligibilityRules backupEligibilityRules) {
         init(packageMgr, null, userId);
 
         evaluateStorablePackages(backupEligibilityRules);
@@ -159,12 +156,12 @@ public class PackageManagerBackupAgent extends BackupAgent {
     }
 
     /** Gets all packages installed on user {@code userId} eligible for backup. */
-    public static List<PackageInfo> getStorableApplications(PackageManager pm, int userId,
-            BackupEligibilityRules backupEligibilityRules) {
+    public static List<PackageInfo> getStorableApplications(
+            PackageManager pm, int userId, BackupEligibilityRules backupEligibilityRules) {
         List<PackageInfo> pkgs =
                 pm.getInstalledPackagesAsUser(PackageManager.GET_SIGNING_CERTIFICATES, userId);
         int N = pkgs.size();
-        for (int a = N-1; a >= 0; a--) {
+        for (int a = N - 1; a >= 0; a--) {
             PackageInfo pkg = pkgs.get(a);
             if (!backupEligibilityRules.appIsEligibleForBackup(pkg.applicationInfo)) {
                 pkgs.remove(a);
@@ -204,12 +201,14 @@ public class PackageManagerBackupAgent extends BackupAgent {
         return mRestoredSignatures.keySet();
     }
 
-    // The backed up data is the signature block for each app, keyed by the package name.
-    public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState) {
+    @Override
+    public void onBackup(
+            ParcelFileDescriptor oldState, BackupDataOutput data, ParcelFileDescriptor newState) {
         if (DEBUG) Slog.v(TAG, "onBackup()");
 
-        ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();  // we'll reuse these
+        // The backed up data is the signature block for each app, keyed by the package name.
+
+        ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream(); // we'll reuse these
         DataOutputStream outputBufferStream = new DataOutputStream(outputBuffer);
         parseStateFile(oldState);
 
@@ -218,8 +217,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
         // "already backed up" map built by parseStateFile().
         if (mStoredIncrementalVersion == null
                 || !mStoredIncrementalVersion.equals(Build.VERSION.INCREMENTAL)) {
-            Slog.i(TAG, "Previous metadata " + mStoredIncrementalVersion + " mismatch vs "
-                    + Build.VERSION.INCREMENTAL + " - rewriting");
+            Slog.i(
+                    TAG,
+                    "Previous metadata "
+                            + mStoredIncrementalVersion
+                            + " mismatch vs "
+                            + Build.VERSION.INCREMENTAL
+                            + " - rewriting");
             mExisting.clear();
         }
 
@@ -271,8 +275,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 } else {
                     PackageInfo info = null;
                     try {
-                        info = mPackageManager.getPackageInfoAsUser(packName,
-                                PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
+                        info =
+                                mPackageManager.getPackageInfoAsUser(
+                                        packName, PackageManager.GET_SIGNING_CERTIFICATES, mUserId);
                     } catch (NameNotFoundException e) {
                         // Weird; we just found it, and now are told it doesn't exist.
                         // Treat it as having been removed from the device.
@@ -294,8 +299,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
                     SigningInfo signingInfo = info.signingInfo;
                     if (signingInfo == null) {
-                        Slog.w(TAG, "Not backing up package " + packName
-                                + " since it appears to have no signatures.");
+                        Slog.w(
+                                TAG,
+                                "Not backing up package "
+                                        + packName
+                                        + " since it appears to have no signatures.");
                         continue;
                     }
 
@@ -317,15 +325,20 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     }
                     // retrieve the newest sigs to back up
                     Signature[] infoSignatures = signingInfo.getApkContentsSigners();
-                    writeSignatureHashArray(outputBufferStream,
-                            BackupUtils.hashSignatureArray(infoSignatures));
+                    writeSignatureHashArray(
+                            outputBufferStream, BackupUtils.hashSignatureArray(infoSignatures));
 
                     if (DEBUG) {
-                        Slog.v(TAG, "+ writing metadata for " + packName
-                                + " version=" + info.getLongVersionCode()
-                                + " entityLen=" + outputBuffer.size());
+                        Slog.v(
+                                TAG,
+                                "+ writing metadata for "
+                                        + packName
+                                        + " version="
+                                        + info.getLongVersionCode()
+                                        + " entityLen="
+                                        + outputBuffer.size());
                     }
-                    
+
                     // Now we can write the backup entity for this package
                     writeEntity(data, packName, outputBuffer.toByteArray());
                 }
@@ -363,12 +376,14 @@ public class PackageManagerBackupAgent extends BackupAgent {
         data.writeEntityData(bytes, bytes.length);
     }
 
-    // "Restore" here is a misnomer.  What we're really doing is reading back the
-    // set of app signatures associated with each backed-up app in this restore
-    // image.  We'll use those later to determine what we can legitimately restore.
+    @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
         if (DEBUG) Slog.v(TAG, "onRestore()");
+
+        // "Restore" here is a misnomer.  What we're really doing is reading back the
+        // set of app signatures associated with each backed-up app in this restore
+        // image.  We'll use those later to determine what we can legitimately restore.
 
         // we expect the ANCESTRAL_RECORD_KEY ("@ancestral_record@") to always come first in the
         // restore set - based on that value we use different mechanisms to consume the data;
@@ -380,8 +395,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
         RestoreDataConsumer consumer = getRestoreDataConsumer(ancestralRecordVersion);
         if (consumer == null) {
-            Slog.w(TAG, "Ancestral restore set version is unknown"
-                    + " to this Android version; not restoring");
+            Slog.w(
+                    TAG,
+                    "Ancestral restore set version is unknown"
+                            + " to this Android version; not restoring");
             return;
         } else {
             consumer.consumeRestoreData(data);
@@ -443,9 +460,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 Slog.w(TAG, "Read empty signature block");
                 return null;
             }
-            
+
             if (DEBUG) Slog.v(TAG, " ... unflatten read " + num);
-            
+
             // Sensical?
             if (num > 20) {
                 Slog.e(TAG, "Suspiciously large sig count in restore data; aborting");
@@ -506,8 +523,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
             if (pkg.equals(STATE_FILE_HEADER)) {
                 int stateVersion = in.readInt();
                 if (stateVersion > STATE_FILE_VERSION) {
-                    Slog.w(TAG, "Unsupported state file version " + stateVersion
-                            + ", redoing from start");
+                    Slog.w(
+                            TAG,
+                            "Unsupported state file version "
+                                    + stateVersion
+                                    + ", redoing from start");
                     return;
                 }
                 pkg = in.readUTF();
@@ -574,7 +594,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
     }
 
     // Util: write out our new backup state file
-    private void writeStateFile(List<PackageInfo> pkgs, ParcelFileDescriptor stateFile) {
+    @VisibleForTesting
+    static void writeStateFile(List<PackageInfo> pkgs, ParcelFileDescriptor stateFile) {
         FileOutputStream outstream = new FileOutputStream(stateFile.getFileDescriptor());
         BufferedOutputStream outbuf = new BufferedOutputStream(outstream);
         DataOutputStream out = new DataOutputStream(outbuf);
@@ -640,10 +661,17 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     mStoredIncrementalVersion = inputBufferStream.readUTF();
                     mHasMetadata = true;
                     if (DEBUG) {
-                        Slog.i(TAG, "Restore set version " + storedSystemVersion
-                                + " is compatible with OS version " + Build.VERSION.SDK_INT
-                                + " (" + mStoredIncrementalVersion + " vs "
-                                + Build.VERSION.INCREMENTAL + ")");
+                        Slog.i(
+                                TAG,
+                                "Restore set version "
+                                        + storedSystemVersion
+                                        + " is compatible with OS version "
+                                        + Build.VERSION.SDK_INT
+                                        + " ("
+                                        + mStoredIncrementalVersion
+                                        + " vs "
+                                        + Build.VERSION.INCREMENTAL
+                                        + ")");
                     }
                 } else if (key.equals(DEFAULT_HOME_KEY)) {
                     String cn = inputBufferStream.readUTF();
@@ -652,10 +680,16 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     mRestoredHomeInstaller = inputBufferStream.readUTF();
                     mRestoredHomeSigHashes = readSignatureHashArray(inputBufferStream);
                     if (DEBUG) {
-                        Slog.i(TAG, "   read preferred home app " + mRestoredHome
-                                + " version=" + mRestoredHomeVersion
-                                + " installer=" + mRestoredHomeInstaller
-                                + " sig=" + mRestoredHomeSigHashes);
+                        Slog.i(
+                                TAG,
+                                "   read preferred home app "
+                                        + mRestoredHome
+                                        + " version="
+                                        + mRestoredHomeVersion
+                                        + " installer="
+                                        + mRestoredHomeInstaller
+                                        + " sig="
+                                        + mRestoredHomeSigHashes);
                     }
                 } else {
                     // it's a file metadata record
@@ -668,14 +702,24 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     }
                     ArrayList<byte[]> sigs = readSignatureHashArray(inputBufferStream);
                     if (DEBUG) {
-                        Slog.i(TAG, "   read metadata for " + key
-                                + " dataSize=" + dataSize
-                                + " versionCode=" + versionCode + " sigs=" + sigs);
+                        Slog.i(
+                                TAG,
+                                "   read metadata for "
+                                        + key
+                                        + " dataSize="
+                                        + dataSize
+                                        + " versionCode="
+                                        + versionCode
+                                        + " sigs="
+                                        + sigs);
                     }
 
                     if (sigs == null || sigs.size() == 0) {
-                        Slog.w(TAG, "Not restoring package " + key
-                                + " since it appears to have no signatures.");
+                        Slog.w(
+                                TAG,
+                                "Not restoring package "
+                                        + key
+                                        + " since it appears to have no signatures.");
                         continue;
                     }
 
@@ -687,8 +731,12 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
                 boolean readNextHeader = data.readNextHeader();
                 if (!readNextHeader) {
-                    if (DEBUG) Slog.v(TAG, "LegacyRestoreDataConsumer:"
-                            + " we're done reading all the headers");
+                    if (DEBUG) {
+                        Slog.v(
+                                TAG,
+                                "LegacyRestoreDataConsumer:"
+                                        + " we're done reading all the headers");
+                    }
                     break;
                 }
             }
@@ -725,10 +773,17 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     mStoredIncrementalVersion = inputBufferStream.readUTF();
                     mHasMetadata = true;
                     if (DEBUG) {
-                        Slog.i(TAG, "Restore set version " + storedSystemVersion
-                                + " is compatible with OS version " + Build.VERSION.SDK_INT
-                                + " (" + mStoredIncrementalVersion + " vs "
-                                + Build.VERSION.INCREMENTAL + ")");
+                        Slog.i(
+                                TAG,
+                                "Restore set version "
+                                        + storedSystemVersion
+                                        + " is compatible with OS version "
+                                        + Build.VERSION.SDK_INT
+                                        + " ("
+                                        + mStoredIncrementalVersion
+                                        + " vs "
+                                        + Build.VERSION.INCREMENTAL
+                                        + ")");
                     }
                 } else if (key.equals(DEFAULT_HOME_KEY)) {
                     // Default home app data is no longer backed up by this agent. This code is
@@ -739,10 +794,16 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     mRestoredHomeInstaller = inputBufferStream.readUTF();
                     mRestoredHomeSigHashes = readSignatureHashArray(inputBufferStream);
                     if (DEBUG) {
-                        Slog.i(TAG, "   read preferred home app " + mRestoredHome
-                                + " version=" + mRestoredHomeVersion
-                                + " installer=" + mRestoredHomeInstaller
-                                + " sig=" + mRestoredHomeSigHashes);
+                        Slog.i(
+                                TAG,
+                                "   read preferred home app "
+                                        + mRestoredHome
+                                        + " version="
+                                        + mRestoredHomeVersion
+                                        + " installer="
+                                        + mRestoredHomeInstaller
+                                        + " sig="
+                                        + mRestoredHomeSigHashes);
                     }
                 } else {
                     // it's a file metadata record
@@ -755,14 +816,24 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     }
                     ArrayList<byte[]> sigs = readSignatureHashArray(inputBufferStream);
                     if (DEBUG) {
-                        Slog.i(TAG, "   read metadata for " + key
-                                + " dataSize=" + dataSize
-                                + " versionCode=" + versionCode + " sigs=" + sigs);
+                        Slog.i(
+                                TAG,
+                                "   read metadata for "
+                                        + key
+                                        + " dataSize="
+                                        + dataSize
+                                        + " versionCode="
+                                        + versionCode
+                                        + " sigs="
+                                        + sigs);
                     }
 
                     if (sigs == null || sigs.size() == 0) {
-                        Slog.w(TAG, "Not restoring package " + key
-                                + " since it appears to have no signatures.");
+                        Slog.w(
+                                TAG,
+                                "Not restoring package "
+                                        + key
+                                        + " since it appears to have no signatures.");
                         continue;
                     }
 

@@ -37,16 +37,18 @@ import static android.os.UserHandle.getCallingUserId;
 import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-import static com.android.server.companion.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
-import static com.android.server.companion.PackageUtils.isRestrictedSettingsAllowed;
-import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
-import static com.android.server.companion.PackageUtils.getPackageInfo;
-import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
-import static com.android.server.companion.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
-import static com.android.server.companion.PermissionsUtils.enforceCallerCanObservingDevicePresenceByUuid;
-import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
-import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOrCanInteractWithUserId;
-import static com.android.server.companion.PermissionsUtils.sanitizeWithCallerChecks;
+import static com.android.server.companion.association.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
+import static com.android.server.companion.utils.AssociationUtils.getFirstAssociationIdForUser;
+import static com.android.server.companion.utils.AssociationUtils.getLastAssociationIdForUser;
+import static com.android.server.companion.utils.PackageUtils.isRestrictedSettingsAllowed;
+import static com.android.server.companion.utils.PackageUtils.enforceUsesCompanionDeviceFeature;
+import static com.android.server.companion.utils.PackageUtils.getPackageInfo;
+import static com.android.server.companion.utils.PermissionsUtils.checkCallerCanManageCompanionDevice;
+import static com.android.server.companion.utils.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
+import static com.android.server.companion.utils.PermissionsUtils.enforceCallerCanObservingDevicePresenceByUuid;
+import static com.android.server.companion.utils.PermissionsUtils.enforceCallerIsSystemOr;
+import static com.android.server.companion.utils.PermissionsUtils.enforceCallerIsSystemOrCanInteractWithUserId;
+import static com.android.server.companion.utils.PermissionsUtils.sanitizeWithCallerChecks;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -117,12 +119,19 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.companion.association.AssociationDiskStore;
+import com.android.server.companion.association.AssociationRequestsProcessor;
+import com.android.server.companion.association.AssociationRevokeProcessor;
+import com.android.server.companion.association.AssociationStore;
+import com.android.server.companion.association.InactiveAssociationsRemovalService;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceCall;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncControllerCallback;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.presence.ObservableUuid;
+import com.android.server.companion.presence.ObservableUuidStore;
 import com.android.server.companion.transport.CompanionTransportManager;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -145,8 +154,6 @@ public class CompanionDeviceManagerService extends SystemService {
     static final String TAG = "CDM_CompanionDeviceManagerService";
     static final boolean DEBUG = false;
 
-    /** Range of Association IDs allocated for a user. */
-    private static final int ASSOCIATIONS_IDS_PER_USER_RANGE = 100000;
     private static final long PAIR_WITHOUT_PROMPT_WINDOW_MS = 10 * 60 * 1000; // 10 min
 
     private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
@@ -158,10 +165,10 @@ public class CompanionDeviceManagerService extends SystemService {
     private static final int MAX_CN_LENGTH = 500;
 
     private final ActivityManager mActivityManager;
-    private PersistentDataStore mPersistentStore;
+    private AssociationDiskStore mAssociationDiskStore;
     private final PersistUserStateHandler mUserPersistenceHandler;
 
-    private final AssociationStoreImpl mAssociationStore;
+    private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private AssociationRequestsProcessor mAssociationRequestsProcessor;
     private SystemDataTransferProcessor mSystemDataTransferProcessor;
@@ -176,7 +183,7 @@ public class CompanionDeviceManagerService extends SystemService {
     private final IAppOpsService mAppOpsManager;
     private final PowerWhitelistManager mPowerWhitelistManager;
     private final UserManager mUserManager;
-    final PackageManagerInternal mPackageManagerInternal;
+    public final PackageManagerInternal mPackageManagerInternal;
     private final PowerManagerInternal mPowerManagerInternal;
 
     /**
@@ -208,7 +215,7 @@ public class CompanionDeviceManagerService extends SystemService {
         mUserManager = context.getSystemService(UserManager.class);
 
         mUserPersistenceHandler = new PersistUserStateHandler();
-        mAssociationStore = new AssociationStoreImpl();
+        mAssociationStore = new AssociationStore();
         mSystemDataTransferRequestStore = new SystemDataTransferRequestStore();
 
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
@@ -219,14 +226,12 @@ public class CompanionDeviceManagerService extends SystemService {
     public void onStart() {
         final Context context = getContext();
 
-        mPersistentStore = new PersistentDataStore();
+        mAssociationDiskStore = new AssociationDiskStore();
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(
                 /* cdmService */ this, mAssociationStore);
         mBackupRestoreProcessor = new BackupRestoreProcessor(
-                /* cdmService */ this, mAssociationStore, mPersistentStore,
+                /* cdmService */ this, mAssociationStore, mAssociationDiskStore,
                 mSystemDataTransferRequestStore, mAssociationRequestsProcessor);
-
-        loadAssociationsFromDisk();
 
         mObservableUuidStore.getObservableUuidsForUser(getContext().getUserId());
 
@@ -238,13 +243,19 @@ public class CompanionDeviceManagerService extends SystemService {
         mCompanionAppController = new CompanionApplicationController(
                 context, mAssociationStore, mObservableUuidStore, mDevicePresenceMonitor,
                 mPowerManagerInternal);
+
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
+
+        mAssociationRevokeProcessor = new AssociationRevokeProcessor(this, mAssociationStore,
+                mPackageManagerInternal, mDevicePresenceMonitor, mCompanionAppController,
+                mSystemDataTransferRequestStore, mTransportManager);
+
+        loadAssociationsFromDisk();
+
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
                 mPackageManagerInternal, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
-        mAssociationRevokeProcessor = new AssociationRevokeProcessor(this, mAssociationStore,
-                mPackageManagerInternal, mDevicePresenceMonitor, mCompanionAppController,
-                mSystemDataTransferRequestStore);
+
         // TODO(b/279663946): move context sync to a dedicated system service
         mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);
 
@@ -259,10 +270,13 @@ public class CompanionDeviceManagerService extends SystemService {
     void loadAssociationsFromDisk() {
         final Set<AssociationInfo> allAssociations = new ArraySet<>();
         synchronized (mPreviouslyUsedIds) {
+            List<Integer> userIds = new ArrayList<>();
+            for (UserInfo user : mUserManager.getAliveUsers()) {
+                userIds.add(user.id);
+            }
             // The data is stored in DE directories, so we can read the data for all users now
             // (which would not be possible if the data was stored to CE directories).
-            mPersistentStore.readStateForUsers(
-                    mUserManager.getAliveUsers(), allAssociations, mPreviouslyUsedIds);
+            mAssociationDiskStore.readStateForUsers(userIds, allAssociations, mPreviouslyUsedIds);
         }
 
         final Set<AssociationInfo> activeAssociations =
@@ -286,7 +300,7 @@ public class CompanionDeviceManagerService extends SystemService {
             }
         }
 
-        mAssociationStore.setAssociations(activeAssociations);
+        mAssociationStore.setAssociationsToCache(activeAssociations);
 
         // IMPORTANT: only do this AFTER mAssociationStore.setAssociations(), because
         // persistStateForUser() queries AssociationStore.
@@ -435,7 +449,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
                 bindApplicationIfNeeded(association);
 
-                mCompanionAppController.notifyCompanionApplicationDevicePresenceEvent(
+                mCompanionAppController.notifyCompanionDevicePresenceEvent(
                         association, event);
                 break;
             case EVENT_BLE_DISAPPEARED:
@@ -446,7 +460,7 @@ public class CompanionDeviceManagerService extends SystemService {
                     return;
                 }
                 if (association.shouldBindWhenPresent()) {
-                    mCompanionAppController.notifyCompanionApplicationDevicePresenceEvent(
+                    mCompanionAppController.notifyCompanionDevicePresenceEvent(
                             association, event);
                 }
                 // Check if there are other devices associated to the app that are present.
@@ -475,7 +489,7 @@ public class CompanionDeviceManagerService extends SystemService {
                     Log.i(TAG, "u" + userId + "\\" + packageName + " is already bound");
                 }
 
-                mCompanionAppController.notifyApplicationDevicePresenceEvent(uuid, event);
+                mCompanionAppController.notifyUuidDevicePresenceEvent(uuid, event);
 
                 break;
             case EVENT_BT_DISCONNECTED:
@@ -484,7 +498,7 @@ public class CompanionDeviceManagerService extends SystemService {
                     return;
                 }
 
-                mCompanionAppController.notifyApplicationDevicePresenceEvent(uuid, event);
+                mCompanionAppController.notifyUuidDevicePresenceEvent(uuid, event);
                 // Check if there are other devices associated to the app or the UUID to be
                 // observed are present.
                 if (shouldBindPackage(userId, packageName)) return;
@@ -577,7 +591,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
         final Map<String, Set<Integer>> usedIdsForUser = getPreviouslyUsedIdsForUser(userId);
 
-        mPersistentStore.persistStateForUser(userId, allAssociations, usedIdsForUser);
+        mAssociationDiskStore.persistStateForUser(userId, allAssociations, usedIdsForUser);
     }
 
     private void notifyListeners(
@@ -641,7 +655,8 @@ public class CompanionDeviceManagerService extends SystemService {
         final List<AssociationInfo> associationsForPackage =
                 mAssociationStore.getAssociationsForPackage(userId, packageName);
         for (AssociationInfo association : associationsForPackage) {
-            updateSpecialAccessPermissionForAssociatedPackage(association);
+            updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
+                    association.getPackageName());
         }
 
         mCompanionAppController.onPackagesChanged(userId);
@@ -687,7 +702,7 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    class CompanionDeviceManagerImpl extends ICompanionDeviceManager.Stub {
+    public class CompanionDeviceManagerImpl extends ICompanionDeviceManager.Stub {
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
@@ -1333,7 +1348,10 @@ public class CompanionDeviceManagerService extends SystemService {
         return usedIdsForPackage;
     }
 
-    int getNewAssociationIdForPackage(@UserIdInt int userId, @NonNull String packageName) {
+    /**
+     * Get a new association id for the package.
+     */
+    public int getNewAssociationIdForPackage(@UserIdInt int userId, @NonNull String packageName) {
         synchronized (mPreviouslyUsedIds) {
             // First: collect all IDs currently in use for this user's Associations.
             final SparseBooleanArray usedIds = new SparseBooleanArray();
@@ -1378,9 +1396,12 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    void updateSpecialAccessPermissionForAssociatedPackage(AssociationInfo association) {
+    /**
+     * Update special access for the association's package
+     */
+    public void updateSpecialAccessPermissionForAssociatedPackage(int userId, String packageName) {
         final PackageInfo packageInfo =
-                getPackageInfo(getContext(), association.getUserId(), association.getPackageName());
+                getPackageInfo(getContext(), userId, packageName);
 
         Binder.withCleanCallingIdentity(() -> updateSpecialAccessPermissionAsSystem(packageInfo));
     }
@@ -1534,15 +1555,6 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     };
 
-    static int getFirstAssociationIdForUser(@UserIdInt int userId) {
-        // We want the IDs to start from 1, not 0.
-        return userId * ASSOCIATIONS_IDS_PER_USER_RANGE + 1;
-    }
-
-    static int getLastAssociationIdForUser(@UserIdInt int userId) {
-        return (userId + 1) * ASSOCIATIONS_IDS_PER_USER_RANGE;
-    }
-
     private static Map<String, Set<Integer>> deepUnmodifiableCopy(Map<String, Set<Integer>> orig) {
         final Map<String, Set<Integer>> copy = new HashMap<>();
 
@@ -1666,11 +1678,17 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    void postPersistUserState(@UserIdInt int userId) {
+    /**
+     * Persist associations
+     */
+    public void postPersistUserState(@UserIdInt int userId) {
         mUserPersistenceHandler.postPersistUserState(userId);
     }
 
-    static class PerUserAssociationSet extends PerUser<Set<AssociationInfo>> {
+    /**
+     * Set to store associations
+     */
+    public static class PerUserAssociationSet extends PerUser<Set<AssociationInfo>> {
         @Override
         protected @NonNull Set<AssociationInfo> create(int userId) {
             return new ArraySet<>();

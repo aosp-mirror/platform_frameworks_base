@@ -306,7 +306,7 @@ public class TransactionExecutorTests {
         final IBinder token = mock(IBinder.class);
         final ClientTransaction destroyTransaction = ClientTransaction.obtain(null /* client */);
         destroyTransaction.addTransactionItem(
-                DestroyActivityItem.obtain(token, false /* finished */, 0 /* configChanges */));
+                DestroyActivityItem.obtain(token, false /* finished */));
         destroyTransaction.preExecute(mTransactionHandler);
         // The activity should be added to to-be-destroyed container.
         assertEquals(1, activitiesToBeDestroyed.size());

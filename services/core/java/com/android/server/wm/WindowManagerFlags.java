@@ -48,5 +48,7 @@ class WindowManagerFlags {
     final boolean mAllowsScreenSizeDecoupledFromStatusBarAndCutout =
             Flags.allowsScreenSizeDecoupledFromStatusBarAndCutout();
 
+    final boolean mInsetsDecoupledConfiguration = Flags.insetsDecoupledConfiguration();
+
     /* End Available Flags */
 }

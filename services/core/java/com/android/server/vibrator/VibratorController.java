@@ -17,7 +17,6 @@
 package com.android.server.vibrator;
 
 import android.annotation.Nullable;
-import android.annotation.Nullable;
 import android.hardware.vibrator.IVibrator;
 import android.os.Binder;
 import android.os.IVibratorStateListener;
@@ -354,13 +353,13 @@ final class VibratorController {
     }
 
     void dump(IndentingPrintWriter pw) {
-        pw.println("VibratorController:");
+        pw.println("Vibrator (id=" + mVibratorInfo.getId() + "):");
         pw.increaseIndent();
         pw.println("isVibrating = " + mIsVibrating);
         pw.println("isUnderExternalControl = " + mIsUnderExternalControl);
         pw.println("currentAmplitude = " + mCurrentAmplitude);
         pw.println("vibratorInfoLoadSuccessful = " + mVibratorInfoLoadSuccessful);
-        pw.println("vibratorStateListenerCount = "
+        pw.println("vibratorStateListener size = "
                 + mVibratorStateListeners.getRegisteredCallbackCount());
         mVibratorInfo.dump(pw);
         pw.decreaseIndent();

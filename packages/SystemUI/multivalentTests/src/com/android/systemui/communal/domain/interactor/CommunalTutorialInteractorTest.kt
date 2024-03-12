@@ -25,7 +25,7 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.fakeCommunalTutorialRepository
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -158,7 +158,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             kosmos.setCommunalAvailable(true)
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_NOT_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalInteractor.onSceneChanged(CommunalScenes.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_NOT_STARTED)
         }
@@ -171,7 +171,7 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_STARTED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalInteractor.onSceneChanged(CommunalScenes.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
@@ -184,13 +184,13 @@ class CommunalTutorialInteractorTest : SysuiTestCase() {
             goToCommunal()
             communalTutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 
-            communalInteractor.onSceneChanged(CommunalSceneKey.Blank)
+            communalInteractor.onSceneChanged(CommunalScenes.Blank)
 
             assertThat(tutorialSettingState).isEqualTo(HUB_MODE_TUTORIAL_COMPLETED)
         }
 
     private suspend fun goToCommunal() {
         kosmos.setCommunalAvailable(true)
-        communalInteractor.onSceneChanged(CommunalSceneKey.Communal)
+        communalInteractor.onSceneChanged(CommunalScenes.Communal)
     }
 }

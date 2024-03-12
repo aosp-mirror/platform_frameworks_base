@@ -175,7 +175,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
                 () -> {
                     Slog.d(TAG, "Cancellation invoked from the client - clearing session");
                     boolean isUiActive = maybeCancelUi();
-                    finishSession(!isUiActive);
+                    finishSession(!isUiActive, ApiStatus.CLIENT_CANCELED.getMetricCode());
                 }
         );
     }
@@ -231,7 +231,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             return;
         }
         if (isSessionCancelled()) {
-            finishSession(/*propagateCancellation=*/true);
+            finishSession(/*propagateCancellation=*/true,
+                    ApiStatus.CLIENT_CANCELED.getMetricCode());
             return;
         }
         String providerId = selection.getProviderId();
@@ -257,11 +258,12 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         }
     }
 
-    protected void finishSession(boolean propagateCancellation) {
+    protected void finishSession(boolean propagateCancellation, int apiStatus) {
         Slog.i(TAG, "finishing session with propagateCancellation " + propagateCancellation);
         if (propagateCancellation) {
             mProviders.values().forEach(ProviderSession::cancelProviderRemoteSession);
         }
+        mRequestSessionMetric.logApiCalledAtFinish(apiStatus);
         mRequestSessionStatus = RequestSessionStatus.COMPLETE;
         mProviders.clear();
         clearRequestSessionLocked();
@@ -326,7 +328,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
 
         if (isSessionCancelled()) {
-            finishSession(/*propagateCancellation=*/true);
+            finishSession(/*propagateCancellation=*/true,
+                    ApiStatus.CLIENT_CANCELED.getMetricCode());
             return providerDataList;
         }
 
@@ -353,23 +356,20 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             return;
         }
         if (isSessionCancelled()) {
-            mRequestSessionMetric.logApiCalledAtFinish(
-                    /*apiStatus=*/ ApiStatus.CLIENT_CANCELED.getMetricCode());
-            finishSession(/*propagateCancellation=*/true);
+            finishSession(/*propagateCancellation=*/true,
+                    ApiStatus.CLIENT_CANCELED.getMetricCode());
             return;
         }
         try {
             invokeClientCallbackSuccess(response);
-            mRequestSessionMetric.logApiCalledAtFinish(
-                    /*apiStatus=*/ ApiStatus.SUCCESS.getMetricCode());
+            finishSession(/*propagateCancellation=*/false,
+                    ApiStatus.SUCCESS.getMetricCode());
         } catch (RemoteException e) {
             mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
                     /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
             Slog.e(TAG, "Issue while responding to client with a response : " + e);
-            mRequestSessionMetric.logApiCalledAtFinish(
-                    /*apiStatus=*/ ApiStatus.FAILURE.getMetricCode());
+            finishSession(/*propagateCancellation=*/false, ApiStatus.FAILURE.getMetricCode());
         }
-        finishSession(/*propagateCancellation=*/false);
     }
 
     /**
@@ -387,9 +387,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             return;
         }
         if (isSessionCancelled()) {
-            mRequestSessionMetric.logApiCalledAtFinish(
-                    /*apiStatus=*/ ApiStatus.CLIENT_CANCELED.getMetricCode());
-            finishSession(/*propagateCancellation=*/true);
+            finishSession(/*propagateCancellation=*/true, ApiStatus.CLIENT_CANCELED.getMetricCode());
             return;
         }
 
@@ -399,8 +397,14 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             Slog.e(TAG, "Issue while responding to client with error : " + e);
         }
         boolean isUserCanceled = errorType.contains(MetricUtilities.USER_CANCELED_SUBSTRING);
-        mRequestSessionMetric.logFailureOrUserCancel(isUserCanceled);
-        finishSession(/*propagateCancellation=*/false);
+        if (isUserCanceled) {
+            mRequestSessionMetric.setHasExceptionFinalPhase(/* has_exception */ false);
+            finishSession(/*propagateCancellation=*/false,
+                    ApiStatus.USER_CANCELED.getMetricCode());
+        } else {
+            finishSession(/*propagateCancellation=*/false,
+                    ApiStatus.FAILURE.getMetricCode());
+        }
     }
 
     /**
@@ -419,7 +423,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         @Override
         public void binderDied() {
             Slog.d(TAG, "Client binder died - clearing session");
-            finishSession(isUiWaitingForData());
+            finishSession(isUiWaitingForData(), ApiStatus.CLIENT_CANCELED.getMetricCode());
         }
     }
 }

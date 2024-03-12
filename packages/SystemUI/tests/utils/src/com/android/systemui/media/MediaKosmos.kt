@@ -17,7 +17,7 @@
 package com.android.systemui.media
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.media.dialog.MediaOutputDialogFactory
+import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.util.mockito.mock
 
-var Kosmos.mediaOutputDialogFactory: MediaOutputDialogFactory by Kosmos.Fixture { mock {} }
+var Kosmos.mediaOutputDialogManager: MediaOutputDialogManager by Kosmos.Fixture { mock {} }

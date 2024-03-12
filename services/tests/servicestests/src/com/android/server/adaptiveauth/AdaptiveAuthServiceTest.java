@@ -24,6 +24,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.server.adaptiveauth.AdaptiveAuthService.MAX_ALLOWED_FAILED_AUTH_ATTEMPTS;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -32,9 +33,11 @@ import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricManager;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.InstrumentationRegistry;
@@ -62,6 +65,7 @@ import org.mockito.MockitoAnnotations;
 /**
  * atest FrameworksServicesTests:AdaptiveAuthServiceTest
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AdaptiveAuthServiceTest {
@@ -103,6 +107,10 @@ public class AdaptiveAuthServiceTest {
         mSetFlagsRule.enableFlags(FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS);
 
         mContext = spy(ApplicationProvider.getApplicationContext());
+
+        assumeTrue("Adaptive auth is disabled on device",
+                !mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE));
+
         when(mContext.getSystemService(BiometricManager.class)).thenReturn(mBiometricManager);
         when(mContext.getSystemService(KeyguardManager.class)).thenReturn(mKeyguardManager);
 

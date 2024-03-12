@@ -31,8 +31,11 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.startable.shadeStartable
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -62,9 +65,9 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             )
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
             kosmos.fakeDeviceEntryRepository.setUnlocked(true)
-            sceneInteractor.changeScene(SceneKey.Lockscreen, "reason")
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Gone)
         }
 
     @Test
@@ -75,9 +78,9 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pin
             )
             kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-            sceneInteractor.changeScene(SceneKey.Lockscreen, "reason")
+            sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
+            assertThat(upTransitionSceneKey).isEqualTo(Scenes.Bouncer)
         }
 
     @EnableFlags(FLAG_COMMUNAL_HUB)
@@ -89,7 +92,25 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
 
             kosmos.setCommunalAvailable(true)
             runCurrent()
-            assertThat(leftDestinationSceneKey).isEqualTo(SceneKey.Communal)
+            assertThat(leftDestinationSceneKey).isEqualTo(Scenes.Communal)
+        }
+
+    @Test
+    fun downFromTopEdgeDestinationSceneKey_whenNotSplitShade_quickSettings() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            kosmos.shadeStartable.start()
+            val sceneKey by collectLastValue(underTest.downFromTopEdgeDestinationSceneKey)
+            assertThat(sceneKey).isEqualTo(Scenes.QuickSettings)
+        }
+
+    @Test
+    fun downFromTopEdgeDestinationSceneKey_whenSplitShade_null() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            kosmos.shadeStartable.start()
+            val sceneKey by collectLastValue(underTest.downFromTopEdgeDestinationSceneKey)
+            assertThat(sceneKey).isNull()
         }
 
     private fun createLockscreenSceneViewModel(): LockscreenSceneViewModel {
@@ -102,6 +123,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
                     interactor = mock(),
                 ),
             notifications = kosmos.notificationsPlaceholderViewModel,
+            shadeInteractor = kosmos.shadeInteractor,
         )
     }
 }

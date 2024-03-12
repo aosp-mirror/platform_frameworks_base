@@ -42,6 +42,25 @@ class AodToGoneTransitionViewModelTest : SysuiTestCase() {
     val underTest = kosmos.aodToGoneTransitionViewModel
 
     @Test
+    fun lockscreenAlpha() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor(alpha = { 0.5f })
+            val alpha by collectValues(underTest.lockscreenAlpha(viewState))
+
+            repository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
+                testScope
+            )
+
+            assertThat(alpha[0]).isEqualTo(0.5f)
+            // Fades out just prior to halfway
+            assertThat(alpha[1]).isEqualTo(0f)
+            // Must finish at 0
+            assertThat(alpha[2]).isEqualTo(0f)
+        }
+
+    @Test
     fun deviceEntryParentViewHides() =
         testScope.runTest {
             val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)

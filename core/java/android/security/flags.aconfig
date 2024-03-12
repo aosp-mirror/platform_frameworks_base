@@ -2,6 +2,7 @@ package: "android.security"
 
 flag {
     name: "certificate_transparency_configuration"
+    is_exported: true
     namespace: "network_security"
     description: "Enable certificate transparency setting in the network security config"
     bug: "28746284"
@@ -16,6 +17,7 @@ flag {
 
 flag {
     name: "mgf1_digest_setter_v2"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "Feature flag for mgf1 digest setter in key generation and import parameters."
     bug: "308378912"
@@ -32,6 +34,7 @@ flag {
 
 flag {
     name: "keyinfo_unlocked_device_required"
+    is_exported: true
     namespace: "hardware_backed_security"
     description: "Add the API android.security.keystore.KeyInfo#isUnlockedDeviceRequired()"
     bug: "296475382"

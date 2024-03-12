@@ -18,7 +18,6 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.security.GateKeeper;
-import android.security.KeyStore;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyGenParameterSpec;
@@ -45,8 +44,6 @@ import javax.crypto.spec.SecretKeySpec;
  * @hide
  */
 public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
-
-    private final KeyStore mKeyStore = KeyStore.getInstance();
 
     @Override
     protected KeySpec engineGetKeySpec(SecretKey key,

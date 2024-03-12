@@ -78,6 +78,14 @@ public interface ShadeController extends CoreStartable {
      */
     void animateCollapseShade(int flags, boolean force, boolean delayed, float speedUpFactor);
 
+    /**
+     * Collapses the shade with an animation duration in milliseconds.
+     *
+     * @deprecated use animateCollapseShade with a speed up factor instead
+     */
+    @Deprecated
+    void collapseWithDuration(int animationDuration);
+
     /** Expand the shade with an animation. */
     void animateExpandShade();
 

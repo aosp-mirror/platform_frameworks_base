@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
@@ -238,6 +240,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun animationsEnabled_isTrue_whenKeyguardIsShowing() =
         testComponent.runTest {
             keyguardTransitionRepository.sendTransitionStep(

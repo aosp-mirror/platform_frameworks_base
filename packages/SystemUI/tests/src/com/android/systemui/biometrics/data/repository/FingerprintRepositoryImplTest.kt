@@ -84,8 +84,8 @@ class FingerprintRepositoryImplTest : SysuiTestCase() {
             val sensorType by collectLastValue(repository.sensorType)
             val sensorLocations by collectLastValue(repository.sensorLocations)
 
-            // Assert default properties.
-            assertThat(sensorId).isEqualTo(-1)
+            // Assert non-initialized properties.
+            assertThat(sensorId).isEqualTo(-2)
             assertThat(strength).isEqualTo(SensorStrength.CONVENIENCE)
             assertThat(sensorType).isEqualTo(FingerprintSensorType.UNKNOWN)
 

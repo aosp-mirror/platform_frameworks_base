@@ -14,30 +14,52 @@
   ~ limitations under the License.
   -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
                 android:id="@android:id/content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/dropdown_touch_target_min_height"
                 android:orientation="horizontal"
-                android:layout_marginEnd="@dimen/dropdown_layout_horizontal_margin"
                 android:elevation="3dp">
 
-    <ImageView
-        android:id="@android:id/icon1"
+    <LinearLayout
+        android:id="@+id/credential_card"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-        android:contentDescription="@string/more_options_content_description"
-        android:background="@null"/>
-    <TextView
-        android:id="@android:id/text1"
-        android:layout_width="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@android:id/icon1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingLeft="@dimen/autofill_view_left_padding"
+            android:src="@drawable/more_horiz_24px"
+            android:tint="?androidprv:attr/materialColorOnSurface"
+            android:layout_alignParentStart="true"
+            android:contentDescription="@string/more_options_content_description"
+            android:background="@null"/>
+
+    <LinearLayout
+        android:id="@+id/text_container"
+        android:layout_width="@dimen/autofill_dropdown_textview_max_width"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@android:id/icon1"
-        android:minWidth="@dimen/autofill_dropdown_textview_min_width"
-        android:maxWidth="@dimen/autofill_dropdown_textview_max_width"
-        style="@style/autofill.TextTitle"/>
+        android:paddingLeft="@dimen/autofill_view_left_padding"
+        android:paddingRight="@dimen/autofill_view_right_padding"
+        android:paddingTop="@dimen/more_options_item_vertical_padding"
+        android:paddingBottom="@dimen/more_options_item_vertical_padding"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
+            android:layout_toEndOf="@android:id/icon1"
+            style="@style/autofill.TextTitle"/>
+    </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

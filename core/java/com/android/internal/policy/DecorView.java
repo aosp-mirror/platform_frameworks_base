@@ -29,6 +29,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
 import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
+import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -135,6 +136,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     public static final int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
 
     private static final int SCRIM_LIGHT = 0xe6ffffff; // 90% white
+
+    private static final int SCRIM_ALPHA = 0xcc0000; // 80% alpha
 
     public static final ColorViewAttributes STATUS_BAR_COLOR_VIEW_ATTRIBUTES =
             new ColorViewAttributes(FLAG_TRANSLUCENT_STATUS,
@@ -989,6 +992,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mOriginalBackgroundDrawable != drawable) {
             mOriginalBackgroundDrawable = drawable;
             updateBackgroundDrawable();
+            if (mWindow.mEdgeToEdgeEnforced && !mWindow.mNavigationBarColorSpecified
+                    && drawable instanceof ColorDrawable) {
+                final int color = ((ColorDrawable) drawable).getColor();
+                final boolean lightBar = Color.valueOf(color).luminance() > 0.5f;
+                getWindowInsetsController().setSystemBarsAppearance(
+                        lightBar ? APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS : 0,
+                        APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS);
+                mWindow.mNavigationBarColor = color;
+                updateColorViews(null /* insets */, false /* animate */);
+            }
             if (drawable != null) {
                 mResizingBackgroundDrawable = enforceNonTranslucentBackground(drawable,
                         mWindow.isTranslucent() || mWindow.isShowingWallpaper());
@@ -1407,7 +1420,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 mSemiTransparentBarColor, mWindow.mStatusBarColor,
                 appearance, APPEARANCE_LIGHT_STATUS_BARS,
                 mWindow.mEnsureStatusBarContrastWhenTransparent
-                        && (mLastSuppressScrimTypes & WindowInsets.Type.statusBars()) == 0);
+                        && (mLastSuppressScrimTypes & WindowInsets.Type.statusBars()) == 0,
+                false /* movesBarColorToScrim */);
     }
 
     private int calculateNavigationBarColor(@Appearance int appearance) {
@@ -1415,22 +1429,29 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 mSemiTransparentBarColor, mWindow.mNavigationBarColor,
                 appearance, APPEARANCE_LIGHT_NAVIGATION_BARS,
                 mWindow.mEnsureNavigationBarContrastWhenTransparent
-                        && (mLastSuppressScrimTypes & WindowInsets.Type.navigationBars()) == 0);
+                        && (mLastSuppressScrimTypes & WindowInsets.Type.navigationBars()) == 0,
+                mWindow.mEdgeToEdgeEnforced);
     }
 
     public static int calculateBarColor(int flags, int translucentFlag, int semiTransparentBarColor,
             int barColor, @Appearance int appearance, @Appearance int lightAppearanceFlag,
-            boolean scrimTransparent) {
+            boolean ensuresContrast, boolean movesBarColorToScrim) {
         if ((flags & translucentFlag) != 0) {
             return semiTransparentBarColor;
         } else if ((flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
             return Color.BLACK;
-        } else if (scrimTransparent && Color.alpha(barColor) == 0) {
-            boolean light = (appearance & lightAppearanceFlag) != 0;
-            return light ? SCRIM_LIGHT : semiTransparentBarColor;
-        } else {
-            return barColor;
+        } else if (ensuresContrast) {
+            final int alpha = Color.alpha(barColor);
+            if (alpha == 0) {
+                boolean light = (appearance & lightAppearanceFlag) != 0;
+                return light ? SCRIM_LIGHT : semiTransparentBarColor;
+            } else if (movesBarColorToScrim) {
+                return (barColor & 0xffffff) | SCRIM_ALPHA;
+            }
+        } else if (movesBarColorToScrim) {
+            return Color.TRANSPARENT;
         }
+        return barColor;
     }
 
     private int getCurrentColor(ColorViewState state) {

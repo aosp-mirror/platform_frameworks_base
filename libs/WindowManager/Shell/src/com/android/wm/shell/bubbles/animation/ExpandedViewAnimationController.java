@@ -15,6 +15,8 @@
  */
 package com.android.wm.shell.bubbles.animation;
 
+import android.graphics.PointF;
+
 import com.android.wm.shell.bubbles.BubbleExpandedView;
 
 /**
@@ -55,8 +57,9 @@ public interface ExpandedViewAnimationController {
      * @param startStackCollapse runnable that is triggered when bubbles can start moving back to
      *                           their collapsed location
      * @param after              runnable to run after animation is complete
+     * @param collapsePosition the position on screen the stack will collapse to
      */
-    void animateCollapse(Runnable startStackCollapse, Runnable after);
+    void animateCollapse(Runnable startStackCollapse, Runnable after, PointF collapsePosition);
 
     /**
      * Animate the view back to fully expanded state.
@@ -67,6 +70,22 @@ public interface ExpandedViewAnimationController {
      * Animate view for IME visibility change
      */
     void animateForImeVisibilityChange(boolean visible);
+
+    /**
+     * Whether this controller should also animate the expansion for the bubble
+     */
+    boolean shouldAnimateExpansion();
+
+    /**
+     * Animate the expansion of the bubble.
+     *
+     * @param startDelayMillis how long to delay starting the expansion animation
+     * @param after runnable to run after the animation is complete
+     * @param collapsePosition the position on screen the stack will collapse to (and expand from)
+     * @param bubblePosition the position of the bubble on screen that the view is associated with
+     */
+    void animateExpansion(long startDelayMillis, Runnable after, PointF collapsePosition,
+            PointF bubblePosition);
 
     /**
      * Reset the view to fully expanded state

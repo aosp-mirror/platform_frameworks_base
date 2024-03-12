@@ -72,6 +72,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -157,6 +158,9 @@ final class SettingsState {
             "/product/etc/aconfig_flags.pb",
             "/vendor/etc/aconfig_flags.pb");
 
+    private static final String APEX_DIR = "/apex";
+    private static final String APEX_ACONFIG_PATH_SUFFIX = "/etc/aconfig_flags.pb";
+
     /**
      * This tag is applied to all aconfig default value-loaded flags.
      */
@@ -238,7 +242,7 @@ final class SettingsState {
     private int mNextHistoricalOpIdx;
 
     @GuardedBy("mLock")
-    @Nullable
+    @NonNull
     private Map<String, Map<String, String>> mNamespaceDefaults;
 
     public static final int SETTINGS_TYPE_GLOBAL = 0;
@@ -332,23 +336,29 @@ final class SettingsState {
         mHistoricalOperations = Build.IS_DEBUGGABLE
                 ? new ArrayList<>(HISTORICAL_OPERATION_COUNT) : null;
 
+        mNamespaceDefaults = new HashMap<>();
+
         synchronized (mLock) {
             readStateSyncLocked();
 
             if (Flags.loadAconfigDefaults()) {
                 if (isConfigSettingsKey(mKey)) {
-                    loadAconfigDefaultValuesLocked();
+                    loadAconfigDefaultValuesLocked(sAconfigTextProtoFilesOnDevice);
                 }
             }
 
+            if (Flags.loadApexAconfigProtobufs()) {
+                if (isConfigSettingsKey(mKey)) {
+                    List<String> apexProtoPaths = listApexProtoPaths();
+                    loadAconfigDefaultValuesLocked(apexProtoPaths);
+                }
+            }
         }
     }
 
     @GuardedBy("mLock")
-    private void loadAconfigDefaultValuesLocked() {
-        mNamespaceDefaults = new HashMap<>();
-
-        for (String fileName : sAconfigTextProtoFilesOnDevice) {
+    private void loadAconfigDefaultValuesLocked(List<String> filePaths) {
+        for (String fileName : filePaths) {
             try (FileInputStream inputStream = new FileInputStream(fileName)) {
                 loadAconfigDefaultValues(inputStream.readAllBytes(), mNamespaceDefaults);
             } catch (IOException e) {
@@ -357,13 +367,41 @@ final class SettingsState {
         }
     }
 
+    private List<String> listApexProtoPaths() {
+        LinkedList<String> paths = new LinkedList();
+
+        File apexDirectory = new File(APEX_DIR);
+        if (!apexDirectory.isDirectory()) {
+            return paths;
+        }
+
+        File[] subdirs = apexDirectory.listFiles();
+        if (subdirs == null) {
+            return paths;
+        }
+
+        for (File prefix : subdirs) {
+            // For each mainline modules, there are two directories, one <modulepackage>/,
+            // and one <modulepackage>@<versioncode>/. Just read the former.
+            if (prefix.getAbsolutePath().contains("@")) {
+                continue;
+            }
+
+            File protoPath = new File(prefix + APEX_ACONFIG_PATH_SUFFIX);
+            if (!protoPath.exists()) {
+                continue;
+            }
+
+            paths.add(protoPath.getAbsolutePath());
+        }
+        return paths;
+    }
+
     @VisibleForTesting
     @GuardedBy("mLock")
     public void addAconfigDefaultValuesFromMap(
             @NonNull Map<String, Map<String, String>> defaultMap) {
-        if (mNamespaceDefaults != null) {
-            mNamespaceDefaults.putAll(defaultMap);
-        }
+        mNamespaceDefaults.putAll(defaultMap);
     }
 
     @VisibleForTesting
@@ -447,7 +485,7 @@ final class SettingsState {
         return names;
     }
 
-    @Nullable
+    @NonNull
     public Map<String, Map<String, String>> getAconfigDefaultValues() {
         synchronized (mLock) {
             return mNamespaceDefaults;
@@ -519,9 +557,9 @@ final class SettingsState {
             return false;
         }
 
-        // Aconfig flags are always boot stable, so we anytime we write one, we staged it to be
+        // Aconfig flags are always boot stable, so we anytime we write one, we stage it to be
         // applied on reboot.
-        if (Flags.stageAllAconfigFlags() && mNamespaceDefaults != null) {
+        if (Flags.stageAllAconfigFlags()) {
             int slashIndex = name.indexOf("/");
             boolean stageFlag = isConfigSettingsKey(mKey)
                     && slashIndex != -1
@@ -669,23 +707,36 @@ final class SettingsState {
         // Update/add new keys
         for (String key : keyValues.keySet()) {
             String value = keyValues.get(key);
+
+            // Rename key if it's an aconfig flag.
+            String flagName = key;
+            if (Flags.stageAllAconfigFlags() && isConfigSettingsKey(mKey)) {
+                int slashIndex = flagName.indexOf("/");
+                boolean stageFlag = slashIndex > 0 && slashIndex != flagName.length();
+                boolean isAconfig = trunkFlagMap != null && trunkFlagMap.containsKey(flagName);
+                if (stageFlag && isAconfig) {
+                    String flagWithoutNamespace = flagName.substring(slashIndex + 1);
+                    flagName = "staged/" + namespace + "*" + flagWithoutNamespace;
+                }
+            }
+
             String oldValue = null;
-            Setting state = mSettings.get(key);
+            Setting state = mSettings.get(flagName);
             if (state == null) {
-                state = new Setting(key, value, false, packageName, null);
-                mSettings.put(key, state);
-                changedKeys.add(key); // key was added
+                state = new Setting(flagName, value, false, packageName, null);
+                mSettings.put(flagName, state);
+                changedKeys.add(flagName); // key was added
             } else if (state.value != value) {
                 oldValue = state.value;
                 state.update(value, false, packageName, null, true,
                         /* overrideableByRestore */ false);
-                changedKeys.add(key); // key was updated
+                changedKeys.add(flagName); // key was updated
             } else {
                 // this key/value already exists, no change and no logging necessary
                 continue;
             }
 
-            FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, key, value, state.value,
+            FrameworkStatsLog.write(FrameworkStatsLog.SETTING_CHANGED, flagName, value, state.value,
                     oldValue, /* tag */ null, /* make default */ false,
                     getUserIdFromKey(mKey), FrameworkStatsLog.SETTING_CHANGED__REASON__UPDATED);
             addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, state);

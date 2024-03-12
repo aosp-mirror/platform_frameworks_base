@@ -50,7 +50,7 @@ object BouncerInteractorModule {
     }
 
     @Provides
-    fun provideEuiccManager(@Application applicationContext: Context): EuiccManager {
-        return applicationContext.getSystemService(Context.EUICC_SERVICE) as EuiccManager
+    fun provideEuiccManager(@Application applicationContext: Context): EuiccManager? {
+        return applicationContext.getSystemService(Context.EUICC_SERVICE) as EuiccManager?
     }
 }

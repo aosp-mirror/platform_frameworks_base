@@ -22,11 +22,11 @@ import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
-import static com.android.server.companion.DataStoreUtils.fileToByteArray;
-import static com.android.server.companion.DataStoreUtils.isEndOfTag;
-import static com.android.server.companion.DataStoreUtils.isStartOfTag;
-import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
+import static com.android.server.companion.utils.DataStoreUtils.createStorageFileForUser;
+import static com.android.server.companion.utils.DataStoreUtils.fileToByteArray;
+import static com.android.server.companion.utils.DataStoreUtils.isEndOfTag;
+import static com.android.server.companion.utils.DataStoreUtils.isStartOfTag;
+import static com.android.server.companion.utils.DataStoreUtils.writeToFileSafely;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

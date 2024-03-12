@@ -76,13 +76,23 @@ FileType getFileType(const char* fileName)
 /*
  * Get a file's modification date.
  */
-time_t getFileModDate(const char* fileName)
-{
+time_t getFileModDate(const char* fileName) {
     struct stat sb;
+    if (stat(fileName, &sb) < 0) {
+        return (time_t)-1;
+    }
+    return sb.st_mtime;
+}
 
-    if (stat(fileName, &sb) < 0)
-        return (time_t) -1;
-
+time_t getFileModDate(int fd) {
+    struct stat sb;
+    if (fstat(fd, &sb) < 0) {
+        return (time_t)-1;
+    }
+    if (sb.st_nlink <= 0) {
+        errno = ENOENT;
+        return (time_t)-1;
+    }
     return sb.st_mtime;
 }
 

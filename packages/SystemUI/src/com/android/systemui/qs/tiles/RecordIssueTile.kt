@@ -85,7 +85,13 @@ constructor(
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
 
-    override fun isAvailable(): Boolean = recordIssueQsTile()
+    /**
+     * There are SELinux constraints that are stopping this tile from reaching production builds.
+     * Once those are resolved, this condition will be removed, but the solution (of properly
+     * creating a distince SELinux context for com.android.systemui) is complex and will take time
+     * to implement.
+     */
+    override fun isAvailable(): Boolean = android.os.Build.IS_DEBUGGABLE && recordIssueQsTile()
 
     override fun newTileState(): QSTile.BooleanState =
         QSTile.BooleanState().apply {
@@ -97,14 +103,27 @@ constructor(
     public override fun handleClick(view: View?) {
         if (isRecording) {
             isRecording = false
-            stopScreenRecord()
+            stopIssueRecordingService()
         } else {
             mUiHandler.post { showPrompt(view) }
         }
         refreshState()
     }
 
-    private fun stopScreenRecord() =
+    private fun startIssueRecordingService(screenRecord: Boolean, winscopeTracing: Boolean) =
+        PendingIntent.getForegroundService(
+                userContextProvider.userContext,
+                RecordingService.REQUEST_CODE,
+                IssueRecordingService.getStartIntent(
+                    userContextProvider.userContext,
+                    screenRecord,
+                    winscopeTracing
+                ),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+
+    private fun stopIssueRecordingService() =
         PendingIntent.getService(
                 userContextProvider.userContext,
                 RecordingService.REQUEST_CODE,
@@ -118,6 +137,7 @@ constructor(
             delegateFactory
                 .create {
                     isRecording = true
+                    startIssueRecordingService(it.screenRecord, it.winscopeTracing)
                     refreshState()
                 }
                 .createDialog()

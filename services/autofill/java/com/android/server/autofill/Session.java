@@ -1246,7 +1246,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
             int flags) {
-        final FillResponse existingResponse = shouldRequestSecondaryProvider(flags)
+        boolean isSecondary = shouldRequestSecondaryProvider(flags);
+        final FillResponse existingResponse = isSecondary
                 ? viewState.getSecondaryResponse() : viewState.getResponse();
         mFillRequestEventLogger.startLogForNewRequest();
         mRequestCount++;
@@ -1283,12 +1284,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         viewState.setState(newState);
-
-        int requestId;
-        // TODO(b/158623971): Update this to prevent possible overflow
-        do {
-            requestId = sIdCounter.getAndIncrement();
-        } while (requestId == INVALID_REQUEST_ID);
+        int requestId = getRequestId(isSecondary);
 
         // Create a metrics log for the request
         final int ordinal = mRequestLogs.size() + 1;
@@ -1365,6 +1361,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         // Now request the assist structure data.
         requestAssistStructureLocked(requestId, flags);
+    }
+
+    private static int getRequestId(boolean isSecondary) {
+        // For authentication flows, there needs to be a way to know whether to retrieve the Fill
+        // Response from the primary provider or the secondary provider from the requestId. A simple
+        // way to achieve this is by assigning odd number request ids to secondary provider and
+        // even numbers to primary provider.
+        int requestId;
+        // TODO(b/158623971): Update this to prevent possible overflow
+        if (isSecondary) {
+            do {
+                requestId = sIdCounter.getAndIncrement();
+            } while (!isSecondaryProviderRequestId(requestId));
+        } else {
+            do {
+                requestId = sIdCounter.getAndIncrement();
+            } while (requestId == INVALID_REQUEST_ID || isSecondaryProviderRequestId(requestId));
+        }
+        return requestId;
     }
 
     private boolean isRequestSupportFillDialog(int flags) {
@@ -2790,7 +2805,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             removeFromService();
             return;
         }
-        final FillResponse authenticatedResponse = mResponses.get(requestId);
+        final FillResponse authenticatedResponse = isSecondaryProviderRequestId(requestId)
+                ? mSecondaryResponses.get(requestId)
+                : mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
             Slog.w(TAG, "no authenticated response");
             mPresentationStatsEventLogger.maybeSetAuthenticationResult(
@@ -2913,6 +2930,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 AUTHENTICATION_RESULT_FAILURE);
             processNullResponseLocked(requestId, 0);
         }
+    }
+
+    private static boolean isSecondaryProviderRequestId(int requestId) {
+        return requestId % 2 == 1;
     }
 
     private Dataset getDatasetFromCredentialResponse(GetCredentialResponse result) {
@@ -3935,6 +3956,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     @Nullable
+    private ViewNode getViewNodeFromContextsLocked(@NonNull AutofillId autofillId) {
+        final int numContexts = mContexts.size();
+        for (int i = numContexts - 1; i >= 0; i--) {
+            final FillContext context = mContexts.get(i);
+            final ViewNode node = Helper.findViewNodeByAutofillId(context.getStructure(),
+                    autofillId);
+            if (node != null) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the latest non-empty value for the given id in the autofill contexts.
+     */
+    @GuardedBy("mLock")
+    @Nullable
     private AutofillValue getValueFromContextsLocked(@NonNull AutofillId autofillId) {
         final int numContexts = mContexts.size();
         for (int i = numContexts - 1; i >= 0; i--) {
@@ -4782,7 +4821,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         if (isCredmanIntegrationActive(response)) {
-            Slog.d(TAG, "Attempting to add Credential Manager callback to pinned entries");
             addCredentialManagerCallback(response);
         }
 
@@ -5713,7 +5751,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 /* isPrimary= */ true);
         updateFillDialogTriggerIdsLocked();
         updateTrackedIdsLocked();
-
         if (mCurrentViewId == null) {
             return;
         }
@@ -6419,7 +6456,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mClient.onGetCredentialException(id, viewId, exception.getType(),
                             exception.getMessage());
                 } else if (response != null) {
-                    mClient.onGetCredentialResponse(id, viewId, response);
+                    if (viewId.isVirtualInt()) {
+                        ViewNode viewNode = getViewNodeFromContextsLocked(viewId);
+                        if (viewNode != null && viewNode.getPendingCredentialCallback() != null) {
+                            Bundle resultData = new Bundle();
+                            resultData.putParcelable(
+                                    CredentialProviderService.EXTRA_GET_CREDENTIAL_RESPONSE,
+                                    response);
+                            viewNode.getPendingCredentialCallback().send(SUCCESS_CREDMAN_SELECTOR,
+                                        resultData);
+                        } else {
+                            Slog.w(TAG, "View node not found after GetCredentialResponse");
+                        }
+                    } else {
+                        mClient.onGetCredentialResponse(id, viewId, response);
+                    }
                 } else {
                     Slog.w(TAG, "sendCredentialManagerResponseToApp called with null response"
                             + "and exception");

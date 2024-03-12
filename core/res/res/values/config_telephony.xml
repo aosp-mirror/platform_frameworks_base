@@ -84,7 +84,7 @@
          CarrierConfigManager#KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_STRING_ARRAY.
          If 0, the device always switch to the higher score SIM.
          If < 0, the network type and signal strength based auto switch is disabled. -->
-    <integer name="auto_data_switch_score_tolerance">4000</integer>
+    <integer name="auto_data_switch_score_tolerance">-1</integer>
     <java-symbol type="integer" name="auto_data_switch_score_tolerance" />
 
     <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
@@ -334,4 +334,22 @@
     <bool name="config_enable_cellular_on_boot_default">true</bool>
     <java-symbol type="bool" name="config_enable_cellular_on_boot_default" />
 
+    <!-- Defines metrics pull cooldown period. The default cooldown period is 23 hours,
+         some Telephony metrics need to be pulled more frequently  -->
+    <integer name="config_metrics_pull_cooldown_millis">82800000</integer>
+    <java-symbol type="integer" name="config_metrics_pull_cooldown_millis" />
+
+    <!-- The network capabilities that would be forced marked as cellular transport regardless it's
+         on cellular or satellite-->
+    <string-array name="config_force_cellular_transport_capabilities">
+        <!-- Added the following three capabilities for now. For the long term solution, the client
+             requests satellite network should really include TRANSPORT_SATELLITE in the network
+             request. With the following workaround, the clients can continue request network with
+             the following capabilities with TRANSPORT_CELLULAR. The network with one of the
+             following capabilities would also be marked as cellular. -->
+        <item>ims</item>
+        <item>eims</item>
+        <item>xcap</item>
+    </string-array>
+    <java-symbol type="array" name="config_force_cellular_transport_capabilities" />
 </resources>

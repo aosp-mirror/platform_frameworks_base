@@ -26,13 +26,13 @@ sealed interface DeviceIconViewModel {
     val iconColor: Color
     val backgroundColor: Color
 
-    class IsPlaying(
+    data class IsPlaying(
         override val icon: Icon,
         override val iconColor: Color,
         override val backgroundColor: Color,
     ) : DeviceIconViewModel
 
-    class IsNotPlaying(
+    data class IsNotPlaying(
         override val icon: Icon,
         override val iconColor: Color,
         override val backgroundColor: Color,

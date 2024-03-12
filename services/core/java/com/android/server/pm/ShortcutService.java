@@ -520,7 +520,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
         mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true)
+                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, false)
                 && !injectIsLowRamDevice();
 
         if (onlyForPackageManagerApis) {
@@ -2833,7 +2833,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     boolean areShortcutsSupportedOnHomeScreen(@UserIdInt int userId) {
-        if (!android.os.Flags.allowPrivateProfile() || !Flags.disablePrivateSpaceItemsOnHome()) {
+        if (!android.os.Flags.allowPrivateProfile() || !Flags.disablePrivateSpaceItemsOnHome()
+                || !android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             return true;
         }
         final long start = getStatStartTime();
@@ -3795,6 +3796,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 }
 
                 final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                final boolean archival = intent.getBooleanExtra(Intent.EXTRA_ARCHIVAL, false);
 
                 switch (action) {
                     case Intent.ACTION_PACKAGE_ADDED:
@@ -3805,7 +3807,7 @@ public class ShortcutService extends IShortcutService.Stub {
                         }
                         break;
                     case Intent.ACTION_PACKAGE_REMOVED:
-                        if (!replacing) {
+                        if (!replacing || (replacing && archival)) {
                             handlePackageRemoved(packageName, userId);
                         }
                         break;

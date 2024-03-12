@@ -16,8 +16,13 @@
 
 package com.android.server.contentprotection;
 
+import static android.view.contentprotection.flags.Flags.manageDevicePolicyEnabled;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.admin.DevicePolicyCache;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -28,6 +33,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 
 /**
  * Manages consent for content protection.
@@ -45,6 +51,8 @@ public class ContentProtectionConsentManager {
 
     @NonNull private final ContentResolver mContentResolver;
 
+    @NonNull private final DevicePolicyCache mDevicePolicyCache;
+
     @NonNull private final DevicePolicyManagerInternal mDevicePolicyManagerInternal;
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
@@ -53,52 +61,96 @@ public class ContentProtectionConsentManager {
 
     private volatile boolean mCachedPackageVerifierConsent;
 
-    private volatile boolean mCachedContentProtectionConsent;
+    private volatile boolean mCachedContentProtectionUserConsent;
 
     public ContentProtectionConsentManager(
             @NonNull Handler handler,
             @NonNull ContentResolver contentResolver,
-            @NonNull DevicePolicyManagerInternal devicePolicyManagerInternal) {
+            @NonNull DevicePolicyCache devicePolicyCache) {
         mContentResolver = contentResolver;
-        mDevicePolicyManagerInternal = devicePolicyManagerInternal;
+        mDevicePolicyCache = devicePolicyCache;
+        mDevicePolicyManagerInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         mContentObserver = new SettingsObserver(handler);
 
-        contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(KEY_PACKAGE_VERIFIER_USER_CONSENT),
-                /* notifyForDescendants= */ false,
-                mContentObserver,
-                UserHandle.USER_ALL);
+        registerSettingsGlobalObserver(KEY_PACKAGE_VERIFIER_USER_CONSENT);
+        registerSettingsGlobalObserver(KEY_CONTENT_PROTECTION_USER_CONSENT);
+        readPackageVerifierConsentGranted();
+        readContentProtectionUserConsentGranted();
+    }
 
-        mCachedPackageVerifierConsent = isPackageVerifierConsentGranted();
-        mCachedContentProtectionConsent = isContentProtectionConsentGranted();
+    /** Returns true if the consent is ultimately granted. */
+    public boolean isConsentGranted(@UserIdInt int userId) {
+        return mCachedPackageVerifierConsent && isContentProtectionConsentGranted(userId);
     }
 
     /**
-     * Returns true if all the consents are granted
+     * Not always cached internally and can be expensive, when possible prefer to use {@link
+     * #mCachedPackageVerifierConsent} instead.
      */
-    public boolean isConsentGranted(@UserIdInt int userId) {
-        return mCachedPackageVerifierConsent
-                && mCachedContentProtectionConsent
-                && !isUserOrganizationManaged(userId);
-    }
-
     private boolean isPackageVerifierConsentGranted() {
-        // Not always cached internally
         return Settings.Global.getInt(
                         mContentResolver, KEY_PACKAGE_VERIFIER_USER_CONSENT, /* def= */ 0)
                 >= 1;
     }
 
-    private boolean isContentProtectionConsentGranted() {
-        // Not always cached internally
+    /**
+     * Not always cached internally and can be expensive, when possible prefer to use {@link
+     * #mCachedContentProtectionUserConsent} instead.
+     */
+    private boolean isContentProtectionUserConsentGranted() {
         return Settings.Global.getInt(
                         mContentResolver, KEY_CONTENT_PROTECTION_USER_CONSENT, /* def= */ 0)
                 >= 0;
     }
 
+    private void readPackageVerifierConsentGranted() {
+        mCachedPackageVerifierConsent = isPackageVerifierConsentGranted();
+    }
+
+    private void readContentProtectionUserConsentGranted() {
+        mCachedContentProtectionUserConsent = isContentProtectionUserConsentGranted();
+    }
+
+    /** Always cached internally, cheap and safe to use. */
     private boolean isUserOrganizationManaged(@UserIdInt int userId) {
-        // Cached internally
         return mDevicePolicyManagerInternal.isUserOrganizationManaged(userId);
+    }
+
+    /** Always cached internally, cheap and safe to use. */
+    private boolean isContentProtectionPolicyGranted(@UserIdInt int userId) {
+        if (!manageDevicePolicyEnabled()) {
+            return false;
+        }
+
+        @DevicePolicyManager.ContentProtectionPolicy
+        int policy = mDevicePolicyCache.getContentProtectionPolicy(userId);
+
+        return switch (policy) {
+            case DevicePolicyManager.CONTENT_PROTECTION_ENABLED -> true;
+            case DevicePolicyManager.CONTENT_PROTECTION_NOT_CONTROLLED_BY_POLICY ->
+                    mCachedContentProtectionUserConsent;
+            default -> false;
+        };
+    }
+
+    /** Always cached internally, cheap and safe to use. */
+    private boolean isContentProtectionConsentGranted(@UserIdInt int userId) {
+        if (!manageDevicePolicyEnabled()) {
+            return mCachedContentProtectionUserConsent && !isUserOrganizationManaged(userId);
+        }
+
+        return isUserOrganizationManaged(userId)
+                ? isContentProtectionPolicyGranted(userId)
+                : mCachedContentProtectionUserConsent;
+    }
+
+    private void registerSettingsGlobalObserver(@NonNull String key) {
+        registerSettingsObserver(Settings.Global.getUriFor(key));
+    }
+
+    private void registerSettingsObserver(@NonNull Uri uri) {
+        mContentResolver.registerContentObserver(
+                uri, /* notifyForDescendants= */ false, mContentObserver, UserHandle.USER_ALL);
     }
 
     private final class SettingsObserver extends ContentObserver {
@@ -108,17 +160,20 @@ public class ContentProtectionConsentManager {
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
+        public void onChange(boolean selfChange, @Nullable Uri uri, @UserIdInt int userId) {
+            if (uri == null) {
+                return;
+            }
             final String property = uri.getLastPathSegment();
             if (property == null) {
                 return;
             }
             switch (property) {
                 case KEY_PACKAGE_VERIFIER_USER_CONSENT:
-                    mCachedPackageVerifierConsent = isPackageVerifierConsentGranted();
+                    readPackageVerifierConsentGranted();
                     return;
                 case KEY_CONTENT_PROTECTION_USER_CONSENT:
-                    mCachedContentProtectionConsent = isContentProtectionConsentGranted();
+                    readContentProtectionUserConsentGranted();
                     return;
                 default:
                     Slog.w(TAG, "Ignoring unexpected property: " + property);

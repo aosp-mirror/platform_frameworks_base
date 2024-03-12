@@ -27,10 +27,14 @@ import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.os.Handler
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.util.SparseArray
 import android.view.Choreographer
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.IWindowManager
 import android.view.InputChannel
 import android.view.InputMonitor
 import android.view.InsetsSource
@@ -40,6 +44,10 @@ import android.view.SurfaceView
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
+import com.android.dx.mockito.inline.extended.StaticMockitoSession
+import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
@@ -49,6 +57,7 @@ import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopModeStatus
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.sysui.KeyguardChangeListener
 import com.android.wm.shell.sysui.ShellCommandHandler
@@ -57,6 +66,7 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -69,8 +79,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.mockito.quality.Strictness
 import java.util.Optional
 import java.util.function.Supplier
+import org.mockito.Mockito
+import org.mockito.kotlin.spy
 
 
 /** Tests of [DesktopModeWindowDecorViewModel]  */
@@ -78,6 +91,10 @@ import java.util.function.Supplier
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
+    @JvmField
+    @Rule
+    val setFlagsRule = SetFlagsRule()
+
     @Mock private lateinit var mockDesktopModeWindowDecorFactory:
             DesktopModeWindowDecoration.Factory
     @Mock private lateinit var mockMainHandler: Handler
@@ -96,10 +113,12 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockShellExecutor: ShellExecutor
     @Mock private lateinit var mockRootTaskDisplayAreaOrganizer: RootTaskDisplayAreaOrganizer
     @Mock private lateinit var mockShellCommandHandler: ShellCommandHandler
+    @Mock private lateinit var mockWindowManager: IWindowManager
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
     }
+    private val windowDecorByTaskIdSpy = spy(SparseArray<DesktopModeWindowDecoration>())
 
     private lateinit var shellInit: ShellInit
     private lateinit var desktopModeOnInsetsChangedListener: DesktopModeOnInsetsChangedListener
@@ -108,12 +127,15 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Before
     fun setUp() {
         shellInit = ShellInit(mockShellExecutor)
+        windowDecorByTaskIdSpy.clear()
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
                 mContext,
+                mockShellExecutor,
                 mockMainHandler,
                 mockMainChoreographer,
                 shellInit,
                 mockShellCommandHandler,
+                mockWindowManager,
                 mockTaskOrganizer,
                 mockDisplayController,
                 mockShellController,
@@ -124,7 +146,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockDesktopModeWindowDecorFactory,
                 mockInputMonitorFactory,
                 transactionFactory,
-                mockRootTaskDisplayAreaOrganizer
+                mockRootTaskDisplayAreaOrganizer,
+            windowDecorByTaskIdSpy
         )
 
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -326,6 +349,89 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         // Verify relayout runs only once when status bar inset visibility changes.
         verify(decoration, times(1)).relayout(task)
+    }
+
+    @Test
+    fun testDestroyWindowDecoration_closesBeforeCleanup() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration = setUpMockDecorationForTask(task)
+        val inOrder = Mockito.inOrder(decoration, windowDecorByTaskIdSpy)
+
+        onTaskOpening(task)
+        desktopModeWindowDecorViewModel.destroyWindowDecoration(task)
+
+        inOrder.verify(decoration).close()
+        inOrder.verify(windowDecorByTaskIdSpy).remove(task.taskId)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    fun testWindowDecor_desktopModeUnsupportedOnDevice_decorNotCreated() {
+        val mockitoSession: StaticMockitoSession = mockitoSession()
+            .strictness(Strictness.LENIENT)
+            .spyStatic(DesktopModeStatus::class.java)
+            .startMocking()
+        try {
+            // Simulate default enforce device restrictions system property
+            whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
+
+            val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+            // Simulate device that doesn't support desktop mode
+            doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+
+            onTaskOpening(task)
+            verify(mockDesktopModeWindowDecorFactory, never())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    fun testWindowDecor_desktopModeUnsupportedOnDevice_deviceRestrictionsOverridden_decorCreated() {
+        val mockitoSession: StaticMockitoSession = mockitoSession()
+            .strictness(Strictness.LENIENT)
+            .spyStatic(DesktopModeStatus::class.java)
+            .startMocking()
+        try {
+            // Simulate enforce device restrictions system property overridden to false
+            whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(false)
+            // Simulate device that doesn't support desktop mode
+            doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+
+            val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+            setUpMockDecorationsForTasks(task)
+
+            onTaskOpening(task)
+            verify(mockDesktopModeWindowDecorFactory)
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    fun testWindowDecor_deviceSupportsDesktopMode_decorCreated() {
+        val mockitoSession: StaticMockitoSession = mockitoSession()
+            .strictness(Strictness.LENIENT)
+            .spyStatic(DesktopModeStatus::class.java)
+            .startMocking()
+        try {
+            // Simulate default enforce device restrictions system property
+            whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
+
+            val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+            doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
+            setUpMockDecorationsForTasks(task)
+
+            onTaskOpening(task)
+            verify(mockDesktopModeWindowDecorFactory)
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+        } finally {
+            mockitoSession.finishMocking()
+        }
     }
 
     private fun onTaskOpening(task: RunningTaskInfo, leash: SurfaceControl = SurfaceControl()) {

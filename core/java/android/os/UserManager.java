@@ -2353,6 +2353,17 @@ public class UserManager {
     public static final int USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS = 7;
 
     /**
+     * Indicates user operation failed because user is disabled on the device.
+     * @hide
+     */
+    public static final int USER_OPERATION_ERROR_DISABLED_USER = 8;
+    /**
+     * Indicates user operation failed because user is disabled on the device.
+     * @hide
+     */
+    public static final int USER_OPERATION_ERROR_PRIVATE_PROFILE = 9;
+
+    /**
      * Result returned from various user operations.
      *
      * @hide
@@ -2366,7 +2377,9 @@ public class UserManager {
             USER_OPERATION_ERROR_CURRENT_USER,
             USER_OPERATION_ERROR_LOW_STORAGE,
             USER_OPERATION_ERROR_MAX_USERS,
-            USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS
+            USER_OPERATION_ERROR_USER_ACCOUNT_ALREADY_EXISTS,
+            USER_OPERATION_ERROR_DISABLED_USER,
+            USER_OPERATION_ERROR_PRIVATE_PROFILE,
     })
     public @interface UserOperationResult {}
 
@@ -2560,6 +2573,17 @@ public class UserManager {
         return SystemProperties.getBoolean("persist.fw.omnipresent_communal_user",
                 Resources.getSystem()
                         .getBoolean(com.android.internal.R.bool.config_omnipresentCommunalUser));
+    }
+
+    /**
+     * Returns whether the device supports Private Profile
+     * @hide
+     */
+    public static boolean isPrivateProfileEnabled() {
+        if (android.multiuser.Flags.blockPrivateSpaceCreation()) {
+            return !ActivityManager.isLowRamDeviceStatic();
+        }
+        return true;
     }
 
     /**
@@ -3152,6 +3176,27 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks if it's possible to add a private profile to the context user
+     * @return whether the context user can add a private profile.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS},
+            conditional = true)
+    @UserHandleAware
+    public boolean canAddPrivateProfile() {
+        if (android.multiuser.Flags.blockPrivateSpaceCreation()) {
+            try {
+                return mService.canAddPrivateProfile(mUserId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return true;
     }
 
     /**
@@ -4708,6 +4753,9 @@ public class UserManager {
      * Sets the user as enabled, if such an user exists.
      *
      * <p>Note that the default is true, it's only that managed profiles might not be enabled.
+     * (Managed profiles created by DevicePolicyManager will start out disabled, and DPM will later
+     * toggle them to enabled once they are provisioned. This is the primary purpose of the
+     * {@link UserInfo#FLAG_DISABLED} flag.)
      * Also ephemeral users can be disabled to indicate that their removal is in progress and they
      * shouldn't be re-entered. Therefore ephemeral users should not be re-enabled once disabled.
      *
@@ -5259,7 +5307,7 @@ public class UserManager {
 
     /**
      * Returns list of the profiles of userId including userId itself.
-     * Note that this returns only enabled.
+     * Note that this returns only {@link UserInfo#isEnabled() enabled} profiles.
      * <p>Note that this includes all profile types (not including Restricted profiles).
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} or

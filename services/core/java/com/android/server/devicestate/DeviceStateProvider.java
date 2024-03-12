@@ -28,8 +28,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Responsible for providing the set of supported {@link DeviceState device states} as well as the
- * current device state.
+ * Responsible for providing the set of supported {@link DeviceState.Configuration device states} as
+ * well as the current device state.
  *
  * @see DeviceStatePolicy
  */

@@ -207,18 +207,8 @@ public final class BroadcastHelper {
                     + intent.toShortString(false, true, false, false)
                     + " " + intent.getExtras(), here);
         }
-        final boolean ordered;
-        if (mAmInternal.isModernQueueEnabled()) {
-            // When the modern broadcast stack is enabled, deliver all our
-            // broadcasts as unordered, since the modern stack has better
-            // support for sequencing cold-starts, and it supports
-            // delivering resultTo for non-ordered broadcasts
-            ordered = false;
-        } else {
-            ordered = (finishedReceiver != null);
-        }
-        mAmInternal.broadcastIntent(
-                intent, finishedReceiver, requiredPermissions, ordered, userId,
+        mAmInternal.broadcastIntentWithCallback(
+                intent, finishedReceiver, requiredPermissions, userId,
                 broadcastAllowList == null ? null : broadcastAllowList.get(userId),
                 filterExtrasForReceiver, bOptions);
     }
@@ -389,7 +379,8 @@ public final class BroadcastHelper {
      */
     boolean canLauncherAccessProfile(ComponentName launcherComponent, int userId) {
         if (android.os.Flags.allowPrivateProfile()
-                && Flags.enablePermissionToAccessHiddenProfiles()) {
+                && Flags.enablePermissionToAccessHiddenProfiles()
+                && Flags.enablePrivateSpaceFeatures()) {
             if (mUmInternal.getUserProperties(userId).getProfileApiVisibility()
                     != UserProperties.PROFILE_API_VISIBILITY_HIDDEN) {
                 return true;

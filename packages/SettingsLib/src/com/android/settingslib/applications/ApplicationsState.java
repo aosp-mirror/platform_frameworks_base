@@ -1703,6 +1703,7 @@ public class ApplicationsState {
 
         public boolean isPrivateProfile() {
             return android.os.Flags.allowPrivateProfile()
+                    && android.multiuser.Flags.enablePrivateSpaceFeatures()
                     && UserManager.USER_TYPE_PROFILE_PRIVATE.equals(mProfileType);
         }
 

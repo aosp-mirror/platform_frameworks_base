@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.footer.ui.compose
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.LocalIndication
@@ -76,8 +77,30 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
+
+@Composable
+fun FooterActionsWithAnimatedVisibility(
+    viewModel: FooterActionsViewModel,
+    isCustomizing: Boolean,
+    lifecycleOwner: LifecycleOwner,
+    footerActionsModifier: (Modifier) -> Modifier,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(visible = !isCustomizing, modifier = modifier.fillMaxWidth()) {
+        QuickSettingsTheme {
+            // This view has its own horizontal padding
+            // TODO(b/321716470) This should use a lifecycle tied to the scene.
+            FooterActions(
+                viewModel = viewModel,
+                qsVisibilityLifecycleOwner = lifecycleOwner,
+                modifier = footerActionsModifier(Modifier),
+            )
+        }
+    }
+}
 
 /** The Quick Settings footer actions row. */
 @Composable

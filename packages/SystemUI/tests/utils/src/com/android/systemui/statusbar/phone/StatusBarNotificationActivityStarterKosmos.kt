@@ -33,6 +33,7 @@ import com.android.systemui.settings.userTracker
 import com.android.systemui.shade.domain.interactor.shadeAnimationInteractor
 import com.android.systemui.shade.shadeController
 import com.android.systemui.shade.shadeViewController
+import com.android.systemui.statusbar.commandQueue
 import com.android.systemui.statusbar.notification.collection.provider.launchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.notificationVisibilityProvider
 import com.android.systemui.statusbar.notification.notificationTransitionAnimatorControllerProvider
@@ -59,6 +60,7 @@ val Kosmos.statusBarNotificationActivityStarter by
             notificationVisibilityProvider,
             headsUpManager,
             activityStarter,
+            commandQueue,
             notificationClickNotifier,
             statusBarKeyguardViewManager,
             keyguardManager,

@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -93,6 +94,26 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun onSensitiveStateChanged_invokeInvalidationListener() {
+        coordinator.attach(pipeline)
+        val invalidator =
+            withArgCaptor<Invalidator> { verify(pipeline).addPreRenderInvalidator(capture()) }
+        val onSensitiveStateChangedListener =
+            withArgCaptor<Runnable> {
+                verify(sensitiveNotificationProtectionController)
+                    .registerSensitiveStateListener(capture())
+            }
+
+        val invalidationListener = mock<Pluggable.PluggableListener<Invalidator>>()
+        invalidator.setInvalidationListener(invalidationListener)
+
+        onSensitiveStateChangedListener.run()
+
+        verify(invalidationListener).onPluggableInvalidated(eq(invalidator), any())
+    }
+
+    @Test
     fun onBeforeRenderList_deviceUnlocked_notifDoesNotNeedRedaction() {
         coordinator.attach(pipeline)
         val onBeforeRenderListListener =
@@ -130,6 +151,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(false, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(true)
     }
 
     @Test
@@ -156,6 +178,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, false)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(false)
     }
 
     @Test
@@ -196,6 +219,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(false, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(true)
     }
 
     @Test
@@ -222,6 +246,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, false)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(false)
     }
 
     @Test
@@ -262,6 +287,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(false, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(true)
     }
 
     @Test
@@ -288,6 +314,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, false)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(false)
     }
 
     @Test
@@ -329,6 +356,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(false, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(true)
     }
 
     @Test
@@ -356,6 +384,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(false)
     }
 
     @Test
@@ -396,6 +425,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(true)
     }
 
     @Test
@@ -422,6 +452,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(false)
     }
 
     @Test
@@ -462,6 +493,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(false, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(true)
     }
 
     @Test
@@ -489,6 +521,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(false)
     }
 
     @Test
@@ -531,6 +564,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(true)
     }
 
     @Test
@@ -559,6 +593,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!).setSensitive(true, true)
+        verify(entry.representativeEntry!!.row!!).setPublicExpanderVisible(false)
     }
 
     @Test
@@ -584,6 +619,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         onBeforeRenderListListener.onBeforeRenderList(listOf(entry))
 
         verify(entry.representativeEntry!!, never()).setSensitive(any(), any())
+        verify(entry.representativeEntry!!.row!!, never()).setPublicExpanderVisible(any())
     }
 
     private fun fakeNotification(notifUserId: Int, needsRedaction: Boolean): ListEntry {
@@ -591,7 +627,11 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
             mock<UserHandle>().apply { whenever(identifier).thenReturn(notifUserId) }
         val mockSbn: StatusBarNotification =
             mock<StatusBarNotification>().apply { whenever(user).thenReturn(mockUserHandle) }
-        val mockEntry = mock<NotificationEntry>().apply { whenever(sbn).thenReturn(mockSbn) }
+        val mockRow: ExpandableNotificationRow = mock<ExpandableNotificationRow>()
+        val mockEntry = mock<NotificationEntry>().apply {
+            whenever(sbn).thenReturn(mockSbn)
+            whenever(row).thenReturn(mockRow)
+        }
         whenever(lockscreenUserManager.needsRedaction(mockEntry)).thenReturn(needsRedaction)
         whenever(mockEntry.rowExists()).thenReturn(true)
         return object : ListEntry("key", 0) {

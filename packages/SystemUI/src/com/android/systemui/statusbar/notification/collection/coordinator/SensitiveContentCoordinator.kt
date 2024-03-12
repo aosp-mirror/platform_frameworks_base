@@ -63,9 +63,16 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
         SensitiveContentCoordinator,
         DynamicPrivacyController.Listener,
         OnBeforeRenderListListener {
+    private val onSensitiveStateChanged = Runnable() {
+        invalidateList("onSensitiveStateChanged")
+    }
 
     override fun attach(pipeline: NotifPipeline) {
         dynamicPrivacyController.addListener(this)
+        if (screenshareNotificationHiding()) {
+            sensitiveNotificationProtectionController
+                .registerSensitiveStateListener(onSensitiveStateChanged)
+        }
         pipeline.addOnBeforeRenderListListener(this)
         pipeline.addPreRenderInvalidator(this)
     }
@@ -119,6 +126,9 @@ class SensitiveContentCoordinatorImpl @Inject constructor(
             val needsRedaction = lockscreenUserManager.needsRedaction(entry)
             val isSensitive = userPublic && needsRedaction
             entry.setSensitive(isSensitive || shouldProtectNotification, deviceSensitive)
+            if (screenshareNotificationHiding()) {
+                entry.row?.setPublicExpanderVisible(!shouldProtectNotification)
+            }
         }
     }
 }

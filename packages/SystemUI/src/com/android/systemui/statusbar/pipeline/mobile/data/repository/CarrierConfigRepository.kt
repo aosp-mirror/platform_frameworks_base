@@ -55,7 +55,7 @@ class CarrierConfigRepository
 @Inject
 constructor(
     broadcastDispatcher: BroadcastDispatcher,
-    private val carrierConfigManager: CarrierConfigManager,
+    private val carrierConfigManager: CarrierConfigManager?,
     dumpManager: DumpManager,
     logger: MobileInputLogger,
     @Application scope: CoroutineScope,
@@ -87,7 +87,7 @@ constructor(
             .onEach { logger.logCarrierConfigChanged(it) }
             .filter { SubscriptionManager.isValidSubscriptionId(it) }
             .mapNotNull { subId ->
-                val config = carrierConfigManager.getConfigForSubId(subId)
+                val config = carrierConfigManager?.getConfigForSubId(subId)
                 config?.let { subId to it }
             }
             .shareIn(scope, SharingStarted.WhileSubscribed())
@@ -111,7 +111,7 @@ constructor(
     fun getOrCreateConfigForSubId(subId: Int): SystemUiCarrierConfig {
         return configs.getOrElse(subId) {
             val config = SystemUiCarrierConfig(subId, defaultConfig)
-            val carrierConfig = carrierConfigManager.getConfigForSubId(subId)
+            val carrierConfig = carrierConfigManager?.getConfigForSubId(subId)
             if (carrierConfig != null) config.processNewCarrierConfig(carrierConfig)
             configs.put(subId, config)
             config

@@ -114,11 +114,11 @@ public abstract class ClientTransactionHandler {
 
     /** Destroy the activity. */
     public abstract void handleDestroyActivity(@NonNull ActivityClientRecord r, boolean finishing,
-            int configChanges, boolean getNonConfigInstance, String reason);
+            boolean getNonConfigInstance, String reason);
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(@NonNull ActivityClientRecord r, boolean finished,
-            boolean userLeaving, int configChanges, boolean autoEnteringPip,
+            boolean userLeaving, boolean autoEnteringPip,
             PendingTransactionActions pendingActions, String reason);
 
     /**
@@ -146,14 +146,13 @@ public abstract class ClientTransactionHandler {
     /**
      * Stop the activity.
      * @param r Target activity record.
-     * @param configChanges Activity configuration changes.
      * @param pendingActions Pending actions to be used on this or later stages of activity
      *                       transaction.
      * @param finalStateRequest Flag indicating if this call is handling final lifecycle state
      *                          request for a transaction.
      * @param reason Reason for performing this operation.
      */
-    public abstract void handleStopActivity(@NonNull ActivityClientRecord r, int configChanges,
+    public abstract void handleStopActivity(@NonNull ActivityClientRecord r,
             PendingTransactionActions pendingActions, boolean finalStateRequest, String reason);
 
     /** Report that activity was stopped to server. */

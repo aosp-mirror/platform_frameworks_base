@@ -561,6 +561,8 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Device default insets types shall be excluded from config app sizes. */
     final int mConfigTypes;
 
+    final int mLegacyConfigTypes;
+
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
@@ -1190,13 +1192,23 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean isScreenSizeDecoupledFromStatusBarAndCutout = context.getResources()
                 .getBoolean(R.bool.config_decoupleStatusBarAndDisplayCutoutFromScreenSize)
                 && mFlags.mAllowsScreenSizeDecoupledFromStatusBarAndCutout;
-        if (!isScreenSizeDecoupledFromStatusBarAndCutout) {
+        if (mFlags.mInsetsDecoupledConfiguration) {
+            mDecorTypes = 0;
+            mConfigTypes = 0;
+        } else if (isScreenSizeDecoupledFromStatusBarAndCutout) {
+            mDecorTypes = WindowInsets.Type.navigationBars();
+            mConfigTypes = WindowInsets.Type.navigationBars();
+        } else {
             mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
                     | WindowInsets.Type.navigationBars();
+        }
+        if (isScreenSizeDecoupledFromStatusBarAndCutout) {
+            // Do not fallback to legacy value for enabled devices.
+            mLegacyConfigTypes = WindowInsets.Type.navigationBars();
         } else {
-            mDecorTypes = WindowInsets.Type.navigationBars();
-            mConfigTypes = WindowInsets.Type.navigationBars();
+            mLegacyConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
+                    | WindowInsets.Type.navigationBars();
         }
 
         mLetterboxConfiguration = new LetterboxConfiguration(
@@ -2109,7 +2121,15 @@ public class WindowManagerService extends IWindowManager.Stub
                         + ", touchableRegion=" + w.mGivenTouchableRegion + " -> " + touchableRegion
                         + ", touchableInsets " + w.mTouchableInsets + " -> " + touchableInsets);
                 if (w != null) {
+                    final boolean wasGivenInsetsPending = w.mGivenInsetsPending;
                     w.mGivenInsetsPending = false;
+                    if ((!wasGivenInsetsPending || !w.hasInsetsSourceProvider())
+                            && w.mTouchableInsets == touchableInsets
+                            && w.mGivenContentInsets.equals(contentInsets)
+                            && w.mGivenVisibleInsets.equals(visibleInsets)
+                            && w.mGivenTouchableRegion.equals(touchableRegion)) {
+                        return;
+                    }
                     w.mGivenContentInsets.set(contentInsets);
                     w.mGivenVisibleInsets.set(visibleInsets);
                     w.mGivenTouchableRegion.set(touchableRegion);
@@ -3638,7 +3658,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setCurrentUser(@UserIdInt int newUserId) {
         synchronized (mGlobalLock) {
-            mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_OPEN, null);
+            final TransitionController controller = mAtmService.getTransitionController();
+            if (!controller.isCollecting() && controller.isShellTransitionsEnabled()) {
+                controller.requestStartTransition(controller.createTransition(TRANSIT_OPEN),
+                        null /* trigger */, null /* remote */, null /* disp */);
+            }
             mCurrentUserId = newUserId;
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
@@ -6706,7 +6730,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void dumpLogStatus(PrintWriter pw) {
         pw.println("WINDOW MANAGER LOGGING (dumpsys window logging)");
-        if (android.tracing.Flags.perfettoProtolog()) {
+        if (android.tracing.Flags.perfettoProtologTracing()) {
             pw.println("Deprecated legacy command. Use Perfetto commands instead.");
             return;
         }
@@ -8258,12 +8282,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void showImePostLayout(IBinder imeTargetWindowToken,
-                @Nullable ImeTracker.Token statsToken) {
+                @NonNull ImeTracker.Token statsToken) {
             synchronized (mGlobalLock) {
                 InputTarget imeTarget = getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget == null) {
+                    ImeTracker.forLogging().onFailed(statsToken,
+                            ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                     return;
                 }
+                ImeTracker.forLogging().onProgress(statsToken,
+                        ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
+
                 Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.showImePostLayout", 0);
                 final InsetsControlTarget controlTarget = imeTarget.getImeControlTarget();
                 imeTarget = controlTarget.getWindow();
@@ -8278,7 +8307,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void hideIme(IBinder imeTargetWindowToken, int displayId,
-                @Nullable ImeTracker.Token statsToken) {
+                @NonNull ImeTracker.Token statsToken) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.hideIme");
             synchronized (mGlobalLock) {
                 WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
@@ -9206,6 +9235,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         if (!Flags.embeddedActivityBackNavFlag()) {
             // Skip if flag is not enabled.
+            return false;
+        }
+
+        if (taskFragment.mDimmerSurfaceBoosted) {
+            // Skip if the TaskFragment currently has dimmer surface boosted.
             return false;
         }
 

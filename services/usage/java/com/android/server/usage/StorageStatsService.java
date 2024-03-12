@@ -383,7 +383,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             return queryStatsForUid(volumeUuid, appInfo.uid, callingPackage);
         } else {
             // Multiple packages means we need to go manual
-            final int appId = UserHandle.getUserId(appInfo.uid);
+            final int appId = UserHandle.getAppId(appInfo.uid);
             final String[] packageNames = new String[] { packageName };
             final long[] ceDataInodes = new long[1];
             String[] codePaths = new String[0];

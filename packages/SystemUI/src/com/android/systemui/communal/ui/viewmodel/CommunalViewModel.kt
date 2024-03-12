@@ -21,6 +21,7 @@ import com.android.systemui.communal.domain.interactor.CommunalTutorialInteracto
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /** The default view model used for showing the communal hub. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalViewModel
 @Inject
@@ -54,6 +56,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     shadeInteractor: ShadeInteractor,
+    deviceEntryInteractor: DeviceEntryInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
     @CommunalLog logBuffer: LogBuffer,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {
@@ -84,8 +87,18 @@ constructor(
     override val isPopupOnDismissCtaShowing: Flow<Boolean> =
         _isPopupOnDismissCtaShowing.asStateFlow()
 
+    private val _isEnableWidgetDialogShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isEnableWidgetDialogShowing: Flow<Boolean> = _isEnableWidgetDialogShowing.asStateFlow()
+
+    private val _isEnableWorkProfileDialogShowing: MutableStateFlow<Boolean> =
+        MutableStateFlow(false)
+    val isEnableWorkProfileDialogShowing: Flow<Boolean> =
+        _isEnableWorkProfileDialogShowing.asStateFlow()
+
     /** Whether touches should be disabled in communal */
     val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
+
+    val deviceUnlocked: Flow<Boolean> = deviceEntryInteractor.isUnlocked
 
     init {
         // Initialize our media host for the UMO. This only needs to happen once and must be done
@@ -113,6 +126,40 @@ constructor(
     override fun onHidePopupAfterDismissCta() {
         cancelDelayedPopupHiding()
         setPopupOnDismissCtaVisibility(false)
+    }
+
+    override fun onOpenEnableWidgetDialog() {
+        setIsEnableWidgetDialogShowing(true)
+    }
+
+    fun onEnableWidgetDialogConfirm() {
+        communalInteractor.navigateToCommunalWidgetSettings()
+        setIsEnableWidgetDialogShowing(false)
+    }
+
+    fun onEnableWidgetDialogCancel() {
+        setIsEnableWidgetDialogShowing(false)
+    }
+
+    override fun onOpenEnableWorkProfileDialog() {
+        setIsEnableWorkProfileDialogShowing(true)
+    }
+
+    fun onEnableWorkProfileDialogConfirm() {
+        communalInteractor.unpauseWorkProfile()
+        setIsEnableWorkProfileDialogShowing(false)
+    }
+
+    fun onEnableWorkProfileDialogCancel() {
+        setIsEnableWorkProfileDialogShowing(false)
+    }
+
+    private fun setIsEnableWidgetDialogShowing(isVisible: Boolean) {
+        _isEnableWidgetDialogShowing.value = isVisible
+    }
+
+    private fun setIsEnableWorkProfileDialogShowing(isVisible: Boolean) {
+        _isEnableWorkProfileDialogShowing.value = isVisible
     }
 
     private fun setPopupOnDismissCtaVisibility(isVisible: Boolean) {

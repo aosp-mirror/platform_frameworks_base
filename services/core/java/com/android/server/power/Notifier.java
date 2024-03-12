@@ -902,9 +902,9 @@ public class Notifier {
         }
 
         if (mActivityManagerInternal.isSystemReady()) {
-            final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
-            mActivityManagerInternal.broadcastIntent(mScreenOnIntent, mWakeUpBroadcastDone,
-                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOffOptions);
+            mActivityManagerInternal.broadcastIntentWithCallback(mScreenOnIntent,
+                    mWakeUpBroadcastDone, null, UserHandle.USER_ALL,
+                    null, null, mScreenOnOffOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 2, 1);
             sendNextBroadcast();
@@ -927,9 +927,9 @@ public class Notifier {
         }
 
         if (mActivityManagerInternal.isSystemReady()) {
-            final boolean ordered = !mActivityManagerInternal.isModernQueueEnabled();
-            mActivityManagerInternal.broadcastIntent(mScreenOffIntent, mGoToSleepBroadcastDone,
-                    null, ordered, UserHandle.USER_ALL, null, null, mScreenOnOffOptions);
+            mActivityManagerInternal.broadcastIntentWithCallback(mScreenOffIntent,
+                    mGoToSleepBroadcastDone, null, UserHandle.USER_ALL,
+                    null, null, mScreenOnOffOptions);
         } else {
             EventLog.writeEvent(EventLogTags.POWER_SCREEN_BROADCAST_STOP, 3, 1);
             sendNextBroadcast();

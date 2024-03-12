@@ -652,6 +652,7 @@ package android.webkit {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.webkit.WebViewProviderResponse> CREATOR;
     field public static final int STATUS_FAILED_LISTING_WEBVIEW_PACKAGES = 4; // 0x4
+    field public static final int STATUS_FAILED_OTHER = 11; // 0xb
     field public static final int STATUS_FAILED_WAITING_FOR_RELRO = 3; // 0x3
     field public static final int STATUS_SUCCESS = 0; // 0x0
     field @Nullable public final android.content.pm.PackageInfo packageInfo;

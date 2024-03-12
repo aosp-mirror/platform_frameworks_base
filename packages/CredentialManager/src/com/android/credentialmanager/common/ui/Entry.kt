@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -78,6 +79,8 @@ fun Entry(
     isLockedAuthEntry: Boolean = false,
     enforceOneLine: Boolean = false,
     onTextLayout: (TextLayoutResult) -> Unit = {},
+    /** Get flow only, if present, where be drawn as a line above the headline. */
+    affiliatedDomainText: String? = null,
 ) {
     val iconPadding = Modifier.wrapContentSize().padding(
         // Horizontal padding should be 16dp, but the suggestion chip itself
@@ -92,7 +95,7 @@ fun Entry(
         label = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(
                     // Total end padding should be 16dp, but the suggestion chip itself
                     // has 8dp horizontal elements padding
                     horizontal = 8.dp, vertical = 16.dp,
@@ -102,6 +105,13 @@ fun Entry(
             ) {
                 // Apply weight so that the trailing icon can always show.
                 Column(modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f)) {
+                    if (!affiliatedDomainText.isNullOrBlank()) {
+                        BodySmallText(
+                            text = affiliatedDomainText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
+                    }
                     SmallTitleText(
                         text = entryHeadlineText,
                         enforceOneLine = enforceOneLine,
@@ -143,14 +153,14 @@ fun Entry(
                                 },
                             )
                         }
-                    } else if (entrySecondLineText != null) {
+                    } else if (!entrySecondLineText.isNullOrBlank()) {
                         BodySmallText(
                             text = entrySecondLineText,
                             enforceOneLine = enforceOneLine,
                             onTextLayout = onTextLayout,
                         )
                     }
-                    if (entryThirdLineText != null) {
+                    if (!entryThirdLineText.isNullOrBlank()) {
                         BodySmallText(
                             text = entryThirdLineText,
                             enforceOneLine = enforceOneLine,
@@ -249,10 +259,14 @@ fun ActionEntry(
         onClick = onClick,
         shape = Shapes.large,
         label = {
-            Column(modifier = Modifier.wrapContentSize()
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
+            Column(
+                    modifier = Modifier.heightIn(min = 56.dp).wrapContentSize().padding(
+                            start = 16.dp, top = 16.dp, bottom = 16.dp
+                    ),
+                    verticalArrangement = Arrangement.Center,
+            ) {
                 SmallTitleText(entryHeadlineText)
-                if (entrySecondLineText != null && entrySecondLineText.isNotEmpty()) {
+                if (!entrySecondLineText.isNullOrBlank()) {
                     BodySmallText(entrySecondLineText)
                 }
             }

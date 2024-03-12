@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.shared
 
 import com.android.systemui.Flags
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
@@ -34,7 +33,7 @@ object ComposeLockscreen {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.composeLockscreen() && ComposeFacade.isComposeAvailable()
+        get() = Flags.composeLockscreen()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the

@@ -301,22 +301,20 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
         if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP == key.getKeyCode()) {
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_UP);
-            mShadeViewController.collapse(
-                    false /* delayed */, 1.0f /* speedUpFactor */);
+            mShadeController.animateCollapseShade();
         } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key.getKeyCode()) {
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
             if (mShadeViewController.isFullyCollapsed()) {
                 if (mVibrateOnOpening) {
                     vibrateOnNavigationKeyDown();
                 }
-                mShadeViewController.expand(true /* animate */);
+                mShadeController.animateExpandShade();
                 mNotificationStackScrollLayoutController.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count("panel_open", 1);
             } else if (!mQsController.getExpanded()
                     && !mShadeViewController.isExpandingOrCollapsing()) {
-                mQsController.flingQs(0 /* velocity */,
-                        ShadeViewController.FLING_EXPAND);
+                mShadeController.animateExpandQs();
                 mMetricsLogger.count("panel_open_qs", 1);
             }
         }

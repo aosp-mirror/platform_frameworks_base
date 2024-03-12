@@ -274,7 +274,7 @@ TEST(IdmapTests, FabricatedOverlay) {
                   .Build();
 
   ASSERT_TRUE(frro);
-  TemporaryFile tf;
+  TempFrroFile tf;
   std::ofstream out(tf.path);
   ASSERT_TRUE((*frro).ToBinaryStream(out));
   out.close();
@@ -467,9 +467,9 @@ TEST(IdmapTests, CreateIdmapDataInlineResources) {
 TEST(IdmapTests, IdmapHeaderIsUpToDate) {
   fclose(stderr);  // silence expected warnings from libandroidfw
 
-  const std::string target_apk_path = kIdmapRawTargetPath;
-  const std::string overlay_apk_path = kIdmapRawOverlayPath;
-  const std::string overlay_name = kIdmapRawOverlayName;
+  const std::string target_apk_path {kIdmapRawTargetPath};
+  const std::string overlay_apk_path {kIdmapRawOverlayPath};
+  const std::string overlay_name {kIdmapRawOverlayName};
   const PolicyBitmask policies = kIdmapRawDataPolicies;
   const uint32_t target_crc = kIdmapRawDataTargetCrc;
   const uint32_t overlay_crc = kIdmapRawOverlayCrc;

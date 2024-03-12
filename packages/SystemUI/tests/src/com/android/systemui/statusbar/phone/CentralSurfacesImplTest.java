@@ -73,6 +73,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -95,8 +96,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.communal.data.repository.CommunalRepository;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
-import com.android.systemui.communal.shared.model.CommunalSceneKey;
-import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState;
+import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -842,20 +842,43 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Test
     public void testEnteringGlanceableHub_updatesScrim() {
         // Transition to the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
-                CommunalSceneKey.Communal.INSTANCE)));
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
+                CommunalScenes.Communal)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState also transitions.
         verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB);
 
         // Transition away from the glanceable hub.
-        mCommunalRepository.setTransitionState(flowOf(new ObservableCommunalTransitionState.Idle(
-                CommunalSceneKey.Blank.INSTANCE)));
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
+                CommunalScenes.Blank)));
         mTestScope.getTestScheduler().runCurrent();
 
         // ScrimState goes back to UNLOCKED.
         verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+    }
+
+    @Test
+    public void testEnteringGlanceableHub_whenDreaming_updatesScrim() {
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // Transition to the glanceable hub.
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
+                CommunalScenes.Communal)));
+        mTestScope.getTestScheduler().runCurrent();
+
+        // ScrimState also transitions.
+        verify(mScrimController).transitionTo(ScrimState.GLANCEABLE_HUB_OVER_DREAM);
+
+        // Transition away from the glanceable hub.
+        mCommunalRepository.setTransitionState(flowOf(new ObservableTransitionState.Idle(
+                CommunalScenes.Blank)));
+        mTestScope.getTestScheduler().runCurrent();
+
+        // ScrimState goes back to UNLOCKED.
+        verify(mScrimController).transitionTo(eq(ScrimState.DREAMING));
     }
 
     @Test

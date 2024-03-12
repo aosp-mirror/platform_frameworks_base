@@ -471,6 +471,21 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_COLOR_MOTION_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of accessibility color contrast.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ACCESSIBILITY_COLOR_CONTRAST_SETTINGS =
+            "android.settings.ACCESSIBILITY_COLOR_CONTRAST_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of Reduce Bright Colors.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -3568,6 +3583,12 @@ public final class Settings {
                                                     + " and user:" + userHandle
                                                     + " with index:" + index);
                                         }
+                                        // Always make sure to close any pre-existing tracker before
+                                        // replacing it, to prevent memory leaks
+                                        var oldTracker = mGenerationTrackers.get(name);
+                                        if (oldTracker != null) {
+                                            oldTracker.destroy();
+                                        }
                                         mGenerationTrackers.put(name, new GenerationTracker(name,
                                                 array, index, generation,
                                                 mGenerationTrackerErrorHandler));
@@ -3789,6 +3810,12 @@ public final class Settings {
                                         + " type:" + mUri.getPath()
                                         + " in package:" + cr.getPackageName()
                                         + " with index:" + index);
+                            }
+                            // Always make sure to close any pre-existing tracker before
+                            // replacing it, to prevent memory leaks
+                            var oldTracker = mGenerationTrackers.get(prefix);
+                            if (oldTracker != null) {
+                                oldTracker.destroy();
                             }
                             mGenerationTrackers.put(prefix,
                                     new GenerationTracker(prefix, array, index, generation,
@@ -11559,6 +11586,15 @@ public final class Settings {
          */
         public static final String EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED =
                 "extra_low_power_warning_acknowledged";
+
+        /**
+         * Whether the emergency thermal alert would be disabled
+         * (0: default) or not (1).
+         *
+         * @hide
+         */
+        public static final String EMERGENCY_THERMAL_ALERT_DISABLED =
+                "emergency_thermal_alert_disabled";
 
         /**
          * 0 (default) Auto battery saver suggestion has not been suppressed. 1) it has been
@@ -19968,6 +20004,13 @@ public final class Settings {
             @Readable
             public static final String CONSISTENT_NOTIFICATION_BLOCKING_ENABLED =
                     "consistent_notification_blocking_enabled";
+
+            /**
+             * Whether the Auto Bedtime Mode experience is enabled.
+             *
+             * @hide
+             */
+            public static final String AUTO_BEDTIME_MODE = "auto_bedtime_mode";
         }
     }
 

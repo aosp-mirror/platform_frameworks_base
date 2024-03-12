@@ -23,8 +23,6 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
-import android.sysprop.InitProperties;
 
 public class PowerCommand extends Svc.Command {
     private static final int FORCE_SUSPEND_DELAY_DEFAULT_MILLIS = 0;
@@ -142,12 +140,10 @@ public class PowerCommand extends Svc.Command {
     // Check if remote exception is benign during shutdown. Pm can be killed
     // before system server during shutdown, so remote exception can be ignored
     // if it is already in shutdown flow.
+    // sys.powerctl is no longer set to avoid a possible DOS attack (see
+    // bionic/libc/bionic/system_property_set.cpp) so we have no real way of knowing if a
+    // remote exception is real or simply because pm is killed (b/318323013)
+    // So we simply do not display anything.
     private void maybeLogRemoteException(String msg) {
-        String powerProp = SystemProperties.get("sys.powerctl");
-        // Also check if userspace reboot is ongoing, since in case of userspace reboot value of the
-        // sys.powerctl property will be reset.
-        if (powerProp.isEmpty() && !InitProperties.userspace_reboot_in_progress().orElse(false)) {
-            System.err.println(msg);
-        }
     }
 }

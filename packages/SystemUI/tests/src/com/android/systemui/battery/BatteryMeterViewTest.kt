@@ -193,6 +193,34 @@ class BatteryMeterViewTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_NEW_STATUS_BAR_ICONS)
+    fun modeEstimate_batteryPercentView_isNotNull_flagOn() {
+        mBatteryMeterView.onBatteryLevelChanged(15, false)
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+
+        mBatteryMeterView.updatePercentText()
+
+        // New battery icon only uses the percent view for the estimate text
+        assertThat(mBatteryMeterView.batteryPercentView).isNotNull()
+        // Make sure that it was added to the view hierarchy
+        assertThat(mBatteryMeterView.batteryPercentView.parent).isNotNull()
+    }
+
+    @Test
+    @EnableFlags(FLAG_NEW_STATUS_BAR_ICONS)
+    fun modePercent_batteryPercentView_isNull_flagOn() {
+        mBatteryMeterView.onBatteryLevelChanged(15, false)
+        mBatteryMeterView.setPercentShowMode(BatteryMeterView.MODE_ON)
+        mBatteryMeterView.setBatteryEstimateFetcher(Fetcher())
+
+        mBatteryMeterView.updatePercentText()
+
+        // New battery icon only uses the percent view for the estimate text
+        assertThat(mBatteryMeterView.batteryPercentView).isNull()
+    }
+
+    @Test
     fun contentDescription_manyUpdates_alwaysUpdated() {
         // BatteryDefender
         mBatteryMeterView.onBatteryLevelChanged(90, false)

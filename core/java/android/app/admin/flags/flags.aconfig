@@ -10,7 +10,14 @@ flag {
 flag {
   name: "device_policy_size_tracking_enabled"
   namespace: "enterprise"
-  description: "Add feature to track the total policy size and have a max threshold."
+  description: "Add feature to track the total policy size and have a max threshold - public API changes"
+  bug: "281543351"
+}
+
+flag {
+  name: "device_policy_size_tracking_internal_enabled"
+  namespace: "enterprise"
+  description: "Add feature to track the total policy size and have a max threshold - internal changes"
   bug: "281543351"
 }
 
@@ -148,4 +155,11 @@ flag {
   namespace: "enterprise"
   description: "Allow to query whether MTE is enabled or not to check for compliance for enterprise policy"
   bug: "322777918"
+}
+
+flag {
+  name: "esim_management_ux_enabled"
+  namespace: "enterprise"
+  description: "Enable UX changes for esim management"
+  bug: "295301164"
 }

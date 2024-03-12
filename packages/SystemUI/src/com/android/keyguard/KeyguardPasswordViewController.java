@@ -86,8 +86,9 @@ public class KeyguardPasswordViewController
     };
 
     private final View.OnKeyListener mKeyListener = (v, keyCode, keyEvent) -> {
+        // Ignore SPACE as a confirm key to allow the space character within passwords.
         final boolean isKeyboardEnterKey = keyEvent != null
-                && KeyEvent.isConfirmKey(keyCode)
+                && KeyEvent.isConfirmKey(keyCode) && keyCode != KeyEvent.KEYCODE_SPACE
                 && keyEvent.getAction() == KeyEvent.ACTION_UP;
         if (isKeyboardEnterKey) {
             verifyPasswordAndUnlock();

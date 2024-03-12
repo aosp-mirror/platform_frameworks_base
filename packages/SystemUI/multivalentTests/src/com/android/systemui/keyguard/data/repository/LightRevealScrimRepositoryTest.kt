@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import android.os.PowerManager.WAKE_REASON_UNKNOWN
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -25,18 +26,18 @@ import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
-import com.android.systemui.power.data.repository.FakePowerRepository
-import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.power.data.repository.powerRepository
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealEffect
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -49,9 +50,10 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LightRevealScrimRepositoryTest : SysuiTestCase() {
-    private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
-    private lateinit var powerRepository: FakePowerRepository
-    private lateinit var powerInteractor: PowerInteractor
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
+    private val powerRepository = kosmos.powerRepository
     private lateinit var underTest: LightRevealScrimRepositoryImpl
 
     @get:Rule val animatorTestRule = AnimatorTestRule(this)
@@ -59,13 +61,13 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        fakeKeyguardRepository = FakeKeyguardRepository()
-        powerRepository = FakePowerRepository()
-        powerInteractor =
-            PowerInteractorFactory.create(repository = powerRepository).powerInteractor
-
         underTest =
-            LightRevealScrimRepositoryImpl(fakeKeyguardRepository, context, powerInteractor, mock())
+            LightRevealScrimRepositoryImpl(
+                kosmos.fakeKeyguardRepository,
+                context,
+                powerRepository,
+                mock()
+            )
     }
 
     @Test
@@ -73,7 +75,14 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         val values = mutableListOf<LightRevealEffect>()
         val job = launch { underTest.revealEffect.collect { values.add(it) } }
 
-        powerInteractor.setAwakeForTest()
+        powerRepository.updateWakefulness(
+            rawState = WakefulnessState.STARTING_TO_WAKE,
+            lastWakeReason = WakeSleepReason.fromPowerManagerWakeReason(WAKE_REASON_UNKNOWN),
+            powerButtonLaunchGestureTriggered =
+                powerRepository.wakefulness.value.powerButtonLaunchGestureTriggered,
+        )
+        powerRepository.updateWakefulness(rawState = WakefulnessState.AWAKE)
+
         // We should initially emit the default reveal effect.
         runCurrent()
         values.assertEffectsMatchPredicates({ it == DEFAULT_REVEAL_EFFECT })
@@ -168,9 +177,10 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     fun revealAmount_emitsTo1AfterAnimationStarted() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val value by collectLastValue(underTest.revealAmount)
-            underTest.startRevealAmountAnimator(true)
+            runCurrent()
+            underTest.startRevealAmountAnimator(true, 500L)
             assertEquals(0.0f, value)
             animatorTestRule.advanceTimeBy(500L)
             assertEquals(1.0f, value)
@@ -179,13 +189,14 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     fun revealAmount_startingRevealTwiceWontRerunAnimator() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val value by collectLastValue(underTest.revealAmount)
-            underTest.startRevealAmountAnimator(true)
+            runCurrent()
+            underTest.startRevealAmountAnimator(true, 500L)
             assertEquals(0.0f, value)
             animatorTestRule.advanceTimeBy(250L)
             assertEquals(0.5f, value)
-            underTest.startRevealAmountAnimator(true)
+            underTest.startRevealAmountAnimator(true, 500L)
             animatorTestRule.advanceTimeBy(250L)
             assertEquals(1.0f, value)
         }
@@ -193,12 +204,14 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     fun revealAmount_emitsTo0AfterAnimationStartedReversed() =
-        runTest(UnconfinedTestDispatcher()) {
-            val value by collectLastValue(underTest.revealAmount)
-            underTest.startRevealAmountAnimator(false)
-            assertEquals(1.0f, value)
+        testScope.runTest {
+            val lastValue by collectLastValue(underTest.revealAmount)
+            runCurrent()
+            underTest.startRevealAmountAnimator(true, 500L)
             animatorTestRule.advanceTimeBy(500L)
-            assertEquals(0.0f, value)
+            underTest.startRevealAmountAnimator(false, 500L)
+            animatorTestRule.advanceTimeBy(500L)
+            assertEquals(0.0f, lastValue)
         }
 
     /**

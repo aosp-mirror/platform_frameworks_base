@@ -29,6 +29,7 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.app.LocaleConfig;
 import android.app.ResourcesManager;
+import android.app.ResourcesManager.SharedLibraryAssets;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -47,6 +48,7 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -197,6 +199,14 @@ public class ResourcesImpl {
     public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
             @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
         mAssets = assets;
+        if (Flags.registerResourcePaths()) {
+            ArrayMap<String, SharedLibraryAssets> sharedLibMap =
+                    ResourcesManager.getInstance().getSharedLibAssetsMap();
+            final int size = sharedLibMap.size();
+            for (int i = 0; i < size; i++) {
+                assets.addSharedLibraryPaths(sharedLibMap.valueAt(i).getAllAssetPaths());
+            }
+        }
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();

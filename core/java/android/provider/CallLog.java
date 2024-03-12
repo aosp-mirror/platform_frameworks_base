@@ -667,7 +667,8 @@ public class CallLog {
             @FlaggedApi(Flags.FLAG_BUSINESS_CALL_COMPOSER)
             public @NonNull AddCallParametersBuilder setAssertedDisplayName(
                     String assertedDisplayName) {
-                if (assertedDisplayName.length() > MAX_NUMBER_OF_CHARACTERS) {
+                if (assertedDisplayName != null
+                        && assertedDisplayName.length() > MAX_NUMBER_OF_CHARACTERS) {
                     throw new IllegalArgumentException("assertedDisplayName exceeds the character"
                             + " limit of " + MAX_NUMBER_OF_CHARACTERS + ".");
                 }

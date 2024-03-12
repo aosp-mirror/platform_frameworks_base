@@ -77,12 +77,28 @@ java_library {
     libs: [
         "android.test.mock",
         "framework-minus-apex.ravenwood",
+        "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
     ],
     sdk_version: "core_current",
     visibility: ["//frameworks/base"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
+}
+
+// Separated out from ravenwood-junit-impl since it needs to compile
+// against `module_current`
+java_library {
+    name: "ravenwood-junit-impl-flag",
+    srcs: [
+        "junit-flag-src/**/*.java",
+    ],
+    sdk_version: "module_current",
+    libs: [
+        "junit",
+        "flag-junit",
+    ],
+    visibility: ["//visibility:public"],
 }
 
 // Carefully compiles against only test_current to support tests that
@@ -94,11 +110,28 @@ java_library {
     srcs: [
         "junit-src/**/*.java",
         "junit-stub-src/**/*.java",
+        "junit-flag-src/**/*.java",
     ],
     sdk_version: "test_current",
     libs: [
         "junit",
+        "flag-junit",
     ],
+    visibility: ["//visibility:public"],
+}
+
+// Library used to publish a handful of `android.ravenwood` APIs into
+// the Ravenwood BCP; we don't want to publish these APIs into the BCP
+// on physical devices, which is why this is a separate library
+java_library {
+    name: "ravenwood-framework",
+    srcs: [
+        "framework-src/**/*.java",
+    ],
+    libs: [
+        "framework-minus-apex.ravenwood",
+    ],
+    sdk_version: "core_current",
     visibility: ["//visibility:public"],
 }
 

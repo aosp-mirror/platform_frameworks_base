@@ -16,7 +16,6 @@
 
 package com.android.settingslib.media;
 
-import android.app.Notification;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
@@ -54,9 +53,8 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     /* package */ ManagerInfoMediaManager(
             Context context,
             @NonNull String packageName,
-            Notification notification,
             LocalBluetoothManager localBluetoothManager) {
-        super(context, packageName, notification, localBluetoothManager);
+        super(context, packageName, localBluetoothManager);
 
         mRouterManager = MediaRouter2Manager.getInstance(context);
     }

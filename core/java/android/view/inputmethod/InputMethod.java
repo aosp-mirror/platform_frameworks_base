@@ -281,7 +281,7 @@ public interface InputMethod {
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ShowFlags {}
-    
+
     /**
      * Flag for {@link #showSoftInput}: this show has been explicitly
      * requested by the user.  If not set, the system has decided it may be
@@ -314,18 +314,18 @@ public interface InputMethod {
      * @param showInputToken an opaque {@link android.os.Binder} token to identify which API call
      *        of {@link InputMethodManager#showSoftInput(View, int)} is associated with
      *        this callback.
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request.
      * @hide
      */
     @MainThread
     public default void showSoftInputWithToken(@ShowFlags int flags, ResultReceiver resultReceiver,
-            IBinder showInputToken, @Nullable ImeTracker.Token statsToken) {
+            IBinder showInputToken, @NonNull ImeTracker.Token statsToken) {
         showSoftInput(flags, resultReceiver);
     }
 
     /**
      * Request that any soft input part of the input method be shown to the user.
-     * 
+     *
      * @param resultReceiver The client requesting the show may wish to
      * be told the impact of their request, which should be supplied here.
      * The result code should be
@@ -352,12 +352,12 @@ public interface InputMethod {
      * @param hideInputToken an opaque {@link android.os.Binder} token to identify which API call
      *         of {@link InputMethodManager#hideSoftInputFromWindow(IBinder, int)}} is associated
      *         with this callback.
-     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request.
      * @hide
      */
     @MainThread
     public default void hideSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-            IBinder hideInputToken, @Nullable ImeTracker.Token statsToken) {
+            IBinder hideInputToken, @NonNull ImeTracker.Token statsToken) {
         hideSoftInput(flags, resultReceiver);
     }
 

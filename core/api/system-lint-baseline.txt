@@ -511,9 +511,9 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
 
 InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceIntelligenceService#onBind(android.content.Intent) parameter #0:
     Invalid nullability on parameter `intent` in method `onBind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
-InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceTrustedInferenceService#onBind(android.content.Intent) parameter #0:
+InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService#onBind(android.content.Intent) parameter #0:
     Invalid nullability on parameter `intent` in method `onBind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
-InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceTrustedInferenceService#openFileInput(String) parameter #0:
+InvalidNullabilityOverride: android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService#openFileInput(String) parameter #0:
     Invalid nullability on parameter `filename` in method `openFileInput`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
 InvalidNullabilityOverride: android.service.textclassifier.TextClassifierService#onUnbind(android.content.Intent) parameter #0:
     Invalid nullability on parameter `intent` in method `onUnbind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
@@ -571,7 +571,7 @@ MissingNullability: android.service.contentcapture.ContentCaptureService#dump(ja
     Missing nullability on parameter `args` in method `dump`
 MissingNullability: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context) parameter #0:
     Missing nullability on parameter `base` in method `attachBaseContext`
-MissingNullability: android.service.ondeviceintelligence.OnDeviceTrustedInferenceService#openFileInput(String):
+MissingNullability: android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService#openFileInput(String):
     Missing nullability on method `openFileInput` return
 MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
     Missing nullability on parameter `intent` in method `onUnbind`

@@ -20,6 +20,9 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__BOOT_COMPLETED;
+import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__LOCKED_BOOT_COMPLETED;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_UNKNOWN;
@@ -29,6 +32,7 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.LOG_WRITER_INFO;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
@@ -59,6 +63,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.BundleMerger;
 import android.os.Handler;
@@ -85,9 +90,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalServices;
 import com.android.server.am.BroadcastProcessQueue.BroadcastConsumer;
 import com.android.server.am.BroadcastProcessQueue.BroadcastPredicate;
+import com.android.server.am.BroadcastProcessQueue.BroadcastRecordConsumer;
 import com.android.server.am.BroadcastRecord.DeliveryState;
+import com.android.server.pm.UserJourneyLogger;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.AnrTimer;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -277,6 +286,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     // when the flag is fused on.
     private static final int MSG_DELIVERY_TIMEOUT_SOFT = 8;
 
+    // TODO: Use the trunk stable flag.
+    private static final boolean DEFER_FROZEN_OUTGOING_BCASTS = false;
+
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
         mLocalHandler.sendEmptyMessage(MSG_UPDATE_RUNNING_LIST);
@@ -325,9 +337,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return true;
             }
             case MSG_PROCESS_FREEZABLE_CHANGED: {
-                synchronized (mService) {
-                    refreshProcessQueueLocked((ProcessRecord) msg.obj);
-                }
+                handleProcessFreezableChanged((ProcessRecord) msg.obj);
                 return true;
             }
             case MSG_UID_STATE_CHANGED: {
@@ -428,7 +438,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
 
         // If app isn't running, and there's nothing in the queue, clean up
-        if (queue.isEmpty() && !queue.isActive() && !queue.isProcessWarm()) {
+        if (queue.isEmpty() && queue.isOutgoingEmpty() && !queue.isActive()
+                && !queue.isProcessWarm()) {
             removeProcessQueue(queue.processName, queue.uid);
         }
     }
@@ -752,6 +763,21 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     public void enqueueBroadcastLocked(@NonNull BroadcastRecord r) {
+        // TODO: Apply delivery group policies and FLAG_REPLACE_PENDING to collapse the
+        // outgoing broadcasts.
+        // TODO: Add traces/logs for the enqueueing outgoing broadcasts logic.
+        if (DEFER_FROZEN_OUTGOING_BCASTS && isProcessFreezable(r.callerApp)) {
+            final BroadcastProcessQueue queue = getOrCreateProcessQueue(
+                    r.callerApp.processName, r.callerApp.uid);
+            if (queue.getOutgoingBroadcastCount() >= mConstants.MAX_FROZEN_OUTGOING_BROADCASTS) {
+                // TODO: Kill the process if the outgoing broadcasts count is
+                // beyond a certain limit.
+            }
+            queue.enqueueOutgoingBroadcast(r);
+            mHistory.onBroadcastFrozenLocked(r);
+            mService.mOomAdjuster.mCachedAppOptimizer.freezeAppAsyncImmediateLSP(r.callerApp);
+            return;
+        }
         if (DEBUG_BROADCAST) logv("Enqueuing " + r + " for " + r.receivers.size() + " receivers");
 
         final int cookie = traceBegin("enqueueBroadcast");
@@ -959,6 +985,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             queue.setActiveWasStopped(true);
         }
         final int intentFlags = r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND;
+        final boolean firstLaunch = !mService.wasPackageEverLaunched(info.packageName, r.userId);
+        queue.setActiveFirstLaunch(firstLaunch);
+
         final HostingRecord hostingRecord = new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST,
                 component, r.intent.getAction(), r.getHostingRecordTriggerType());
         final boolean isActivityCapable = (r.options != null
@@ -1627,6 +1656,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 "mBroadcastConsumerDeferClear");
     };
 
+    final BroadcastRecordConsumer mBroadcastRecordConsumerEnqueue = this::enqueueBroadcastLocked;
+
     /**
      * Verify that all known {@link #mProcessQueues} are in the state tested by
      * the given {@link Predicate}.
@@ -1923,8 +1954,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @VisibleForTesting
     @GuardedBy("mService")
-    private boolean isProcessFreezable(@Nullable ProcessRecord app) {
+    boolean isProcessFreezable(@Nullable ProcessRecord app) {
         if (app == null) {
             return false;
         }
@@ -1949,16 +1981,25 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         enqueueUpdateRunningList();
     }
 
+    private void handleProcessFreezableChanged(@NonNull ProcessRecord app) {
+        synchronized (mService) {
+            final BroadcastProcessQueue queue = getProcessQueue(app.processName, app.uid);
+            if (queue == null || queue.app == null || queue.app.getPid() != app.getPid()) {
+                return;
+            }
+            if (!isProcessFreezable(app)) {
+                queue.enqueueOutgoingBroadcasts(mBroadcastRecordConsumerEnqueue);
+            }
+            refreshProcessQueueLocked(queue);
+        }
+    }
+
     /**
      * Refresh the process queue corresponding to {@code app} with the latest process state
      * so that runnableAt can be updated.
      */
     @GuardedBy("mService")
-    private void refreshProcessQueueLocked(@NonNull ProcessRecord app) {
-        final BroadcastProcessQueue queue = getProcessQueue(app.processName, app.uid);
-        if (queue == null || queue.app == null || queue.app.getPid() != app.getPid()) {
-            return;
-        }
+    private void refreshProcessQueueLocked(@NonNull BroadcastProcessQueue queue) {
         setQueueProcess(queue, queue.app);
         enqueueUpdateRunningList();
     }
@@ -2101,6 +2142,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final long dispatchDelay = r.scheduledTime[index] - r.enqueueTime;
         final long receiveDelay = 0;
         final long finishDelay = r.terminalTime[index] - r.scheduledTime[index];
+        if (DEBUG_PROCESSES) {
+            Slog.d(TAG, "Logging broadcast for "
+                    + (app != null ? app.info.packageName : "<null>")
+                    + ", stopped=" + queue.getActiveWasStopped()
+                    + ", firstLaunch=" + queue.getActiveFirstLaunch());
+        }
         if (queue != null) {
             final int packageState = queue.getActiveWasStopped()
                     ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
@@ -2110,7 +2157,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     app != null ? app.info.packageName : null, r.callerPackage,
                     r.calculateTypeForLogging(), r.getDeliveryGroupPolicy(), r.intent.getFlags(),
                     BroadcastRecord.getReceiverPriority(receiver), r.callerProcState,
-                    receiverProcessState);
+                    receiverProcessState, queue.getActiveFirstLaunch(),
+                    0L /* TODO: stoppedDuration */);
+            // Reset the states after logging
+            queue.setActiveFirstLaunch(false);
+            queue.setActiveWasStopped(false);
         }
     }
 
@@ -2120,7 +2171,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.nextReceiver = r.receivers.size();
         mHistory.onBroadcastFinishedLocked(r);
 
-        BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
+        logBootCompletedBroadcastCompletionLatencyIfPossible(r);
 
         if (r.intent.getComponent() == null && r.intent.getPackage() == null
                 && (r.intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
@@ -2214,6 +2265,59 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             leaf = leaf.processNameNext;
         }
         return null;
+    }
+
+    private void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
+        // Only log after last receiver.
+        // In case of split BOOT_COMPLETED broadcast, make sure only call this method on the
+        // last BroadcastRecord of the split broadcast which has non-null resultTo.
+        final int numReceivers = (r.receivers != null) ? r.receivers.size() : 0;
+        if (r.nextReceiver < numReceivers) {
+            return;
+        }
+        final String action = r.intent.getAction();
+        int event = 0;
+        if (Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)) {
+            event = BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__LOCKED_BOOT_COMPLETED;
+        } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+            event = BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__BOOT_COMPLETED;
+        }
+        if (event != 0) {
+            final int dispatchLatency = (int) (r.dispatchTime - r.enqueueTime);
+            final int completeLatency = (int) (SystemClock.uptimeMillis() - r.enqueueTime);
+            final int dispatchRealLatency = (int) (r.dispatchRealTime - r.enqueueRealTime);
+            final int completeRealLatency = (int)
+                    (SystemClock.elapsedRealtime() - r.enqueueRealTime);
+            int userType =
+                    FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN;
+            // This method is called very infrequently, no performance issue we call
+            // LocalServices.getService() here.
+            final UserManagerInternal umInternal = LocalServices.getService(
+                    UserManagerInternal.class);
+            final UserInfo userInfo =
+                    (umInternal != null) ? umInternal.getUserInfo(r.userId) : null;
+            if (userInfo != null) {
+                userType = UserJourneyLogger.getUserTypeForStatsd(userInfo.userType);
+            }
+            Slog.i(TAG, "BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED action:"
+                    + action
+                    + " dispatchLatency:" + dispatchLatency
+                    + " completeLatency:" + completeLatency
+                    + " dispatchRealLatency:" + dispatchRealLatency
+                    + " completeRealLatency:" + completeRealLatency
+                    + " receiversSize:" + numReceivers
+                    + " userId:" + r.userId
+                    + " userType:" + (userInfo != null ? userInfo.userType : null));
+            FrameworkStatsLog.write(
+                    BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED,
+                    event,
+                    dispatchLatency,
+                    completeLatency,
+                    dispatchRealLatency,
+                    completeRealLatency,
+                    r.userId,
+                    userType);
+        }
     }
 
     @Override

@@ -177,7 +177,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -191,6 +190,7 @@ import android.util.SparseIntArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
+import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
@@ -206,6 +206,7 @@ import libcore.io.Streams;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;
@@ -2150,12 +2151,14 @@ public class NetworkPolicyManagerServiceTest {
         assertFalse(mService.isUidNetworkingBlocked(UID_E, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainEnabled() throws Exception {
         verify(mNetworkManager).setFirewallChainEnabled(FIREWALL_CHAIN_BACKGROUND, true);
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnProcStateChange() throws Exception {
@@ -2185,6 +2188,7 @@ public class NetworkPolicyManagerServiceTest {
         assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnAllowlistChange() throws Exception {
@@ -2223,6 +2227,7 @@ public class NetworkPolicyManagerServiceTest {
         assertFalse(mService.isUidNetworkingBlocked(UID_B, false));
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testBackgroundChainOnTempAllowlistChange() throws Exception {
@@ -2261,6 +2266,7 @@ public class NetworkPolicyManagerServiceTest {
                 && uidState.procState == procState && uidState.capability == capability;
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersProcStateChanges() throws Exception {
@@ -2323,6 +2329,7 @@ public class NetworkPolicyManagerServiceTest {
         waitForUidEventHandlerIdle();
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersStaleChanges() throws Exception {
@@ -2343,6 +2350,7 @@ public class NetworkPolicyManagerServiceTest {
         waitForUidEventHandlerIdle();
     }
 
+    @Ignore("Temporarily disabled until the feature is enabled")
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
     public void testUidObserverFiltersCapabilityChanges() throws Exception {
@@ -2401,6 +2409,46 @@ public class NetworkPolicyManagerServiceTest {
         }
         waitForUidEventHandlerIdle();
         assertTrue(isUidState(UID_B, testProcState, testProcStateSeq + 1, PROCESS_CAPABILITY_NONE));
+    }
+
+    @Test
+    public void testObsoleteHandleUidGone() throws Exception {
+        callAndWaitOnUidStateChanged(UID_A, PROCESS_STATE_TOP, 51);
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+
+        clearInvocations(mNetworkManager);
+
+        // In the service, handleUidGone is only called from mUidEventHandler. Then a call to it may
+        // be rendered obsolete by a newer uid change posted on the handler. The latest uid state
+        // change is always reflected in the current UidStateChangeCallbackInfo for the uid, so to
+        // simulate an obsolete call for test, we directly call handleUidGone and leave the state in
+        // UidStateChangeCallbackInfo set by the previous call to onUidStateChanged(TOP). This call
+        // should then do nothing.
+        mService.handleUidGone(UID_A);
+
+        verify(mNetworkManager, times(0)).setFirewallUidRule(anyInt(), anyInt(), anyInt());
+        assertFalse(mService.isUidNetworkingBlocked(UID_A, false));
+    }
+
+    @Ignore("Temporarily disabled until the feature is enabled")
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_NETWORK_BLOCKED_FOR_TOP_SLEEPING_AND_ABOVE)
+    public void testObsoleteHandleUidChanged() throws Exception {
+        callAndWaitOnUidGone(UID_A);
+        assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
+
+        clearInvocations(mNetworkManager);
+
+        // In the service, handleUidChanged is only called from mUidEventHandler. Then a call to it
+        // may be rendered obsolete by an immediate uid-gone posted on the handler. The latest uid
+        // state change is always reflected in the current UidStateChangeCallbackInfo for the uid,
+        // so to simulate an obsolete call for test, we directly call handleUidChanged and leave the
+        // state in UidStateChangeCallbackInfo as null as it would get removed by the previous call
+        // to onUidGone(). This call should then do nothing.
+        mService.handleUidChanged(UID_A);
+
+        verify(mNetworkManager, times(0)).setFirewallUidRule(anyInt(), anyInt(), anyInt());
+        assertTrue(mService.isUidNetworkingBlocked(UID_A, false));
     }
 
     @Test

@@ -16,11 +16,14 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -44,10 +47,11 @@ constructor(
     @Application scope: CoroutineScope,
     sceneInteractor: SceneInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
+    shadeRepository: ShadeRepository,
 ) : BaseShadeInteractor {
-    override val shadeExpansion: Flow<Float> = sceneBasedExpansion(sceneInteractor, SceneKey.Shade)
+    override val shadeExpansion: Flow<Float> = sceneBasedExpansion(sceneInteractor, Scenes.Shade)
 
-    private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, SceneKey.QuickSettings)
+    private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, Scenes.QuickSettings)
 
     override val qsExpansion: StateFlow<Float> =
         combine(
@@ -75,7 +79,7 @@ constructor(
                 when (state) {
                     is ObservableTransitionState.Idle -> false
                     is ObservableTransitionState.Transition ->
-                        state.toScene == SceneKey.QuickSettings && state.fromScene != SceneKey.Shade
+                        state.toScene == Scenes.QuickSettings && state.fromScene != Scenes.Shade
                 }
             }
             .distinctUntilChanged()
@@ -84,7 +88,7 @@ constructor(
         sceneInteractor.transitionState
             .map { state ->
                 when (state) {
-                    is ObservableTransitionState.Idle -> state.scene == SceneKey.QuickSettings
+                    is ObservableTransitionState.Idle -> state.scene == Scenes.QuickSettings
                     is ObservableTransitionState.Transition -> false
                 }
             }
@@ -100,10 +104,12 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isUserInteractingWithShade: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, SceneKey.Shade)
+        sceneBasedInteracting(sceneInteractor, Scenes.Shade)
 
     override val isUserInteractingWithQs: Flow<Boolean> =
-        sceneBasedInteracting(sceneInteractor, SceneKey.QuickSettings)
+        sceneBasedInteracting(sceneInteractor, Scenes.QuickSettings)
+
+    override val shadeMode: StateFlow<ShadeMode> = shadeRepository.shadeMode
 
     /**
      * Returns a flow that uses scene transition progress to and from a scene that is pulled down

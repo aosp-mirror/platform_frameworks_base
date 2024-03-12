@@ -978,7 +978,6 @@ class Task extends TaskFragment {
         }
         effectiveUid = info.applicationInfo.uid;
         mIsEffectivelySystemApp = info.applicationInfo.isSystemApp();
-        stringName = null;
 
         if (info.targetActivity == null) {
             if (_intent != null) {
@@ -1045,6 +1044,7 @@ class Task extends TaskFragment {
             updateTaskDescription();
         }
         mSupportsPictureInPicture = info.supportsPictureInPicture();
+        stringName = null;
 
         // Re-adding the task to Recents once updated
         if (inRecents) {
@@ -1933,8 +1933,8 @@ class Task extends TaskFragment {
                 td.setEnsureStatusBarContrastWhenTransparent(
                         atd.getEnsureStatusBarContrastWhenTransparent());
             }
-            if (td.getStatusBarAppearance() == 0) {
-                td.setStatusBarAppearance(atd.getStatusBarAppearance());
+            if (td.getSystemBarsAppearance() == 0) {
+                td.setSystemBarsAppearance(atd.getSystemBarsAppearance());
             }
             if (td.getNavigationBarColor() == 0) {
                 td.setNavigationBarColor(atd.getNavigationBarColor());
@@ -3751,9 +3751,11 @@ class Task extends TaskFragment {
                 // Boost the adjacent TaskFragment for dimmer if needed.
                 final TaskFragment taskFragment = wc.asTaskFragment();
                 if (taskFragment != null && taskFragment.isEmbedded()) {
+                    taskFragment.mDimmerSurfaceBoosted = false;
                     final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
                     if (adjacentTf != null && adjacentTf.shouldBoostDimmer()) {
                         adjacentTf.assignLayer(t, layer++);
+                        adjacentTf.mDimmerSurfaceBoosted = true;
                     }
                 }
 
@@ -4946,13 +4948,6 @@ class Task extends TaskFragment {
         }
     }
 
-    void minimalResumeActivityLocked(ActivityRecord r) {
-        ProtoLog.v(WM_DEBUG_STATES, "Moving to RESUMED: %s (starting new instance) "
-                + "callers=%s", r, Debug.getCallers(5));
-        r.setState(RESUMED, "minimalResumeActivityLocked");
-        r.completeResumeLocked();
-    }
-
     void checkReadyForSleep() {
         if (shouldSleepActivities() && goToSleepIfPossible(false /* shuttingDown */)) {
             mTaskSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
@@ -5861,7 +5856,7 @@ class Task extends TaskFragment {
             }
 
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                    mDisplayContent.mDisplayId, false /* deferResume */);
+                    mDisplayContent, false /* deferResume */);
         } finally {
             if (mTransitionController.isShellTransitionsEnabled()) {
                 mAtmService.continueWindowLayout();

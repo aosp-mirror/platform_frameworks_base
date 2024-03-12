@@ -20,7 +20,7 @@ import static android.companion.DevicePresenceEvent.EVENT_BT_CONNECTED;
 import static android.companion.DevicePresenceEvent.EVENT_BT_DISCONNECTED;
 
 import static com.android.server.companion.presence.CompanionDevicePresenceMonitor.DEBUG;
-import static com.android.server.companion.presence.Utils.btDeviceToString;
+import static com.android.server.companion.utils.Utils.btDeviceToString;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -39,9 +39,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.companion.AssociationStore;
-import com.android.server.companion.ObservableUuid;
-import com.android.server.companion.ObservableUuidStore;
+import com.android.server.companion.association.AssociationStore;
 
 import java.util.Arrays;
 import java.util.Collections;

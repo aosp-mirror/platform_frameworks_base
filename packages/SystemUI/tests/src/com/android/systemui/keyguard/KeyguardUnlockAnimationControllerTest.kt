@@ -6,6 +6,7 @@ import android.app.WindowConfiguration
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.PowerManager
+import android.platform.test.annotations.DisableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.RemoteAnimationTarget
@@ -15,6 +16,7 @@ import android.view.View
 import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.shared.system.smartspace.ILauncherUnlockAnimationController
@@ -130,6 +132,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
      * surface, or the user will see the wallpaper briefly as the app animates in.
      */
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun noSurfaceAnimation_ifWakeAndUnlocking() {
         whenever(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
@@ -320,6 +323,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
      * If we are not wake and unlocking, we expect the unlock animation to play normally.
      */
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceAnimation_multipleTargets() {
         keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
                 arrayOf(remoteTarget1, remoteTarget2),
@@ -358,6 +362,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceBehindAlphaOverriddenTo0_ifNotInteractive() {
         whenever(powerManager.isInteractive).thenReturn(false)
 
@@ -389,6 +394,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun surfaceBehindAlphaNotOverriddenTo0_ifInteractive() {
         whenever(powerManager.isInteractive).thenReturn(true)
 

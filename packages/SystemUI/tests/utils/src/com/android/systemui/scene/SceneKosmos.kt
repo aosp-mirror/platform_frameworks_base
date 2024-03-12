@@ -3,18 +3,18 @@ package com.android.systemui.scene
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 
 var Kosmos.sceneKeys by Fixture {
     listOf(
-        SceneKey.QuickSettings,
-        SceneKey.Shade,
-        SceneKey.Lockscreen,
-        SceneKey.Bouncer,
-        SceneKey.Gone,
-        SceneKey.Communal,
+        Scenes.QuickSettings,
+        Scenes.Shade,
+        Scenes.Lockscreen,
+        Scenes.Bouncer,
+        Scenes.Gone,
+        Scenes.Communal,
     )
 }
 
-val Kosmos.initialSceneKey by Fixture { SceneKey.Lockscreen }
+val Kosmos.initialSceneKey by Fixture { Scenes.Lockscreen }
 val Kosmos.sceneContainerConfig by Fixture { SceneContainerConfig(sceneKeys, initialSceneKey) }

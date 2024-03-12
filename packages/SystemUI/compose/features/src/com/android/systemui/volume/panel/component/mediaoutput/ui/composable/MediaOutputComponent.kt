@@ -27,12 +27,14 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -137,12 +139,14 @@ constructor(
                     }
                 }
             ) { targetViewModel ->
-                Expandable(
-                    modifier = Modifier.fillMaxSize(),
-                    color = targetViewModel.backgroundColor.toColor(),
-                    shape = RoundedCornerShape(12.dp),
-                    onClick = { viewModel.onDeviceClick(it) },
-                ) {}
+                Spacer(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .background(
+                                color = targetViewModel.backgroundColor.toColor(),
+                                shape = RoundedCornerShape(12.dp),
+                            ),
+                )
             }
             transition.AnimatedContent(
                 contentKey = { it.icon },

@@ -1366,7 +1366,7 @@ package android.credentials.selection {
   }
 
   @FlaggedApi("android.credentials.flags.configurable_selector_ui_enabled") public class IntentFactory {
-    method @NonNull public static android.content.Intent createCancelUiIntent(@NonNull android.os.IBinder, boolean, @NonNull String);
+    method @NonNull public static android.content.Intent createCancelUiIntent(@NonNull android.content.Context, @NonNull android.os.IBinder, boolean, @NonNull String);
     method @NonNull public static android.content.Intent createCredentialSelectorIntent(@NonNull android.content.Context, @NonNull android.credentials.selection.RequestInfo, @NonNull java.util.ArrayList<android.credentials.selection.ProviderData>, @NonNull java.util.ArrayList<android.credentials.selection.DisabledProviderData>, @NonNull android.os.ResultReceiver);
   }
 
@@ -1519,6 +1519,7 @@ package android.graphics.fonts {
 package android.hardware {
 
   public final class SensorPrivacyManager {
+    method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setCameraPrivacyAllowlist(@NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacy(int, int, boolean);
     method @FlaggedApi("com.android.internal.camera.flags.camera_privacy_allowlist") @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setSensorPrivacyState(int, int, int);
   }
@@ -1623,8 +1624,6 @@ package android.hardware.camera2.params {
 package android.hardware.devicestate {
 
   @FlaggedApi("android.hardware.devicestate.feature.flags.device_state_property_api") public final class DeviceState {
-    ctor @Deprecated public DeviceState(@IntRange(from=android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER, to=android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER) int, @NonNull String, int);
-    ctor public DeviceState(@IntRange(from=android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STATE_IDENTIFIER, to=android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE_IDENTIFIER) int, @NonNull String, @NonNull java.util.Set<java.lang.Integer>);
     field public static final int PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST = 8; // 0x8
   }
 
@@ -1705,15 +1704,6 @@ package android.hardware.display {
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 16384; // 0x4000
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
     field public static final int VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH = 64; // 0x40
-  }
-
-}
-
-package android.hardware.fingerprint {
-
-  @Deprecated public class FingerprintManager {
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
   }
 
 }
@@ -2029,41 +2019,6 @@ package android.media {
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
-  }
-
-  @FlaggedApi("android.os.vibrator.haptics_customization_enabled") public final class RingtoneSelection {
-    method @NonNull public static android.media.RingtoneSelection fromUri(@Nullable android.net.Uri, int);
-    method public int getSoundSource();
-    method @Nullable public android.net.Uri getSoundUri();
-    method public int getVibrationSource();
-    method @Nullable public android.net.Uri getVibrationUri();
-    method public static boolean isRingtoneSelectionUri(@Nullable android.net.Uri);
-    method @NonNull public android.net.Uri toUri();
-    field public static final String DEFAULT_SELECTION_URI_STRING = "content://media/ringtone";
-    field public static final int FROM_URI_RINGTONE_SELECTION_ONLY = 3; // 0x3
-    field public static final int FROM_URI_RINGTONE_SELECTION_OR_SOUND = 1; // 0x1
-    field public static final int FROM_URI_RINGTONE_SELECTION_OR_VIBRATION = 2; // 0x2
-    field public static final int SOUND_SOURCE_OFF = 1; // 0x1
-    field public static final int SOUND_SOURCE_SYSTEM_DEFAULT = 3; // 0x3
-    field public static final int SOUND_SOURCE_UNSPECIFIED = 0; // 0x0
-    field public static final int SOUND_SOURCE_URI = 2; // 0x2
-    field public static final int VIBRATION_SOURCE_APPLICATION_DEFAULT = 4; // 0x4
-    field public static final int VIBRATION_SOURCE_AUDIO_CHANNEL = 10; // 0xa
-    field public static final int VIBRATION_SOURCE_HAPTIC_GENERATOR = 11; // 0xb
-    field public static final int VIBRATION_SOURCE_OFF = 1; // 0x1
-    field public static final int VIBRATION_SOURCE_SYSTEM_DEFAULT = 3; // 0x3
-    field public static final int VIBRATION_SOURCE_UNSPECIFIED = 0; // 0x0
-    field public static final int VIBRATION_SOURCE_URI = 2; // 0x2
-  }
-
-  @FlaggedApi("android.os.vibrator.haptics_customization_enabled") public static final class RingtoneSelection.Builder {
-    ctor public RingtoneSelection.Builder();
-    ctor public RingtoneSelection.Builder(@NonNull android.media.RingtoneSelection);
-    method @NonNull public android.media.RingtoneSelection build();
-    method @NonNull public android.media.RingtoneSelection.Builder setSoundSource(int);
-    method @NonNull public android.media.RingtoneSelection.Builder setSoundSource(@NonNull android.net.Uri);
-    method @NonNull public android.media.RingtoneSelection.Builder setVibrationSource(int);
-    method @NonNull public android.media.RingtoneSelection.Builder setVibrationSource(@NonNull android.net.Uri);
   }
 
   public static final class VolumeShaper.Configuration.Builder {
@@ -3964,6 +3919,7 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodInfo implements android.os.Parcelable {
+    ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, @NonNull String);
     ctor @FlaggedApi("android.view.inputmethod.connectionless_handwriting") public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, @NonNull String, boolean, boolean, @NonNull String);
     ctor public InputMethodInfo(@NonNull String, @NonNull String, @NonNull CharSequence, @NonNull String, int);
@@ -3979,6 +3935,7 @@ package android.view.inputmethod {
     method @NonNull @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional=true) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean hasPendingImeVisibilityRequests();
+    method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public void hideSoftInputFromServerForTest();
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isCurrentRootView(@NonNull android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isInputMethodPickerShown();
     method @FlaggedApi("android.view.inputmethod.imm_userhandle_hostsidetests") @NonNull @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional=true) public boolean isStylusHandwritingAvailableAsUser(@NonNull android.os.UserHandle);

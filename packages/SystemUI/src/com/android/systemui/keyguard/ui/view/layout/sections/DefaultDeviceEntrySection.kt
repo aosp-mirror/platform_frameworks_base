@@ -26,7 +26,6 @@ import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
@@ -56,7 +55,6 @@ class DefaultDeviceEntrySection
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val authController: AuthController,
     private val windowManager: WindowManager,
     private val context: Context,
@@ -111,7 +109,12 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        val isUdfpsSupported = keyguardUpdateMonitor.isUdfpsSupported
+        val isUdfpsSupported =
+            if (DeviceEntryUdfpsRefactor.isEnabled) {
+                deviceEntryIconViewModel.get().isUdfpsSupported.value
+            } else {
+                authController.isUdfpsSupported
+            }
         val scaleFactor: Float = authController.scaleFactor
         val mBottomPaddingPx =
             context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)

@@ -9,3 +9,10 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "start_user_before_scheduled_alarms"
+    namespace: "multiuser"
+    description: "Persist list of users with alarms scheduled and wakeup stopped users before alarms are due"
+    bug: "314907186"
+}

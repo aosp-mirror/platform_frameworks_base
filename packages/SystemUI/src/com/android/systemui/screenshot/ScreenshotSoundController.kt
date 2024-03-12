@@ -21,22 +21,34 @@ import android.util.Log
 import com.android.app.tracing.coroutines.async
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.google.errorprone.annotations.CanIgnoreReturnValue
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 
 /** Controls sound reproduction after a screenshot is taken. */
 interface ScreenshotSoundController {
     /** Reproduces the camera sound. */
-    @CanIgnoreReturnValue fun playCameraSound(): Deferred<Unit>
+    suspend fun playScreenshotSound()
 
-    /** Releases the sound. [playCameraSound] behaviour is undefined after this has been called. */
-    @CanIgnoreReturnValue fun releaseScreenshotSound(): Deferred<Unit>
+    /**
+     * Releases the sound. [playScreenshotSound] behaviour is undefined after this has been called.
+     */
+    suspend fun releaseScreenshotSound()
+
+    /** Reproduces the camera sound. Used for compatibility with Java code. */
+    fun playScreenshotSoundAsync()
+
+    /**
+     * Releases the sound. [playScreenshotSound] behaviour is undefined after this has been called.
+     * Used for compatibility with Java code.
+     */
+    fun releaseScreenshotSoundAsync()
 }
 
 class ScreenshotSoundControllerImpl
@@ -47,8 +59,8 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher
 ) : ScreenshotSoundController {
 
-    val player: Deferred<MediaPlayer?> =
-        coroutineScope.async("loadCameraSound", bgDispatcher) {
+    private val player: Deferred<MediaPlayer?> =
+        coroutineScope.async("loadScreenshotSound", bgDispatcher) {
             try {
                 soundProvider.getScreenshotSound()
             } catch (e: IllegalStateException) {
@@ -57,8 +69,8 @@ constructor(
             }
         }
 
-    override fun playCameraSound(): Deferred<Unit> {
-        return coroutineScope.async("playCameraSound", bgDispatcher) {
+    override suspend fun playScreenshotSound() {
+        withContext(bgDispatcher) {
             try {
                 player.await()?.start()
             } catch (e: IllegalStateException) {
@@ -68,8 +80,8 @@ constructor(
         }
     }
 
-    override fun releaseScreenshotSound(): Deferred<Unit> {
-        return coroutineScope.async("releaseScreenshotSound", bgDispatcher) {
+    override suspend fun releaseScreenshotSound() {
+        withContext(bgDispatcher) {
             try {
                 withTimeout(1.seconds) { player.await()?.release() }
             } catch (e: TimeoutCancellationException) {
@@ -77,6 +89,14 @@ constructor(
                 Log.w(TAG, "Error releasing shutter sound", e)
             }
         }
+    }
+
+    override fun playScreenshotSoundAsync() {
+        coroutineScope.launch { playScreenshotSound() }
+    }
+
+    override fun releaseScreenshotSoundAsync() {
+        coroutineScope.launch { releaseScreenshotSound() }
     }
 
     private companion object {

@@ -126,6 +126,11 @@
     <item msgid="8259411607272330225">"כבוי"</item>
     <item msgid="578444932039713369">"פועל"</item>
   </string-array>
+  <string-array name="tile_states_record_issue">
+    <item msgid="1727196795383575383">"לא זמין"</item>
+    <item msgid="9061144428113385092">"מצב מושבת"</item>
+    <item msgid="2984256114867200368">"מצב פעיל"</item>
+  </string-array>
   <string-array name="tile_states_reverse">
     <item msgid="3574611556622963971">"לא זמין"</item>
     <item msgid="8707481475312432575">"כבוי"</item>

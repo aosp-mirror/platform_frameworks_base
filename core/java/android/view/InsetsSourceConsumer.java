@@ -314,7 +314,7 @@ public class InsetsSourceConsumer {
      * @param fromController {@code true} if request is coming from controller.
      *                       (e.g. in IME case, controller is
      *                       {@link android.inputmethodservice.InputMethodService}).
-     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
+     * @param statsToken the token tracking the current IME request or {@code null} otherwise.
      *
      * @implNote The {@code statsToken} is ignored here, and only handled in
      * {@link ImeInsetsSourceConsumer} for IME animations only.

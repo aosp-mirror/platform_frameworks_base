@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.data.repository
 
 import android.os.Handler
 import android.util.Log
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
@@ -30,7 +29,6 @@ import com.android.systemui.util.ThreadAssert
 import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -49,7 +47,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class KeyguardBlueprintRepository
 @Inject
 constructor(
-    configurationRepository: ConfigurationRepository,
     blueprints: Set<@JvmSuppressWildcards KeyguardBlueprint>,
     @Main val handler: Handler,
     val assert: ThreadAssert,
@@ -60,7 +57,6 @@ constructor(
         TreeMap<String, KeyguardBlueprint>().apply { putAll(blueprints.associateBy { it.id }) }
     val blueprint: MutableStateFlow<KeyguardBlueprint> = MutableStateFlow(blueprintIdMap[DEFAULT]!!)
     val refreshTransition = MutableSharedFlow<Config>(extraBufferCapacity = 1)
-    val configurationChange: Flow<Unit> = configurationRepository.onAnyConfigurationChange
     private var targetTransitionConfig: Config? = null
 
     /**

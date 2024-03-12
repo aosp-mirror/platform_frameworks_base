@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.ActivityManager
+import android.app.WindowConfiguration
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -26,6 +28,7 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -42,6 +45,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 
@@ -126,7 +130,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             keyguardRepository.setKeyguardDismissible(true)
             runCurrent()
             shadeRepository.setCurrentFling(
-                FlingInfo(expand = true) // Not a dismiss fling (expand = true).
+                FlingInfo(expand = false) // Is a dismiss fling upward (expand = false).
             )
             runCurrent()
 
@@ -152,5 +156,68 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThatRepository(transitionRepository).noTransitionsStarted()
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testDoesNotTransitionToGone_whenDismissFling_emitsNull() =
+        testScope.runTest {
+            underTest.start()
+            verify(transitionRepository, never()).startTransition(any())
+
+            keyguardRepository.setKeyguardDismissible(true)
+            runCurrent()
+
+            // The fling is null when it a) initializes b) ends and in either case we should not
+            // swipe to unlock.
+            shadeRepository.setCurrentFling(null)
+            runCurrent()
+
+            assertThatRepository(transitionRepository).noTransitionsStarted()
+        }
+
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionsToOccluded_whenShowWhenLockedActivityOnTop() =
+        testScope.runTest {
+            underTest.start()
+            runCurrent()
+
+            reset(transitionRepository)
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(
+                true,
+                ActivityManager.RunningTaskInfo().apply {
+                    topActivityType = WindowConfiguration.ACTIVITY_TYPE_STANDARD
+                }
+            )
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.OCCLUDED,
+                )
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionsToDream_whenDreamActivityOnTop() =
+        testScope.runTest {
+            underTest.start()
+            runCurrent()
+
+            reset(transitionRepository)
+            kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(
+                true,
+                ActivityManager.RunningTaskInfo().apply {
+                    topActivityType = WindowConfiguration.ACTIVITY_TYPE_DREAM
+                }
+            )
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.DREAMING,
+                )
         }
 }

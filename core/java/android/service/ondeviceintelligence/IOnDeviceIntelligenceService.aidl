@@ -26,6 +26,7 @@ import android.app.ondeviceintelligence.IFeatureCallback;
 import android.app.ondeviceintelligence.IListFeaturesCallback;
 import android.app.ondeviceintelligence.IFeatureDetailsCallback;
 import com.android.internal.infra.AndroidFuture;
+import android.service.ondeviceintelligence.IRemoteProcessingService;
 
 
 /**
@@ -35,10 +36,13 @@ import com.android.internal.infra.AndroidFuture;
  */
 oneway interface IOnDeviceIntelligenceService {
     void getVersion(in RemoteCallback remoteCallback);
-    void getFeature(in int featureId, in IFeatureCallback featureCallback);
-    void listFeatures(in IListFeaturesCallback listFeaturesCallback);
-    void getFeatureDetails(in Feature feature, in IFeatureDetailsCallback featureDetailsCallback);
+    void getFeature(int callerUid, int featureId, in IFeatureCallback featureCallback);
+    void listFeatures(int callerUid, in IListFeaturesCallback listFeaturesCallback);
+    void getFeatureDetails(int callerUid, in Feature feature, in IFeatureDetailsCallback featureDetailsCallback);
     void getReadOnlyFileDescriptor(in String fileName, in AndroidFuture<ParcelFileDescriptor> future);
     void getReadOnlyFeatureFileDescriptorMap(in Feature feature, in RemoteCallback remoteCallback);
-    void requestFeatureDownload(in Feature feature, in ICancellationSignal cancellationSignal, in IDownloadCallback downloadCallback);
+    void requestFeatureDownload(int callerUid, in Feature feature, in ICancellationSignal cancellationSignal, in IDownloadCallback downloadCallback);
+    void registerRemoteServices(in IRemoteProcessingService remoteProcessingService);
+    void notifyInferenceServiceConnected();
+    void notifyInferenceServiceDisconnected();
 }

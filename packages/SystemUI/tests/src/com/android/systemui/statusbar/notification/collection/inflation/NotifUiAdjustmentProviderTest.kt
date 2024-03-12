@@ -23,6 +23,7 @@ import android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -31,7 +32,9 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
+import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -46,6 +49,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
@@ -55,6 +59,8 @@ import org.mockito.Mockito.`when` as whenever
 @RunWithLooper
 class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     private val lockscreenUserManager: NotificationLockscreenUserManager = mock()
+    private val sensitiveNotifProtectionController: SensitiveNotificationProtectionController =
+        mock()
     private val sectionStyleProvider: SectionStyleProvider = mock()
     private val handler: Handler = mock()
     private val secureSettings: SecureSettings = mock()
@@ -75,6 +81,7 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
         handler,
         secureSettings,
         lockscreenUserManager,
+        sensitiveNotifProtectionController,
         sectionStyleProvider,
         userTracker,
         groupMembershipManager,
@@ -102,6 +109,19 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
                 verify(lockscreenUserManager).addNotificationStateChangedListener(capture())
             }
         notifLocksreenStateChangeListener.onNotificationStateChanged()
+        verify(dirtyListener).run()
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun sensitiveNotifProtectionStateChangeWillNotifDirty() {
+        val dirtyListener = mock<Runnable>()
+        adjustmentProvider.addDirtyListener(dirtyListener)
+        val sensitiveStateChangedListener =
+            withArgCaptor<Runnable> {
+                verify(sensitiveNotifProtectionController).registerSensitiveStateListener(capture())
+            }
+        sensitiveStateChangedListener.run()
         verify(dirtyListener).run()
     }
 
@@ -141,12 +161,14 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     fun changeIsChildInGroup_asyncHybirdFlagEnabled_needReInflation() {
         // Given: an Entry that is not child in group
         // AsyncHybridViewInflation flag is enabled
-        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(false)
+        val spySbn = spy(entry.sbn)
+        entry.sbn = spySbn
+        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(false)
         val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(oldAdjustment.isChildInGroup).isFalse()
 
         // When: the Entry becomes a group child
-        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(true)
+        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(true)
         val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(newAdjustment.isChildInGroup).isTrue()
         assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
@@ -160,15 +182,71 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     fun changeIsChildInGroup_asyncHybirdFlagDisabled_noNeedForReInflation() {
         // Given: an Entry that is not child in group
         // AsyncHybridViewInflation flag is disabled
-        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(false)
+        val spySbn = spy(entry.sbn)
+        entry.sbn = spySbn
+        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(false)
         val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(oldAdjustment.isChildInGroup).isFalse()
 
         // When: the Entry becomes a group child
-        whenever(groupMembershipManager.isChildInGroup(entry)).thenReturn(true)
+        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(true)
         val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(newAdjustment.isChildInGroup).isTrue()
         assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
+
+        // Then: need no re-inflation
+        assertFalse(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
+    }
+
+    @Test
+    @EnableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
+    fun changeIsGroupSummary_needReInflation() {
+        // Given: an Entry that is not a group summary
+        val spySbn = spy(entry.sbn)
+        entry.sbn = spySbn
+        whenever(spySbn.isAppOrSystemGroupSummary).thenReturn(false)
+        val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(oldAdjustment.isGroupSummary).isFalse()
+
+        // When: the Entry becomes a group summary
+        whenever(spySbn.isAppOrSystemGroupSummary).thenReturn(true)
+        val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertThat(newAdjustment.isGroupSummary).isTrue()
+        assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
+
+        // Then: Need re-inflation
+        assertTrue(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
+    }
+
+    @Test
+    @EnableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun changeSensitiveNotifProtection_screenshareNotificationHidingEnabled_needReinflate() {
+        whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
+            .thenReturn(false)
+        val oldAdjustment: NotifUiAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertFalse(oldAdjustment.needsRedaction)
+
+        whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
+            .thenReturn(true)
+        val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertTrue(newAdjustment.needsRedaction)
+
+        // Then: need re-inflation
+        assertTrue(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
+    }
+
+    @Test
+    @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
+    fun changeSensitiveNotifProtection_screenshareNotificationHidingDisabled_noNeedReinflate() {
+        whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
+            .thenReturn(false)
+        val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertFalse(oldAdjustment.needsRedaction)
+
+        whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
+            .thenReturn(true)
+        val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
+        assertFalse(newAdjustment.needsRedaction)
 
         // Then: need no re-inflation
         assertFalse(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))

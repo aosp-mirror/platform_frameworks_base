@@ -36,6 +36,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 
 import com.android.app.animation.Interpolators;
+import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -49,7 +50,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.model.SceneKey;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -659,11 +660,11 @@ public class StatusBarStateControllerImpl implements
     }
 
     private static final Map<SceneKey, Integer> sStatusBarStateByLockedSceneKey = Map.of(
-            SceneKey.Lockscreen.INSTANCE, StatusBarState.KEYGUARD,
-            SceneKey.Bouncer.INSTANCE, StatusBarState.KEYGUARD,
-            SceneKey.Communal.INSTANCE, StatusBarState.KEYGUARD,
-            SceneKey.Shade.INSTANCE, StatusBarState.SHADE_LOCKED,
-            SceneKey.QuickSettings.INSTANCE, StatusBarState.SHADE_LOCKED
+            Scenes.Lockscreen, StatusBarState.KEYGUARD,
+            Scenes.Bouncer, StatusBarState.KEYGUARD,
+            Scenes.Communal, StatusBarState.KEYGUARD,
+            Scenes.Shade, StatusBarState.SHADE_LOCKED,
+            Scenes.QuickSettings, StatusBarState.SHADE_LOCKED
     );
 
     /**

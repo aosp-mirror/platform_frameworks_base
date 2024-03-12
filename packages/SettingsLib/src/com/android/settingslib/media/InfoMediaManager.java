@@ -44,7 +44,6 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
 import android.annotation.TargetApi;
-import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -67,6 +66,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.flags.Flags;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -74,16 +74,50 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /** InfoMediaManager provide interface to get InfoMediaDevice list. */
 @RequiresApi(Build.VERSION_CODES.R)
-public abstract class InfoMediaManager extends MediaManager {
+public abstract class InfoMediaManager {
+    /** Callback for notifying device is added, removed and attributes changed. */
+    public interface MediaDeviceCallback {
 
-    private static final String TAG = "InfoMediaManager";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+        /**
+         * Callback for notifying MediaDevice list is added.
+         *
+         * @param devices the MediaDevice list
+         */
+        void onDeviceListAdded(@NonNull List<MediaDevice> devices);
+
+        /**
+         * Callback for notifying MediaDevice list is removed.
+         *
+         * @param devices the MediaDevice list
+         */
+        void onDeviceListRemoved(@NonNull List<MediaDevice> devices);
+
+        /**
+         * Callback for notifying connected MediaDevice is changed.
+         *
+         * @param id the id of MediaDevice
+         */
+        void onConnectedDeviceChanged(@Nullable String id);
+
+        /**
+         * Callback for notifying that transferring is failed.
+         *
+         * @param reason the reason that the request has failed. Can be one of followings: {@link
+         *     android.media.MediaRoute2ProviderService#REASON_UNKNOWN_ERROR}, {@link
+         *     android.media.MediaRoute2ProviderService#REASON_REJECTED}, {@link
+         *     android.media.MediaRoute2ProviderService#REASON_NETWORK_ERROR}, {@link
+         *     android.media.MediaRoute2ProviderService#REASON_ROUTE_NOT_AVAILABLE}, {@link
+         *     android.media.MediaRoute2ProviderService#REASON_INVALID_COMMAND},
+         */
+        void onRequestFailed(int reason);
+    }
 
     /** Checked exception that signals the specified package is not present in the system. */
     public static class PackageNotAvailableException extends Exception {
@@ -92,19 +126,22 @@ public abstract class InfoMediaManager extends MediaManager {
         }
     }
 
+    private static final String TAG = "InfoMediaManager";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    protected final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
+    @NonNull protected final Context mContext;
     @NonNull protected final String mPackageName;
+    private final Collection<MediaDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
     private MediaDevice mCurrentConnectedDevice;
     private final LocalBluetoothManager mBluetoothManager;
     private final Map<String, RouteListingPreference.Item> mPreferenceItemMap =
             new ConcurrentHashMap<>();
 
     /* package */ InfoMediaManager(
-            Context context,
+            @NonNull Context context,
             @NonNull String packageName,
-            Notification notification,
-            LocalBluetoothManager localBluetoothManager) {
-        super(context, notification);
-
+            @NonNull LocalBluetoothManager localBluetoothManager) {
+        mContext = context;
         mBluetoothManager = localBluetoothManager;
         mPackageName = packageName;
     }
@@ -113,7 +150,6 @@ public abstract class InfoMediaManager extends MediaManager {
     public static InfoMediaManager createInstance(
             Context context,
             @Nullable String packageName,
-            Notification notification,
             LocalBluetoothManager localBluetoothManager) {
 
         // The caller is only interested in system routes (headsets, built-in speakers, etc), and is
@@ -125,17 +161,14 @@ public abstract class InfoMediaManager extends MediaManager {
 
         if (Flags.useMediaRouter2ForInfoMediaManager()) {
             try {
-                return new RouterInfoMediaManager(
-                        context, packageName, notification, localBluetoothManager);
+                return new RouterInfoMediaManager(context, packageName, localBluetoothManager);
             } catch (PackageNotAvailableException ex) {
                 // TODO: b/293578081 - Propagate this exception to callers for proper handling.
                 Log.w(TAG, "Returning a no-op InfoMediaManager for package " + packageName);
-                return new NoOpInfoMediaManager(
-                        context, packageName, notification, localBluetoothManager);
+                return new NoOpInfoMediaManager(context, packageName, localBluetoothManager);
             }
         } else {
-            return new ManagerInfoMediaManager(
-                    context, packageName, notification, localBluetoothManager);
+            return new ManagerInfoMediaManager(context, packageName, localBluetoothManager);
         }
     }
 
@@ -225,6 +258,48 @@ public abstract class InfoMediaManager extends MediaManager {
     protected final void notifyRouteListingPreferenceUpdated(
             RouteListingPreference routeListingPreference) {
         Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference, mPreferenceItemMap);
+    }
+
+    protected final MediaDevice findMediaDevice(@NonNull String id) {
+        for (MediaDevice mediaDevice : mMediaDevices) {
+            if (mediaDevice.getId().equals(id)) {
+                return mediaDevice;
+            }
+        }
+        Log.e(TAG, "findMediaDevice() can't find device with id: " + id);
+        return null;
+    }
+
+    protected final void registerCallback(MediaDeviceCallback callback) {
+        if (!mCallbacks.contains(callback)) {
+            mCallbacks.add(callback);
+        }
+    }
+
+    protected final void unregisterCallback(MediaDeviceCallback callback) {
+        mCallbacks.remove(callback);
+    }
+
+    private void dispatchDeviceListAdded(@NonNull List<MediaDevice> devices) {
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onDeviceListAdded(new ArrayList<>(devices));
+        }
+    }
+
+    private void dispatchConnectedDeviceChanged(String id) {
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onConnectedDeviceChanged(id);
+        }
+    }
+
+    protected void dispatchOnRequestFailed(int reason) {
+        for (MediaDeviceCallback callback : getCallbacks()) {
+            callback.onRequestFailed(reason);
+        }
+    }
+
+    private Collection<MediaDeviceCallback> getCallbacks() {
+        return new CopyOnWriteArrayList<>(mCallbacks);
     }
 
     /**
@@ -433,7 +508,7 @@ public abstract class InfoMediaManager extends MediaManager {
 
     protected final synchronized void refreshDevices() {
         rebuildDeviceList();
-        dispatchDeviceListAdded();
+        dispatchDeviceListAdded(mMediaDevices);
     }
 
     // MediaRoute2Info.getType was made public on API 34, but exists since API 30.

@@ -16,11 +16,14 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +40,7 @@ constructor(
     @Application applicationScope: CoroutineScope,
     deviceEntryInteractor: DeviceEntryInteractor,
     communalInteractor: CommunalInteractor,
+    shadeInteractor: ShadeInteractor,
     val longPress: KeyguardLongPressViewModel,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
@@ -51,13 +55,23 @@ constructor(
             )
 
     private fun upDestinationSceneKey(isUnlocked: Boolean): SceneKey {
-        return if (isUnlocked) SceneKey.Gone else SceneKey.Bouncer
+        return if (isUnlocked) Scenes.Gone else Scenes.Bouncer
     }
 
     /** The key of the scene we should switch to when swiping left. */
     val leftDestinationSceneKey: StateFlow<SceneKey?> =
         communalInteractor.isCommunalAvailable
-            .map { available -> if (available) SceneKey.Communal else null }
+            .map { available -> if (available) Scenes.Communal else null }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null,
+            )
+
+    /** The key of the scene we should switch to when swiping down from the top edge. */
+    val downFromTopEdgeDestinationSceneKey: StateFlow<SceneKey?> =
+        shadeInteractor.shadeMode
+            .map { shadeMode -> Scenes.QuickSettings.takeIf { shadeMode is ShadeMode.Single } }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),

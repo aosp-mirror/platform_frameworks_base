@@ -37,14 +37,13 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collapsing
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Expanding
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Unsquishing
-import com.android.systemui.scene.ui.composable.QuickSettings as QuickSettingsSceneKey
-import com.android.systemui.scene.ui.composable.Shade
+import com.android.systemui.scene.shared.model.Scenes
 
 object QuickSettings {
     private val SCENES =
         setOf(
-            QuickSettingsSceneKey,
-            Shade,
+            Scenes.QuickSettings,
+            Scenes.Shade,
         )
 
     object Elements {
@@ -64,23 +63,28 @@ object QuickSettings {
 }
 
 private fun SceneScope.stateForQuickSettingsContent(
+    isSplitShade: Boolean,
     squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default
 ): QSSceneAdapter.State {
     return when (val transitionState = layoutState.transitionState) {
         is TransitionState.Idle -> {
             when (transitionState.currentScene) {
-                Shade -> QSSceneAdapter.State.QQS
-                QuickSettingsSceneKey -> QSSceneAdapter.State.QS
+                Scenes.Shade -> QSSceneAdapter.State.QQS.takeUnless { isSplitShade }
+                        ?: QSSceneAdapter.State.QS
+                Scenes.QuickSettings -> QSSceneAdapter.State.QS
                 else -> QSSceneAdapter.State.CLOSED
             }
         }
         is TransitionState.Transition ->
             with(transitionState) {
                 when {
-                    fromScene == Shade && toScene == QuickSettingsSceneKey -> Expanding(progress)
-                    fromScene == QuickSettingsSceneKey && toScene == Shade -> Collapsing(progress)
-                    fromScene == Shade || toScene == Shade -> Unsquishing(squishiness)
-                    fromScene == QuickSettingsSceneKey || toScene == QuickSettingsSceneKey -> {
+                    isSplitShade -> QSSceneAdapter.State.QS
+                    fromScene == Scenes.Shade && toScene == Scenes.QuickSettings ->
+                        Expanding(progress)
+                    fromScene == Scenes.QuickSettings && toScene == Scenes.Shade ->
+                        Collapsing(progress)
+                    fromScene == Scenes.Shade || toScene == Scenes.Shade -> Unsquishing(squishiness)
+                    fromScene == Scenes.QuickSettings || toScene == Scenes.QuickSettings -> {
                         QSSceneAdapter.State.QS
                     }
                     else ->
@@ -110,10 +114,11 @@ private fun SceneScope.stateForQuickSettingsContent(
 fun SceneScope.QuickSettings(
     qsSceneAdapter: QSSceneAdapter,
     heightProvider: () -> Int,
+    isSplitShade: Boolean,
     modifier: Modifier = Modifier,
     squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default,
 ) {
-    val contentState = stateForQuickSettingsContent(squishiness)
+    val contentState = stateForQuickSettingsContent(isSplitShade, squishiness)
 
     MovableElement(
         key = QuickSettings.Elements.Content,

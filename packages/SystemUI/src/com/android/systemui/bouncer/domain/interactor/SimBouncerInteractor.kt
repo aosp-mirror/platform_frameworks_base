@@ -61,7 +61,7 @@ constructor(
     private val telephonyManager: TelephonyManager,
     @Main private val resources: Resources,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val euiccManager: EuiccManager,
+    private val euiccManager: EuiccManager?,
     // TODO(b/307977401): Replace this with `MobileConnectionsInteractor` when available.
     mobileConnectionsRepository: MobileConnectionsRepository,
 ) {
@@ -141,11 +141,13 @@ constructor(
                 UserHandle.SYSTEM
             )
         applicationScope.launch(backgroundDispatcher) {
-            euiccManager.switchToSubscription(
-                INVALID_SUBSCRIPTION_ID,
-                activeSubscription.portIndex,
-                callbackIntent,
-            )
+            if (euiccManager != null) {
+                euiccManager.switchToSubscription(
+                    INVALID_SUBSCRIPTION_ID,
+                    activeSubscription.portIndex,
+                    callbackIntent,
+                )
+            }
         }
     }
 

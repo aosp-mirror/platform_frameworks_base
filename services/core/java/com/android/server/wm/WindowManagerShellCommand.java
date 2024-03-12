@@ -49,6 +49,7 @@ import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.protolog.LegacyProtoLogImpl;
+import com.android.internal.protolog.PerfettoProtoLogImpl;
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.IoThread;
@@ -111,8 +112,13 @@ public class WindowManagerShellCommand extends ShellCommand {
                 case "logging":
                     IProtoLog instance = ProtoLog.getSingleInstance();
                     int result = 0;
-                    if (instance instanceof LegacyProtoLogImpl) {
-                        result = ((LegacyProtoLogImpl) instance).onShellCommand(this);
+                    if (instance instanceof LegacyProtoLogImpl
+                            || instance instanceof PerfettoProtoLogImpl) {
+                        if (instance instanceof LegacyProtoLogImpl) {
+                            result = ((LegacyProtoLogImpl) instance).onShellCommand(this);
+                        } else {
+                            result = ((PerfettoProtoLogImpl) instance).onShellCommand(this);
+                        }
                         if (result != 0) {
                             pw.println("Not handled, please use "
                                     + "`adb shell dumpsys activity service SystemUIService "
@@ -120,8 +126,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                         }
                     } else {
                         result = -1;
-                        pw.println("Command not supported. "
-                                + "Only supported when using legacy ProtoLog.");
+                        pw.println("ProtoLog impl doesn't support handling commands");
                     }
                     return result;
                 case "user-rotation":

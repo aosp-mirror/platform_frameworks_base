@@ -45,9 +45,10 @@ constructor(
     val isSmallClockVisible: Flow<Boolean> =
         interactor.selectedClockSize.map { it == SettingsClockSize.SMALL }
 
-    var lastClock: ClockController? = null
+    var lastClockPair: Pair<ClockController, ClockController>? = null
 
-    val previewClock: StateFlow<ClockController> = interactor.previewClock
+    val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
+        interactor.previewClockPair
 
     val selectedClockSize: StateFlow<SettingsClockSize?> =
         interactor.selectedClockSize.stateIn(

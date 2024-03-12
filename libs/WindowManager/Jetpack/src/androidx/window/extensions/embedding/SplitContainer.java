@@ -201,7 +201,7 @@ class SplitContainer {
             return null;
         }
         return new SplitInfo(primaryActivityStack, secondaryActivityStack,
-                mCurrentSplitAttributes, mToken);
+                mCurrentSplitAttributes, SplitInfo.Token.createFromBinder(mToken));
     }
 
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {

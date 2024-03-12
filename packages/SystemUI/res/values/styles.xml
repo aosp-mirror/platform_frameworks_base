@@ -987,6 +987,11 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
+
+        <!--
+            TODO(b/309578419): Make activities handle insets properly and then remove this.
+        -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
     <style name="Theme.EditWidgetsActivity"
@@ -1580,5 +1585,9 @@
 
     <style name="Theme.PrivacyDialog" parent="@style/Theme.SystemUI.Dialog">
         <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
+    </style>
+
+    <style name="Theme.SystemUI.Dialog.StickyKeys" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:colorBackground">@color/transparent</item>
     </style>
 </resources>

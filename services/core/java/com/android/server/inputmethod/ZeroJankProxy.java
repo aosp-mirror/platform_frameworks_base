@@ -72,6 +72,7 @@ import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.view.IInputMethodManager;
 
 import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -100,7 +101,6 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
     }
 
     private void offloadInner(Runnable r) {
-        boolean useThrowingRunnable = r instanceof ThrowingRunnable;
         final long identity = Binder.clearCallingIdentity();
         try {
             mExecutor.execute(() -> {
@@ -109,14 +109,9 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
                 Binder.restoreCallingIdentity(identity);
                 try {
                     try {
-                        if (useThrowingRunnable) {
-                            ((ThrowingRunnable) r).runOrThrow();
-                        } else {
-                            r.run();
-                        }
+                        r.run();
                     } catch (Exception e) {
-                        Slog.e(TAG, "Error in async call", e);
-                        throw ExceptionUtils.propagate(e);
+                        Slog.e(TAG, "Error in async IMMS call", e);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(inner);
@@ -181,6 +176,13 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
         offload(() -> mInner.hideSoftInput(client, windowToken, statsToken, flags, resultReceiver,
                 reason));
         return true;
+    }
+
+    @Override
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    public void hideSoftInputFromServerForTest() throws RemoteException {
+        super.hideSoftInputFromServerForTest_enforcePermission();
+        mInner.hideSoftInputFromServerForTest();
     }
 
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
@@ -402,6 +404,13 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             @NonNull ResultReceiver resultReceiver) throws RemoteException {
         ((InputMethodManagerService) mInner).onShellCommand(
                 in, out, err, args, callback, resultReceiver);
+    }
+
+    @Override
+    protected void dump(@NonNull FileDescriptor fd,
+            @NonNull PrintWriter fout,
+            @Nullable String[] args) {
+        ((InputMethodManagerService) mInner).dump(fd, fout, args);
     }
 
     private void sendOnStartInputResult(

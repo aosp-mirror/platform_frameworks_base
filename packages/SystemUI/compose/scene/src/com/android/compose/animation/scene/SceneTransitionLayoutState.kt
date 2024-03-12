@@ -31,6 +31,7 @@ import com.android.compose.animation.scene.transition.link.LinkedTransition
 import com.android.compose.animation.scene.transition.link.StateLink
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 
 /**
@@ -188,13 +189,8 @@ sealed interface TransitionState {
         val fromScene: SceneKey,
 
         /** The scene this transition is going to. Can't be the same as fromScene */
-        val toScene: SceneKey
+        val toScene: SceneKey,
     ) : TransitionState {
-
-        init {
-            check(fromScene != toScene)
-        }
-
         /**
          * The progress of the transition. This is usually in the `[0; 1]` range, but it can also be
          * less than `0` or greater than `1` when using transitions with a spring AnimationSpec or
@@ -207,6 +203,21 @@ sealed interface TransitionState {
 
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
+
+        init {
+            check(fromScene != toScene)
+        }
+
+        /**
+         * Force this transition to finish and animate to [currentScene], so that this transition
+         * progress will settle to either 0% (if [currentScene] == [fromScene]) or 100% (if
+         * [currentScene] == [toScene]) in a finite amount of time.
+         *
+         * @return the [Job] that animates the progress to [currentScene]. It can be used to wait
+         *   until the animation is complete or cancel it to snap to [currentScene]. Calling
+         *   [finish] multiple times will return the same [Job].
+         */
+        abstract fun finish(): Job
 
         /**
          * Whether we are transitioning. If [from] or [to] is empty, we will also check that they

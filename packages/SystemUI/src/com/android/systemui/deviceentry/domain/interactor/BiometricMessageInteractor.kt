@@ -21,9 +21,12 @@ import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInte
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FaceFailureMessage
+import com.android.systemui.deviceentry.shared.model.FaceLockoutMessage
 import com.android.systemui.deviceentry.shared.model.FaceMessage
 import com.android.systemui.deviceentry.shared.model.FaceTimeoutMessage
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus
+import com.android.systemui.deviceentry.shared.model.FingerprintFailureMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintMessage
 import com.android.systemui.deviceentry.shared.model.HelpFaceAuthenticationStatus
@@ -97,11 +100,7 @@ constructor(
         fingerprintAuthInteractor.fingerprintHelp
             .sample(biometricSettingsInteractor.fingerprintAuthCurrentlyAllowed, ::Pair)
             .filter { (_, fingerprintAuthAllowed) -> fingerprintAuthAllowed }
-            .map { (helpStatus, _) ->
-                FingerprintMessage(
-                    helpStatus.msg,
-                )
-            }
+            .map { (helpStatus, _) -> FingerprintMessage(helpStatus.msg) }
 
     private val fingerprintFailMessage: Flow<FingerprintMessage> =
         fingerprintPropertyInteractor.isUdfps.flatMapLatest { isUdfps ->
@@ -109,7 +108,7 @@ constructor(
                 .sample(biometricSettingsInteractor.fingerprintAuthCurrentlyAllowed)
                 .filter { fingerprintAuthAllowed -> fingerprintAuthAllowed }
                 .map {
-                    FingerprintMessage(
+                    FingerprintFailureMessage(
                         if (isUdfps) {
                             resources.getString(
                                 com.android.internal.R.string.fingerprint_udfps_error_not_match
@@ -118,7 +117,7 @@ constructor(
                             resources.getString(
                                 com.android.internal.R.string.fingerprint_error_not_match
                             )
-                        },
+                        }
                     )
                 }
         }
@@ -154,7 +153,7 @@ constructor(
         faceFailure
             .sample(biometricSettingsInteractor.faceAuthCurrentlyAllowed)
             .filter { faceAuthCurrentlyAllowed -> faceAuthCurrentlyAllowed }
-            .map { FaceMessage(resources.getString(R.string.keyguard_face_failed)) }
+            .map { FaceFailureMessage(resources.getString(R.string.keyguard_face_failed)) }
 
     private val faceErrorMessage: Flow<FaceMessage> =
         faceError
@@ -173,6 +172,7 @@ constructor(
                             FaceTimeoutMessage(status.msg)
                         }
                     }
+                    status.isLockoutError() -> FaceLockoutMessage(status.msg)
                     else -> FaceMessage(status.msg)
                 }
             }

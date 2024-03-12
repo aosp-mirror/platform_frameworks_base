@@ -17,6 +17,7 @@
 package com.android.server.input
 
 import android.hardware.input.KeyboardLayout
+import android.hardware.input.KeyboardLayoutSelectionResult
 import android.icu.util.ULocale
 import android.platform.test.annotations.Presubmit
 import android.view.InputDevice
@@ -120,15 +121,15 @@ class KeyboardMetricsCollectorTests {
         val event = builder.addLayoutSelection(
             createImeSubtype(1, ULocale.forLanguageTag("en-US"), "qwerty"),
             "English(US)(Qwerty)",
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD
         ).addLayoutSelection(
             createImeSubtype(2, ULocale.forLanguageTag("en-US"), "azerty"),
             null, // Default layout type
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_USER
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_USER
         ).addLayoutSelection(
             createImeSubtype(3, ULocale.forLanguageTag("en-US"), "qwerty"),
             "German",
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE
         ).setIsFirstTimeConfiguration(true).build()
 
         assertEquals(
@@ -158,7 +159,7 @@ class KeyboardMetricsCollectorTests {
             "de-CH",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwertz"),
             "English(US)(Qwerty)",
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
             "en-US",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwerty"),
         )
@@ -167,7 +168,7 @@ class KeyboardMetricsCollectorTests {
             "de-CH",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwertz"),
             KeyboardMetricsCollector.DEFAULT_LAYOUT_NAME,
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_USER,
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_USER,
             "en-US",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("azerty"),
         )
@@ -176,7 +177,7 @@ class KeyboardMetricsCollectorTests {
             "de-CH",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwertz"),
             "German",
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE,
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE,
             "en-US",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwerty"),
         )
@@ -197,7 +198,7 @@ class KeyboardMetricsCollectorTests {
         val event = builder.addLayoutSelection(
             createImeSubtype(4, null, "qwerty"), // Default language tag
             "German",
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE
         ).build()
 
         assertExpectedLayoutConfiguration(
@@ -205,7 +206,7 @@ class KeyboardMetricsCollectorTests {
             KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("azerty"),
             "German",
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE,
+            KeyboardLayoutSelectionResult.LAYOUT_SELECTION_CRITERIA_DEVICE,
             KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwerty"),
         )

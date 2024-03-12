@@ -41,7 +41,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
-import androidx.compose.ui.zIndex
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.plus
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
@@ -247,7 +246,7 @@ fun LazyGridItemScope.DraggableItem(
     content: @Composable (isDragging: Boolean) -> Unit
 ) {
     if (!enabled) {
-        return Box(modifier = modifier) { content(false) }
+        return content(false)
     }
 
     val dragging = index == dragDropState.draggingItemIndex
@@ -258,7 +257,7 @@ fun LazyGridItemScope.DraggableItem(
         )
     val draggingModifier =
         if (dragging) {
-            Modifier.zIndex(1f).graphicsLayer {
+            Modifier.graphicsLayer {
                 translationX = dragDropState.draggingItemOffset.x
                 translationY = dragDropState.draggingItemOffset.y
                 alpha = itemAlpha
@@ -268,13 +267,14 @@ fun LazyGridItemScope.DraggableItem(
         }
 
     Box(modifier) {
+        Box(draggingModifier) { content(dragging) }
         AnimatedVisibility(
+            modifier = Modifier.matchParentSize(),
             visible = (dragging || selected) && !dragDropState.isDraggingToRemove,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            HighlightedItem()
+            HighlightedItem(Modifier.matchParentSize())
         }
-        Box(modifier = draggingModifier, propagateMinConstraints = true) { content(dragging) }
     }
 }

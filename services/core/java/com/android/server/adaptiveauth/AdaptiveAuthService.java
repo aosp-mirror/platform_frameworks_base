@@ -20,6 +20,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
@@ -187,6 +188,11 @@ public class AdaptiveAuthService extends SystemService {
     }
 
     private void reportAuthAttempt(int authType, boolean success, int userId) {
+        // Disable adaptive auth for automotive devices by default
+        if (getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            return;
+        }
+
         if (success) {
             // Deleting the entry effectively resets the counter of failed attempts for the user
             mFailedAttemptsForUser.delete(userId);

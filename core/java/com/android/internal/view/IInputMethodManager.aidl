@@ -65,11 +65,20 @@ interface IInputMethodManager {
     InputMethodSubtype getLastInputMethodSubtype(int userId);
 
     boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
-            in @nullable ImeTracker.Token statsToken, int flags, int lastClickToolType,
+            in ImeTracker.Token statsToken, int flags, int lastClickToolType,
             in @nullable ResultReceiver resultReceiver, int reason);
     boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
-            in @nullable ImeTracker.Token statsToken, int flags,
+            in ImeTracker.Token statsToken, int flags,
             in @nullable ResultReceiver resultReceiver, int reason);
+
+    /**
+     * A test API for CTS to request hiding the current soft input window, with the request origin
+     * on the server side.
+     */
+    @EnforcePermission("TEST_INPUT_METHOD")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.TEST_INPUT_METHOD)")
+    void hideSoftInputFromServerForTest();
 
     // TODO(b/293640003): Remove method once Flags.useZeroJankProxy() is enabled.
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window

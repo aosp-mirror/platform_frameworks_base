@@ -172,7 +172,7 @@ public class PipScheduler {
     }
 
     void setInSwipePipToHomeTransition(boolean inSwipePipToHome) {
-        mInSwipePipToHomeTransition = true;
+        mInSwipePipToHomeTransition = inSwipePipToHome;
     }
 
     boolean isInSwipePipToHomeTransition() {

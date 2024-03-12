@@ -66,15 +66,18 @@ object NotificationStackAppearanceViewBinder {
                 }
 
                 launch {
+                    var wasExpanding = false
                     viewModel.expandFraction.collect { expandFraction ->
+                        val nowExpanding = expandFraction != 0f && expandFraction != 1f
+                        if (nowExpanding && !wasExpanding) {
+                            controller.onExpansionStarted()
+                        }
                         ambientState.expansionFraction = expandFraction
                         controller.expandedHeight = expandFraction * controller.view.height
-                        controller.setMaxAlphaForExpansion(
-                            ((expandFraction - 0.5f) / 0.5f).coerceAtLeast(0f)
-                        )
-                        if (expandFraction == 0f || expandFraction == 1f) {
+                        if (!nowExpanding && wasExpanding) {
                             controller.onExpansionStopped()
                         }
+                        wasExpanding = nowExpanding
                     }
                 }
             }

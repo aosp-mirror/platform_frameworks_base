@@ -23,17 +23,23 @@ import com.android.systemui.Flags.communalHub
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.util.kotlin.Utils
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -47,17 +53,23 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    powerInteractor: PowerInteractor,
+    keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.DREAMING,
         transitionInteractor = transitionInteractor,
         mainDispatcher = mainDispatcher,
         bgDispatcher = bgDispatcher,
+        powerInteractor = powerInteractor,
+        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
     ) {
 
     override fun start() {
         listenForDreamingToOccluded()
-        listenForDreamingToGone()
+        listenForDreamingToGoneWhenDismissable()
+        listenForDreamingToGoneFromBiometricUnlock()
+        listenForDreamingToLockscreen()
         listenForDreamingToAodOrDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
         listenForDreamingToGlanceableHub()
@@ -76,6 +88,7 @@ constructor(
 
     fun startToLockscreenTransition() {
         scope.launch {
+            KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
             if (
                 transitionInteractor.startedKeyguardState.replayCache.last() ==
                     KeyguardState.DREAMING
@@ -85,23 +98,93 @@ constructor(
         }
     }
 
-    private fun listenForDreamingToOccluded() {
+    fun startToGlanceableHubTransition() {
         scope.launch {
-            combine(keyguardInteractor.isKeyguardOccluded, keyguardInteractor.isDreaming, ::Pair)
-                .sample(startedKeyguardTransitionStep, ::toTriple)
-                .collect { (isOccluded, isDreaming, lastStartedTransition) ->
-                    if (
-                        isOccluded &&
-                            !isDreaming &&
-                            lastStartedTransition.to == KeyguardState.DREAMING
-                    ) {
-                        startTransitionTo(KeyguardState.OCCLUDED)
+            KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
+            if (
+                transitionInteractor.startedKeyguardState.replayCache.last() ==
+                    KeyguardState.DREAMING
+            ) {
+                startTransitionTo(KeyguardState.GLANCEABLE_HUB)
+            }
+        }
+    }
+
+    private fun listenForDreamingToOccluded() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            scope.launch {
+                combine(
+                        keyguardInteractor.isDreaming,
+                        keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop,
+                        ::Pair
+                    )
+                    .sample(startedKeyguardTransitionStep, ::toTriple)
+                    .filter { (isDreaming, _, startedStep) ->
+                        !isDreaming && startedStep.to == KeyguardState.DREAMING
+                    }
+                    .collect { maybeStartTransitionToOccludedOrInsecureCamera() }
+            }
+        } else {
+            scope.launch {
+                combine(
+                        keyguardInteractor.isKeyguardOccluded,
+                        keyguardInteractor.isDreaming,
+                        ::Pair
+                    )
+                    .sample(startedKeyguardTransitionStep, Utils.Companion::toTriple)
+                    .collect { (isOccluded, isDreaming, lastStartedTransition) ->
+                        if (
+                            isOccluded &&
+                                !isDreaming &&
+                                lastStartedTransition.to == KeyguardState.DREAMING
+                        ) {
+                            startTransitionTo(KeyguardState.OCCLUDED)
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun listenForDreamingToLockscreen() {
+        if (!KeyguardWmStateRefactor.isEnabled) {
+            return
+        }
+
+        scope.launch {
+            keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
+                .filter { onTop -> !onTop }
+                .sample(startedKeyguardState)
+                .collect { startedState ->
+                    if (startedState == KeyguardState.DREAMING) {
+                        startTransitionTo(KeyguardState.LOCKSCREEN)
                     }
                 }
         }
     }
 
-    private fun listenForDreamingToGone() {
+    private fun listenForDreamingToGoneWhenDismissable() {
+        scope.launch {
+            keyguardInteractor.isAbleToDream
+                .sampleCombine(
+                    keyguardInteractor.isKeyguardShowing,
+                    keyguardInteractor.isKeyguardDismissible,
+                    startedKeyguardTransitionStep,
+                )
+                .collect {
+                    (isDreaming, isKeyguardShowing, isKeyguardDismissible, lastStartedTransition) ->
+                    if (
+                        !isDreaming &&
+                            lastStartedTransition.to == KeyguardState.DREAMING &&
+                            isKeyguardDismissible &&
+                            !isKeyguardShowing
+                    ) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
+                }
+        }
+    }
+
+    private fun listenForDreamingToGoneFromBiometricUnlock() {
         scope.launch {
             keyguardInteractor.biometricUnlockState
                 .sample(startedKeyguardTransitionStep, ::Pair)
@@ -135,14 +218,18 @@ constructor(
         return ValueAnimator().apply {
             interpolator = Interpolators.LINEAR
             duration =
-                if (toState == KeyguardState.LOCKSCREEN) TO_LOCKSCREEN_DURATION.inWholeMilliseconds
-                else DEFAULT_DURATION.inWholeMilliseconds
+                when (toState) {
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    else -> DEFAULT_DURATION
+                }.inWholeMilliseconds
         }
     }
 
     companion object {
         const val TAG = "FromDreamingTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
+        val TO_GLANCEABLE_HUB_DURATION = 1.seconds
         val TO_LOCKSCREEN_DURATION = 1167.milliseconds
     }
 }

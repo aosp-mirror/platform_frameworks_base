@@ -25,9 +25,11 @@ import android.hardware.usb.UsbDevice;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.Flags;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FunctionalUtils;
 
 import java.io.IOException;
@@ -36,24 +38,46 @@ import java.util.concurrent.Executor;
 
 /**
  * Default implementation of {@link BrailleDisplayController}.
+ *
+ * @hide
  */
 // BrailleDisplayControllerImpl is not an API, but it implements BrailleDisplayController APIs.
 // This @FlaggedApi annotation tells the linter that this method delegates API checks to its
 // callers.
 @FlaggedApi(Flags.FLAG_BRAILLE_DISPLAY_HID)
-final class BrailleDisplayControllerImpl implements BrailleDisplayController {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public final class BrailleDisplayControllerImpl implements BrailleDisplayController {
 
     private final AccessibilityService mAccessibilityService;
     private final Object mLock;
+    private final boolean mIsHidrawSupported;
 
     private IBrailleDisplayConnection mBrailleDisplayConnection;
     private Executor mCallbackExecutor;
     private BrailleDisplayCallback mCallback;
 
+    /**
+     * Read-only property that returns whether HIDRAW access is supported on this device.
+     *
+     * <p>Defaults to true.
+     *
+     * <p>Device manufacturers without HIDRAW kernel support can set this to false in
+     * the device's product makefile.
+     */
+    private static final boolean IS_HIDRAW_SUPPORTED = SystemProperties.getBoolean(
+            "ro.accessibility.support_hidraw", true);
+
     BrailleDisplayControllerImpl(AccessibilityService accessibilityService,
             Object lock) {
+        this(accessibilityService, lock, IS_HIDRAW_SUPPORTED);
+    }
+
+    @VisibleForTesting
+    public BrailleDisplayControllerImpl(AccessibilityService accessibilityService,
+            Object lock, boolean isHidrawSupported) {
         mAccessibilityService = accessibilityService;
         mLock = lock;
+        mIsHidrawSupported = isHidrawSupported;
     }
 
     @Override
@@ -113,6 +137,11 @@ final class BrailleDisplayControllerImpl implements BrailleDisplayController {
                     createConnection,
             @NonNull Executor callbackExecutor, @NonNull BrailleDisplayCallback callback) {
         BrailleDisplayController.checkApiFlagIsEnabled();
+        if (!mIsHidrawSupported) {
+            callbackExecutor.execute(() -> callback.onConnectionFailed(
+                    BrailleDisplayCallback.FLAG_ERROR_CANNOT_ACCESS));
+            return;
+        }
         if (isConnected()) {
             throw new IllegalStateException(
                     "This service already has a connected Braille display");

@@ -21,6 +21,7 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.SpringSpec
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -147,13 +148,16 @@ private fun CoroutineScope.animate(
         }
 
     // Animate the progress to its target value.
-    launch { animatable.animateTo(targetProgress, animationSpec) }
-        .invokeOnCompletion {
-            // Settle the state to Idle(target). Note that this will do nothing if this transition
-            // was replaced/interrupted by another one, and this also runs if this coroutine is
-            // cancelled, i.e. if [this] coroutine scope is cancelled.
-            layoutState.finishTransition(transition, target)
-        }
+    transition.job =
+        launch { animatable.animateTo(targetProgress, animationSpec) }
+            .apply {
+                invokeOnCompletion {
+                    // Settle the state to Idle(target). Note that this will do nothing if this
+                    // transition was replaced/interrupted by another one, and this also runs if
+                    // this coroutine is cancelled, i.e. if [this] coroutine scope is cancelled.
+                    layoutState.finishTransition(transition, target)
+                }
+            }
 
     return transition
 }
@@ -174,8 +178,13 @@ private class OneOffTransition(
      */
     lateinit var animatable: Animatable<Float, AnimationVector1D>
 
+    /** The job that is animating [animatable]. */
+    lateinit var job: Job
+
     override val progress: Float
         get() = animatable.value
+
+    override fun finish(): Job = job
 }
 
 // TODO(b/290184746): Compute a good default visibility threshold that depends on the layout size

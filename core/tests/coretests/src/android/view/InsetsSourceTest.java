@@ -291,6 +291,17 @@ public class InsetsSourceTest {
     }
 
     @Test
+    public void testCalculateBoundingRects_noBoundingRectsAndFrameNotAtOrigin_createsSingleRect() {
+        mSource.setFrame(new Rect(100, 100, 1200, 200));
+        mSource.setBoundingRects(null);
+
+        final Rect[] rects = mSource.calculateBoundingRects(new Rect(100, 100, 1100, 1100), false);
+
+        assertEquals(1, rects.length);
+        assertEquals(new Rect(0, 0, 1000, 100), rects[0]);
+    }
+
+    @Test
     public void testCalculateBoundingRects_noBoundingRectsAndLargerFrame_singleRectFitsRelFrame() {
         mSource.setFrame(new Rect(0, 0, 1000, 100));
         mSource.setBoundingRects(null);

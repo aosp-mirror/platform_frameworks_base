@@ -27,6 +27,8 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.wakelock.WakeLockFake
+import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -44,6 +46,9 @@ class HomeControlsDreamServiceTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
+    private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
+    private lateinit var fakeWakeLock: WakeLockFake
+
     @Mock private lateinit var taskFragmentComponentFactory: TaskFragmentComponent.Factory
     @Mock private lateinit var taskFragmentComponent: TaskFragmentComponent
     @Mock private lateinit var activity: Activity
@@ -56,6 +61,10 @@ class HomeControlsDreamServiceTest : SysuiTestCase() {
             MockitoAnnotations.initMocks(this@HomeControlsDreamServiceTest)
             whenever(taskFragmentComponentFactory.create(any(), any(), any(), any()))
                 .thenReturn(taskFragmentComponent)
+
+            fakeWakeLock = WakeLockFake()
+            fakeWakeLockBuilder = WakeLockFake.Builder(context)
+            fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
 
             whenever(controlsComponent.getControlsListingController())
                 .thenReturn(Optional.of(controlsListingController))
@@ -87,12 +96,29 @@ class HomeControlsDreamServiceTest : SysuiTestCase() {
             verify(taskFragmentComponentFactory, never()).create(any(), any(), any(), any())
         }
 
+    @Test
+    fun testAttachWindow_wakeLockAcquired() =
+        testScope.runTest {
+            underTest.onAttachedToWindow()
+            assertThat(fakeWakeLock.isHeld).isTrue()
+        }
+    @Test
+    fun testDetachWindow_wakeLockCanBeReleased() =
+        testScope.runTest {
+            underTest.onAttachedToWindow()
+            assertThat(fakeWakeLock.isHeld).isTrue()
+
+            underTest.onDetachedFromWindow()
+            assertThat(fakeWakeLock.isHeld).isFalse()
+        }
+
     private fun buildService(activityProvider: DreamActivityProvider): HomeControlsDreamService =
         with(kosmos) {
             return HomeControlsDreamService(
                 controlsSettingsRepository = FakeControlsSettingsRepository(),
                 taskFragmentFactory = taskFragmentComponentFactory,
                 homeControlsComponentInteractor = homeControlsComponentInteractor,
+                fakeWakeLockBuilder,
                 dreamActivityProvider = activityProvider,
                 bgDispatcher = testDispatcher,
                 logBuffer = logcatLogBuffer("HomeControlsDreamServiceTest")

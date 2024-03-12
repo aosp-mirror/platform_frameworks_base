@@ -31,7 +31,7 @@
  import android.app.ondeviceintelligence.IResponseCallback;
  import android.app.ondeviceintelligence.IStreamingResponseCallback;
  import android.app.ondeviceintelligence.IProcessingSignal;
- import android.app.ondeviceintelligence.ITokenCountCallback;
+ import android.app.ondeviceintelligence.ITokenInfoCallback;
 
 
  /**
@@ -56,8 +56,8 @@
       void requestFeatureDownload(in Feature feature, ICancellationSignal signal, in IDownloadCallback callback) = 5;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void requestTokenCount(in Feature feature, in Content request, in  ICancellationSignal signal,
-                                                        in ITokenCountCallback tokenCountcallback) = 6;
+      void requestTokenInfo(in Feature feature, in Content request, in  ICancellationSignal signal,
+                                                        in ITokenInfoCallback tokenInfocallback) = 6;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
       void processRequest(in Feature feature, in Content request, int requestType, in  ICancellationSignal cancellationSignal, in IProcessingSignal signal,

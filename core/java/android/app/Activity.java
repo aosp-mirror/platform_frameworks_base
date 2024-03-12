@@ -1126,8 +1126,8 @@ public class Activity extends ContextThemeWrapper
          * @hide
          */
         @Override
-        public void updateStatusBarAppearance(int appearance) {
-            mTaskDescription.setStatusBarAppearance(appearance);
+        public void updateSystemBarsAppearance(int appearance) {
+            mTaskDescription.setSystemBarsAppearance(appearance);
             setTaskDescription(mTaskDescription);
         }
 
@@ -1254,12 +1254,23 @@ public class Activity extends ContextThemeWrapper
         return mApplication;
     }
 
-    /** Is this activity embedded inside of another activity? */
+    /**
+     * Whether this is a child {@link Activity} of an {@link ActivityGroup}.
+     *
+     * @deprecated {@link ActivityGroup} is deprecated.
+     */
+    @Deprecated
     public final boolean isChild() {
         return mParent != null;
     }
 
-    /** Return the parent activity if this view is an embedded child. */
+    /**
+     * Returns the parent {@link Activity} if this is a child {@link Activity} of an
+     * {@link ActivityGroup}.
+     *
+     * @deprecated {@link ActivityGroup} is deprecated.
+     */
+    @Deprecated
     public final Activity getParent() {
         return mParent;
     }
@@ -5535,6 +5546,15 @@ public class Activity extends ContextThemeWrapper
         }
 
         a.recycle();
+        if (first && mTaskDescription.getSystemBarsAppearance() == 0
+                && mWindow != null && mWindow.getSystemBarAppearance() != 0) {
+            // When the theme is applied for the first time during the activity re-creation process,
+            // the attached window restores the system bars appearance from the old window/activity.
+            // Make sure to restore this appearance in TaskDescription too, to prevent the
+            // #setTaskDescription() call below from incorrectly sending an empty value to the
+            // server.
+            mTaskDescription.setSystemBarsAppearance(mWindow.getSystemBarAppearance());
+        }
         setTaskDescription(mTaskDescription);
     }
 
@@ -9601,9 +9621,9 @@ public class Activity extends ContextThemeWrapper
      * Specifies whether the activities below this one in the task can also start other activities
      * or finish the task.
      * <p>
-     * Starting from Target SDK Level {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, apps
-     * are blocked from starting new activities or finishing their task unless the top activity of
-     * such task belong to the same UID for security reasons.
+     * Starting from Target SDK Level {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, apps
+     * may be blocked from starting new activities or finishing their task unless the top activity
+     * of such task belong to the same UID for security reasons.
      * <p>
      * Setting this flag to {@code true} will allow the launching app to ignore the restriction if
      * this activity is on top. Apps matching the UID of this activity are always exempt.

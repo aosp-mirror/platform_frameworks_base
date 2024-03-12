@@ -20,15 +20,16 @@ import android.app.Dialog
 import android.content.Context
 import android.view.Gravity
 import android.view.Window
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
 import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
 import android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL
 import androidx.activity.ComponentDialog
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyboard.stickykeys.ui.view.createStickyKeyIndicatorView
 import com.android.systemui.keyboard.stickykeys.ui.viewmodel.StickyKeysIndicatorViewModel
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -45,10 +46,10 @@ constructor(
     }
 
     private fun createStickyKeyIndicator(viewModel: StickyKeysIndicatorViewModel): Dialog {
-        return ComponentDialog(context, R.style.Theme_SystemUI_Dialog).apply {
+        return ComponentDialog(context, R.style.Theme_SystemUI_Dialog_StickyKeys).apply {
             // because we're requesting window feature it must be called before setting content
             window?.setStickyKeyWindowAttributes()
-            setContentView(ComposeFacade.createStickyKeysIndicatorContent(context, viewModel))
+            setContentView(createStickyKeyIndicatorView(context, viewModel))
         }
     }
 
@@ -61,6 +62,9 @@ constructor(
         attributes =
             WindowManager.LayoutParams().apply {
                 copyFrom(attributes)
+                // needed because we're above system bars windows, see [TYPE_STATUS_BAR_SUB_PANEL]
+                receiveInsetsIgnoringZOrder = true
+                fitInsetsTypes = WindowInsets.Type.systemBars()
                 title = "StickyKeysIndicator"
             }
     }

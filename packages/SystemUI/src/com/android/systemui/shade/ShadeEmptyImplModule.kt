@@ -21,6 +21,7 @@ import com.android.systemui.shade.data.repository.PrivacyChipRepository
 import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorEmptyImpl
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
@@ -63,6 +64,12 @@ abstract class ShadeEmptyImplModule {
     abstract fun bindsShadeAnimationInteractor(
         sai: ShadeAnimationInteractorEmptyImpl
     ): ShadeAnimationInteractor
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsPanelExpansionInteractor(
+        sbai: ShadeViewControllerEmptyImpl
+    ): PanelExpansionInteractor
 
     @Binds
     @SysUISingleton

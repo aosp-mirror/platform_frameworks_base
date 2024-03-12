@@ -31,6 +31,8 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"ဖွင့်ရန်"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"ဖွင့်ရန်"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"မလိုပါ"</string>
+    <string name="standard_battery_saver_text" msgid="6855876746552374119">"ပုံမှန်"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"လွန်ကဲ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"ဖန်သားပြင် အလိုအလျောက်လှည့်ရန်"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> အား ဝင်သုံးရန် <xliff:g id="APPLICATION">%1$s</xliff:g> ကို ခွင့်ပြုပါသလား။"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> အား <xliff:g id="USB_DEVICE">%2$s</xliff:g> ကို သုံးခွင့်ပြုမလား။\nဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
@@ -269,7 +271,10 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"စသုံးရန်"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"မနက်ဖြန် အလိုအလျောက် ထပ်ဖွင့်ရန်"</string>
-    <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"‘အမြန် မျှဝေပါ’၊ Find My Device နှင့် စက်ပစ္စည်းတည်နေရာကဲ့သို့ တူးလ်များသည် ဘလူးတုသ်သုံးသည်"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ဘက်ထရီ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"အသံ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"မိုက်ခွက်ပါနားကြပ်"</string>
@@ -429,6 +434,7 @@
     <string name="cta_label_to_open_widget_picker" msgid="3874946756976360699">"နောက်ထပ်ဝိဂျက်များ ထည့်ရန်"</string>
     <string name="popup_on_dismiss_cta_tile_text" msgid="8292501780996070019">"ဝိဂျက်များ စိတ်ကြိုက်လုပ်ရန် ကြာကြာနှိပ်ထားပါ"</string>
     <string name="button_to_configure_widgets_text" msgid="4191862850185256901">"ဝိဂျက်များကို စိတ်ကြိုက်လုပ်ရန်"</string>
+    <string name="icon_description_for_disabled_widget" msgid="4693151565003206943">"ပိတ်ထားသော ဝိဂျက်အတွက် အက်ပ်သင်္ကေတ"</string>
     <string name="edit_widget" msgid="9030848101135393954">"ဝိဂျက်ပြင်ရန်"</string>
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ဖယ်ရှားရန်"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ဝိဂျက်ထည့်ရန်"</string>
@@ -573,11 +579,22 @@
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"အသံမြည်သည်"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"တုန်ခါသည်"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံတိတ်သည်"</string>
+    <string name="media_device_cast" msgid="4786241789687569892">"ကာစ်လုပ်ရန်"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"ဖုန်းမြည်သံပိတ်ထားသဖြင့် မရနိုင်ပါ"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s။ တုန်ခါခြင်းသို့ သတ်မှတ်ရန်တို့ပါ။"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s။ အသံပိတ်ရန် တို့ပါ။"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ဆူညံသံ ထိန်းချုပ်ရန်"</string>
+    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
+    <skip />
+    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
+    <skip />
     <string name="volume_ringer_change" msgid="3574969197796055532">"ဖုန်းခေါ်သံမုဒ်သို့ ပြောင်းရန် တို့ပါ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"အသံပိတ်ရန်"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"အသံဖွင့်ရန်"</string>
@@ -832,6 +849,8 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
+    <string name="finder_active" msgid="7907846989716941952">"ပါဝါပိတ်ထားသော်လည်း Find My Device ဖြင့် ဤဖုန်းကို ရှာနိုင်သည်"</string>
+    <string name="shutdown_progress" msgid="5464239146561542178">"စက်ပိတ်နေသည်…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"သင့်စက်ကို ပလတ်ဖြုတ်ပါ"</string>
@@ -1186,6 +1205,7 @@
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>၊ <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="230135078402003532">"မှတ်စုလိုက်ခြင်း"</string>
     <string name="note_task_shortcut_long_label" msgid="7729325091147319409">"မှတ်စုလိုက်ခြင်း၊ <xliff:g id="NOTE_TAKING_APP">%1$s</xliff:g>"</string>
+    <string name="audio_sharing_description" msgid="8849060142768870004">"အသံမျှဝေခြင်း"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ထုတ်လွှင့်ခြင်း"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> ထုတ်လွှင့်ခြင်းကို ရပ်မလား။"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ကို ထုတ်လွှင့်သောအခါ (သို့) အထွက်ကို ပြောင်းသောအခါ သင့်လက်ရှိထုတ်လွှင့်ခြင်း ရပ်သွားမည်"</string>
@@ -1216,6 +1236,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ပုံရိပ် ပိုမိုပြတ်သားစေရန် ဖုန်းကို တစ်ဖက်သို့ လှန်လိုက်ပါ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ခေါက်နိုင်သောစက်ကို ဖြန့်လိုက်သည်"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ခေါက်နိုင်သောစက်ကို တစ်ဘက်သို့ လှန်လိုက်သည်"</string>
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ခေါက်ထားသည်"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"ဖြန့်ထားသည်"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%s</xliff:g> ကျန်သေးသည်"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"စတိုင်လပ်စ်ကို အားသွင်းကိရိယာနှင့် ချိတ်ဆက်ခြင်း"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"စတိုင်လပ်စ် ဘက်ထရီ အားနည်းနေသည်"</string>

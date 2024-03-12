@@ -21,19 +21,17 @@ import android.app.assist.AssistStructure
 import android.content.Context
 import android.credentials.CredentialManager
 import android.credentials.GetCredentialRequest
-import android.credentials.GetCredentialResponse
-import android.credentials.GetCredentialException
 import android.credentials.GetCandidateCredentialsResponse
 import android.credentials.GetCandidateCredentialsException
 import android.credentials.CredentialOption
 import android.credentials.selection.Entry
 import android.credentials.selection.GetCredentialProviderData
 import android.credentials.selection.ProviderData
+import android.graphics.BlendMode
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
-import android.provider.Settings
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -124,13 +122,10 @@ class CredentialAutofillService : AutofillService() {
         // TODO(b/324635774): Use callback for validating. If the request is coming
         // directly from the view, there should be a corresponding callback, otherwise
         // we should fail fast,
-        val getCredCallback = getCredManCallback(structure)
         if (getCredRequest == null) {
             Log.i(TAG, "No credential manager request found")
             callback.onFailure("No credential manager request found")
             return
-        } else if (getCredCallback == null) {
-            Log.i(TAG, "No credential manager callback found")
         }
         val credentialManager: CredentialManager =
                 getSystemService(Context.CREDENTIAL_SERVICE) as CredentialManager
@@ -140,7 +135,7 @@ class CredentialAutofillService : AutofillService() {
             override fun onResult(result: GetCandidateCredentialsResponse) {
                 Log.i(TAG, "getCandidateCredentials onResult")
                 val fillResponse = convertToFillResponse(result, request,
-                    responseClientState)
+                    responseClientState, GetFlowUtils.extractTypePriorityMap(getCredRequest))
                 if (fillResponse != null) {
                     callback.onSuccess(fillResponse)
                 } else {
@@ -197,7 +192,8 @@ class CredentialAutofillService : AutofillService() {
     private fun convertToFillResponse(
             getCredResponse: GetCandidateCredentialsResponse,
             filLRequest: FillRequest,
-            responseClientState: Bundle
+            responseClientState: Bundle,
+            typePriorityMap: Map<String, Int>,
     ): FillResponse? {
         val candidateProviders = getCredResponse.candidateProviderDataList
         if (candidateProviders.isEmpty()) {
@@ -213,7 +209,7 @@ class CredentialAutofillService : AutofillService() {
         autofillIdToProvidersMap.forEach { (autofillId, providers) ->
             validFillResponse = processProvidersForAutofillId(
                     filLRequest, autofillId, providers, entryIconMap, fillResponseBuilder,
-                    getCredResponse.intent)
+                    getCredResponse.intent, typePriorityMap)
                     .or(validFillResponse)
         }
         if (!validFillResponse) {
@@ -229,7 +225,8 @@ class CredentialAutofillService : AutofillService() {
             providerDataList: ArrayList<GetCredentialProviderData>,
             entryIconMap: Map<String, Icon>,
             fillResponseBuilder: FillResponse.Builder,
-            bottomSheetIntent: Intent
+            bottomSheetIntent: Intent,
+            typePriorityMap: Map<String, Int>,
     ): Boolean {
         val providerList = GetFlowUtils.toProviderList(
             providerDataList,
@@ -237,23 +234,15 @@ class CredentialAutofillService : AutofillService() {
         if (providerList.isEmpty()) {
             return false
         }
-        var totalEntryCount = 0
-        providerList.forEach { provider ->
-            totalEntryCount += provider.credentialEntryList.size
-        }
-        val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerList)
+        val providerDisplayInfo: ProviderDisplayInfo =
+                toProviderDisplayInfo(providerList, typePriorityMap)
+        var totalEntryCount = providerDisplayInfo.sortedUserNameToCredentialEntryList.size
         val inlineSuggestionsRequest = filLRequest.inlineSuggestionsRequest
-        val inlineMaxSuggestedCount = inlineSuggestionsRequest?.maxSuggestionCount ?: 0
         val inlinePresentationSpecs = inlineSuggestionsRequest?.inlinePresentationSpecs
         val inlinePresentationSpecsCount = inlinePresentationSpecs?.size ?: 0
-        val maxDropdownDisplayLimit = this.resources.getInteger(
+        val maxDatasetDisplayLimit = this.resources.getInteger(
                 com.android.credentialmanager.R.integer.autofill_max_visible_datasets)
-        var maxInlineItemCount = totalEntryCount
-        maxInlineItemCount = maxInlineItemCount.coerceAtMost(inlineMaxSuggestedCount)
-        val lastDropdownDatasetIndex = Settings.Global.getInt(this.contentResolver,
-                Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
-                (maxDropdownDisplayLimit - 1)).coerceAtMost(totalEntryCount)
-
+                .coerceAtMost(totalEntryCount)
         var i = 0
         var datasetAdded = false
 
@@ -278,7 +267,7 @@ class CredentialAutofillService : AutofillService() {
                 Log.e(TAG, "PendingIntent was missing from the entry.")
                 return@usernameLoop
             }
-            if (i >= maxInlineItemCount && i >= lastDropdownDatasetIndex) {
+            if (i >= maxDatasetDisplayLimit) {
                 return@usernameLoop
             }
             val icon: Icon = if (primaryEntry.icon == null) {
@@ -291,7 +280,7 @@ class CredentialAutofillService : AutofillService() {
             }
             // Create inline presentation
             var inlinePresentation: InlinePresentation? = null
-            if (inlinePresentationSpecs != null && i < maxInlineItemCount) {
+            if (inlinePresentationSpecs != null && i < maxDatasetDisplayLimit) {
                 val spec: InlinePresentationSpec? = if (i < inlinePresentationSpecsCount) {
                     inlinePresentationSpecs[i]
                 } else {
@@ -305,9 +294,10 @@ class CredentialAutofillService : AutofillService() {
                 }
             }
             var dropdownPresentation: RemoteViews? = null
-            if (i < lastDropdownDatasetIndex) {
-                dropdownPresentation = RemoteViewsFactory
-                        .createDropdownPresentation(this, icon, primaryEntry)
+            if (i < maxDatasetDisplayLimit) {
+                dropdownPresentation = RemoteViewsFactory.createDropdownPresentation(
+                    this, icon, primaryEntry, /*isFirstEntry= */ i == 0,
+                    /*isLastEntry= */ (totalEntryCount - i == 1))
             }
 
             val dataSetBuilder = Dataset.Builder()
@@ -331,17 +321,15 @@ class CredentialAutofillService : AutofillService() {
                             .build())
             datasetAdded = true
             i++
-
-            if (i == lastDropdownDatasetIndex) {
-                addDropdownMoreOptionsPresentation(bottomSheetIntent, autofillId,
-                        fillResponseBuilder)
-            }
         }
         val pinnedSpec = getLastInlinePresentationSpec(inlinePresentationSpecs,
                 inlinePresentationSpecsCount)
-        if (datasetAdded && pinnedSpec != null) {
-            addPinnedInlineSuggestion(pinnedSpec, autofillId,
-                    fillResponseBuilder, bottomSheetIntent)
+        if (datasetAdded) {
+            addDropdownMoreOptionsPresentation(bottomSheetIntent, autofillId, fillResponseBuilder)
+            if (pinnedSpec != null) {
+                addPinnedInlineSuggestion(pinnedSpec, autofillId,
+                        fillResponseBuilder, bottomSheetIntent)
+            }
         }
         return datasetAdded
     }
@@ -362,6 +350,7 @@ class CredentialAutofillService : AutofillService() {
         val sliceBuilder = InlineSuggestionUi
                 .newContentBuilder(pendingIntent)
                 .setTitle(displayName)
+        icon.setTintBlendMode(BlendMode.DST)
         sliceBuilder.setStartIcon(icon)
         if (primaryEntry.credentialType ==
                 CredentialType.PASSKEY && duplicateDisplayNameForPasskeys[displayName] == true) {
@@ -535,42 +524,6 @@ class CredentialAutofillService : AutofillService() {
         TODO("Not yet implemented")
     }
 
-    private fun getCredManCallback(structure: AssistStructure): OutcomeReceiver<
-            GetCredentialResponse, GetCredentialException>? {
-        return traverseStructureForCallback(structure)
-    }
-
-    private fun traverseStructureForCallback(
-            structure: AssistStructure
-    ): OutcomeReceiver<GetCredentialResponse, GetCredentialException>? {
-        val windowNodes: List<AssistStructure.WindowNode> =
-                structure.run {
-                    (0 until windowNodeCount).map { getWindowNodeAt(it) }
-                }
-
-        windowNodes.forEach { windowNode: AssistStructure.WindowNode ->
-            return traverseNodeForCallback(windowNode.rootViewNode)
-        }
-        return null
-    }
-
-    private fun traverseNodeForCallback(
-            viewNode: AssistStructure.ViewNode
-    ): OutcomeReceiver<GetCredentialResponse, GetCredentialException>? {
-        val children: List<AssistStructure.ViewNode> =
-                viewNode.run {
-                    (0 until childCount).map { getChildAt(it) }
-                }
-
-        children.forEach { childNode: AssistStructure.ViewNode ->
-            if (childNode.isFocused() && childNode.credentialManagerCallback != null) {
-                return childNode.credentialManagerCallback
-            }
-            return traverseNodeForCallback(childNode)
-        }
-        return null
-    }
-
     private fun getCredManRequest(
             structure: AssistStructure,
             sessionId: Int,
@@ -620,6 +573,12 @@ class CredentialAutofillService : AutofillService() {
             sessionId: Int
     ) {
         viewNode.autofillId?.let {
+            val domain = viewNode.webDomain
+            val request = viewNode.pendingCredentialRequest
+            if (domain != null && request != null) {
+                responseClientState.putBoolean(
+                    WEBVIEW_REQUESTED_CREDENTIAL_KEY, true)
+            }
             cmRequests.addAll(getCredentialOptionsFromViewNode(viewNode, it, responseClientState,
                 traversedViewNodes, credentialOptionsFromHints, sessionId))
             traversedViewNodes.add(it)
@@ -645,8 +604,8 @@ class CredentialAutofillService : AutofillService() {
             sessionId: Int
     ): MutableList<CredentialOption> {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
-        if (Flags.autofillCredmanDevIntegration() && viewNode.credentialManagerRequest != null) {
-            viewNode.credentialManagerRequest
+        if (Flags.autofillCredmanDevIntegration() && viewNode.pendingCredentialRequest != null) {
+            viewNode.pendingCredentialRequest
                     ?.getCredentialOptions()
                     ?.forEach { credentialOption ->
                 credentialOption.candidateQueryData

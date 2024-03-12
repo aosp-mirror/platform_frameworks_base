@@ -43,7 +43,6 @@ import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
-import static android.view.inputmethod.ImeTracker.TOKEN_NONE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -165,9 +164,9 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mStatsToken = statsToken;
         if (DEBUG_IME_VISIBILITY && (types & ime()) != 0) {
             EventLog.writeEvent(IMF_IME_ANIM_START,
-                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
-                    mCurrentAlpha, "Current:" + mCurrentInsets, "Shown:" + mShownInsets,
-                    "Hidden:" + mHiddenInsets);
+                    mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
+                    mAnimationType, mCurrentAlpha, "Current:" + mCurrentInsets,
+                    "Shown:" + mShownInsets, "Hidden:" + mHiddenInsets);
         }
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
@@ -245,6 +244,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     }
 
     @Override
+    @Nullable
     public ImeTracker.Token getStatsToken() {
         return mStatsToken;
     }
@@ -330,8 +330,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mListener.onFinished(this);
         if (DEBUG_IME_VISIBILITY && (mTypes & ime()) != 0) {
             EventLog.writeEvent(IMF_IME_ANIM_FINISH,
-                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
-                    mCurrentAlpha, shown ? 1 : 0, Objects.toString(insets));
+                    mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
+                    mAnimationType, mCurrentAlpha, shown ? 1 : 0, Objects.toString(insets));
         }
     }
 
@@ -355,8 +355,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         if (DEBUG) Log.d(TAG, "notify Control request cancelled for types: " + mTypes);
         if (DEBUG_IME_VISIBILITY && (mTypes & ime()) != 0) {
             EventLog.writeEvent(IMF_IME_ANIM_CANCEL,
-                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
-                    Objects.toString(mPendingInsets));
+                    mStatsToken != null ? mStatsToken.getTag() : ImeTracker.TOKEN_NONE,
+                    mAnimationType, Objects.toString(mPendingInsets));
         }
         releaseLeashes();
     }

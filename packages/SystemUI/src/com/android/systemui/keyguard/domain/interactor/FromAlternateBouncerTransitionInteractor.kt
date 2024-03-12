@@ -21,6 +21,7 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -31,8 +32,8 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -46,13 +47,16 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     private val keyguardInteractor: KeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
-    private val powerInteractor: PowerInteractor,
+    powerInteractor: PowerInteractor,
+    keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.ALTERNATE_BOUNCER,
         transitionInteractor = transitionInteractor,
         mainDispatcher = mainDispatcher,
         bgDispatcher = bgDispatcher,
+        powerInteractor = powerInteractor,
+        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
     ) {
 
     override fun start() {
@@ -62,7 +66,6 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    @FlowPreview
     private fun listenForAlternateBouncerToLockscreenHubAodOrDozing() {
         scope.launch {
             keyguardInteractor.alternateBouncerShowing
@@ -71,7 +74,7 @@ constructor(
                 // happening prematurely.
                 // This should eventually be removed in favor of
                 // [KeyguardTransitionInteractor#startDismissKeyguardTransition]
-                .sample(150L)
+                .onEach { delay(150L) }
                 .sampleCombine(
                     keyguardInteractor.primaryBouncerShowing,
                     startedKeyguardTransitionStep,
@@ -113,6 +116,11 @@ constructor(
     }
 
     private fun listenForAlternateBouncerToGone() {
+        if (KeyguardWmStateRefactor.isEnabled) {
+            // Handled via #dismissAlternateBouncer.
+            return
+        }
+
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
                 .sampleUtil(finishedKeyguardState, ::Pair)
@@ -148,6 +156,10 @@ constructor(
                     else -> TRANSITION_DURATION_MS
                 }.inWholeMilliseconds
         }
+    }
+
+    fun dismissAlternateBouncer() {
+        scope.launch { startTransitionTo(KeyguardState.GONE) }
     }
 
     companion object {

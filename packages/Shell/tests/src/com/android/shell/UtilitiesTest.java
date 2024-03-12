@@ -15,9 +15,11 @@
  */
 package com.android.shell;
 
-import android.test.suitebuilder.annotation.SmallTest;
-import junit.framework.TestCase;
 import static com.android.shell.BugreportProgressService.isValid;
+
+import androidx.test.filters.SmallTest;
+
+import junit.framework.TestCase;
 
 @SmallTest
 public class UtilitiesTest extends TestCase {

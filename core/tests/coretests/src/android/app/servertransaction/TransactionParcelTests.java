@@ -95,8 +95,11 @@ public class TransactionParcelTests {
     @Test
     public void testActivityConfigChange() {
         // Write to parcel
+        final ActivityWindowInfo activityWindowInfo = new ActivityWindowInfo();
+        activityWindowInfo.set(true /* isEmbedded */, new Rect(0, 0, 500, 1000),
+                new Rect(0, 0, 500, 500));
         ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(
-                mActivityToken, config());
+                mActivityToken, config(), activityWindowInfo);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -152,8 +155,7 @@ public class TransactionParcelTests {
 
     @Test
     public void testDestroy() {
-        DestroyActivityItem item = DestroyActivityItem.obtain(mActivityToken, true /* finished */,
-                135 /* configChanges */);
+        DestroyActivityItem item = DestroyActivityItem.obtain(mActivityToken, true /* finished */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -241,8 +243,7 @@ public class TransactionParcelTests {
     public void testPause() {
         // Write to parcel
         PauseActivityItem item = PauseActivityItem.obtain(mActivityToken, true /* finished */,
-                true /* userLeaving */, 135 /* configChanges */, true /* dontReport */,
-                true /* autoEnteringPip */);
+                true /* userLeaving */, true /* dontReport */, true /* autoEnteringPip */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -269,7 +270,7 @@ public class TransactionParcelTests {
     @Test
     public void testStop() {
         // Write to parcel
-        StopActivityItem item = StopActivityItem.obtain(mActivityToken, 14 /* configChanges */);
+        StopActivityItem item = StopActivityItem.obtain(mActivityToken);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -300,10 +301,9 @@ public class TransactionParcelTests {
         // Write to parcel
         NewIntentItem callback1 = NewIntentItem.obtain(mActivityToken, new ArrayList<>(), true);
         ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
-                mActivityToken, config());
+                mActivityToken, config(), new ActivityWindowInfo());
 
-        StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken,
-                78 /* configChanges */);
+        StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken);
 
         ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.addTransactionItem(callback1);
@@ -327,7 +327,7 @@ public class TransactionParcelTests {
         // Write to parcel
         NewIntentItem callback1 = NewIntentItem.obtain(mActivityToken, new ArrayList<>(), true);
         ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
-                mActivityToken, config());
+                mActivityToken, config(), new ActivityWindowInfo());
 
         ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.addTransactionItem(callback1);
@@ -348,8 +348,7 @@ public class TransactionParcelTests {
         mSetFlagsRule.disableFlags(FLAG_BUNDLE_CLIENT_TRANSACTION_FLAG);
 
         // Write to parcel
-        StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken,
-                78 /* configChanges */);
+        StopActivityItem lifecycleRequest = StopActivityItem.obtain(mActivityToken);
 
         ClientTransaction transaction = ClientTransaction.obtain(null /* client */);
         transaction.addTransactionItem(lifecycleRequest);

@@ -44,6 +44,7 @@ import dalvik.annotation.optimization.NeverCompile;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -181,6 +182,12 @@ class BroadcastProcessQueue {
     private boolean mActiveWasStopped;
 
     /**
+     * Flag indicating that the currently active broadcast is being dispatched
+     * to a package that was never launched before.
+     */
+    private boolean mActiveFirstLaunch;
+
+    /**
      * Number of consecutive urgent broadcasts that have been dispatched
      * since the last non-urgent dispatch.
      */
@@ -233,6 +240,11 @@ class BroadcastProcessQueue {
      */
     private long mForcedDelayedDurationMs;
 
+    /**
+     * List of outgoing broadcasts from a freezable process.
+     */
+    private final ArrayList<BroadcastRecord> mOutgoingBroadcasts = new ArrayList<>();
+
     public BroadcastProcessQueue(@NonNull BroadcastConstants constants,
             @NonNull String processName, int uid) {
         this.constants = Objects.requireNonNull(constants);
@@ -248,6 +260,21 @@ class BroadcastProcessQueue {
         } else {
             return mPending;
         }
+    }
+
+    public void enqueueOutgoingBroadcast(@NonNull BroadcastRecord record) {
+        mOutgoingBroadcasts.add(record);
+    }
+
+    public int getOutgoingBroadcastCount() {
+        return mOutgoingBroadcasts.size();
+    }
+
+    public void enqueueOutgoingBroadcasts(@NonNull BroadcastRecordConsumer consumer) {
+        for (int i = 0; i < mOutgoingBroadcasts.size(); ++i) {
+            consumer.accept(mOutgoingBroadcasts.get(i));
+        }
+        mOutgoingBroadcasts.clear();
     }
 
     /**
@@ -276,6 +303,11 @@ class BroadcastProcessQueue {
                 && record.getDeliveryGroupPolicy() == BroadcastOptions.DELIVERY_GROUP_POLICY_ALL) {
             final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex);
             if (replacedBroadcastRecord != null) {
+                if (mLastDeferredStates && shouldBeDeferred()
+                        && (record.getDeliveryState(recordIndex)
+                                == BroadcastRecord.DELIVERY_PENDING)) {
+                    deferredStatesApplyConsumer.accept(record, recordIndex);
+                }
                 return replacedBroadcastRecord;
             }
         }
@@ -381,8 +413,8 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Functional interface that tests a {@link BroadcastRecord} that has been
-     * previously enqueued in {@link BroadcastProcessQueue}.
+     * Functional interface that tests a {@link BroadcastRecord} and an index in the
+     * {@link BroadcastRecord} that has been previously enqueued in {@link BroadcastProcessQueue}.
      */
     @FunctionalInterface
     public interface BroadcastPredicate {
@@ -390,12 +422,21 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Functional interface that consumes a {@link BroadcastRecord} that has
-     * been previously enqueued in {@link BroadcastProcessQueue}.
+     * Functional interface that consumes a {@link BroadcastRecord} and an index in the
+     * {@link BroadcastRecord} that has been previously enqueued in {@link BroadcastProcessQueue}.
      */
     @FunctionalInterface
     public interface BroadcastConsumer {
         void accept(@NonNull BroadcastRecord r, int index);
+    }
+
+    /**
+     * Functional interface that consumes a {@link BroadcastRecord} that has
+     * been previously enqueued in {@link BroadcastProcessQueue}.
+     */
+    @FunctionalInterface
+    public interface BroadcastRecordConsumer {
+        void accept(@NonNull BroadcastRecord r);
     }
 
     /**
@@ -591,12 +632,20 @@ class BroadcastProcessQueue {
         mActiveWasStopped = activeWasStopped;
     }
 
+    public void setActiveFirstLaunch(boolean activeFirstLaunch) {
+        mActiveFirstLaunch = activeFirstLaunch;
+    }
+
     public boolean getActiveViaColdStart() {
         return mActiveViaColdStart;
     }
 
     public boolean getActiveWasStopped() {
         return mActiveWasStopped;
+    }
+
+    public boolean getActiveFirstLaunch() {
+        return mActiveFirstLaunch;
     }
 
     /**
@@ -767,6 +816,10 @@ class BroadcastProcessQueue {
     public int getActiveIndex() {
         Objects.requireNonNull(mActive);
         return mActiveIndex;
+    }
+
+    public boolean isOutgoingEmpty() {
+        return mOutgoingBroadcasts.isEmpty();
     }
 
     public boolean isEmpty() {
@@ -1438,7 +1491,7 @@ class BroadcastProcessQueue {
 
     @NeverCompile
     public void dumpLocked(@UptimeMillisLong long now, @NonNull IndentingPrintWriter pw) {
-        if ((mActive == null) && isEmpty()) return;
+        if ((mActive == null) && isEmpty() && isOutgoingEmpty()) return;
 
         pw.print(toShortString());
         pw.print(" ");
@@ -1448,6 +1501,12 @@ class BroadcastProcessQueue {
         pw.increaseIndent();
         dumpProcessState(pw);
         dumpBroadcastCounts(pw);
+
+        if (!mOutgoingBroadcasts.isEmpty()) {
+            for (int i = 0; i < mOutgoingBroadcasts.size(); ++i) {
+                dumpOutgoingRecord(now, pw, mOutgoingBroadcasts.get(i));
+            }
+        }
 
         if (mActive != null) {
             dumpRecord("ACTIVE", now, pw, mActive, mActiveIndex);
@@ -1517,6 +1576,15 @@ class BroadcastProcessQueue {
         pw.print(" ccu:"); pw.print(mActiveCountConsecutiveUrgent);
         pw.print(" ccn:"); pw.print(mActiveCountConsecutiveNormal);
         pw.println();
+    }
+
+    @NeverCompile
+    private void dumpOutgoingRecord(@UptimeMillisLong long now,
+            @NonNull IndentingPrintWriter pw, @NonNull BroadcastRecord record) {
+        pw.print("OUTGOING ");
+        TimeUtils.formatDuration(record.enqueueTime, now, pw);
+        pw.print(' ');
+        pw.println(record.toShortString());
     }
 
     @NeverCompile

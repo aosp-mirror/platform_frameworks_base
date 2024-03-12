@@ -370,9 +370,10 @@ oneway interface IStatusBar
     /**
      * Enters stage split from a current running app.
      *
+     * @param displayId the id of the current display.
      * @param leftOrTop indicates where the stage split is.
      */
-    void enterStageSplitFromRunningApp(boolean leftOrTop);
+    void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
 
     /**
      * Shows the media output switcher dialog.

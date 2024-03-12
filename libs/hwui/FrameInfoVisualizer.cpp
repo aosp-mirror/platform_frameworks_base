@@ -249,6 +249,7 @@ bool FrameInfoVisualizer::consumeProperties() {
 }
 
 void FrameInfoVisualizer::dumpData(int fd) {
+#ifdef __ANDROID__
     RETURN_IF_PROFILING_DISABLED();
 
     // This method logs the last N frames (where N is <= mDataSize) since the
@@ -268,6 +269,7 @@ void FrameInfoVisualizer::dumpData(int fd) {
                 durationMS(i, FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers),
                 durationMS(i, FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted));
     }
+#endif
 }
 
 } /* namespace uirenderer */

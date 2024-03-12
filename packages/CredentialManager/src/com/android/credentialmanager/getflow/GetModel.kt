@@ -16,20 +16,23 @@
 
 package com.android.credentialmanager.getflow
 
+import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
+import androidx.credentials.PriorityHints
 import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.EntryInfo
-import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.get.AuthenticationEntryInfo
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.internal.util.Preconditions
+import java.time.Instant
 
 data class GetCredentialUiState(
     val isRequestForAllOptions: Boolean,
     val providerInfoList: List<ProviderInfo>,
     val requestDisplayInfo: RequestDisplayInfo,
-    val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
+    val providerDisplayInfo: ProviderDisplayInfo =
+            toProviderDisplayInfo(providerInfoList, requestDisplayInfo.typePriorityMap),
     val currentScreenState: GetScreenState = toGetScreenState(
             providerDisplayInfo, isRequestForAllOptions),
     val activeEntry: EntryInfo? = toActiveEntry(providerDisplayInfo),
@@ -78,6 +81,8 @@ data class RequestDisplayInfo(
     val preferIdentityDocUi: Boolean,
     // A top level branding icon + display name preferred by the app.
     val preferTopBrandingContent: TopBrandingContent?,
+    // Map of credential type -> priority.
+    val typePriorityMap: Map<String, Int>,
 )
 
 data class TopBrandingContent(
@@ -118,7 +123,8 @@ enum class GetScreenState {
  * @hide
  */
 fun toProviderDisplayInfo(
-    providerInfoList: List<ProviderInfo>
+    providerInfoList: List<ProviderInfo>,
+    typePriorityMap: Map<String, Int>,
 ): ProviderDisplayInfo {
     val userNameToCredentialEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()
     val authenticationEntryList = mutableListOf<AuthenticationEntryInfo>()
@@ -133,7 +139,7 @@ fun toProviderDisplayInfo(
 
         providerInfo.credentialEntryList.forEach {
             userNameToCredentialEntryMap.compute(
-                it.userName
+                if (selectorUiImprovementsEnabled()) it.entryGroupId else it.userName
             ) { _, v ->
                 if (v == null) {
                     mutableListOf(it)
@@ -146,16 +152,22 @@ fun toProviderDisplayInfo(
     }
 
     // Compose sortedUserNameToCredentialEntryList
-    val comparator = CredentialEntryInfoComparatorByTypeThenTimestamp()
+    val comparator = CredentialEntryInfoComparatorByTypeThenTimestamp(typePriorityMap)
     // Sort per username
     userNameToCredentialEntryMap.values.forEach {
         it.sortWith(comparator)
     }
-    // Transform to list of PerUserNameCredentialEntryLists and then sort across usernames
+    // Transform to list of PerUserNameCredentialEntryLists and then sort the outer list (of
+    // entries grouped by username / entryGroupId) based on the latest timestamp within that
+    // PerUserNameCredentialEntryList
     val sortedUserNameToCredentialEntryList = userNameToCredentialEntryMap.map {
         PerUserNameCredentialEntryList(it.key, it.value)
     }.sortedWith(
-        compareByDescending { it.sortedCredentialEntryList.first().lastUsedTimeMillis }
+        compareByDescending {
+            it.sortedCredentialEntryList.maxByOrNull{ entry ->
+                entry.lastUsedTimeMillis ?: Instant.MIN
+            }?.lastUsedTimeMillis ?: Instant.MIN
+        }
     )
 
     return ProviderDisplayInfo(
@@ -202,16 +214,25 @@ private fun toGetScreenState(
     else GetScreenState.PRIMARY_SELECTION
 }
 
-internal class CredentialEntryInfoComparatorByTypeThenTimestamp : Comparator<CredentialEntryInfo> {
+internal class CredentialEntryInfoComparatorByTypeThenTimestamp(
+        val typePriorityMap: Map<String, Int>,
+) : Comparator<CredentialEntryInfo> {
     override fun compare(p0: CredentialEntryInfo, p1: CredentialEntryInfo): Int {
-        // First prefer passkey type for its security benefits
-        if (p0.credentialType != p1.credentialType) {
-            if (CredentialType.PASSKEY == p0.credentialType) {
+        // First rank by priorities of each credential type.
+        if (p0.rawCredentialType != p1.rawCredentialType) {
+            val p0Priority = typePriorityMap.getOrDefault(
+                    p0.rawCredentialType, PriorityHints.PRIORITY_DEFAULT
+            )
+            val p1Priority = typePriorityMap.getOrDefault(
+                    p1.rawCredentialType, PriorityHints.PRIORITY_DEFAULT
+            )
+            if (p0Priority < p1Priority) {
                 return -1
-            } else if (CredentialType.PASSKEY == p1.credentialType) {
+            } else if (p1Priority < p0Priority) {
                 return 1
             }
         }
+        // Then rank by last used timestamps.
         val p0LastUsedTimeMillis = p0.lastUsedTimeMillis
         val p1LastUsedTimeMillis = p1.lastUsedTimeMillis
         // Then order by last used timestamp

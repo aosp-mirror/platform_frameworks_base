@@ -50,6 +50,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.isFloating;
 import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -75,6 +76,7 @@ import static android.content.pm.ActivityInfo.FLAG_NO_HISTORY;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.FLAG_STATE_NOT_NEEDED;
 import static android.content.pm.ActivityInfo.FLAG_TURN_SCREEN_ON;
+import static android.content.pm.ActivityInfo.INSETS_DECOUPLED_CONFIGURATION_ENFORCED;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -332,6 +334,7 @@ import android.service.contentcapture.ActivityEvent;
 import android.service.dreams.DreamActivity;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
@@ -553,7 +556,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean launchFailed;   // set if a launched failed, to abort on 2nd try
     boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
-    int configChangeFlags;  // which config values have changed
     private boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
     int lockTaskLaunchMode; // the lockTaskMode manifest attribute, subject to override
@@ -659,7 +661,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean mVoiceInteraction;
 
-    private int mPendingRelaunchCount;
+    int mPendingRelaunchCount;
     long mRelaunchStartTime;
 
     // True if we are current in the process of removing this app token from the display
@@ -1295,10 +1297,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDeferHidingClient) {
             pw.println(prefix + "mDeferHidingClient=" + mDeferHidingClient);
         }
-        if (configChangeFlags != 0) {
-            pw.print(prefix); pw.print(" configChangeFlags=");
-                    pw.println(Integer.toHexString(configChangeFlags));
-        }
         if (mServiceConnectionsHolder != null) {
             pw.print(prefix); pw.print("connections="); pw.println(mServiceConnectionsHolder);
         }
@@ -1476,7 +1474,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    private void scheduleConfigurationChanged(Configuration config) {
+    private void scheduleConfigurationChanged(@NonNull Configuration config,
+            @NonNull ActivityWindowInfo activityWindowInfo) {
         if (!attachedToProcess()) {
             ProtoLog.w(WM_DEBUG_CONFIGURATION, "Can't report activity configuration "
                     + "update - client not running, activityRecord=%s", this);
@@ -1487,7 +1486,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     + "config: %s", this, config);
 
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    ActivityConfigurationChangeItem.obtain(token, config));
+                    ActivityConfigurationChangeItem.obtain(token, config, activityWindowInfo));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -2893,6 +2892,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Makes starting window always fill the associated task. */
     private void attachStartingSurfaceToAssociatedTask() {
+        if (mSyncState == SYNC_STATE_NONE && isEmbedded()) {
+            // Collect this activity since it's starting window will reparent to task. To ensure
+            // any starting window's transaction will occur in order.
+            mTransitionController.collect(this);
+        }
         // Associate the configuration of starting window with the task.
         overrideConfigurationPropagation(mStartingWindow, mStartingData.mAssociatedTask);
         getSyncTransaction().reparent(mStartingWindow.mSurfaceControl,
@@ -3716,8 +3720,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
+            final WindowContainer<?> trigger = endTask ? task : this;
             final Transition newTransition =
-                    mTransitionController.requestCloseTransitionIfNeeded(endTask ? task : this);
+                    mTransitionController.requestCloseTransitionIfNeeded(trigger);
+            if (newTransition != null) {
+                newTransition.collectClose(trigger);
+            } else if (mTransitionController.isCollecting()) {
+                mTransitionController.getCollectingTransition().collectClose(trigger);
+            }
             if (isState(RESUMED)) {
                 if (endTask) {
                     mAtmService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
@@ -3987,7 +3997,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the display does not have running activity, the configuration may need to be
         // updated for restoring original orientation of the display.
         if (next == null) {
-            mRootWindowContainer.ensureVisibilityAndConfig(next, getDisplayId(),
+            mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */, mDisplayContent,
                     true /* deferResume */);
         }
         if (activityRemoved) {
@@ -4058,7 +4068,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + this);
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                        DestroyActivityItem.obtain(token, finishing, configChangeFlags));
+                        DestroyActivityItem.obtain(token, finishing));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process has crashed, our death
                 // notification will clean things up.
@@ -4099,8 +4109,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 setState(DESTROYED, "destroyActivityLocked. not finishing and had no app");
             }
         }
-
-        configChangeFlags = 0;
 
         return removedFromHistory;
     }
@@ -4378,7 +4386,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // closing the task.
         final WindowContainer trigger = remove && task != null && task.getChildCount() == 1
                 ? task : this;
-        mTransitionController.requestCloseTransitionIfNeeded(trigger);
+        final Transition newTransit = mTransitionController.requestCloseTransitionIfNeeded(trigger);
+        if (newTransit != null) {
+            newTransit.collectClose(trigger);
+        } else if (mTransitionController.isCollecting()) {
+            mTransitionController.getCollectingTransition().collectClose(trigger);
+        }
         cleanUp(true /* cleanServices */, true /* setState */);
         if (remove) {
             if (mStartingData != null && mVisible && task != null) {
@@ -5020,7 +5033,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return PauseActivityItem.obtain(token);
             case STOPPING:
             case STOPPED:
-                return StopActivityItem.obtain(token, configChangeFlags);
+                return StopActivityItem.obtain(token);
             default:
                 // Do not send a result immediately if the activity is in state INITIALIZING,
                 // RESTARTING_PROCESS, FINISHING, DESTROYING, or DESTROYED.
@@ -6294,7 +6307,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             try {
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
                         PauseActivityItem.obtain(token, finishing, false /* userLeaving */,
-                                configChangeFlags, false /* dontReport */, mAutoEnteringPip));
+                                false /* dontReport */, mAutoEnteringPip));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
             }
@@ -6464,12 +6477,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * state to match that fact.
      */
     void completeResumeLocked() {
-        final boolean wasVisible = mVisibleRequested;
-        setVisibility(true);
-        if (!wasVisible) {
-            // Visibility has changed, so take a note of it so we call the TaskStackChangedListener
-            mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
-        }
         idle = false;
         results = null;
         if (newIntents != null && newIntents.size() > 0) {
@@ -6608,7 +6615,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    StopActivityItem.obtain(token, configChangeFlags));
+                    StopActivityItem.obtain(token));
 
             mAtmService.mH.postDelayed(mStopTimeoutRunnable, STOP_TIMEOUT);
         } catch (Exception e) {
@@ -6866,6 +6873,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // stop tracking
         mSplashScreenStyleSolidColor = true;
 
+        mAtmService.mBackNavigationController.removePredictiveSurfaceIfNeeded(this);
         if (mStartingWindow != null) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Finish starting %s"
                     + ": first real window is shown, no animation", win.mToken);
@@ -8476,6 +8484,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // and back which can cause visible issues (see b/184078928).
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
+
+        applySizeOverrideIfNeeded(newParentConfiguration, parentWindowingMode, resolvedConfig);
+
         final boolean isFixedOrientationLetterboxAllowed =
                 parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
@@ -8572,6 +8583,87 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         logAppCompatState();
+    }
+
+    /**
+     * If necessary, override configuration fields related to app bounds.
+     * This will happen when the app is targeting SDK earlier than 35.
+     * The insets and configuration has decoupled since SDK level 35, to make the system
+     * compatible to existing apps, override the configuration with legacy metrics. In legacy
+     * metrics, fields such as appBounds will exclude some of the system bar areas.
+     * The override contains all potentially affected fields in Configuration, including
+     * screenWidthDp, screenHeightDp, smallestScreenWidthDp, and orientation.
+     * All overrides to those fields should be in this method.
+     */
+    private void applySizeOverrideIfNeeded(Configuration newParentConfiguration,
+            int parentWindowingMode, Configuration inOutConfig) {
+        if (mDisplayContent == null) {
+            return;
+        }
+        final Rect fullBounds = newParentConfiguration.windowConfiguration.getAppBounds();
+        int rotation = newParentConfiguration.windowConfiguration.getRotation();
+        if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
+            rotation = mDisplayContent.getRotation();
+        }
+        if (!mWmService.mFlags.mInsetsDecoupledConfiguration
+                || info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
+                || getCompatDisplayInsets() != null
+                || isFloating(parentWindowingMode) || fullBounds == null
+                || fullBounds.isEmpty() || rotation == ROTATION_UNDEFINED) {
+            // If the insets configuration decoupled logic is not enabled for the app, or the app
+            // already has a compat override, or the context doesn't contain enough info to
+            // calculate the override, skip the override.
+            return;
+        }
+
+        // Override starts here.
+        final Rect stableInsets = mDisplayContent.getDisplayPolicy().getDecorInsetsInfo(
+                rotation, fullBounds.width(), fullBounds.height()).mLegacyConfigInsets;
+        // This should be the only place override the configuration for ActivityRecord. Override
+        // the value if not calculated yet.
+        Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+        if (outAppBounds == null || outAppBounds.isEmpty()) {
+            inOutConfig.windowConfiguration.setAppBounds(fullBounds);
+            outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
+            outAppBounds.inset(stableInsets);
+        }
+        float density = inOutConfig.densityDpi;
+        if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+            density = newParentConfiguration.densityDpi;
+        }
+        density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+            final int overrideScreenWidthDp = (int) (outAppBounds.width() / density + 0.5f);
+            inOutConfig.screenWidthDp =
+                    Math.min(overrideScreenWidthDp, newParentConfiguration.screenWidthDp);
+        }
+        if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+            final int overrideScreenHeightDp =
+                    (int) (outAppBounds.height() / density + 0.5f);
+            inOutConfig.screenHeightDp =
+                    Math.min(overrideScreenHeightDp, newParentConfiguration.screenHeightDp);
+        }
+        if (inOutConfig.smallestScreenWidthDp
+                == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && parentWindowingMode == WINDOWING_MODE_FULLSCREEN) {
+            // For the case of PIP transition and multi-window environment, the
+            // smallestScreenWidthDp is handled already. Override only if the app is in
+            // fullscreen.
+            final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+            DisplayInfo info = new DisplayInfo();
+            mDisplayContent.getDisplay().getDisplayInfo(info);
+            mDisplayContent.computeSizeRanges(info, rotated, info.logicalWidth,
+                    info.logicalHeight, mDisplayContent.getDisplayMetrics().density,
+                    inOutConfig, true /* legacyConfig */);
+        }
+
+        // It's possible that screen size will be considered in different orientation with or
+        // without considering the system bar insets. Override orientation as well.
+        if (inOutConfig.orientation == ORIENTATION_UNDEFINED) {
+            inOutConfig.orientation =
+                    (inOutConfig.screenWidthDp <= inOutConfig.screenHeightDp)
+                            ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        }
     }
 
     /**
@@ -8827,6 +8919,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDisplayContent == null) {
             return true;
         }
+        if (mWmService.mFlags.mInsetsDecoupledConfiguration
+                && info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)) {
+            // No insets should be considered any more.
+            return true;
+        }
         // Only need to make changes if activity sets an orientation
         final int requestedOrientation = getRequestedConfigurationOrientation();
         if (requestedOrientation == ORIENTATION_UNDEFINED) {
@@ -8841,7 +8938,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 : mDisplayContent.getDisplayInfo();
         final Task task = getTask();
         task.calculateInsetFrames(mTmpBounds /* outNonDecorBounds */,
-                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di);
+                outStableBounds /* outStableBounds */, parentBounds /* bounds */, di,
+                true /* useLegacyInsetsForStableBounds */);
         final int orientationWithInsets = outStableBounds.height() >= outStableBounds.width()
                 ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         // If orientation does not match the orientation with insets applied, then a
@@ -9785,7 +9883,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // configurations because there are cases (like moving a task to the root pinned task) where
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
-        if (getConfiguration().equals(mTmpConfig) && !displayChanged) {
+        final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
+        final boolean isActivityWindowInfoChanged = Flags.activityWindowInfoFlag()
+                && !mLastReportedActivityWindowInfo.equals(newActivityWindowInfo);
+        if (!displayChanged && !isActivityWindowInfoChanged
+                && getConfiguration().equals(mTmpConfig)) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
                     + "unchanged in %s", this);
             return true;
@@ -9800,7 +9902,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
-        final ActivityWindowInfo newActivityWindowInfo = getActivityWindowInfo();
 
         setLastReportedConfiguration(getProcessGlobalConfiguration(), newMergedOverrideConfig);
         setLastReportedActivityWindowInfo(newActivityWindowInfo);
@@ -9823,7 +9924,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
                         newActivityWindowInfo);
             } else {
-                scheduleConfigurationChanged(newMergedOverrideConfig);
+                scheduleConfigurationChanged(newMergedOverrideConfig, newActivityWindowInfo);
             }
             notifyDisplayCompatPolicyAboutConfigurationChange(
                     mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);
@@ -9848,7 +9949,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (shouldRelaunchLocked(changes, mTmpConfig)) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
-            configChangeFlags |= changes;
             if (mVisible && mAtmService.mTmpUpdateConfigurationResult.mIsUpdating
                     && !mTransitionController.isShellTransitionsEnabled()) {
                 startFreezingScreenLocked(app, mAtmService.mTmpUpdateConfigurationResult.changes);
@@ -9877,7 +9977,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ProtoLog.v(WM_DEBUG_STATES, "Config is relaunching invisible "
                         + "activity %s called by %s", this, Debug.getCallers(4));
             }
-            relaunchActivityLocked(preserveWindow);
+            relaunchActivityLocked(preserveWindow, changes);
 
             // All done...  tell the caller we weren't able to keep this activity around.
             return false;
@@ -9891,7 +9991,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             scheduleActivityMovedToDisplay(newDisplayId, newMergedOverrideConfig,
                     newActivityWindowInfo);
         } else {
-            scheduleConfigurationChanged(newMergedOverrideConfig);
+            scheduleConfigurationChanged(newMergedOverrideConfig, newActivityWindowInfo);
         }
         notifyDisplayCompatPolicyAboutConfigurationChange(
                 mLastReportedConfiguration.getMergedConfiguration(), mTmpConfig);
@@ -10019,9 +10119,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 | CONFIG_SCREEN_LAYOUT)) != 0;
     }
 
-    void relaunchActivityLocked(boolean preserveWindow) {
+    void relaunchActivityLocked(boolean preserveWindow, int configChangeFlags) {
         if (mAtmService.mSuppressResizeConfigChanges && preserveWindow) {
-            configChangeFlags = 0;
             return;
         }
         if (!preserveWindow) {
@@ -10094,8 +10193,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // The activity may be waiting for stop, but that is no longer appropriate for it.
         mTaskSupervisor.mStoppingActivities.remove(this);
-
-        configChangeFlags = 0;
     }
 
     /**
@@ -10164,7 +10261,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // {@link ActivityTaskManagerService.activityStopped}).
         try {
             mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
-                    StopActivityItem.obtain(token, 0 /* configChanges */));
+                    StopActivityItem.obtain(token));
         } catch (RemoteException e) {
             Slog.w(TAG, "Exception thrown during restart " + this, e);
         }

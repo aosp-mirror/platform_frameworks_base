@@ -138,8 +138,7 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         mInfoMediaManager =
-                InfoMediaManager.createInstance(
-                        context, packageName, notification, mLocalBluetoothManager);
+                InfoMediaManager.createInstance(context, packageName, mLocalBluetoothManager);
     }
 
     /**
@@ -505,9 +504,9 @@ public class LocalMediaManager implements BluetoothCallback {
         return new CopyOnWriteArrayList<>(mCallbacks);
     }
 
-    class MediaDeviceCallback implements MediaManager.MediaDeviceCallback {
+    class MediaDeviceCallback implements InfoMediaManager.MediaDeviceCallback {
         @Override
-        public void onDeviceListAdded(List<MediaDevice> devices) {
+        public void onDeviceListAdded(@NonNull List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
@@ -637,7 +636,7 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         @Override
-        public void onDeviceListRemoved(List<MediaDevice> devices) {
+        public void onDeviceListRemoved(@NonNull List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
                 mMediaDevices.removeAll(devices);
             }

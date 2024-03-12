@@ -51,6 +51,7 @@ sealed interface CommunalContentModel {
             override val appWidgetId: Int,
             override val providerInfo: AppWidgetProviderInfo,
             val appWidgetHost: CommunalAppWidgetHost,
+            val inQuietMode: Boolean,
         ) : WidgetContent {
             override val key = KEY.widget(appWidgetId)
             // Widget size is always half.
@@ -152,4 +153,6 @@ sealed interface CommunalContentModel {
     }
 
     fun isWidgetContent() = this is WidgetContent
+
+    fun isSmartspace() = this is Smartspace
 }

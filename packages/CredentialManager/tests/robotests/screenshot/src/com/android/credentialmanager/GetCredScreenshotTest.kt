@@ -53,6 +53,7 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 preferImmediatelyAvailableCredentials = false,
                 preferIdentityDocUi = false,
                 preferTopBrandingContent = null,
+                typePriorityMap = emptyMap(),
         )
     }
 
@@ -68,7 +69,7 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     fun singleCredentialScreen_M3BottomSheetDisabled() {
         setFlagsRule.disableFlags(Flags.FLAG_SELECTOR_UI_IMPROVEMENTS_ENABLED)
         val providerInfoList = buildProviderInfoList()
-        val providerDisplayInfo = toProviderDisplayInfo(providerInfoList)
+        val providerDisplayInfo = toProviderDisplayInfo(providerInfoList, emptyMap())
         val activeEntry = toActiveEntry(providerDisplayInfo)
         screenshotRule.screenshotTest("singleCredentialScreen") {
             ModalBottomSheet(
@@ -96,7 +97,7 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     fun singleCredentialScreen_M3BottomSheetEnabled() {
         setFlagsRule.enableFlags(Flags.FLAG_SELECTOR_UI_IMPROVEMENTS_ENABLED)
         val providerInfoList = buildProviderInfoList()
-        val providerDisplayInfo = toProviderDisplayInfo(providerInfoList)
+        val providerDisplayInfo = toProviderDisplayInfo(providerInfoList, emptyMap())
         val activeEntry = toActiveEntry(providerDisplayInfo)
         screenshotRule.screenshotTest(
                 "singleCredentialScreen_newM3BottomSheet",
@@ -146,7 +147,11 @@ class GetCredScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                                 icon = null,
                                 shouldTintIcon = true,
                                 lastUsedTimeMillis = null,
-                                isAutoSelectable = false
+                                isAutoSelectable = false,
+                                entryGroupId = "username",
+                                isDefaultIconPreferredAsSingleProvider = false,
+                                rawCredentialType = "unknown-type",
+                                affiliatedDomain = null,
                         )
                 ),
                 authenticationEntryList = emptyList(),

@@ -41,12 +41,14 @@ import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
+import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.WeatherClockSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import dagger.Binds
@@ -68,6 +70,7 @@ constructor(
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
     private val clockInteractor: KeyguardClockInteractor,
+    private val mediaCarouselSection: MediaCarouselSection,
 ) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = WEATHER_CLOCK_BLUEPRINT_ID
@@ -107,7 +110,9 @@ constructor(
                             )
                         }
 
-                        if (viewModel.areNotificationsVisible) {
+                        with(mediaCarouselSection) { MediaCarousel() }
+
+                        if (viewModel.areNotificationsVisible(resources = resources)) {
                             with(notificationSection) {
                                 Notifications(
                                     modifier = Modifier.fillMaxWidth().weight(weight = 1f)
@@ -228,6 +233,7 @@ constructor(
     private val clockInteractor: KeyguardClockInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val weatherClockSection: WeatherClockSection,
+    private val mediaCarouselSection: MediaCarouselSection,
 ) : ComposableLockscreenSceneBlueprint {
     override val id: String = SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
 
@@ -276,6 +282,8 @@ constructor(
                                                 ),
                                     )
                                 }
+
+                                with(mediaCarouselSection) { MediaCarousel() }
                             }
                             with(notificationSection) {
                                 val splitShadeTopMargin: Dp =

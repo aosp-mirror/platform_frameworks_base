@@ -247,8 +247,6 @@ public final class PermissionManager {
 
     private final LegacyPermissionManager mLegacyPermissionManager;
 
-    private final VirtualDeviceManager mVirtualDeviceManager;
-
     private final ArrayMap<PackageManager.OnPermissionsChangedListener,
             IOnPermissionsChangeListener> mPermissionListeners = new ArrayMap<>();
     private PermissionUsageHelper mUsageHelper;
@@ -269,7 +267,6 @@ public final class PermissionManager {
         mPermissionManager = IPermissionManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
                 "permissionmgr"));
         mLegacyPermissionManager = context.getSystemService(LegacyPermissionManager.class);
-        mVirtualDeviceManager = context.getSystemService(VirtualDeviceManager.class);
     }
 
     /**
@@ -1791,6 +1788,9 @@ public final class PermissionManager {
 
     /**
      * Gets the permission states for requested package and persistent device.
+     * <p>
+     * <strong>Note: </strong>Default device permissions are not inherited in this API. Returns the
+     * exact permission states for the requested device.
      *
      * @param packageName name of the package you are checking against
      * @param persistentDeviceId id of the persistent device you are checking against
@@ -1800,7 +1800,11 @@ public final class PermissionManager {
      */
     @SystemApi
     @NonNull
-    @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
+    })
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
             @NonNull String persistentDeviceId) {
@@ -1918,14 +1922,18 @@ public final class PermissionManager {
         if (deviceId == Context.DEVICE_ID_DEFAULT) {
             persistentDeviceId = VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
         } else if (android.companion.virtual.flags.Flags.vdmPublicApis()) {
-            VirtualDevice virtualDevice = mVirtualDeviceManager.getVirtualDevice(deviceId);
-            if (virtualDevice == null) {
-                Slog.e(LOG_TAG, "Virtual device is not found with device Id " + deviceId);
-                return null;
-            }
-            persistentDeviceId = virtualDevice.getPersistentDeviceId();
-            if (persistentDeviceId == null) {
-                Slog.e(LOG_TAG, "Cannot find persistent device Id for " + deviceId);
+            VirtualDeviceManager virtualDeviceManager = mContext.getSystemService(
+                    VirtualDeviceManager.class);
+            if (virtualDeviceManager != null) {
+                VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
+                if (virtualDevice == null) {
+                    Slog.e(LOG_TAG, "Virtual device is not found with device Id " + deviceId);
+                    return null;
+                }
+                persistentDeviceId = virtualDevice.getPersistentDeviceId();
+                if (persistentDeviceId == null) {
+                    Slog.e(LOG_TAG, "Cannot find persistent device Id for " + deviceId);
+                }
             }
         } else {
             Slog.e(LOG_TAG, "vdmPublicApis flag is not enabled when device Id " + deviceId
@@ -2072,5 +2080,29 @@ public final class PermissionManager {
                 return new PermissionState[size];
             }
         };
+
+        /** @hide */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PermissionState that = (PermissionState) o;
+            return mGranted == that.mGranted && mFlags == that.mFlags;
+        }
+
+        /** @hide */
+        @Override
+        public int hashCode() {
+            return Objects.hash(mGranted, mFlags);
+        }
+
+        /** @hide */
+        @Override
+        public String toString() {
+            return "PermissionState{"
+                    + "mGranted=" + mGranted
+                    + ", mFlags=" + mFlags
+                    + '}';
+        }
     }
 }

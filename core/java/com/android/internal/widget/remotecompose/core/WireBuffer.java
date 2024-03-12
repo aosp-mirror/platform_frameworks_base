@@ -92,7 +92,7 @@ public class WireBuffer {
         mIndex = 0;
         mStartingIndex = 0;
         mSize = 0;
-        if (expectedSize > mMaxSize) {
+        if (expectedSize >= mMaxSize) {
             resize(expectedSize);
         }
     }

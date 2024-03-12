@@ -4,14 +4,13 @@ import android.view.ViewGroup
 import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.ViewMediatorCallback
 import com.android.keyguard.dagger.KeyguardBouncerComponent
-import com.android.systemui.Flags
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.Flags.COMPOSE_BOUNCER_ENABLED
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
@@ -55,13 +54,12 @@ constructor(
 class BouncerViewBinder
 @Inject
 constructor(
+    private val composeBouncerFlags: ComposeBouncerFlags,
     private val legacyBouncerDependencies: Lazy<LegacyBouncerDependencies>,
     private val composeBouncerDependencies: Lazy<ComposeBouncerDependencies>,
 ) {
     fun bind(view: ViewGroup) {
-        if (
-            ComposeFacade.isComposeAvailable() && Flags.composeBouncer() && COMPOSE_BOUNCER_ENABLED
-        ) {
+        if (COMPOSE_BOUNCER_ENABLED && composeBouncerFlags.isOnlyComposeBouncerEnabled()) {
             val deps = composeBouncerDependencies.get()
             ComposeBouncerViewBinder.bind(
                 view,

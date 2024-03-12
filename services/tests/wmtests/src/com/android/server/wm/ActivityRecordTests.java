@@ -527,7 +527,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
+                ActivityConfigurationChangeItem.obtain(activity.token, newConfig,
+                        activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(
                 eq(activity.app.getThread()), eq(expected));
     }
@@ -599,7 +600,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Configuration currentConfig = activity.getConfiguration();
         assertEquals(expectedOrientation, currentConfig.orientation);
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig);
+                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig,
+                        activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(activity.app.getThread(), expected);
         verify(displayRotation).onSetRequestedOrientation();
     }
@@ -818,7 +820,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
             final ActivityConfigurationChangeItem expected =
                     ActivityConfigurationChangeItem.obtain(activity.token,
-                            activity.getConfiguration());
+                            activity.getConfiguration(), activity.getActivityWindowInfo());
             verify(mClientLifecycleManager).scheduleTransactionItem(
                     activity.app.getThread(), expected);
         } finally {
@@ -3145,12 +3147,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         // By default, activity is visible.
         assertTrue(activity.isVisible());
         assertTrue(activity.isVisibleRequested());
-        assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
         // Request the activity to be visible. Although the activity is already visible, app
         // transition animation should be applied on this activity. This might be unnecessary, but
         // until we verify no logic relies on this behavior, we'll keep this as is.
+        mDisplayContent.prepareAppTransition(0);
         activity.setVisibility(true);
         assertTrue(activity.isVisible());
         assertTrue(activity.isVisibleRequested());
@@ -3165,11 +3167,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         // By default, activity is visible.
         assertTrue(activity.isVisible());
         assertTrue(activity.isVisibleRequested());
-        assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
         // Request the activity to be invisible. Since the visibility changes, app transition
         // animation should be applied on this activity.
+        mDisplayContent.prepareAppTransition(0);
         activity.setVisibility(false);
         assertTrue(activity.isVisible());
         assertFalse(activity.isVisibleRequested());
@@ -3185,7 +3187,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         // activity.
         assertFalse(activity.isVisible());
         assertTrue(activity.isVisibleRequested());
-        assertTrue(activity.mDisplayContent.mOpeningApps.contains(activity));
         assertFalse(activity.mDisplayContent.mClosingApps.contains(activity));
 
         // Request the activity to be visible. Since the visibility changes, app transition
@@ -3387,6 +3388,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // frozen until the input started.
         mDisplayContent.setImeLayeringTarget(app1);
         mDisplayContent.updateImeInputAndControlTarget(app1);
+        mDisplayContent.computeImeTarget(true /* updateImeTarget */);
         performSurfacePlacementAndWaitForWindowAnimator();
 
         assertEquals(app1, mDisplayContent.getImeInputTarget());
@@ -3681,7 +3683,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(WINDOWING_MODE_FULLSCREEN, activity.getWindowingMode());
 
         registerTestTransitionPlayer();
-        task.mTransitionController.requestTransitionIfNeeded(TRANSIT_PIP, task);
+        Transition tr = task.mTransitionController.requestStartTransition(
+                task.mTransitionController.createTransition(TRANSIT_PIP), task, null, null);
+        tr.collect(task);
         task.setWindowingMode(WINDOWING_MODE_PINNED);
 
         // Collect activity in the transition if the Task windowing mode is going to change.

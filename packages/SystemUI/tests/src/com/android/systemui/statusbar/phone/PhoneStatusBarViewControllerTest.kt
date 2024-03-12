@@ -20,6 +20,7 @@ import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
 import android.app.StatusBarManager.WINDOW_STATE_HIDING
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import android.view.InputDevice
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -233,14 +234,35 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun shadeIsExpandedOnStatusIconClick() {
+    fun shadeIsExpandedOnStatusIconMouseClick() {
         val view = createViewMock()
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             controller = createAndInitController(view)
         }
         val statusContainer = view.requireViewById<View>(R.id.system_icons)
-        statusContainer.performClick()
-        verify(shadeViewController).expand(any())
+        statusContainer.dispatchTouchEvent(
+            getActionUpEventFromSource(InputDevice.SOURCE_MOUSE)
+        )
+        verify(shadeControllerImpl).animateExpandShade()
+    }
+
+    @Test
+    fun statusIconContainerIsNotHandlingTouchScreenTouches() {
+        val view = createViewMock()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            controller = createAndInitController(view)
+        }
+        val statusContainer = view.requireViewById<View>(R.id.system_icons)
+        val handled = statusContainer.dispatchTouchEvent(
+            getActionUpEventFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+        )
+        assertThat(handled).isFalse()
+    }
+
+    private fun getActionUpEventFromSource(source: Int): MotionEvent {
+        val ev = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0f, 0f, 0)
+        ev.source = source
+        return ev
     }
 
     @Test
@@ -250,7 +272,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             controller = createAndInitController(view)
         }
         view.performClick()
-        verify(shadeViewController, never()).expand(any())
+        verify(shadeControllerImpl, never()).animateExpandShade()
     }
 
     private fun getCommandQueueCallback(): CommandQueue.Callbacks {

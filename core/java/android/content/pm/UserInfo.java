@@ -112,6 +112,12 @@ public class UserInfo implements Parcelable {
     /**
      * Indicates that this user is disabled.
      *
+     * <p> This is currently used to indicate that a Managed Profile, when created via
+     * DevicePolicyManager, has not yet been provisioned; once the DPC provisions it, a DPM call
+     * will manually set it to enabled.
+     *
+     * <p>Users that are slated for deletion are also generally set to disabled.
+     *
      * <p>Note: If an ephemeral user is disabled, it shouldn't be later re-enabled. Ephemeral users
      * are disabled as their removal is in progress to indicate that they shouldn't be re-entered.
      */
@@ -398,6 +404,7 @@ public class UserInfo implements Parcelable {
         return UserManager.isUserTypePrivateProfile(userType);
     }
 
+    /** See {@link #FLAG_DISABLED}*/
     @UnsupportedAppUsage
     public boolean isEnabled() {
         return (flags & FLAG_DISABLED) != FLAG_DISABLED;

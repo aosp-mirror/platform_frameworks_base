@@ -184,3 +184,11 @@ flag {
     description: "Enable Private Space telephony and SMS intent redirection to the main user"
     bug: "325576602"
 }
+
+flag {
+    name: "block_private_space_creation"
+    namespace: "profile_experiences"
+    description: "Allow blocking private space creation based on specific conditions"
+    bug: "290333800"
+    is_fixed_read_only: true
+}

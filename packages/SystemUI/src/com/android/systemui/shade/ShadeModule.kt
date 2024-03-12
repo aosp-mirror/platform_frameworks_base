@@ -17,12 +17,16 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.plugins.qs.QSContainerController
+import com.android.systemui.qs.ui.adapter.QSSceneAdapterImpl
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.data.repository.PrivacyChipRepository
 import com.android.systemui.shade.data.repository.PrivacyChipRepositoryImpl
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorSceneContainerImpl
@@ -110,6 +114,40 @@ abstract class ShadeModule {
             } else {
                 sceneContainerOff.get()
             }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providePanelExpansionInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<PanelExpansionInteractorImpl>,
+            sceneContainerOff: Provider<NotificationPanelViewController>
+        ): PanelExpansionInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun provideQuickSettingsController(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<QuickSettingsControllerSceneImpl>,
+            sceneContainerOff: Provider<QuickSettingsControllerImpl>,
+        ): QuickSettingsController {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesQSContainerController(impl: QSSceneAdapterImpl): QSContainerController {
+            return impl
         }
     }
 

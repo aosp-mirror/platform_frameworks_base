@@ -44,10 +44,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.IntArray;
 import android.util.Xml;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;

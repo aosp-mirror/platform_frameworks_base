@@ -157,13 +157,21 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        if (mService.mPolicy.isKeyguardLocked() && w.canShowWhenLocked()) {
-            if (mService.mPolicy.isKeyguardOccluded() || (useShellTransition
-                    ? w.inTransition() : mService.mPolicy.isKeyguardUnoccluding())) {
-                // The lowest show when locked window decides whether we need to put the wallpaper
-                // behind.
-                mFindResults.mNeedsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
-                        || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+        if (mService.mPolicy.isKeyguardLocked()) {
+            if (w.canShowWhenLocked()) {
+                if (mService.mPolicy.isKeyguardOccluded() || (useShellTransition
+                        ? w.inTransition() : mService.mPolicy.isKeyguardUnoccluding())) {
+                    // The lowest show-when-locked window decides whether to show wallpaper.
+                    mFindResults.mNeedsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                            || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+                }
+            } else if (w.hasWallpaper() && mService.mPolicy.isKeyguardHostWindow(w.mAttrs)
+                    && w.mTransitionController.isTransitionOnDisplay(mDisplayContent)) {
+                // If we have no candidates at all, notification shade is allowed to be the target
+                // of last resort even if it has not been made visible yet.
+                if (DEBUG_WALLPAPER) Slog.v(TAG, "Found keyguard as wallpaper target: " + w);
+                mFindResults.setWallpaperTarget(w);
+                return false;
             }
         }
 
@@ -200,14 +208,7 @@ class WallpaperController {
 
     private boolean isRecentsTransitionTarget(WindowState w) {
         if (w.mTransitionController.isShellTransitionsEnabled()) {
-            // Because the recents activity is invisible in background while keyguard is occluded
-            // (the activity window is on screen while keyguard is locked) with recents animation,
-            // the task animating by recents needs to be wallpaper target to make wallpaper visible.
-            // While for unlocked case, because recents activity will be moved to top, it can be
-            // the wallpaper target naturally.
-            return w.mActivityRecord != null && w.mAttrs.type == TYPE_BASE_APPLICATION
-                    && mDisplayContent.isKeyguardLocked()
-                    && w.mTransitionController.isTransientHide(w.getTask());
+            return false;
         }
         // The window is either the recents activity or is in the task animating by the recents.
         final RecentsAnimationController controller = mService.getRecentsAnimationController();
@@ -349,7 +350,7 @@ class WallpaperController {
         final Rect lastWallpaperBounds = wallpaperWin.getParentFrame();
         int screenWidth = lastWallpaperBounds.width();
         int screenHeight = lastWallpaperBounds.height();
-        float screenRatio = ((float) screenWidth) / screenHeight;
+        float screenRatio = (float) screenWidth / screenHeight;
         Point screenSize = new Point(screenWidth, screenHeight);
 
         WallpaperWindowToken token = wallpaperWin.mToken.asWallpaperToken();
@@ -399,20 +400,32 @@ class WallpaperController {
             Point bitmapSize = new Point(
                     wallpaperWin.mRequestedWidth, wallpaperWin.mRequestedHeight);
             SparseArray<Rect> cropHints = token.getCropHints();
-            wallpaperFrame = mWallpaperCropUtils.getCrop(
-                    screenSize, bitmapSize, cropHints, wallpaperWin.isRtl());
+            wallpaperFrame = bitmapSize.x <= 0 || bitmapSize.y <= 0 ? wallpaperWin.getFrame()
+                    : mWallpaperCropUtils.getCrop(screenSize, bitmapSize, cropHints,
+                            wallpaperWin.isRtl());
+            int frameWidth = wallpaperFrame.width();
+            int frameHeight = wallpaperFrame.height();
+            float frameRatio = (float) frameWidth / frameHeight;
 
-            cropZoom = wallpaperFrame.isEmpty() ? 1f
-                    : ((float) screenHeight) / wallpaperFrame.height() / wallpaperWin.mVScale;
+            // If the crop is proportionally wider/taller than the screen, scale it so that its
+            // height/width matches the screen height/width, and use the additional width/height
+            // for parallax (respectively).
+            boolean scaleHeight = frameRatio >= screenRatio;
+            cropZoom = wallpaperFrame.isEmpty() ? 1f : scaleHeight
+                    ? (float) screenHeight / frameHeight / wallpaperWin.mVScale
+                    : (float) screenWidth / frameWidth / wallpaperWin.mHScale;
 
-            // A positive x / y offset shifts the wallpaper to the right / bottom respectively.
-            cropOffsetX = -wallpaperFrame.left
-                    + (int) ((cropZoom - 1f) * wallpaperFrame.height() * screenRatio / 2f);
-            cropOffsetY = -wallpaperFrame.top
-                    + (int) ((cropZoom - 1f) * wallpaperFrame.height() / 2f);
+            // The dimensions of the frame, without the additional width or height for parallax.
+            float w = scaleHeight ? frameHeight * screenRatio : frameWidth;
+            float h = scaleHeight ? frameHeight : frameWidth / screenRatio;
 
-            diffWidth = (int) (wallpaperFrame.width() * wallpaperWin.mHScale) - screenWidth;
-            diffHeight = (int) (wallpaperFrame.height() * wallpaperWin.mVScale) - screenHeight;
+            // Note: a positive x/y offset shifts the wallpaper to the right/bottom respectively.
+            cropOffsetX = -wallpaperFrame.left + (int) ((cropZoom - 1f) * w / 2f);
+            cropOffsetY = -wallpaperFrame.top + (int) ((cropZoom - 1f) * h / 2f);
+
+            // Available width or height for parallax
+            diffWidth = (int) ((frameWidth - w) * wallpaperWin.mHScale);
+            diffHeight = (int) ((frameHeight - h) * wallpaperWin.mVScale);
         } else {
             wallpaperFrame = wallpaperWin.getFrame();
             cropZoom = 1f;

@@ -17,7 +17,7 @@ package com.android.server.devicepolicy;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 

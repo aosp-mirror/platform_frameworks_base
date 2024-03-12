@@ -23,6 +23,13 @@ flag {
 }
 
 flag {
+    name: "fgs_disable_saw"
+    namespace: "backstage_power"
+    description: "Disable System Alert Window FGS start"
+    bug: "296558535"
+}
+
+flag {
     name: "bfgs_managed_network_access"
     namespace: "backstage_power"
     description: "Restrict network access for certain applications in BFGS process state"
@@ -52,4 +59,11 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "defer_outgoing_bcasts"
+    description: "Defer outgoing broadcasts from processes in freezable state"
+    bug: "327496592"
 }

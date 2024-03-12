@@ -33,6 +33,7 @@ open class ShadeControllerEmptyImpl @Inject constructor() : ShadeController {
         delayed: Boolean,
         speedUpFactor: Float
     ) {}
+    override fun collapseWithDuration(animationDuration: Int) {}
     override fun animateExpandShade() {}
     override fun animateExpandQs() {}
     override fun postAnimateCollapseShade() {}

@@ -375,4 +375,323 @@ class WindowManagerLockscreenVisibilityInteractorTest : SysuiTestCase() {
                 values
             )
         }
+
+    @Test
+    fun testLockscreenVisibility_usesFromState_ifCanceled() =
+        testScope.runTest {
+            val values by collectValues(underTest.lockscreenVisibility)
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
+            )
+
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    // Initially should be true, as we start in LOCKSCREEN.
+                    true,
+                    // Then, false, since we finish in GONE.
+                    false,
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    // Should remain false as we transition from GONE.
+                    false,
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.CANCELED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // If we cancel and then go from LS -> GONE, we should immediately flip to the
+                    // visibility of the from state (LS).
+                    true,
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                )
+            )
+
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    true,
+                ),
+                values
+            )
+        }
+
+    /**
+     * Tests the special case for insecure camera launch. CANCELING a transition from GONE and then
+     * STARTING a transition back to GONE should never show the lockscreen, even though the current
+     * state during the AOD/isAsleep -> GONE transition is AOD (where lockscreen visibility = true).
+     */
+    @Test
+    fun testLockscreenVisibility_falseDuringTransitionToGone_fromCanceledGone() =
+        testScope.runTest {
+            val values by collectValues(underTest.lockscreenVisibility)
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    // Not visible since we're GONE.
+                    false,
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.CANCELED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                )
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    // Remains not visible from GONE -> AOD (canceled) -> AOD since we never
+                    // FINISHED in AOD, and special-case handling for the insecure camera launch
+                    // ensures that we use the lockscreen visibility for GONE (false) if we're
+                    // STARTED to GONE after a CANCELED from GONE.
+                    false,
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.GONE,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // Make sure there's no stuck overrides or something - we should make lockscreen
+                    // visible again once we're finished in LOCKSCREEN.
+                    true,
+                ),
+                values
+            )
+        }
+
+    /**  */
+    @Test
+    fun testLockscreenVisibility_trueDuringTransitionToGone_fromNotCanceledGone() =
+        testScope.runTest {
+            val values by collectValues(underTest.lockscreenVisibility)
+
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    // Not visible when finished in GONE.
+                    false,
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    // Still not visible during GONE -> AOD.
+                    false,
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // Visible now that we're FINISHED in AOD.
+                    true
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.RUNNING,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    // Remains visible from AOD during transition.
+                    true
+                ),
+                values
+            )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.FINISHED,
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                )
+            )
+
+            runCurrent()
+            assertEquals(
+                listOf(
+                    true,
+                    false,
+                    true,
+                    // Until we're finished in GONE again.
+                    false
+                ),
+                values
+            )
+        }
 }

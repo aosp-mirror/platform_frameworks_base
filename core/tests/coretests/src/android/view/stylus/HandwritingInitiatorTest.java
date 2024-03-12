@@ -472,6 +472,26 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
+    public void onTouchEvent_doesNothing_viewDisabled() {
+        mTestView1.setEnabled(false);
+
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + mHandwritingSlop * 2;
+        final int y2 = y1;
+
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        // HandwritingInitiator will not request focus if it is disabled.
+        verify(mTestView1, never()).requestFocus();
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView1);
+    }
+
+    @Test
     public void onTouchEvent_focusView_inputConnectionAlreadyBuilt_stylusMoveOnce_withinHWArea() {
         if (!mInitiateWithoutConnection) {
             mHandwritingInitiator.onInputConnectionCreated(mTestView1);

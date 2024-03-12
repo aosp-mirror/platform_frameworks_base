@@ -63,6 +63,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -105,6 +106,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManager mHeadsUpManager;
     private final ActivityStarter mActivityStarter;
+    private final CommandQueue mCommandQueue;
     private final NotificationClickNotifier mClickNotifier;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardManager mKeyguardManager;
@@ -143,6 +145,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             NotificationVisibilityProvider visibilityProvider,
             HeadsUpManager headsUpManager,
             ActivityStarter activityStarter,
+            CommandQueue commandQueue,
             NotificationClickNotifier clickNotifier,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             KeyguardManager keyguardManager,
@@ -175,6 +178,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mActivityStarter = activityStarter;
+        mCommandQueue = commandQueue;
         mClickNotifier = clickNotifier;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardManager = keyguardManager;
@@ -444,10 +448,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             ActivityTransitionAnimator.Controller animationController =
                     new StatusBarTransitionAnimatorController(
                             mNotificationAnimationProvider.getAnimatorController(row, null),
-                            mShadeViewController,
                             mShadeAnimationInteractor,
                             mShadeController,
                             mNotificationShadeWindowController,
+                            mCommandQueue,
+                            mDisplayId,
                             isActivityIntent);
             mActivityTransitionAnimator.startPendingIntentWithAnimation(
                     animationController,
@@ -486,10 +491,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     ActivityTransitionAnimator.Controller animationController =
                             new StatusBarTransitionAnimatorController(
                                     mNotificationAnimationProvider.getAnimatorController(row),
-                                    mShadeViewController,
                                     mShadeAnimationInteractor,
                                     mShadeController,
                                     mNotificationShadeWindowController,
+                                    mCommandQueue,
+                                    mDisplayId,
                                     true /* isActivityIntent */);
 
                     mActivityTransitionAnimator.startIntentWithAnimation(
@@ -537,10 +543,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                             viewController == null ? null
                                 : new StatusBarTransitionAnimatorController(
                                         viewController,
-                                        mShadeViewController,
                                         mShadeAnimationInteractor,
                                         mShadeController,
                                         mNotificationShadeWindowController,
+                                        mCommandQueue,
+                                        mDisplayId,
                                         true /* isActivityIntent */);
 
                     mActivityTransitionAnimator.startIntentWithAnimation(

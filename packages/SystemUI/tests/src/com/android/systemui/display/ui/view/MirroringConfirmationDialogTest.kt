@@ -16,14 +16,17 @@
 
 package com.android.systemui.display.ui.view
 
+import android.graphics.Insets
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
+import android.view.WindowInsets
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -41,6 +44,7 @@ class MirroringConfirmationDialogTest : SysuiTestCase() {
 
     private val onStartMirroringCallback = mock<View.OnClickListener>()
     private val onCancelCallback = mock<View.OnClickListener>()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -96,10 +100,40 @@ class MirroringConfirmationDialogTest : SysuiTestCase() {
         verify(onStartMirroringCallback).onClick(any())
     }
 
+    @Test
+    fun onInsetsChanged_navBarInsets_updatesBottomPadding() {
+        dialog.show()
+
+        val insets = buildInsets(WindowInsets.Type.navigationBars(), TEST_BOTTOM_INSETS)
+        dialog.onInsetsChanged(WindowInsets.Type.navigationBars(), insets)
+
+        assertThat(dialog.requireViewById<View>(R.id.cd_bottom_sheet).paddingBottom)
+            .isEqualTo(TEST_BOTTOM_INSETS)
+    }
+
+    @Test
+    fun onInsetsChanged_otherType_doesNotUpdateBottomPadding() {
+        dialog.show()
+
+        val insets = buildInsets(WindowInsets.Type.ime(), TEST_BOTTOM_INSETS)
+        dialog.onInsetsChanged(WindowInsets.Type.ime(), insets)
+
+        assertThat(dialog.requireViewById<View>(R.id.cd_bottom_sheet).paddingBottom)
+            .isNotEqualTo(TEST_BOTTOM_INSETS)
+    }
+
+    private fun buildInsets(@WindowInsets.Type.InsetsType type: Int, bottom: Int): WindowInsets {
+        return WindowInsets.Builder().setInsets(type, Insets.of(0, 0, 0, bottom)).build()
+    }
+
     @After
     fun teardown() {
         if (::dialog.isInitialized) {
             dialog.dismiss()
         }
+    }
+
+    private companion object {
+        const val TEST_BOTTOM_INSETS = 1000 // arbitrarily high number
     }
 }

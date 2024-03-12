@@ -31,12 +31,6 @@ import java.util.function.Consumer
  * @see NotificationPanelViewController
  */
 interface ShadeViewController {
-    /** Expand the shade either animated or instantly. */
-    fun expand(animate: Boolean)
-
-    /** Animates to an expanded shade with QS expanded. If the shade starts expanded, expands QS. */
-    fun expandToQs()
-
     /** Returns whether the shade is expanding or collapsing itself or quick settings. */
     val isExpandingOrCollapsing: Boolean
 
@@ -45,28 +39,6 @@ interface ShadeViewController {
      * down event.
      */
     val isPanelExpanded: Boolean
-
-    /** Returns whether the shade is fully expanded in either QS or QQS. */
-    val isShadeFullyExpanded: Boolean
-
-    /**
-     * Animates the collapse of a shade with the given delay and the default duration divided by
-     * speedUpFactor.
-     */
-    fun collapse(delayed: Boolean, speedUpFactor: Float)
-
-    /** Collapses the shade. */
-    fun collapse(animate: Boolean, delayed: Boolean, speedUpFactor: Float)
-
-    /** Collapses the shade with an animation duration in milliseconds. */
-    fun collapseWithDuration(animationDuration: Int)
-
-    /** Collapses the shade instantly without animation. */
-    fun instantCollapse()
-
-    /** Returns whether the shade can be collapsed. */
-    @Deprecated("Do not use outside of the shade package. Not supported by scenes.")
-    fun canBeCollapsed(): Boolean
 
     /** Returns whether the shade is in the process of collapsing. */
     val isCollapsing: Boolean
@@ -80,14 +52,8 @@ interface ShadeViewController {
     /** Returns whether the shade's top level view is enabled. */
     val isViewEnabled: Boolean
 
-    /** Sets a listener to be notified when the shade starts opening or finishes closing. */
-    fun setOpenCloseListener(openCloseListener: OpenCloseListener)
-
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean
-
-    /** Sets a listener to be notified when touch tracking begins. */
-    fun setTrackingStartedListener(trackingStartedListener: TrackingStartedListener)
 
     /**
      * Disables the shade header.
@@ -101,9 +67,6 @@ interface ShadeViewController {
 
     /** Returns the StatusBarState. */
     val barState: Int
-
-    /** Sets the amount of progress in the status bar launch animation. */
-    fun applyLaunchAnimationProgress(linearProgress: Float)
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
     fun setAlpha(alpha: Int, animate: Boolean)
@@ -280,18 +243,4 @@ interface ShadeViewStateProvider {
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
     val lockscreenShadeDragProgress: Float
-}
-
-/** Listens for when touch tracking begins. */
-interface TrackingStartedListener {
-    fun onTrackingStarted()
-}
-
-/** Listens for when shade begins opening or finishes closing. */
-interface OpenCloseListener {
-    /** Called when the shade finishes closing. */
-    fun onClosingFinished()
-
-    /** Called when the shade starts opening. */
-    fun onOpenStarted()
 }

@@ -73,7 +73,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -148,6 +147,7 @@ object KeyguardRootViewBinder {
                             viewModel.alpha(viewState).collect { alpha ->
                                 view.alpha = alpha
                                 childViews[statusViewId]?.alpha = alpha
+                                childViews[burnInLayerId]?.alpha = alpha
                             }
                         }
                     }
@@ -195,66 +195,68 @@ object KeyguardRootViewBinder {
                             // large clock isn't added to burnInLayer due to its scale transition
                             // so we also need to add translation to it here
                             // same as translationX
-                            burnInParams
-                                .flatMapLatest { params -> viewModel.translationY(params) }
-                                .collect { y ->
-                                    childViews[burnInLayerId]?.translationY = y
-                                    childViews[largeClockId]?.translationY = y
-                                    childViews[aodNotificationIconContainerId]?.translationY = y
-                                }
+                            viewModel.translationY.collect { y ->
+                                childViews[burnInLayerId]?.translationY = y
+                                childViews[largeClockId]?.translationY = y
+                                childViews[aodNotificationIconContainerId]?.translationY = y
+                            }
                         }
 
                         launch {
-                            burnInParams
-                                .flatMapLatest { params -> viewModel.translationX(params) }
-                                .collect { state ->
-                                    val px = state.value ?: return@collect
-                                    when {
-                                        state.isToOrFrom(KeyguardState.AOD) -> {
-                                            childViews[largeClockId]?.translationX = px
-                                            childViews[burnInLayerId]?.translationX = px
-                                            childViews[aodNotificationIconContainerId]
-                                                ?.translationX = px
-                                        }
-                                        state.isToOrFrom(KeyguardState.GLANCEABLE_HUB) -> {
-                                            for ((key, childView) in childViews.entries) {
-                                                when (key) {
-                                                    indicationArea,
-                                                    startButton,
-                                                    endButton,
-                                                    lockIcon -> {
-                                                        // Do not move these views
-                                                    }
-                                                    else -> childView.translationX = px
+                            viewModel.translationX.collect { state ->
+                                val px = state.value ?: return@collect
+                                when {
+                                    state.isToOrFrom(KeyguardState.AOD) -> {
+                                        childViews[largeClockId]?.translationX = px
+                                        childViews[burnInLayerId]?.translationX = px
+                                        childViews[aodNotificationIconContainerId]?.translationX =
+                                            px
+                                    }
+                                    state.isToOrFrom(KeyguardState.GLANCEABLE_HUB) -> {
+                                        for ((key, childView) in childViews.entries) {
+                                            when (key) {
+                                                indicationArea,
+                                                startButton,
+                                                endButton,
+                                                lockIcon -> {
+                                                    // Do not move these views
                                                 }
+                                                else -> childView.translationX = px
                                             }
                                         }
                                     }
                                 }
+                            }
                         }
 
                         launch {
-                            burnInParams
-                                .flatMapLatest { params -> viewModel.scale(params) }
-                                .collect { scaleViewModel ->
-                                    if (scaleViewModel.scaleClockOnly) {
-                                        // For clocks except weather clock, we have scale transition
-                                        // besides translate
-                                        childViews[largeClockId]?.let {
-                                            it.scaleX = scaleViewModel.scale
-                                            it.scaleY = scaleViewModel.scale
-                                        }
-                                    } else {
-                                        // For weather clock, large clock should have only scale
-                                        // transition with other parts in burnInLayer
-                                        childViews[burnInLayerId]?.scaleX = scaleViewModel.scale
-                                        childViews[burnInLayerId]?.scaleY = scaleViewModel.scale
-                                        childViews[aodNotificationIconContainerId]?.scaleX =
-                                            scaleViewModel.scale
-                                        childViews[aodNotificationIconContainerId]?.scaleY =
-                                            scaleViewModel.scale
+                            viewModel.scale.collect { scaleViewModel ->
+                                if (scaleViewModel.scaleClockOnly) {
+                                    // For clocks except weather clock, we have scale transition
+                                    // besides translate
+                                    childViews[largeClockId]?.let {
+                                        it.scaleX = scaleViewModel.scale
+                                        it.scaleY = scaleViewModel.scale
                                     }
+                                    // Make sure to reset these views, or they will be invisible
+                                    if (childViews[burnInLayerId]?.scaleX != 1f) {
+                                        childViews[burnInLayerId]?.scaleX = 1f
+                                        childViews[burnInLayerId]?.scaleY = 1f
+                                        childViews[aodNotificationIconContainerId]?.scaleX = 1f
+                                        childViews[aodNotificationIconContainerId]?.scaleY = 1f
+                                        view.requestLayout()
+                                    }
+                                } else {
+                                    // For weather clock, large clock should have only scale
+                                    // transition with other parts in burnInLayer
+                                    childViews[burnInLayerId]?.scaleX = scaleViewModel.scale
+                                    childViews[burnInLayerId]?.scaleY = scaleViewModel.scale
+                                    childViews[aodNotificationIconContainerId]?.scaleX =
+                                        scaleViewModel.scale
+                                    childViews[aodNotificationIconContainerId]?.scaleY =
+                                        scaleViewModel.scale
                                 }
+                            }
                         }
 
                         if (NotificationIconContainerRefactor.isEnabled) {
@@ -310,6 +312,8 @@ object KeyguardRootViewBinder {
                                 }
                         }
                     }
+
+                    launch { burnInParams.collect { viewModel.updateBurnInParams(it) } }
 
                     if (deviceEntryHapticsInteractor != null && vibratorHelper != null) {
                         launch {

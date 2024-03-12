@@ -16,10 +16,10 @@
 package com.android.systemui.statusbar.policy
 
 import android.content.res.Resources
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /**
@@ -29,10 +29,15 @@ import javax.inject.Inject
 @SysUISingleton
 class SplitShadeStateControllerImpl @Inject constructor(private val featureFlags: FeatureFlags) :
     SplitShadeStateController {
-    /**
-     * Returns true if the device should use the split notification shade. Based on orientation,
-     * screen width, and flags.
-     */
+
+    @Deprecated(
+        message = "This is deprecated, please use ShadeInteractor#isSplitShade instead",
+        replaceWith =
+            ReplaceWith(
+                "shadeInteractor.isSplitShade",
+                "com.android.systemui.shade.domain.interactor.ShadeInteractor",
+            ),
+    )
     override fun shouldUseSplitNotificationShade(resources: Resources): Boolean {
         return (resources.getBoolean(R.bool.config_use_split_notification_shade) ||
             (featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE) &&

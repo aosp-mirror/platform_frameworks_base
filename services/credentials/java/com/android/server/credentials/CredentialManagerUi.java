@@ -113,8 +113,8 @@ public class CredentialManagerUi {
 
     /** Creates intent that is ot be invoked to cancel an in-progress UI session. */
     public Intent createCancelIntent(IBinder requestId, String packageName) {
-        return IntentFactory.createCancelUiIntent(requestId, /*shouldShowCancellationUi=*/ true,
-                packageName);
+        return IntentFactory.createCancelUiIntent(mContext, requestId,
+                /*shouldShowCancellationUi=*/ true, packageName);
     }
 
     /**

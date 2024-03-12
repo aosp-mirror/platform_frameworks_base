@@ -471,6 +471,16 @@ public final class AssetManager implements AutoCloseable {
         return addAssetPathInternal(path, true /*overlay*/, false /*appAsLib*/);
     }
 
+    /**
+     * @hide
+     */
+    public void addSharedLibraryPaths(@NonNull String[] paths) {
+        final int length = paths.length;
+        for (int i = 0; i < length; i++) {
+            addAssetPathInternal(paths[i], false, true);
+        }
+    }
+
     private int addAssetPathInternal(String path, boolean overlay, boolean appAsLib) {
         Objects.requireNonNull(path, "path");
         synchronized (this) {

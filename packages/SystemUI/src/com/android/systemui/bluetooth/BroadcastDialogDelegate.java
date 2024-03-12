@@ -42,7 +42,7 @@ import com.android.settingslib.media.MediaOutputConstants;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.controls.util.MediaDataUtils;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
@@ -69,7 +69,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
 
     private final Context mContext;
     private final UiEventLogger mUiEventLogger;
-    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final MediaOutputDialogManager mMediaOutputDialogManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final BroadcastSender mBroadcastSender;
     private final SystemUIDialog.Factory mSystemUIDialogFactory;
@@ -157,7 +157,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
     @AssistedInject
     BroadcastDialogDelegate(
             Context context,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
+            MediaOutputDialogManager mediaOutputDialogManager,
             @Nullable LocalBluetoothManager localBluetoothManager,
             UiEventLogger uiEventLogger,
             @Background Executor bgExecutor,
@@ -166,7 +166,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
             @Assisted(CURRENT_BROADCAST_APP) String currentBroadcastApp,
             @Assisted(OUTPUT_PKG_NAME) String outputPkgName) {
         mContext = context;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mMediaOutputDialogManager = mediaOutputDialogManager;
         mLocalBluetoothManager = localBluetoothManager;
         mSystemUIDialogFactory = systemUIDialogFactory;
         mCurrentBroadcastApp = currentBroadcastApp;
@@ -218,7 +218,7 @@ public class BroadcastDialogDelegate implements SystemUIDialog.Delegate {
                 R.string.bt_le_audio_broadcast_dialog_switch_app, switchBroadcastApp), null);
         mSwitchBroadcast.setOnClickListener((view) -> startSwitchBroadcast());
         changeOutput.setOnClickListener((view) -> {
-            mMediaOutputDialogFactory.create(mOutputPackageName, true, null);
+            mMediaOutputDialogManager.createAndShow(mOutputPackageName, true, null);
             dialog.dismiss();
         });
         cancelBtn.setOnClickListener((view) -> {

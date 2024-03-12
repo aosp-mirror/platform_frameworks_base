@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Perfetto"
+#define LOG_TAG "NativeJavaPerfettoDs"
 
 #include "android_tracing_PerfettoDataSource.h"
 
@@ -166,15 +166,24 @@ jobject PerfettoDataSource::createIncrementalStateGlobalRef(JNIEnv* env,
 
 void PerfettoDataSource::trace(JNIEnv* env, jobject traceFunction) {
     PERFETTO_DS_TRACE(dataSource, ctx) {
+        ALOG(LOG_DEBUG, LOG_TAG, "\tin native trace callback function %p", this);
         TlsState* tls_state =
                 reinterpret_cast<TlsState*>(PerfettoDsGetCustomTls(&dataSource, &ctx));
         IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(
                 PerfettoDsGetIncrementalState(&dataSource, &ctx));
 
+        ALOG(LOG_DEBUG, LOG_TAG, "\t tls_state = %p", tls_state);
+        ALOG(LOG_DEBUG, LOG_TAG, "\t incr_state = %p", incr_state);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "\t tls_state->jobj = %p", tls_state->jobj);
+        ALOG(LOG_DEBUG, LOG_TAG, "\t incr_state->jobj = %p", incr_state->jobj);
+
         ScopedLocalRef<jobject> jCtx(env,
                                      env->NewObject(gTracingContextClassInfo.clazz,
                                                     gTracingContextClassInfo.init, &ctx,
                                                     tls_state->jobj, incr_state->jobj));
+
+        ALOG(LOG_DEBUG, LOG_TAG, "\t jCtx = %p", jCtx.get());
 
         jclass objclass = env->GetObjectClass(traceFunction);
         jmethodID method =
@@ -209,7 +218,9 @@ PerfettoDataSource::~PerfettoDataSource() {
 
 jlong nativeCreate(JNIEnv* env, jclass clazz, jobject javaDataSource, jstring name) {
     const char* nativeString = env->GetStringUTFChars(name, 0);
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeCreate(%p, %s)", javaDataSource, nativeString);
     PerfettoDataSource* dataSource = new PerfettoDataSource(env, javaDataSource, nativeString);
+    ALOG(LOG_DEBUG, LOG_TAG, "\tdatasource* = %p", dataSource);
     env->ReleaseStringUTFChars(name, nativeString);
 
     dataSource->incStrong((void*)nativeCreate);
@@ -218,33 +229,39 @@ jlong nativeCreate(JNIEnv* env, jclass clazz, jobject javaDataSource, jstring na
 }
 
 void nativeDestroy(void* ptr) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeCreate(%p)", ptr);
     PerfettoDataSource* dataSource = reinterpret_cast<PerfettoDataSource*>(ptr);
     dataSource->decStrong((void*)nativeCreate);
 }
 
 static jlong nativeGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeGetFinalizer()");
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&nativeDestroy));
 }
 
 void nativeTrace(JNIEnv* env, jclass clazz, jlong dataSourcePtr, jobject traceFunctionInterface) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeTrace(%p)", (void*)dataSourcePtr);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
 
     datasource->trace(env, traceFunctionInterface);
 }
 
 void nativeFlush(JNIEnv* env, jclass clazz, jobject jCtx, jlong ctxPtr) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlush(%p, %p)", jCtx, (void*)ctxPtr);
     auto* ctx = reinterpret_cast<struct PerfettoDsTracerIterator*>(ctxPtr);
     traceAllPendingPackets(env, jCtx, ctx);
     PerfettoDsTracerFlush(ctx, nullptr, nullptr);
 }
 
 void nativeFlushAll(JNIEnv* env, jclass clazz, jlong ptr) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlushAll(%p)", (void*)ptr);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(ptr);
     datasource->flushAll();
 }
 
 void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
                               int buffer_exhausted_policy) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeRegisterDataSource(%p)", (void*)datasource_ptr);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(datasource_ptr);
 
     struct PerfettoDsParams params = PerfettoDsParamsDefault();
@@ -267,6 +284,9 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         auto* datasource_instance =
                 new PerfettoDataSourceInstance(env, java_data_source_instance.get(), inst_id);
 
+        ALOG(LOG_DEBUG, LOG_TAG, "on_setup_cb ds=%p, ds_instance=%p", datasource,
+             datasource_instance);
+
         return static_cast<void*>(datasource_instance);
     };
 
@@ -280,6 +300,8 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
 
         auto* tls_state = new TlsState(java_tls_state);
 
+        ALOG(LOG_DEBUG, LOG_TAG, "on_create_tls_cb ds=%p, tsl_state=%p", datasource, tls_state);
+
         return static_cast<void*>(tls_state);
     };
 
@@ -287,6 +309,9 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
         TlsState* tls_state = reinterpret_cast<TlsState*>(ptr);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "on_delete_tls_cb %p", tls_state);
+
         env->DeleteGlobalRef(tls_state->jobj);
         delete tls_state;
     };
@@ -299,6 +324,9 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         jobject java_incr_state = datasource->createIncrementalStateGlobalRef(env, inst_id);
 
         auto* incr_state = new IncrementalState(java_incr_state);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "on_create_incr_cb ds=%p, incr_state=%p", datasource, incr_state);
+
         return static_cast<void*>(incr_state);
     };
 
@@ -306,6 +334,9 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
         IncrementalState* incr_state = reinterpret_cast<IncrementalState*>(ptr);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "on_delete_incr_cb incr_state=%p", incr_state);
+
         env->DeleteGlobalRef(incr_state->jobj);
         delete incr_state;
     };
@@ -315,6 +346,9 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
         auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "on_start_cb ds_instance=%p", datasource_instance);
+
         datasource_instance->onStart(env);
     };
 
@@ -323,6 +357,9 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
         auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "on_flush_cb ds_instance=%p", datasource_instance);
+
         datasource_instance->onFlush(env);
     };
 
@@ -331,12 +368,18 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
         JNIEnv* env = GetOrAttachJNIEnvironment(gVm, JNI_VERSION_1_6);
 
         auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "on_stop_cb ds_instance=%p", datasource_instance);
+
         datasource_instance->onStop(env);
     };
 
     params.on_destroy_cb = [](struct PerfettoDsImpl* ds_impl, void* user_arg,
                               void* inst_ctx) -> void {
         auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(inst_ctx);
+
+        ALOG(LOG_DEBUG, LOG_TAG, "on_destroy_cb ds_instance=%p", datasource_instance);
+
         delete datasource_instance;
     };
 
@@ -345,20 +388,28 @@ void nativeRegisterDataSource(JNIEnv* env, jclass clazz, jlong datasource_ptr,
 
 jobject nativeGetPerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSourcePtr,
                                         PerfettoDsInstanceIndex instance_idx) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeGetPerfettoInstanceLocked ds=%p, idx=%d", (void*)dataSourcePtr,
+         instance_idx);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     auto* datasource_instance = static_cast<PerfettoDataSourceInstance*>(
             PerfettoDsImplGetInstanceLocked(datasource->dataSource.impl, instance_idx));
 
     if (datasource_instance == nullptr) {
         // datasource instance doesn't exist
+        ALOG(LOG_WARN, LOG_TAG,
+             "DS instance invalid!! nativeGetPerfettoInstanceLocked returning NULL");
         return nullptr;
     }
 
+    ALOG(LOG_DEBUG, LOG_TAG, "\tnativeGetPerfettoInstanceLocked got lock ds=%p, idx=%d",
+         (void*)dataSourcePtr, instance_idx);
     return datasource_instance->GetJavaDataSourceInstance();
 }
 
 void nativeReleasePerfettoInstanceLocked(JNIEnv* env, jclass clazz, jlong dataSourcePtr,
                                          PerfettoDsInstanceIndex instance_idx) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeReleasePerfettoInstanceLocked got lock ds=%p, idx=%d",
+         (void*)dataSourcePtr, instance_idx);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(dataSourcePtr);
     PerfettoDsImplReleaseInstanceLocked(datasource->dataSource.impl, instance_idx);
 }

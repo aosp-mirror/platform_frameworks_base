@@ -18,7 +18,7 @@ package com.android.server.companion;
 
 import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_CONTEXT_SYNC;
 
-import static com.android.server.companion.PermissionsUtils.sanitizeWithCallerChecks;
+import static com.android.server.companion.utils.PermissionsUtils.sanitizeWithCallerChecks;
 
 import android.companion.AssociationInfo;
 import android.companion.ContextSyncMessage;
@@ -32,10 +32,14 @@ import android.os.ShellCommand;
 import android.util.Base64;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.companion.association.AssociationRequestsProcessor;
+import com.android.server.companion.association.AssociationRevokeProcessor;
+import com.android.server.companion.association.AssociationStore;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.presence.ObservableUuid;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.PrintWriter;
@@ -46,7 +50,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
 
     private final CompanionDeviceManagerService mService;
     private final AssociationRevokeProcessor mRevokeProcessor;
-    private final AssociationStoreImpl mAssociationStore;
+    private final AssociationStore mAssociationStore;
     private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final CompanionTransportManager mTransportManager;
 
@@ -55,7 +59,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private final BackupRestoreProcessor mBackupRestoreProcessor;
 
     CompanionDeviceShellCommand(CompanionDeviceManagerService service,
-            AssociationStoreImpl associationStore,
+            AssociationStore associationStore,
             CompanionDevicePresenceMonitor devicePresenceMonitor,
             CompanionTransportManager transportManager,
             SystemDataTransferProcessor systemDataTransferProcessor,

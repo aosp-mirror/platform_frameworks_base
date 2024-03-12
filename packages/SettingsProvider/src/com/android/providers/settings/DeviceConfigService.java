@@ -20,8 +20,6 @@ import static android.provider.Settings.Config.SYNC_DISABLED_MODE_NONE;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_PERSISTENT;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT;
 
-import static com.android.providers.settings.Flags.supportOverrides;
-
 import android.aconfig.Aconfig.parsed_flag;
 import android.aconfig.Aconfig.parsed_flags;
 import android.annotation.SuppressLint;
@@ -269,9 +267,9 @@ public final class DeviceConfigService extends Binder {
                 verb = CommandVerb.GET;
             } else if ("put".equalsIgnoreCase(cmd)) {
                 verb = CommandVerb.PUT;
-            } else if (supportOverrides() && "override".equalsIgnoreCase(cmd)) {
+            } else if ("override".equalsIgnoreCase(cmd)) {
                 verb = CommandVerb.OVERRIDE;
-            } else if (supportOverrides() && "clear_override".equalsIgnoreCase(cmd)) {
+            } else if ("clear_override".equalsIgnoreCase(cmd)) {
                 verb = CommandVerb.CLEAR_OVERRIDE;
             } else if ("delete".equalsIgnoreCase(cmd)) {
                 verb = CommandVerb.DELETE;
@@ -285,7 +283,7 @@ public final class DeviceConfigService extends Binder {
                 if (peekNextArg() == null) {
                     isValid = true;
                 }
-            } else if (supportOverrides() && "list_local_overrides".equalsIgnoreCase(cmd)) {
+            } else if ("list_local_overrides".equalsIgnoreCase(cmd)) {
                 verb = CommandVerb.LIST_LOCAL_OVERRIDES;
                 if (peekNextArg() == null) {
                     isValid = true;
@@ -427,14 +425,10 @@ public final class DeviceConfigService extends Binder {
                     DeviceConfig.setProperty(namespace, key, value, makeDefault);
                     break;
                 case OVERRIDE:
-                    if (supportOverrides()) {
-                        DeviceConfig.setLocalOverride(namespace, key, value);
-                    }
+                    DeviceConfig.setLocalOverride(namespace, key, value);
                     break;
                 case CLEAR_OVERRIDE:
-                    if (supportOverrides()) {
-                        DeviceConfig.clearLocalOverride(namespace, key);
-                    }
+                    DeviceConfig.clearLocalOverride(namespace, key);
                     break;
                 case DELETE:
                     pout.println(delete(iprovider, namespace, key)
@@ -452,19 +446,15 @@ public final class DeviceConfigService extends Binder {
                         }
                     } else {
                         for (String line : listAll(iprovider)) {
-                            if (supportOverrides()) {
-                                boolean isPrivate = false;
-                                for (String privateNamespace : PRIVATE_NAMESPACES) {
-                                    if (line.startsWith(privateNamespace)) {
-                                        isPrivate = true;
-                                        break;
-                                    }
+                            boolean isPrivate = false;
+                            for (String privateNamespace : PRIVATE_NAMESPACES) {
+                                if (line.startsWith(privateNamespace)) {
+                                    isPrivate = true;
+                                    break;
                                 }
+                            }
 
-                                if (!isPrivate) {
-                                    pout.println(line);
-                                }
-                            } else {
+                            if (!isPrivate) {
                                 pout.println(line);
                             }
                         }
@@ -495,18 +485,16 @@ public final class DeviceConfigService extends Binder {
                     }
                     break;
                 case LIST_LOCAL_OVERRIDES:
-                    if (supportOverrides()) {
-                        Map<String, Map<String, String>> underlyingValues =
-                                DeviceConfig.getUnderlyingValuesForOverriddenFlags();
-                        for (String overrideNamespace : underlyingValues.keySet()) {
-                            Map<String, String> flagToValue =
-                                    underlyingValues.get(overrideNamespace);
-                            for (String flag : flagToValue.keySet()) {
-                                String flagText = overrideNamespace + "/" + flag;
-                                String valueText =
-                                        DeviceConfig.getProperty(overrideNamespace, flag);
-                                pout.println(flagText + "=" + valueText);
-                            }
+                    Map<String, Map<String, String>> underlyingValues =
+                            DeviceConfig.getUnderlyingValuesForOverriddenFlags();
+                    for (String overrideNamespace : underlyingValues.keySet()) {
+                        Map<String, String> flagToValue =
+                                underlyingValues.get(overrideNamespace);
+                        for (String flag : flagToValue.keySet()) {
+                            String flagText = overrideNamespace + "/" + flag;
+                            String valueText =
+                                    DeviceConfig.getProperty(overrideNamespace, flag);
+                            pout.println(flagText + "=" + valueText);
                         }
                     }
                     break;

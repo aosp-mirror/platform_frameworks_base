@@ -119,6 +119,7 @@ constructor(
                         }
                         .catchTimeoutAndLog()
                         .onCompletion {
+                            controller.ensureOverlayRemoved()
                             val onReady = readyCallback?.takeIf { it.isCompleted }?.getCompleted()
                             onReady?.run()
                             readyCallback = null

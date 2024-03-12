@@ -17,7 +17,6 @@
 package com.android.systemui.flags
 
 import android.util.Log
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import org.junit.Assert
 import org.junit.Assume
@@ -41,10 +40,6 @@ class SceneContainerRule : TestRule {
                     description?.testClass?.getAnnotation(EnableSceneContainer::class.java) !=
                         null || description?.getAnnotation(EnableSceneContainer::class.java) != null
                 if (hasAnnotation) {
-                    Assume.assumeTrue(
-                        "Compose must be available for @EnableSceneContainer test",
-                        ComposeFacade.isComposeAvailable()
-                    )
                     Assume.assumeTrue(
                         "Couldn't set Flags.SCENE_CONTAINER_ENABLED for @EnableSceneContainer test",
                         trySetSceneContainerEnabled(true)

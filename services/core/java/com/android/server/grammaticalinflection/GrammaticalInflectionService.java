@@ -126,7 +126,7 @@ public class GrammaticalInflectionService extends SystemService {
 
         @Override
         public void setSystemWideGrammaticalGender(int grammaticalGender, int userId) {
-            checkCallerIsSystem();
+            isCallerAllowed();
             GrammaticalInflectionService.this.setSystemWideGrammaticalGender(grammaticalGender,
                     userId);
         }
@@ -154,7 +154,7 @@ public class GrammaticalInflectionService extends SystemService {
         @Override
         @Nullable
         public byte[] getBackupPayload(int userId) {
-            checkCallerIsSystem();
+            isCallerAllowed();
             return mBackupHelper.getBackupPayload(userId);
         }
 
@@ -333,11 +333,13 @@ public class GrammaticalInflectionService extends SystemService {
         return GRAMMATICAL_GENDER_NOT_SPECIFIED;
     }
 
-    private void checkCallerIsSystem() {
+    private void isCallerAllowed() {
         int callingUid = Binder.getCallingUid();
         if (callingUid != Process.SYSTEM_UID && callingUid != Process.SHELL_UID
                 && callingUid != Process.ROOT_UID) {
-            throw new SecurityException("Caller is not system, shell and root.");
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.CHANGE_CONFIGURATION,
+                    "Caller must be system, shell, root or has CHANGE_CONFIGURATION permission.");
         }
     }
 

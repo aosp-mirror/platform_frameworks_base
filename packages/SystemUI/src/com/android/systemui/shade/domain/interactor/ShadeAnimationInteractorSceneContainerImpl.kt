@@ -16,10 +16,10 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.ObservableTransitionState
-import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,10 +44,10 @@ constructor(
                     is ObservableTransitionState.Idle -> flowOf(false)
                     is ObservableTransitionState.Transition ->
                         if (
-                            (state.fromScene == SceneKey.Shade &&
-                                state.toScene != SceneKey.QuickSettings) ||
-                                (state.fromScene == SceneKey.QuickSettings &&
-                                    state.toScene != SceneKey.Shade)
+                            (state.fromScene == Scenes.Shade &&
+                                state.toScene != Scenes.QuickSettings) ||
+                                (state.fromScene == Scenes.QuickSettings &&
+                                    state.toScene != Scenes.Shade)
                         ) {
                             state.isUserInputOngoing.map { !it }
                         } else {

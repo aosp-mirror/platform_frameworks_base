@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
@@ -424,9 +425,12 @@ public class SnapshotDrawerUtils {
         layoutParams.flags = (windowFlags & ~FLAG_INHERIT_EXCLUDES)
                 | FLAG_NOT_FOCUSABLE
                 | FLAG_NOT_TOUCHABLE;
-        // Setting as trusted overlay to let touches pass through. This is safe because this
-        // window is controlled by the system.
-        layoutParams.privateFlags = (windowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS)
+        layoutParams.privateFlags =
+                (windowPrivateFlags
+                        & (PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS
+                        | PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED))
+                // Setting as trusted overlay to let touches pass through. This is safe because this
+                // window is controlled by the system.
                 | PRIVATE_FLAG_TRUSTED_OVERLAY;
         layoutParams.token = token;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -475,14 +479,16 @@ public class SnapshotDrawerUtils {
             mStatusBarColor = DecorView.calculateBarColor(windowFlags, FLAG_TRANSLUCENT_STATUS,
                     semiTransparent, taskDescription.getStatusBarColor(), appearance,
                     APPEARANCE_LIGHT_STATUS_BARS,
-                    taskDescription.getEnsureStatusBarContrastWhenTransparent());
+                    taskDescription.getEnsureStatusBarContrastWhenTransparent(),
+                    false /* movesBarColorToScrim */);
             mNavigationBarColor = DecorView.calculateBarColor(windowFlags,
                     FLAG_TRANSLUCENT_NAVIGATION, semiTransparent,
                     taskDescription.getNavigationBarColor(), appearance,
                     APPEARANCE_LIGHT_NAVIGATION_BARS,
                     taskDescription.getEnsureNavigationBarContrastWhenTransparent()
                             && context.getResources().getBoolean(
-                            R.bool.config_navBarNeedsScrim));
+                            R.bool.config_navBarNeedsScrim),
+                    (windowPrivateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0);
             mStatusBarPaint.setColor(mStatusBarColor);
             mNavigationBarPaint.setColor(mNavigationBarColor);
             mRequestedVisibleTypes = requestedVisibleTypes;

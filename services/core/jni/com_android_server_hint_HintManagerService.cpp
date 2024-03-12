@@ -24,16 +24,17 @@
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <powermanager/PowerHalController.h>
+#include <powermanager/PowerHintSessionWrapper.h>
 #include <utils/Log.h>
 
 #include <unordered_map>
 
 #include "jni.h"
 
-using aidl::android::hardware::power::IPowerHintSession;
 using aidl::android::hardware::power::SessionHint;
 using aidl::android::hardware::power::SessionMode;
 using aidl::android::hardware::power::WorkDuration;
+using android::power::PowerHintSessionWrapper;
 
 using android::base::StringPrintf;
 
@@ -49,7 +50,7 @@ static struct {
 } gWorkDurationInfo;
 
 static power::PowerHalController gPowerHalController;
-static std::unordered_map<jlong, std::shared_ptr<IPowerHintSession>> gSessionMap;
+static std::unordered_map<jlong, std::shared_ptr<PowerHintSessionWrapper>> gSessionMap;
 static std::mutex gSessionMapLock;
 
 static int64_t getHintSessionPreferredRate() {
@@ -76,45 +77,45 @@ static jlong createHintSession(JNIEnv* env, int32_t tgid, int32_t uid,
 }
 
 static void pauseHintSession(JNIEnv* env, int64_t session_ptr) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->pause();
 }
 
 static void resumeHintSession(JNIEnv* env, int64_t session_ptr) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->resume();
 }
 
 static void closeHintSession(JNIEnv* env, int64_t session_ptr) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->close();
     std::unique_lock<std::mutex> sessionLock(gSessionMapLock);
     gSessionMap.erase(session_ptr);
 }
 
 static void updateTargetWorkDuration(int64_t session_ptr, int64_t targetDurationNanos) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->updateTargetWorkDuration(targetDurationNanos);
 }
 
 static void reportActualWorkDuration(int64_t session_ptr,
                                      const std::vector<WorkDuration>& actualDurations) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->reportActualWorkDuration(actualDurations);
 }
 
 static void sendHint(int64_t session_ptr, SessionHint hint) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->sendHint(hint);
 }
 
 static void setThreads(int64_t session_ptr, const std::vector<int32_t>& threadIds) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->setThreads(threadIds);
 }
 
 static void setMode(int64_t session_ptr, SessionMode mode, bool enabled) {
-    auto appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->setMode(mode, enabled);
 }
 

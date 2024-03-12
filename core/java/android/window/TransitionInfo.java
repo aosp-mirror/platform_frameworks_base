@@ -1021,6 +1021,10 @@ public final class TransitionInfo implements Parcelable {
                 sb.append(" component=");
                 sb.append(mActivityComponent.flattenToShortString());
             }
+            if (mTaskInfo != null) {
+                sb.append(" taskParent=");
+                sb.append(mTaskInfo.parentTaskId);
+            }
             sb.append('}');
             return sb.toString();
         }

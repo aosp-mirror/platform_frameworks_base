@@ -21,6 +21,7 @@ import android.hardware.display.DisplayManagerInternal;
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
+import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 
 import java.io.PrintWriter;
 
@@ -45,4 +46,10 @@ public class OverrideBrightnessStrategy implements DisplayBrightnessStrategy {
 
     @Override
     public void dump(PrintWriter writer) {}
+
+    @Override
+    public void strategySelectionPostProcessor(
+            StrategySelectionNotifyRequest strategySelectionNotifyRequest) {
+        // DO NOTHING
+    }
 }
