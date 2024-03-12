@@ -314,6 +314,11 @@ public class WallpaperDataParser {
             wallpaper.wallpaperId = makeWallpaperIdLocked();
         }
 
+        Rect legacyCropHint = new Rect(
+                getAttributeInt(parser, "cropLeft", 0),
+                getAttributeInt(parser, "cropTop", 0),
+                getAttributeInt(parser, "cropRight", 0),
+                getAttributeInt(parser, "cropBottom", 0));
         Rect totalCropHint = new Rect(
                 getAttributeInt(parser, "totalCropLeft", 0),
                 getAttributeInt(parser, "totalCropTop", 0),
@@ -332,17 +337,18 @@ public class WallpaperDataParser {
                         parser.getAttributeInt(null, "cropBottom" + pair.second, 0));
                 if (!cropHint.isEmpty()) wallpaper.mCropHints.put(pair.first, cropHint);
             }
-            if (wallpaper.mCropHints.size() == 0) {
+            if (wallpaper.mCropHints.size() == 0 && totalCropHint.isEmpty()) {
                 // migration case: the crops per screen orientation are not specified.
-                // use the old attributes to find the crop for one screen orientation.
-                Integer orientation = totalCropHint.width() < totalCropHint.height()
+                int orientation = legacyCropHint.width() < legacyCropHint.height()
                         ? WallpaperManager.PORTRAIT : WallpaperManager.LANDSCAPE;
-                if (!totalCropHint.isEmpty()) wallpaper.mCropHints.put(orientation, totalCropHint);
+                if (!legacyCropHint.isEmpty()) {
+                    wallpaper.mCropHints.put(orientation, legacyCropHint);
+                }
             } else {
                 wallpaper.cropHint.set(totalCropHint);
             }
         } else {
-            wallpaper.cropHint.set(totalCropHint);
+            wallpaper.cropHint.set(legacyCropHint);
         }
         final DisplayData wpData = mWallpaperDisplayHelper
                 .getDisplayDataOrCreate(DEFAULT_DISPLAY);
