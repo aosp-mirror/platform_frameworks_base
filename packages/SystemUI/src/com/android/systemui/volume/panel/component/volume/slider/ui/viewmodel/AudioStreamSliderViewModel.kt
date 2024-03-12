@@ -67,6 +67,8 @@ constructor(
         mapOf(
             AudioStream(AudioManager.STREAM_NOTIFICATION) to
                 R.string.stream_notification_unavailable,
+            AudioStream(AudioManager.STREAM_ALARM) to R.string.stream_alarm_unavailable,
+            AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_media_unavailable,
         )
 
     private var value = 0f

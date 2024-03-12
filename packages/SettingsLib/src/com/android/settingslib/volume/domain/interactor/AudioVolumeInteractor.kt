@@ -25,7 +25,6 @@ import com.android.settingslib.volume.shared.model.RingerMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** Provides audio stream state and an ability to change it */
@@ -56,9 +55,14 @@ class AudioVolumeInteractor(
     /** Checks if the volume can be changed via the UI. */
     fun canChangeVolume(audioStream: AudioStream): Flow<Boolean> {
         return if (audioStream.value == AudioManager.STREAM_NOTIFICATION) {
-            getAudioStream(AudioStream(AudioManager.STREAM_RING)).map { !it.isMuted }
+            combine(
+                notificationsSoundPolicyInteractor.isZenMuted(audioStream),
+                getAudioStream(AudioStream(AudioManager.STREAM_RING)).map { it.isMuted },
+            ) { isZenMuted, isRingMuted ->
+                !isZenMuted && !isRingMuted
+            }
         } else {
-            flowOf(true)
+            notificationsSoundPolicyInteractor.isZenMuted(audioStream).map { !it }
         }
     }
 
