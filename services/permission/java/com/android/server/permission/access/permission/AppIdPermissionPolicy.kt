@@ -63,6 +63,12 @@ class AppIdPermissionPolicy : SchemePolicy() {
 
     private val privilegedPermissionAllowlistViolations = MutableIndexedSet<String>()
 
+    /**
+     * Test-only switch to enforce signature permission allowlist even on debuggable builds.
+     */
+    @Volatile
+    var isSignaturePermissionAllowlistForceEnforced = false
+
     override val subjectScheme: String
         get() = UidUri.SCHEME
 
@@ -1274,7 +1280,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     SigningDetails.CertCapabilities.PERMISSION
                 )
         if (!Flags.signaturePermissionAllowlistEnabled()) {
-            return hasCommonSigner;
+            return hasCommonSigner
         }
         if (!hasCommonSigner) {
             return false
@@ -1308,7 +1314,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                         " ${packageState.packageName} (${packageState.path}) not in" +
                         " signature permission allowlist"
                 )
-                if (!Build.isDebuggable()) {
+                if (!Build.isDebuggable() || isSignaturePermissionAllowlistForceEnforced) {
                     return false
                 }
             }
