@@ -1073,7 +1073,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         new SurfaceControl.DesiredDisplayModeSpecs(baseSfModeId,
                                 mDisplayModeSpecs.allowGroupSwitching,
                                 mDisplayModeSpecs.primary,
-                                mDisplayModeSpecs.appRequest)));
+                                mDisplayModeSpecs.appRequest,
+                                mDisplayModeSpecs.mIdleScreenRefreshRateConfig)));
             }
         }
 
