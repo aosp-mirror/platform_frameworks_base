@@ -312,15 +312,23 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10;
     /**
      * 1: AM, 2:FM
+     * @deprecated use {@link #IDENTIFIER_TYPE_DRMO_FREQUENCY} instead
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11;
     /**
      * 32bit primary identifier for SiriusXM Satellite Radio.
+     *
+     * @deprecated SiriusXM Satellite Radio is not supported
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12;
     /**
      * 0-999 range
+     *
+     * @deprecated SiriusXM Satellite Radio is not supported
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13;
     /**
      * 44bit compound primary identifier for Digital Audio Broadcasting and
