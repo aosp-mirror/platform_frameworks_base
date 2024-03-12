@@ -315,6 +315,23 @@ public class TaskTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUserLeaving() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity.getTask();
+        mSupervisor.mUserLeaving = true;
+        activity.setState(ActivityRecord.State.RESUMED, "test");
+        task.sleepIfPossible(false /* shuttingDown */);
+        verify(task).startPausing(eq(true) /* userLeaving */, anyBoolean(), any(), any());
+
+        clearInvocations(task);
+        activity.setState(ActivityRecord.State.RESUMED, "test");
+        task.setPausingActivity(null);
+        doReturn(false).when(task).canBeResumed(any());
+        task.pauseActivityIfNeeded(null /* resuming */, "test");
+        verify(task).startPausing(eq(true) /* userLeaving */, anyBoolean(), any(), any());
+    }
+
+    @Test
     public void testSwitchUser() {
         final Task rootTask = createTask(mDisplayContent);
         final Task childTask = createTaskInRootTask(rootTask, 0 /* userId */);
