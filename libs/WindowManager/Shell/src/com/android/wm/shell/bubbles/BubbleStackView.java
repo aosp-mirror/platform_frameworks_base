@@ -449,17 +449,21 @@ public class BubbleStackView extends FrameLayout
 
                 @Override
                 public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target,
-                        @NonNull MagnetizedObject draggedObject) {
-                    if (draggedObject.getUnderlyingObject() instanceof View view) {
+                        @NonNull MagnetizedObject<?> draggedObject) {
+                    Object underlyingObject = draggedObject.getUnderlyingObject();
+                    if (underlyingObject instanceof View) {
+                        View view = (View) underlyingObject;
                         animateDismissBubble(view, true);
                     }
                 }
 
                 @Override
                 public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
-                        @NonNull MagnetizedObject draggedObject,
+                        @NonNull MagnetizedObject<?> draggedObject,
                         float velX, float velY, boolean wasFlungOut) {
-                    if (draggedObject.getUnderlyingObject() instanceof View view) {
+                    Object underlyingObject = draggedObject.getUnderlyingObject();
+                    if (underlyingObject instanceof View) {
+                        View view = (View) underlyingObject;
                         animateDismissBubble(view, false);
 
                         if (wasFlungOut) {
@@ -474,7 +478,9 @@ public class BubbleStackView extends FrameLayout
                 @Override
                 public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target,
                         @NonNull MagnetizedObject<?> draggedObject) {
-                    if (draggedObject.getUnderlyingObject() instanceof View view) {
+                    Object underlyingObject = draggedObject.getUnderlyingObject();
+                    if (underlyingObject instanceof View) {
+                        View view = (View) underlyingObject;
                         mExpandedAnimationController.dismissDraggedOutBubble(
                                 view /* bubble */,
                                 mDismissView.getHeight() /* translationYBy */,
