@@ -78,3 +78,11 @@ flag {
     bug: "312530526"
     is_fixed_read_only: true
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "enable_wm_extensions_for_all_flag"
+    description: "Whether to enable WM Extensions for all devices"
+    bug: "306666082"
+    is_fixed_read_only: true
+}
