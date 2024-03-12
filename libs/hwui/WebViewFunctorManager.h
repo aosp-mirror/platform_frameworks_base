@@ -81,6 +81,8 @@ public:
     ASurfaceControl* getSurfaceControl();
     void mergeTransaction(ASurfaceTransaction* transaction);
 
+    void reportRenderingThreads(const int32_t* thread_ids, size_t size);
+
     sp<Handle> createHandle() {
         LOG_ALWAYS_FATAL_IF(mCreatedHandle);
         mCreatedHandle = true;
@@ -110,6 +112,7 @@ public:
     void releaseFunctor(int functor);
     void onContextDestroyed();
     void destroyFunctor(int functor);
+    void reportRenderingThreads(int functor, const int32_t* thread_ids, size_t size);
 
     sp<WebViewFunctor::Handle> handleFor(int functor);
 
