@@ -26,8 +26,10 @@ import android.os.UserHandle
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.dagger.qualifiers.LongRunning
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.RecordingService
@@ -53,7 +55,9 @@ constructor(
     uiEventLogger: UiEventLogger,
     notificationManager: NotificationManager,
     userContextProvider: UserContextProvider,
-    keyguardDismissUtil: KeyguardDismissUtil
+    keyguardDismissUtil: KeyguardDismissUtil,
+    private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val panelInteractor: PanelInteractor,
 ) :
     RecordingService(
         controller,
@@ -97,6 +101,8 @@ constructor(
             }
             ACTION_SHARE -> {
                 shareRecording(intent)
+                dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
+                panelInteractor.collapsePanels()
 
                 // Unlike all other actions, action_share has different behavior for the screen
                 // recording qs tile than it does for the record issue qs tile. Return sticky to
@@ -119,13 +125,11 @@ constructor(
             FileSender.buildSendIntent(this, listOf(sharableUri))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        if (mNotificationId != NOTIF_BASE_ID) {
-            mNotificationManager.cancelAsUser(
-                null,
-                mNotificationId,
-                UserHandle(mUserContextTracker.userContext.userId)
-            )
-        }
+        mNotificationManager.cancelAsUser(
+            null,
+            mNotificationId,
+            UserHandle(mUserContextTracker.userContext.userId)
+        )
 
         // TODO: Debug why the notification shade isn't closing upon starting the BetterBug activity
         mKeyguardDismissUtil.executeWhenUnlocked(

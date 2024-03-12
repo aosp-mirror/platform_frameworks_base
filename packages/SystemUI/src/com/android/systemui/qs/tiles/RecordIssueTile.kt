@@ -41,6 +41,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.IssueRecordingService
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
@@ -66,6 +67,7 @@ constructor(
     private val keyguardDismissUtil: KeyguardDismissUtil,
     private val keyguardStateController: KeyguardStateController,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
 ) :
@@ -138,6 +140,8 @@ constructor(
                 .create {
                     isRecording = true
                     startIssueRecordingService(it.screenRecord, it.winscopeTracing)
+                    dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
+                    panelInteractor.collapsePanels()
                     refreshState()
                 }
                 .createDialog()
