@@ -16,24 +16,30 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
-import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.deviceentry.shared.model.DeviceEntryRestrictionReason
+import com.android.systemui.flags.SystemPropertiesHelper
+import com.android.systemui.keyguard.domain.interactor.TrustInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.Quad
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -55,10 +61,13 @@ constructor(
     private val repository: DeviceEntryRepository,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
-    deviceEntryFaceAuthRepository: DeviceEntryFaceAuthRepository,
-    trustRepository: TrustRepository,
+    faceAuthInteractor: DeviceEntryFaceAuthInteractor,
+    private val fingerprintAuthInteractor: DeviceEntryFingerprintAuthInteractor,
+    private val biometricSettingsInteractor: DeviceEntryBiometricSettingsInteractor,
+    private val trustInteractor: TrustInteractor,
     flags: SceneContainerFlags,
     deviceUnlockedInteractor: DeviceUnlockedInteractor,
+    private val systemPropertiesHelper: SystemPropertiesHelper,
 ) {
     /**
      * Whether the device is unlocked.
@@ -96,8 +105,8 @@ constructor(
      */
     private val isPassivelyAuthenticated =
         merge(
-                trustRepository.isCurrentUserTrusted,
-                deviceEntryFaceAuthRepository.isAuthenticated,
+                trustInteractor.isTrusted,
+                faceAuthInteractor.authenticated,
             )
             .onStart { emit(false) }
 
@@ -133,6 +142,67 @@ constructor(
                 // from upstream data sources.
                 initialValue = null,
             )
+
+    private val faceEnrolledAndEnabled = biometricSettingsInteractor.isFaceAuthEnrolledAndEnabled
+    private val fingerprintEnrolledAndEnabled =
+        biometricSettingsInteractor.isFingerprintAuthEnrolledAndEnabled
+    private val trustAgentEnabled = trustInteractor.isEnrolledAndEnabled
+
+    private val faceOrFingerprintOrTrustEnabled: Flow<Triple<Boolean, Boolean, Boolean>> =
+        combine(faceEnrolledAndEnabled, fingerprintEnrolledAndEnabled, trustAgentEnabled, ::Triple)
+
+    /**
+     * Reason why device entry is restricted to certain authentication methods for the current user.
+     *
+     * Emits null when there are no device entry restrictions active.
+     */
+    val deviceEntryRestrictionReason: Flow<DeviceEntryRestrictionReason?> =
+        faceOrFingerprintOrTrustEnabled.flatMapLatest {
+            (faceEnabled, fingerprintEnabled, trustEnabled) ->
+            if (faceEnabled || fingerprintEnabled || trustEnabled) {
+                combine(
+                        biometricSettingsInteractor.authenticationFlags,
+                        faceAuthInteractor.lockedOut,
+                        fingerprintAuthInteractor.isLockedOut,
+                        trustInteractor.isTrustAgentCurrentlyAllowed,
+                        ::Quad
+                    )
+                    .map { (authFlags, isFaceLockedOut, isFingerprintLockedOut, trustManaged) ->
+                        when {
+                            authFlags.isPrimaryAuthRequiredAfterReboot &&
+                                wasRebootedForMainlineUpdate ->
+                                DeviceEntryRestrictionReason.DeviceNotUnlockedSinceMainlineUpdate
+                            authFlags.isPrimaryAuthRequiredAfterReboot ->
+                                DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot
+                            authFlags.isPrimaryAuthRequiredAfterDpmLockdown ->
+                                DeviceEntryRestrictionReason.PolicyLockdown
+                            authFlags.isInUserLockdown -> DeviceEntryRestrictionReason.UserLockdown
+                            authFlags.isPrimaryAuthRequiredForUnattendedUpdate ->
+                                DeviceEntryRestrictionReason.UnattendedUpdate
+                            authFlags.isPrimaryAuthRequiredAfterTimeout ->
+                                DeviceEntryRestrictionReason.SecurityTimeout
+                            authFlags.isPrimaryAuthRequiredAfterLockout ->
+                                DeviceEntryRestrictionReason.BouncerLockedOut
+                            isFingerprintLockedOut ->
+                                DeviceEntryRestrictionReason.StrongBiometricsLockedOut
+                            isFaceLockedOut && faceAuthInteractor.isFaceAuthStrong() ->
+                                DeviceEntryRestrictionReason.StrongBiometricsLockedOut
+                            isFaceLockedOut -> DeviceEntryRestrictionReason.NonStrongFaceLockedOut
+                            authFlags.isSomeAuthRequiredAfterAdaptiveAuthRequest ->
+                                DeviceEntryRestrictionReason.AdaptiveAuthRequest
+                            (trustEnabled && !trustManaged) &&
+                                (authFlags.someAuthRequiredAfterTrustAgentExpired ||
+                                    authFlags.someAuthRequiredAfterUserRequest) ->
+                                DeviceEntryRestrictionReason.TrustAgentDisabled
+                            authFlags.strongerAuthRequiredAfterNonStrongBiometricsTimeout ->
+                                DeviceEntryRestrictionReason.NonStrongBiometricsSecurityTimeout
+                            else -> null
+                        }
+                    }
+            } else {
+                flowOf(null)
+            }
+        }
 
     /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
@@ -186,5 +256,13 @@ constructor(
                 }
             }
         }
+    }
+
+    private val wasRebootedForMainlineUpdate
+        get() = systemPropertiesHelper.get(SYS_BOOT_REASON_PROP) == REBOOT_MAINLINE_UPDATE
+
+    companion object {
+        @VisibleForTesting const val SYS_BOOT_REASON_PROP = "sys.boot.reason.last"
+        @VisibleForTesting const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
     }
 }

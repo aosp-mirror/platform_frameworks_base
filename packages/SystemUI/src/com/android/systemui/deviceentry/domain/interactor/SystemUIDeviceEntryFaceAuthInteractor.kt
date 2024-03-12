@@ -272,6 +272,8 @@ constructor(
 
     /** Provide the status of face detection */
     override val detectionStatus = repository.detectionStatus
+    override val lockedOut: Flow<Boolean> = repository.isLockedOut
+    override val authenticated: Flow<Boolean> = repository.isAuthenticated
 
     private fun runFaceAuth(uiEvent: FaceAuthUiEvent, fallbackToDetect: Boolean) {
         if (repository.isLockedOut.value) {

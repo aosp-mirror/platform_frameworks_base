@@ -62,6 +62,7 @@ val Kosmos.featureFlagsClassicRelease by
     }
 
 val Kosmos.systemPropertiesHelper by Kosmos.Fixture { SystemPropertiesHelper() }
+val Kosmos.fakeSystemPropertiesHelper by Kosmos.Fixture { FakeSystemPropertiesHelper() }
 var Kosmos.serverFlagReader: ServerFlagReader by Kosmos.Fixture { serverFlagReaderFake }
 val Kosmos.serverFlagReaderFake by Kosmos.Fixture { ServerFlagReaderFake() }
 var Kosmos.restarter: Restarter by Kosmos.Fixture { mock() }

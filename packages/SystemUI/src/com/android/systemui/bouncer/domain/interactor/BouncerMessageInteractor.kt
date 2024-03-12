@@ -177,7 +177,7 @@ constructor(
                         )
                         .toMessage()
                 } else if (
-                    trustOrBiometricsAvailable && flags.primaryAuthRequiredForUnattendedUpdate
+                    trustOrBiometricsAvailable && flags.isPrimaryAuthRequiredForUnattendedUpdate
                 ) {
                     BouncerMessageStrings.authRequiredForUnattendedUpdate(
                             currentSecurityMode.toAuthModel()

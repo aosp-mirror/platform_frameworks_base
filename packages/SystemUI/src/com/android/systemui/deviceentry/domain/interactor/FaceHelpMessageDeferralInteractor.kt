@@ -77,7 +77,7 @@ constructor(
 
     private fun startUpdatingFaceHelpMessageDeferral() {
         scope.launch {
-            biometricSettingsInteractor.faceAuthEnrolledAndEnabled
+            biometricSettingsInteractor.isFaceAuthEnrolledAndEnabled
                 .flatMapLatest { faceEnrolledAndEnabled ->
                     if (faceEnrolledAndEnabled) {
                         faceAcquired
@@ -94,7 +94,7 @@ constructor(
         }
 
         scope.launch {
-            biometricSettingsInteractor.faceAuthEnrolledAndEnabled
+            biometricSettingsInteractor.isFaceAuthEnrolledAndEnabled
                 .flatMapLatest { faceEnrolledAndEnabled ->
                     if (faceEnrolledAndEnabled) {
                         faceHelp

@@ -54,7 +54,7 @@ class ShadeControllerSceneImplTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor = kosmos.sceneInteractor
-    private val deviceEntryInteractor = kosmos.deviceEntryInteractor
+    private val deviceEntryInteractor by lazy { kosmos.deviceEntryInteractor }
 
     private lateinit var shadeInteractor: ShadeInteractor
     private lateinit var underTest: ShadeControllerSceneImpl

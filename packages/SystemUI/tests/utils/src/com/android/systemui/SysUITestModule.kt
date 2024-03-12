@@ -27,6 +27,9 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigModule
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
+import com.android.systemui.deviceentry.domain.interactor.SystemUIDeviceEntryFaceAuthInteractor
 import com.android.systemui.scene.SceneContainerFrameworkModule
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneDataSource
@@ -56,6 +59,7 @@ import kotlinx.coroutines.test.runTest
             CoroutineTestScopeModule::class,
             FakeSystemUiModule::class,
             SceneContainerFrameworkModule::class,
+            FaceWakeUpTriggersConfigModule::class,
         ]
 )
 interface SysUITestModule {
@@ -68,6 +72,11 @@ interface SysUITestModule {
     @Binds fun bindBroadcastDispatcher(fake: FakeBroadcastDispatcher): BroadcastDispatcher
     @Binds @SysUISingleton fun bindsShadeInteractor(sii: ShadeInteractorImpl): ShadeInteractor
     @Binds fun bindSceneDataSource(delegator: SceneDataSourceDelegator): SceneDataSource
+
+    @Binds
+    fun provideFaceAuthInteractor(
+        sysUIFaceAuthInteractor: SystemUIDeviceEntryFaceAuthInteractor
+    ): DeviceEntryFaceAuthInteractor
 
     companion object {
         @Provides
