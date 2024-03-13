@@ -741,7 +741,7 @@ public class NotificationManagerService extends SystemService {
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
-    static final IBinder ALLOWLIST_TOKEN = new Binder();
+    private static final IBinder ALLOWLIST_TOKEN = new Binder();
     protected RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
@@ -4875,7 +4875,7 @@ public class NotificationManagerService extends SystemService {
                     // Remove background token before returning notification to untrusted app, this
                     // ensures the app isn't able to perform background operations that are
                     // associated with notification interactions.
-                    notification.overrideAllowlistToken(null);
+                    notification.clearAllowlistToken();
                     return new StatusBarNotification(
                             sbn.getPackageName(),
                             sbn.getOpPkg(),
@@ -7883,8 +7883,6 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
-
-        notification.overrideAllowlistToken(ALLOWLIST_TOKEN);
 
         // Remote views? Are they too big?
         checkRemoteViews(pkg, tag, id, notification);

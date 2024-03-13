@@ -325,7 +325,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13223,35 +13222,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertSame(0, n.flags & Notification.FLAG_NO_DISMISS);
-    }
-
-    @Test
-    public void fixNotification_customAllowlistToken()
-            throws Exception {
-        Notification n = new Notification.Builder(mContext, "test")
-                .build();
-        try {
-            Field allowlistToken = Class.forName("android.app.Notification").
-                    getDeclaredField("mAllowlistToken");
-            allowlistToken.setAccessible(true);
-            allowlistToken.set(n, new Binder());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
-
-        IBinder actual = null;
-        try {
-            Field allowlistToken = Class.forName("android.app.Notification").
-                    getDeclaredField("mAllowlistToken");
-            allowlistToken.setAccessible(true);
-            actual = (IBinder) allowlistToken.get(n);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        assertTrue(mService.ALLOWLIST_TOKEN == actual);
     }
 
     @Test
