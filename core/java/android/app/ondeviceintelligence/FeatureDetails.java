@@ -60,6 +60,9 @@ public final class FeatureDetails implements Parcelable {
     /** Underlying service is unavailable and feature status cannot be fetched. */
     public static final int FEATURE_STATUS_SERVICE_UNAVAILABLE = 4;
 
+    /**
+     * @hide
+     */
     @IntDef(value = {
             FEATURE_STATUS_UNAVAILABLE,
             FEATURE_STATUS_DOWNLOADABLE,

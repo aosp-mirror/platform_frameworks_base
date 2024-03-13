@@ -1885,8 +1885,6 @@ Todo: android.Manifest.permission#READ_PEOPLE_DATA:
     Documentation mentions 'TODO'
 Todo: android.app.NotificationManager#isNotificationAssistantAccessGranted(android.content.ComponentName):
     Documentation mentions 'TODO'
-Todo: android.app.ondeviceintelligence.OnDeviceIntelligenceManager#requestFeatureDownload(android.app.ondeviceintelligence.Feature, android.app.ondeviceintelligence.CancellationSignal, java.util.concurrent.Executor, android.app.ondeviceintelligence.DownloadCallback):
-    Documentation mentions 'TODO'
 Todo: android.hardware.camera2.params.StreamConfigurationMap:
     Documentation mentions 'TODO'
 Todo: android.hardware.location.ContextHubManager#getNanoAppInstanceInfo(int):
