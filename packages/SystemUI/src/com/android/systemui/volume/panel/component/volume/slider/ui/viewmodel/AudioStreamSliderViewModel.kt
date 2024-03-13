@@ -21,6 +21,7 @@ import android.media.AudioManager
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
+import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.volume.domain.interactor.VolumeSliderInteractor
@@ -54,14 +55,6 @@ constructor(
             AudioStream(AudioManager.STREAM_NOTIFICATION) to R.drawable.ic_volume_ringer,
             AudioStream(AudioManager.STREAM_ALARM) to R.drawable.ic_volume_alarm,
         )
-    private val mutedIconsByStream =
-        mapOf(
-            AudioStream(AudioManager.STREAM_MUSIC) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_VOICE_CALL) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_RING) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_NOTIFICATION) to R.drawable.ic_volume_off,
-            AudioStream(AudioManager.STREAM_ALARM) to R.drawable.ic_volume_off,
-        )
     private val labelsByStream =
         mapOf(
             AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_music,
@@ -74,6 +67,8 @@ constructor(
         mapOf(
             AudioStream(AudioManager.STREAM_NOTIFICATION) to
                 R.string.stream_notification_unavailable,
+            AudioStream(AudioManager.STREAM_ALARM) to R.string.stream_alarm_unavailable,
+            AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_media_unavailable,
         )
 
     private var value = 0f
@@ -81,8 +76,9 @@ constructor(
         combine(
                 audioVolumeInteractor.getAudioStream(audioStream),
                 audioVolumeInteractor.canChangeVolume(audioStream),
-            ) { model, isEnabled ->
-                model.toState(value, isEnabled)
+                audioVolumeInteractor.ringerMode,
+            ) { model, isEnabled, ringerMode ->
+                model.toState(value, isEnabled, ringerMode)
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, EmptyState)
 
@@ -100,7 +96,11 @@ constructor(
         }
     }
 
-    private fun AudioStreamModel.toState(value: Float, isEnabled: Boolean): State {
+    private fun AudioStreamModel.toState(
+        value: Float,
+        isEnabled: Boolean,
+        ringerMode: RingerMode,
+    ): State {
         return State(
             value =
                 volumeSliderInteractor.processVolumeToValue(
@@ -110,7 +110,7 @@ constructor(
                     isMuted,
                 ),
             valueRange = volumeSliderInteractor.displayValueRange,
-            icon = getIcon(this),
+            icon = getIcon(ringerMode),
             label = labelsByStream[audioStream]?.let(context::getString)
                     ?: error("No label for the stream: $audioStream"),
             disabledMessage = disabledTextByStream[audioStream]?.let(context::getString),
@@ -119,14 +119,31 @@ constructor(
         )
     }
 
-    private fun getIcon(model: AudioStreamModel): Icon {
-        val isMutedOrNoVolume = model.isMuted || model.volume == model.minVolume
+    private fun AudioStreamModel.getIcon(ringerMode: RingerMode): Icon {
+        val isMutedOrNoVolume = isMuted || volume == minVolume
         val iconRes =
             if (isMutedOrNoVolume) {
-                mutedIconsByStream
+                when (audioStream.value) {
+                    AudioManager.STREAM_MUSIC -> R.drawable.ic_volume_off
+                    AudioManager.STREAM_VOICE_CALL -> R.drawable.ic_volume_off
+                    AudioManager.STREAM_RING ->
+                        if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
+                            R.drawable.ic_volume_ringer_vibrate
+                        } else {
+                            R.drawable.ic_volume_off
+                        }
+                    AudioManager.STREAM_NOTIFICATION ->
+                        if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
+                            R.drawable.ic_volume_ringer_vibrate
+                        } else {
+                            R.drawable.ic_volume_off
+                        }
+                    AudioManager.STREAM_ALARM -> R.drawable.ic_volume_off
+                    else -> null
+                }
             } else {
-                iconsByStream
-            }[audioStream]
+                iconsByStream[audioStream]
+            }
                 ?: error("No icon for the stream: $audioStream")
         return Icon.Resource(iconRes, null)
     }

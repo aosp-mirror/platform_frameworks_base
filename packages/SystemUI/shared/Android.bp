@@ -35,6 +35,9 @@ java_library {
     srcs: [
         ":statslog-SystemUI-java-gen",
     ],
+    libs: [
+        "androidx.annotation_annotation",
+    ],
 }
 
 android_library {

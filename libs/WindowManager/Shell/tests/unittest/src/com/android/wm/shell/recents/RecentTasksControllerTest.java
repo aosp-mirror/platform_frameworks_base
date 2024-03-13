@@ -58,6 +58,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
@@ -96,6 +97,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private DesktopModeTaskRepository mDesktopModeTaskRepository;
     @Mock
     private ActivityTaskManager mActivityTaskManager;
+    @Mock
+    private DisplayInsetsController mDisplayInsetsController;
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
@@ -110,7 +113,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
         mShellController = spy(new ShellController(mContext, mShellInit, mShellCommandHandler,
-                mMainExecutor));
+                mDisplayInsetsController, mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
                 Optional.of(mDesktopModeTaskRepository), mMainExecutor);

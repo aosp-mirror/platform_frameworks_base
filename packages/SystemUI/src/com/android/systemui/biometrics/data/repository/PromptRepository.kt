@@ -18,6 +18,7 @@ package com.android.systemui.biometrics.data.repository
 
 import android.hardware.biometrics.Flags
 import android.hardware.biometrics.PromptInfo
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.Utils.isDeviceCredentialAllowed
@@ -151,6 +152,7 @@ constructor(
         val hasCredentialViewShown = kind.value !is PromptKind.Biometric
         val showBpForCredential =
             Flags.customBiometricPrompt() &&
+                constraintBp() &&
                 !Utils.isBiometricAllowed(promptInfo) &&
                 isDeviceCredentialAllowed(promptInfo) &&
                 promptInfo.contentView != null

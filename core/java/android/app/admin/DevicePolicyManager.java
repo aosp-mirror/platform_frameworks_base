@@ -53,6 +53,7 @@ import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
+import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
@@ -93,6 +94,7 @@ import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.admin.flags.Flags;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -17525,5 +17527,26 @@ public class DevicePolicyManager {
             }
         }
         return -1;
+    }
+
+    /**
+     * @return The headless device owner mode for the current set DO, returns
+     * {@link DeviceAdminInfo#HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED} if no DO is set.
+     *
+     * @hide
+     */
+    @DeviceAdminInfo.HeadlessDeviceOwnerMode
+    public int getHeadlessDeviceOwnerMode() {
+        if (!Flags.headlessDeviceOwnerProvisioningFixEnabled()) {
+            return HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
+        }
+        if (mService != null) {
+            try {
+                return mService.getHeadlessDeviceOwnerMode(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
     }
 }

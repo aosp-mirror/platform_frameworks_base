@@ -186,6 +186,14 @@ flag {
 }
 
 flag {
+    name: "enable_pixel_anisotropy_correction"
+    namespace: "display_manager"
+    description: "Feature flag for enabling display anisotropy correction through LogicalDisplay upscaling"
+    bug: "317363416"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "sensor_based_brightness_throttling"
     namespace: "display_manager"
     description: "Feature flag for enabling brightness throttling using sensor from config."

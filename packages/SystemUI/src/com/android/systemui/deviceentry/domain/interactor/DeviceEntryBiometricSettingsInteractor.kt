@@ -18,6 +18,7 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
+import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -31,9 +32,22 @@ class DeviceEntryBiometricSettingsInteractor
 constructor(
     repository: BiometricSettingsRepository,
 ) {
+
+    /**
+     * Flags that control the device entry authentication behavior.
+     *
+     * This exposes why biometrics may not be currently allowed.
+     */
+    val authenticationFlags: Flow<AuthenticationFlags> = repository.authenticationFlags
+
+    /** Whether the current user has enrolled and enabled fingerprint auth. */
+    val isFingerprintAuthEnrolledAndEnabled: Flow<Boolean> =
+        repository.isFingerprintEnrolledAndEnabled
+
     val fingerprintAuthCurrentlyAllowed: Flow<Boolean> =
         repository.isFingerprintAuthCurrentlyAllowed
-    val faceAuthEnrolledAndEnabled: Flow<Boolean> = repository.isFaceAuthEnrolledAndEnabled
+    /** Whether the current user has enrolled and enabled face auth. */
+    val isFaceAuthEnrolledAndEnabled: Flow<Boolean> = repository.isFaceAuthEnrolledAndEnabled
     val faceAuthCurrentlyAllowed: Flow<Boolean> = repository.isFaceAuthCurrentlyAllowed
 
     /** Whether both fingerprint and face are enrolled and enabled for device entry. */

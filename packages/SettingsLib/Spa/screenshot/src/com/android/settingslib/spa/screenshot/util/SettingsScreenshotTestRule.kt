@@ -44,7 +44,7 @@ class SettingsScreenshotTestRule(
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SettingsGoldenImagePathManager(
+            SettingsGoldenPathManager(
                 getEmulatedDevicePathConfig(emulationSpec),
                 assetsPathRelativeToBuildRoot
             )

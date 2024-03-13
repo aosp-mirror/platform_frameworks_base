@@ -60,7 +60,6 @@ import com.android.internal.widget.CachingIconView;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
@@ -104,7 +103,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 TestableLooper.get(this),
                 mFeatureFlags);
         mNotificationTestHelper.setDefaultInflationFlags(FLAG_CONTENT_VIEW_ALL);
-        mFeatureFlags.setDefault(Flags.SENSITIVE_REVEAL_ANIM);
     }
 
     @Test
@@ -186,14 +184,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetSensitiveOnNotifRowNotifiesOfHeightChange_withOtherFlagValue()
-            throws Exception {
-        FakeFeatureFlags flags = mFeatureFlags;
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, !flags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
-        testSetSensitiveOnNotifRowNotifiesOfHeightChange();
-    }
-
-    @Test
     public void testSetSensitiveOnNotifRowNotifiesOfHeightChange() throws Exception {
         // GIVEN a sensitive notification row that's currently redacted
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();
@@ -210,19 +200,10 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // WHEN the row is set to no longer be sensitive
         row.setSensitive(false, true);
 
-        boolean expectAnimation = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         // VERIFY that the height change listener is invoked
         assertThat(row.getShowingLayout()).isSameInstanceAs(row.getPrivateLayout());
         assertThat(row.getIntrinsicHeight()).isGreaterThan(0);
-        verify(listener).onHeightChanged(eq(row), eq(expectAnimation));
-    }
-
-    @Test
-    public void testSetSensitiveOnGroupRowNotifiesOfHeightChange_withOtherFlagValue()
-            throws Exception {
-        FakeFeatureFlags flags = mFeatureFlags;
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, !flags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
-        testSetSensitiveOnGroupRowNotifiesOfHeightChange();
+        verify(listener).onHeightChanged(eq(row), eq(true));
     }
 
     @Test
@@ -242,19 +223,10 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         // WHEN the row is set to no longer be sensitive
         group.setSensitive(false, true);
 
-        boolean expectAnimation = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         // VERIFY that the height change listener is invoked
         assertThat(group.getShowingLayout()).isSameInstanceAs(group.getPrivateLayout());
         assertThat(group.getIntrinsicHeight()).isGreaterThan(0);
-        verify(listener).onHeightChanged(eq(group), eq(expectAnimation));
-    }
-
-    @Test
-    public void testSetSensitiveOnPublicRowDoesNotNotifyOfHeightChange_withOtherFlagValue()
-            throws Exception {
-        FakeFeatureFlags flags = mFeatureFlags;
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, !flags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
-        testSetSensitiveOnPublicRowDoesNotNotifyOfHeightChange();
+        verify(listener).onHeightChanged(eq(group), eq(true));
     }
 
     @Test

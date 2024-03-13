@@ -76,6 +76,9 @@ java_sdk_library {
         "//apex_available:platform",
         "com.android.nfcservices",
     ],
+    aconfig_declarations: [
+        "android.nfc.flags-aconfig",
+    ],
 }
 
 filegroup {

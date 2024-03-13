@@ -18,34 +18,34 @@ package com.android.credentialmanager
 
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
-import platform.test.screenshot.GoldenImagePathManager
+import platform.test.screenshot.GoldenPathManager
 import platform.test.screenshot.PathConfig
 
 /** The assets path to be used by all CredentialManager screenshot tests. */
 private const val ASSETS_PREFIX = "frameworks/base/packages/CredentialManager"
 private const val ASSETS_PATH = "${ASSETS_PREFIX}/tests/robotests/screenshot/customization/assets"
-private const val ASSETS_PATH_ROBO =
-        "${ASSETS_PREFIX}/tests/robotests/customization/assets"
+private const val ASSETS_PATH_ROBO = "${ASSETS_PREFIX}/tests/robotests/customization/assets"
 
 private val isRobolectric = Build.FINGERPRINT.contains("robolectric")
 
-class CredentialManagerGoldenImagePathManager(
-        pathConfig: PathConfig,
-        assetsPathRelativeToBuildRoot: String = if (isRobolectric) ASSETS_PATH_ROBO else ASSETS_PATH
-) : GoldenImagePathManager(
+class CredentialManagerGoldenPathManager(
+    pathConfig: PathConfig,
+    assetsPathRelativeToBuildRoot: String = if (isRobolectric) ASSETS_PATH_ROBO else ASSETS_PATH
+) :
+    GoldenPathManager(
         appContext = InstrumentationRegistry.getInstrumentation().context,
         assetsPathRelativeToBuildRoot = assetsPathRelativeToBuildRoot,
         deviceLocalPath =
-        InstrumentationRegistry.getInstrumentation()
+            InstrumentationRegistry.getInstrumentation()
                 .targetContext
                 .filesDir
                 .absolutePath
                 .toString() + "/credman_screenshots",
         pathConfig = pathConfig,
-) {
+    ) {
     override fun toString(): String {
         // This string is appended to all actual/expected screenshots on the device, so make sure
         // it is a static value.
-        return "CredentialManagerGoldenImagePathManager"
+        return "CredentialManagerGoldenPathManager"
     }
 }

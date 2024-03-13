@@ -89,8 +89,7 @@ constructor(
 
     override fun isShadeFullyOpen(): Boolean = shadeInteractor.isAnyFullyExpanded.value
 
-    override fun isExpandingOrCollapsing(): Boolean =
-        shadeInteractor.anyExpansion.value > 0f && shadeInteractor.anyExpansion.value < 1f
+    override fun isExpandingOrCollapsing(): Boolean = shadeInteractor.isUserInteracting.value
 
     override fun instantExpandShade() {
         // Do nothing

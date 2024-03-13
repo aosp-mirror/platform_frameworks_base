@@ -4755,6 +4755,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         autofillOptions,
                         contentCaptureOptions,
                         app.getDisabledCompatChanges(),
+                        app.getLoggableCompatChanges(),
                         serializedSystemFontMap,
                         app.getStartElapsedTime(),
                         app.getStartUptime());
@@ -9010,7 +9011,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             // cleaning up the old proxies.
                             VMRuntime.getRuntime().requestConcurrentGC();
                         }
-                    }, BackgroundThread.getHandler());
+                    }, mHandler);
             t.traceEnd(); // setBinderProxies
 
             t.traceEnd(); // ActivityManagerStartApps

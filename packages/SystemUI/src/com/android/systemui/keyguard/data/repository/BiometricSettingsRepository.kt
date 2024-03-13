@@ -175,7 +175,6 @@ constructor(
         pw.println("isFingerprintAuthCurrentlyAllowed=${isFingerprintAuthCurrentlyAllowed.value}")
         pw.println("isNonStrongBiometricAllowed=${isNonStrongBiometricAllowed.value}")
         pw.println("isStrongBiometricAllowed=${isStrongBiometricAllowed.value}")
-        pw.println("isFingerprintEnabledByDevicePolicy=${isFingerprintEnabledByDevicePolicy.value}")
     }
 
     /** UserId of the current selected user. */
@@ -324,22 +323,14 @@ constructor(
             else isNonStrongBiometricAllowed
         }
 
-    private val isFingerprintEnabledByDevicePolicy: StateFlow<Boolean> =
-        selectedUserId
-            .flatMapLatest { userId ->
-                devicePolicyChangedForAllUsers
-                    .transformLatest { emit(devicePolicyManager.isFingerprintDisabled(userId)) }
-                    .flowOn(backgroundDispatcher)
-                    .distinctUntilChanged()
-            }
-            .stateIn(
-                scope,
-                started = SharingStarted.Eagerly,
-                initialValue =
-                    devicePolicyManager.isFingerprintDisabled(
-                        userRepository.getSelectedUserInfo().id
-                    )
-            )
+    private val isFingerprintEnabledByDevicePolicy: Flow<Boolean> =
+        selectedUserId.flatMapLatest { userId ->
+            devicePolicyChangedForAllUsers
+                .transformLatest { emit(devicePolicyManager.isFingerprintDisabled(userId)) }
+                .onStart { emit(devicePolicyManager.isFingerprintDisabled(userId)) }
+                .flowOn(backgroundDispatcher)
+                .distinctUntilChanged()
+        }
 
     override val isFingerprintEnrolledAndEnabled: StateFlow<Boolean> =
         isFingerprintEnrolled

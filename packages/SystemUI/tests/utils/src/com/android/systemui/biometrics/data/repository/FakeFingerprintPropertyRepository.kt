@@ -68,6 +68,16 @@ class FakeFingerprintPropertyRepository @Inject constructor() : FingerprintPrope
         )
     }
 
+    /** setProperties as if the device supports POWER_BUTTON fingerprint sensor. */
+    fun supportsSideFps() {
+        setProperties(
+            sensorId = 0,
+            strength = SensorStrength.STRONG,
+            sensorType = FingerprintSensorType.POWER_BUTTON,
+            sensorLocations = emptyMap(),
+        )
+    }
+
     /** setProperties as if the device supports the rear fingerprint sensor. */
     fun supportsRearFps() {
         setProperties(

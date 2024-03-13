@@ -82,13 +82,6 @@ public final class BroadcastRadioServiceImpl {
                     Slogf.w(TAG, "No module %s with id %d (HAL AIDL)", name, moduleId);
                     return;
                 }
-                try {
-                    radioModule.setInternalHalCallback();
-                } catch (RemoteException ex) {
-                    Slogf.wtf(TAG, ex, "Broadcast radio module %s with id %d (HAL AIDL) "
-                            + "cannot register HAL callback", name, moduleId);
-                    return;
-                }
                 if (DEBUG) {
                     Slogf.d(TAG, "Loaded broadcast radio module %s with id %d (HAL AIDL)",
                             name, moduleId);

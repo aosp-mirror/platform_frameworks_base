@@ -10,7 +10,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.res.R
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
@@ -23,7 +22,6 @@ import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,7 +36,6 @@ import org.mockito.Mockito.`when` as whenever
 @RunWithLooper
 open class NotificationShelfTest : SysuiTestCase() {
 
-    open val useSensitiveReveal: Boolean = false
     private val flags = FakeFeatureFlags()
 
     @Mock private lateinit var largeScreenShadeInterpolator: LargeScreenShadeInterpolator
@@ -53,7 +50,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         mDependency.injectTestDependency(FeatureFlags::class.java, flags)
-        flags.set(Flags.SENSITIVE_REVEAL_ANIM, useSensitiveReveal)
         val root = FrameLayout(context)
         shelf =
             LayoutInflater.from(root.context)
@@ -335,7 +331,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withNullLastVisibleBackgroundChild_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -362,7 +357,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withNullFirstViewInShelf_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -389,7 +383,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withCollapsedShade_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -416,7 +409,6 @@ open class NotificationShelfTest : SysuiTestCase() {
     @Test
     fun updateState_withHiddenSectionBeforeShelf_hideShelf() {
         // GIVEN
-        assumeTrue(useSensitiveReveal)
         whenever(ambientState.stackY).thenReturn(100f)
         whenever(ambientState.stackHeight).thenReturn(100f)
         val paddingBetweenElements =
@@ -475,11 +467,4 @@ open class NotificationShelfTest : SysuiTestCase() {
 
         assertEquals(expectedAlpha, shelf.viewState.alpha)
     }
-}
-
-@SmallTest
-@RunWith(AndroidTestingRunner::class)
-@RunWithLooper
-class NotificationShelfWithSensitiveRevealTest : NotificationShelfTest() {
-    override val useSensitiveReveal: Boolean = true
 }

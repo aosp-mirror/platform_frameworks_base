@@ -38,6 +38,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.brightness.BrightnessController;
 import com.android.systemui.settings.brightness.BrightnessMirrorHandler;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
@@ -90,9 +91,11 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             FalsingManager falsingManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             SplitShadeStateController splitShadeStateController,
-            SceneContainerFlags sceneContainerFlags) {
+            SceneContainerFlags sceneContainerFlags,
+            VibratorHelper vibratorHelper) {
         super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost,
-                metricsLogger, uiEventLogger, qsLogger, dumpManager, splitShadeStateController);
+                metricsLogger, uiEventLogger, qsLogger, dumpManager, splitShadeStateController,
+                vibratorHelper);
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
         mQsTileRevealControllerFactory = qsTileRevealControllerFactory;

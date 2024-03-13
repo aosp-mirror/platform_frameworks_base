@@ -1151,7 +1151,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      */
     private LogicalDisplay createNewLogicalDisplayLocked(DisplayDevice device, int displayId) {
         final int layerStack = assignLayerStackLocked(displayId);
-        final LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device);
+        final LogicalDisplay display = new LogicalDisplay(displayId, layerStack, device,
+                mFlags.isPixelAnisotropyCorrectionInLogicalDisplayEnabled());
         display.updateLocked(mDisplayDeviceRepo);
 
         final DisplayInfo info = display.getDisplayInfoLocked();

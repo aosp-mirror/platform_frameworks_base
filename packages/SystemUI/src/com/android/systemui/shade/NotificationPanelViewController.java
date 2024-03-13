@@ -1753,10 +1753,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
+        boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
         if (migrateClocksToBlueprint()) {
+            mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
             return;
         }
-        boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
         ConstraintLayout layout = mNotificationContainerParent;
         mKeyguardStatusViewController.updateAlignment(
                 layout, mSplitShadeEnabled, shouldBeCentered, animate);
@@ -2603,7 +2604,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return maxHeight;
     }
 
-    @Override
     public boolean isExpandingOrCollapsing() {
         float lockscreenExpansionProgress = mQsController.getLockscreenShadeDragProgress();
         return mIsExpandingOrCollapsing

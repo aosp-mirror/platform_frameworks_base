@@ -26,6 +26,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_SCROLL;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotController.SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS;
 
 import static java.util.Objects.requireNonNull;
 
@@ -33,6 +34,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.BroadcastOptions;
 import android.app.Notification;
@@ -168,7 +170,6 @@ public class ScreenshotView extends FrameLayout implements
     private ScreenshotData mScreenshotData;
 
     private final InteractionJankMonitor mInteractionJankMonitor;
-    private long mDefaultTimeoutOfTimeoutHandler;
     private FeatureFlags mFlags;
     private final Bundle mInteractiveBroadcastOption;
 
@@ -242,10 +243,6 @@ public class ScreenshotView extends FrameLayout implements
 
     private InteractionJankMonitor getInteractionJankMonitorInstance() {
         return InteractionJankMonitor.getInstance();
-    }
-
-    void setDefaultTimeoutMillis(long timeout) {
-        mDefaultTimeoutOfTimeoutHandler = timeout;
     }
 
     public void hideScrollChip() {
@@ -755,7 +752,7 @@ public class ScreenshotView extends FrameLayout implements
                         InteractionJankMonitor.Configuration.Builder.withView(
                                         CUJ_TAKE_SCREENSHOT, mScreenshotStatic)
                                 .setTag("Actions")
-                                .setTimeout(mDefaultTimeoutOfTimeoutHandler);
+                                .setTimeout(SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS);
                 mInteractionJankMonitor.begin(builder);
             }
         });
@@ -781,7 +778,7 @@ public class ScreenshotView extends FrameLayout implements
         return animator;
     }
 
-    void badgeScreenshot(Drawable badge) {
+    void badgeScreenshot(@Nullable Drawable badge) {
         mScreenshotBadge.setImageDrawable(badge);
         mScreenshotBadge.setVisibility(badge != null ? View.VISIBLE : View.GONE);
     }

@@ -48,8 +48,11 @@ constructor(
                 modifier = modifier.fillMaxWidth(),
             )
         } else {
+            val isExpanded by viewModel.isExpanded.collectAsState()
             ColumnVolumeSliders(
                 viewModels = sliderViewModels,
+                isExpanded = isExpanded,
+                onExpandedChanged = viewModel::onExpandedChanged,
                 sliderColors = PlatformSliderDefaults.defaultPlatformSliderColors(),
                 isExpandable = isPortrait,
                 modifier = modifier.fillMaxWidth(),

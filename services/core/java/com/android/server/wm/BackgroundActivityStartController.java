@@ -18,10 +18,10 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityOptions.BackgroundActivityStartMode;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
-import static android.app.ActivityOptions.BackgroundActivityStartMode;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
@@ -37,12 +37,11 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
+import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balRequireOptInSameUid;
-import static com.android.window.flags.Flags.balShowToasts;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
-import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 import static java.util.Objects.requireNonNull;
@@ -752,7 +751,6 @@ public class BackgroundActivityStartController {
                 Slog.wtf(TAG, "With Android 15 BAL hardening this activity start may be blocked"
                         + " if the PI creator upgrades target_sdk to 35+! "
                         + " (missing opt in by PI creator)!" + state.dump());
-                showBalRiskToast();
                 return allowBasedOnCaller(state);
             }
         }
@@ -762,7 +760,6 @@ public class BackgroundActivityStartController {
                 Slog.wtf(TAG, "With Android 14 BAL hardening this activity start will be blocked"
                         + " if the PI sender upgrades target_sdk to 34+! "
                         + " (missing opt in by PI sender)!" + state.dump());
-                showBalRiskToast();
                 return allowBasedOnRealCaller(state);
             }
         }
@@ -793,7 +790,11 @@ public class BackgroundActivityStartController {
     private BalVerdict abortLaunch(BalState state) {
         Slog.wtf(TAG, "Background activity launch blocked! "
                 + state.dump());
-        showBalBlockedToast();
+        if (balShowToastsBlocked()
+                && (state.mResultForCaller.allows() || state.mResultForRealCaller.allows())) {
+            // only show a toast if either caller or real caller could launch if they opted in
+            showToast("BAL blocked. go/debug-bal");
+        }
         return statsLog(BalVerdict.BLOCK, state);
     }
 
@@ -1190,18 +1191,6 @@ public class BackgroundActivityStartController {
         }
 
         return true;
-    }
-
-    private void showBalBlockedToast() {
-        if (balShowToastsBlocked()) {
-            showToast("BAL blocked. go/debug-bal");
-        }
-    }
-
-    private void showBalRiskToast() {
-        if (balShowToasts()) {
-            showToast("BAL allowed in compat mode. go/debug-bal");
-        }
     }
 
     @VisibleForTesting void showToast(String toastText) {

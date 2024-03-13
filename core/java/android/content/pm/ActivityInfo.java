@@ -333,10 +333,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     }
 
     /**
-     * Specifies permissions necessary to launch this activity via
-     * {@link android.content.Context#startActivity} when passing content URIs. The default value is
-     * {@code none}, meaning no specific permissions are required. Setting this attribute restricts
-     * activity invocation based on the invoker's permissions.
+     * Specifies permissions necessary to launch this activity when passing content URIs. The
+     * default value is {@code none}, meaning no specific permissions are required. Setting this
+     * attribute restricts activity invocation based on the invoker's permissions.
      * @hide
      */
     @RequiredContentUriPermission

@@ -233,6 +233,17 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE =
             "include_invisible_view_group_in_assist_structure";
 
+    /**
+     * Bugfix flag, Autofill should ignore views resetting to empty states.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#ignore_view_state_reset_to_empty
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY =
+            "ignore_view_state_reset_to_empty";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -491,6 +502,14 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_INCLUDE_INVISIBLE_VIEW_GROUP_IN_ASSIST_STRUCTURE,
+                false);
+    }
+
+    /** @hide */
+    public static boolean shouldIgnoreViewStateResetToEmpty() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY,
                 false);
     }
 

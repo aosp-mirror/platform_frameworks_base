@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.params.DynamicRangeProfiles;
 
 import com.android.internal.camera.flags.Flags;
 
@@ -79,6 +80,11 @@ public class ExtensionOutputConfiguration {
         config.outputId = new OutputConfigId();
         config.outputId.id = mOutputConfigId;
         config.surfaceGroupId = mSurfaceGroupId;
+        if (Flags.extension10Bit()) {
+            config.dynamicRangeProfile = surface.getDynamicRangeProfile();
+        } else {
+            config.dynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        }
     }
 
     @Nullable CameraOutputConfig getOutputConfig() {

@@ -17,28 +17,25 @@
 package com.android.input.screenshot
 
 import androidx.test.platform.app.InstrumentationRegistry
-import platform.test.screenshot.GoldenImagePathManager
+import platform.test.screenshot.GoldenPathManager
 import platform.test.screenshot.PathConfig
 
-/** A [GoldenImagePathManager] that should be used for all Input screenshot tests. */
-class InputGoldenImagePathManager(
-        pathConfig: PathConfig,
-        assetsPathRelativeToBuildRoot: String
-) :
-        GoldenImagePathManager(
-                appContext = InstrumentationRegistry.getInstrumentation().context,
-                assetsPathRelativeToBuildRoot = assetsPathRelativeToBuildRoot,
-                deviceLocalPath =
-                    InstrumentationRegistry.getInstrumentation()
-                        .targetContext
-                        .filesDir
-                        .absolutePath
-                        .toString() + "/input_screenshots",
-                pathConfig = pathConfig,
-        ) {
+/** A [GoldenPathManager] that should be used for all Input screenshot tests. */
+class InputGoldenPathManager(pathConfig: PathConfig, assetsPathRelativeToBuildRoot: String) :
+    GoldenPathManager(
+        appContext = InstrumentationRegistry.getInstrumentation().context,
+        assetsPathRelativeToBuildRoot = assetsPathRelativeToBuildRoot,
+        deviceLocalPath =
+            InstrumentationRegistry.getInstrumentation()
+                .targetContext
+                .filesDir
+                .absolutePath
+                .toString() + "/input_screenshots",
+        pathConfig = pathConfig,
+    ) {
     override fun toString(): String {
         // This string is appended to all actual/expected screenshots on the device, so make sure
         // it is a static value.
-        return "InputGoldenImagePathManager"
+        return "InputGoldenPathManager"
     }
 }

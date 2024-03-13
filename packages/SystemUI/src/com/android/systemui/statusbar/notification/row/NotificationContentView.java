@@ -699,8 +699,7 @@ public class NotificationContentView extends FrameLayout implements Notification
         int hint;
         if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
             hint = getViewHeight(VISIBLE_TYPE_HEADSUP);
-            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()
-                    && mHeadsUpRemoteInputController.isFocusAnimationFlagActive()) {
+            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()) {
                 // While the RemoteInputView is animating its appearance, it should be allowed
                 // to overlap the hint, therefore no space is reserved for the hint during the
                 // appearance animation of the RemoteInputView

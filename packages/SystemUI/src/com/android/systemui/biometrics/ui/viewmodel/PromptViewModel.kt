@@ -29,6 +29,7 @@ import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import com.android.systemui.Flags.bpTalkback
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.UdfpsUtils
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
@@ -284,7 +285,7 @@ constructor(
         promptSelectorInteractor.prompt
             .map {
                 when {
-                    !customBiometricPrompt() || it == null -> null
+                    !(customBiometricPrompt() && constraintBp()) || it == null -> null
                     it.logoRes != -1 -> context.resources.getDrawable(it.logoRes, context.theme)
                     it.logoBitmap != null -> BitmapDrawable(context.resources, it.logoBitmap)
                     else ->
@@ -304,7 +305,7 @@ constructor(
         promptSelectorInteractor.prompt
             .map {
                 when {
-                    !customBiometricPrompt() || it == null -> ""
+                    !(customBiometricPrompt() && constraintBp()) || it == null -> ""
                     it.logoDescription != null -> it.logoDescription
                     else ->
                         try {
@@ -329,7 +330,7 @@ constructor(
     /** Custom content view for the prompt. */
     val contentView: Flow<PromptContentView?> =
         promptSelectorInteractor.prompt
-            .map { if (customBiometricPrompt()) it?.contentView else null }
+            .map { if (customBiometricPrompt() && constraintBp()) it?.contentView else null }
             .distinctUntilChanged()
 
     private val originalDescription =

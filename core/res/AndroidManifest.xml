@@ -6916,6 +6916,12 @@
     <permission android:name="android.permission.MANAGE_MEDIA_PROJECTION"
         android:protectionLevel="signature" />
 
+    <!-- @hide @TestApi Allows an application to record sensitive content during media
+         projection. This is intended for on device screen recording system app.
+         @FlaggedApi("android.permission.flags.sensitive_notification_app_protection") -->
+    <permission android:name="android.permission.RECORD_SENSITIVE_CONTENT"
+                android:protectionLevel="signature"/>
+
     <!-- @SystemApi Allows an application to read install sessions
          @hide This is not a third-party API (intended for system apps). -->
     <permission android:name="android.permission.READ_INSTALL_SESSIONS"

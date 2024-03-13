@@ -22,6 +22,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -88,8 +89,7 @@ interface SceneTransitionsBuilder {
     ): OverscrollSpec
 }
 
-@TransitionDsl
-interface OverscrollBuilder : PropertyTransformationBuilder {
+interface BaseTransitionBuilder : PropertyTransformationBuilder {
     /**
      * The distance it takes for this transition to animate from 0% to 100% when it is driven by a
      * [UserAction].
@@ -120,7 +120,7 @@ interface OverscrollBuilder : PropertyTransformationBuilder {
 }
 
 @TransitionDsl
-interface TransitionBuilder : OverscrollBuilder, PropertyTransformationBuilder {
+interface TransitionBuilder : BaseTransitionBuilder {
     /**
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).
@@ -174,6 +174,24 @@ interface TransitionBuilder : OverscrollBuilder, PropertyTransformationBuilder {
      * of the transition from scene `Bar` to scene `Foo`.
      */
     fun reversed(builder: TransitionBuilder.() -> Unit)
+}
+
+@TransitionDsl
+interface OverscrollBuilder : BaseTransitionBuilder {
+    /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
+    fun translate(
+        matcher: ElementMatcher,
+        x: OverscrollScope.() -> Float = { 0f },
+        y: OverscrollScope.() -> Float = { 0f },
+    )
+}
+
+interface OverscrollScope {
+    /**
+     * Return the absolute distance between fromScene and toScene, if available, otherwise
+     * [DistanceUnspecified].
+     */
+    val absoluteDistance: Float
 }
 
 /**

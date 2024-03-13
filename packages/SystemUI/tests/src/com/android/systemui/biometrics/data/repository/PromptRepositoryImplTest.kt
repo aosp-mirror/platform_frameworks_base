@@ -17,9 +17,11 @@
 package com.android.systemui.biometrics.data.repository
 
 import android.hardware.biometrics.BiometricManager
+import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.shared.model.PromptKind
@@ -135,6 +137,8 @@ class PromptRepositoryImplTest : SysuiTestCase() {
     @Test
     fun showBpWithoutIconForCredential_withCustomBp() =
         testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             for (case in
                 listOf(
                     PromptKind.Biometric(),

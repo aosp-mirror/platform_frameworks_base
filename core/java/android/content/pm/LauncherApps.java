@@ -1328,6 +1328,19 @@ public class LauncherApps {
     }
 
     /**
+     * Saves view capture data to the default location.
+     * @hide
+     */
+    @RequiresPermission(READ_FRAME_BUFFER)
+    public void saveViewCaptureData() {
+        try {
+            mService.saveViewCaptureData();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
      * Unregister a callback, so that it won't be called when LauncherApps dumps.
      * @hide
      */

@@ -37,6 +37,7 @@ import com.android.wm.shell.WindowManagerShellWrapper
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView
 import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
@@ -94,7 +95,8 @@ class BubbleViewInfoTest : ShellTestCase() {
         val windowManager = context.getSystemService(WindowManager::class.java)
         val shellInit = ShellInit(mainExecutor)
         val shellCommandHandler = ShellCommandHandler()
-        val shellController = ShellController(context, shellInit, shellCommandHandler, mainExecutor)
+        val shellController = ShellController(context, shellInit, shellCommandHandler,
+					      mock<DisplayInsetsController>(), mainExecutor)
         bubblePositioner = BubblePositioner(context, windowManager)
         val bubbleData =
             BubbleData(

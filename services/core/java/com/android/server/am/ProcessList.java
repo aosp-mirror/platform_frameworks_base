@@ -2088,8 +2088,10 @@ public final class ProcessList {
                     + " with non-zero pid:" + app.getPid());
         }
         app.setDisabledCompatChanges(null);
+        app.setLoggableCompatChanges(null);
         if (mPlatformCompat != null) {
             app.setDisabledCompatChanges(mPlatformCompat.getDisabledChanges(app.info));
+            app.setLoggableCompatChanges(mPlatformCompat.getLoggableChanges(app.info));
         }
         final long startSeq = ++mProcStartSeqCounter;
         app.setStartSeq(startSeq);

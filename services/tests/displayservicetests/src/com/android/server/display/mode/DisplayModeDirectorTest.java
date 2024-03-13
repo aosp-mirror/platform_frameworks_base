@@ -1631,11 +1631,24 @@ public class DisplayModeDirectorTest {
         director.start(sensorManager);
         director.injectSupportedModesByDisplay(supportedModesByDisplay);
 
-        setPeakRefreshRate(Float.POSITIVE_INFINITY);
+        // Disable Smooth Display
+        setPeakRefreshRate(RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
 
         Vote vote1 = director.getVote(DISPLAY_ID,
                 Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
         Vote vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+
+        // Enable Smooth Display
+        setPeakRefreshRate(Float.POSITIVE_INFINITY);
+
+        vote1 = director.getVote(DISPLAY_ID,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        vote2 = director.getVote(DISPLAY_ID_2,
                 Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
         assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0, /* frameRateHigh= */ 130);
         assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0, /* frameRateHigh= */ 140);
@@ -1654,9 +1667,17 @@ public class DisplayModeDirectorTest {
         SensorManager sensorManager = createMockSensorManager(lightSensor);
         director.start(sensorManager);
 
-        setPeakRefreshRate(peakRefreshRate);
+        // Disable Smooth Display
+        setPeakRefreshRate(RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
 
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+
+        // Enable Smooth Display
+        setPeakRefreshRate(peakRefreshRate);
+
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
         assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0,
                 /* frameRateHigh= */ peakRefreshRate);
     }
@@ -1759,10 +1780,22 @@ public class DisplayModeDirectorTest {
         director.start(sensorManager);
         director.injectSupportedModesByDisplay(supportedModesByDisplay);
 
-        setMinRefreshRate(Float.POSITIVE_INFINITY);
+        // Disable Force Peak Refresh Rate
+        setMinRefreshRate(0);
 
         Vote vote1 = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
         Vote vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+
+        // Enable Force Peak Refresh Rate
+        setMinRefreshRate(Float.POSITIVE_INFINITY);
+
+        vote1 = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        vote2 = director.getVote(DISPLAY_ID_2,
                 Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
         assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 130,
                 /* frameRateHigh= */ Float.POSITIVE_INFINITY);
@@ -1783,9 +1816,17 @@ public class DisplayModeDirectorTest {
         SensorManager sensorManager = createMockSensorManager(lightSensor);
         director.start(sensorManager);
 
-        setMinRefreshRate(minRefreshRate);
+        // Disable Force Peak Refresh Rate
+        setMinRefreshRate(0);
 
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+
+        // Enable Force Peak Refresh Rate
+        setMinRefreshRate(minRefreshRate);
+
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
         assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ minRefreshRate,
                 /* frameRateHigh= */ Float.POSITIVE_INFINITY);
     }
@@ -1826,6 +1867,58 @@ public class DisplayModeDirectorTest {
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
         assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 140,
                 /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+    }
+
+    @Test
+    public void testPeakAndMinRefreshRate_FlagEnabled_DisplayWithOneMode() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        DisplayModeDirector director =
+                new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Display.Mode[] modes1 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+        Display.Mode[] modes2 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+        };
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        supportedModesByDisplay.put(DISPLAY_ID, modes1);
+        supportedModesByDisplay.put(DISPLAY_ID_2, modes2);
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
+
+        // Disable Force Peak Refresh Rate and Smooth Display
+        setMinRefreshRate(0);
+        setPeakRefreshRate(RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+
+        // Even though the highest refresh rate of the second display == the current min refresh
+        // rate == 60, Force Peak Refresh Rate should remain disabled
+        Vote vote1 = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        Vote vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+
+        // Even though the highest refresh rate of the second display == the current peak refresh
+        // rate == 60, Smooth Display should remain disabled
+        vote1 = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ RefreshRateSettingsUtils.DEFAULT_REFRESH_RATE);
     }
 
     @Test

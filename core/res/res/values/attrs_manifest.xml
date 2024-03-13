@@ -3287,10 +3287,9 @@
         -->
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
 
-        <!-- Specifies permissions necessary to launch this activity via
-             {@link android.content.Context#startActivity} when passing content URIs. The default
-             value is {@code none}, meaning no specific permissions are required. Setting this
-             attribute restricts activity invocation based on the invoker's permissions. If the
+        <!-- Specifies permissions necessary to launch this activity when passing content URIs. The
+             default value is {@code none}, meaning no specific permissions are required. Setting
+             this attribute restricts activity invocation based on the invoker's permissions. If the
              invoker doesn't have the required permissions, the activity start will be denied via a
              {@link java.lang.SecurityException}.
 

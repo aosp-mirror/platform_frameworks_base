@@ -42,9 +42,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -61,12 +58,13 @@ private const val COLLAPSE_DURATION_MILLIS = 300
 @Composable
 fun ColumnVolumeSliders(
     viewModels: List<SliderViewModel>,
+    isExpanded: Boolean,
+    onExpandedChanged: (Boolean) -> Unit,
     sliderColors: PlatformSliderColors,
     isExpandable: Boolean,
     modifier: Modifier = Modifier,
 ) {
     require(viewModels.isNotEmpty())
-    var isExpanded: Boolean by remember(isExpandable) { mutableStateOf(!isExpandable) }
     val transition = updateTransition(isExpanded, label = "CollapsableSliders")
     Column(modifier = modifier) {
         Row(
@@ -85,7 +83,7 @@ fun ColumnVolumeSliders(
             if (isExpandable) {
                 ExpandButton(
                     isExpanded = isExpanded,
-                    onExpandedChanged = { isExpanded = it },
+                    onExpandedChanged = onExpandedChanged,
                     sliderColors,
                     Modifier,
                 )

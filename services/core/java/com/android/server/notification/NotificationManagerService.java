@@ -12054,10 +12054,17 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onServiceAdded(ManagedServiceInfo info) {
             if (lifetimeExtensionRefactor()) {
-                // We explicitly check the status bar permission for the uid in the info object.
-                // We can't use the calling uid here because it's probably always system server.
-                // Note that this will also be true for the shell.
-                info.isSystemUi = getContext().checkPermission(
+                // Generally, only System or System UI should have the permissions to call
+                // registerSystemService.
+                // isCallerSystemOrPhone tells us whether the caller is System. We negate this,
+                // to eliminate cases where the service was added by the system. This leaves
+                // services registered by system server.
+                // To identify system UI, we explicitly check the status bar permission for the
+                // uid in the info object.
+                // We can't use the calling uid here because it belongs to system server.
+                // Note that this will also return true for the shell, but we deem this
+                // acceptable, for the purposes of testing.
+                info.isSystemUi = !isCallerSystemOrPhone() && getContext().checkPermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, -1, info.uid)
                         == PERMISSION_GRANTED;
             }

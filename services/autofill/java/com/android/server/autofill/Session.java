@@ -171,6 +171,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.KeyEvent;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillCommitReason;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
@@ -1498,7 +1499,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mSessionCommittedEventLogger.maybeSetComponentPackageUid(uid);
         mSaveEventLogger = SaveEventLogger.forSessionId(sessionId);
         mIsPrimaryCredential = isPrimaryCredential;
-        mIgnoreViewStateResetToEmpty = Flags.ignoreViewStateResetToEmpty();
+        mIgnoreViewStateResetToEmpty = AutofillFeatureFlags.shouldIgnoreViewStateResetToEmpty();
 
         synchronized (mLock) {
             mSessionFlags = new SessionFlags();

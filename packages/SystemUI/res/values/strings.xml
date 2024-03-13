@@ -1536,8 +1536,12 @@
 
     <!-- Media device casting volume slider label [CHAR_LIMIT=20] -->
     <string name="media_device_cast">Cast</string>
-    <!-- A message shown when the notification volume changing is disabled because of the muted ring stream [CHAR_LIMIT=40]-->
+    <!-- A message shown when the notification volume changing is disabled because of the muted ring stream [CHAR_LIMIT=50]-->
     <string name="stream_notification_unavailable">Unavailable because ring is muted</string>
+    <!-- A message shown when the alarm volume changing is disabled because of the don't disturb mode [CHAR_LIMIT=50]-->
+    <string name="stream_alarm_unavailable">Unavailable because Do Not Disturb is on</string>
+    <!-- A message shown when the media volume changing is disabled because of the don't disturb mode [CHAR_LIMIT=50]-->
+    <string name="stream_media_unavailable">Unavailable because Do Not Disturb is on</string>
 
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on vibrate. [CHAR_LIMIT=NONE] -->
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on silent (muted). [CHAR_LIMIT=NONE] -->

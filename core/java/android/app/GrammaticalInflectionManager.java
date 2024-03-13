@@ -125,7 +125,10 @@ public class GrammaticalInflectionManager {
     /**
      * Get the current grammatical gender of privileged application from the encrypted file.
      *
-     * @return the value of grammatical gender
+     * @return the value of system grammatical gender only if the calling app has the permission,
+     * otherwise throwing an exception.
+     *
+     * @throws SecurityException if the caller does not have the required permission.
      *
      * @see Configuration#getGrammaticalGender
      */

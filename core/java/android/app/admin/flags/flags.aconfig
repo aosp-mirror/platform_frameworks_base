@@ -163,3 +163,13 @@ flag {
   description: "Enable UX changes for esim management"
   bug: "295301164"
 }
+
+flag {
+  name: "headless_device_owner_provisioning_fix_enabled"
+  namespace: "enterprise"
+  description: "Fix provisioning for single-user headless DO"
+  bug: "289515470"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

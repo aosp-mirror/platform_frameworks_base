@@ -51,6 +51,7 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 import com.android.systemui.util.animation.DisappearParameters;
 
@@ -100,6 +101,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     Configuration mConfiguration;
     @Mock
     Runnable mHorizontalLayoutListener;
+    @Mock
+    VibratorHelper mVibratorHelper;
 
     private QSPanelControllerBase<QSPanel> mController;
 
@@ -110,7 +113,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
                 DumpManager dumpManager) {
             super(view, host, qsCustomizerController, true, mediaHost, metricsLogger, uiEventLogger,
-                    qsLogger, dumpManager, new ResourcesSplitShadeStateController());
+                    qsLogger, dumpManager, new ResourcesSplitShadeStateController(),
+                    mVibratorHelper);
         }
 
         @Override

@@ -32,6 +32,10 @@ interface DeviceEntryFaceAuthInteractor {
     /** Current detection status */
     val detectionStatus: Flow<FaceDetectionStatus>
 
+    val lockedOut: Flow<Boolean>
+
+    val authenticated: Flow<Boolean>
+
     /** Can face auth be run right now */
     fun canFaceAuthRun(): Boolean
 
