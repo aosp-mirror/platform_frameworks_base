@@ -85,6 +85,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInWindow
@@ -177,33 +179,43 @@ fun CommunalHub(
                 }
                 .thenIf(!viewModel.isEditMode) {
                     Modifier.pointerInput(
-                        gridState,
-                        contentOffset,
-                        communalContent,
-                        gridCoordinates
-                    ) {
-                        detectLongPressGesture { offset ->
-                            // Deduct both grid offset relative to its container and content offset.
-                            val adjustedOffset =
-                                gridCoordinates?.let {
-                                    offset - it.positionInWindow() - contentOffset
+                            gridState,
+                            contentOffset,
+                            communalContent,
+                            gridCoordinates
+                        ) {
+                            detectLongPressGesture { offset ->
+                                // Deduct both grid offset relative to its container and content
+                                // offset.
+                                val adjustedOffset =
+                                    gridCoordinates?.let {
+                                        offset - it.positionInWindow() - contentOffset
+                                    }
+                                val index =
+                                    adjustedOffset?.let { firstIndexAtOffset(gridState, it) }
+                                // Display the button only when the gesture initiates from widgets,
+                                // the CTA tile, or an empty area on the screen. UMO/smartspace have
+                                // their own long-press handlers. To prevent user confusion, we
+                                // should
+                                // not display this button.
+                                if (
+                                    index == null ||
+                                        communalContent[index].isWidgetContent() ||
+                                        communalContent[index] is
+                                            CommunalContentModel.CtaTileInViewMode
+                                ) {
+                                    isButtonToEditWidgetsShowing = true
                                 }
-                            val index = adjustedOffset?.let { firstIndexAtOffset(gridState, it) }
-                            // Display the button only when the gesture initiates from widgets,
-                            // the CTA tile, or an empty area on the screen. UMO/smartspace have
-                            // their own long-press handlers. To prevent user confusion, we should
-                            // not display this button.
-                            if (
-                                index == null ||
-                                    communalContent[index].isWidgetContent() ||
-                                    communalContent[index] is CommunalContentModel.CtaTileInViewMode
-                            ) {
-                                isButtonToEditWidgetsShowing = true
+                                val key =
+                                    index?.let { keyAtIndexIfEditable(communalContent, index) }
+                                viewModel.setSelectedKey(key)
                             }
-                            val key = index?.let { keyAtIndexIfEditable(communalContent, index) }
-                            viewModel.setSelectedKey(key)
                         }
-                    }
+                        .onPreviewKeyEvent {
+                            onKeyEvent(viewModel)
+                            false
+                        }
+                        .motionEventSpy { onMotionEvent(viewModel) }
                 },
     ) {
         CommunalHubLazyGrid(
@@ -309,6 +321,14 @@ fun CommunalHub(
                 .pointerInput(Unit) {}
         )
     }
+}
+
+private fun onKeyEvent(viewModel: BaseCommunalViewModel) {
+    viewModel.signalUserInteraction()
+}
+
+private fun onMotionEvent(viewModel: BaseCommunalViewModel) {
+    viewModel.signalUserInteraction()
 }
 
 @Composable
