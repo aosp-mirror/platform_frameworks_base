@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.util.kotlin.emitOnStart
+import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import com.android.systemui.util.settings.SystemSettings
 import javax.inject.Inject
@@ -38,7 +39,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
@@ -108,23 +108,29 @@ constructor(
         bgScope.launch {
             combine(
                     communalInteractor.desiredScene,
-                    keyguardInteractor.isDreaming,
                     // Emit a value on start so the combine starts.
                     communalInteractor.userActivity.emitOnStart()
-                ) { scene, isDreaming, _ ->
+                ) { scene, _ ->
                     // Time out should run whenever we're dreaming and the hub is open, even if not
                     // docked.
-                    scene == CommunalScenes.Communal && isDreaming
+                    scene == CommunalScenes.Communal
                 }
-                // collectLatest cancels the previous action block when new values arrive, so any
+                // mapLatest cancels the previous action block when new values arrive, so any
                 // already running timeout gets cancelled when conditions change or user interaction
                 // is detected.
-                .collectLatest { shouldTimeout ->
+                .mapLatest { shouldTimeout ->
                     if (!shouldTimeout) {
-                        return@collectLatest
+                        return@mapLatest false
                     }
+
                     delay(screenTimeout.milliseconds)
-                    communalInteractor.onSceneChanged(CommunalScenes.Blank)
+                    true
+                }
+                .sample(keyguardInteractor.isDreaming, ::Pair)
+                .collect { (shouldTimeout, isDreaming) ->
+                    if (isDreaming && shouldTimeout) {
+                        communalInteractor.onSceneChanged(CommunalScenes.Blank)
+                    }
                 }
         }
     }

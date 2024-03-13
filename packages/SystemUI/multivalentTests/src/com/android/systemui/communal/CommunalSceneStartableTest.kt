@@ -256,7 +256,7 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun hubTimeout_whenDreaming() =
+    fun hubTimeout_whenDreaming_goesToBlank() =
         with(kosmos) {
             testScope.runTest {
                 // Device is dreaming and on communal.
@@ -273,7 +273,22 @@ class CommunalSceneStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun hubTimeout_dreamStopped() =
+    fun hubTimeout_notDreaming_staysOnCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is not dreaming and on communal.
+                fakeKeyguardRepository.setDreaming(false)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                // Scene stays as Communal
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    fun hubTimeout_dreamStopped_staysOnCommunal() =
         with(kosmos) {
             testScope.runTest {
                 // Device is dreaming and on communal.
@@ -292,6 +307,28 @@ class CommunalSceneStartableTest : SysuiTestCase() {
                 fakeKeyguardRepository.setDreaming(false)
                 advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
                 assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    fun hubTimeout_dreamStartedHalfway_goesToCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is on communal, but not dreaming.
+                fakeKeyguardRepository.setDreaming(false)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Wait a bit, but not long enough to timeout, then start dreaming.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                fakeKeyguardRepository.setDreaming(true)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Device times out after one screen timeout interval, dream doesn't reset timeout.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
             }
         }
 
