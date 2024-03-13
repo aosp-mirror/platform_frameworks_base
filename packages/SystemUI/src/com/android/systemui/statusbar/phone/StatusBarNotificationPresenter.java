@@ -236,7 +236,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
 
     @Override
     public boolean isPresenterFullyCollapsed() {
-        return mNotificationPanel.isFullyCollapsed();
+        return mPanelExpansionInteractor.isFullyCollapsed();
     }
 
     @Override

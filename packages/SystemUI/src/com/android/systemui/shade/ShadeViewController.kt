@@ -37,9 +37,6 @@ interface ShadeViewController {
      */
     val isPanelExpanded: Boolean
 
-    /** Returns whether shade's height is zero. */
-    val isFullyCollapsed: Boolean
-
     /** Returns whether the shade is tracking touches for expand/collapse of the shade or QS. */
     val isTracking: Boolean
 

@@ -32,6 +32,7 @@ import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -58,6 +59,7 @@ private constructor(
     private val statusBarWindowStateController: StatusBarWindowStateController,
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
+    private val panelExpansionInteractor: PanelExpansionInteractor,
     private val windowRootView: Provider<WindowRootView>,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
@@ -218,7 +220,7 @@ private constructor(
                     )
                     return true
                 }
-                if (shadeViewController.isFullyCollapsed && event.y < 1f) {
+                if (panelExpansionInteractor.isFullyCollapsed && event.y < 1f) {
                     // b/235889526 Eat events on the top edge of the phone when collapsed
                     shadeLogger.logMotionEvent(event, "top edge touch ignored")
                     return true
@@ -271,6 +273,7 @@ private constructor(
         private val statusBarWindowStateController: StatusBarWindowStateController,
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
+        private val panelExpansionInteractor: PanelExpansionInteractor,
         private val windowRootView: Provider<WindowRootView>,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
@@ -292,6 +295,7 @@ private constructor(
                 statusBarWindowStateController,
                 shadeController,
                 shadeViewController,
+                panelExpansionInteractor,
                 windowRootView,
                 shadeLogger,
                 statusBarMoveFromCenterAnimationController,

@@ -55,6 +55,9 @@ interface PanelExpansionInteractor {
     )
     val isFullyExpanded: Boolean
 
+    /** Returns whether shade's height is zero. */
+    @Deprecated("Use !ShadeInteractor.isAnyExpanded instead") val isFullyCollapsed: Boolean
+
     /** Returns whether the shade is in the process of collapsing. */
     @Deprecated("Use ShadeAnimationInteractor instead") val isCollapsing: Boolean
 }
