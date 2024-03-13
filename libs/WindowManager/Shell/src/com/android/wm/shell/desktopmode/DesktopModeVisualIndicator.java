@@ -138,9 +138,9 @@ public class DesktopModeVisualIndicator {
             @WindowConfiguration.WindowingMode int windowingMode, int captionHeight) {
         final Region region = new Region();
         int transitionHeight = windowingMode == WINDOWING_MODE_FREEFORM
-                ? 2 * layout.stableInsets().top
-                : mContext.getResources().getDimensionPixelSize(
-                        com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height);
+                ? mContext.getResources().getDimensionPixelSize(
+                com.android.wm.shell.R.dimen.desktop_mode_fullscreen_from_desktop_height)
+                : 2 * layout.stableInsets().top;
         // A thin, short Rect at the top of the screen.
         if (windowingMode == WINDOWING_MODE_FREEFORM) {
             int fromFreeformWidth = mContext.getResources().getDimensionPixelSize(
