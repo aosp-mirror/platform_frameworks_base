@@ -996,8 +996,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             } else {
                 // Still have something resumed; can't sleep until it is paused.
                 ProtoLog.v(WM_DEBUG_STATES, "Sleep needs to pause %s", mResumedActivity);
-                startPausing(false /* userLeaving */, true /* uiSleeping */, null /* resuming */,
-                        "sleep");
+                startPausing(true /* uiSleeping */, null /* resuming */, "sleep");
             }
             shouldSleep = false;
         } else if (mPausingActivity != null) {
