@@ -140,6 +140,14 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun canShowAlternateBouncerForFingerprint_primaryBouncerShowing() {
+        givenCanShowAlternateBouncer()
+        bouncerRepository.setPrimaryShow(true)
+
+        assertFalse(underTest.canShowAlternateBouncerForFingerprint())
+    }
+
+    @Test
     fun show_whenCannotShow() {
         givenCannotShowAlternateBouncer()
 
@@ -202,7 +210,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         } else {
             bouncerRepository.setAlternateBouncerUIAvailable(true)
         }
-
+        bouncerRepository.setPrimaryShow(false)
         biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
         biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
         whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
