@@ -44,36 +44,39 @@ data class GetCredentialUiState(
 
 /**
  * Checks if this get flow is a biometric selection flow by ensuring that the first account has a
- * single credential entry to display. The presently agreed upon condition matches the auto
- * select criteria, but with one additional requirement that the entry contains an extra parameter
- * that indicates the biometric flow. The auto select flow is supported over the biometric flow
- * at the moment in cases where they collide.
+ * single credential entry to display. The presently agreed upon condition validates this flow for
+ * a single account. In the case when there's a single credential, this flow matches the auto
+ * select criteria, but with the possibility that the two flows (autoselect and biometric) may
+ * collide. In those collision cases, the auto select flow is supported over the biometric flow.
+ * If there is a single account but more than one credential, and the first ranked credential has
+ * the biometric bit flipped on, we will use the biometric flow. If all conditions are valid, this
+ * responds with the entry utilized by the biometricFlow, or null otherwise.
  */
-internal fun isBiometricFlow(
+internal fun findBiometricFlowEntry(
     providerDisplayInfo: ProviderDisplayInfo,
     isAutoSelectFlow: Boolean
-): Boolean {
+): CredentialEntryInfo? {
     if (!credmanBiometricApiEnabled()) {
-        return false
+        return null
     }
     if (isAutoSelectFlow) {
         // For this to be true, it must be the case that there is a single entry and a single
         // account. If that is the case, and auto-select is enabled along side the one-tap flow, we
         // always favor that over the one tap flow.
-        return false
+        return null
     }
     // The flow through an authentication entry, even if only a singular entry exists, is deemed
     // as not being eligible for the single tap flow given that it adds any number of credentials
     // once unlocked; essentially, this entry contains additional complexities behind it, making it
     // invalid.
     if (providerDisplayInfo.authenticationEntryList.isNotEmpty()) {
-        return false
+        return null
     }
     val singleAccountEntryList = getCredentialEntryListIffSingleAccount(
-        providerDisplayInfo.sortedUserNameToCredentialEntryList) ?: return false
+        providerDisplayInfo.sortedUserNameToCredentialEntryList) ?: return null
 
-    // TODO(b/326243754) : Set this value from dynamic slice until structured jetpack object is used
-    return singleAccountEntryList.firstOrNull()?.isSupportingSingleTap ?: false
+    val firstEntry = singleAccountEntryList.firstOrNull()
+    return if (firstEntry?.biometricRequest != null) firstEntry else null
 }
 
 /**
@@ -282,11 +285,17 @@ private fun toGetScreenState(
         GetScreenState.REMOTE_ONLY
     else if (isRequestForAllOptions)
         GetScreenState.ALL_SIGN_IN_OPTIONS
-    else if (isBiometricFlow(providerDisplayInfo,
-            findAutoSelectEntry(providerDisplayInfo) != null))
+    else if (isBiometricFlow(providerDisplayInfo))
         GetScreenState.BIOMETRIC_SELECTION
     else GetScreenState.PRIMARY_SELECTION
 }
+
+/**
+ * Determines if the flow is a biometric flow by taking into account autoselect criteria.
+ */
+internal fun isBiometricFlow(providerDisplayInfo: ProviderDisplayInfo) =
+    findBiometricFlowEntry(providerDisplayInfo,
+        findAutoSelectEntry(providerDisplayInfo) != null) != null
 
 internal class CredentialEntryInfoComparatorByTypeThenTimestamp(
         val typePriorityMap: Map<String, Int>,

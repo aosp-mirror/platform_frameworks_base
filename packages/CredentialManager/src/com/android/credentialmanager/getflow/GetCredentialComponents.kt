@@ -16,7 +16,6 @@
 
 package com.android.credentialmanager.getflow
 
-import android.content.Context
 import android.credentials.flags.Flags.credmanBiometricApiEnabled
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.graphics.drawable.Drawable
@@ -147,7 +146,7 @@ fun GetCredentialScreen(
                             BiometricSelectionPage(
                                 // TODO(b/326243754) : Utilize expected entry for this flow, confirm
                                 // activeEntry will always be what represents the single tap flow
-                                selectedEntry = getCredentialUiState.activeEntry,
+                                biometricEntry = getCredentialUiState.activeEntry,
                                 onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
                                 onCancelFlowAndFinish = viewModel::onIllegalUiState,
                                 requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
@@ -212,7 +211,7 @@ fun GetCredentialScreen(
 
 @Composable
 internal fun BiometricSelectionPage(
-    selectedEntry: EntryInfo?,
+    biometricEntry: EntryInfo?,
     onCancelFlowAndFinish: (String) -> Unit,
     onMoreOptionSelected: () -> Unit,
     requestDisplayInfo: RequestDisplayInfo,
@@ -221,8 +220,12 @@ internal fun BiometricSelectionPage(
     onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult?) -> Unit,
     fallbackToOriginalFlow: () -> Unit,
 ) {
+    if (biometricEntry == null) {
+        fallbackToOriginalFlow()
+        return
+    }
     runBiometricFlow(
-        selectedEntry = selectedEntry,
+        biometricEntry = biometricEntry,
         context = LocalContext.current,
         openMoreOptionsPage = onMoreOptionSelected,
         sendDataToProvider = onBiometricEntrySelected,

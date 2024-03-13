@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.common
+package com.android.credentialmanager.model
 
-class Constants {
-    companion object Constants {
-        const val LOG_TAG = "CredentialSelector"
-        const val BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS =
-            "androidx.credentials.BUNDLE_KEY_IS_AUTO_SELECT_ALLOWED"
-        const val IS_AUTO_SELECTED_KEY = "IS_AUTO_SELECTED"
-        const val BIOMETRIC_AUTH_TYPE = "BIOMETRIC_AUTH_TYPE"
-        const val BIOMETRIC_AUTH_FAILURE = "BIOMETRIC_AUTH_FAILURE"
-    }
-}
+/**
+ * This allows reading the data from the request, and holding that state around the framework.
+ * The [opId] bit is required for some authentication flows where CryptoObjects are used.
+ * The [allowedAuthenticators] is needed for all flows, and our flow ensures this value is never
+ * null.
+ */
+data class BiometricRequestInfo(
+    val opId: Int? = null,
+    val allowedAuthenticators: Int
+)
