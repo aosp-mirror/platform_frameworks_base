@@ -34,6 +34,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_REQUEST_FOCUS_ON_TASK
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_COMPANION_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_DECOR_SURFACE_BOOSTED;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_DIM_ON_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ISOLATED_NAVIGATION;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH;
@@ -124,6 +125,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1557,13 +1559,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE: {
-                final Task task = taskFragment.getTask();
-                task.moveOrCreateDecorSurfaceFor(taskFragment);
+                taskFragment.getTask().moveOrCreateDecorSurfaceFor(taskFragment);
                 break;
             }
             case OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE: {
-                final Task task = taskFragment.getTask();
-                task.removeDecorSurface();
+                taskFragment.getTask().removeDecorSurface();
                 break;
             }
             case OP_TYPE_SET_DIM_ON_TASK: {
@@ -1575,6 +1575,23 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             case OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH: {
                 taskFragment.setMoveToBottomIfClearWhenLaunch(
                         operation.isMoveToBottomIfClearWhenLaunch());
+                break;
+            }
+            case OP_TYPE_SET_DECOR_SURFACE_BOOSTED: {
+                if (Flags.activityEmbeddingInteractiveDividerFlag()) {
+                    final SurfaceControl.Transaction clientTransaction =
+                            operation.getSurfaceTransaction();
+                    if (clientTransaction != null) {
+                        // Sanitize the client transaction. sanitize() silently removes invalid
+                        // operations and does not throw or provide signal about whether there are
+                        // any invalid operations.
+                        clientTransaction.sanitize(caller.mPid, caller.mUid);
+                    }
+                    taskFragment.getTask().setDecorSurfaceBoosted(
+                            taskFragment,
+                            operation.getBooleanValue() /* isBoosted */,
+                            clientTransaction);
+                }
                 break;
             }
         }
@@ -1610,19 +1627,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final Throwable exception = new SecurityException(
                     "Only a system organizer can perform OP_TYPE_REORDER_TO_BOTTOM_OF_TASK or "
                             + "OP_TYPE_REORDER_TO_TOP_OF_TASK."
-            );
-            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
-                    opType, exception);
-            return false;
-        }
-
-        // TODO (b/293654166) remove the decor surface checks once we clear security reviews
-        if ((opType == OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE
-                || opType == OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE)
-                && !mTaskFragmentOrganizerController.isSystemOrganizer(organizer.asBinder())) {
-            final Throwable exception = new SecurityException(
-                    "Only a system organizer can perform OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE"
-                            + " or OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE."
             );
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
                     opType, exception);
