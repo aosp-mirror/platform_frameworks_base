@@ -98,6 +98,9 @@ LIBANDROID {
     AInputQueue_getEvent;
     AInputQueue_hasEvents;
     AInputQueue_preDispatchEvent;
+    AInputTransferToken_fromJava; # introduced=35
+    AInputTransferToken_release; # introduced=35
+    AInputTransferToken_toJava; # introduced=35
     AKeyEvent_getAction;
     AKeyEvent_getDownTime;
     AKeyEvent_getEventTime;

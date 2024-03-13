@@ -36,19 +36,24 @@ import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.SettingsStringUtil;
 import android.util.ArraySet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -120,6 +125,7 @@ class MenuViewLayer extends FrameLayout implements
     private final MenuAnimationController mMenuAnimationController;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationManager mNotificationManager;
+    private StatusBarManager mStatusBarManager;
     private final MenuNotificationFactory mNotificationFactory;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final IAccessibilityFloatingMenu mFloatingMenu;
@@ -246,6 +252,7 @@ class MenuViewLayer extends FrameLayout implements
         mDismissView.getCircle().setId(R.id.action_remove_menu);
         mNotificationFactory = new MenuNotificationFactory(context);
         mNotificationManager = context.getSystemService(NotificationManager.class);
+        mStatusBarManager = context.getSystemService(StatusBarManager.class);
 
         if (Flags.floatingMenuDragToEdit()) {
             mDragToInteractAnimationController = new DragToInteractAnimationController(
@@ -319,6 +326,9 @@ class MenuViewLayer extends FrameLayout implements
         if (Flags.floatingMenuAnimatedTuck()) {
             setClipChildren(true);
         }
+        setClickable(false);
+        setFocusable(false);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     @Override
@@ -443,21 +453,18 @@ class MenuViewLayer extends FrameLayout implements
     }
 
     public void onMoveToTuckedChanged(boolean moveToTuck) {
-        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
-            if (moveToTuck) {
-                final Rect bounds = mMenuViewAppearance.getWindowAvailableBounds();
-                final int[] location = getLocationOnScreen();
-                bounds.offset(
-                        location[0],
-                        location[1]
-                );
+        if (moveToTuck) {
+            final Rect bounds = mMenuViewAppearance.getWindowAvailableBounds();
+            final int[] location = getLocationOnScreen();
+            bounds.offset(
+                    location[0],
+                    location[1]
+            );
 
-                setClipBounds(bounds);
-            }
-            // Instead of clearing clip bounds when moveToTuck is false,
-            // wait until the spring animation finishes.
+            setClipBounds(bounds);
         }
-        // Function is a no-operation if flag is disabled.
+        // Instead of clearing clip bounds when moveToTuck is false,
+        // wait until the spring animation finishes.
     }
 
     private void onSpringAnimationsEndAction() {
@@ -475,9 +482,7 @@ class MenuViewLayer extends FrameLayout implements
                 setClipBounds(null);
             }
         }
-        if (Flags.floatingMenuImeDisplacementAnimation()) {
-            mMenuView.onArrivalAtPosition(false);
-        }
+        mMenuView.onArrivalAtPosition(false);
     }
 
     void dispatchAccessibilityAction(int id) {
@@ -490,13 +495,47 @@ class MenuViewLayer extends FrameLayout implements
             mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_DISMISS);
         } else if (id == R.id.action_edit
                 && Flags.floatingMenuDragToEdit()) {
-            mMenuView.gotoEditScreen();
+            gotoEditScreen();
             mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_EDIT);
         }
         mDismissView.hide();
         mDragToInteractView.hide();
         mDragToInteractAnimationController.animateInteractMenu(
                 id, /* scaleUp= */ false);
+    }
+
+    void gotoEditScreen() {
+        if (!Flags.floatingMenuDragToEdit()) {
+            return;
+        }
+        mMenuAnimationController.flingMenuThenSpringToEdge(
+                mMenuView.getMenuPosition().x, 100f, 0f);
+
+        Intent intent = getIntentForEditScreen();
+        PackageManager packageManager = getContext().getPackageManager();
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
+        if (!activities.isEmpty()) {
+            mContext.startActivity(intent);
+            mStatusBarManager.collapsePanels();
+        }
+    }
+
+    Intent getIntentForEditScreen() {
+        List<String> targets = new SettingsStringUtil.ColonDelimitedSet.OfStrings(
+                mSecureSettings.getStringForUser(
+                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                        UserHandle.USER_CURRENT)).stream().toList();
+
+        Intent intent = new Intent(
+                Settings.ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS);
+        Bundle args = new Bundle();
+        Bundle fragmentArgs = new Bundle();
+        fragmentArgs.putStringArray("targets", targets.toArray(new String[0]));
+        args.putBundle(":settings:show_fragment_args", fragmentArgs);
+        intent.replaceExtras(args);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        return intent;
     }
 
     private CharSequence getMigrationMessage() {

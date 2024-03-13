@@ -272,17 +272,10 @@ class ContextImpl extends Context {
 
     @UnsupportedAppUsage
     private Context mOuterContext;
-
-    private final Object mThemeLock = new Object();
-
     @UnsupportedAppUsage
-    @GuardedBy("mThemeLock")
     private int mThemeResource = 0;
-
     @UnsupportedAppUsage
-    @GuardedBy("mThemeLock")
     private Resources.Theme mTheme = null;
-
     @UnsupportedAppUsage
     private PackageManager mPackageManager;
     private Context mReceiverRestrictedContext = null;
@@ -295,6 +288,7 @@ class ContextImpl extends Context {
 
     private ContentCaptureOptions mContentCaptureOptions = null;
 
+    private final Object mSync = new Object();
     /**
      * Indicates this {@link Context} can not handle UI components properly and is not associated
      * with a {@link Display} instance.
@@ -346,18 +340,21 @@ class ContextImpl extends Context {
      */
     private boolean mOwnsToken = false;
 
-    private final Object mDirsLock = new Object();
-    private volatile File mDatabasesDir;
-    @UnsupportedAppUsage private volatile File mPreferencesDir;
-    private volatile File mFilesDir;
-    private volatile File mCratesDir;
-    private volatile File mNoBackupFilesDir;
-    private volatile File[] mExternalFilesDirs;
-    private volatile File[] mObbDirs;
-    private volatile File mCacheDir;
-    private volatile File mCodeCacheDir;
-    private volatile File[] mExternalCacheDirs;
-    private volatile File[] mExternalMediaDirs;
+    @GuardedBy("mSync")
+    private File mDatabasesDir;
+    @GuardedBy("mSync")
+    @UnsupportedAppUsage
+    private File mPreferencesDir;
+    @GuardedBy("mSync")
+    private File mFilesDir;
+    @GuardedBy("mSync")
+    private File mCratesDir;
+    @GuardedBy("mSync")
+    private File mNoBackupFilesDir;
+    @GuardedBy("mSync")
+    private File mCacheDir;
+    @GuardedBy("mSync")
+    private File mCodeCacheDir;
 
     // The system service cache for the system services that are cached per-ContextImpl.
     @UnsupportedAppUsage
@@ -461,7 +458,7 @@ class ContextImpl extends Context {
 
     @Override
     public void setTheme(int resId) {
-        synchronized (mThemeLock) {
+        synchronized (mSync) {
             if (mThemeResource != resId) {
                 mThemeResource = resId;
                 initializeTheme();
@@ -471,14 +468,14 @@ class ContextImpl extends Context {
 
     @Override
     public int getThemeResId() {
-        synchronized (mThemeLock) {
+        synchronized (mSync) {
             return mThemeResource;
         }
     }
 
     @Override
     public Resources.Theme getTheme() {
-        synchronized (mThemeLock) {
+        synchronized (mSync) {
             if (mTheme != null) {
                 return mTheme;
             }
@@ -491,7 +488,6 @@ class ContextImpl extends Context {
         }
     }
 
-    @GuardedBy("mThemeLock")
     private void initializeTheme() {
         if (mTheme == null) {
             mTheme = mResources.newTheme();
@@ -741,18 +737,12 @@ class ContextImpl extends Context {
 
     @UnsupportedAppUsage
     private File getPreferencesDir() {
-        File localPreferencesDir = mPreferencesDir;
-        if (localPreferencesDir == null) {
-            synchronized (mDirsLock) {
-                localPreferencesDir = mPreferencesDir;
-                if (localPreferencesDir == null) {
-                    localPreferencesDir = new File(getDataDir(), "shared_prefs");
-                    ensurePrivateDirExists(localPreferencesDir);
-                    mPreferencesDir = localPreferencesDir;
-                }
+        synchronized (mSync) {
+            if (mPreferencesDir == null) {
+                mPreferencesDir = new File(getDataDir(), "shared_prefs");
             }
+            return ensurePrivateDirExists(mPreferencesDir);
         }
-        return localPreferencesDir;
     }
 
     @Override
@@ -794,16 +784,16 @@ class ContextImpl extends Context {
     /**
      * Common-path handling of app data dir creation
      */
-    private static void ensurePrivateDirExists(File file) {
-        ensurePrivateDirExists(file, 0771, -1, null);
+    private static File ensurePrivateDirExists(File file) {
+        return ensurePrivateDirExists(file, 0771, -1, null);
     }
 
-    private static void ensurePrivateCacheDirExists(File file, String xattr) {
+    private static File ensurePrivateCacheDirExists(File file, String xattr) {
         final int gid = UserHandle.getCacheAppGid(Process.myUid());
-        ensurePrivateDirExists(file, 02771, gid, xattr);
+        return ensurePrivateDirExists(file, 02771, gid, xattr);
     }
 
-    private static void ensurePrivateDirExists(File file, int mode, int gid, String xattr) {
+    private static File ensurePrivateDirExists(File file, int mode, int gid, String xattr) {
         if (!file.exists()) {
             final String path = file.getAbsolutePath();
             try {
@@ -831,22 +821,17 @@ class ContextImpl extends Context {
                 }
             }
         }
+        return file;
     }
 
     @Override
     public File getFilesDir() {
-        File localFilesDir = mFilesDir;
-        if (localFilesDir == null) {
-            localFilesDir = mFilesDir;
-            synchronized (mDirsLock) {
-                if (localFilesDir == null) {
-                    localFilesDir = new File(getDataDir(), "files");
-                    ensurePrivateDirExists(localFilesDir);
-                    mFilesDir = localFilesDir;
-                }
+        synchronized (mSync) {
+            if (mFilesDir == null) {
+                mFilesDir = new File(getDataDir(), "files");
             }
+            return ensurePrivateDirExists(mFilesDir);
         }
-        return localFilesDir;
     }
 
     @Override
@@ -856,37 +841,25 @@ class ContextImpl extends Context {
         final Path absoluteNormalizedCratePath = cratesRootPath.resolve(crateId)
                 .toAbsolutePath().normalize();
 
-        File localCratesDir = mCratesDir;
-        if (localCratesDir == null) {
-            synchronized (mDirsLock) {
-                localCratesDir = mCratesDir;
-                if (localCratesDir == null) {
-                    localCratesDir = cratesRootPath.toFile();
-                    ensurePrivateDirExists(localCratesDir);
-                    mCratesDir = localCratesDir;
-                }
+        synchronized (mSync) {
+            if (mCratesDir == null) {
+                mCratesDir = cratesRootPath.toFile();
             }
+            ensurePrivateDirExists(mCratesDir);
         }
 
-        File crateDir = absoluteNormalizedCratePath.toFile();
-        ensurePrivateDirExists(crateDir);
-        return crateDir;
+        File cratedDir = absoluteNormalizedCratePath.toFile();
+        return ensurePrivateDirExists(cratedDir);
     }
 
     @Override
     public File getNoBackupFilesDir() {
-        File localNoBackupFilesDir = mNoBackupFilesDir;
-        if (localNoBackupFilesDir == null) {
-            synchronized (mDirsLock) {
-                localNoBackupFilesDir = mNoBackupFilesDir;
-                if (localNoBackupFilesDir == null) {
-                    localNoBackupFilesDir = new File(getDataDir(), "no_backup");
-                    ensurePrivateDirExists(localNoBackupFilesDir);
-                    mNoBackupFilesDir = localNoBackupFilesDir;
-                }
+        synchronized (mSync) {
+            if (mNoBackupFilesDir == null) {
+                mNoBackupFilesDir = new File(getDataDir(), "no_backup");
             }
+            return ensurePrivateDirExists(mNoBackupFilesDir);
         }
-        return localNoBackupFilesDir;
     }
 
     @Override
@@ -898,24 +871,13 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalFilesDirs(String type) {
-        File[] localExternalFilesDirs = mExternalFilesDirs;
-        if (localExternalFilesDirs == null) {
-            synchronized (mDirsLock) {
-                localExternalFilesDirs = mExternalFilesDirs;
-                if (localExternalFilesDirs == null) {
-                    localExternalFilesDirs =
-                            Environment.buildExternalStorageAppFilesDirs(getPackageName());
-                    if (type != null) {
-                        localExternalFilesDirs =
-                                Environment.buildPaths(localExternalFilesDirs, type);
-                    }
-                    localExternalFilesDirs = ensureExternalDirsExistOrFilter(
-                            localExternalFilesDirs, true /* tryCreateInProcess */);
-                    mExternalFilesDirs = localExternalFilesDirs;
-                }
+        synchronized (mSync) {
+            File[] dirs = Environment.buildExternalStorageAppFilesDirs(getPackageName());
+            if (type != null) {
+                dirs = Environment.buildPaths(dirs, type);
             }
+            return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
-        return localExternalFilesDirs;
     }
 
     @Override
@@ -927,51 +889,30 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getObbDirs() {
-        File[] localObbDirs = mObbDirs;
-        if (mObbDirs == null) {
-            synchronized (mDirsLock) {
-                localObbDirs = mObbDirs;
-                if (localObbDirs == null) {
-                    localObbDirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
-                    localObbDirs = ensureExternalDirsExistOrFilter(
-                            localObbDirs, true /* tryCreateInProcess */);
-                    mObbDirs = localObbDirs;
-                }
-            }
+        synchronized (mSync) {
+            File[] dirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
+            return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
-        return localObbDirs;
     }
 
     @Override
     public File getCacheDir() {
-        File localCacheDir = mCacheDir;
-        if (localCacheDir == null) {
-            synchronized (mDirsLock) {
-                localCacheDir = mCacheDir;
-                if (localCacheDir == null) {
-                    localCacheDir = new File(getDataDir(), "cache");
-                    ensurePrivateCacheDirExists(localCacheDir, XATTR_INODE_CACHE);
-                    mCacheDir = localCacheDir;
-                }
+        synchronized (mSync) {
+            if (mCacheDir == null) {
+                mCacheDir = new File(getDataDir(), "cache");
             }
+            return ensurePrivateCacheDirExists(mCacheDir, XATTR_INODE_CACHE);
         }
-        return localCacheDir;
     }
 
     @Override
     public File getCodeCacheDir() {
-        File localCodeCacheDir = mCodeCacheDir;
-        if (localCodeCacheDir == null) {
-            synchronized (mDirsLock) {
-                localCodeCacheDir = mCodeCacheDir;
-                if (localCodeCacheDir == null) {
-                    localCodeCacheDir = getCodeCacheDirBeforeBind(getDataDir());
-                    ensurePrivateCacheDirExists(localCodeCacheDir, XATTR_INODE_CODE_CACHE);
-                    mCodeCacheDir = localCodeCacheDir;
-                }
+        synchronized (mSync) {
+            if (mCodeCacheDir == null) {
+                mCodeCacheDir = getCodeCacheDirBeforeBind(getDataDir());
             }
+            return ensurePrivateCacheDirExists(mCodeCacheDir, XATTR_INODE_CODE_CACHE);
         }
-        return localCodeCacheDir;
     }
 
     /**
@@ -992,37 +933,21 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalCacheDirs() {
-        File[] localExternalCacheDirs = mExternalCacheDirs;
-        if (localExternalCacheDirs == null) {
-            synchronized (mDirsLock) {
-                localExternalCacheDirs = mExternalCacheDirs;
-                if (localExternalCacheDirs == null) {
-                    localExternalCacheDirs =
-                            Environment.buildExternalStorageAppCacheDirs(getPackageName());
-                    localExternalCacheDirs = ensureExternalDirsExistOrFilter(
-                            localExternalCacheDirs, false /* tryCreateInProcess */);
-                    mExternalCacheDirs = localExternalCacheDirs;
-                }
-            }
+        synchronized (mSync) {
+            File[] dirs = Environment.buildExternalStorageAppCacheDirs(getPackageName());
+            // We don't try to create cache directories in-process, because they need special
+            // setup for accurate quota tracking. This ensures the cache dirs are always
+            // created through StorageManagerService.
+            return ensureExternalDirsExistOrFilter(dirs, false /* tryCreateInProcess */);
         }
-        return localExternalCacheDirs;
     }
 
     @Override
     public File[] getExternalMediaDirs() {
-        File[] localExternalMediaDirs = mExternalMediaDirs;
-        if (localExternalMediaDirs == null) {
-            synchronized (mDirsLock) {
-                localExternalMediaDirs = mExternalMediaDirs;
-                if (localExternalMediaDirs == null) {
-                    localExternalMediaDirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
-                    localExternalMediaDirs = ensureExternalDirsExistOrFilter(
-                            localExternalMediaDirs, true /* tryCreateInProcess */);
-                    mExternalMediaDirs = localExternalMediaDirs;
-                }
-            }
+        synchronized (mSync) {
+            File[] dirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
+            return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
-        return localExternalMediaDirs;
     }
 
     /**
@@ -1121,22 +1046,16 @@ class ContextImpl extends Context {
     }
 
     private File getDatabasesDir() {
-        File localDatabasesDir = mDatabasesDir;
-        if (localDatabasesDir == null) {
-            synchronized (mDirsLock) {
-                localDatabasesDir = mDatabasesDir;
-                if (localDatabasesDir == null) {
-                    if ("android".equals(getPackageName())) {
-                        localDatabasesDir = new File("/data/system");
-                    } else {
-                        localDatabasesDir = new File(getDataDir(), "databases");
-                    }
-                    ensurePrivateDirExists(localDatabasesDir);
-                    mDatabasesDir = localDatabasesDir;
+        synchronized (mSync) {
+            if (mDatabasesDir == null) {
+                if ("android".equals(getPackageName())) {
+                    mDatabasesDir = new File("/data/system");
+                } else {
+                    mDatabasesDir = new File(getDataDir(), "databases");
                 }
             }
+            return ensurePrivateDirExists(mDatabasesDir);
         }
-        return localDatabasesDir;
     }
 
     @Override

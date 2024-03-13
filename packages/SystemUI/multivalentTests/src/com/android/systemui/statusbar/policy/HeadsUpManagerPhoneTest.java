@@ -28,8 +28,8 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.testing.TestableLooper;
 
-import androidx.test.filters.SmallTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -76,6 +76,7 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private JavaAdapter mJavaAdapter;
     @Mock private ShadeInteractor mShadeInteractor;
+    private AvalancheController mAvalancheController = new AvalancheController();
 
     private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
@@ -92,7 +93,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
-                ShadeInteractor shadeInteractor
+                ShadeInteractor shadeInteractor,
+                AvalancheController avalancheController
         ) {
             super(
                     context,
@@ -109,7 +111,8 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                     accessibilityManagerWrapper,
                     uiEventLogger,
                     javaAdapter,
-                    shadeInteractor
+                    shadeInteractor,
+                    avalancheController
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
@@ -131,12 +134,15 @@ public class HeadsUpManagerPhoneTest extends BaseHeadsUpManagerTest {
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
                 mJavaAdapter,
-                mShadeInteractor
+                mShadeInteractor,
+                mAvalancheController
         );
     }
 
     @Before
     public void setUp() {
+        // TODO(b/315362456) create separate test with the flag disabled
+        //  then modify this file to test with the flag enabled
         mSetFlagsRule.disableFlags(NotificationThrottleHun.FLAG_NAME);
 
         when(mShadeInteractor.isAnyExpanded()).thenReturn(StateFlowKt.MutableStateFlow(false));

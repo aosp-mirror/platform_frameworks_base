@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import javax.inject.Inject
 
-class MediaCarouselViewModel @Inject constructor(mediaDataManager: MediaDataManager) {
-    val isMediaVisible: Boolean = mediaDataManager.hasActiveMediaOrRecommendation()
+class MediaCarouselViewModel @Inject constructor(private val mediaDataManager: MediaDataManager) {
+    val isMediaVisible: Boolean
+        get() = mediaDataManager.hasActiveMediaOrRecommendation()
 }

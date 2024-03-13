@@ -39,4 +39,7 @@ interface SpatialAudioEnabledModel {
 
     /** Head tracking is enabled. This also means that [SpatialAudioEnabled]. */
     data object HeadTrackingEnabled : SpatialAudioEnabled
+
+    /** Spatial audio enabled state is unknown. */
+    data object Unknown : SpatialAudioEnabled
 }

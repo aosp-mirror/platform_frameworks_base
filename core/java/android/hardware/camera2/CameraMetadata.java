@@ -3905,7 +3905,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#EFV_STABILIZATION_MODE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_OFF = 0;
 
     /**
@@ -3913,7 +3913,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#EFV_STABILIZATION_MODE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_GIMBAL = 1;
 
     /**
@@ -3923,7 +3923,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#EFV_STABILIZATION_MODE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_LOCKED = 2;
 
     //

@@ -3397,7 +3397,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                     maybeMigratePoliciesPostUpgradeToDevicePolicyEngineLocked();
                     migratePoliciesToPolicyEngineLocked();
-
                 }
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 break;
@@ -12303,9 +12302,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         final CallerIdentity caller = getCallerIdentity(admin);
 
-        // Only allow the system user to use this method
-        Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
-                "createAndManageUser was called from non-system user");
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_CREATE_AND_MANAGE_USER);
 
@@ -12315,6 +12311,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     getHeadlessDeviceOwnerMode() != HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER,
                     "createAndManageUser was called while in headless single user mode");
         }
+
+        // Only allow the system user to use this method
+        Preconditions.checkCallAuthorization(caller.getUserHandle().isSystem(),
+                "createAndManageUser was called from non-system user");
 
         final boolean ephemeral = (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0;
         final boolean demo = (flags & DevicePolicyManager.MAKE_USER_DEMO) != 0
@@ -13179,27 +13179,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             CallerIdentity caller, EnforcingAdmin admin, String key, boolean enabled,
             boolean parent) {
         synchronized (getLockObject()) {
+
+            int ownerType;
             if (isDeviceOwner(caller)) {
-                if (UserRestrictionsUtils.isGlobal(OWNER_TYPE_DEVICE_OWNER, key)) {
-                    setGlobalUserRestrictionInternal(admin, key, enabled);
-                } else {
-                    setLocalUserRestrictionInternal(admin, key, enabled, caller.getUserId());
-                }
+                ownerType = OWNER_TYPE_DEVICE_OWNER;
+            } else if (isProfileOwnerOfOrganizationOwnedDevice(caller)) {
+                ownerType = OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
             } else if (isProfileOwner(caller)) {
-                if (UserRestrictionsUtils.isGlobal(OWNER_TYPE_PROFILE_OWNER, key)
-                        || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        && UserRestrictionsUtils.isGlobal(
-                                OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE, key))) {
-                    setGlobalUserRestrictionInternal(admin, key, enabled);
-                } else {
-                    int affectedUserId = parent
-                            ? getProfileParentId(caller.getUserId()) : caller.getUserId();
-                    setLocalUserRestrictionInternal(admin, key, enabled, affectedUserId);
-                }
+                ownerType = OWNER_TYPE_PROFILE_OWNER;
             } else {
                 throw new IllegalStateException("Non-DO/Non-PO cannot set restriction " + key
                         + " while targetSdkVersion is less than UPSIDE_DOWN_CAKE");
             }
+            setBackwardCompatibleUserRestrictionLocked(ownerType, admin, caller.getUserId(), key,
+                    enabled, parent);
+        }
+    }
+
+    private void setBackwardCompatibleUserRestrictionLocked(
+            int ownerType, EnforcingAdmin admin, int userId, String key, boolean enabled,
+            boolean parent) {
+        if (ownerType == OWNER_TYPE_DEVICE_OWNER) {
+            if (UserRestrictionsUtils.isGlobal(OWNER_TYPE_DEVICE_OWNER, key)) {
+                setGlobalUserRestrictionInternal(admin, key, enabled);
+            } else {
+                setLocalUserRestrictionInternal(admin, key, enabled, userId);
+            }
+        } else if (ownerType == OWNER_TYPE_PROFILE_OWNER
+                || ownerType == OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE) {
+            if (UserRestrictionsUtils.isGlobal(OWNER_TYPE_PROFILE_OWNER, key)
+                    || (parent && ownerType == OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE
+                    && UserRestrictionsUtils.isGlobal(
+                    OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE, key))) {
+                setGlobalUserRestrictionInternal(admin, key, enabled);
+            } else {
+                int affectedUserId = parent
+                        ? getProfileParentId(userId) : userId;
+                setLocalUserRestrictionInternal(admin, key, enabled, affectedUserId);
+            }
+        } else {
+            throw new IllegalStateException("Non-DO/Non-PO cannot set restriction " + key
+                    + " while targetSdkVersion is less than UPSIDE_DOWN_CAKE");
         }
     }
 
@@ -23747,13 +23767,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
         return mInjector.binderWithCleanCallingIdentity(() -> {
-            boolean canForceMigration = forceMigration && !hasNonTestOnlyActiveAdmins();
-            if (!canForceMigration && !shouldMigrateV1ToDevicePolicyEngine()) {
-                return false;
+            synchronized (getLockObject()) {
+                boolean canForceMigration = forceMigration && !hasNonTestOnlyActiveAdmins();
+                if (!canForceMigration && !shouldMigrateV1ToDevicePolicyEngine()) {
+                    return false;
+                }
+                boolean migrated = migrateV1PoliciesToDevicePolicyEngine();
+                migrated &= migratePoliciesPostUpgradeToDevicePolicyEngineLocked();
+                return migrated;
             }
-            boolean migrated = migrateV1PoliciesToDevicePolicyEngine();
-            migrated &= migratePoliciesPostUpgradeToDevicePolicyEngineLocked();
-            return migrated;
         });
     }
 
@@ -23797,6 +23819,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             migrateScreenCapturePolicyLocked();
             migrateLockTaskPolicyLocked();
+            migrateUserRestrictionsLocked();
             return true;
         } catch (Exception e) {
             Slogf.e(LOG_TAG, e, "Error occurred during post upgrade migration to the device "
@@ -24061,6 +24084,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 new StringSetPolicyValue(new HashSet<>(admin.protectedPackages)),
                                 admin.getUserHandle().getIdentifier());
                     }
+                }
+            }
+        });
+    }
+
+    private void migrateUserRestrictionsLocked() {
+        Binder.withCleanCallingIdentity(() -> {
+            List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo userInfo : users) {
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(userInfo.id);
+                if (admin == null) continue;
+                ComponentName adminComponent = admin.info.getComponent();
+                int userId = userInfo.id;
+                EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        adminComponent,
+                        userId,
+                        admin);
+                int ownerType;
+                if (isDeviceOwner(admin)) {
+                    ownerType = OWNER_TYPE_DEVICE_OWNER;
+                } else if (isProfileOwnerOfOrganizationOwnedDevice(adminComponent, userId)) {
+                    ownerType = OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
+                } else if (isProfileOwner(adminComponent, userId)) {
+                    ownerType = OWNER_TYPE_PROFILE_OWNER;
+                } else {
+                    throw new IllegalStateException("Invalid DO/PO state");
+                }
+
+                for (final String restriction : admin.ensureUserRestrictions().keySet()) {
+                    setBackwardCompatibleUserRestrictionLocked(ownerType, enforcingAdmin, userId,
+                            restriction, /* enabled */ true, /* parent */ false);
+                }
+                for (final String restriction : admin.getParentActiveAdmin()
+                        .ensureUserRestrictions().keySet()) {
+                    setBackwardCompatibleUserRestrictionLocked(ownerType, enforcingAdmin, userId,
+                            restriction, /* enabled */ true, /* parent */ true);
                 }
             }
         });

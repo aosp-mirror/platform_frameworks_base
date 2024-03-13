@@ -266,7 +266,11 @@ public class GrammaticalInflectionService extends SystemService {
                 throw new RuntimeException(e);
             }
         }
+        updateConfiguration(grammaticalGender, userId);
+        Trace.endSection();
+    }
 
+    private void updateConfiguration(int grammaticalGender, int userId) {
         try {
             Configuration config = new Configuration();
             int preValue = config.getGrammaticalGender();
@@ -280,7 +284,6 @@ public class GrammaticalInflectionService extends SystemService {
         } catch (RemoteException e) {
             Log.w(TAG, "Can not update configuration", e);
         }
-        Trace.endSection();
     }
 
     public int getSystemGrammaticalGender(AttributionSource attributionSource, int userId) {
@@ -372,7 +375,9 @@ public class GrammaticalInflectionService extends SystemService {
                 if (mGrammaticalGenderCache.indexOfKey(userId) < 0) {
                     try (FileInputStream in = new FileInputStream(file)) {
                         final TypedXmlPullParser parser = Xml.resolvePullParser(in);
-                        mGrammaticalGenderCache.put(userId, getGrammaticalGenderFromXml(parser));
+                        int grammaticalGender = getGrammaticalGenderFromXml(parser);
+                        mGrammaticalGenderCache.put(userId, grammaticalGender);
+                        updateConfiguration(grammaticalGender, userId);
                     } catch (IOException | XmlPullParserException e) {
                         Log.e(TAG, "Failed to parse XML configuration from " + file, e);
                     }

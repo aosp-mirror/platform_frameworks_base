@@ -30,6 +30,7 @@ import java.io.IOException;
  *
  * To use:
  * - locally edit your test class to inherit from MemoryTrackingTestCase instead of SysuiTestCase
+ * - Use `atest -d` to prevent files being cleaned up
  * - Watch the logcat with tag MEMORY to see the path to the .ahprof file
  * - adb pull /path/to/something.ahprof
  * - Download ahat from https://sites.google.com/corp/google.com/ahat/home

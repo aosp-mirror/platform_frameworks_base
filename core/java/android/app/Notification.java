@@ -3586,12 +3586,15 @@ public class Notification implements Parcelable
      * Sets the token used for background operations for the pending intents associated with this
      * notification.
      *
+     * This token is automatically set during deserialization for you, you usually won't need to
+     * call this unless you want to change the existing token, if any.
+     *
      * @hide
      */
-    public void overrideAllowlistToken(IBinder token) {
-        mAllowlistToken = token;
+    public void clearAllowlistToken() {
+        mAllowlistToken = null;
         if (publicVersion != null) {
-            publicVersion.overrideAllowlistToken(token);
+            publicVersion.clearAllowlistToken();
         }
     }
 
@@ -7377,6 +7380,15 @@ public class Notification implements Parcelable
      * object.
      */
     public static abstract class Style {
+
+        /**
+         * @deprecated public access to the constructor of Style() is only useful for creating
+         * custom subclasses, but that has actually been impossible due to hidden abstract
+         * methods, so this constructor is now officially deprecated to clarify that this is
+         * intended to be disallowed.
+         */
+        @Deprecated
+        public Style() {}
 
         /**
          * The number of items allowed simulatanously in the remote input history.

@@ -47,9 +47,7 @@ import org.junit.runner.RunWith
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 @android.platform.test.annotations.EnabledOnRavenwood
 class KeyguardTransitionInteractorTest : SysuiTestCase() {
-
     val kosmos = testKosmos()
-
     val underTest = kosmos.keyguardTransitionInteractor
     val repository = kosmos.fakeKeyguardTransitionRepository
     val testScope = kosmos.testScope
@@ -242,33 +240,34 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun transitionValue() = runTest {
-        val startedSteps by collectValues(underTest.transitionValue(state = DOZING))
+    fun transitionValue() =
+        testScope.runTest {
+            val startedSteps by collectValues(underTest.transitionValue(state = DOZING))
 
-        val toSteps =
-            listOf(
-                TransitionStep(AOD, DOZING, 0f, STARTED),
-                TransitionStep(AOD, DOZING, 0.5f, RUNNING),
-                TransitionStep(AOD, DOZING, 1f, FINISHED),
-            )
-        toSteps.forEach {
-            repository.sendTransitionStep(it)
-            runCurrent()
+            val toSteps =
+                listOf(
+                    TransitionStep(AOD, DOZING, 0f, STARTED),
+                    TransitionStep(AOD, DOZING, 0.5f, RUNNING),
+                    TransitionStep(AOD, DOZING, 1f, FINISHED),
+                )
+            toSteps.forEach {
+                repository.sendTransitionStep(it)
+                runCurrent()
+            }
+
+            val fromSteps =
+                listOf(
+                    TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED),
+                    TransitionStep(DOZING, LOCKSCREEN, 0.5f, RUNNING),
+                    TransitionStep(DOZING, LOCKSCREEN, 1f, FINISHED),
+                )
+            fromSteps.forEach {
+                repository.sendTransitionStep(it)
+                runCurrent()
+            }
+
+            assertThat(startedSteps).isEqualTo(listOf(0f, 0.5f, 1f, 1f, 0.5f, 0f))
         }
-
-        val fromSteps =
-            listOf(
-                TransitionStep(DOZING, LOCKSCREEN, 0f, STARTED),
-                TransitionStep(DOZING, LOCKSCREEN, 0.5f, RUNNING),
-                TransitionStep(DOZING, LOCKSCREEN, 1f, FINISHED),
-            )
-        fromSteps.forEach {
-            repository.sendTransitionStep(it)
-            runCurrent()
-        }
-
-        assertThat(startedSteps).isEqualTo(listOf(0f, 0.5f, 1f, 1f, 0.5f, 0f))
-    }
 
     @Test
     fun isInTransitionToAnyState() =

@@ -113,13 +113,8 @@ class MenuAnimationController {
 
     /* Moves position without updating underlying percentage position. Can be animated. */
     void moveToPosition(PointF position, boolean animateMovement) {
-        if (Flags.floatingMenuImeDisplacementAnimation()) {
-            moveToPositionX(position.x, animateMovement);
-            moveToPositionY(position.y, animateMovement);
-        } else {
-            moveToPositionX(position.x, /* animateMovement = */ false);
-            moveToPositionY(position.y, /* animateMovement = */ false);
-        }
+        moveToPositionX(position.x, animateMovement);
+        moveToPositionY(position.y, animateMovement);
     }
 
     void moveToPositionX(float positionX) {
@@ -127,7 +122,7 @@ class MenuAnimationController {
     }
 
     void moveToPositionX(float positionX, boolean animateMovement) {
-        if (animateMovement && Flags.floatingMenuImeDisplacementAnimation()) {
+        if (animateMovement) {
             springMenuWith(DynamicAnimation.TRANSLATION_X,
                     createSpringForce(),
                     /* velocity = */ 0,
@@ -142,7 +137,7 @@ class MenuAnimationController {
     }
 
     void moveToPositionY(float positionY, boolean animateMovement) {
-        if (animateMovement && Flags.floatingMenuImeDisplacementAnimation()) {
+        if (animateMovement) {
             springMenuWith(DynamicAnimation.TRANSLATION_Y,
                     createSpringForce(),
                     /* velocity = */ 0,
@@ -455,7 +450,7 @@ class MenuAnimationController {
                 ? MIN_PERCENT
                 : Math.min(MAX_PERCENT, position.y / draggableBounds.height());
 
-        if (Flags.floatingMenuImeDisplacementAnimation() && !writeToPosition) {
+        if (!writeToPosition) {
             mMenuView.onEdgeChangedIfNeeded();
         } else {
             mMenuView.persistPositionAndUpdateEdge(new Position(percentageX, percentageY));

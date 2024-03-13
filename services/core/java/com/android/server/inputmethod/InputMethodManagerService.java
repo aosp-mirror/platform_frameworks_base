@@ -284,6 +284,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final Context mContext;
     final Resources mRes;
     private final Handler mHandler;
+
+    /**
+     * TODO(b/329163064): Remove this field.
+     */
     @NonNull
     @MultiUserUnawareField
     private InputMethodSettings mSettings;
@@ -867,7 +871,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!mSystemReady) {
                 return;
             }
-            buildInputMethodListLocked(true);
+            for (int userId : mUserManagerInternal.getUserIds()) {
+                final InputMethodSettings settings = queryInputMethodServicesInternal(
+                                mContext,
+                                userId,
+                                AdditionalSubtypeMapRepository.get(userId),
+                                DirectBootAwareness.AUTO);
+                InputMethodSettingsRepository.put(userId, settings);
+                if (userId == mSettings.getUserId()) {
+                    mSettings = settings;
+                }
+            }
+            postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */);
             // If the locale is changed, needs to reset the default ime
             resetDefaultImeLocked(mContext);
             updateFromSettingsLocked(true);
@@ -1063,13 +1078,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final boolean isCurrentUser = (userId == mSettings.getUserId());
                 final AdditionalSubtypeMap additionalSubtypeMap =
                         AdditionalSubtypeMapRepository.get(userId);
-                final InputMethodSettings settings;
-                if (isCurrentUser) {
-                    settings = mSettings;
-                } else {
-                    settings = queryInputMethodServicesInternal(mContext, userId,
-                            additionalSubtypeMap, DirectBootAwareness.AUTO);
-                }
+                final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
 
                 InputMethodInfo curIm = null;
                 String curInputMethodId = settings.getSelectedInputMethod();
@@ -1113,13 +1122,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     AdditionalSubtypeMapRepository.putAndSave(userId, newAdditionalSubtypeMap,
                             settings.getMethodMap());
                 }
-
-                if (!isCurrentUser
-                        || !(additionalSubtypeChanged || shouldRebuildInputMethodListLocked())) {
+                if (isCurrentUser
+                        && !(additionalSubtypeChanged || shouldRebuildInputMethodListLocked())) {
                     return;
                 }
 
-                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
+                        userId, newAdditionalSubtypeMap, DirectBootAwareness.AUTO);
+                InputMethodSettingsRepository.put(userId, newSettings);
+                if (!isCurrentUser) {
+                    return;
+                }
+                mSettings = newSettings;
+                postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
 
                 boolean changed = false;
 
@@ -1271,17 +1286,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     void onUnlockUser(@UserIdInt int userId) {
         synchronized (ImfLock.class) {
-            final int currentUserId = mSettings.getUserId();
             if (DEBUG) {
-                Slog.d(TAG, "onUnlockUser: userId=" + userId + " curUserId=" + currentUserId);
+                Slog.d(TAG, "onUnlockUser: userId=" + userId + " curUserId="
+                        + mSettings.getUserId());
             }
-            if (userId != currentUserId) {
+            if (!mSystemReady) {
                 return;
             }
-            mSettings = InputMethodSettings.createEmptyMap(userId);
-            if (mSystemReady) {
+            final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
+                    userId, AdditionalSubtypeMapRepository.get(userId), DirectBootAwareness.AUTO);
+            InputMethodSettingsRepository.put(userId, newSettings);
+            if (mSettings.getUserId() == userId) {
+                mSettings = newSettings;
                 // We need to rebuild IMEs.
-                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
                 updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
             }
         }
@@ -1347,12 +1365,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         mShowOngoingImeSwitcherForPhones = false;
 
-        AdditionalSubtypeMapRepository.initialize(mHandler);
+        // InputMethodSettingsRepository should be initialized before buildInputMethodListLocked
+        InputMethodSettingsRepository.initialize(mHandler, mContext);
+        AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
 
         final int userId = mActivityManagerInternal.getCurrentUserId();
 
-        // mSettings should be created before buildInputMethodListLocked
-        mSettings = InputMethodSettings.createEmptyMap(userId);
+        mSettings = InputMethodSettingsRepository.get(userId);
 
         mSwitchingController =
                 InputMethodSubtypeSwitchingController.createInstanceLocked(context,
@@ -1515,7 +1534,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // The mSystemReady flag is set during boot phase,
         // and user switch would not happen at that time.
         resetCurrentMethodAndClientLocked(UnbindReason.SWITCH_USER);
-        buildInputMethodListLocked(initialUserSwitch);
+
+        final InputMethodSettings newSettings = InputMethodSettingsRepository.get(newUserId);
+        mSettings = newSettings;
+        postInputMethodSettingUpdatedLocked(initialUserSwitch /* resetDefaultEnabledIme */);
         if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
             // This is the first time of the user switch and
             // set the current ime to the proper one.
@@ -1596,7 +1618,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                 final String defaultImiId = mSettings.getSelectedInputMethod();
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
-                buildInputMethodListLocked(!imeSelectedOnBoot /* resetDefaultEnabledIme */);
+                final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
+                        currentUserId, AdditionalSubtypeMapRepository.get(currentUserId),
+                        DirectBootAwareness.AUTO);
+                InputMethodSettingsRepository.put(currentUserId, newSettings);
+                mSettings = newSettings;
+                postInputMethodSettingUpdatedLocked(
+                        !imeSelectedOnBoot /* resetDefaultEnabledIme */);
                 updateFromSettingsLocked(true);
                 InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
                         getPackageManagerForUser(mContext, currentUserId),
@@ -1703,9 +1731,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         && (!connectionless
                                 || mBindingController.supportsConnectionlessStylusHandwriting());
             }
-            //TODO(b/197848765): This can be optimized by caching multi-user methodMaps/methodList.
-            //TODO(b/210039666): use cache.
-            final InputMethodSettings settings = queryMethodMapForUserLocked(userId);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final InputMethodInfo imi = settings.getMethodMap().get(
                     settings.getSelectedInputMethod());
             return imi != null && imi.supportsStylusHandwriting()
@@ -1729,9 +1755,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private List<InputMethodInfo> getInputMethodListLocked(@UserIdInt int userId,
             @DirectBootAwareness int directBootAwareness, int callingUid) {
         final InputMethodSettings settings;
-        if (userId == mSettings.getUserId()
-                && directBootAwareness == DirectBootAwareness.AUTO) {
-            settings = mSettings;
+        if (directBootAwareness == DirectBootAwareness.AUTO) {
+            settings = InputMethodSettingsRepository.get(userId);
         } else {
             final AdditionalSubtypeMap additionalSubtypeMap =
                     AdditionalSubtypeMapRepository.get(userId);
@@ -1755,7 +1780,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             methodList = mSettings.getEnabledInputMethodList();
             settings = mSettings;
         } else {
-            settings = queryMethodMapForUserLocked(userId);
+            settings = InputMethodSettingsRepository.get(userId);
             methodList = settings.getEnabledInputMethodList();
         }
         // filter caller's access to input methods
@@ -1815,22 +1840,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(String imiId,
             boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId, int callingUid) {
-        if (userId == mSettings.getUserId()) {
-            final InputMethodInfo imi;
-            String selectedMethodId = getSelectedMethodIdLocked();
-            if (imiId == null && selectedMethodId != null) {
-                imi = mSettings.getMethodMap().get(selectedMethodId);
-            } else {
-                imi = mSettings.getMethodMap().get(imiId);
-            }
-            if (imi == null || !canCallerAccessInputMethod(
-                    imi.getPackageName(), callingUid, userId, mSettings)) {
-                return Collections.emptyList();
-            }
-            return mSettings.getEnabledInputMethodSubtypeList(
-                    imi, allowsImplicitlyEnabledSubtypes);
-        }
-        final InputMethodSettings settings = queryMethodMapForUserLocked(userId);
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         final InputMethodInfo imi = settings.getMethodMap().get(imiId);
         if (imi == null) {
             return Collections.emptyList();
@@ -3996,8 +4006,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return mSettings.getLastInputMethodSubtype();
             }
 
-            final InputMethodSettings settings = queryMethodMapForUserLocked(userId);
-            return settings.getLastInputMethodSubtype();
+            return InputMethodSettingsRepository.get(userId).getLastInputMethodSubtype();
         }
     }
 
@@ -4029,19 +4038,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             final var additionalSubtypeMap = AdditionalSubtypeMapRepository.get(userId);
             final boolean isCurrentUser = (mSettings.getUserId() == userId);
-            final InputMethodSettings settings = isCurrentUser
-                    ? mSettings
-                    : queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                            DirectBootAwareness.AUTO);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             final var newAdditionalSubtypeMap = settings.getNewAdditionalSubtypeMap(
                     imiId, toBeAdded, additionalSubtypeMap, mPackageManagerInternal, callingUid);
             if (additionalSubtypeMap != newAdditionalSubtypeMap) {
                 AdditionalSubtypeMapRepository.putAndSave(userId, newAdditionalSubtypeMap,
                         settings.getMethodMap());
+                final InputMethodSettings newSettings = queryInputMethodServicesInternal(mContext,
+                        userId, AdditionalSubtypeMapRepository.get(userId),
+                        DirectBootAwareness.AUTO);
+                InputMethodSettingsRepository.put(userId, newSettings);
                 if (isCurrentUser) {
                     final long ident = Binder.clearCallingIdentity();
                     try {
-                        buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                        mSettings = newSettings;
+                        postInputMethodSettingUpdatedLocked(false /* resetDefaultEnabledIme */);
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
@@ -4071,8 +4082,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         try {
             synchronized (ImfLock.class) {
                 final boolean currentUser = (mSettings.getUserId() == userId);
-                final InputMethodSettings settings = currentUser
-                        ? mSettings : queryMethodMapForUserLocked(userId);
+                final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                 if (!settings.setEnabledInputMethodSubtypes(imeId, subtypeHashCodes)) {
                     return;
                 }
@@ -4969,7 +4979,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
+    void postInputMethodSettingUpdatedLocked(boolean resetDefaultEnabledIme) {
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
                     + " \n ------ caller=" + Debug.getCallers(10));
@@ -4980,10 +4990,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         mMethodMapUpdateCount++;
         mMyPackageMonitor.clearKnownImePackageNamesLocked();
-
-        mSettings = queryInputMethodServicesInternal(mContext, mSettings.getUserId(),
-                AdditionalSubtypeMapRepository.get(mSettings.getUserId()),
-                DirectBootAwareness.AUTO);
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -5255,8 +5261,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return getCurrentInputMethodSubtypeLocked();
             }
 
-            final InputMethodSettings settings = queryMethodMapForUserLocked(userId);
-            return settings.getCurrentInputMethodSubtypeForNonCurrentUsers();
+            return InputMethodSettingsRepository.get(userId)
+                    .getCurrentInputMethodSubtypeForNonCurrentUsers();
         }
     }
 
@@ -5318,24 +5324,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private InputMethodInfo queryDefaultInputMethodForUserIdLocked(@UserIdInt int userId) {
-        final InputMethodSettings settings;
-        if (userId == mSettings.getUserId()) {
-            settings = mSettings;
-        } else {
-            final AdditionalSubtypeMap additionalSubtypeMap =
-                    AdditionalSubtypeMapRepository.get(userId);
-            settings = queryInputMethodServicesInternal(mContext, userId,
-                    additionalSubtypeMap, DirectBootAwareness.AUTO);
-        }
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         return settings.getMethodMap().get(settings.getSelectedInputMethod());
-    }
-
-    @GuardedBy("ImfLock.class")
-    private InputMethodSettings queryMethodMapForUserLocked(@UserIdInt int userId) {
-        final AdditionalSubtypeMap additionalSubtypeMap =
-                AdditionalSubtypeMapRepository.get(userId);
-        return queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                DirectBootAwareness.AUTO);
     }
 
     @GuardedBy("ImfLock.class")
@@ -5349,7 +5339,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             setInputMethodLocked(imeId, NOT_A_SUBTYPE_ID);
             return true;
         }
-        final InputMethodSettings settings = queryMethodMapForUserLocked(userId);
+        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
         if (!settings.getMethodMap().containsKey(imeId)
                 || !settings.getEnabledInputMethodList().contains(
                         settings.getMethodMap().get(imeId))) {
@@ -5489,7 +5479,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     setInputMethodEnabledLocked(imeId, enabled);
                     return true;
                 }
-                final InputMethodSettings settings = queryMethodMapForUserLocked(userId);
+                final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
                 if (!settings.getMethodMap().containsKey(imeId)) {
                     return false; // IME is not found.
                 }
@@ -6243,7 +6233,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 previouslyEnabled = setInputMethodEnabledLocked(imeId, enabled);
             }
         } else {
-            final InputMethodSettings settings = queryMethodMapForUserLocked(userId);
+            final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
             if (enabled) {
                 if (!settings.getMethodMap().containsKey(imeId)) {
                     failedToEnableUnknownIme = true;
@@ -6377,10 +6367,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         nextIme = mSettings.getSelectedInputMethod();
                         nextEnabledImes = mSettings.getEnabledInputMethodList();
                     } else {
-                        final AdditionalSubtypeMap additionalSubtypeMap =
-                                AdditionalSubtypeMapRepository.get(userId);
-                        final InputMethodSettings settings = queryInputMethodServicesInternal(
-                                mContext, userId, additionalSubtypeMap, DirectBootAwareness.AUTO);
+                        final InputMethodSettings settings =
+                                InputMethodSettingsRepository.get(userId);
 
                         nextEnabledImes = InputMethodInfoUtils.getDefaultEnabledImes(mContext,
                                 settings.getMethodList());

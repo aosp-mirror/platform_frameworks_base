@@ -4335,7 +4335,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_PADDING_ZOOM_FACTOR =
             new Key<Float>("android.efv.paddingZoomFactor", float.class);
 
@@ -4358,7 +4358,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Boolean> EFV_AUTO_ZOOM =
             new Key<Boolean>("android.efv.autoZoom", boolean.class);
 
@@ -4379,7 +4379,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_MAX_PADDING_ZOOM_FACTOR =
             new Key<Float>("android.efv.maxPaddingZoomFactor", float.class);
 
@@ -4406,7 +4406,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Integer> EFV_STABILIZATION_MODE =
             new Key<Integer>("android.efv.stabilizationMode", int.class);
 
@@ -4428,7 +4428,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Pair<Integer,Integer>> EFV_TRANSLATE_VIEWPORT =
             new Key<android.util.Pair<Integer,Integer>>("android.efv.translateViewport", new TypeReference<android.util.Pair<Integer,Integer>>() {{ }});
 
@@ -4445,7 +4445,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_ROTATE_VIEWPORT =
             new Key<Float>("android.efv.rotateViewport", float.class);
 

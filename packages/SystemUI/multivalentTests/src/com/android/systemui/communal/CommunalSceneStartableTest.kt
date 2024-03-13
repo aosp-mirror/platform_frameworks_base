@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal
 
+import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,13 +26,17 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.dockManager
 import com.android.systemui.dock.fakeDockManager
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
+import com.android.systemui.util.settings.fakeSettings
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -54,11 +59,15 @@ class CommunalSceneStartableTest : SysuiTestCase() {
     @Before
     fun setUp() {
         with(kosmos) {
+            fakeSettings.putInt(Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT)
+
             underTest =
                 CommunalSceneStartable(
                         dockManager = dockManager,
                         communalInteractor = communalInteractor,
                         keyguardTransitionInteractor = keyguardTransitionInteractor,
+                        keyguardInteractor = keyguardInteractor,
+                        systemSettings = fakeSettings,
                         applicationScope = applicationCoroutineScope,
                         bgScope = applicationCoroutineScope,
                     )
@@ -246,6 +255,132 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun hubTimeout_whenDreaming_goesToBlank() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is dreaming and on communal.
+                fakeKeyguardRepository.setDreaming(true)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Scene times out back to blank after the screen timeout.
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+            }
+        }
+
+    @Test
+    fun hubTimeout_notDreaming_staysOnCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is not dreaming and on communal.
+                fakeKeyguardRepository.setDreaming(false)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                // Scene stays as Communal
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    fun hubTimeout_dreamStopped_staysOnCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is dreaming and on communal.
+                fakeKeyguardRepository.setDreaming(true)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Wait a bit, but not long enough to timeout.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Dream stops, timeout is cancelled and device stays on hub, because the regular
+                // screen timeout will take effect at this point.
+                fakeKeyguardRepository.setDreaming(false)
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+            }
+        }
+
+    @Test
+    fun hubTimeout_dreamStartedHalfway_goesToCommunal() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is on communal, but not dreaming.
+                fakeKeyguardRepository.setDreaming(false)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Wait a bit, but not long enough to timeout, then start dreaming.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                fakeKeyguardRepository.setDreaming(true)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Device times out after one screen timeout interval, dream doesn't reset timeout.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+            }
+        }
+
+    @Test
+    fun hubTimeout_userActivityTriggered_resetsTimeout() =
+        with(kosmos) {
+            testScope.runTest {
+                // Device is dreaming and on communal.
+                fakeKeyguardRepository.setDreaming(true)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Wait a bit, but not long enough to timeout.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+
+                // Send user interaction to reset timeout.
+                communalInteractor.signalUserInteraction()
+
+                // If user activity didn't reset timeout, we would have gone back to Blank by now.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Timeout happens one interval after the user interaction.
+                advanceTimeBy((SCREEN_TIMEOUT / 2).milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+            }
+        }
+
+    @Test
+    fun hubTimeout_screenTimeoutChanged() =
+        with(kosmos) {
+            testScope.runTest {
+                fakeSettings.putInt(Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT * 2)
+
+                // Device is dreaming and on communal.
+                fakeKeyguardRepository.setDreaming(true)
+                communalInteractor.onSceneChanged(CommunalScenes.Communal)
+
+                val scene by collectLastValue(communalInteractor.desiredScene)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                // Scene times out back to blank after the screen timeout.
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Communal)
+
+                advanceTimeBy(SCREEN_TIMEOUT.milliseconds)
+                assertThat(scene).isEqualTo(CommunalScenes.Blank)
+            }
+        }
+
     private fun TestScope.updateDocked(docked: Boolean) =
         with(kosmos) {
             runCurrent()
@@ -260,4 +395,8 @@ class CommunalSceneStartableTest : SysuiTestCase() {
             setCommunalAvailable(true)
             runCurrent()
         }
+
+    companion object {
+        private const val SCREEN_TIMEOUT = 1000
+    }
 }

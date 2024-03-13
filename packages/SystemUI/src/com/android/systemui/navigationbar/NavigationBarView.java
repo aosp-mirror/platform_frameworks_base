@@ -75,6 +75,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
@@ -149,7 +150,9 @@ public class NavigationBarView extends FrameLayout {
     private NavigationBarInflaterView mNavigationInflaterView;
     private Optional<Recents> mRecentsOptional = Optional.empty();
     @Nullable
-    private ShadeViewController mPanelView;
+    private ShadeViewController mShadeViewController;
+    @Nullable
+    private PanelExpansionInteractor mPanelExpansionInteractor;
     private RotationContextButton mRotationContextButton;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
@@ -347,8 +350,9 @@ public class NavigationBarView extends FrameLayout {
     }
 
     /** */
-    public void setComponents(ShadeViewController panel) {
-        mPanelView = panel;
+    public void setComponents(ShadeViewController svc, PanelExpansionInteractor pei) {
+        mShadeViewController = svc;
+        mPanelExpansionInteractor = pei;
         updatePanelSystemUiStateFlags();
     }
 
@@ -750,10 +754,10 @@ public class NavigationBarView extends FrameLayout {
 
     private void updatePanelSystemUiStateFlags() {
         if (SysUiState.DEBUG) {
-            Log.d(TAG, "Updating panel sysui state flags: panelView=" + mPanelView);
+            Log.d(TAG, "Updating panel sysui state flags: panelView=" + mShadeViewController);
         }
-        if (mPanelView != null) {
-            mPanelView.updateSystemUiStateFlags();
+        if (mShadeViewController != null) {
+            mShadeViewController.updateSystemUiStateFlags();
         }
     }
 
@@ -801,7 +805,8 @@ public class NavigationBarView extends FrameLayout {
      */
     void updateSlippery() {
         setSlippery(!isQuickStepSwipeUpEnabled() ||
-                (mPanelView != null && mPanelView.isFullyExpanded() && !mPanelView.isCollapsing()));
+                (mPanelExpansionInteractor != null && mPanelExpansionInteractor.isFullyExpanded()
+                        && !mPanelExpansionInteractor.isCollapsing()));
     }
 
     void setSlippery(boolean slippery) {

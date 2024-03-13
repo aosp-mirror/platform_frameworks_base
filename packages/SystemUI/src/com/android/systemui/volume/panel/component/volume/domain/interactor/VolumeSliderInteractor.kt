@@ -24,75 +24,24 @@ import javax.inject.Inject
 class VolumeSliderInteractor @Inject constructor() {
 
     /** mimic percentage volume setting */
-    val displayValueRange: ClosedFloatingPointRange<Float> = 0f..100f
+    private val displayValueRange: ClosedFloatingPointRange<Float> = 0f..100f
 
     /**
      * Translates [volume], that belongs to [volumeRange] to the value that belongs to
      * [displayValueRange].
-     *
-     * [currentValue] is the raw value received from the slider. Returns [currentValue] when it
-     * translates to the same volume as [volume] parameter. This ensures smooth slider experience
-     * (avoids snapping when the user stops dragging).
      */
     fun processVolumeToValue(
         volume: Int,
         volumeRange: ClosedRange<Int>,
-        currentValue: Float?,
-        isMuted: Boolean,
     ): Float {
-        if (isMuted) {
-            return 0f
-        }
-        val changedVolume: Int? = currentValue?.let { translateValueToVolume(it, volumeRange) }
-        return if (volume != volumeRange.start && volume == changedVolume) {
-            currentValue
-        } else {
-            translateToRange(
-                currentValue = volume.toFloat(),
-                currentRangeStart = volumeRange.start.toFloat(),
-                currentRangeEnd = volumeRange.endInclusive.toFloat(),
-                targetRangeStart = displayValueRange.start,
-                targetRangeEnd = displayValueRange.endInclusive,
-            )
-        }
-    }
-
-    /** Translates [value] from [displayValueRange] to volume that has [volumeRange]. */
-    fun translateValueToVolume(
-        value: Float,
-        volumeRange: ClosedRange<Int>,
-    ): Int {
-        return translateToRange(
-                currentValue = value,
-                currentRangeStart = displayValueRange.start,
-                currentRangeEnd = displayValueRange.endInclusive,
-                targetRangeStart = volumeRange.start.toFloat(),
-                targetRangeEnd = volumeRange.endInclusive.toFloat(),
-            )
-            .toInt()
-    }
-
-    /**
-     * Translates a value from one range to another.
-     *
-     * ```
-     * Given: currentValue=3, currentRange=[0, 8], targetRange=[0, 100]
-     * Result: 37.5
-     * ```
-     */
-    private fun translateToRange(
-        currentValue: Float,
-        currentRangeStart: Float,
-        currentRangeEnd: Float,
-        targetRangeStart: Float,
-        targetRangeEnd: Float,
-    ): Float {
-        val currentRangeLength: Float = (currentRangeEnd - currentRangeStart)
-        val targetRangeLength: Float = targetRangeEnd - targetRangeStart
+        val currentRangeStart: Float = volumeRange.start.toFloat()
+        val targetRangeStart: Float = displayValueRange.start
+        val currentRangeLength: Float = (volumeRange.endInclusive.toFloat() - currentRangeStart)
+        val targetRangeLength: Float = displayValueRange.endInclusive - targetRangeStart
         if (currentRangeLength == 0f || targetRangeLength == 0f) {
             return 0f
         }
-        val volumeFraction: Float = (currentValue - currentRangeStart) / currentRangeLength
+        val volumeFraction: Float = (volume.toFloat() - currentRangeStart) / currentRangeLength
         return targetRangeStart + volumeFraction * targetRangeLength
     }
 }

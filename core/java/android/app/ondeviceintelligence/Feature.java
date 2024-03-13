@@ -34,7 +34,6 @@ import android.os.PersistableBundle;
 @SystemApi
 @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE)
 public final class Feature implements Parcelable {
-    // TODO(b/325315604) - Check if we can expose non-hidden IntDefs in Framework.
     private final int mId;
     @Nullable
     private final String mName;

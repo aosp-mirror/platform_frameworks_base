@@ -46,12 +46,18 @@ constructor(
                     !footerComponents.contains(it.key) &&
                     it.key != bottomBar
             }
-        val headerComponents = components.filter { headerComponents.contains(it.key) }
-        val footerComponents = components.filter { footerComponents.contains(it.key) }
+        val headerComponents =
+            components
+                .filter { it.key in headerComponents }
+                .sortedBy { headerComponents.indexOf(it.key) }
+        val footerComponents =
+            components
+                .filter { it.key in footerComponents }
+                .sortedBy { footerComponents.indexOf(it.key) }
         return ComponentsLayout(
-            headerComponents = headerComponents.sortedBy { it.key },
+            headerComponents = headerComponents,
             contentComponents = contentComponents.sortedBy { it.key },
-            footerComponents = footerComponents.sortedBy { it.key },
+            footerComponents = footerComponents,
             bottomBarComponent = components.find { it.key == bottomBar }
                     ?: error(
                         "VolumePanelComponents.BOTTOM_BAR must be present in the default " +

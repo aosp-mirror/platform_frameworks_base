@@ -347,9 +347,6 @@ private fun SceneScope.SplitShade(
                         viewModel = footerActionsViewModel,
                         isCustomizing = isCustomizing,
                         lifecycleOwner = lifecycleOwner,
-                        footerActionsModifier = { modifier ->
-                            modifier.element(QuickSettings.Elements.FooterActions)
-                        },
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                     )
                 }

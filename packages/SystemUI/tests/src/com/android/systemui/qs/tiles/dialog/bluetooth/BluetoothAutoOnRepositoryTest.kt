@@ -68,7 +68,7 @@ class BluetoothAutoOnRepositoryTest : SysuiTestCase() {
     fun testGetValue_valueUnset() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(SYSTEM_USER)
-            val actualValue by collectLastValue(bluetoothAutoOnRepository.getValue)
+            val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
 
             runCurrent()
 
@@ -81,7 +81,7 @@ class BluetoothAutoOnRepositoryTest : SysuiTestCase() {
     fun testGetValue_valueFalse() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(SYSTEM_USER)
-            val actualValue by collectLastValue(bluetoothAutoOnRepository.getValue)
+            val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
 
             secureSettings.putIntForUser(SETTING_NAME, DISABLED, UserHandle.USER_SYSTEM)
             runCurrent()
@@ -94,7 +94,7 @@ class BluetoothAutoOnRepositoryTest : SysuiTestCase() {
     fun testGetValue_valueTrue() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(SYSTEM_USER)
-            val actualValue by collectLastValue(bluetoothAutoOnRepository.getValue)
+            val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
 
             secureSettings.putIntForUser(SETTING_NAME, ENABLED, UserHandle.USER_SYSTEM)
             runCurrent()
@@ -104,15 +104,16 @@ class BluetoothAutoOnRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun testGetValue_valueTrue_secondaryUser_returnUnset() {
+    fun testGetValue_valueTrue_secondaryUser_returnTrue() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(SECONDARY_USER)
-            val actualValue by collectLastValue(bluetoothAutoOnRepository.getValue)
+            val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
 
+            secureSettings.putIntForUser(SETTING_NAME, DISABLED, SYSTEM_USER_ID)
             secureSettings.putIntForUser(SETTING_NAME, ENABLED, SECONDARY_USER_ID)
             runCurrent()
 
-            assertThat(actualValue).isEqualTo(UNSET)
+            assertThat(actualValue).isEqualTo(ENABLED)
         }
     }
 

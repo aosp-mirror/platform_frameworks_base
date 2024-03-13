@@ -27,7 +27,13 @@ sealed interface SliderState {
     val value: Float
     val valueRange: ClosedFloatingPointRange<Float>
     val icon: Icon?
-    val label: String
-    val disabledMessage: String?
     val isEnabled: Boolean
+    val valueText: String
+    val label: String
+    /**
+     * A11y slider controls works by adjusting one step up or down. The default slider step isn't
+     * enough to trigger rounding to the correct value.
+     */
+    val a11yStep: Int
+    val disabledMessage: String?
 }

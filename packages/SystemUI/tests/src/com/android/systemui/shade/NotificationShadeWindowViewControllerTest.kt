@@ -481,8 +481,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         // AND status bar doesn't want it
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
             .thenReturn(false)
-        // AND shade is not fully expanded
-        whenever(notificationPanelViewController.isFullyExpanded()).thenReturn(false)
+        // AND shade is not fully expanded (mock is false by default)
         // AND the lock icon does NOT want the touch
         whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT)).thenReturn(false)
         // AND quick settings controller DOES want it

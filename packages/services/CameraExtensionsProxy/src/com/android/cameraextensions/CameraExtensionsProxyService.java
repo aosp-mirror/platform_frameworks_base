@@ -528,7 +528,7 @@ public class CameraExtensionsProxyService extends Service {
      */
     public static Pair<PreviewExtenderImpl, ImageCaptureExtenderImpl> initializeExtension(
             int extensionType) {
-        if (Flags.concertMode()) {
+        if (Flags.concertModeApi()) {
             if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
                 // Basic extensions are deprecated starting with extension version 1.5
                 return new Pair<>(new PreviewExtenderImpl() {
@@ -713,7 +713,7 @@ public class CameraExtensionsProxyService extends Service {
      * @hide
      */
     public static AdvancedExtenderImpl initializeAdvancedExtensionImpl(int extensionType) {
-        if (Flags.concertMode()) {
+        if (Flags.concertModeApi()) {
             if (extensionType == CameraExtensionCharacteristics.EXTENSION_EYES_FREE_VIDEOGRAPHY) {
                 if (EFV_SUPPORTED) {
                     return new EyesFreeVideographyAdvancedExtenderImpl();

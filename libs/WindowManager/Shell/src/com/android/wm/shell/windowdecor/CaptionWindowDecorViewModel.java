@@ -19,9 +19,11 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Choreographer;
@@ -186,7 +188,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         final FluidResizeTaskPositioner taskPositioner =
                 new FluidResizeTaskPositioner(mTaskOrganizer, mTransitions, windowDecoration,
-                        mDisplayController, 0 /* disallowedAreaForEndBoundsHeight */);
+                        mDisplayController);
         final CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
@@ -286,8 +288,15 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         mDragPointerId = e.getPointerId(0);
                     }
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
-                    mDragPositioningCallback.onDragPositioningEnd(
+                    final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
+                    DragPositioningCallbackUtility.snapTaskBoundsIfNecessary(newTaskBounds,
+                            mWindowDecorByTaskId.get(mTaskId).calculateValidDragArea());
+                    if (newTaskBounds != taskInfo.configuration.windowConfiguration.getBounds()) {
+                        final WindowContainerTransaction wct = new WindowContainerTransaction();
+                        wct.setBounds(taskInfo.token, newTaskBounds);
+                        mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
+                    }
                     final boolean wasDragging = mIsDragging;
                     mIsDragging = false;
                     return wasDragging;

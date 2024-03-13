@@ -61,7 +61,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -115,7 +115,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
-    private final com.android.systemui.shade.ShadeController mShadeController;
+    private final ShadeController mShadeController;
     private final KeyguardStateController mKeyguardStateController;
     private final LockPatternUtils mLockPatternUtils;
     private final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback;
@@ -126,7 +126,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final StatusBarNotificationActivityStarterLogger mLogger;
 
     private final NotificationPresenter mPresenter;
-    private final ShadeViewController mShadeViewController;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ActivityTransitionAnimator mActivityTransitionAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
@@ -163,7 +163,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             StatusBarNotificationActivityStarterLogger logger,
             OnUserInteractionCallback onUserInteractionCallback,
             NotificationPresenter presenter,
-            ShadeViewController shadeViewController,
+            PanelExpansionInteractor panelExpansionInteractor,
             NotificationShadeWindowController notificationShadeWindowController,
             ActivityTransitionAnimator activityTransitionAnimator,
             ShadeAnimationInteractor shadeAnimationInteractor,
@@ -192,13 +192,13 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mLockPatternUtils = lockPatternUtils;
         mStatusBarRemoteInputCallback = remoteInputCallback;
         mActivityIntentHelper = activityIntentHelper;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mShadeAnimationInteractor = shadeAnimationInteractor;
         mMetricsLogger = metricsLogger;
         mLogger = logger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mPresenter = presenter;
-        mShadeViewController = shadeViewController;
         mActivityTransitionAnimator = activityTransitionAnimator;
         mNotificationAnimationProvider = notificationAnimationProvider;
         mPowerInteractor = powerInteractor;
@@ -296,7 +296,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
 
         // Always defer the keyguard dismiss when animating.
-        return animate || !mShadeViewController.isFullyCollapsed();
+        return animate || !mPanelExpansionInteractor.isFullyCollapsed();
     }
 
     private void handleNotificationClickAfterPanelCollapsed(

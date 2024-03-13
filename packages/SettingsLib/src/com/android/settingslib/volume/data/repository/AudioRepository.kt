@@ -161,11 +161,11 @@ class AudioRepositoryImpl(
 
     override suspend fun setMuted(audioStream: AudioStream, isMuted: Boolean) =
         withContext(backgroundCoroutineContext) {
-            if (isMuted) {
-                audioManager.adjustStreamVolume(audioStream.value, 0, AudioManager.ADJUST_MUTE)
-            } else {
-                audioManager.adjustStreamVolume(audioStream.value, 0, AudioManager.ADJUST_UNMUTE)
-            }
+            audioManager.adjustStreamVolume(
+                audioStream.value,
+                if (isMuted) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE,
+                0,
+            )
         }
 
     private fun getMinVolume(stream: AudioStream): Int =

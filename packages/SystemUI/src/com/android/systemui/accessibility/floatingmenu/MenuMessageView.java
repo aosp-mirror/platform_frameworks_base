@@ -74,6 +74,12 @@ class MenuMessageView extends LinearLayout implements
         addView(mTextView, Index.TEXT_VIEW,
                 new LayoutParams(/* width= */ 0, WRAP_CONTENT, /* weight= */ 1));
         addView(mUndoButton, Index.UNDO_BUTTON, new LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+
+        // The message box is not focusable, but will announce its contents when it appears.
+        // The textView and button are still interactable.
+        setClickable(false);
+        setFocusable(false);
+        setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
     @Override

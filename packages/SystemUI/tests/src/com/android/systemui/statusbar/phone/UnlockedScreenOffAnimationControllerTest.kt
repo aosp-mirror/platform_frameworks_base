@@ -100,10 +100,6 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 handler = handler
         )
         controller.initialize(centralSurfaces, shadeViewController, lightRevealScrim)
-
-        // Screen off does not run if the panel is expanded, so we should say it's collapsed to test
-        // screen off.
-        `when`(shadeViewController.isFullyCollapsed).thenReturn(true)
     }
 
     @After

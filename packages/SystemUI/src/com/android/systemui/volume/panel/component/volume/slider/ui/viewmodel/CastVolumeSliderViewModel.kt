@@ -26,8 +26,8 @@ import com.android.systemui.volume.panel.component.volume.domain.interactor.Volu
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -46,46 +46,46 @@ constructor(
 ) : SliderViewModel {
 
     private val volumeRange = 0..routingSession.routingSessionInfo.volumeMax
-    private val value = MutableStateFlow(0f)
 
     override val slider: StateFlow<SliderState> =
-        combine(value, mediaOutputInteractor.currentConnectedDevice) { value, _ ->
-                getCurrentState(value)
-            }
-            .stateIn(coroutineScope, SharingStarted.Eagerly, getCurrentState(value.value))
+        combine(mediaOutputInteractor.currentConnectedDevice) { _ -> getCurrentState() }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, getCurrentState())
 
-    override fun onValueChangeFinished(state: SliderState, newValue: Float) {
+    override fun onValueChanged(state: SliderState, newValue: Float) {
         coroutineScope.launch {
-            value.value = newValue
-            castVolumeInteractor.setVolume(
-                routingSession,
-                volumeSliderInteractor.translateValueToVolume(newValue, volumeRange),
-            )
+            castVolumeInteractor.setVolume(routingSession, newValue.roundToInt())
         }
     }
 
-    private fun getCurrentState(value: Float): State {
-        return State(
-            value =
-                volumeSliderInteractor.processVolumeToValue(
-                    volume = routingSession.routingSessionInfo.volume,
-                    volumeRange = volumeRange,
-                    currentValue = value,
-                    isMuted = false,
-                ),
-            valueRange = volumeSliderInteractor.displayValueRange,
+    override fun toggleMuted(state: SliderState) {
+        // do nothing because this action isn't supported for Cast sliders.
+    }
+
+    private fun getCurrentState(): State =
+        State(
+            value = routingSession.routingSessionInfo.volume.toFloat(),
+            valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
             icon = Icon.Resource(R.drawable.ic_cast, null),
+            valueText =
+                SliderViewModel.formatValue(
+                    volumeSliderInteractor.processVolumeToValue(
+                        volume = routingSession.routingSessionInfo.volume,
+                        volumeRange = volumeRange,
+                    )
+                ),
             label = context.getString(R.string.media_device_cast),
             isEnabled = true,
+            a11yStep = 1
         )
-    }
 
     private data class State(
         override val value: Float,
         override val valueRange: ClosedFloatingPointRange<Float>,
         override val icon: Icon,
+        override val valueText: String,
         override val label: String,
         override val isEnabled: Boolean,
+        override val a11yStep: Int,
     ) : SliderState {
         override val disabledMessage: String?
             get() = null

@@ -56,7 +56,7 @@ fun SinglePasskeyScreen(
         headerContent = {
             SignInHeader(
                 icon = entry.icon,
-                title = stringResource(R.string.use_password_title),
+                title = stringResource(R.string.use_passkey_title),
             )
         },
         accountContent = {

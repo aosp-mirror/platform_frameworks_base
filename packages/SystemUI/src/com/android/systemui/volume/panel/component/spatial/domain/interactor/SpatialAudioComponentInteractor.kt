@@ -115,7 +115,7 @@ constructor(
             .stateIn(
                 coroutineScope,
                 SharingStarted.Eagerly,
-                SpatialAudioEnabledModel.Disabled,
+                SpatialAudioEnabledModel.Unknown,
             )
 
     /**

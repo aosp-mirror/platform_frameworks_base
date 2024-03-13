@@ -63,10 +63,13 @@ import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -84,7 +87,7 @@ import kotlinx.coroutines.flow.shareIn
 class CommunalInteractor
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
+    @Application val applicationScope: CoroutineScope,
     broadcastDispatcher: BroadcastDispatcher,
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
@@ -151,6 +154,14 @@ constructor(
 
     /** Transition state of the hub mode. */
     val transitionState: StateFlow<ObservableTransitionState> = communalRepository.transitionState
+
+    val _userActivity: MutableSharedFlow<Unit> =
+        MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val userActivity: Flow<Unit> = _userActivity.asSharedFlow()
+
+    fun signalUserInteraction() {
+        _userActivity.tryEmit(Unit)
+    }
 
     /**
      * Updates the transition state of the hub [SceneTransitionLayout].

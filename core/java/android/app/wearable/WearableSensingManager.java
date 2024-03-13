@@ -246,7 +246,10 @@ public class WearableSensingManager {
      * @param executor Executor on which to run the consumer callback
      * @param statusConsumer A consumer that handles the status codes, which is returned
      *                 right after the call.
+     * @deprecated Use {@link #provideConnection(ParcelFileDescriptor, Executor, Consumer)} instead
+     *     to provide a remote wearable device connection to the WearableSensingService
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void provideDataStream(
             @NonNull ParcelFileDescriptor parcelFileDescriptor,

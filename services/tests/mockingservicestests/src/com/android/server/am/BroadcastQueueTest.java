@@ -86,7 +86,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
@@ -2335,8 +2334,8 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
                 .isGreaterThan(getReceiverScheduledTime(prioritizedRecord, receiverBlue));
     }
 
-    @Ignore
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DEFER_OUTGOING_BCASTS)
     public void testDeferOutgoingBroadcasts() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         setProcessFreezable(callerApp, true /* pendingFreeze */, false /* frozen */);
@@ -2350,6 +2349,8 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
                 makeRegisteredReceiver(receiverGreenApp),
                 makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
                 makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW))));
+        // Verify that we invoke the call to freeze the caller app.
+        verify(mAms.mOomAdjuster.mCachedAppOptimizer).freezeAppAsyncImmediateLSP(callerApp);
 
         waitForIdle();
         verifyScheduleRegisteredReceiver(never(), receiverGreenApp, timeTick);

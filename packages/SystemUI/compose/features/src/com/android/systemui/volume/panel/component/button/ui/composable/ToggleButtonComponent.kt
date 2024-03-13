@@ -32,6 +32,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.ui.compose.Icon
@@ -50,13 +53,16 @@ class ToggleButtonComponent(
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         val viewModelByState by viewModelFlow.collectAsState()
         val viewModel = viewModelByState ?: return
+        val label = viewModel.label.toString()
+
         Column(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             OutlinedIconToggleButton(
-                modifier = Modifier.height(64.dp).fillMaxWidth(),
+                modifier =
+                    Modifier.height(64.dp).fillMaxWidth().semantics { contentDescription = label },
                 checked = viewModel.isChecked,
                 onCheckedChange = onCheckedChange,
                 shape = RoundedCornerShape(28.dp),
@@ -72,7 +78,8 @@ class ToggleButtonComponent(
                 Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
             }
             Text(
-                text = viewModel.label.toString(),
+                modifier = Modifier.clearAndSetSemantics {},
+                text = label,
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

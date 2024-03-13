@@ -35,13 +35,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Intent;
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -77,6 +74,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
+    private AvalancheController mAvalancheController = new AvalancheController();
+
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
     protected static final int TEST_MINIMUM_DISPLAY_TIME = 400;
@@ -99,7 +98,7 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
     private BaseHeadsUpManager createHeadsUpManager() {
         return new TestableHeadsUpManager(mContext, mLogger, mExecutor, mGlobalSettings,
-                mSystemClock, mAccessibilityMgr, mUiEventLoggerFake);
+                mSystemClock, mAccessibilityMgr, mUiEventLoggerFake, mAvalancheController);
     }
 
     private NotificationEntry createStickyEntry(int id) {

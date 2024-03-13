@@ -111,8 +111,8 @@ bool SkiaDisplayList::prepareListAndChildren(
     }
 
     auto grContext = info.canvasContext.getGrContext();
-    for (auto mesh : mMeshes) {
-        mesh->updateSkMesh(grContext);
+    for (const auto& bufferData : mMeshBufferData) {
+        bufferData->updateBuffers(grContext);
     }
 
 #endif
@@ -181,7 +181,7 @@ void SkiaDisplayList::reset() {
 
     mDisplayList.reset();
 
-    mMeshes.clear();
+    mMeshBufferData.clear();
     mMutableImages.clear();
     mVectorDrawables.clear();
     mAnimatedImages.clear();

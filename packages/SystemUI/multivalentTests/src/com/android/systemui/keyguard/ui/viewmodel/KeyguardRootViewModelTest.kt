@@ -250,6 +250,17 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
             keyguardRepository.topClippingBounds.value = 1000
             assertThat(topClippingBounds).isEqualTo(1000)
+
+            // Run at least 1 transition to make sure value remains at 0
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+
+            // Make sure the value hasn't changed since we're GONE
+            keyguardRepository.topClippingBounds.value = 5
+            assertThat(topClippingBounds).isEqualTo(1000)
         }
 
     @Test

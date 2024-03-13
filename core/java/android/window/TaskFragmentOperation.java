@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControl;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -111,7 +112,8 @@ public final class TaskFragmentOperation implements Parcelable {
     /**
      * Creates a decor surface in the parent Task of the TaskFragment. The created decor surface
      * will be provided in {@link TaskFragmentTransaction#TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED}
-     * event callback.
+     * event callback. The decor surface can be used to draw the divider between TaskFragments or
+     * other decorations.
      */
     public static final int OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE = 14;
 
@@ -135,6 +137,15 @@ public final class TaskFragmentOperation implements Parcelable {
      */
     public static final int OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH = 17;
 
+    /**
+     * Sets whether the decor surface will be boosted. When not boosted, the decor surface is placed
+     * below any TaskFragments in untrusted mode or any activities with uid different from the
+     * TaskFragmentOrganizer uid and just above its owner TaskFragment; when boosted, the decor
+     * surface is placed above all the non-boosted windows in the Task, the content of these
+     * non-boosted windows will be hidden and inputs are disabled.
+     */
+    public static final int OP_TYPE_SET_DECOR_SURFACE_BOOSTED = 18;
+
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
             OP_TYPE_CREATE_TASK_FRAGMENT,
@@ -155,6 +166,7 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE,
             OP_TYPE_SET_DIM_ON_TASK,
             OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH,
+            OP_TYPE_SET_DECOR_SURFACE_BOOSTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationType {}
@@ -186,12 +198,18 @@ public final class TaskFragmentOperation implements Parcelable {
 
     private final boolean mMoveToBottomIfClearWhenLaunch;
 
+    private final boolean mBooleanValue;
+
+    @Nullable
+    private final SurfaceControl.Transaction mSurfaceTransaction;
+
     private TaskFragmentOperation(@OperationType int opType,
             @Nullable TaskFragmentCreationParams taskFragmentCreationParams,
             @Nullable IBinder activityToken, @Nullable Intent activityIntent,
             @Nullable Bundle bundle, @Nullable IBinder secondaryFragmentToken,
             @Nullable TaskFragmentAnimationParams animationParams,
-            boolean isolatedNav, boolean dimOnTask, boolean moveToBottomIfClearWhenLaunch) {
+            boolean isolatedNav, boolean dimOnTask, boolean moveToBottomIfClearWhenLaunch,
+            boolean booleanValue, @Nullable SurfaceControl.Transaction surfaceTransaction) {
         mOpType = opType;
         mTaskFragmentCreationParams = taskFragmentCreationParams;
         mActivityToken = activityToken;
@@ -202,6 +220,8 @@ public final class TaskFragmentOperation implements Parcelable {
         mIsolatedNav = isolatedNav;
         mDimOnTask = dimOnTask;
         mMoveToBottomIfClearWhenLaunch = moveToBottomIfClearWhenLaunch;
+        mBooleanValue = booleanValue;
+        mSurfaceTransaction = surfaceTransaction;
     }
 
     private TaskFragmentOperation(Parcel in) {
@@ -215,6 +235,8 @@ public final class TaskFragmentOperation implements Parcelable {
         mIsolatedNav = in.readBoolean();
         mDimOnTask = in.readBoolean();
         mMoveToBottomIfClearWhenLaunch = in.readBoolean();
+        mBooleanValue = in.readBoolean();
+        mSurfaceTransaction = in.readTypedObject(SurfaceControl.Transaction.CREATOR);
     }
 
     @Override
@@ -229,6 +251,8 @@ public final class TaskFragmentOperation implements Parcelable {
         dest.writeBoolean(mIsolatedNav);
         dest.writeBoolean(mDimOnTask);
         dest.writeBoolean(mMoveToBottomIfClearWhenLaunch);
+        dest.writeBoolean(mBooleanValue);
+        dest.writeTypedObject(mSurfaceTransaction, flags);
     }
 
     @NonNull
@@ -324,6 +348,22 @@ public final class TaskFragmentOperation implements Parcelable {
         return mMoveToBottomIfClearWhenLaunch;
     }
 
+    /** Returns the boolean value for this operation. */
+    public boolean getBooleanValue() {
+        return mBooleanValue;
+    }
+
+    /**
+     * Returns {@link SurfaceControl.Transaction} associated with this operation. Currently, this is
+     * only used by {@link TaskFragmentOperation#OP_TYPE_SET_DECOR_SURFACE_BOOSTED} to specify a
+     * {@link SurfaceControl.Transaction} that should be applied together with the transaction to
+     * change the decor surface layers.
+     */
+    @Nullable
+    public SurfaceControl.Transaction getSurfaceTransaction() {
+        return mSurfaceTransaction;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -349,6 +389,10 @@ public final class TaskFragmentOperation implements Parcelable {
         sb.append(", isolatedNav=").append(mIsolatedNav);
         sb.append(", dimOnTask=").append(mDimOnTask);
         sb.append(", moveToBottomIfClearWhenLaunch=").append(mMoveToBottomIfClearWhenLaunch);
+        sb.append(", booleanValue=").append(mBooleanValue);
+        if (mSurfaceTransaction != null) {
+            sb.append(", surfaceTransaction=").append(mSurfaceTransaction);
+        }
 
         sb.append('}');
         return sb.toString();
@@ -358,7 +402,7 @@ public final class TaskFragmentOperation implements Parcelable {
     public int hashCode() {
         return Objects.hash(mOpType, mTaskFragmentCreationParams, mActivityToken, mActivityIntent,
                 mBundle, mSecondaryFragmentToken, mAnimationParams, mIsolatedNav, mDimOnTask,
-                mMoveToBottomIfClearWhenLaunch);
+                mMoveToBottomIfClearWhenLaunch, mBooleanValue, mSurfaceTransaction);
     }
 
     @Override
@@ -376,7 +420,9 @@ public final class TaskFragmentOperation implements Parcelable {
                 && Objects.equals(mAnimationParams, other.mAnimationParams)
                 && mIsolatedNav == other.mIsolatedNav
                 && mDimOnTask == other.mDimOnTask
-                && mMoveToBottomIfClearWhenLaunch == other.mMoveToBottomIfClearWhenLaunch;
+                && mMoveToBottomIfClearWhenLaunch == other.mMoveToBottomIfClearWhenLaunch
+                && mBooleanValue == other.mBooleanValue
+                && Objects.equals(mSurfaceTransaction, other.mSurfaceTransaction);
     }
 
     @Override
@@ -413,6 +459,11 @@ public final class TaskFragmentOperation implements Parcelable {
         private boolean mDimOnTask;
 
         private boolean mMoveToBottomIfClearWhenLaunch;
+
+        private boolean mBooleanValue;
+
+        @Nullable
+        private SurfaceControl.Transaction mSurfaceTransaction;
 
         /**
          * @param opType the {@link OperationType} of this {@link TaskFragmentOperation}.
@@ -505,13 +556,37 @@ public final class TaskFragmentOperation implements Parcelable {
         }
 
         /**
+         * Sets the boolean value for this operation.
+         * TODO(b/327338038) migrate other boolean values to use shared mBooleanValue
+         */
+        @NonNull
+        public Builder setBooleanValue(boolean booleanValue) {
+            mBooleanValue = booleanValue;
+            return this;
+        }
+
+        /**
+         * Sets {@link SurfaceControl.Transaction} associated with this operation. Currently, this
+         * is only used by {@link TaskFragmentOperation#OP_TYPE_SET_DECOR_SURFACE_BOOSTED} to
+         * specify a {@link SurfaceControl.Transaction} that should be applied together with the
+         * transaction to change the decor surface layers.
+         */
+        @NonNull
+        public Builder setSurfaceTransaction(
+                @Nullable SurfaceControl.Transaction surfaceTransaction) {
+            mSurfaceTransaction = surfaceTransaction;
+            return this;
+        }
+
+        /**
          * Constructs the {@link TaskFragmentOperation}.
          */
         @NonNull
         public TaskFragmentOperation build() {
             return new TaskFragmentOperation(mOpType, mTaskFragmentCreationParams, mActivityToken,
                     mActivityIntent, mBundle, mSecondaryFragmentToken, mAnimationParams,
-                    mIsolatedNav, mDimOnTask, mMoveToBottomIfClearWhenLaunch);
+                    mIsolatedNav, mDimOnTask, mMoveToBottomIfClearWhenLaunch, mBooleanValue,
+                    mSurfaceTransaction);
         }
     }
 }

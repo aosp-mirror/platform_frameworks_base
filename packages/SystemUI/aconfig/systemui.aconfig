@@ -463,6 +463,13 @@ flag {
 }
 
 flag {
+   name: "enable_contextual_tips_frequency_cap"
+   description: "Enables frequency capping for contextual tips, e.g. 1x/day, 2x/week, 3x/lifetime."
+   namespace: "systemui"
+   bug: "322891421"
+}
+
+flag {
    name: "enable_contextual_tips"
    description: "Enables showing contextual tips."
    namespace: "systemui"
@@ -627,4 +634,12 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "qs_ui_refactor"
+    namespace: "systemui"
+    description: "Enables the new QS UI pipeline that follows recommended architecture and uses"
+      " Compose for the UI."
+    bug: "325099249"
 }

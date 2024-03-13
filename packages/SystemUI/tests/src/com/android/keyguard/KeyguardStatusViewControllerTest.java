@@ -30,12 +30,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.animation.AnimatorTestRule;
+import android.platform.test.annotations.DisableFlags;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
+import com.android.systemui.Flags;
 import com.android.systemui.animation.ViewHierarchyAnimator;
 import com.android.systemui.plugins.clocks.ClockConfig;
 import com.android.systemui.plugins.clocks.ClockController;
@@ -80,6 +82,7 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void onLocaleListChangedNotifiesClockSwitchController() {
         ArgumentCaptor<ConfigurationListener> configurationListenerArgumentCaptor =
                 ArgumentCaptor.forClass(ConfigurationListener.class);
@@ -239,6 +242,7 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     public void statusAreaHeightChange_animatesHeightOutputChange() {
         // Init & Capture Layout Listener
         mController.onInit();

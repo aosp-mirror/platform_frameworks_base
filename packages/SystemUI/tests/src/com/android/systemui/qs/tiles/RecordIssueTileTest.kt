@@ -30,6 +30,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
@@ -66,6 +67,7 @@ class RecordIssueTileTest : SysuiTestCase() {
     @Mock private lateinit var keyguardDismissUtil: KeyguardDismissUtil
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var dialogLauncherAnimator: DialogTransitionAnimator
+    @Mock private lateinit var panelInteractor: PanelInteractor
     @Mock private lateinit var userContextProvider: UserContextProvider
     @Mock private lateinit var delegateFactory: RecordIssueDialogDelegate.Factory
     @Mock private lateinit var dialogDelegate: RecordIssueDialogDelegate
@@ -96,6 +98,7 @@ class RecordIssueTileTest : SysuiTestCase() {
                 keyguardDismissUtil,
                 keyguardStateController,
                 dialogLauncherAnimator,
+                panelInteractor,
                 userContextProvider,
                 delegateFactory,
             )
