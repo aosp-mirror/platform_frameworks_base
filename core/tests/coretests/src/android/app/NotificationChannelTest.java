@@ -46,6 +46,7 @@ import android.os.Parcel;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
+import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.MediaStore.Audio.AudioColumns;
 import android.test.mock.MockContentResolver;
@@ -74,6 +75,7 @@ import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class NotificationChannelTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
