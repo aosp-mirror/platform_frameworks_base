@@ -4794,8 +4794,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getCompat(), getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), app.getLoggableCompatChanges(),
-                        serializedSystemFontMap, app.getStartElapsedTime(), app.getStartUptime());
+                        app.getDisabledCompatChanges(), serializedSystemFontMap,
+                        app.getStartElapsedTime(), app.getStartUptime());
             } else {
                 thread.bindApplication(processName, appInfo,
                         app.sdkSandboxClientAppVolumeUuid, app.sdkSandboxClientAppPackage,

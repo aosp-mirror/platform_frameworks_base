@@ -24,7 +24,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.compat.flags.Flags;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
@@ -41,7 +40,7 @@ import java.util.Set;
  * @hide
  */
 public final class ChangeReporter {
-    private static final String TAG = "CompatChangeReporter";
+    private static final String TAG = "CompatibilityChangeReporter";
     private int mSource;
 
     private static final class ChangeReport {
@@ -85,34 +84,19 @@ public final class ChangeReporter {
      * Report the change to stats log and to the debug log if the change was not previously
      * logged already.
      *
-     * @param uid             affected by the change
-     * @param changeId        the reported change id
-     * @param state           of the reported change - enabled/disabled/only logged
-     * @param isLoggableBySdk whether debug logging is allowed for this change based on target
-     *                        SDK version. This is combined with other logic to determine whether to
-     *                        actually log. If the sdk version does not matter, should be true.
-     */
-    public void reportChange(int uid, long changeId, int state, boolean isLoggableBySdk) {
-        if (shouldWriteToStatsLog(uid, changeId, state)) {
-            FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid,
-                    changeId, state, mSource);
-        }
-        if (shouldWriteToDebug(uid, changeId, state, isLoggableBySdk)) {
-            debugLog(uid, changeId, state);
-        }
-        markAsReported(uid, new ChangeReport(changeId, state));
-    }
-
-    /**
-     * Report the change to stats log and to the debug log if the change was not previously
-     * logged already.
-     *
      * @param uid      affected by the change
      * @param changeId the reported change id
      * @param state    of the reported change - enabled/disabled/only logged
      */
     public void reportChange(int uid, long changeId, int state) {
-        reportChange(uid, changeId, state, true);
+        if (shouldWriteToStatsLog(uid, changeId, state)) {
+            FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid,
+                    changeId, state, mSource);
+        }
+        if (shouldWriteToDebug(uid, changeId, state)) {
+            debugLog(uid, changeId, state);
+        }
+        markAsReported(uid, new ChangeReport(changeId, state));
     }
 
     /**
@@ -146,43 +130,14 @@ public final class ChangeReporter {
     /**
      * Returns whether the next report should be logged to logcat.
      *
-     * @param uid             affected by the change
-     * @param changeId        the reported change id
-     * @param state           of the reported change - enabled/disabled/only logged
-     * @param isLoggableBySdk whether debug logging is allowed for this change based on target
-     *                        SDK version. This is combined with other logic to determine whether to
-     *                        actually log. If the sdk version does not matter, should be true.
-     * @return true if the report should be logged
-     */
-    @VisibleForTesting
-    public boolean shouldWriteToDebug(
-            int uid, long changeId, int state, boolean isLoggableBySdk) {
-        // If log all bit is on, always return true.
-        if (mDebugLogAll) return true;
-        // If the change has already been reported, do not write.
-        if (isAlreadyReported(uid, new ChangeReport(changeId, state))) return false;
-
-        // If the flag is turned off or the TAG's logging is forced to debug level with
-        // `adb setprop log.tag.CompatChangeReporter=DEBUG`, write to debug since the above checks
-        // have already passed.
-        boolean skipLoggingFlag = Flags.skipOldAndDisabledCompatLogging();
-        if (!skipLoggingFlag || Log.isLoggable(TAG, Log.DEBUG)) return true;
-
-        // Log if the change is enabled and targets the latest sdk version.
-        return isLoggableBySdk && state != STATE_DISABLED;
-    }
-
-    /**
-     * Returns whether the next report should be logged to logcat.
-     *
-     * @param uid         affected by the change
-     * @param changeId    the reported change id
-     * @param state       of the reported change - enabled/disabled/only logged
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
      * @return true if the report should be logged
      */
     @VisibleForTesting
     public boolean shouldWriteToDebug(int uid, long changeId, int state) {
-        return shouldWriteToDebug(uid, changeId, state, true);
+        return mDebugLogAll || !isAlreadyReported(uid, new ChangeReport(changeId, state));
     }
 
     private boolean isAlreadyReported(int uid, ChangeReport report) {
