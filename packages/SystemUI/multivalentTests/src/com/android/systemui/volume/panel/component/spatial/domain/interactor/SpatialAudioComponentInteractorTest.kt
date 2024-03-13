@@ -108,6 +108,7 @@ class SpatialAudioComponentInteractorTest : SysuiTestCase() {
 
                 assertThat(values)
                     .containsExactly(
+                        SpatialAudioEnabledModel.Unknown,
                         SpatialAudioEnabledModel.Disabled,
                         SpatialAudioEnabledModel.HeadTrackingEnabled,
                         SpatialAudioEnabledModel.SpatialAudioEnabled,
