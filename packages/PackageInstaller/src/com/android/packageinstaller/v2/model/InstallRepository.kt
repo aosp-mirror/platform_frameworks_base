@@ -30,6 +30,7 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionInfo
 import android.content.pm.PackageInstaller.SessionParams
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.os.Process
@@ -830,12 +831,21 @@ class InstallRepository(private val context: Context) {
             val resultIntent = if (shouldReturnResult) {
                 Intent().putExtra(Intent.EXTRA_INSTALL_RESULT, PackageManager.INSTALL_SUCCEEDED)
             } else {
-                packageManager.getLaunchIntentForPackage(newPackageInfo!!.packageName)
+                val intent = packageManager.getLaunchIntentForPackage(newPackageInfo!!.packageName)
+                if (isLauncherActivityEnabled(intent)) intent else null
             }
             _installResult.setValue(InstallSuccess(appSnippet, shouldReturnResult, resultIntent))
         } else {
             _installResult.setValue(InstallFailed(appSnippet, statusCode, legacyStatus, message))
         }
+    }
+
+    private fun isLauncherActivityEnabled(intent: Intent?): Boolean {
+        if (intent == null || intent.component == null) {
+            return false
+        }
+        return (intent.component?.let { packageManager.getComponentEnabledSetting(it) }
+            != COMPONENT_ENABLED_STATE_DISABLED)
     }
 
     /**
