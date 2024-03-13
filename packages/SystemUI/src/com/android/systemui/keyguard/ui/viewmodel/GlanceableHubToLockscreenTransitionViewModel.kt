@@ -72,7 +72,11 @@ constructor(
                     duration = TO_LOCKSCREEN_DURATION,
                     onStep = { value -> -translatePx + value * translatePx },
                     interpolator = EMPHASIZED,
-                    onCancel = { -translatePx.toFloat() },
+                    // Move notifications back to their original position since they can be
+                    // accessed from the shade, and also keyguard elements in case the animation
+                    // is cancelled.
+                    onFinish = { 0f },
+                    onCancel = { 0f },
                     name = "GLANCEABLE_HUB->LOCKSCREEN: keyguardTranslationX"
                 )
             }
