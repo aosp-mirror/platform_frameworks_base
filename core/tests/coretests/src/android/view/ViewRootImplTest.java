@@ -1024,6 +1024,13 @@ public class ViewRootImplTest {
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_NO_PREFERENCE);
         });
+        Thread.sleep(delay);
+        sInstrumentation.runOnMainSync(() -> {
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        });
 
         // Infrequent update
         Thread.sleep(delay);
