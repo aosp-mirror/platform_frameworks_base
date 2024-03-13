@@ -5870,7 +5870,10 @@ public interface WindowManager extends ViewManager {
                     && height == WindowManager.LayoutParams.MATCH_PARENT;
         }
 
-        private static String layoutInDisplayCutoutModeToString(
+        /**
+         * @hide
+         */
+        public static String layoutInDisplayCutoutModeToString(
                 @LayoutInDisplayCutoutMode int mode) {
             switch (mode) {
                 case LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT:
