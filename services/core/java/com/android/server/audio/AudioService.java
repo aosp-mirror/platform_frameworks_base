@@ -7124,7 +7124,8 @@ public class AudioService extends IAudioService.Stub
 
         switch (mPlatformType) {
         case AudioSystem.PLATFORM_VOICE:
-            if (isInCommunication()) {
+            if (isInCommunication()
+                    || mAudioSystem.isStreamActive(AudioManager.STREAM_VOICE_CALL, 0)) {
                 if (mDeviceBroker.isBluetoothScoActive()) {
                     // Log.v(TAG, "getActiveStreamType: Forcing STREAM_BLUETOOTH_SCO...");
                     return AudioSystem.STREAM_BLUETOOTH_SCO;
