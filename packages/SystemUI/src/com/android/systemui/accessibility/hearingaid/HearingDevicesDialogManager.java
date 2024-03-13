@@ -16,10 +16,14 @@
 
 package com.android.systemui.accessibility.hearingaid;
 
+import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.dagger.SysUISingleton;
@@ -39,13 +43,16 @@ public class HearingDevicesDialogManager {
     private SystemUIDialog mDialog;
     private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final HearingDevicesDialogDelegate.Factory mDialogFactory;
+    private final LocalBluetoothManager mLocalBluetoothManager;
 
     @Inject
     public HearingDevicesDialogManager(
             DialogTransitionAnimator dialogTransitionAnimator,
-            HearingDevicesDialogDelegate.Factory dialogFactory) {
+            HearingDevicesDialogDelegate.Factory dialogFactory,
+            @Nullable LocalBluetoothManager localBluetoothManager) {
         mDialogTransitionAnimator = dialogTransitionAnimator;
         mDialogFactory = dialogFactory;
+        mLocalBluetoothManager = localBluetoothManager;
     }
 
     /**
@@ -60,13 +67,13 @@ public class HearingDevicesDialogManager {
             }
             destroyDialog();
         }
-        mDialog = mDialogFactory.create().createDialog();
+
+        mDialog = mDialogFactory.create(!isAnyBondedHearingDevice()).createDialog();
 
         if (view != null) {
             mDialogTransitionAnimator.showFromView(mDialog, view,
                     new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG),
-                    true);
+                            INTERACTION_JANK_TAG), /* animateBackgroundBoundsChange= */ true);
         } else {
             mDialog.show();
         }
@@ -75,5 +82,18 @@ public class HearingDevicesDialogManager {
     private void destroyDialog() {
         mDialog.dismiss();
         mDialog = null;
+    }
+
+    private boolean isAnyBondedHearingDevice() {
+        if (mLocalBluetoothManager == null) {
+            return false;
+        }
+        if (!mLocalBluetoothManager.getBluetoothAdapter().isEnabled()) {
+            return false;
+        }
+
+        return mLocalBluetoothManager.getCachedDeviceManager().getCachedDevicesCopy().stream()
+                .anyMatch(device -> device.isHearingAidDevice()
+                        && device.getBondState() != BluetoothDevice.BOND_NONE);
     }
 }
