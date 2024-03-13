@@ -17,6 +17,8 @@ package com.android.wm.shell.draganddrop
 
 import android.app.ActivityManager
 import android.os.RemoteException
+import android.os.Trace
+import android.os.Trace.TRACE_TAG_WINDOW_MANAGER
 import android.util.Log
 import android.view.DragEvent
 import android.view.IWindowManager
@@ -27,6 +29,7 @@ import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import java.util.function.Consumer
+import kotlin.random.Random
 
 /**
  * Manages the listener and callbacks for unhandled global drags.
@@ -101,10 +104,15 @@ class GlobalDragListener(
 
     @VisibleForTesting
     fun onUnhandledDrop(dragEvent: DragEvent, wmCallback: IUnhandledDragCallback) {
+        val traceCookie = Random.nextInt()
+        Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, "GlobalDragListener.onUnhandledDrop",
+            traceCookie);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
             "onUnhandledDrop: %s", dragEvent)
         if (callback == null) {
             wmCallback.notifyUnhandledDropComplete(false)
+            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, "GlobalDragListener.onUnhandledDrop",
+                traceCookie);
             return
         }
 
@@ -112,6 +120,8 @@ class GlobalDragListener(
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                 "Notifying onUnhandledDrop complete: %b", it)
             wmCallback.notifyUnhandledDropComplete(it)
+            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, "GlobalDragListener.onUnhandledDrop",
+                traceCookie);
         }
     }
 

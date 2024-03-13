@@ -21,8 +21,10 @@ import static android.content.pm.ActivityInfo.OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS;
 import static android.graphics.HardwareRenderer.SYNC_CONTEXT_IS_STOPPED;
 import static android.graphics.HardwareRenderer.SYNC_LOST_SURFACE_REWARD_IF_FOUND;
 import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
+import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.DragEvent.ACTION_DRAG_LOCATION;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
@@ -6464,7 +6466,18 @@ public final class ViewRootImpl implements ViewParent,
                     DragEvent event = (DragEvent) msg.obj;
                     // only present when this app called startDrag()
                     event.mLocalState = mLocalDragState;
-                    handleDragEvent(event);
+                    final boolean traceDragEvent = event.mAction != ACTION_DRAG_LOCATION;
+                    try {
+                        if (traceDragEvent) {
+                            Trace.traceBegin(TRACE_TAG_VIEW,
+                                    "c#" + DragEvent.actionToString(event.mAction));
+                        }
+                        handleDragEvent(event);
+                    } finally {
+                        if (traceDragEvent) {
+                            Trace.traceEnd(TRACE_TAG_VIEW);
+                        }
+                    }
                 } break;
                 case MSG_DISPATCH_SYSTEM_UI_VISIBILITY: {
                     handleDispatchSystemUiVisibilityChanged();
