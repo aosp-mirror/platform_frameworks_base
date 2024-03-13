@@ -362,6 +362,12 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                     suppressedByDND);
         }
 
+        // The current user hasn't completed setup, launch FSI.
+        if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+            return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_USER_SETUP_INCOMPLETE,
+                    suppressedByDND);
+        }
+
         // Detect the case determined by b/231322873 to launch FSI while device is in use,
         // as blocked by the correct implementation, and report the event.
         return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD,
