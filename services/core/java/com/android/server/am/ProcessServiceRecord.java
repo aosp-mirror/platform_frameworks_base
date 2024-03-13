@@ -674,14 +674,16 @@ final class ProcessServiceRecord {
         return mScheduleServiceTimeoutPending;
     }
 
-    @GuardedBy("mService")
     void onProcessUnfrozen() {
-        scheduleServiceTimeoutIfNeededLocked();
+        synchronized (mService) {
+            scheduleServiceTimeoutIfNeededLocked();
+        }
     }
 
-    @GuardedBy("mService")
     void onProcessFrozenCancelled() {
-        scheduleServiceTimeoutIfNeededLocked();
+        synchronized (mService) {
+            scheduleServiceTimeoutIfNeededLocked();
+        }
     }
 
     @GuardedBy("mService")
