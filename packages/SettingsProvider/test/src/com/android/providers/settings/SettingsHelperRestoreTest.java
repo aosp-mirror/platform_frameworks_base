@@ -16,22 +16,30 @@
 
 package com.android.providers.settings;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.provider.SettingsStringUtil;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.util.test.BroadcastInterceptingContext;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Tests for {@link SettingsHelper#restoreValue(Context, ContentResolver, ContentValues, Uri,
@@ -164,5 +172,34 @@ public class SettingsHelperRestoreTest {
                 Build.VERSION.SDK_INT);
 
         assertEquals(restoreSettingValue, Settings.Secure.getInt(mContentResolver, settingName));
+    }
+
+    @Test
+    public void restoreAccessibilityQsTargets_broadcastSent()
+            throws ExecutionException, InterruptedException {
+        BroadcastInterceptingContext interceptingContext = new BroadcastInterceptingContext(
+                mContext);
+        final String settingName = Settings.Secure.ACCESSIBILITY_QS_TARGETS;
+        final String restoreSettingValue = "com.android.server.accessibility/ColorInversion"
+                + SettingsStringUtil.DELIMITER
+                + "com.android.server.accessibility/ColorCorrectionTile";
+        BroadcastInterceptingContext.FutureIntent futureIntent =
+                interceptingContext.nextBroadcastIntent(Intent.ACTION_SETTING_RESTORED);
+
+        mSettingsHelper.restoreValue(
+                interceptingContext,
+                mContentResolver,
+                new ContentValues(2),
+                Settings.Secure.getUriFor(settingName),
+                settingName,
+                restoreSettingValue,
+                Build.VERSION.SDK_INT);
+
+        Intent intentReceived = futureIntent.get();
+        assertThat(intentReceived.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE))
+                .isEqualTo(restoreSettingValue);
+        assertThat(intentReceived.getIntExtra(
+                Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT, /* defaultValue= */ 0))
+                .isEqualTo(Build.VERSION.SDK_INT);
     }
 }
