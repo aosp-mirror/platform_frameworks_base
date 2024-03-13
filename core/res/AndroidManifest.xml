@@ -6920,7 +6920,8 @@
          projection. This is intended for on device screen recording system app.
          @FlaggedApi("android.permission.flags.sensitive_notification_app_protection") -->
     <permission android:name="android.permission.RECORD_SENSITIVE_CONTENT"
-                android:protectionLevel="signature"/>
+        android:protectionLevel="signature"
+        android:featureFlag="android.permission.flags.sensitive_notification_app_protection"/>
 
     <!-- @SystemApi Allows an application to read install sessions
          @hide This is not a third-party API (intended for system apps). -->
