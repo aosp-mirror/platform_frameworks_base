@@ -168,7 +168,7 @@ class HighBrightnessModeController {
     }
 
     float getCurrentBrightnessMax() {
-        if (!deviceSupportsHbm() || isCurrentlyAllowed()) {
+        if (!deviceSupportsHbm() || isHbmCurrentlyAllowed()) {
             // Either the device doesn't support HBM, or HBM range is currently allowed (device
             // it in a high-lux environment). In either case, return the highest brightness
             // level supported by the device.
@@ -356,7 +356,7 @@ class HighBrightnessModeController {
         return event.getStartTimeMillis();
     }
 
-    private boolean isCurrentlyAllowed() {
+    boolean isHbmCurrentlyAllowed() {
         // Returns true if HBM is allowed (above the ambient lux threshold) and there's still
         // time within the current window for additional HBM usage. We return false if there is an
         // HDR layer because we don't want the brightness MAX to change for HDR, which has its
@@ -369,7 +369,7 @@ class HighBrightnessModeController {
                 && !mIsBlockedByLowPowerMode);
     }
 
-    private boolean deviceSupportsHbm() {
+    boolean deviceSupportsHbm() {
         return mHbmData != null && mHighBrightnessModeMetadata != null;
     }
 
@@ -462,7 +462,7 @@ class HighBrightnessModeController {
                     + ", isOnlyAllowedToStayOn: " + isOnlyAllowedToStayOn
                     + ", remainingAllowedTime: " + remainingTime
                     + ", isLuxHigh: " + mIsInAllowedAmbientRange
-                    + ", isHBMCurrentlyAllowed: " + isCurrentlyAllowed()
+                    + ", isHBMCurrentlyAllowed: " + isHbmCurrentlyAllowed()
                     + ", isHdrLayerPresent: " + mIsHdrLayerPresent
                     + ", mMaxDesiredHdrSdrRatio: " + mMaxDesiredHdrSdrRatio
                     + ", isAutoBrightnessEnabled: " +  mIsAutoBrightnessEnabled
@@ -575,7 +575,7 @@ class HighBrightnessModeController {
             return BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
         } else if (mIsHdrLayerPresent) {
             return BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR;
-        } else if (isCurrentlyAllowed()) {
+        } else if (isHbmCurrentlyAllowed()) {
             return BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT;
         }
 
