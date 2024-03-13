@@ -1,6 +1,11 @@
 package com.android.systemui.scene.ui.composable
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.transitions
+import com.android.systemui.bouncer.ui.composable.Bouncer
+import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
@@ -27,6 +32,10 @@ import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettings
  * Please keep the list sorted alphabetically.
  */
 val SceneContainerTransitions = transitions {
+    defaultSwipeSpec = spring(Spring.DampingRatioLowBouncy, Spring.StiffnessLow)
+
+    // Scene transitions
+
     from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
     from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }
     from(
@@ -64,4 +73,13 @@ val SceneContainerTransitions = transitions {
     from(Scenes.Lockscreen, to = Scenes.QuickSettings) { lockscreenToQuickSettingsTransition() }
     from(Scenes.Lockscreen, to = Scenes.Gone) { lockscreenToGoneTransition() }
     from(Scenes.Shade, to = Scenes.QuickSettings) { shadeToQuickSettingsTransition() }
+
+    // Scene overscroll
+
+    overscroll(Scenes.Bouncer, Orientation.Vertical) {
+        translate(Bouncer.Elements.Content, y = { absoluteDistance })
+    }
+    overscroll(Scenes.Shade, Orientation.Vertical) {
+        translate(Notifications.Elements.NotificationScrim, y = { absoluteDistance })
+    }
 }
