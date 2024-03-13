@@ -147,6 +147,7 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
         mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
+        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
 
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
