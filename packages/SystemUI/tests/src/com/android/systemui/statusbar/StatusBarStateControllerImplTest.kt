@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -153,6 +154,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 shadeRepository,
                 keyguardTransitionInteractor,
                 { kosmos.sceneInteractor },
+                { kosmos.fromGoneTransitionInteractor },
             )
 
         whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(MutableStateFlow(false))

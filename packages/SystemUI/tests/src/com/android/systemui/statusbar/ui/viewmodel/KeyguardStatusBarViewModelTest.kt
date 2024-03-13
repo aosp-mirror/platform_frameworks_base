@@ -24,6 +24,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
@@ -63,9 +64,9 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
             ConfigurationInteractor(FakeConfigurationRepository()),
             FakeShadeRepository(),
             kosmos.keyguardTransitionInteractor,
-        ) {
-            kosmos.sceneInteractor
-        }
+            { kosmos.sceneInteractor },
+            { kosmos.fromGoneTransitionInteractor },
+        )
     private val keyguardStatusBarInteractor =
         KeyguardStatusBarInteractor(
             FakeKeyguardStatusBarRepository(),
