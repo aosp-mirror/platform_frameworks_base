@@ -77,6 +77,7 @@ aconfig_declarations_group {
         "camera_platform_flags_core_java_lib",
         "com.android.hardware.input-aconfig-java",
         "com.android.input.flags-aconfig-java",
+        "com.android.internal.compat.flags-aconfig-java",
         "com.android.internal.foldables.flags-aconfig-java",
         "com.android.internal.pm.pkg.component.flags-aconfig-java",
         "com.android.media.flags.bettertogether-aconfig-java",
@@ -627,6 +628,13 @@ java_aconfig_library {
 java_aconfig_library {
     name: "com.android.internal.foldables.flags-aconfig-java",
     aconfig_declarations: "fold_lock_setting_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Platform Compat
+java_aconfig_library {
+    name: "com.android.internal.compat.flags-aconfig-java",
+    aconfig_declarations: "compat_logging_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
