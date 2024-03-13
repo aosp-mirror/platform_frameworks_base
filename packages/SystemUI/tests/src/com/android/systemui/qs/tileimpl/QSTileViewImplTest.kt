@@ -18,6 +18,7 @@ package com.android.systemui.qs.tileimpl
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.platform.test.annotations.EnableFlags
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -27,6 +28,7 @@ import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
@@ -380,6 +382,34 @@ class QSTileViewImplTest : SysuiTestCase() {
         assertThat(tileView.stateDescription?.contains(unavailableString)).isTrue()
     }
 
+    @Test
+    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
+    fun onStateChange_longPressEffectActive_withInvalidDuration_doesNotCreateEffect() {
+        val state = QSTile.State() // A state that handles longPress
+
+        // GIVEN an invalid long-press effect duration
+        tileView.constantLongPressEffectDuration = -1
+
+        // WHEN the state changes
+        tileView.changeState(state)
+
+        // THEN the long-press effect is not created
+        assertThat(tileView.hasLongPressEffect).isFalse()
+    }
+
+    @Test
+    @EnableFlags(FLAG_QUICK_SETTINGS_VISUAL_HAPTICS_LONGPRESS)
+    fun onStateChange_longPressEffectActive_withValidDuration_createsEffect() {
+        // GIVEN a test state that handles long-press and a valid long-press effect duration
+        val state = QSTile.State()
+
+        // WHEN the state changes
+        tileView.changeState(state)
+
+        // THEN the long-press effect created
+        assertThat(tileView.hasLongPressEffect).isTrue()
+    }
+
     class FakeTileView(
         context: Context,
         collapsed: Boolean
@@ -387,6 +417,9 @@ class QSTileViewImplTest : SysuiTestCase() {
             ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings),
             collapsed
     ) {
+        var constantLongPressEffectDuration = 500
+
+        override fun getLongPressEffectDuration(): Int = constantLongPressEffectDuration
         fun changeState(state: QSTile.State) {
             handleStateChanged(state)
         }
