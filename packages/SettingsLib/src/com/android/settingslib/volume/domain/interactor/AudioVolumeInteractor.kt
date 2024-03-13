@@ -84,10 +84,10 @@ class AudioVolumeInteractor(
                     (audioStreamModel.audioStream.value == AudioManager.STREAM_NOTIFICATION &&
                         audioStreamModel.isMuted)
             ) {
-                return 0
+                return audioStreamModel.minVolume
             }
         } else if (audioStreamModel.isMuted) {
-            return 0
+            return audioStreamModel.minVolume
         }
         return audioStreamModel.volume
     }

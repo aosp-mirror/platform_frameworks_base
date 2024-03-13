@@ -32,6 +32,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Expandable
@@ -52,6 +57,7 @@ class ButtonComponent(
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         val viewModelByState by viewModelFlow.collectAsState()
         val viewModel = viewModelByState ?: return
+        val label = viewModel.label.toString()
 
         Column(
             modifier = modifier,
@@ -59,7 +65,11 @@ class ButtonComponent(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Expandable(
-                modifier = Modifier.height(64.dp).fillMaxWidth(),
+                modifier =
+                    Modifier.height(64.dp).fillMaxWidth().semantics {
+                        role = Role.Button
+                        contentDescription = label
+                    },
                 color = MaterialTheme.colorScheme.primaryContainer,
                 shape = RoundedCornerShape(28.dp),
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -71,7 +81,8 @@ class ButtonComponent(
                 }
             }
             Text(
-                text = viewModel.label.toString(),
+                modifier = Modifier.clearAndSetSemantics {},
+                text = label,
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

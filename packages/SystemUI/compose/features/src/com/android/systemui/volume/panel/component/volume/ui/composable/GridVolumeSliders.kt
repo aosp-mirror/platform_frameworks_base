@@ -43,7 +43,10 @@ fun GridVolumeSliders(
             VolumeSlider(
                 modifier = Modifier.fillMaxWidth(),
                 state = sliderState,
-                onValueChangeFinished = { sliderViewModel.onValueChangeFinished(sliderState, it) },
+                onValueChange = { newValue: Float ->
+                    sliderViewModel.onValueChanged(sliderState, newValue)
+                },
+                onIconTapped = { sliderViewModel.toggleMuted(sliderState) },
                 sliderColors = sliderColors,
             )
         }

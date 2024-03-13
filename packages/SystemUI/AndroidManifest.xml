@@ -911,7 +911,7 @@
 
         <activity
             android:name=".volume.panel.ui.activity.VolumePanelActivity"
-            android:label="@string/sound_settings"
+            android:label="@string/accessibility_volume_settings"
             android:excludeFromRecents="true"
             android:exported="false"
             android:launchMode="singleInstance"

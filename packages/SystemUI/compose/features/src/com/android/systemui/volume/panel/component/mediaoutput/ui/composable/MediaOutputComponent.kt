@@ -49,10 +49,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.common.ui.compose.toColor
+import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel.ConnectedDeviceViewModel
 import com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel.DeviceIconViewModel
 import com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel.MediaOutputViewModel
@@ -74,14 +80,19 @@ constructor(
             viewModel.connectedDeviceViewModel.collectAsState()
         val deviceIconViewModel: DeviceIconViewModel? by
             viewModel.deviceIconViewModel.collectAsState()
+        val clickLabel = stringResource(R.string.volume_panel_enter_media_output_settings)
 
         Expandable(
-            modifier = Modifier.fillMaxWidth().height(80.dp),
+            modifier =
+                Modifier.fillMaxWidth().height(80.dp).semantics {
+                    liveRegion = LiveRegionMode.Polite
+                    this.onClick(label = clickLabel) { false }
+                },
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(28.dp),
             onClick = { viewModel.onBarClick(it) },
         ) { _ ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                 connectedDeviceViewModel?.let { ConnectedDeviceText(it) }
 
                 deviceIconViewModel?.let { ConnectedDeviceIcon(it) }

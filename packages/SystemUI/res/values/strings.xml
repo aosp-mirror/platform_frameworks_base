@@ -1556,11 +1556,11 @@
     <string name="volume_panel_noise_control_title">Noise Control</string>
     <!-- Label for button to enabled/disable spatial audio [CHAR_LIMIT=30] -->
     <string name="volume_panel_spatial_audio_title">Spatial Audio</string>
-    <!-- Label for button to disable spatial audio [CHAR_LIMIT=20] -->
+    <!-- Label for a spatial audio button for the case when it is disabled [CHAR_LIMIT=20] -->
     <string name="volume_panel_spatial_audio_off">Off</string>
-    <!-- Label for button to enabled spatial audio [CHAR_LIMIT=20] -->
+    <!-- Label for a spatial audio button for the case when it is enabled without head tracking [CHAR_LIMIT=20] -->
     <string name="volume_panel_spatial_audio_fixed">Fixed</string>
-    <!-- Label for button to enabled head tracking [CHAR_LIMIT=20] -->
+    <!-- Label for a spatial audio button for the case when it is enabled with head tracking [CHAR_LIMIT=20] -->
     <string name="volume_panel_spatial_audio_tracking">Head Tracking</string>
 
     <string name="volume_ringer_change">Tap to change ringer mode</string>
@@ -1575,6 +1575,18 @@
     <string name="volume_dialog_title">%s volume controls</string>
 
     <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring (<xliff:g id="volume level" example="56">%1$s</xliff:g>)</string>
+
+    <!-- An audible a11y label for a button, that opens settings when clicked [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_enter_media_output_settings">Enter output settings</string>
+    <!-- An audible a11y state description for a button, that expands volume sliders menu [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_expanded_sliders">Volume sliders expanded</string>
+    <!-- An audible a11y state description for a button, that collapses volume sliders menu [CHAR LIMIT=NONE] -->
+    <string name="volume_panel_collapsed_sliders">Volume sliders collapsed</string>
+
+    <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to mute media [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_mute">mute %s</string>
+    <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to unmute media [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_unmute">unmute %s</string>
 
     <!-- Title with application label for media output settings. [CHAR LIMIT=20] -->
     <string name="media_output_label_title">Playing <xliff:g id="label" example="Music Player">%s</xliff:g> on</string>
