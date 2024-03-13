@@ -53,19 +53,22 @@
       void getFeatureDetails(in Feature feature, in IFeatureDetailsCallback featureDetailsCallback) = 4;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void requestFeatureDownload(in Feature feature, in ICancellationSignal signal, in IDownloadCallback callback) = 5;
+      void requestFeatureDownload(in Feature feature, in  AndroidFuture cancellationSignalFuture, in IDownloadCallback callback) = 5;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void requestTokenInfo(in Feature feature, in Bundle requestBundle, in  ICancellationSignal signal,
+      void requestTokenInfo(in Feature feature, in Bundle requestBundle, in  AndroidFuture cancellationSignalFuture,
                                                         in ITokenInfoCallback tokenInfocallback) = 6;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void processRequest(in Feature feature, in Bundle requestBundle, int requestType, in  ICancellationSignal cancellationSignal,
-                                                in IProcessingSignal signal, in IResponseCallback responseCallback) = 7;
+      void processRequest(in Feature feature, in Bundle requestBundle, int requestType,
+                                                in  AndroidFuture cancellationSignalFuture,
+                                                in AndroidFuture processingSignalFuture,
+                                                in IResponseCallback responseCallback) = 7;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
       void processRequestStreaming(in Feature feature,
-                    in Bundle requestBundle, int requestType, in  ICancellationSignal cancellationSignal, in  IProcessingSignal signal,
+                    in Bundle requestBundle, int requestType, in  AndroidFuture cancellationSignalFuture,
+                    in  AndroidFuture processingSignalFuture,
                     in IStreamingResponseCallback streamingCallback) = 8;
 
       String getRemoteServicePackageName() = 9;

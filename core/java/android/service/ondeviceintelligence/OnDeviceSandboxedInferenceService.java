@@ -122,46 +122,72 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
 
                 @Override
                 public void requestTokenInfo(int callerUid, Feature feature, Bundle request,
-                        ICancellationSignal cancellationSignal,
+                        AndroidFuture cancellationSignalFuture,
                         ITokenInfoCallback tokenInfoCallback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(tokenInfoCallback);
+                    ICancellationSignal transport = null;
+                    if (cancellationSignalFuture != null) {
+                        transport = CancellationSignal.createTransport();
+                        cancellationSignalFuture.complete(transport);
+                    }
                     OnDeviceSandboxedInferenceService.this.onTokenInfoRequest(callerUid,
                             feature,
                             request,
-                            CancellationSignal.fromTransport(cancellationSignal),
+                            CancellationSignal.fromTransport(transport),
                             wrapTokenInfoCallback(tokenInfoCallback));
                 }
 
                 @Override
                 public void processRequestStreaming(int callerUid, Feature feature, Bundle request,
-                        int requestType, ICancellationSignal cancellationSignal,
-                        IProcessingSignal processingSignal,
+                        int requestType,
+                        AndroidFuture cancellationSignalFuture,
+                        AndroidFuture processingSignalFuture,
                         IStreamingResponseCallback callback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(callback);
 
+                    ICancellationSignal transport = null;
+                    if (cancellationSignalFuture != null) {
+                        transport = CancellationSignal.createTransport();
+                        cancellationSignalFuture.complete(transport);
+                    }
+                    IProcessingSignal processingSignalTransport = null;
+                    if (processingSignalFuture != null) {
+                        processingSignalTransport = ProcessingSignal.createTransport();
+                        processingSignalFuture.complete(processingSignalTransport);
+                    }
                     OnDeviceSandboxedInferenceService.this.onProcessRequestStreaming(callerUid,
                             feature,
                             request,
                             requestType,
-                            CancellationSignal.fromTransport(cancellationSignal),
-                            ProcessingSignal.fromTransport(processingSignal),
+                            CancellationSignal.fromTransport(transport),
+                            ProcessingSignal.fromTransport(processingSignalTransport),
                             wrapStreamingResponseCallback(callback));
                 }
 
                 @Override
                 public void processRequest(int callerUid, Feature feature, Bundle request,
-                        int requestType, ICancellationSignal cancellationSignal,
-                        IProcessingSignal processingSignal,
+                        int requestType,
+                        AndroidFuture cancellationSignalFuture,
+                        AndroidFuture processingSignalFuture,
                         IResponseCallback callback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(callback);
-
+                    ICancellationSignal transport = null;
+                    if (cancellationSignalFuture != null) {
+                        transport = CancellationSignal.createTransport();
+                        cancellationSignalFuture.complete(transport);
+                    }
+                    IProcessingSignal processingSignalTransport = null;
+                    if (processingSignalFuture != null) {
+                        processingSignalTransport = ProcessingSignal.createTransport();
+                        processingSignalFuture.complete(processingSignalTransport);
+                    }
                     OnDeviceSandboxedInferenceService.this.onProcessRequest(callerUid, feature,
                             request, requestType,
-                            CancellationSignal.fromTransport(cancellationSignal),
-                            ProcessingSignal.fromTransport(processingSignal),
+                            CancellationSignal.fromTransport(transport),
+                            ProcessingSignal.fromTransport(processingSignalTransport),
                             wrapResponseCallback(callback));
                 }
 
@@ -206,7 +232,8 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      * Invoked when caller provides a request for a particular feature to be processed in a
      * streaming manner. The expectation from the implementation is that when processing the
      * request,
-     * it periodically populates the {@link StreamingProcessingCallback#onPartialResult} to continuously
+     * it periodically populates the {@link StreamingProcessingCallback#onPartialResult} to
+     * continuously
      * provide partial Bundle results for the caller to utilize. Optionally the implementation can
      * provide the complete response in the {@link StreamingProcessingCallback#onResult} upon
      * processing completion.
