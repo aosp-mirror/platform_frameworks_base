@@ -106,8 +106,6 @@ class AccessCheckingService(context: Context) : SystemService(context) {
         persistence.read(state)
         this.state = state
 
-        mutateState { with(policy) { onInitialized() } }
-
         appOpService.initialize()
         permissionService.initialize()
     }
