@@ -164,16 +164,18 @@ public final class NanoAppMessage implements Parcelable {
 
     /**
      * Sets the isReliable field of the message
+     *
+     * @hide
      */
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public void setIsReliable(boolean isReliable) {
         mIsReliable = isReliable;
     }
 
     /**
      * Sets the message sequence number of the message
+     *
+     * @hide
      */
-    @FlaggedApi(Flags.FLAG_RELIABLE_MESSAGE)
     public void setMessageSequenceNumber(int messageSequenceNumber) {
         mMessageSequenceNumber = messageSequenceNumber;
     }
