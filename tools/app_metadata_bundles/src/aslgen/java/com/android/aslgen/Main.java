@@ -19,16 +19,20 @@ package com.android.aslgen;
 import com.android.asllib.AndroidSafetyLabel;
 import com.android.asllib.AndroidSafetyLabel.Format;
 
+import org.xml.sax.SAXException;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 public class Main {
 
-    /**
-     * Takes the options to make file conversion.
-     */
-    public static void main(String[] args) throws IOException {
+    /** Takes the options to make file conversion. */
+    public static void main(String[] args)
+            throws IOException, ParserConfigurationException, SAXException, TransformerException {
 
         String inFile = null;
         String outFile = null;
@@ -78,15 +82,13 @@ public class Main {
             throw new IllegalArgumentException("output format is required");
         }
 
-
         System.out.println("in path: " + inFile);
         System.out.println("out path: " + outFile);
         System.out.println("in format: " + inFormat);
         System.out.println("out format: " + outFormat);
 
-        var asl = AndroidSafetyLabel.readFromStream(new FileInputStream(inFile),
-                Format.HUMAN_READABLE);
-        asl.writeToStream(new FileOutputStream(outFile), Format.ON_DEVICE);
+        var asl = AndroidSafetyLabel.readFromStream(new FileInputStream(inFile), inFormat);
+        asl.writeToStream(new FileOutputStream(outFile), outFormat);
     }
 
     private static Format getFormat(String argValue) {

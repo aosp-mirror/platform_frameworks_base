@@ -12,11 +12,6 @@ java_library_host {
     srcs: [
         "src/lib/java/**/*.java",
     ],
-    target: {
-        windows: {
-            enabled: true,
-        },
-    },
 }
 
 java_binary_host {
