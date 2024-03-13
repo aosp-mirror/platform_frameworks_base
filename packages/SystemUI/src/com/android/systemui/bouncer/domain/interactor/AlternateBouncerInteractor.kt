@@ -51,7 +51,7 @@ constructor(
     var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     private val alternateBouncerUiAvailableFromSource: HashSet<String> = HashSet()
-    private val alternateBouncerSupported: StateFlow<Boolean> =
+    val alternateBouncerSupported: StateFlow<Boolean> =
         if (DeviceEntryUdfpsRefactor.isEnabled) {
             fingerprintPropertyRepository.sensorType
                 .map { sensorType -> sensorType.isUdfps() || sensorType.isPowerButton() }

@@ -38,19 +38,14 @@ constructor(
     alternateBouncerInteractor: AlternateBouncerInteractor,
     systemUIDialogManager: SystemUIDialogManager,
 ) : UdfpsTouchOverlayViewModel {
-    private val showingUdfpsAffordance: Flow<Boolean> =
+    override val shouldHandleTouches: Flow<Boolean> =
         combine(
             deviceEntryIconViewModel.deviceEntryViewAlpha,
             alternateBouncerInteractor.isVisible,
-        ) { deviceEntryViewAlpha, alternateBouncerVisible ->
-            deviceEntryViewAlpha > ALLOW_TOUCH_ALPHA_THRESHOLD || alternateBouncerVisible
-        }
-    override val shouldHandleTouches: Flow<Boolean> =
-        combine(
-            showingUdfpsAffordance,
-            systemUIDialogManager.hideAffordancesRequest,
-        ) { showingUdfpsAffordance, dialogRequestingHideAffordances ->
-            showingUdfpsAffordance && !dialogRequestingHideAffordances
+            systemUIDialogManager.hideAffordancesRequest
+        ) { deviceEntryViewAlpha, alternateBouncerVisible, hideAffordancesRequest ->
+            (deviceEntryViewAlpha > ALLOW_TOUCH_ALPHA_THRESHOLD && !hideAffordancesRequest) ||
+                alternateBouncerVisible
         }
 
     companion object {

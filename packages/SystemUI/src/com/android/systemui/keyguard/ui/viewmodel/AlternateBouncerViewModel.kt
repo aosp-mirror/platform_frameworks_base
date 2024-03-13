@@ -71,7 +71,7 @@ constructor(
             )
 
     /** Progress to a fully transitioned alternate bouncer. 1f represents fully transitioned. */
-    private val transitionToAlternateBouncerProgress =
+    val transitionToAlternateBouncerProgress =
         merge(fromAlternateBouncerTransition, toAlternateBouncerTransition)
 
     val forcePluginOpen: Flow<Boolean> =
