@@ -5225,18 +5225,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private int mSystemUiUid = 0;
 
         AccessibilityDisplayListener(Context context, Handler handler) {
-            if (Flags.addWindowTokenWithoutLock()) {
-                // Avoid concerns about one thread adding displays while another thread removes
-                // them by ensuring the looper is the main looper and the DisplayListener
-                // callbacks are always executed on the one main thread.
-                final boolean isMainHandler = handler.getLooper() == Looper.getMainLooper();
-                final String errorMessage =
-                        "AccessibilityDisplayListener must use the main handler";
-                if (Build.IS_USERDEBUG || Build.IS_ENG) {
-                    Preconditions.checkArgument(isMainHandler, errorMessage);
-                } else if (!isMainHandler) {
-                    Slog.e(LOG_TAG, errorMessage);
-                }
+            // Avoid concerns about one thread adding displays while another thread removes
+            // them by ensuring the looper is the main looper and the DisplayListener
+            // callbacks are always executed on the one main thread.
+            final boolean isMainHandler = handler.getLooper() == Looper.getMainLooper();
+            final String errorMessage =
+                    "AccessibilityDisplayListener must use the main handler";
+            if (Build.IS_USERDEBUG || Build.IS_ENG) {
+                Preconditions.checkArgument(isMainHandler, errorMessage);
+            } else if (!isMainHandler) {
+                Slog.e(LOG_TAG, errorMessage);
             }
 
             mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
@@ -5280,14 +5278,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         @Override
         public void onDisplayAdded(int displayId) {
-            if (Flags.addWindowTokenWithoutLock()) {
-                final boolean isMainThread = Looper.getMainLooper().isCurrentThread();
-                final String errorMessage = "onDisplayAdded must be called from the main thread";
-                if (Build.IS_USERDEBUG || Build.IS_ENG) {
-                    Preconditions.checkArgument(isMainThread, errorMessage);
-                } else if (!isMainThread) {
-                    Slog.e(LOG_TAG, errorMessage);
-                }
+            final boolean isMainThread = Looper.getMainLooper().isCurrentThread();
+            final String errorMessage = "onDisplayAdded must be called from the main thread";
+            if (Build.IS_USERDEBUG || Build.IS_ENG) {
+                Preconditions.checkArgument(isMainThread, errorMessage);
+            } else if (!isMainThread) {
+                Slog.e(LOG_TAG, errorMessage);
             }
             final Display display = mDisplayManager.getDisplay(displayId);
             if (!isValidDisplay(display)) {
@@ -5303,41 +5299,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mInputFilter.onDisplayAdded(display);
                 }
                 AccessibilityUserState userState = getCurrentUserStateLocked();
-                if (Flags.addWindowTokenWithoutLock()) {
-                    services = new ArrayList<>(userState.mBoundServices);
-                } else {
-                    services = userState.mBoundServices;
-                    if (displayId != Display.DEFAULT_DISPLAY) {
-                        for (int i = 0; i < services.size(); i++) {
-                            AccessibilityServiceConnection boundClient = services.get(i);
-                            boundClient.addWindowTokenForDisplay(displayId);
-                        }
-                    }
-                }
+                services = new ArrayList<>(userState.mBoundServices);
                 updateMagnificationLocked(userState);
                 updateWindowsForAccessibilityCallbackLocked(userState);
                 notifyClearAccessibilityCacheLocked();
             }
-            if (Flags.addWindowTokenWithoutLock()) {
-                if (displayId != Display.DEFAULT_DISPLAY) {
-                    for (int i = 0; i < services.size(); i++) {
-                        AccessibilityServiceConnection boundClient = services.get(i);
-                        boundClient.addWindowTokenForDisplay(displayId);
-                    }
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                for (int i = 0; i < services.size(); i++) {
+                    AccessibilityServiceConnection boundClient = services.get(i);
+                    boundClient.addWindowTokenForDisplay(displayId);
                 }
             }
         }
 
         @Override
         public void onDisplayRemoved(int displayId) {
-            if (Flags.addWindowTokenWithoutLock()) {
-                final boolean isMainThread = Looper.getMainLooper().isCurrentThread();
-                final String errorMessage = "onDisplayRemoved must be called from the main thread";
-                if (Build.IS_USERDEBUG || Build.IS_ENG) {
-                    Preconditions.checkArgument(isMainThread, errorMessage);
-                } else if (!isMainThread) {
-                    Slog.e(LOG_TAG, errorMessage);
-                }
+            final boolean isMainThread = Looper.getMainLooper().isCurrentThread();
+            final String errorMessage = "onDisplayRemoved must be called from the main thread";
+            if (Build.IS_USERDEBUG || Build.IS_ENG) {
+                Preconditions.checkArgument(isMainThread, errorMessage);
+            } else if (!isMainThread) {
+                Slog.e(LOG_TAG, errorMessage);
             }
             synchronized (mLock) {
                 if (!removeDisplayFromList(displayId)) {

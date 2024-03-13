@@ -220,7 +220,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder service) {
         AccessibilityUserState userState = mUserStateWeakReference.get();
-        if (userState != null && Flags.addWindowTokenWithoutLock()) {
+        if (userState != null) {
             addWindowTokensForAllDisplays();
         }
         synchronized (mLock) {

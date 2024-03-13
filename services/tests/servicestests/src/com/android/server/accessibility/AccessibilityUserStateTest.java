@@ -51,7 +51,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
@@ -217,18 +216,6 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.getBoundServicesLocked().contains(mMockConnection));
         assertEquals(mMockConnection, mUserState.mComponentNameToServiceMap.get(COMPONENT_NAME));
         verify(mMockListener).onServiceInfoChangedLocked(eq(mUserState));
-    }
-
-    @Test
-    // addServiceLocked only calls addWindowTokensForAllDisplays when
-    // FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK is off, so skip the test if it is on.
-    @RequiresFlagsDisabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
-    public void addService_flagDisabled_addsWindowTokens() {
-        when(mMockConnection.getComponentName()).thenReturn(COMPONENT_NAME);
-
-        mUserState.addServiceLocked(mMockConnection);
-
-        verify(mMockConnection).addWindowTokensForAllDisplays();
     }
 
     @Test
