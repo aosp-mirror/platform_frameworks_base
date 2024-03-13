@@ -86,7 +86,12 @@ object PromptIconViewBinder {
                 launch {
                     var width = 0
                     var height = 0
-                    viewModel.activeAuthType.collect { activeAuthType ->
+                    combine(promptViewModel.size, viewModel.activeAuthType, ::Pair).collect {
+                        (_, activeAuthType) ->
+                        // Every time after bp shows, [isIconViewLoaded] is set to false in
+                        // [BiometricViewSizeBinder]. Then when biometric prompt view is redrew
+                        // (when size or activeAuthType changes), we need to update
+                        // [isIconViewLoaded] here to keep it correct.
                         when (activeAuthType) {
                             AuthType.Fingerprint,
                             AuthType.Coex -> {
