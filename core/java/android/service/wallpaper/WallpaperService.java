@@ -27,12 +27,15 @@ import static android.graphics.Matrix.MSKEW_Y;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import static com.android.window.flags.Flags.FLAG_OFFLOAD_COLOR_EXTRACTION;
 import static com.android.window.flags.Flags.noConsecutiveVisibilityEvents;
+import static com.android.window.flags.Flags.offloadColorExtraction;
 
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
@@ -832,6 +835,15 @@ public abstract class WallpaperService extends Service {
         }
 
         /**
+         * Called when the dim amount of the wallpaper changed. This can be used to recompute the
+         * wallpaper colors based on the new dim, and call {@link #notifyColorsChanged()}.
+         * @hide
+         */
+        @FlaggedApi(FLAG_OFFLOAD_COLOR_EXTRACTION)
+        public void onDimAmountChanged(float dimAmount) {
+        }
+
+        /**
          * Called when an application has changed the desired virtual size of
          * the wallpaper.
          */
@@ -1043,6 +1055,10 @@ public abstract class WallpaperService extends Service {
             }
 
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
+
+            // after the dim changes, allow colors to be immediately recomputed
+            mLastColorInvalidation = 0;
+            if (offloadColorExtraction()) onDimAmountChanged(mWallpaperDimAmount);
         }
 
         /**

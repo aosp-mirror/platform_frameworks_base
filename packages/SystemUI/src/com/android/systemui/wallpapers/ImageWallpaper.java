@@ -20,6 +20,9 @@ import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.SetWallpaperFlags;
 
+import static com.android.window.flags.Flags.offloadColorExtraction;
+
+import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -135,6 +138,12 @@ public class ImageWallpaper extends WallpaperService {
                     mLongExecutor,
                     mLock,
                     new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
+
+                        @Override
+                        public void onColorsProcessed() {
+                            CanvasEngine.this.notifyColorsChanged();
+                        }
+
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
                                 List<WallpaperColors> colors) {
@@ -433,6 +442,12 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         @Override
+        public @Nullable WallpaperColors onComputeColors() {
+            if (!offloadColorExtraction()) return null;
+            return mWallpaperLocalColorExtractor.onComputeColors();
+        }
+
+        @Override
         public boolean supportsLocalColorExtraction() {
             return true;
         }
@@ -466,6 +481,12 @@ public class ImageWallpaper extends WallpaperService {
                 mPagesComputed = true;
                 mWallpaperLocalColorExtractor.onPageChanged(mPages);
             }
+        }
+
+        @Override
+        public void onDimAmountChanged(float dimAmount) {
+            if (!offloadColorExtraction()) return;
+            mWallpaperLocalColorExtractor.onDimAmountChanged(dimAmount);
         }
 
         @Override
