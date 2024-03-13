@@ -170,8 +170,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.KeyEvent;
-import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillFeatureFlags;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillCommitReason;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
@@ -596,6 +596,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private AutofillId[] mLastFillDialogTriggerIds;
 
     private boolean mIgnoreViewStateResetToEmpty;
+
+    /*
+     * Id of the previous view that was entered. Once set, it would only be replaced by non-null
+     * view ids.
+     * When a user focuses on a field, autofill request is sent. When the keyboard pops up, or the
+     * autofill dialog shows up, this field loses focus. After selecting a suggestion, focus goes
+     * back to the same field. This field allows to ignore focus loss when autofill dialog comes up.
+     * TODO(b/319872477): Note that there maybe some cases where we incorrectly detect focus loss.
+     */
+    @GuardedBy("mLock")
+    private @Nullable AutofillId mPreviousNonNullEnteredViewId;
 
     void onSwitchInputMethodLocked() {
         // One caveat is that for the case where the focus is on a field for which regular autofill
@@ -4390,6 +4401,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             case ACTION_START_SESSION:
                 // View is triggering autofill.
                 mCurrentViewId = viewState.id;
+                mPreviousNonNullEnteredViewId = viewState.id;
                 viewState.update(value, virtualBounds, flags);
                 startNewEventForPresentationStatsEventLogger();
                 mPresentationStatsEventLogger.maybeSetIsNewRequest(true);
@@ -4459,6 +4471,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (value != null) {
                     viewState.setCurrentValue(value);
                 }
+                // isSameViewEntered has some limitations, where it isn't considered same view when
+                // autofill suggestions pop up, user selects, and the focus lands back on the view.
+                // isSameViewAgain tries to overcome that situation.
+                final boolean isSameViewAgain = isSameViewEntered
+                        || Objects.equals(mCurrentViewId, mPreviousNonNullEnteredViewId);
+                if (mCurrentViewId != null) {
+                    mPreviousNonNullEnteredViewId = mCurrentViewId;
+                }
                 boolean isCredmanRequested = (flags & FLAG_VIEW_REQUESTS_CREDMAN_SERVICE) != 0;
                 if (shouldRequestSecondaryProvider(flags)) {
                     if (requestNewFillResponseOnViewEnteredIfNecessaryLocked(
@@ -4510,7 +4530,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // With Fill Dialog, request starts prior to view getting entered. So, we can't end
                 // the event at this moment, otherwise we will be wrongly attributing fill dialog
                 // event as concluded.
-                if (!wasPreviouslyFillDialog) {
+                if (!wasPreviouslyFillDialog && !isSameViewAgain) {
+                    // TODO(b/319872477): Re-consider this logic below
                     mPresentationStatsEventLogger.maybeSetNoPresentationEventReason(
                             NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED);
                     mPresentationStatsEventLogger.logAndEndEvent();
@@ -4588,10 +4609,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         mCurrentViewId = null;
                     }
 
-
+                    // It's not necessary that there's no more presentation for this view. It could
+                    // be that the user chose some suggestion, in which case, view exits.
                     mPresentationStatsEventLogger.maybeSetNoPresentationEventReason(
                                 NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED);
-                    mPresentationStatsEventLogger.logAndEndEvent();
                 }
                 break;
             default:
@@ -5327,6 +5348,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     void setAutofillFailureLocked(@NonNull List<AutofillId> ids) {
+        if (sVerbose && !ids.isEmpty()) {
+            Slog.v(TAG, "Total views that failed to populate: " + ids.size());
+        }
         for (int i = 0; i < ids.size(); i++) {
             final AutofillId id = ids.get(i);
             final ViewState viewState = mViewStates.get(id);
@@ -5341,6 +5365,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.v(TAG, "Changed state of " + id + " to " + viewState.getStateAsString());
             }
         }
+        mPresentationStatsEventLogger.maybeSetViewFillFailureCounts(ids.size());
+        mPresentationStatsEventLogger.logAndEndEvent();
     }
 
     @GuardedBy("mLock")
@@ -6526,8 +6552,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (waitingDatasetAuth) {
                         mUi.hideFillUi(this);
                     }
+                    if (sVerbose) {
+                        Slog.v(TAG, "Total views to be autofilled: " + ids.size());
+                    }
+                    mPresentationStatsEventLogger.maybeSetViewFillableCounts(ids.size());
                     if (sDebug) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
-
                     mClient.autofill(id, ids, values, hideHighlight);
                     if (dataset.getId() != null) {
                         if (mSelectedDatasetIds == null) {
