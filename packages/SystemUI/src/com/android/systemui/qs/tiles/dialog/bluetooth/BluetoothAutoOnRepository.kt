@@ -16,8 +16,6 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
-import android.os.UserHandle
-import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -27,17 +25,21 @@ import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
-/** Repository class responsible for managing the Bluetooth Auto-On feature settings. */
-// TODO(b/316822488): Handle multi-user
+/**
+ * Repository class responsible for managing the Bluetooth Auto-On feature settings for the current
+ * user.
+ */
 @SysUISingleton
 class BluetoothAutoOnRepository
 @Inject
@@ -47,21 +49,24 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
-    // Flow representing the auto on setting value
-    internal val getValue: Flow<Int> =
-        secureSettings
-            .observerFlow(UserHandle.USER_SYSTEM, SETTING_NAME)
-            .onStart { emit(Unit) }
-            .map {
-                if (userRepository.getSelectedUserInfo().id != UserHandle.USER_SYSTEM) {
-                    Log.i(TAG, "Current user is not USER_SYSTEM. Multi-user is not supported")
-                    return@map UNSET
-                }
-                secureSettings.getIntForUser(SETTING_NAME, UNSET, UserHandle.USER_SYSTEM)
+
+    // Flow representing the auto on setting value for the current user
+    @OptIn(ExperimentalCoroutinesApi::class)
+    internal val isAutoOn: StateFlow<Int> =
+        userRepository.selectedUserInfo
+            .flatMapLatest { userInfo ->
+                secureSettings
+                    .observerFlow(userInfo.id, SETTING_NAME)
+                    .onStart { emit(Unit) }
+                    .map { secureSettings.getIntForUser(SETTING_NAME, UNSET, userInfo.id) }
             }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
-            .shareIn(coroutineScope, SharingStarted.WhileSubscribed(replayExpirationMillis = 0))
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(replayExpirationMillis = 0),
+                UNSET
+            )
 
     /**
      * Checks if the auto on setting value is ever set for the current user.
@@ -70,12 +75,11 @@ constructor(
      */
     suspend fun isValuePresent(): Boolean =
         withContext(backgroundDispatcher) {
-            if (userRepository.getSelectedUserInfo().id != UserHandle.USER_SYSTEM) {
-                Log.i(TAG, "Current user is not USER_SYSTEM. Multi-user is not supported")
-                false
-            } else {
-                secureSettings.getIntForUser(SETTING_NAME, UNSET, UserHandle.USER_SYSTEM) != UNSET
-            }
+            secureSettings.getIntForUser(
+                SETTING_NAME,
+                UNSET,
+                userRepository.getSelectedUserInfo().id
+            ) != UNSET
         }
 
     /**
@@ -83,18 +87,17 @@ constructor(
      *
      * @param value The new setting value to be applied.
      */
-    suspend fun setValue(value: Int) {
+    suspend fun setAutoOn(value: Int) {
         withContext(backgroundDispatcher) {
-            if (userRepository.getSelectedUserInfo().id != UserHandle.USER_SYSTEM) {
-                Log.i(TAG, "Current user is not USER_SYSTEM. Multi-user is not supported")
-            } else {
-                secureSettings.putIntForUser(SETTING_NAME, value, UserHandle.USER_SYSTEM)
-            }
+            secureSettings.putIntForUser(
+                SETTING_NAME,
+                value,
+                userRepository.getSelectedUserInfo().id
+            )
         }
     }
 
     companion object {
-        private const val TAG = "BluetoothAutoOnRepository"
         const val SETTING_NAME = "bluetooth_automatic_turn_on"
         const val UNSET = -1
     }
