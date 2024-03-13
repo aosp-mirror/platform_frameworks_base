@@ -1478,7 +1478,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 }
                 mLaunchingActivityWakeLock.release();
             }
-            mRootWindowContainer.ensureActivitiesVisible();
         }
 
         // Atomically retrieve all of the other things to do.
