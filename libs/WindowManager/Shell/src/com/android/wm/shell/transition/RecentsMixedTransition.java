@@ -212,6 +212,7 @@ class RecentsMixedTransition extends DefaultMixedHandler.MixedTransition {
         switch (mType) {
             case TYPE_RECENTS_DURING_DESKTOP:
             case TYPE_RECENTS_DURING_SPLIT:
+            case TYPE_RECENTS_DURING_KEYGUARD:
                 mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
                 break;
             default:
