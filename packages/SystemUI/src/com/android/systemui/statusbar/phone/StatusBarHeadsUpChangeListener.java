@@ -24,6 +24,7 @@ import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -98,15 +99,21 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
                 // we need to keep the panel open artificially, let's wait until the
                 //animation
                 // is finished.
-                mHeadsUpManager.setHeadsUpAnimatingAway(true);
+                setHeadsAnimatingAway(true);
                 mNsslController.runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
                         mNotificationShadeWindowController.setHeadsUpShowing(false);
-                        mHeadsUpManager.setHeadsUpAnimatingAway(false);
+                        setHeadsAnimatingAway(false);
                     }
                     mNotificationRemoteInputManager.onPanelCollapsed();
                 });
             }
+        }
+    }
+
+    private void setHeadsAnimatingAway(boolean headsUpAnimatingAway) {
+        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+            mHeadsUpManager.setHeadsUpAnimatingAway(headsUpAnimatingAway);
         }
     }
 }

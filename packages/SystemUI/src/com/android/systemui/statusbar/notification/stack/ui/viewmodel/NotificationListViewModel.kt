@@ -299,4 +299,8 @@ constructor(
         HeadsUpRowViewModel(headsUpNotificationInteractor.headsUpRow(key))
 
     fun elementKeyFor(key: HeadsUpRowKey): Any = headsUpNotificationInteractor.elementKeyFor(key)
+
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        headsUpNotificationInteractor.setHeadsUpAnimatingAway(animatingAway)
+    }
 }

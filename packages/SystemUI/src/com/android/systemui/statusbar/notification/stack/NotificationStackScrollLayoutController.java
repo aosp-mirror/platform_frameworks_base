@@ -1482,6 +1482,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        NotificationsHeadsUpRefactor.assertInLegacyMode();
         mView.setHeadsUpAnimatingAway(headsUpAnimatingAway);
     }
 

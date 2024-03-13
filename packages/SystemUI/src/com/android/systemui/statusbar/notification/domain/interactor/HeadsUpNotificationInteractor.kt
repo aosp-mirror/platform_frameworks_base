@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
-class HeadsUpNotificationInteractor @Inject constructor(repository: HeadsUpRepository) {
+class HeadsUpNotificationInteractor @Inject constructor(private val repository: HeadsUpRepository) {
 
     val topHeadsUpRow: Flow<HeadsUpRowKey?> = repository.topHeadsUpRow
 
@@ -67,6 +67,9 @@ class HeadsUpNotificationInteractor @Inject constructor(repository: HeadsUpRepos
     fun headsUpRow(key: HeadsUpRowKey): HeadsUpRowInteractor =
         HeadsUpRowInteractor(key as HeadsUpRowRepository)
     fun elementKeyFor(key: HeadsUpRowKey) = (key as HeadsUpRowRepository).elementKey
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        repository.setHeadsUpAnimatingAway(animatingAway)
+    }
 }
 
 class HeadsUpRowInteractor(repository: HeadsUpRowRepository)

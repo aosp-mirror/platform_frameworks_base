@@ -658,6 +658,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         updateForHeadsUp(true);
     }
 
+    // TODO(b/328579846) bind the StatusBar visibility to heads up events
     void updateForHeadsUp(boolean animate) {
         boolean showingKeyguardHeadsUp =
                 isKeyguardShowing() && mShadeViewStateProvider.shouldHeadsUpBeVisible();
