@@ -16,6 +16,7 @@
 
 package com.android.server.power.stats;
 
+import android.annotation.NonNull;
 import android.content.pm.PackageManager;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.net.NetworkStats;
@@ -114,6 +115,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         private static final String EXTRA_DEVICE_IDLE_TIME_POSITION = "dt-idle";
         private static final String EXTRA_DEVICE_SCAN_TIME_POSITION = "dt-scan";
         private static final String EXTRA_DEVICE_CALL_TIME_POSITION = "dt-call";
+        private static final String EXTRA_DEVICE_CALL_POWER_POSITION = "dp-call";
         private static final String EXTRA_STATE_RX_TIME_POSITION = "srx";
         private static final String EXTRA_STATE_TX_TIMES_POSITION = "stx";
         private static final String EXTRA_STATE_TX_TIMES_COUNT = "stxc";
@@ -126,6 +128,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         private int mDeviceIdleTimePosition;
         private int mDeviceScanTimePosition;
         private int mDeviceCallTimePosition;
+        private int mDeviceCallPowerPosition;
         private int mStateRxTimePosition;
         private int mStateTxTimesPosition;
         private int mStateTxTimesCount;
@@ -133,6 +136,12 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         private int mUidTxBytesPosition;
         private int mUidRxPacketsPosition;
         private int mUidTxPacketsPosition;
+
+        MobileRadioStatsArrayLayout() {}
+
+        MobileRadioStatsArrayLayout(@NonNull PowerStats.Descriptor descriptor) {
+            fromExtras(descriptor.extras);
+        }
 
         void addDeviceMobileActivity() {
             mDeviceSleepTimePosition = addDeviceSection(1);
@@ -152,6 +161,12 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             mUidTxBytesPosition = addUidSection(1);
             mUidRxPacketsPosition = addUidSection(1);
             mUidTxPacketsPosition = addUidSection(1);
+        }
+
+        @Override
+        public void addDeviceSectionPowerEstimate() {
+            super.addDeviceSectionPowerEstimate();
+            mDeviceCallPowerPosition = addDeviceSection(1);
         }
 
         public void setDeviceSleepTime(long[] stats, long durationMillis) {
@@ -184,6 +199,14 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
 
         public long getDeviceCallTime(long[] stats) {
             return stats[mDeviceCallTimePosition];
+        }
+
+        public void setDeviceCallPowerEstimate(long[] stats, double power) {
+            stats[mDeviceCallPowerPosition] = (long) (power * MILLI_TO_NANO_MULTIPLIER);
+        }
+
+        public double getDeviceCallPowerEstimate(long[] stats) {
+            return stats[mDeviceCallPowerPosition] / MILLI_TO_NANO_MULTIPLIER;
         }
 
         public void setStateRxTime(long[] stats, long durationMillis) {
@@ -243,6 +266,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             extras.putInt(EXTRA_DEVICE_IDLE_TIME_POSITION, mDeviceIdleTimePosition);
             extras.putInt(EXTRA_DEVICE_SCAN_TIME_POSITION, mDeviceScanTimePosition);
             extras.putInt(EXTRA_DEVICE_CALL_TIME_POSITION, mDeviceCallTimePosition);
+            extras.putInt(EXTRA_DEVICE_CALL_POWER_POSITION, mDeviceCallPowerPosition);
             extras.putInt(EXTRA_STATE_RX_TIME_POSITION, mStateRxTimePosition);
             extras.putInt(EXTRA_STATE_TX_TIMES_POSITION, mStateTxTimesPosition);
             extras.putInt(EXTRA_STATE_TX_TIMES_COUNT, mStateTxTimesCount);
@@ -261,6 +285,7 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
             mDeviceIdleTimePosition = extras.getInt(EXTRA_DEVICE_IDLE_TIME_POSITION);
             mDeviceScanTimePosition = extras.getInt(EXTRA_DEVICE_SCAN_TIME_POSITION);
             mDeviceCallTimePosition = extras.getInt(EXTRA_DEVICE_CALL_TIME_POSITION);
+            mDeviceCallPowerPosition = extras.getInt(EXTRA_DEVICE_CALL_POWER_POSITION);
             mStateRxTimePosition = extras.getInt(EXTRA_STATE_RX_TIME_POSITION);
             mStateTxTimesPosition = extras.getInt(EXTRA_STATE_TX_TIMES_POSITION);
             mStateTxTimesCount = extras.getInt(EXTRA_STATE_TX_TIMES_COUNT);
@@ -311,7 +336,6 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
     public MobileRadioPowerStatsCollector(Injector injector, long throttlePeriodMs) {
         super(injector.getHandler(), throttlePeriodMs, injector.getClock());
         mInjector = injector;
-
     }
 
     @Override
@@ -353,6 +377,9 @@ public class MobileRadioPowerStatsCollector extends PowerStatsCollector {
         mLayout.addDeviceSectionEnergyConsumers(mEnergyConsumerIds.length);
         mLayout.addStateStats();
         mLayout.addUidNetworkStats();
+        mLayout.addDeviceSectionUsageDuration();
+        mLayout.addDeviceSectionPowerEstimate();
+        mLayout.addUidSectionPowerEstimate();
 
         SparseArray<String> stateLabels = new SparseArray<>();
         for (int rat = 0; rat < BatteryStats.RADIO_ACCESS_TECHNOLOGY_COUNT; rat++) {

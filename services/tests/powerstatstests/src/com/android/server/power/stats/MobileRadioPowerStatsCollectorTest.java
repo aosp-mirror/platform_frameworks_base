@@ -236,8 +236,7 @@ public class MobileRadioPowerStatsCollectorTest {
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
         MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout layout =
-                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout();
-        layout.fromExtras(descriptor.extras);
+                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getDeviceCallTime(powerStats.stats)).isEqualTo(40000);
@@ -293,8 +292,7 @@ public class MobileRadioPowerStatsCollectorTest {
 
         PowerStats.Descriptor descriptor = powerStats.descriptor;
         MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout layout =
-                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout();
-        layout.fromExtras(descriptor.extras);
+                new MobileRadioPowerStatsCollector.MobileRadioStatsArrayLayout(descriptor);
         assertThat(layout.getDeviceSleepTime(powerStats.stats)).isEqualTo(200);
         assertThat(layout.getDeviceIdleTime(powerStats.stats)).isEqualTo(300);
         assertThat(layout.getConsumedEnergy(powerStats.stats, 0))
@@ -340,11 +338,11 @@ public class MobileRadioPowerStatsCollectorTest {
         String dump = sw.toString();
         assertThat(dump).contains("duration=100");
         assertThat(dump).contains(
-                "stats=[200, 300, 60000, 40000, " + ((64321 - 10000) * 1000 / 3500) + "]");
+                "stats=[200, 300, 60000, 40000, " + ((64321 - 10000) * 1000 / 3500) + ", 0, 0, 0]");
         assertThat(dump).contains("state LTE: [7000, 8000, 9000, 1000, 2000, 3000]");
         assertThat(dump).contains("state NR MMWAVE: [6000, 1000, 2000, 3000, 4000, 5000]");
-        assertThat(dump).contains("UID 24: [6000, 3000, 60, 30]");
-        assertThat(dump).contains("UID 42: [1000, 2000, 100, 200]");
+        assertThat(dump).contains("UID 24: [6000, 3000, 60, 30, 0]");
+        assertThat(dump).contains("UID 42: [1000, 2000, 100, 200, 0]");
     }
 
     private PowerStats collectPowerStats(boolean perNetworkTypeData) throws Throwable {

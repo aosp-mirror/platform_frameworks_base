@@ -410,7 +410,7 @@ public abstract class PowerStatsCollector {
     }
 
     /** Calculate charge consumption (in microcoulombs) from a given energy and voltage */
-    protected long uJtoUc(long deltaEnergyUj, int avgVoltageMv) {
+    protected static long uJtoUc(long deltaEnergyUj, int avgVoltageMv) {
         // To overflow, a 3.7V 10000mAh battery would need to completely drain 69244 times
         // since the last snapshot. Round off to the nearest whole long.
         return (deltaEnergyUj * MILLIVOLTS_PER_VOLT + (avgVoltageMv / 2)) / avgVoltageMv;

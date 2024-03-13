@@ -12085,6 +12085,13 @@ public class BatteryStatsImpl extends BatteryStats {
         public long getTxPackets() {
             return mTxPackets;
         }
+
+        @Override
+        public String toString() {
+            return "NetworkStatsDelta{mUid=" + mUid + ", mSet=" + mSet + ", mRxBytes=" + mRxBytes
+                    + ", mRxPackets=" + mRxPackets + ", mTxBytes=" + mTxBytes + ", mTxPackets="
+                    + mTxPackets + '}';
+        }
     }
 
     static List<NetworkStatsDelta> computeDelta(NetworkStats currentStats,

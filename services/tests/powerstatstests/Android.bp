@@ -41,6 +41,7 @@ filegroup {
         "src/com/android/server/power/stats/LongSamplingCounterArrayTest.java",
         "src/com/android/server/power/stats/LongSamplingCounterTest.java",
         "src/com/android/server/power/stats/MemoryPowerCalculatorTest.java",
+        "src/com/android/server/power/stats/MobileRadioAggregatedPowerStatsProcessorTest.java",
         "src/com/android/server/power/stats/MobileRadioPowerCalculatorTest.java",
         "src/com/android/server/power/stats/MobileRadioPowerStatsCollectorTest.java",
         "src/com/android/server/power/stats/MultiStateStatsTest.java",
