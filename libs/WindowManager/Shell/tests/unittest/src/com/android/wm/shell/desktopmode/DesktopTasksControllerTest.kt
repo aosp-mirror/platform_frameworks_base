@@ -23,9 +23,13 @@ import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.graphics.Point
+import android.graphics.PointF
+import android.graphics.Rect
 import android.os.Binder
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.SurfaceControl
 import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_OPEN
@@ -48,6 +52,7 @@ import com.android.wm.shell.transition.TestRemoteTransition
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.LaunchAdjacentController
 import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
@@ -86,6 +91,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.quality.Strictness
@@ -839,6 +845,31 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val wct = getLatestExitDesktopWct()
         assertThat(wct.changes[task2.token.asBinder()]?.windowingMode)
                 .isEqualTo(WINDOWING_MODE_FULLSCREEN)
+    }
+
+    @Test
+    fun onDesktopDragMove_endsOutsideValidDragArea_snapsToValidBounds() {
+        val task = setUpFreeformTask()
+        val mockSurface = mock(SurfaceControl::class.java)
+        val mockDisplayLayout = mock(DisplayLayout::class.java)
+        whenever(displayController.getDisplayLayout(task.displayId)).thenReturn(mockDisplayLayout)
+        whenever(mockDisplayLayout.stableInsets()).thenReturn(Rect(0, 100, 2000, 2000))
+        controller.onDragPositioningMove(task, mockSurface, 200f,
+            Rect(100, -100, 500, 1000))
+
+        controller.onDragPositioningEnd(task,
+            Point(100, -100), /* position */
+            PointF(200f, -200f), /* inputCoordinate */
+            Rect(100, -100, 500, 1000), /* taskBounds */
+            Rect(0, 50, 2000, 2000) /* validDragArea */
+        )
+        val rectAfterEnd = Rect(100, 50, 500, 1150)
+        verify(transitions).startTransition(
+            eq(TRANSIT_CHANGE), Mockito.argThat { wct ->
+                return@argThat wct.changes.any { (token, change) ->
+                    change.configuration.windowConfiguration.bounds == rectAfterEnd
+                }
+            }, eq(null))
     }
 
     fun enterSplit_freeformTaskIsMovedToSplit() {
