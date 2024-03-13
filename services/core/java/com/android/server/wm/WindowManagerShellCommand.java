@@ -519,6 +519,9 @@ public class WindowManagerShellCommand extends ShellCommand {
             case "default":
                 fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
                 break;
+            case "enabled_if_no_auto_rotation":
+                fixedToUserRotation = IWindowManager.FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION;
+                break;
             default:
                 getErrPrintWriter().println("Error: expecting enabled, disabled or default, but we "
                         + "get " + arg);
@@ -537,6 +540,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                 return 0;
             case IWindowManager.FIXED_TO_USER_ROTATION_DISABLED:
                 pw.println("disabled");
+                return 0;
+            case IWindowManager.FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION:
+                pw.println("enabled_if_no_auto_rotation");
                 return 0;
             case IWindowManager.FIXED_TO_USER_ROTATION_ENABLED:
                 pw.println("enabled");
@@ -1494,7 +1500,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Print or set user rotation mode and user rotation.");
         pw.println("  dump-visible-window-views");
         pw.println("    Dumps the encoded view hierarchies of visible windows");
-        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default]");
+        pw.println("  fixed-to-user-rotation [-d DISPLAY_ID] [enabled|disabled|default");
+        pw.println("      |enabled_if_no_auto_rotation]");
         pw.println("    Print or set rotating display for app requested orientation.");
         pw.println("  set-ignore-orientation-request [-d DISPLAY_ID] [true|1|false|0]");
         pw.println("  get-ignore-orientation-request [-d DISPLAY_ID] ");
