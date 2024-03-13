@@ -101,6 +101,10 @@ class MenuView extends FrameLayout implements
         loadLayoutResources();
 
         addView(mTargetFeaturesView);
+
+        setClickable(false);
+        setFocusable(false);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     @Override

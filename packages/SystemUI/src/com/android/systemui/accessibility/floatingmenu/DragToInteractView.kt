@@ -118,6 +118,12 @@ class DragToInteractView(context: Context) : FrameLayout(context) {
                 iconResId = R.drawable.pip_ic_close_white
             )
         )
+
+        // Ensure this is unfocusable & uninteractable
+        isClickable = false
+        isFocusable = false
+        importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
+
         // END DragToInteractView modification
     }
 
