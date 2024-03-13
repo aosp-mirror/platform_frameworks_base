@@ -25,6 +25,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.MeasuredText;
+import android.os.Build;
+import android.os.Trace;
 import android.text.style.MetricAffectingSpan;
 
 import com.android.internal.util.Preconditions;
@@ -77,6 +79,8 @@ import java.util.Objects;
  */
 public class PrecomputedText implements Spannable {
     private static final char LINE_FEED = '\n';
+
+    private static final boolean TRACE_PCT = Build.isDebuggable();
 
     /**
      * The information required for building {@link PrecomputedText}.
@@ -447,35 +451,47 @@ public class PrecomputedText implements Spannable {
 
     private static ParagraphInfo[] createMeasuredParagraphsFromPrecomputedText(
             @NonNull PrecomputedText pct, @NonNull Params params, boolean computeLayout) {
-        final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
-                && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
-        final int hyphenationMode;
-        if (needHyphenation) {
-            hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
-                    ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
-                    MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
-        } else {
-            hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
+        if (TRACE_PCT) {
+            Trace.beginSection("PrecomputedText#createMeasuredParagraphsFromPrecomputedText");
+            Trace.setCounter("PrecomputedText#textCharCount", pct.length());
         }
-        LineBreakConfig config = params.getLineBreakConfig();
-        if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
-                && pct.getParagraphCount() != 1) {
-            // If the text has multiple paragraph, resolve line break word style auto to none.
-            config = new LineBreakConfig.Builder()
-                    .merge(config)
-                    .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
-                    .build();
+        try {
+            final boolean needHyphenation =
+                    params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
+                            && params.getHyphenationFrequency()
+                            != Layout.HYPHENATION_FREQUENCY_NONE;
+            final int hyphenationMode;
+            if (needHyphenation) {
+                hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
+                        ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
+                        MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
+            } else {
+                hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
+            }
+            LineBreakConfig config = params.getLineBreakConfig();
+            if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
+                    && pct.getParagraphCount() != 1) {
+                // If the text has multiple paragraph, resolve line break word style auto to none.
+                config = new LineBreakConfig.Builder()
+                        .merge(config)
+                        .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                        .build();
+            }
+            ArrayList<ParagraphInfo> result = new ArrayList<>();
+            for (int i = 0; i < pct.getParagraphCount(); ++i) {
+                final int paraStart = pct.getParagraphStart(i);
+                final int paraEnd = pct.getParagraphEnd(i);
+                result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
+                        params.getTextPaint(), config, pct, paraStart, paraEnd,
+                        params.getTextDirection(), hyphenationMode, computeLayout, true,
+                        pct.getMeasuredParagraph(i), null /* no recycle */)));
+            }
+            return result.toArray(new ParagraphInfo[result.size()]);
+        } finally {
+            if (TRACE_PCT) {
+                Trace.endSection();
+            }
         }
-        ArrayList<ParagraphInfo> result = new ArrayList<>();
-        for (int i = 0; i < pct.getParagraphCount(); ++i) {
-            final int paraStart = pct.getParagraphStart(i);
-            final int paraEnd = pct.getParagraphEnd(i);
-            result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), config, pct, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout, true,
-                    pct.getMeasuredParagraph(i), null /* no recycle */)));
-        }
-        return result.toArray(new ParagraphInfo[result.size()]);
     }
 
     /** @hide */
@@ -483,53 +499,65 @@ public class PrecomputedText implements Spannable {
             @NonNull CharSequence text, @NonNull Params params,
             @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean computeLayout,
             boolean computeBounds) {
-        ArrayList<ParagraphInfo> result = new ArrayList<>();
-
-        Preconditions.checkNotNull(text);
-        Preconditions.checkNotNull(params);
-        final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
-                && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
-        final int hyphenationMode;
-        if (needHyphenation) {
-            hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
-                    ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
-                    MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
-        } else {
-            hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
+        if (TRACE_PCT) {
+            Trace.beginSection("PrecomputedText#createMeasuredParagraphs");
+            Trace.setCounter("PrecomputedText#textCharCount", text.length());
         }
+        try {
+            ArrayList<ParagraphInfo> result = new ArrayList<>();
 
-        LineBreakConfig config = null;
-        int paraEnd = 0;
-        for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
-            paraEnd = TextUtils.indexOf(text, LINE_FEED, paraStart, end);
-            if (paraEnd < 0) {
-                // No LINE_FEED(U+000A) character found. Use end of the text as the paragraph
-                // end.
-                paraEnd = end;
+            Preconditions.checkNotNull(text);
+            Preconditions.checkNotNull(params);
+            final boolean needHyphenation =
+                    params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
+                            && params.getHyphenationFrequency()
+                            != Layout.HYPHENATION_FREQUENCY_NONE;
+            final int hyphenationMode;
+            if (needHyphenation) {
+                hyphenationMode = isFastHyphenation(params.getHyphenationFrequency())
+                        ? MeasuredText.Builder.HYPHENATION_MODE_FAST :
+                        MeasuredText.Builder.HYPHENATION_MODE_NORMAL;
             } else {
-                paraEnd++;  // Includes LINE_FEED(U+000A) to the prev paragraph.
+                hyphenationMode = MeasuredText.Builder.HYPHENATION_MODE_NONE;
             }
 
-            if (config == null) {
-                config = params.getLineBreakConfig();
-                if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
-                        && !(paraStart == start && paraEnd == end)) {
-                    // If the text has multiple paragraph, resolve line break word style auto to
-                    // none.
-                    config = new LineBreakConfig.Builder()
-                            .merge(config)
-                            .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
-                            .build();
+            LineBreakConfig config = null;
+            int paraEnd = 0;
+            for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
+                paraEnd = TextUtils.indexOf(text, LINE_FEED, paraStart, end);
+                if (paraEnd < 0) {
+                    // No LINE_FEED(U+000A) character found. Use end of the text as the paragraph
+                    // end.
+                    paraEnd = end;
+                } else {
+                    paraEnd++;  // Includes LINE_FEED(U+000A) to the prev paragraph.
                 }
-            }
 
-            result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
-                    params.getTextPaint(), config, text, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout, computeBounds,
-                    null /* no hint */,
-                    null /* no recycle */)));
+                if (config == null) {
+                    config = params.getLineBreakConfig();
+                    if (config.getLineBreakWordStyle() == LineBreakConfig.LINE_BREAK_WORD_STYLE_AUTO
+                            && !(paraStart == start && paraEnd == end)) {
+                        // If the text has multiple paragraph, resolve line break word style auto to
+                        // none.
+                        config = new LineBreakConfig.Builder()
+                                .merge(config)
+                                .setLineBreakWordStyle(LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE)
+                                .build();
+                    }
+                }
+
+                result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
+                        params.getTextPaint(), config, text, paraStart, paraEnd,
+                        params.getTextDirection(), hyphenationMode, computeLayout, computeBounds,
+                        null /* no hint */,
+                        null /* no recycle */)));
+            }
+            return result.toArray(new ParagraphInfo[result.size()]);
+        } finally {
+            if (TRACE_PCT) {
+                Trace.endSection();
+            }
         }
-        return result.toArray(new ParagraphInfo[result.size()]);
     }
 
     // Use PrecomputedText.create instead.
