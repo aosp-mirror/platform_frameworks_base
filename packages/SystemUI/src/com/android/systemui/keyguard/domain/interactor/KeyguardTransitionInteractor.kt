@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -38,9 +39,12 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,6 +54,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,6 +63,7 @@ class KeyguardTransitionInteractor
 @Inject
 constructor(
     @Application val scope: CoroutineScope,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     private val keyguardRepository: KeyguardRepository,
     private val repository: KeyguardTransitionRepository,
     private val fromLockscreenTransitionInteractor: dagger.Lazy<FromLockscreenTransitionInteractor>,
@@ -69,6 +75,30 @@ constructor(
     private val fromDozingTransitionInteractor: dagger.Lazy<FromDozingTransitionInteractor>,
 ) {
     private val TAG = this::class.simpleName
+
+    private val transitionValueCache = mutableMapOf<KeyguardState, MutableSharedFlow<Float>>()
+
+    /**
+     * Numerous flows are derived from, or care directly about, the transition value in and out of a
+     * single state. This prevent the redundant filters from running.
+     */
+    private fun getTransitionValueFlow(state: KeyguardState): MutableSharedFlow<Float> {
+        return transitionValueCache.getOrPut(state) {
+            MutableSharedFlow<Float>(
+                extraBufferCapacity = 2,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST
+            )
+        }
+    }
+
+    init {
+        scope.launch(mainDispatcher) {
+            repository.transitions.collect { step ->
+                getTransitionValueFlow(step.from).emit(1f - step.value)
+                getTransitionValueFlow(step.to).emit(step.value)
+            }
+        }
+    }
 
     /** (any)->GONE transition information */
     val anyStateToGoneTransition: Flow<TransitionStep> =
@@ -353,15 +383,7 @@ constructor(
     fun transitionValue(
         state: KeyguardState,
     ): Flow<Float> {
-        return repository.transitions
-            .filter { it.from == state || it.to == state }
-            .map {
-                if (it.from == state) {
-                    1 - it.value
-                } else {
-                    it.value
-                }
-            }
+        return getTransitionValueFlow(state)
     }
 
     fun transitionStepsFromState(fromState: KeyguardState): Flow<TransitionStep> {

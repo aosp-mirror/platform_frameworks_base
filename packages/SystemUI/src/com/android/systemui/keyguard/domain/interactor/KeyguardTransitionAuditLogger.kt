@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.core.LogLevel.VERBOSE
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -34,7 +34,7 @@ private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
 class KeyguardTransitionAuditLogger
 @Inject
 constructor(
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     private val interactor: KeyguardTransitionInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val logger: KeyguardLogger,
@@ -66,6 +66,12 @@ constructor(
         scope.launch {
             shadeInteractor.isUserInteracting.collect {
                 logger.log(TAG, VERBOSE, "Shade: isUserInteracting", it)
+            }
+        }
+
+        scope.launch {
+            sharedNotificationContainerViewModel.bounds.collect {
+                logger.log(TAG, VERBOSE, "Notif: bounds", it)
             }
         }
 
