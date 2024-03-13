@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume.panel.component.spatial.domain
 
+import android.media.AudioDeviceAttributes
+import android.media.AudioDeviceInfo
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.testing.TestableLooper.RunWithLooper
@@ -49,25 +51,26 @@ import org.junit.runner.RunWith
 class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-    private val cachedBluetoothDevice: CachedBluetoothDevice = mock {
-        whenever(address).thenReturn("test_address")
-    }
-    private val bluetoothMediaDevice: BluetoothMediaDevice = mock {
-        whenever(cachedDevice).thenReturn(cachedBluetoothDevice)
-    }
-
     private lateinit var underTest: SpatialAudioAvailabilityCriteria
 
     @Before
     fun setup() {
         with(kosmos) {
-            mediaControllerRepository.setActiveLocalMediaController(
-                mediaController.apply {
-                    whenever(packageName).thenReturn("test.pkg")
-                    whenever(sessionToken).thenReturn(MediaSession.Token(0, mock {}))
-                    whenever(playbackState).thenReturn(PlaybackState.Builder().build())
+            val cachedBluetoothDevice: CachedBluetoothDevice = mock {
+                whenever(address).thenReturn("test_address")
+            }
+            localMediaRepository.updateCurrentConnectedDevice(
+                mock<BluetoothMediaDevice> {
+                    whenever(name).thenReturn("test_device")
+                    whenever(cachedDevice).thenReturn(cachedBluetoothDevice)
                 }
             )
+
+            whenever(mediaController.packageName).thenReturn("test.pkg")
+            whenever(mediaController.sessionToken).thenReturn(MediaSession.Token(0, mock {}))
+            whenever(mediaController.playbackState).thenReturn(PlaybackState.Builder().build())
+
+            mediaControllerRepository.setActiveLocalMediaController(mediaController)
 
             underTest = SpatialAudioAvailabilityCriteria(spatialAudioComponentInteractor)
         }
@@ -77,9 +80,8 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
     fun noSpatialAudio_noHeadTracking_unavailable() {
         with(kosmos) {
             testScope.runTest {
-                localMediaRepository.updateCurrentConnectedDevice(bluetoothMediaDevice)
-                spatializerRepository.defaultHeadTrackingAvailable = false
-                spatializerRepository.defaultSpatialAudioAvailable = false
+                spatializerRepository.setIsSpatialAudioAvailable(headset, false)
+                spatializerRepository.setIsHeadTrackingAvailable(headset, false)
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
                 runCurrent()
@@ -93,9 +95,8 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
     fun spatialAudio_noHeadTracking_available() {
         with(kosmos) {
             testScope.runTest {
-                localMediaRepository.updateCurrentConnectedDevice(bluetoothMediaDevice)
-                spatializerRepository.defaultHeadTrackingAvailable = false
-                spatializerRepository.defaultSpatialAudioAvailable = true
+                spatializerRepository.setIsSpatialAudioAvailable(headset, true)
+                spatializerRepository.setIsHeadTrackingAvailable(headset, false)
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
                 runCurrent()
@@ -109,9 +110,8 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
     fun spatialAudio_headTracking_available() {
         with(kosmos) {
             testScope.runTest {
-                localMediaRepository.updateCurrentConnectedDevice(bluetoothMediaDevice)
-                spatializerRepository.defaultHeadTrackingAvailable = true
-                spatializerRepository.defaultSpatialAudioAvailable = true
+                spatializerRepository.setIsSpatialAudioAvailable(headset, true)
+                spatializerRepository.setIsHeadTrackingAvailable(headset, true)
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
                 runCurrent()
@@ -125,8 +125,8 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
     fun spatialAudio_headTracking_noDevice_unavailable() {
         with(kosmos) {
             testScope.runTest {
-                spatializerRepository.defaultHeadTrackingAvailable = true
-                spatializerRepository.defaultSpatialAudioAvailable = true
+                localMediaRepository.updateCurrentConnectedDevice(null)
+                spatializerRepository.setIsSpatialAudioAvailable(headset, false)
 
                 val isAvailable by collectLastValue(underTest.isAvailable())
                 runCurrent()
@@ -134,5 +134,14 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
                 assertThat(isAvailable).isFalse()
             }
         }
+    }
+
+    private companion object {
+        val headset =
+            AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_OUTPUT,
+                AudioDeviceInfo.TYPE_BLE_HEADSET,
+                "test_address"
+            )
     }
 }
