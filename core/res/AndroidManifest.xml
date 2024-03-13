@@ -6781,7 +6781,7 @@
          @FlaggedApi("android.hardware.biometrics.custom_biometric_prompt")
     -->
     <permission android:name="android.permission.SET_BIOMETRIC_DIALOG_LOGO"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
         @hide -->
