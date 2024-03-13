@@ -898,8 +898,9 @@
     <dimen name="communal_tutorial_indicator_horizontal_offset">32dp</dimen>
 
     <!-- Size of the maximum radius for the enforced rounded rectangles on communal hub.
-        Keep it the same as in Launcher-->
-    <dimen name="communal_enforced_rounded_corner_max_radius">16dp</dimen>
+        Larger than the 16dp Launcher uses, to ensure consistency on the hub, where it's much more
+        obvious when corner radii differ.-->
+    <dimen name="communal_enforced_rounded_corner_max_radius">28dp</dimen>
 
     <!-- Width and height used to filter widgets displayed in the communal widget picker -->
     <dimen name="communal_widget_picker_desired_width">424dp</dimen>
