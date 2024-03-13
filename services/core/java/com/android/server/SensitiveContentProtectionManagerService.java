@@ -69,6 +69,8 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
 
     final Object mSensitiveContentProtectionLock = new Object();
 
+    private final ArraySet<PackageInfo> mPackagesShowingSensitiveContent = new ArraySet<>();
+
     @GuardedBy("mSensitiveContentProtectionLock")
     private boolean mProjectionActive = false;
 
@@ -203,6 +205,10 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             mProjectionActive = true;
             if (sensitiveNotificationAppProtection()) {
                 updateAppsThatShouldBlockScreenCapture();
+            }
+
+            if (sensitiveContentAppProtection() && mPackagesShowingSensitiveContent.size() > 0) {
+                mWindowManager.addBlockScreenCaptureForApps(mPackagesShowingSensitiveContent);
             }
         }
     }
@@ -351,17 +357,27 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     void setSensitiveContentProtection(IBinder windowToken, String packageName, int uid,
             boolean isShowingSensitiveContent) {
         synchronized (mSensitiveContentProtectionLock) {
+            // The window token distinguish this package from packages added for notifications.
+            PackageInfo packageInfo = new PackageInfo(packageName, uid, windowToken);
+            // track these packages to protect when screen share starts.
+            if (isShowingSensitiveContent) {
+                mPackagesShowingSensitiveContent.add(packageInfo);
+                if (mPackagesShowingSensitiveContent.size() > 100) {
+                    Log.w(TAG, "Unexpectedly large number of sensitive windows, count: "
+                            + mPackagesShowingSensitiveContent.size());
+                }
+            } else {
+                mPackagesShowingSensitiveContent.remove(packageInfo);
+            }
             if (!mProjectionActive) {
                 return;
             }
             if (DEBUG) {
-                Log.d(TAG, "setSensitiveContentProtection - windowToken=" + windowToken
-                        + ", package=" + packageName + ", uid=" + uid
-                        + ", isShowingSensitiveContent=" + isShowingSensitiveContent);
+                Log.d(TAG, "setSensitiveContentProtection - current package=" + packageInfo
+                        + ", isShowingSensitiveContent=" + isShowingSensitiveContent
+                        + ", sensitive packages=" + mPackagesShowingSensitiveContent);
             }
 
-            // The window token distinguish this package from packages added for notifications.
-            PackageInfo packageInfo = new PackageInfo(packageName, uid, windowToken);
             ArraySet<PackageInfo> packageInfos = new ArraySet<>();
             packageInfos.add(packageInfo);
             if (isShowingSensitiveContent) {
@@ -389,6 +405,12 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
                 verifyCallingPackage(callingUid, packageName);
                 final long identity = Binder.clearCallingIdentity();
                 try {
+                    if (isShowingSensitiveContent
+                            && mWindowManager.getWindowName(windowToken) == null) {
+                        Log.e(TAG, "window token is not know to WMS, can't apply protection,"
+                                + " token: " + windowToken + ", package: " + packageName);
+                        return;
+                    }
                     SensitiveContentProtectionManagerService.this.setSensitiveContentProtection(
                             windowToken, packageName, callingUid, isShowingSensitiveContent);
                 } finally {
