@@ -335,6 +335,7 @@ android_library {
         "platform-test-annotations",
         "notification_flags_lib",
     ],
+    skip_jarjar_repackage: true,
 }
 
 android_library {
@@ -384,6 +385,7 @@ android_library {
         test: true,
         extra_check_modules: ["SystemUILintChecker"],
     },
+    skip_jarjar_repackage: true,
 }
 
 android_app {
