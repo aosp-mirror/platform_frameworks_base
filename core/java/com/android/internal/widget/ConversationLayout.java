@@ -37,7 +37,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.Spannable;
@@ -1216,7 +1215,7 @@ public class ConversationLayout extends FrameLayout
             return new ConversationHeaderData(
                     conversationText,
                     new OneToOneConversationAvatarData(
-                            resolveAvatarImage(conversationIcon)));
+                            resolveAvatarImageForOneToOne(conversationIcon)));
         }
 
         final List<List<Notification.MessagingStyle.Message>> groupMessages = new ArrayList<>();
@@ -1283,18 +1282,29 @@ public class ConversationLayout extends FrameLayout
 
         return new ConversationHeaderData(
                 conversationText,
-                new GroupConversationAvatarData(resolveAvatarImage(lastIcon),
-                        resolveAvatarImage(secondLastIcon)));
+                new GroupConversationAvatarData(resolveAvatarImageForFacePile(lastIcon),
+                        resolveAvatarImageForFacePile(secondLastIcon)));
     }
 
     /**
-     * {@link ImageResolver#loadImage(Uri)} accepts Uri to load images. However Conversation Avatars
-     * are received as Icon. So, we can't make use of ImageResolver.
+     * One To One Conversation Avatars is loaded by CachingIconView(conversation icon view).
      */
     @Nullable
-    private Drawable resolveAvatarImage(Icon conversationIcon) {
+    private Drawable resolveAvatarImageForOneToOne(Icon conversationIcon) {
         try {
-            return LocalImageResolver.resolveImage(conversationIcon, getContext());
+            return mConversationIconView.loadSizeRestrictedIcon(conversationIcon);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Group Avatar drawables are loaded by Icon.
+     */
+    @Nullable
+    private Drawable resolveAvatarImageForFacePile(Icon conversationIcon) {
+        try {
+            return conversationIcon.loadDrawable(getContext());
         } catch (Exception ex) {
             return null;
         }
