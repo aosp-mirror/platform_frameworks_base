@@ -30,59 +30,41 @@ import java.util.Arrays;
  */
 public final class AppCompatCallbacks implements Compatibility.BehaviorChangeDelegate {
     private final long[] mDisabledChanges;
-    private final long[] mLoggableChanges;
     private final ChangeReporter mChangeReporter;
 
     /**
-     * Install this class into the current process using the disabled and loggable changes lists.
+     * Install this class into the current process.
      *
      * @param disabledChanges Set of compatibility changes that are disabled for this process.
-     * @param loggableChanges Set of compatibility changes that we want to log.
      */
-    public static void install(long[] disabledChanges, long[] loggableChanges) {
-        Compatibility.setBehaviorChangeDelegate(
-                new AppCompatCallbacks(disabledChanges, loggableChanges));
+    public static void install(long[] disabledChanges) {
+        Compatibility.setBehaviorChangeDelegate(new AppCompatCallbacks(disabledChanges));
     }
 
-    private AppCompatCallbacks(long[] disabledChanges, long[] loggableChanges) {
+    private AppCompatCallbacks(long[] disabledChanges) {
         mDisabledChanges = Arrays.copyOf(disabledChanges, disabledChanges.length);
-        mLoggableChanges = Arrays.copyOf(loggableChanges, loggableChanges.length);
         Arrays.sort(mDisabledChanges);
-        Arrays.sort(mLoggableChanges);
-        mChangeReporter = new ChangeReporter(ChangeReporter.SOURCE_APP_PROCESS);
-    }
-
-    /**
-     * Helper to determine if a list contains a changeId.
-     *
-     * @param list to search through
-     * @param changeId for which to search in the list
-     * @return true if the given changeId is found in the provided array.
-     */
-    private boolean changeIdInChangeList(long[] list, long changeId) {
-        return Arrays.binarySearch(list, changeId) >= 0;
+        mChangeReporter = new ChangeReporter(
+                ChangeReporter.SOURCE_APP_PROCESS);
     }
 
     public void onChangeReported(long changeId) {
-        boolean isLoggable = changeIdInChangeList(mLoggableChanges, changeId);
-        reportChange(changeId, ChangeReporter.STATE_LOGGED, isLoggable);
+        reportChange(changeId, ChangeReporter.STATE_LOGGED);
     }
 
     public boolean isChangeEnabled(long changeId) {
-        boolean isEnabled = !changeIdInChangeList(mDisabledChanges, changeId);
-        boolean isLoggable = changeIdInChangeList(mLoggableChanges, changeId);
-        if (isEnabled) {
-            // Not present in the disabled changeId array
-            reportChange(changeId, ChangeReporter.STATE_ENABLED, isLoggable);
+        if (Arrays.binarySearch(mDisabledChanges, changeId) < 0) {
+            // Not present in the disabled array
+            reportChange(changeId, ChangeReporter.STATE_ENABLED);
             return true;
         }
-        reportChange(changeId, ChangeReporter.STATE_DISABLED, isLoggable);
+        reportChange(changeId, ChangeReporter.STATE_DISABLED);
         return false;
     }
 
-    private void reportChange(long changeId, int state, boolean isLoggable) {
+    private void reportChange(long changeId, int state) {
         int uid = Process.myUid();
-        mChangeReporter.reportChange(uid, changeId, state, isLoggable);
+        mChangeReporter.reportChange(uid, changeId, state);
     }
 
 }

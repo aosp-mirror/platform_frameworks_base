@@ -25,7 +25,6 @@ import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.LongArray;
@@ -73,6 +72,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  * been configured.
  */
 final class CompatConfig {
+
     private static final String TAG = "CompatConfig";
     private static final String APP_COMPAT_DATA_DIR = "/data/misc/appcompat";
     private static final String STATIC_OVERRIDES_PRODUCT_DIR = "/product/etc/appcompat";
@@ -149,56 +149,6 @@ final class CompatConfig {
     }
 
     /**
-     * Retrieves the set of changes that are intended to be logged. This includes changes that
-     * target the most recent SDK version and are not disabled.
-     *
-     * @param app the app in question
-     * @return a sorted long array of change IDs
-     */
-    long[] getLoggableChanges(ApplicationInfo app) {
-        LongArray loggable = new LongArray(mChanges.size());
-        for (CompatChange c : mChanges.values()) {
-            long changeId = c.getId();
-            boolean isLatestSdk = isChangeTargetingLatestSdk(c, app.targetSdkVersion);
-            if (c.isEnabled(app, mAndroidBuildClassifier) && isLatestSdk) {
-                loggable.add(changeId);
-            }
-        }
-        final long[] sortedChanges = loggable.toArray();
-        Arrays.sort(sortedChanges);
-        return sortedChanges;
-    }
-
-    /**
-     * Whether the change indicated by the given changeId is targeting the latest SDK version.
-     * @param c             the change for which to check the target SDK version
-     * @param appSdkVersion the target sdk version of the app
-     * @return true if the changeId targets the current sdk version or the current development
-     * version.
-     */
-    boolean isChangeTargetingLatestSdk(CompatChange c, int appSdkVersion) {
-        int maxTargetSdk = maxTargetSdkForCompatChange(c) + 1;
-        if (maxTargetSdk <= 0) {
-            // No max target sdk found.
-            return false;
-        }
-
-        return maxTargetSdk == Build.VERSION_CODES.CUR_DEVELOPMENT || maxTargetSdk == appSdkVersion;
-    }
-
-    /**
-     * Retrieves the CompatChange associated with the given changeId. Will return null if the
-     * changeId is not found. Used only for performance improvement purposes, in order to reduce
-     * lookups.
-     *
-     * @param changeId for which to look up the CompatChange
-     * @return the found compat change, or null if not found.
-     */
-    CompatChange getCompatChange(long changeId) {
-        return mChanges.get(changeId);
-    }
-
-    /**
      * Looks up a change ID by name.
      *
      * @param name name of the change to look up
@@ -214,7 +164,7 @@ final class CompatConfig {
     }
 
     /**
-     * Checks if a given change id is enabled for a given application.
+     * Checks if a given change is enabled for a given application.
      *
      * @param changeId the ID of the change in question
      * @param app      app to check for
@@ -223,18 +173,6 @@ final class CompatConfig {
      */
     boolean isChangeEnabled(long changeId, ApplicationInfo app) {
         CompatChange c = mChanges.get(changeId);
-        return isChangeEnabled(c, app);
-    }
-
-    /**
-     * Checks if a given change is enabled for a given application.
-     *
-     * @param c   the CompatChange in question
-     * @param app the app to check for
-     * @return {@code true} if the change is enabled for this app. Also returns {@code true} if the
-     * change ID is not known, as unknown changes are enabled by default.
-     */
-    boolean isChangeEnabled(CompatChange c, ApplicationInfo app) {
         if (c == null) {
             // we know nothing about this change: default behaviour is enabled.
             return true;
@@ -363,21 +301,9 @@ final class CompatConfig {
     /**
      * Returns the maximum SDK version for which this change can be opted in (or -1 if it is not
      * target SDK gated).
-     *
-     * @param changeId the id of the CompatChange to check for the max target sdk
      */
     int maxTargetSdkForChangeIdOptIn(long changeId) {
         CompatChange c = mChanges.get(changeId);
-        return maxTargetSdkForCompatChange(c);
-    }
-
-    /**
-     * Returns the maximum SDK version for which this change can be opted in (or -1 if it is not
-     * target SDK gated).
-     *
-     * @param c the CompatChange to check for the max target sdk
-     */
-    int maxTargetSdkForCompatChange(CompatChange c) {
         if (c != null && c.getEnableSinceTargetSdk() != -1) {
             return c.getEnableSinceTargetSdk() - 1;
         }

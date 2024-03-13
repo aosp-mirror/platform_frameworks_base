@@ -90,7 +90,7 @@ oneway interface IApplicationThread {
             in CompatibilityInfo compatInfo, in Map services,
             in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
             in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges,
-            in long[] loggableCompatChanges, in SharedMemory serializedSystemFontMap,
+            in SharedMemory serializedSystemFontMap,
             long startRequestedElapsedTime, long startRequestedUptime);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();

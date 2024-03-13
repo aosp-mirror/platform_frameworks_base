@@ -170,7 +170,6 @@ public class SettingsToPropertiesMapper {
         "pixel_connectivity_gps",
         "pixel_system_sw_video",
         "pixel_watch",
-        "platform_compat",
         "platform_security",
         "pmw",
         "power",

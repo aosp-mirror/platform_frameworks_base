@@ -1132,7 +1132,7 @@ public final class SystemServer implements Dumpable {
         ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE, platformCompat);
         ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
                 new PlatformCompatNative(platformCompat));
-        AppCompatCallbacks.install(new long[0], new long[0]);
+        AppCompatCallbacks.install(new long[0]);
         t.traceEnd();
 
         // FileIntegrityService responds to requests from apps and the system. It needs to run after
