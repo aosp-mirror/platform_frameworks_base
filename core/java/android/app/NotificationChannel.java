@@ -776,7 +776,8 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Whether or not notifications posted to this channel can bypass the Do Not Disturb
-     * {@link NotificationManager#INTERRUPTION_FILTER_PRIORITY} mode.
+     * {@link NotificationManager#INTERRUPTION_FILTER_PRIORITY} mode when the active policy allows
+     * priority channels to bypass notification filtering.
      */
     public boolean canBypassDnd() {
         return mBypassDnd;
