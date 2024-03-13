@@ -86,6 +86,13 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun defaultBurnInScaleEqualsOne() =
+        testScope.runTest {
+            val burnInScale by collectLastValue(underTest.scale)
+            assertThat(burnInScale!!.scale).isEqualTo(1f)
+        }
+
+    @Test
     fun burnInLayerVisibility() =
         testScope.runTest {
             val burnInLayerVisibility by collectLastValue(underTest.burnInLayerVisibility)

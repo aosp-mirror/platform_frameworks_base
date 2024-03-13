@@ -81,12 +81,12 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun movement_initializedToZero() =
+    fun movement_initializedToDefaultValues() =
         testScope.runTest {
             val movement by collectLastValue(underTest.movement(burnInParameters))
             assertThat(movement?.translationY).isEqualTo(0)
             assertThat(movement?.translationX).isEqualTo(0)
-            assertThat(movement?.scale).isEqualTo(0f)
+            assertThat(movement?.scale).isEqualTo(1f)
         }
 
     @Test
