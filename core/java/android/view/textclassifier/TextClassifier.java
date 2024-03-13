@@ -16,9 +16,6 @@
 
 package android.view.textclassifier;
 
-import static android.service.notification.Flags.FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS;
-
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -111,9 +108,6 @@ public interface TextClassifier {
     String TYPE_DATE_TIME = "datetime";
     /** Flight number in IATA format. */
     String TYPE_FLIGHT_NUMBER = "flight";
-    /** One-time login codes */
-    @FlaggedApi(FLAG_REDACT_SENSITIVE_NOTIFICATIONS_FROM_UNTRUSTED_LISTENERS)
-    String TYPE_OTP_CODE = "otp_code";
     /**
      * Word that users may be interested to look up for meaning.
      * @hide
@@ -132,8 +126,7 @@ public interface TextClassifier {
             TYPE_DATE,
             TYPE_DATE_TIME,
             TYPE_FLIGHT_NUMBER,
-            TYPE_DICTIONARY,
-            TYPE_OTP_CODE
+            TYPE_DICTIONARY
     })
     @interface EntityType {}
 
