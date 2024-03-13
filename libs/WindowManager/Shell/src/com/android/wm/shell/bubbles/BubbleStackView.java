@@ -1025,6 +1025,7 @@ public class BubbleStackView extends FrameLayout
                             WindowManager.class)));
                     onDisplaySizeChanged();
                     mExpandedAnimationController.updateResources();
+                    mExpandedAnimationController.onOrientationChanged();
                     mStackAnimationController.updateResources();
                     mBubbleOverflow.updateResources();
 

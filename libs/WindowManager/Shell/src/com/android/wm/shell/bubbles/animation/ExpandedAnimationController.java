@@ -614,6 +614,14 @@ public class ExpandedAnimationController
         }
     }
 
+    /**
+     * Call to update the bubble positions after an orientation change.
+     */
+    public void onOrientationChanged() {
+        if (mLayout == null) return;
+        updateBubblePositions();
+    }
+
     private void updateBubblePositions() {
         if (mAnimatingExpand || mAnimatingCollapse) {
             return;
