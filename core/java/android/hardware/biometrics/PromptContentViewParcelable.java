@@ -26,5 +26,5 @@ import android.os.Parcelable;
  */
 @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
 sealed interface PromptContentViewParcelable extends PromptContentView, Parcelable
-        permits PromptVerticalListContentView {
+        permits PromptVerticalListContentView, PromptContentViewWithMoreOptionsButton {
 }
