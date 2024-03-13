@@ -679,20 +679,20 @@ public class ViewRootImplTest {
         }
 
         sInstrumentation.runOnMainSync(() -> {
-            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW, 0, null);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
-            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL, 0, null);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
-            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT, 0, null);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_HIGH_HINT);
-            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH, 0, null);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
-            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH_HINT, 0, null);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
-            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL, 0, null);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
-            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW, 0, null);
             assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
         });
     }
