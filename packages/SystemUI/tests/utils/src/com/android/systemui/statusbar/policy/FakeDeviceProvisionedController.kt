@@ -39,8 +39,16 @@ class FakeDeviceProvisionedController : DeviceProvisionedController {
         callbacks.toSet().forEach { it.onUserSwitched() }
     }
 
-    fun setUserSetup(userId: Int) {
-        usersSetup.add(userId)
+    fun setUserSetup(userId: Int, isSetup: Boolean = true) {
+        if (isSetup) {
+            usersSetup.add(userId)
+        } else {
+            usersSetup.remove(userId)
+        }
         callbacks.toSet().forEach { it.onUserSetupChanged() }
+    }
+
+    fun setCurrentUserSetup(isSetup: Boolean) {
+        setUserSetup(currentUser, isSetup)
     }
 }
