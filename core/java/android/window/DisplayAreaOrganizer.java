@@ -112,6 +112,15 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_IME = FEATURE_SYSTEM_FIRST + 8;
 
     /**
+     * Display area that includes all areas which can have windows. It is used to separate the
+     * window content to provide the ability of display level animation and display recording.
+     * It is usually only a placeholder that organizer should not control it. This only exists
+     * if {@link #FEATURE_WINDOWED_MAGNIFICATION} is not available to be the windowing layer.
+     * @hide
+     */
+    public static final int FEATURE_WINDOWING_LAYER = FEATURE_SYSTEM_FIRST + 9;
+
+    /**
      * The last boundary of display area for system features
      */
     public static final int FEATURE_SYSTEM_LAST = 10_000;
