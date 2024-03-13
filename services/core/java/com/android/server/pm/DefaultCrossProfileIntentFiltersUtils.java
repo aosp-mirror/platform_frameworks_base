@@ -688,6 +688,29 @@ public class DefaultCrossProfileIntentFiltersUtils {
         );
     }
 
+    /** Call intent should be handled by the main user. */
+    private static final DefaultCrossProfileIntentFilter CALL_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    SKIP_CURRENT_PROFILE,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_CALL)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addDataScheme("tel")
+                    .addDataScheme("sip")
+                    .addDataScheme("voicemail")
+                    .build();
+
+    /** Pressing the call button should be handled by the main user. */
+    private static final DefaultCrossProfileIntentFilter CALL_BUTTON_PRIVATE_PROFILE =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    ONLY_IF_NO_MATCH_FOUND,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_CALL_BUTTON)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
+
     /** Dial intent with mime type can be handled by either private profile or its parent user. */
     private static final DefaultCrossProfileIntentFilter DIAL_MIME_PRIVATE_PROFILE =
             new DefaultCrossProfileIntentFilter.Builder(
@@ -755,6 +778,10 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 DIAL_MIME_PRIVATE_PROFILE,
                 DIAL_DATA_PRIVATE_PROFILE,
                 DIAL_RAW_PRIVATE_PROFILE,
+                CALL_PRIVATE_PROFILE,
+                CALL_BUTTON_PRIVATE_PROFILE,
+                EMERGENCY_CALL_DATA,
+                EMERGENCY_CALL_MIME,
                 SMS_MMS_PRIVATE_PROFILE
         );
     }
