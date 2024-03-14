@@ -8150,6 +8150,14 @@
     <permission android:name="android.permission.EMERGENCY_INSTALL_PACKAGES"
                 android:protectionLevel="signature|privileged"/>
 
+    <!-- Allows internal applications to restrict display modes
+       <p>Not for use by third-party applications.
+       <p>Protection level: signature
+       @hide
+    -->
+    <permission android:name="android.permission.RESTRICT_DISPLAY_MODES"
+        android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

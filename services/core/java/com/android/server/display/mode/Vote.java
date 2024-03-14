@@ -16,6 +16,8 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.NonNull;
+
 import java.util.List;
 
 interface Vote {
@@ -91,26 +93,29 @@ interface Vote {
     // For concurrent displays we want to limit refresh rate on all displays
     int PRIORITY_LAYOUT_LIMITED_FRAME_RATE = 12;
 
+    // For internal application to limit display modes to specific ids
+    int PRIORITY_SYSTEM_REQUESTED_MODES = 13;
+
     // LOW_POWER_MODE force the render frame rate to [0, 60HZ] if
     // Settings.Global.LOW_POWER_MODE is on.
-    int PRIORITY_LOW_POWER_MODE = 13;
+    int PRIORITY_LOW_POWER_MODE = 14;
 
     // PRIORITY_FLICKER_REFRESH_RATE_SWITCH votes for disabling refresh rate switching. If the
     // higher priority voters' result is a range, it will fix the rate to a single choice.
     // It's used to avoid refresh rate switches in certain conditions which may result in the
     // user seeing the display flickering when the switches occur.
-    int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 14;
+    int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 15;
 
     // Force display to [0, 60HZ] if skin temperature is at or above CRITICAL.
-    int PRIORITY_SKIN_TEMPERATURE = 15;
+    int PRIORITY_SKIN_TEMPERATURE = 16;
 
     // The proximity sensor needs the refresh rate to be locked in order to function, so this is
     // set to a high priority.
-    int PRIORITY_PROXIMITY = 16;
+    int PRIORITY_PROXIMITY = 17;
 
     // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
     // to function, so this needs to be the highest priority of all votes.
-    int PRIORITY_UDFPS = 17;
+    int PRIORITY_UDFPS = 18;
 
     // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
     // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -128,7 +133,7 @@ interface Vote {
      */
     int INVALID_SIZE = -1;
 
-    void updateSummary(VoteSummary summary);
+    void updateSummary(@NonNull VoteSummary summary);
 
     static Vote forPhysicalRefreshRates(float minRefreshRate, float maxRefreshRate) {
         return new CombinedVote(
@@ -166,15 +171,22 @@ interface Vote {
         return new BaseModeRefreshRateVote(baseModeRefreshRate);
     }
 
-    static Vote forSupportedModes(List<SupportedModesVote.SupportedMode> supportedModes) {
-        return new SupportedModesVote(supportedModes);
+    static Vote forSupportedRefreshRates(
+            List<SupportedRefreshRatesVote.RefreshRates> refreshRates) {
+        return new SupportedRefreshRatesVote(refreshRates);
+    }
+
+    static Vote forSupportedModes(List<Integer> modeIds) {
+        return new SupportedModesVote(modeIds);
     }
 
 
-    static Vote forSupportedModesAndDisableRefreshRateSwitching(
-            List<SupportedModesVote.SupportedMode> supportedModes) {
+
+    static Vote forSupportedRefreshRatesAndDisableSwitching(
+            List<SupportedRefreshRatesVote.RefreshRates> supportedRefreshRates) {
         return new CombinedVote(
-                List.of(forDisableRefreshRateSwitching(), forSupportedModes(supportedModes)));
+                List.of(forDisableRefreshRateSwitching(),
+                        forSupportedRefreshRates(supportedRefreshRates)));
     }
 
     static String priorityToString(int priority) {

@@ -41,6 +41,7 @@ import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.Looper;
@@ -80,7 +81,6 @@ import com.android.server.display.utils.AmbientFilterFactory;
 import com.android.server.display.utils.DeviceConfigParsingUtils;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.sensors.SensorManagerInternal;
-import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
@@ -128,9 +128,12 @@ public class DisplayModeDirector {
     private final SettingsObserver mSettingsObserver;
     private final DisplayObserver mDisplayObserver;
     private final UdfpsObserver mUdfpsObserver;
-    private final SensorObserver mSensorObserver;
+    private final ProximitySensorObserver mSensorObserver;
     private final HbmObserver mHbmObserver;
     private final SkinThermalStatusObserver mSkinThermalStatusObserver;
+
+    @Nullable
+    private final SystemRequestObserver mSystemRequestObserver;
     private final DeviceConfigParameterProvider mConfigParameterProvider;
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
 
@@ -203,6 +206,7 @@ public class DisplayModeDirector {
             .isDisplaysRefreshRatesSynchronizationEnabled();
         mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled = displayManagerFlags
                 .isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled();
+
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
@@ -222,10 +226,15 @@ public class DisplayModeDirector {
         mVotesStorage = new VotesStorage(this::notifyDesiredDisplayModeSpecsChangedLocked,
                 mVotesStatsReporter);
         mDisplayObserver = new DisplayObserver(context, handler, mVotesStorage);
-        mSensorObserver = new SensorObserver(context, mVotesStorage, injector);
+        mSensorObserver = new ProximitySensorObserver(mVotesStorage, injector);
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(injector, mVotesStorage);
         mHbmObserver = new HbmObserver(injector, mVotesStorage, BackgroundThread.getHandler(),
                 mDeviceConfigDisplaySettings);
+        if (mDvrrSupported && displayManagerFlags.isRestrictDisplayModesEnabled()) {
+            mSystemRequestObserver = new SystemRequestObserver(mVotesStorage);
+        } else {
+            mSystemRequestObserver = null;
+        }
         mAlwaysRespectAppRequest = false;
         mSupportsFrameRateOverride = injector.supportsFrameRateOverride();
     }
@@ -517,6 +526,15 @@ public class DisplayModeDirector {
     Vote getVote(int displayId, int priority) {
         SparseArray<Vote> votes = mVotesStorage.getVotes(displayId);
         return votes.get(priority);
+    }
+
+    /**
+     * Delegates requestDisplayModes call to SystemRequestObserver
+     */
+    public void requestDisplayModes(IBinder token, int displayId, int[] modeIds) {
+        if (mSystemRequestObserver != null) {
+            mSystemRequestObserver.requestDisplayModes(token, displayId, modeIds);
+        }
     }
 
     /**
@@ -970,10 +988,10 @@ public class DisplayModeDirector {
                     Settings.Global.LOW_POWER_MODE, 0 /*default*/) != 0;
             final Vote vote;
             if (inLowPowerMode && mVsynLowPowerVoteEnabled) {
-                vote = Vote.forSupportedModes(List.of(
-                        new SupportedModesVote.SupportedMode(/* peakRefreshRate= */ 60f,
+                vote = Vote.forSupportedRefreshRates(List.of(
+                        new SupportedRefreshRatesVote.RefreshRates(/* peakRefreshRate= */ 60f,
                                 /* vsyncRate= */ 240f),
-                        new SupportedModesVote.SupportedMode(/* peakRefreshRate= */ 60f,
+                        new SupportedRefreshRatesVote.RefreshRates(/* peakRefreshRate= */ 60f,
                                 /* vsyncRate= */ 60f)
                 ));
             } else if (inLowPowerMode) {
@@ -2158,11 +2176,11 @@ public class DisplayModeDirector {
                 }
 
                 if (mVsyncLowLightBlockingVoteEnabled) {
-                    refreshRateSwitchingVote = Vote.forSupportedModesAndDisableRefreshRateSwitching(
+                    refreshRateSwitchingVote = Vote.forSupportedRefreshRatesAndDisableSwitching(
                             List.of(
-                                    new SupportedModesVote.SupportedMode(
+                                    new SupportedRefreshRatesVote.RefreshRates(
                                             /* peakRefreshRate= */ 60f, /* vsyncRate= */ 60f),
-                                    new SupportedModesVote.SupportedMode(
+                                    new SupportedRefreshRatesVote.RefreshRates(
                                             /* peakRefreshRate= */120f, /* vsyncRate= */ 120f)));
                 } else {
                     refreshRateSwitchingVote = Vote.forDisableRefreshRateSwitching();
@@ -2498,116 +2516,6 @@ public class DisplayModeDirector {
         }
     }
 
-    protected static final class SensorObserver implements ProximityActiveListener,
-            DisplayManager.DisplayListener {
-        private final String mProximitySensorName = null;
-        private final String mProximitySensorType = Sensor.STRING_TYPE_PROXIMITY;
-
-        private final VotesStorage mVotesStorage;
-        private final Context mContext;
-        private final Injector mInjector;
-        @GuardedBy("mSensorObserverLock")
-        private final SparseBooleanArray mDozeStateByDisplay = new SparseBooleanArray();
-        private final Object mSensorObserverLock = new Object();
-
-        private DisplayManager mDisplayManager;
-        private DisplayManagerInternal mDisplayManagerInternal;
-        @GuardedBy("mSensorObserverLock")
-        private boolean mIsProxActive = false;
-
-        SensorObserver(Context context, VotesStorage votesStorage, Injector injector) {
-            mContext = context;
-            mVotesStorage = votesStorage;
-            mInjector = injector;
-        }
-
-        @Override
-        public void onProximityActive(boolean isActive) {
-            synchronized (mSensorObserverLock) {
-                if (mIsProxActive != isActive) {
-                    mIsProxActive = isActive;
-                    recalculateVotesLocked();
-                }
-            }
-        }
-
-        public void observe() {
-            mDisplayManager = mContext.getSystemService(DisplayManager.class);
-            mDisplayManagerInternal = mInjector.getDisplayManagerInternal();
-
-            final SensorManagerInternal sensorManager = mInjector.getSensorManagerInternal();
-            sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
-
-            synchronized (mSensorObserverLock) {
-                for (Display d : mInjector.getDisplays()) {
-                    mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
-                }
-            }
-            mInjector.registerDisplayListener(this, BackgroundThread.getHandler(),
-                    DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                            | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                            | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
-        }
-
-        private void recalculateVotesLocked() {
-            final Display[] displays = mInjector.getDisplays();
-            for (Display d : displays) {
-                int displayId = d.getDisplayId();
-                Vote vote = null;
-                if (mIsProxActive && !mDozeStateByDisplay.get(displayId)) {
-                    final RefreshRateRange rate =
-                            mDisplayManagerInternal.getRefreshRateForDisplayAndSensor(
-                                    displayId, mProximitySensorName, mProximitySensorType);
-                    if (rate != null) {
-                        vote = Vote.forPhysicalRefreshRates(rate.min, rate.max);
-                    }
-                }
-                mVotesStorage.updateVote(displayId, Vote.PRIORITY_PROXIMITY, vote);
-            }
-        }
-
-        void dump(PrintWriter pw) {
-            pw.println("  SensorObserver");
-            synchronized (mSensorObserverLock) {
-                pw.println("    mIsProxActive=" + mIsProxActive);
-                pw.println("    mDozeStateByDisplay:");
-                for (int i = 0; i < mDozeStateByDisplay.size(); i++) {
-                    final int id = mDozeStateByDisplay.keyAt(i);
-                    final boolean dozed = mDozeStateByDisplay.valueAt(i);
-                    pw.println("      " + id + " -> " + dozed);
-                }
-            }
-        }
-
-        @Override
-        public void onDisplayAdded(int displayId) {
-            boolean isDozeState = mInjector.isDozeState(mInjector.getDisplay(displayId));
-            synchronized (mSensorObserverLock) {
-                mDozeStateByDisplay.put(displayId, isDozeState);
-                recalculateVotesLocked();
-            }
-        }
-
-        @Override
-        public void onDisplayChanged(int displayId) {
-            boolean wasDozeState = mDozeStateByDisplay.get(displayId);
-            synchronized (mSensorObserverLock) {
-                mDozeStateByDisplay.put(displayId,
-                        mInjector.isDozeState(mInjector.getDisplay(displayId)));
-                if (wasDozeState != mDozeStateByDisplay.get(displayId)) {
-                    recalculateVotesLocked();
-                }
-            }
-        }
-
-        @Override
-        public void onDisplayRemoved(int displayId) {
-            synchronized (mSensorObserverLock) {
-                mDozeStateByDisplay.delete(displayId);
-                recalculateVotesLocked();
-            }
-        }
-    }
 
     /**
      * Listens to DisplayManager for HBM status and applies any refresh-rate restrictions for

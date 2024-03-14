@@ -16,6 +16,8 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.NonNull;
+
 import java.util.Objects;
 
 class BaseModeRefreshRateVote implements Vote {
@@ -31,7 +33,7 @@ class BaseModeRefreshRateVote implements Vote {
     }
 
     @Override
-    public void updateSummary(VoteSummary summary) {
+    public void updateSummary(@NonNull VoteSummary summary) {
         if (summary.appRequestBaseModeRefreshRate == 0f
                 && mAppRequestBaseModeRefreshRate > 0f) {
             summary.appRequestBaseModeRefreshRate = mAppRequestBaseModeRefreshRate;
