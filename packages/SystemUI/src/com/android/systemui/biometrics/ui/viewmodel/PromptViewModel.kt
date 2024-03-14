@@ -86,6 +86,36 @@ constructor(
     val faceIconHeight: Int =
         context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
 
+    /** Padding for placing icons */
+    val portraitSmallBottomPadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_portrait_small_bottom_padding
+        )
+    val portraitMediumBottomPadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_portrait_medium_bottom_padding
+        )
+    val portraitLargeScreenBottomPadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_portrait_large_screen_bottom_padding
+        )
+    val landscapeSmallBottomPadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_landscape_small_bottom_padding
+        )
+    val landscapeSmallHorizontalPadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_landscape_small_horizontal_padding
+        )
+    val landscapeMediumBottomPadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_landscape_medium_bottom_padding
+        )
+    val landscapeMediumHorizontalPadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_landscape_medium_horizontal_padding
+        )
+
     val fingerprintSensorWidth: Flow<Int> =
         combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
             ->
@@ -110,9 +140,6 @@ constructor(
 
     /** Hint for talkback directional guidance */
     val accessibilityHint: Flow<String> = _accessibilityHint.asSharedFlow()
-
-    val promptMargin: Int =
-        context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_border_padding)
 
     private val _isAuthenticating: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -201,6 +228,66 @@ constructor(
                         !confirmationRequired &&
                         fpStartMode == FingerprintStartMode.Pending -> PromptSize.SMALL
                     else -> PromptSize.MEDIUM
+                }
+            }
+            .distinctUntilChanged()
+
+    /** Prompt panel size padding */
+    private val smallHorizontalGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_small_horizontal_guideline_padding
+        )
+    private val udfpsHorizontalGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_udfps_horizontal_guideline_padding
+        )
+    private val udfpsMidGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_udfps_mid_guideline_padding
+        )
+    private val mediumHorizontalGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_medium_horizontal_guideline_padding
+        )
+    private val mediumMidGuidelinePadding =
+        context.resources.getDimensionPixelSize(
+            R.dimen.biometric_prompt_medium_mid_guideline_padding
+        )
+
+    /**
+     * Rect for positioning prompt guidelines (left, top, right, mid)
+     *
+     * Negative values are used to signify that guideline measuring should be flipped, measuring
+     * from opposite side of the screen
+     */
+    val guidelineBounds: Flow<Rect> =
+        combine(size, position, modalities) { size, position, modalities ->
+                if (position.isBottom) {
+                    Rect(0, 0, 0, 0)
+                } else if (position.isRight) {
+                    if (size.isSmall) {
+                        Rect(-smallHorizontalGuidelinePadding, 0, 0, 0)
+                    } else if (modalities.hasUdfps) {
+                        Rect(udfpsHorizontalGuidelinePadding, 0, 0, udfpsMidGuidelinePadding)
+                    } else if (modalities.isEmpty) {
+                        // TODO: Temporary fix until no biometric landscape layout is added
+                        Rect(-mediumHorizontalGuidelinePadding, 0, 0, 6)
+                    } else {
+                        Rect(-mediumHorizontalGuidelinePadding, 0, 0, mediumMidGuidelinePadding)
+                    }
+                } else if (position.isLeft) {
+                    if (size.isSmall) {
+                        Rect(0, 0, -smallHorizontalGuidelinePadding, 0)
+                    } else if (modalities.hasUdfps) {
+                        Rect(0, 0, udfpsHorizontalGuidelinePadding, -udfpsMidGuidelinePadding)
+                    } else if (modalities.isEmpty) {
+                        // TODO: Temporary fix until no biometric landscape layout is added
+                        Rect(0, 0, -mediumHorizontalGuidelinePadding, -6)
+                    } else {
+                        Rect(0, 0, -mediumHorizontalGuidelinePadding, -mediumMidGuidelinePadding)
+                    }
+                } else {
+                    Rect()
                 }
             }
             .distinctUntilChanged()
@@ -424,7 +511,7 @@ constructor(
             isAuthenticated,
             promptSelectorInteractor.isCredentialAllowed,
         ) { size, _, authState, credentialAllowed ->
-            size.isNotSmall && authState.isNotAuthenticated && credentialAllowed
+            size.isMedium && authState.isNotAuthenticated && credentialAllowed
         }
 
     private val history = PromptHistoryImpl()

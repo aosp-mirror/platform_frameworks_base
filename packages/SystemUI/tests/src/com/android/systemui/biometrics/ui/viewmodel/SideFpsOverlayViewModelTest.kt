@@ -33,6 +33,7 @@ import com.airbnb.lottie.model.KeyPath
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
+import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
@@ -347,6 +348,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     @Test
     fun updatesOverlayViewParams_onDisplayRotationChange_xAlignedSensor() {
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
@@ -388,6 +390,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     @Test
     fun updatesOverlayViewParams_onDisplayRotationChange_yAlignedSensor() {
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
             setupTestConfiguration(
                 DeviceConfig.Y_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
