@@ -32,6 +32,7 @@ import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
+import android.app.contextualsearch.ContextualSearchManager;
 import android.app.ecm.EnhancedConfirmationFrameworkInitializer;
 import android.app.job.JobSchedulerFrameworkInitializer;
 import android.app.ondeviceintelligence.IOnDeviceIntelligenceManager;
@@ -1281,6 +1282,16 @@ public final class SystemServiceRegistry {
                     return b == null ? null : new SmartspaceManager(ctx);
                 }
             });
+
+        registerService(Context.CONTEXTUAL_SEARCH_SERVICE, ContextualSearchManager.class,
+                new CachedServiceFetcher<>() {
+                    @Override
+                    public ContextualSearchManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getService(Context.CONTEXTUAL_SEARCH_SERVICE);
+                        return b == null ? null : new ContextualSearchManager();
+                    }
+                });
 
         registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
                 new CachedServiceFetcher<AppPredictionManager>() {

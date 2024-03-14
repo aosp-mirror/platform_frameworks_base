@@ -7,6 +7,7 @@ package android {
     field public static final String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
     field public static final String ACCESS_BROADCAST_RESPONSE_STATS = "android.permission.ACCESS_BROADCAST_RESPONSE_STATS";
     field public static final String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
+    field @FlaggedApi("android.app.contextualsearch.flags.enable_service") public static final String ACCESS_CONTEXTUAL_SEARCH = "android.permission.ACCESS_CONTEXTUAL_SEARCH";
     field public static final String ACCESS_CONTEXT_HUB = "android.permission.ACCESS_CONTEXT_HUB";
     field public static final String ACCESS_DRM_CERTIFICATES = "android.permission.ACCESS_DRM_CERTIFICATES";
     field @Deprecated public static final String ACCESS_FM_RADIO = "android.permission.ACCESS_FM_RADIO";
@@ -2176,6 +2177,39 @@ package android.app.contentsuggestions {
 
 }
 
+package android.app.contextualsearch {
+
+  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public class ContextualSearchManager {
+    method public void getContextualSearchState(@NonNull android.os.IBinder, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<android.app.contextualsearch.ContextualSearchState,java.lang.Throwable>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXTUAL_SEARCH) public void startContextualSearch(int);
+    field public static final String ACTION_LAUNCH_CONTEXTUAL_SEARCH = "android.app.contextualsearch.action.LAUNCH_CONTEXTUAL_SEARCH";
+    field public static final int ENTRYPOINT_LONG_PRESS_HOME = 2; // 0x2
+    field public static final int ENTRYPOINT_LONG_PRESS_META = 10; // 0xa
+    field public static final int ENTRYPOINT_LONG_PRESS_NAV_HANDLE = 1; // 0x1
+    field public static final int ENTRYPOINT_LONG_PRESS_OVERVIEW = 3; // 0x3
+    field public static final int ENTRYPOINT_OVERVIEW_ACTION = 4; // 0x4
+    field public static final int ENTRYPOINT_OVERVIEW_MENU = 5; // 0x5
+    field public static final int ENTRYPOINT_SYSTEM_ACTION = 9; // 0x9
+    field public static final String EXTRA_ENTRYPOINT = "android.app.contextualsearch.extra.ENTRYPOINT";
+    field public static final String EXTRA_FLAG_SECURE_FOUND = "android.app.contextualsearch.extra.FLAG_SECURE_FOUND";
+    field public static final String EXTRA_IS_MANAGED_PROFILE_VISIBLE = "android.app.contextualsearch.extra.IS_MANAGED_PROFILE_VISIBLE";
+    field public static final String EXTRA_SCREENSHOT = "android.app.contextualsearch.extra.SCREENSHOT";
+    field public static final String EXTRA_TOKEN = "android.app.contextualsearch.extra.TOKEN";
+    field public static final String EXTRA_VISIBLE_PACKAGE_NAMES = "android.app.contextualsearch.extra.VISIBLE_PACKAGE_NAMES";
+  }
+
+  @FlaggedApi("android.app.contextualsearch.flags.enable_service") public final class ContextualSearchState implements android.os.Parcelable {
+    ctor public ContextualSearchState(@Nullable android.app.assist.AssistStructure, @Nullable android.app.assist.AssistContent, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method @Nullable public android.app.assist.AssistContent getContent();
+    method @NonNull public android.os.Bundle getExtras();
+    method @Nullable public android.app.assist.AssistStructure getStructure();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.contextualsearch.ContextualSearchState> CREATOR;
+  }
+
+}
+
 package android.app.job {
 
   public abstract class JobScheduler {
@@ -3747,6 +3781,7 @@ package android.content {
     field public static final String CLOUDSEARCH_SERVICE = "cloudsearch";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
+    field @FlaggedApi("android.app.contextualsearch.flags.enable_service") public static final String CONTEXTUAL_SEARCH_SERVICE = "contextual_search";
     field @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public static final String ECM_ENHANCED_CONFIRMATION_SERVICE = "ecm_enhanced_confirmation";
     field public static final String ETHERNET_SERVICE = "ethernet";
     field public static final String EUICC_CARD_SERVICE = "euicc_card";

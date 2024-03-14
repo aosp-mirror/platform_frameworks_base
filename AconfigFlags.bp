@@ -21,6 +21,7 @@ aconfig_declarations_group {
         // !!! KEEP THIS LIST ALPHABETICAL !!!
         "aconfig_mediacodec_flags_java_lib",
         "android.adaptiveauth.flags-aconfig-java",
+        "android.app.contextualsearch.flags-aconfig-java",
         "android.app.flags-aconfig-java",
         "android.app.ondeviceintelligence-aconfig-java",
         "android.app.smartspace.flags-aconfig-java",
@@ -972,6 +973,19 @@ java_aconfig_library {
         "//apex_available:platform",
         "com.android.extservices",
     ],
+}
+
+// Contextual Search
+aconfig_declarations {
+    name: "android.app.contextualsearch.flags-aconfig",
+    package: "android.app.contextualsearch.flags",
+    srcs: ["core/java/android/app/contextualsearch/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.contextualsearch.flags-aconfig-java",
+    aconfig_declarations: "android.app.contextualsearch.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
 // Smartspace
