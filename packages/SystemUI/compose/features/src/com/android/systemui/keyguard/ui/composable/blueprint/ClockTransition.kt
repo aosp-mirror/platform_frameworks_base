@@ -80,5 +80,14 @@ object ClockScenes {
 object ClockElementKeys {
     val largeClockElementKey = ElementKey("large-clock")
     val smallClockElementKey = ElementKey("small-clock")
+    val weatherSmallClockElementKey = ElementKey("weather-small-clock")
     val smartspaceElementKey = ElementKey("smart-space")
+}
+
+object WeatherClockElementKeys {
+    val timeElementKey = ElementKey("weather-large-clock-time")
+    val dateElementKey = ElementKey("weather-large-clock-date")
+    val weatherIconElementKey = ElementKey("weather-large-clock-weather-icon")
+    val temperatureElementKey = ElementKey("weather-large-clock-temperature")
+    val dndAlarmElementKey = ElementKey("weather-large-clock-dnd-alarm")
 }
