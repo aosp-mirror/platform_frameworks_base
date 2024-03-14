@@ -87,7 +87,7 @@ fun VolumeSlider(
         enabled = state.isEnabled,
         icon = { isDragging ->
             if (isDragging) {
-                Text(text = value.toInt().toString(), color = LocalContentColor.current)
+                Text(text = state.valueText, color = LocalContentColor.current)
             } else {
                 state.icon?.let {
                     IconButton(
