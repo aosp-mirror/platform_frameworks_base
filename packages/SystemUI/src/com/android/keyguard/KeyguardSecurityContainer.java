@@ -343,6 +343,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         setPadding(getPaddingLeft(), getPaddingTop() + getResources().getDimensionPixelSize(
                         R.dimen.keyguard_security_container_padding_top), getPaddingRight(),
                 getPaddingBottom());
+        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.materialColorSurface));
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -800,6 +802,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     void reloadColors() {
         mViewMode.reloadColors();
+        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
+                com.android.internal.R.attr.materialColorSurface));
     }
 
     /** Handles density or font scale changes. */
