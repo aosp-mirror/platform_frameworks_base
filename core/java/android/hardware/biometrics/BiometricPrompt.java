@@ -123,6 +123,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public static final int DISMISSED_REASON_CREDENTIAL_CONFIRMED = 7;
 
     /**
+     * Dialog is done animating away after user clicked on the button set via
+     * {@link PromptContentViewWithMoreOptionsButton.Builder#setMoreOptionsButtonListener(Executor,
+     * DialogInterface.OnClickListener)} )}.
+     *
+     * @hide
+     */
+    public static final int DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS = 8;
+
+    /**
      * @hide
      */
     @IntDef({DISMISSED_REASON_BIOMETRIC_CONFIRMED,
@@ -131,7 +140,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED,
             DISMISSED_REASON_ERROR,
             DISMISSED_REASON_SERVER_REQUESTED,
-            DISMISSED_REASON_CREDENTIAL_CONFIRMED})
+            DISMISSED_REASON_CREDENTIAL_CONFIRMED,
+            DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS})
     @Retention(RetentionPolicy.SOURCE)
     public @interface DismissedReason {}
 
@@ -654,8 +664,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private final IAuthService mService;
     private final PromptInfo mPromptInfo;
     private final ButtonInfo mNegativeButtonInfo;
-    // TODO(b/328843028): add callback onContentViewMoreOptionsButtonClicked() in
-    //  IBiometricServiceReceiver.
     private final ButtonInfo mContentViewMoreOptionsButtonInfo;
 
     private CryptoObject mCryptoObject;
@@ -745,6 +753,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                     mNegativeButtonInfo.listener.onClick(null, DialogInterface.BUTTON_NEGATIVE);
                     mIsPromptShowing = false;
                 });
+            } else if (reason == DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS) {
+                if (mContentViewMoreOptionsButtonInfo != null) {
+                    mContentViewMoreOptionsButtonInfo.executor.execute(() -> {
+                        mContentViewMoreOptionsButtonInfo.listener.onClick(null,
+                                DialogInterface.BUTTON_NEGATIVE);
+                    });
+                }
             } else {
                 mIsPromptShowing = false;
                 Log.e(TAG, "Unknown reason: " + reason);

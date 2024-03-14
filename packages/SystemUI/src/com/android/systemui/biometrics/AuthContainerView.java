@@ -218,6 +218,11 @@ public class AuthContainerView extends LinearLayout
         }
 
         @Override
+        public void onContentViewMoreOptionsButtonPressed() {
+            animateAway(AuthDialogCallback.DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS);
+        }
+
+        @Override
         public void onError() {
             animateAway(AuthDialogCallback.DISMISSED_ERROR);
         }

@@ -205,12 +205,12 @@ public class AuthController implements
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
                 reason = (reason != null) ? reason : "unknown";
-                closeDioalog(reason);
+                closeDialog(reason);
             }
         }
     };
 
-    private void closeDioalog(String reason) {
+    private void closeDialog(String reason) {
         if (isShowing()) {
             Log.i(TAG, "Close BP, reason :" + reason);
             mCurrentDialog.dismissWithoutCallback(true /* animate */);
@@ -571,6 +571,11 @@ public class AuthController implements
                         credentialAttestation);
                 break;
 
+            case AuthDialogCallback.DISMISSED_BUTTON_CONTENT_VIEW_MORE_OPTIONS:
+                sendResultAndCleanUp(
+                        BiometricPrompt.DISMISSED_REASON_CONTENT_VIEW_MORE_OPTIONS,
+                        credentialAttestation);
+                break;
             default:
                 Log.e(TAG, "Unhandled reason: " + reason);
                 break;
@@ -579,7 +584,7 @@ public class AuthController implements
 
     @Override
     public void handleShowGlobalActionsMenu() {
-        closeDioalog("PowerMenu shown");
+        closeDialog("PowerMenu shown");
     }
 
     /**
