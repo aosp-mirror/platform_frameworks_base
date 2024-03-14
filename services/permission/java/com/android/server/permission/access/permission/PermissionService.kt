@@ -1889,7 +1889,7 @@ class PermissionService(
         packageName: String,
         appId: Int,
         packageState: PackageState,
-        androidPackage: AndroidPackage?,
+        androidPackage: AndroidPackage,
         sharedUserPkgs: List<AndroidPackage>,
         userId: Int
     ) {
