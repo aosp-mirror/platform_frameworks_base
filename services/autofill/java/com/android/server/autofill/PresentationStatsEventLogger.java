@@ -545,6 +545,25 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /**
+     * Set views_fillable_total_count as long as mEventInternal presents.
+     */
+    public void maybeSetViewFillableCounts(int totalFillableCount) {
+        mEventInternal.ifPresent(event -> {
+            event.mViewFillableTotalCount = totalFillableCount;
+        });
+    }
+
+    /**
+     * Set views_filled_failure_count using failure count as long as mEventInternal
+     * presents.
+     */
+    public void maybeSetViewFillFailureCounts(int failureCount) {
+        mEventInternal.ifPresent(event -> {
+            event.mViewFillFailureCount = failureCount;
+        });
+    }
+
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
@@ -587,7 +606,9 @@ public final class PresentationStatsEventLogger {
                     + " mFieldClassificationRequestId=" + event.mFieldClassificationRequestId
                     + " mAppPackageUid=" + mCallingAppUid
                     + " mIsCredentialRequest=" + event.mIsCredentialRequest
-                    + " mWebviewRequestedCredential=" + event.mWebviewRequestedCredential);
+                    + " mWebviewRequestedCredential=" + event.mWebviewRequestedCredential
+                    + " mViewFillableTotalCount=" + event.mViewFillableTotalCount
+                    + " mViewFillFailureCount=" + event.mViewFillFailureCount);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -628,7 +649,9 @@ public final class PresentationStatsEventLogger {
                 event.mFieldClassificationRequestId,
                 mCallingAppUid,
                 event.mIsCredentialRequest,
-                event.mWebviewRequestedCredential);
+                event.mWebviewRequestedCredential,
+                event.mViewFillableTotalCount,
+                event.mViewFillFailureCount);
         mEventInternal = Optional.empty();
     }
 
@@ -664,6 +687,8 @@ public final class PresentationStatsEventLogger {
         int mFieldClassificationRequestId = -1;
         boolean mIsCredentialRequest = false;
         boolean mWebviewRequestedCredential = false;
+        int mViewFillableTotalCount = -1;
+        int mViewFillFailureCount = -1;
 
         PresentationStatsEventInternal() {}
     }
