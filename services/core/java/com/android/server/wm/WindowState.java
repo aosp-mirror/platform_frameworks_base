@@ -5700,7 +5700,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // window becomes visible while the sync group is still active.
             return true;
         }
-        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mLastConfigReportedToClient && isDrawn()) {
+        if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mLastConfigReportedToClient && isDrawn()
+                && mPrepareSyncSeqId <= 0) {
             // Complete the sync state immediately for a drawn window that doesn't need to redraw.
             onSyncFinishedDrawing();
         }

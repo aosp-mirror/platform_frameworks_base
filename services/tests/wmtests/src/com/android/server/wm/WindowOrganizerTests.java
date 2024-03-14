@@ -1376,8 +1376,9 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertTrue(w1.syncNextBuffer());
         assertTrue(w2.syncNextBuffer());
 
-        // A drawn window can complete the sync state automatically.
+        // A drawn window in non-explicit sync can complete the sync state automatically.
         w1.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        w1.mPrepareSyncSeqId = 0;
         makeLastConfigReportedToClient(w1, true /* visible */);
         mWm.mSyncEngine.onSurfacePlacement();
         verify(mockCallback).onTransactionReady(anyInt(), any());
