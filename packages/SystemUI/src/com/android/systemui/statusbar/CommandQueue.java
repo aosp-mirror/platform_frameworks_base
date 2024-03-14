@@ -178,6 +178,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_IMMERSIVE_CHANGED = 78 << MSG_SHIFT;
     private static final int MSG_SET_QS_TILES = 79 << MSG_SHIFT;
     private static final int MSG_ENTER_DESKTOP = 80 << MSG_SHIFT;
+    private static final int MSG_SET_SPLITSCREEN_FOCUS = 81 << MSG_SHIFT;
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
     public static final int FLAG_EXCLUDE_RECENTS_PANEL = 1 << 1;
@@ -506,6 +507,11 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#moveFocusedTaskToStageSplit
          */
         default void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {}
+
+        /**
+         * @see IStatusBar#setSplitscreenFocus
+         */
+        default void setSplitscreenFocus(boolean leftOrTop) {}
 
         /**
          * @see IStatusBar#showMediaOutputSwitcher
@@ -1349,6 +1355,12 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void setSplitscreenFocus(boolean leftOrTop) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SET_SPLITSCREEN_FOCUS, leftOrTop).sendToTarget();
+        }
+    }
+    @Override
     public void showMediaOutputSwitcher(String packageName) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
@@ -1919,6 +1931,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                     }
                     break;
                 }
+                case MSG_SET_SPLITSCREEN_FOCUS:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setSplitscreenFocus((Boolean) msg.obj);
+                    }
+                    break;
                 case MSG_SHOW_MEDIA_OUTPUT_SWITCHER:
                     args = (SomeArgs) msg.obj;
                     String clientPackageName = (String) args.arg1;

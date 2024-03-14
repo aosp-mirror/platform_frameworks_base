@@ -3526,6 +3526,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyEvent(event),
                                 true /* leftOrTop */);
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION);
+                    } else if (event.isAltPressed()) {
+                        setSplitscreenFocus(true /* leftOrTop */);
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.CHANGE_SPLITSCREEN_FOCUS);
                     } else {
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.BACK);
                         injectBackGesture(event.getDownTime());
@@ -3534,11 +3537,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
-                    moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyEvent(event),
-                            false /* leftOrTop */);
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION);
-                    return true;
+                if (firstDown && event.isMetaPressed()) {
+                    if (event.isCtrlPressed()) {
+                        moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyEvent(event),
+                                false /* leftOrTop */);
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.SPLIT_SCREEN_NAVIGATION);
+                        return true;
+                    } else if (event.isAltPressed()) {
+                        setSplitscreenFocus(false /* leftOrTop */);
+                        logKeyboardSystemsEvent(event, KeyboardLogEvent.CHANGE_SPLITSCREEN_FOCUS);
+                        return true;
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_SLASH:
@@ -4395,6 +4404,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
             statusbar.moveFocusedTaskToStageSplit(displayId, leftOrTop);
+        }
+    }
+
+    private void setSplitscreenFocus(boolean leftOrTop) {
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.setSplitscreenFocus(leftOrTop);
         }
     }
 
