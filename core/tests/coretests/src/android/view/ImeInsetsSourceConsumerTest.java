@@ -120,6 +120,10 @@ public class ImeInsetsSourceConsumerTest {
             final var statsToken = ImeTracker.Token.empty();
             mImeConsumer.onWindowFocusGained(true);
             mController.show(WindowInsets.Type.ime(), true /* fromIme */, statsToken);
+            // Called once through the show flow.
+            verify(mController).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */,
+                    eq(statsToken));
 
             // set control and verify visibility is applied.
             InsetsSourceControl control = new InsetsSourceControl(ID_IME,
@@ -127,11 +131,11 @@ public class ImeInsetsSourceConsumerTest {
             mController.onControlsChanged(new InsetsSourceControl[] { control });
             // IME show animation should be triggered when control becomes available.
             verify(mController).applyAnimation(
-                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */,
-                    eq(statsToken));
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
+                    and(not(eq(statsToken)), notNull()));
             verify(mController, never()).applyAnimation(
-                    eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(true) /* fromIme */,
-                    eq(statsToken));
+                    eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(false) /* fromIme */,
+                    and(not(eq(statsToken)), notNull()));
         });
     }
 
@@ -159,6 +163,10 @@ public class ImeInsetsSourceConsumerTest {
             final var statsToken = ImeTracker.Token.empty();
             if (imeVisible) {
                 mController.show(WindowInsets.Type.ime(), true /* fromIme */, statsToken);
+                // Called once through the show flow.
+                verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
+                        eq(true) /* show */, eq(true) /* fromIme */,
+                        eq(false) /* skipAnim */, eq(statsToken));
             }
 
             // set control and verify visibility is applied.
@@ -184,13 +192,17 @@ public class ImeInsetsSourceConsumerTest {
             if (!hasViewFocus) {
                 final var statsTokenNext = ImeTracker.Token.empty();
                 mController.show(WindowInsets.Type.ime(), true /* fromIme */, statsTokenNext);
+                // Called once through the show flow.
+                verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
+                        eq(true) /* show */, eq(true) /* fromIme */,
+                        eq(false) /* skipAnim */, eq(statsTokenNext));
                 mController.onControlsChanged(new InsetsSourceControl[]{ control });
                 // Verify IME show animation should be triggered when control becomes available and
                 // the animation will be skipped by getAndClearSkipAnimationOnce invoked.
                 verify(control).getAndClearSkipAnimationOnce();
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
-                        eq(true) /* show */, eq(true) /* fromIme */,
-                        eq(false) /* skipAnim */, eq(statsTokenNext));
+                        eq(true) /* show */, eq(false) /* fromIme */,
+                        eq(true) /* skipAnim */, and(not(eq(statsToken)), notNull()));
             }
         });
     }
