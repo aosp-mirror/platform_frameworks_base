@@ -22,6 +22,7 @@ import android.hardware.biometrics.PromptContentItem
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentItemPlainText
 import android.hardware.biometrics.PromptContentView
+import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.text.SpannableString
 import android.text.Spanned
@@ -31,6 +32,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewTreeObserver
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
@@ -46,7 +48,11 @@ import kotlinx.coroutines.launch
 
 /** Sub-binder for [BiometricPromptLayout.customized_view_container]. */
 object BiometricCustomizedViewBinder {
-    fun bind(customizedViewContainer: LinearLayout, viewModel: PromptViewModel) {
+    fun bind(
+        customizedViewContainer: LinearLayout,
+        viewModel: PromptViewModel,
+        legacyCallback: Spaghetti.Callback
+    ) {
         customizedViewContainer.repeatWhenAttached { containerView ->
             lifecycleScope.launch {
                 val contentView: PromptContentView? = viewModel.contentView.first()
@@ -60,7 +66,7 @@ object BiometricCustomizedViewBinder {
                         return@width
                     }
                     (containerView as LinearLayout).addView(
-                        contentView.toView(containerView.context, containerWidth)
+                        contentView.toView(containerView.context, containerWidth, legacyCallback)
                     )
                     containerView.visibility = View.VISIBLE
                 }
@@ -69,67 +75,98 @@ object BiometricCustomizedViewBinder {
     }
 }
 
-private fun PromptContentView.toView(context: Context, containerViewWidth: Int): View {
-    val inflater = LayoutInflater.from(context)
-    when (this) {
-        is PromptVerticalListContentView -> {
-            val contentView =
-                inflater.inflate(R.layout.biometric_prompt_content_layout, null) as LinearLayout
-
-            val descriptionView =
-                contentView.requireViewById<TextView>(R.id.customized_view_description)
-            if (!description.isNullOrEmpty()) {
-                descriptionView.text = description
-            } else {
-                descriptionView.visibility = View.GONE
-            }
-
-            // Show two column by default, once there is an item exceeding max lines, show single
-            // item instead.
-            val showTwoColumn =
-                listItems.all { !it.doesExceedMaxLinesIfTwoColumn(context, containerViewWidth) }
-            var currRowView = createNewRowLayout(inflater)
-            for (item in listItems) {
-                val itemView = item.toView(context, inflater)
-                // If this item will be in the first row (contentView only has description view) and
-                // description is empty, remove top padding of this item.
-                if (contentView.childCount == 1 && description.isNullOrEmpty()) {
-                    itemView.setPadding(
-                        itemView.paddingLeft,
-                        0,
-                        itemView.paddingRight,
-                        itemView.paddingBottom
-                    )
-                }
-                currRowView.addView(itemView)
-
-                // If this is the first item in the current row, add space behind it.
-                if (currRowView.childCount == 1 && showTwoColumn) {
-                    currRowView.addSpaceView(
-                        context.resources.getDimensionPixelSize(
-                            R.dimen.biometric_prompt_content_space_width_between_items
-                        ),
-                        MATCH_PARENT
-                    )
-                }
-
-                // If there are already two items (plus the space view) in the current row, or it
-                // should be one column, start a new row
-                if (currRowView.childCount == 3 || !showTwoColumn) {
-                    contentView.addView(currRowView)
-                    currRowView = createNewRowLayout(inflater)
-                }
-            }
-            if (currRowView.childCount > 0) {
-                contentView.addView(currRowView)
-            }
-
-            return contentView
-        }
+private fun PromptContentView.toView(
+    context: Context,
+    containerViewWidth: Int,
+    legacyCallback: Spaghetti.Callback
+): View {
+    return when (this) {
+        is PromptVerticalListContentView -> initLayout(context, containerViewWidth)
+        is PromptContentViewWithMoreOptionsButton -> initLayout(context, legacyCallback)
         else -> {
             throw IllegalStateException("No such PromptContentView: $this")
         }
     }
+}
+
+private fun LayoutInflater.inflateContentView(id: Int, description: String?): LinearLayout {
+    val contentView = inflate(id, null) as LinearLayout
+
+    val descriptionView = contentView.requireViewById<TextView>(R.id.customized_view_description)
+    if (!description.isNullOrEmpty()) {
+        descriptionView.text = description
+    } else {
+        descriptionView.visibility = View.GONE
+    }
+    return contentView
+}
+
+private fun PromptContentViewWithMoreOptionsButton.initLayout(
+    context: Context,
+    legacyCallback: Spaghetti.Callback
+): View {
+    val inflater = LayoutInflater.from(context)
+    val contentView =
+        inflater.inflateContentView(
+            R.layout.biometric_prompt_content_with_button_layout,
+            description
+        )
+    val buttonView = contentView.requireViewById<Button>(R.id.customized_view_more_options_button)
+    buttonView.setOnClickListener { legacyCallback.onContentViewMoreOptionsButtonPressed() }
+    return contentView
+}
+
+private fun PromptVerticalListContentView.initLayout(
+    context: Context,
+    containerViewWidth: Int
+): View {
+    val inflater = LayoutInflater.from(context)
+    val resources = context.resources
+    val contentView =
+        inflater.inflateContentView(
+            R.layout.biometric_prompt_vertical_list_content_layout,
+            description
+        )
+    // Show two column by default, once there is an item exceeding max lines, show single
+    // item instead.
+    val showTwoColumn =
+        listItems.all { !it.doesExceedMaxLinesIfTwoColumn(context, containerViewWidth) }
+    var currRowView = createNewRowLayout(inflater)
+    for (item in listItems) {
+        val itemView = item.toView(context, inflater)
+        // If this item will be in the first row (contentView only has description view) and
+        // description is empty, remove top padding of this item.
+        if (contentView.childCount == 1 && description.isNullOrEmpty()) {
+            itemView.setPadding(
+                itemView.paddingLeft,
+                0,
+                itemView.paddingRight,
+                itemView.paddingBottom
+            )
+        }
+        currRowView.addView(itemView)
+
+        // If this is the first item in the current row, add space behind it.
+        if (currRowView.childCount == 1 && showTwoColumn) {
+            currRowView.addSpaceView(
+                resources.getDimensionPixelSize(
+                    R.dimen.biometric_prompt_content_space_width_between_items
+                ),
+                MATCH_PARENT
+            )
+        }
+
+        // If there are already two items (plus the space view) in the current row, or it
+        // should be one column, start a new row
+        if (currRowView.childCount == 3 || !showTwoColumn) {
+            contentView.addView(currRowView)
+            currRowView = createNewRowLayout(inflater)
+        }
+    }
+    if (currRowView.childCount > 0) {
+        contentView.addView(currRowView)
+    }
+    return contentView
 }
 
 private fun createNewRowLayout(inflater: LayoutInflater): LinearLayout {

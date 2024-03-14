@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/biometric_prompt_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 

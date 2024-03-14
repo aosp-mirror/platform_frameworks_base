@@ -135,7 +135,7 @@ object BiometricViewBinder {
         val confirmationButton = view.requireViewById<Button>(R.id.button_confirm)
         val retryButton = view.requireViewById<Button>(R.id.button_try_again)
 
-        // TODO(b/251476085): temporary workaround for the unsafe callbacks & legacy controllers
+        // TODO(b/330788871): temporary workaround for the unsafe callbacks & legacy controllers
         val adapter =
             Spaghetti(
                 view = view,
@@ -169,7 +169,11 @@ object BiometricViewBinder {
             descriptionView.text = viewModel.description.first()
 
             if (Flags.customBiometricPrompt() && constraintBp()) {
-                BiometricCustomizedViewBinder.bind(customizedViewContainer, viewModel)
+                BiometricCustomizedViewBinder.bind(
+                    customizedViewContainer,
+                    viewModel,
+                    legacyCallback
+                )
             }
 
             // set button listeners
@@ -472,7 +476,7 @@ object BiometricViewBinder {
  *
  * Do not reference the [view] for anything other than [asView].
  */
-@Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+@Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
 class Spaghetti(
     private val view: View,
     private val viewModel: PromptViewModel,
@@ -480,7 +484,7 @@ class Spaghetti(
     private val applicationScope: CoroutineScope,
 ) {
 
-    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     interface Callback {
         fun onAuthenticated()
         fun onUserCanceled()
@@ -493,7 +497,7 @@ class Spaghetti(
         fun onAuthenticatedAndConfirmed()
     }
 
-    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     enum class BiometricState {
         /** Authentication hardware idle. */
         STATE_IDLE,
