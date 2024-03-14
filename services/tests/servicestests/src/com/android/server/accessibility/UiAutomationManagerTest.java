@@ -39,7 +39,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.hardware.display.DisplayManager;
 import android.os.IBinder;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.WindowManager;
@@ -209,7 +208,6 @@ public class UiAutomationManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
     public void registerUiAutomationService_callsAddWindowTokenUsingHandler() {
         register(0);
         // registerUiTestAutomationServiceLocked() should not directly call addWindowToken.
