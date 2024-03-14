@@ -94,7 +94,7 @@ android_test {
         "libutils",
         "netd_aidl_interface-V5-cpp",
     ],
-
+    compile_multilib: "both",
     dxflags: ["--multi-dex"],
 
     java_resources: [
