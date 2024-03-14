@@ -26,7 +26,6 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -89,36 +88,6 @@ constructor(
                 }
 
                 fromBouncerStep.value > 0.5f
-            }
-            .onStart {
-                // Default to null ("don't care, use a reasonable default").
-                emit(null)
-            }
-            .distinctUntilChanged()
-
-    val surfaceBehindModel: Flow<KeyguardSurfaceBehindModel?> =
-        combine(
-                transitionInteractor.startedKeyguardTransitionStep,
-                transitionInteractor.transitionStepsFromState(KeyguardState.PRIMARY_BOUNCER)
-            ) { startedStep, fromBouncerStep ->
-                if (startedStep.to != KeyguardState.GONE) {
-                    // BOUNCER to anything but GONE does not require any special surface
-                    // visibility handling.
-                    return@combine null
-                }
-
-                if (fromBouncerStep.value > 0.5f) {
-                    KeyguardSurfaceBehindModel(
-                        animateFromAlpha = 0f,
-                        alpha = 1f,
-                        animateFromTranslationY = 500f,
-                        translationY = 0f,
-                    )
-                } else {
-                    KeyguardSurfaceBehindModel(
-                        alpha = 0f,
-                    )
-                }
             }
             .onStart {
                 // Default to null ("don't care, use a reasonable default").

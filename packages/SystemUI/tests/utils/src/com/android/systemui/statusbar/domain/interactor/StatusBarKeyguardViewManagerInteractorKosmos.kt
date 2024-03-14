@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar.domain.interactor
 
+import com.android.systemui.keyguard.domain.interactor.keyguardSurfaceBehindInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.windowManagerLockscreenVisibilityInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.power.domain.interactor.powerInteractor
 
@@ -26,5 +28,7 @@ val Kosmos.statusBarKeyguardViewManagerInteractor by
             keyguardTransitionInteractor = this.keyguardTransitionInteractor,
             keyguardOcclusionInteractor = this.keyguardOcclusionInteractor,
             powerInteractor = this.powerInteractor,
+            wmLockscreenVisibilityInteractor = windowManagerLockscreenVisibilityInteractor,
+            surfaceBehindInteractor = keyguardSurfaceBehindInteractor,
         )
     }

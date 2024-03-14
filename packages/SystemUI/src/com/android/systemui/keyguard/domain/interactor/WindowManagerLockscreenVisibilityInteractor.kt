@@ -40,6 +40,7 @@ constructor(
     surfaceBehindInteractor: KeyguardSurfaceBehindInteractor,
     fromLockscreenInteractor: FromLockscreenTransitionInteractor,
     fromBouncerInteractor: FromPrimaryBouncerTransitionInteractor,
+    fromAlternateBouncerInteractor: FromAlternateBouncerTransitionInteractor,
     notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
 ) {
     private val defaultSurfaceBehindVisibility =
@@ -64,6 +65,9 @@ constructor(
                     }
                     KeyguardState.PRIMARY_BOUNCER -> {
                         fromBouncerInteractor.surfaceBehindVisibility
+                    }
+                    KeyguardState.ALTERNATE_BOUNCER -> {
+                        fromAlternateBouncerInteractor.surfaceBehindVisibility
                     }
                     else -> flowOf(null)
                 }

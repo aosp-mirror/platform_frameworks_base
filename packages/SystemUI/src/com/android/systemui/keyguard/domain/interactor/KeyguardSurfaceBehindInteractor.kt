@@ -95,7 +95,17 @@ constructor(
             }
             .distinctUntilChanged()
 
-    val isAnimatingSurface = repository.isAnimatingSurface
+    /**
+     * Whether we're animating the surface, or a notification launch animation is running (which
+     * means we're going to animate the surface, even if animators aren't yet running).
+     */
+    val isAnimatingSurface =
+        combine(
+            repository.isAnimatingSurface,
+            notificationLaunchInteractor.isLaunchAnimationRunning
+        ) { animatingSurface, animatingLaunch ->
+            animatingSurface || animatingLaunch
+        }
 
     fun setAnimatingSurface(animating: Boolean) {
         repository.setAnimatingSurface(animating)
