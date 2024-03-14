@@ -142,6 +142,7 @@ import static android.service.notification.NotificationListenerService.TRIM_LIGH
 import static android.view.contentprotection.flags.Flags.rapidClearNotificationsByListenerAppOpEnabled;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static android.app.Flags.updateRankingTime;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -8489,6 +8490,11 @@ public class NotificationManagerService extends SystemService {
                         r.isUpdate = true;
                         final boolean isInterruptive = isVisuallyInterruptive(old, r);
                         r.setTextChanged(isInterruptive);
+                        if (updateRankingTime()) {
+                            if (isInterruptive) {
+                                r.resetRankingTime();
+                            }
+                        }
                     }
 
                     mNotificationsByKey.put(n.getKey(), r);

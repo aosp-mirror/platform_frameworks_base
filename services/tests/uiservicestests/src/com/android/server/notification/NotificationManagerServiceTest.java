@@ -24,6 +24,7 @@ import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.SHOW_IMMEDIATELY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.Flags.FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS;
+import static android.app.Flags.FLAG_UPDATE_RANKING_TIME;
 import static android.app.Notification.EXTRA_ALLOW_DURING_SETUP;
 import static android.app.Notification.EXTRA_PICTURE;
 import static android.app.Notification.EXTRA_PICTURE_ICON;
@@ -101,7 +102,6 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
-
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
@@ -111,11 +111,11 @@ import static com.android.server.notification.NotificationManagerService.DEFAULT
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
-
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -124,7 +124,6 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
-
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -132,27 +131,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -207,7 +186,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
-import android.media.IRingtonePlayer;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Binder;
@@ -246,7 +224,6 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.telecom.TelecomManager;
-import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -260,10 +237,8 @@ import android.util.AtomicFile;
 import android.util.Pair;
 import android.util.Xml;
 import android.widget.RemoteViews;
-
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.config.sysui.TestableFlagResolver;
@@ -294,13 +269,10 @@ import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
-
 import com.google.android.collect.Lists;
 import com.google.common.collect.ImmutableList;
-
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -438,6 +410,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+
+    NotificationChannel mSilentChannel = new NotificationChannel("low", "low", IMPORTANCE_LOW);
 
     private static final int NOTIFICATION_LOCATION_UNKNOWN = 0;
 
@@ -790,14 +764,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService = mService.getBinderService();
         mInternalService = mService.getInternalService();
 
-        mBinderService.createNotificationChannels(
-                PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
-        mBinderService.createNotificationChannels(
-                PKG_P, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
-        mBinderService.createNotificationChannels(
-                PKG_O, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
+        mBinderService.createNotificationChannels(PKG, new ParceledListSlice(
+                Arrays.asList(mTestNotificationChannel, mSilentChannel)));
+        mBinderService.createNotificationChannels(PKG_P, new ParceledListSlice(
+                Arrays.asList(mTestNotificationChannel, mSilentChannel)));
+        mBinderService.createNotificationChannels(PKG_O, new ParceledListSlice(
+                Arrays.asList(mTestNotificationChannel, mSilentChannel)));
         assertNotNull(mBinderService.getNotificationChannel(
                 PKG, mContext.getUserId(), PKG, TEST_CHANNEL_ID));
+        assertNotNull(mBinderService.getNotificationChannel(
+                PKG, mContext.getUserId(), PKG, mSilentChannel.getId()));
         clearInvocations(mRankingHandler);
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
 
@@ -1038,11 +1014,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
             int userId) {
+        return generateNotificationRecord(channel, id, userId, "foo");
+    }
+
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
+            int userId, String title) {
         if (channel == null) {
             channel = mTestNotificationChannel;
         }
         Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
-                .setContentTitle("foo")
+                .setContentTitle(title)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, id, "tag", mUid, 0,
                 nb.build(), new UserHandle(userId), null, 0);
@@ -14726,6 +14707,110 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         verify(listener, never()).onCallNotificationRemoved(anyString(), any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_UPDATE_RANKING_TIME)
+    public void rankingTime_newNotification_noisy_matchesSbn() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, mUserId);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mService.mNotificationList.get(0);
+        long originalPostTime = posted.getSbn().getPostTime();
+        assertThat(posted.getRankingTimeMs()).isEqualTo(originalPostTime);
+    }
+
+    @Test
+    @EnableFlags(FLAG_UPDATE_RANKING_TIME)
+    public void rankingTime_newNotification_silent_matchesSbn() throws Exception {
+        NotificationChannel low = new NotificationChannel("low", "low", IMPORTANCE_LOW);
+        NotificationRecord nr = generateNotificationRecord(low, mUserId);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mService.mNotificationList.get(0);
+        long originalPostTime = posted.getSbn().getPostTime();
+        assertThat(posted.getRankingTimeMs()).isEqualTo(originalPostTime);
+    }
+
+    @Test
+    @EnableFlags(FLAG_UPDATE_RANKING_TIME)
+    public void rankingTime_updatedNotification_silentSameText_originalPostTime() throws Exception {
+        NotificationChannel low = new NotificationChannel("low", "low", IMPORTANCE_LOW);
+        NotificationRecord nr = generateNotificationRecord(low, mUserId);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationRecord posted = mService.mNotificationList.get(0);
+        long originalPostTime = posted.getSbn().getPostTime();
+        assertThat(posted.getRankingTimeMs()).isEqualTo(originalPostTime);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        assertThat(mService.mNotificationList.get(0).getRankingTimeMs())
+                .isEqualTo(originalPostTime);
+    }
+
+    @Test
+    @EnableFlags(FLAG_UPDATE_RANKING_TIME)
+    public void rankingTime_updatedNotification_silentNewText_newPostTime() throws Exception {
+        NotificationChannel low = new NotificationChannel("low", "low", IMPORTANCE_LOW);
+        NotificationRecord nr = generateNotificationRecord(low, 0, mUserId);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationRecord posted = mService.mNotificationList.get(0);
+        long originalPostTime = posted.getSbn().getPostTime();
+        assertThat(posted.getRankingTimeMs()).isEqualTo(originalPostTime);
+
+        NotificationRecord nrUpdate = generateNotificationRecord(low, 0, mUserId, "bar");
+        // no attention helper mocked behavior needed because this does not make noise
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nrUpdate.getSbn().getId(), nrUpdate.getSbn().getNotification(),
+                nrUpdate.getSbn().getUserId());
+        waitForIdle();
+
+        posted = mService.mNotificationList.get(0);
+        assertThat(posted.getRankingTimeMs()).isGreaterThan(originalPostTime);
+        assertThat(posted.getRankingTimeMs()).isEqualTo(posted.getSbn().getPostTime());
+    }
+
+    @Test
+    @EnableFlags(FLAG_UPDATE_RANKING_TIME)
+    public void rankingTime_updatedNotification_noisySameText_newPostTime() throws Exception {
+        NotificationChannel low = new NotificationChannel("low", "low", IMPORTANCE_LOW);
+        NotificationRecord nr = generateNotificationRecord(low, mUserId);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+        NotificationRecord posted = mService.mNotificationList.get(0);
+        long originalPostTime = posted.getSbn().getPostTime();
+        assertThat(posted.getRankingTimeMs()).isEqualTo(originalPostTime);
+
+        NotificationRecord nrUpdate = generateNotificationRecord(mTestNotificationChannel, mUserId);
+        when(mAttentionHelper.buzzBeepBlinkLocked(any(), any())).thenAnswer(new Answer<Object>() {
+            public Object answer(InvocationOnMock invocation) {
+                Object[] args = invocation.getArguments();
+                ((NotificationRecord) args[0]).resetRankingTime();
+                return 2; // beep
+            }
+        });
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag0",
+                nrUpdate.getSbn().getId(), nrUpdate.getSbn().getNotification(),
+                nrUpdate.getSbn().getUserId());
+        waitForIdle();
+        posted = mService.mNotificationList.get(0);
+        assertThat(posted.getRankingTimeMs()).isGreaterThan(originalPostTime);
+        assertThat(posted.getRankingTimeMs()).isEqualTo(posted.getSbn().getPostTime());
     }
 
     private NotificationRecord createAndPostCallStyleNotification(String packageName,
