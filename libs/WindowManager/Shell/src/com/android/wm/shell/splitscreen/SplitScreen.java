@@ -64,23 +64,12 @@ public interface SplitScreen {
         default void onSplitVisibilityChanged(boolean visible) {}
     }
 
-    /**
-     * Callback interface for listening to requests to enter split select. Used for desktop -> split
-     */
+    /** Callback interface for listening to requests to enter split select */
     interface SplitSelectListener {
         default boolean onRequestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
                 int splitPosition, Rect taskBounds) {
             return false;
         }
-    }
-
-    interface SplitInvocationListener {
-        /**
-         * Called whenever shell starts or stops the split screen animation
-         * @param animationRunning if {@code true} the animation has begun, if {@code false} the
-         *                         animation has finished
-         */
-        default void onSplitAnimationInvoked(boolean animationRunning) { }
     }
 
     /** Registers listener that gets split screen callback. */
@@ -89,15 +78,6 @@ public interface SplitScreen {
 
     /** Unregisters listener that gets split screen callback. */
     void unregisterSplitScreenListener(@NonNull SplitScreenListener listener);
-
-    /**
-     * Registers a {@link SplitInvocationListener} to notify when the animation to enter split
-     * screen has started and stopped
-     *
-     * @param executor callbacks to the listener will be executed on this executor
-     */
-    void registerSplitAnimationListener(@NonNull SplitInvocationListener listener,
-            @NonNull Executor executor);
 
     /** Called when device waking up finished. */
     void onFinishedWakingUp();

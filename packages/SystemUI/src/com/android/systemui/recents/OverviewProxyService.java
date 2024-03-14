@@ -36,6 +36,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_D
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_GOING_AWAY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_TRANSITION;
 
@@ -112,6 +113,8 @@ import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.sysui.ShellInterface;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,8 +125,6 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -667,7 +668,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             // Listen for tracing state changes
             @Override
             public void onTracingStateChanged(boolean enabled) {
-                // TODO(b/286509643) Cleanup callers of this; Unused downstream
+                mSysUiState.setFlag(SYSUI_STATE_TRACING_ENABLED, enabled)
+                        .commitUpdate(mContext.getDisplayId());
             }
 
             @Override
