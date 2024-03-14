@@ -5862,6 +5862,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 p.println("    curSession=" + c.mCurSession);
             };
             mClientController.forAllClients(clientControllerDump);
+            p.println("  mCurrentUserId=" + mCurrentUserId);
             p.println("  mCurMethodId=" + getSelectedMethodIdLocked());
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());
@@ -5887,8 +5888,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     ? Arrays.toString(mStylusIds.toArray()) : ""));
             p.println("  mSwitchingController:");
             mSwitchingController.dump(p);
-            p.println("  mSettings:");
-            settings.dump(p, "    ");
 
             p.println("  mStartInputHistory:");
             mStartInputHistory.dump(pw, "    ");
