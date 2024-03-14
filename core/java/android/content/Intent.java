@@ -6129,10 +6129,14 @@ public class Intent implements Parcelable, Cloneable {
      * the selection changes made by the user.
      * Applications may implement this method to change any of the following Chooser arguments by
      * returning new values in the result bundle:
-     * {@link #EXTRA_CHOOSER_TARGETS}, {@link #EXTRA_ALTERNATE_INTENTS},
+     * {@link #EXTRA_CHOOSER_TARGETS},
+     * {@link #EXTRA_ALTERNATE_INTENTS},
      * {@link #EXTRA_CHOOSER_CUSTOM_ACTIONS},
      * {@link #EXTRA_CHOOSER_MODIFY_SHARE_ACTION},
-     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER}.</p>
+     * {@link #EXTRA_METADATA_TEXT},
+     * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER},
+     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER}.
+     * </p>
      */
     @FlaggedApi(android.service.chooser.Flags.FLAG_CHOOSER_PAYLOAD_TOGGLING)
     public static final String EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI =
