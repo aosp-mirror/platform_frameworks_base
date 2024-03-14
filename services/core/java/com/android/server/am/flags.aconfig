@@ -75,3 +75,14 @@ flag {
     description: "Log the excessive incoming binder proxies into statsd"
     bug: "298263955"
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "avoid_resolving_type"
+    description: "Avoid resolving data type for sticky broadcasts"
+    bug: "323817802"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
