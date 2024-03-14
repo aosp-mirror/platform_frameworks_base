@@ -16,6 +16,9 @@
 
 package android.hardware.input;
 
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG;
+import static com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG;
 import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
@@ -23,6 +26,7 @@ import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -465,6 +469,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG)
     public static int getAccessibilityBounceKeysThreshold(@NonNull Context context) {
         if (!isAccessibilityBounceKeysFeatureEnabled()) {
             return 0;
@@ -487,6 +493,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilityBounceKeysThreshold(@NonNull Context context,
             int thresholdTimeMillis) {
@@ -545,6 +553,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG)
     public static int getAccessibilitySlowKeysThreshold(@NonNull Context context) {
         if (!isAccessibilitySlowKeysFeatureFlagEnabled()) {
             return 0;
@@ -567,6 +577,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilitySlowKeysThreshold(@NonNull Context context,
             int thresholdTimeMillis) {
@@ -614,6 +626,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
     public static boolean isAccessibilityStickyKeysEnabled(@NonNull Context context) {
         if (!isAccessibilityStickyKeysFeatureEnabled()) {
             return false;
@@ -635,6 +649,8 @@ public class InputSettings {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG)
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setAccessibilityStickyKeysEnabled(@NonNull Context context,
             boolean enabled) {
