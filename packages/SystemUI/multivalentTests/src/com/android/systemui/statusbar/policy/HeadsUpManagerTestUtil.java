@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 import android.app.ActivityManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.UserHandle;
 
 import android.content.Context;
@@ -66,5 +68,17 @@ public class HeadsUpManagerTestUtil {
     protected static NotificationEntry createEntry(int id, Context context) {
         return new NotificationEntryBuilder().setSbn(
                 HeadsUpManagerTestUtil.createSbn(id, context)).build();
+    }
+
+    protected static NotificationEntry createFullScreenIntentEntry(int id, Context context) {
+        final PendingIntent intent = PendingIntent.getActivity(
+                context, 0, new Intent(),
+                PendingIntent.FLAG_IMMUTABLE);
+
+        final Notification notif = new Notification.Builder(context, "")
+                .setSmallIcon(com.android.systemui.res.R.drawable.ic_person)
+                .setFullScreenIntent(intent, /* highPriority */ true)
+                .build();
+        return HeadsUpManagerTestUtil.createEntry(id, notif);
     }
 }

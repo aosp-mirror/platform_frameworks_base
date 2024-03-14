@@ -776,7 +776,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             return mEarliestRemovalTime < mSystemClock.elapsedRealtime();
         }
 
-        public int compareTo(@NonNull HeadsUpEntry headsUpEntry) {
+        public int compareNonTimeFields(HeadsUpEntry headsUpEntry) {
             boolean isPinned = mEntry.isRowPinned();
             boolean otherPinned = headsUpEntry.mEntry.isRowPinned();
             if (isPinned && !otherPinned) {
@@ -806,7 +806,14 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             } else if (!mRemoteInputActive && headsUpEntry.mRemoteInputActive) {
                 return 1;
             }
+            return 0;
+        }
 
+        public int compareTo(@NonNull HeadsUpEntry headsUpEntry) {
+            int nonTimeCompareResult = compareNonTimeFields(headsUpEntry);
+            if (nonTimeCompareResult != 0) {
+                return nonTimeCompareResult;
+            }
             if (mPostTime > headsUpEntry.mPostTime) {
                 return -1;
             } else if (mPostTime == headsUpEntry.mPostTime) {
@@ -929,10 +936,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             int requestedTimeOutMs;
             if (isStickyForSomeTime()) {
                 requestedTimeOutMs = mStickyForSomeTimeAutoDismissTime;
-            } else if (mAvalancheController.shortenDuration(this)) {
-                requestedTimeOutMs = 1000;
             } else {
-                requestedTimeOutMs = mAutoDismissTime;
+                requestedTimeOutMs = mAvalancheController.getDurationMs(this, mAutoDismissTime);
             }
             final long duration = getRecommendedHeadsUpTimeoutMs(requestedTimeOutMs);
             return mPostTime + duration;
