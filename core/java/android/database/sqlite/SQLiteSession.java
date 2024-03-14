@@ -312,15 +312,6 @@ public final class SQLiteSession {
                 cancellationSignal);
     }
 
-    private String modeString(int transactionMode) {
-        switch (transactionMode) {
-            case TRANSACTION_MODE_IMMEDIATE: return "TRANSACTION-IMMEDIATE";
-            case TRANSACTION_MODE_EXCLUSIVE: return "TRANSACTION-EXCLUSIVE";
-            case TRANSACTION_MODE_DEFERRED:  return "TRANSACTION-DEFERRED";
-            default: return "TRANSACTION";
-        }
-    }
-
     private void beginTransactionUnchecked(int transactionMode,
             SQLiteTransactionListener transactionListener, int connectionFlags,
             CancellationSignal cancellationSignal) {
@@ -330,7 +321,6 @@ public final class SQLiteSession {
 
         if (mTransactionStack == null) {
             acquireConnection(null, connectionFlags, cancellationSignal); // might throw
-            mConnection.recordBeginTransaction(modeString(transactionMode));
         }
         try {
             // Set up the transaction such that we can back out safely
@@ -475,7 +465,6 @@ public final class SQLiteSession {
                     mConnection.execute("ROLLBACK;", null, cancellationSignal); // might throw
                 }
             } finally {
-                mConnection.recordEndTransaction(successful);
                 releaseConnection(); // might throw
             }
         }
