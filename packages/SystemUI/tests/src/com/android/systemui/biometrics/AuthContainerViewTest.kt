@@ -399,6 +399,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     @Ignore("b/302735104")
     fun testShowCredentialUI_withCustomBp() {
+        mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
         val container = initializeFingerprintContainer(
                 authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
                 isUsingContentView = true
