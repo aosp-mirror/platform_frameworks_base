@@ -336,7 +336,7 @@ class WallpaperController {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.setVisibility(false);
-            if (ProtoLog.isEnabled(WM_DEBUG_WALLPAPER) && token.isVisible()) {
+            if (token.isVisible()) {
                 ProtoLog.d(WM_DEBUG_WALLPAPER,
                         "Hiding wallpaper %s from %s target=%s prev=%s callers=%s",
                         token, winGoingAway, mWallpaperTarget, mPrevWallpaperTarget,
@@ -527,15 +527,15 @@ class WallpaperController {
                         if ((mLastWallpaperTimeoutTime + WALLPAPER_TIMEOUT_RECOVERY)
                                 < start) {
                             try {
-                                if (DEBUG_WALLPAPER) Slog.v(TAG,
-                                        "Waiting for offset complete...");
+                                ProtoLog.v(WM_DEBUG_WALLPAPER, "Waiting for offset complete...");
                                 mService.mGlobalLock.wait(WALLPAPER_TIMEOUT);
                             } catch (InterruptedException e) {
                             }
-                            if (DEBUG_WALLPAPER) Slog.v(TAG, "Offset complete!");
+                            ProtoLog.v(WM_DEBUG_WALLPAPER, "Offset complete!");
                             if ((start + WALLPAPER_TIMEOUT) < SystemClock.uptimeMillis()) {
-                                Slog.i(TAG, "Timeout waiting for wallpaper to offset: "
-                                        + wallpaperWin);
+                                ProtoLog.v(WM_DEBUG_WALLPAPER,
+                                        "Timeout waiting for wallpaper to offset: %s",
+                                        wallpaperWin);
                                 mLastWallpaperTimeoutTime = start;
                             }
                         }
@@ -891,10 +891,6 @@ class WallpaperController {
         // The window is visible to the compositor...but is it visible to the user?
         // That is what the wallpaper cares about.
         final boolean visible = token != null;
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "Wallpaper visibility: " + visible + " at display "
-                    + mDisplayContent.getDisplayId());
-        }
 
         if (visible) {
             if (mWallpaperTarget.mWallpaperX >= 0) {
@@ -915,10 +911,9 @@ class WallpaperController {
 
         updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
 
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "adjustWallpaperWindows: wallpaper visibility " + visible
-                    + ", lock visibility " + mDisplayContent.isKeyguardLocked());
-        }
+        ProtoLog.v(WM_DEBUG_WALLPAPER,
+                "Wallpaper at display %d - visibility: %b, keyguardLocked: %b",
+                mDisplayContent.getDisplayId(), visible, mDisplayContent.isKeyguardLocked());
 
         if (visible && mLastFrozen != mFindResults.isWallpaperTargetForLetterbox) {
             mLastFrozen = mFindResults.isWallpaperTargetForLetterbox;
@@ -927,7 +922,7 @@ class WallpaperController {
                     /* x= */ 0, /* y= */ 0, /* z= */ 0, /* extras= */ null, /* sync= */ false);
         }
 
-        ProtoLog.d(WM_DEBUG_WALLPAPER, "New wallpaper: target=%s prev=%s",
+        ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper target=%s prev=%s",
                 mWallpaperTarget, mPrevWallpaperTarget);
     }
 
@@ -973,11 +968,9 @@ class WallpaperController {
                                 WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION);
 
                 }
-                if (DEBUG_WALLPAPER) {
-                    Slog.v(TAG,
-                            "Wallpaper should be visible but has not been drawn yet. "
-                                    + "mWallpaperDrawState=" + mWallpaperDrawState);
-                }
+                ProtoLog.v(WM_DEBUG_WALLPAPER,
+                        "Wallpaper should be visible but has not been drawn yet. "
+                                + "mWallpaperDrawState=%d", mWallpaperDrawState);
                 break;
             }
         }
@@ -1210,15 +1203,17 @@ class WallpaperController {
         boolean isWallpaperTargetForLetterbox = false;
 
         void setTopHideWhenLockedWallpaper(WindowState win) {
-            if (DEBUG_WALLPAPER) {
-                Slog.v(TAG, "setTopHideWhenLockedWallpaper " + win);
+            if (mTopWallpaper.mTopHideWhenLockedWallpaper != win) {
+                ProtoLog.d(WM_DEBUG_WALLPAPER, "New home screen wallpaper: %s, prev: %s",
+                        win, mTopWallpaper.mTopHideWhenLockedWallpaper);
             }
             mTopWallpaper.mTopHideWhenLockedWallpaper = win;
         }
 
         void setTopShowWhenLockedWallpaper(WindowState win) {
-            if (DEBUG_WALLPAPER) {
-                Slog.v(TAG, "setTopShowWhenLockedWallpaper " + win);
+            if (mTopWallpaper.mTopShowWhenLockedWallpaper != win) {
+                ProtoLog.d(WM_DEBUG_WALLPAPER, "New lock/shared screen wallpaper: %s, prev: %s",
+                        win, mTopWallpaper.mTopShowWhenLockedWallpaper);
             }
             mTopWallpaper.mTopShowWhenLockedWallpaper = win;
         }
