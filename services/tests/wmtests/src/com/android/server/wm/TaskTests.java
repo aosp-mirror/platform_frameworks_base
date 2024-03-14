@@ -623,6 +623,23 @@ public class TaskTests extends WindowTestsBase {
         doReturn(true).when(root).fillsParent();
     }
 
+    @Test
+    public void testIsTopActivityTranslucent() {
+        DisplayContent display = mAtm.mRootWindowContainer.getDefaultDisplay();
+        final Task rootTask = new TaskBuilder(mSupervisor).setCreateActivity(true)
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
+        final Task task = rootTask.getBottomMostTask();
+        final ActivityRecord root = task.getTopNonFinishingActivity();
+        spyOn(mWm.mLetterboxConfiguration);
+        spyOn(root);
+
+        doReturn(false).when(root).fillsParent();
+        assertTrue(task.getTaskInfo().isTopActivityTransparent);
+
+        doReturn(true).when(root).fillsParent();
+        assertFalse(task.getTaskInfo().isTopActivityTransparent);
+    }
+
     /**
      * Tests that a task with forced orientation has orientation-consistent bounds within the
      * parent.
