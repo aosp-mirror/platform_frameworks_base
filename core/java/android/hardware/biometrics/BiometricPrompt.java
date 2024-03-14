@@ -932,14 +932,29 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @see Builder#setAllowedAuthenticators(int)
      */
     public static final class CryptoObject extends android.hardware.biometrics.CryptoObject {
+        /**
+         * Create from a {@link Signature} object.
+         *
+         * @param signature a {@link Signature} object.
+         */
         public CryptoObject(@NonNull Signature signature) {
             super(signature);
         }
 
+        /**
+         * Create from a {@link Cipher} object.
+         *
+         * @param cipher a {@link Cipher} object.
+         */
         public CryptoObject(@NonNull Cipher cipher) {
             super(cipher);
         }
 
+        /**
+         * Create from a {@link Mac} object.
+         *
+         * @param mac a {@link Mac} object.
+         */
         public CryptoObject(@NonNull Mac mac) {
             super(mac);
         }
@@ -955,13 +970,34 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             super(credential);
         }
 
+        /**
+         * Create from a {@link PresentationSession} object.
+         *
+         * @param session a {@link PresentationSession} object.
+         */
         public CryptoObject(@NonNull PresentationSession session) {
             super(session);
         }
 
+        /**
+         * Create from a {@link KeyAgreement} object.
+         *
+         * @param keyAgreement a {@link KeyAgreement} object.
+         */
         @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
         public CryptoObject(@NonNull KeyAgreement keyAgreement) {
             super(keyAgreement);
+        }
+
+        /**
+         * Create from an operation handle.
+         * @see CryptoObject#getOperationHandle()
+         *
+         * @param operationHandle the operation handle associated with this object.
+         */
+        @FlaggedApi(FLAG_GET_OP_ID_CRYPTO_OBJECT)
+        public CryptoObject(long operationHandle) {
+            super(operationHandle);
         }
 
         /**
@@ -1016,7 +1052,20 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
-         * Get the operation handle associated with this object or 0 if none.
+         * Returns the {@code operationHandle} associated with this object or 0 if none.
+         * The {@code operationHandle} is the underlying identifier associated with
+         * the {@code CryptoObject}.
+         *
+         * <p> The {@code operationHandle} can be used to reconstruct a {@code CryptoObject}
+         * instance. This is useful for any cross-process communication as the {@code CryptoObject}
+         * class is not {@link android.os.Parcelable}. Hence, if the {@code CryptoObject} is
+         * constructed in one process, and needs to be propagated to another process,
+         * before calling the
+         * {@link BiometricPrompt#authenticate(CryptoObject, CancellationSignal, Executor,
+         * AuthenticationCallback)} API in the second process, the recommendation is to retrieve the
+         * {@code operationHandle} using this API, and then reconstruct the
+         * {@code CryptoObject}using the constructor that takes in an {@code operationHandle}, and
+         * pass that in to the {@code authenticate} API mentioned above.
          */
         @FlaggedApi(FLAG_GET_OP_ID_CRYPTO_OBJECT)
         public long getOperationHandle() {
