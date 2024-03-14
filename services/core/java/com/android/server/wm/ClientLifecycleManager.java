@@ -18,14 +18,19 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.app.IApplicationThread;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.LaunchActivityItem;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -41,6 +46,15 @@ import com.android.window.flags.Flags;
 class ClientLifecycleManager {
 
     private static final String TAG = "ClientLifecycleManager";
+
+    /**
+     * To prevent any existing apps from having app compat issue with the non-sdk usages of
+     * {@link ClientTransaction#getActivityToken()}, only allow bundling {@link LaunchActivityItem}
+     * for apps with targetSDK of V and above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long ENABLE_BUNDLE_LAUNCH_ACTIVITY_ITEM = 324203798L;
 
     /** Mapping from client process binder to its pending transaction. */
     @VisibleForTesting
@@ -251,16 +265,11 @@ class ClientLifecycleManager {
                 && !mWms.mWindowPlacerLocked.isInLayout();
     }
 
-    /**
-     * Guards the bundleClientTransactionFlag feature with targetSDK on Android 15+.
-     *
-     * Suppressing because it can't guard with @EnabledSince on VANILLA_ICE_CREAM yet since the
-     * version is not published.
-     *
-     * TODO(b/324203798): update in V
-     */
-    @SuppressWarnings("AndroidFrameworkCompatChange")
-    static boolean shouldDispatchCompatClientTransactionIndependently(int appTargetSdk) {
-        return appTargetSdk <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+    /** Guards bundling {@link LaunchActivityItem} with targetSDK. */
+    static boolean shouldDispatchLaunchActivityItemIndependently(
+            @NonNull String appPackageName, int appUid) {
+        return !CompatChanges.isChangeEnabled(ENABLE_BUNDLE_LAUNCH_ACTIVITY_ITEM,
+                appPackageName,
+                UserHandle.getUserHandleForUid(appUid));
     }
 }
