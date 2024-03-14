@@ -39,10 +39,11 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -85,6 +86,14 @@ public class TileLayoutTest extends SysuiTestCase {
         QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
         mTileLayout.addTile(tileRecord);
         verify(tileRecord.tile, times(1)).setListening(mTileLayout, false);
+    }
+
+    @Test
+    public void testAddTile_SetsRightSquishiness() {
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
+        ((HeightOverrideable) tileRecord.tileView).setSquishinessFraction(.5f);
+        mTileLayout.addTile(tileRecord);
+        assertEquals(1f, ((HeightOverrideable) tileRecord.tileView).getSquishinessFraction());
     }
 
     @Test

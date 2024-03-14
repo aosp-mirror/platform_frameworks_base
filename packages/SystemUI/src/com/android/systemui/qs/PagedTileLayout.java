@@ -305,6 +305,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         page.setMinRows(mMinRows);
         page.setMaxColumns(mMaxColumns);
         page.setSelected(false);
+
+        // All pages should have the same squishiness, so grabbing the value from the first page
+        // and giving it to new pages.
+        float squishiness = mPages.isEmpty() ? 1f : mPages.get(0).getSquishinessFraction();
+        page.setSquishinessFraction(squishiness);
+
         return page;
     }
 
