@@ -108,6 +108,7 @@ flag {
     is_fixed_read_only: true
 }
 
+# This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
     name: "enable_private_space_features"
     namespace: "profile_experiences"
