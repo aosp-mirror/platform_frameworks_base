@@ -13936,9 +13936,8 @@ package android.telecom {
   }
 
   @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final class DisconnectCause.Builder {
-    ctor public DisconnectCause.Builder();
+    ctor public DisconnectCause.Builder(int);
     method @NonNull public android.telecom.DisconnectCause build();
-    method @NonNull public android.telecom.DisconnectCause.Builder setCode(int);
     method @NonNull public android.telecom.DisconnectCause.Builder setDescription(@Nullable CharSequence);
     method @NonNull public android.telecom.DisconnectCause.Builder setImsReasonInfo(@Nullable android.telephony.ims.ImsReasonInfo);
     method @NonNull public android.telecom.DisconnectCause.Builder setLabel(@Nullable CharSequence);
