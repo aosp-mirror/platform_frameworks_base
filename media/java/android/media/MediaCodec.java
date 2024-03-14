@@ -5099,7 +5099,7 @@ final public class MediaCodec {
      * size is larger than 16x16, then the qpOffset information of all 16x16 blocks that
      * encompass the coding unit is combined and used. The QP of target block will be calculated
      * as 'frameQP + offsetQP'. If the result exceeds minQP or maxQP configured then the value
-     * may be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
+     * will be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
      * positive offsets will result in encoding blocks at higher QP than frame QP. If the areas
      * of negative QP and positive QP are chosen wisely, the overall viewing experience can be
      * improved.
@@ -5126,7 +5126,7 @@ final public class MediaCodec {
      * quantization parameter (QP) offset of the blocks in the bounding box. The bounding box
      * will get stretched outwards to align to LCU boundaries during encoding. The Qp Offset is
      * integral and shall be in the range [-128, 127]. The QP of target block will be calculated
-     * as frameQP + offsetQP. If the result exceeds minQP or maxQP configured then the value may
+     * as frameQP + offsetQP. If the result exceeds minQP or maxQP configured then the value will
      * be clamped. Negative offset results in blocks encoded at lower QP than frame QP and
      * positive offsets will result in blocks encoded at higher QP than frame QP. If the areas of
      * negative QP and positive QP are chosen wisely, the overall viewing experience can be
