@@ -1086,7 +1086,7 @@ public final class CompanionDeviceManager {
         }
         Objects.requireNonNull(deviceAddress, "address cannot be null");
         try {
-            mService.registerDevicePresenceListenerService(deviceAddress,
+            mService.legacyStartObservingDevicePresence(deviceAddress,
                     mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
@@ -1128,7 +1128,7 @@ public final class CompanionDeviceManager {
         }
         Objects.requireNonNull(deviceAddress, "address cannot be null");
         try {
-            mService.unregisterDevicePresenceListenerService(deviceAddress,
+            mService.legacyStopObservingDevicePresence(deviceAddress,
                     mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
@@ -1328,7 +1328,7 @@ public final class CompanionDeviceManager {
     @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED)
     public void notifyDeviceAppeared(int associationId) {
         try {
-            mService.notifyDeviceAppeared(associationId);
+            mService.notifySelfManagedDeviceAppeared(associationId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1350,7 +1350,7 @@ public final class CompanionDeviceManager {
     @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED)
     public void notifyDeviceDisappeared(int associationId) {
         try {
-            mService.notifyDeviceDisappeared(associationId);
+            mService.notifySelfManagedDeviceDisappeared(associationId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
