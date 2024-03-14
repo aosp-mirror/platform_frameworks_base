@@ -34,9 +34,9 @@ import kotlinx.coroutines.flow.map
 class PanelExpansionInteractorImpl
 @Inject
 constructor(
-    sceneInteractor: SceneInteractor,
-    shadeInteractor: ShadeInteractor,
-    shadeAnimationInteractor: ShadeAnimationInteractor,
+    private val sceneInteractor: SceneInteractor,
+    private val shadeInteractor: ShadeInteractor,
+    private val shadeAnimationInteractor: ShadeAnimationInteractor,
 ) : PanelExpansionInteractor {
 
     /**
@@ -99,18 +99,23 @@ constructor(
         "depends on the state you check, use {@link #isShadeFullyExpanded()},\n" +
             "{@link #isOnAod()}, {@link #isOnKeyguard()} instead."
     )
-    override val isFullyExpanded = shadeInteractor.isAnyFullyExpanded.value
+    override val isFullyExpanded get() = shadeInteractor.isAnyFullyExpanded.value
 
     @Deprecated("Use !ShadeInteractor.isAnyExpanded instead")
-    override val isFullyCollapsed = !shadeInteractor.isAnyExpanded.value
+    override val isFullyCollapsed get() = !shadeInteractor.isAnyExpanded.value
 
     @Deprecated("Use ShadeAnimationInteractor instead")
-    override val isCollapsing =
+    override val isCollapsing get() =
         shadeAnimationInteractor.isAnyCloseAnimationRunning.value ||
             shadeAnimationInteractor.isLaunchingActivity.value
+
+    @Deprecated("Use sceneInteractor.isTransitionUserInputOngoing instead")
+    override val isTracking get() = sceneInteractor.isTransitionUserInputOngoing.value
+
+    @Deprecated("Use ShadeInteractor.isAnyExpanded instead.")
+    override val isPanelExpanded get() = shadeInteractor.isAnyExpanded.value
+
     private fun SceneKey.isExpandable(): Boolean {
         return this == Scenes.Shade || this == Scenes.QuickSettings
     }
-
-    override val isPanelExpanded = shadeInteractor.isAnyExpanded.value
 }

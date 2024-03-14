@@ -31,11 +31,8 @@ import java.util.function.Consumer
  * @see NotificationPanelViewController
  */
 interface ShadeViewController {
-    /** Returns whether the shade is tracking touches for expand/collapse of the shade or QS. */
-    val isTracking: Boolean
-
     /** Returns whether the shade's top level view is enabled. */
-    val isViewEnabled: Boolean
+    @Deprecated("No longer supported. Do not add new calls to this.") val isViewEnabled: Boolean
 
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean

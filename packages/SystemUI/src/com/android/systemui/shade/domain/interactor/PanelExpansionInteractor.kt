@@ -66,4 +66,7 @@ interface PanelExpansionInteractor {
 
     /** Returns whether the shade is in the process of collapsing. */
     @Deprecated("Use ShadeAnimationInteractor instead") val isCollapsing: Boolean
+
+    /** Returns whether the shade is tracking touches for expand/collapse of the shade or QS. */
+    @Deprecated("Use sceneInteractor.isTransitionUserInputOngoing instead") val isTracking: Boolean
 }
