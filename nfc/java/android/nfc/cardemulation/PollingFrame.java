@@ -174,6 +174,16 @@ public final class PollingFrame implements Parcelable{
                 && frame.getBoolean(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT);
     }
 
+    /**
+     * Constructor for Polling Frames.
+     *
+     * @param type the type of the frame
+     * @param data a byte array of the data contained in the frame
+     * @param gain the vendor-specific gain of the field
+     * @param timestamp the timestamp in millisecones
+     * @param triggeredAutoTransact whether or not this frame triggered the device to start a
+     * transaction automatically
+     */
     public PollingFrame(@PollingFrameType int type, @Nullable byte[] data,
             int gain, int timestamp, boolean triggeredAutoTransact) {
         mType = type;
