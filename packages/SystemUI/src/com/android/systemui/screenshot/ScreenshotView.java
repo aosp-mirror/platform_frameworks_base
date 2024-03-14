@@ -92,6 +92,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
+import com.android.systemui.screenshot.scroll.ScrollCaptureController;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;

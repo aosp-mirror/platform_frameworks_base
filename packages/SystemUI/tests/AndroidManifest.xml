@@ -113,7 +113,7 @@
             android:excludeFromRecents="true"
             />
 
-        <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
+        <activity android:name="com.android.systemui.screenshot.scroll.ScrollViewActivity"
                   android:exported="false" />
 
         <activity android:name="com.android.systemui.screenshot.RecyclerViewActivity"

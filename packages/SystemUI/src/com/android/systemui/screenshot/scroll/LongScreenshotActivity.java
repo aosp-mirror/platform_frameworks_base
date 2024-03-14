@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.scroll;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
@@ -47,11 +47,14 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.view.OneShotPreDrawListener;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.res.R;
-import com.android.systemui.screenshot.CropView.CropBoundary;
-import com.android.systemui.screenshot.ScrollCaptureController.LongScreenshot;
-import com.android.systemui.settings.UserTracker;
+import com.android.systemui.screenshot.ActionIntentCreator;
+import com.android.systemui.screenshot.ActionIntentExecutor;
+import com.android.systemui.screenshot.ImageExporter;
+import com.android.systemui.screenshot.LogConfig;
+import com.android.systemui.screenshot.ScreenshotEvent;
+import com.android.systemui.screenshot.scroll.CropView.CropBoundary;
+import com.android.systemui.screenshot.scroll.ScrollCaptureController.LongScreenshot;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -81,8 +84,6 @@ public class LongScreenshotActivity extends Activity {
     private final ImageExporter mImageExporter;
     private final LongScreenshotData mLongScreenshotHolder;
     private final ActionIntentExecutor mActionExecutor;
-    private final FeatureFlags mFeatureFlags;
-    private final UserTracker mUserTracker;
 
     private ImageView mPreview;
     private ImageView mTransitionView;
@@ -113,16 +114,13 @@ public class LongScreenshotActivity extends Activity {
     @Inject
     public LongScreenshotActivity(UiEventLogger uiEventLogger, ImageExporter imageExporter,
             @Main Executor mainExecutor, @Background Executor bgExecutor,
-            LongScreenshotData longScreenshotHolder, ActionIntentExecutor actionExecutor,
-            FeatureFlags featureFlags, UserTracker userTracker) {
+            LongScreenshotData longScreenshotHolder, ActionIntentExecutor actionExecutor) {
         mUiEventLogger = uiEventLogger;
         mUiExecutor = mainExecutor;
         mBackgroundExecutor = bgExecutor;
         mImageExporter = imageExporter;
         mLongScreenshotHolder = longScreenshotHolder;
         mActionExecutor = actionExecutor;
-        mFeatureFlags = featureFlags;
-        mUserTracker = userTracker;
     }
 
 
@@ -265,13 +263,13 @@ public class LongScreenshotActivity extends Activity {
     private void onCachedImageLoaded(ImageLoader.Result imageResult) {
         mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_ACTIVITY_CACHED_IMAGE_LOADED);
 
-        BitmapDrawable drawable = new BitmapDrawable(getResources(), imageResult.bitmap);
+        BitmapDrawable drawable = new BitmapDrawable(getResources(), imageResult.mBitmap);
         mPreview.setImageDrawable(drawable);
         mPreview.setAlpha(1f);
-        mMagnifierView.setDrawable(drawable, imageResult.bitmap.getWidth(),
-                imageResult.bitmap.getHeight());
+        mMagnifierView.setDrawable(drawable, imageResult.mBitmap.getWidth(),
+                imageResult.mBitmap.getHeight());
         mCropView.setVisibility(View.VISIBLE);
-        mSavedImagePath = imageResult.fileName;
+        mSavedImagePath = imageResult.mFilename;
 
         setButtonsEnabled(true);
     }

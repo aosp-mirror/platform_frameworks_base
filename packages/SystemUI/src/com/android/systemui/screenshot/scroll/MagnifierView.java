@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.scroll;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -64,16 +64,16 @@ public class MagnifierView extends View implements CropView.CropInteractionListe
     private ViewPropertyAnimator mTranslationAnimator;
     private final Animator.AnimatorListener mTranslationAnimatorListener =
             new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationCancel(Animator animation) {
-            mTranslationAnimator = null;
-        }
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mTranslationAnimator = null;
+                }
 
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mTranslationAnimator = null;
-        }
-    };
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mTranslationAnimator = null;
+                }
+            };
 
     public MagnifierView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);

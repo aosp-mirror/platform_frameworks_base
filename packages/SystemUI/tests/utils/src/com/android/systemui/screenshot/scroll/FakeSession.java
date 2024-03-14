@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.scroll;
 
 import static android.util.MathUtils.constrain;
 
@@ -31,6 +31,8 @@ import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.util.Log;
+
+import com.android.systemui.screenshot.scroll.ScrollCaptureClient;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;

@@ -25,6 +25,7 @@ import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import com.android.systemui.screenshot.scroll.ScrollCaptureController
 
 /** Abstraction of the surface between ScreenshotController and ScreenshotView */
 interface ScreenshotViewProxy {
