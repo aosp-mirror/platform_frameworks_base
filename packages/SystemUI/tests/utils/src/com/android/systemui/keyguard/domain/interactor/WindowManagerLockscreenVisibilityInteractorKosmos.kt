@@ -27,6 +27,7 @@ val Kosmos.windowManagerLockscreenVisibilityInteractor by
             surfaceBehindInteractor = keyguardSurfaceBehindInteractor,
             fromLockscreenInteractor = fromLockscreenTransitionInteractor,
             fromBouncerInteractor = fromPrimaryBouncerTransitionInteractor,
+            fromAlternateBouncerInteractor = fromAlternateBouncerTransitionInteractor,
             notificationLaunchAnimationInteractor = notificationLaunchAnimationInteractor,
         )
     }

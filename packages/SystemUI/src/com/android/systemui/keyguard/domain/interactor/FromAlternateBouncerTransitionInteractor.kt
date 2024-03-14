@@ -33,7 +33,11 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -65,6 +69,25 @@ constructor(
         listenForAlternateBouncerToPrimaryBouncer()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
+
+    val surfaceBehindVisibility: Flow<Boolean?> =
+        combine(
+                transitionInteractor.startedKeyguardTransitionStep,
+                transitionInteractor.transitionStepsFromState(KeyguardState.ALTERNATE_BOUNCER)
+            ) { startedStep, fromBouncerStep ->
+                if (startedStep.to != KeyguardState.GONE) {
+                    return@combine null
+                }
+
+                // The alt bouncer is pretty fast to hide, so start the surface behind animation
+                // around 30%.
+                fromBouncerStep.value > 0.3f
+            }
+            .onStart {
+                // Default to null ("don't care, use a reasonable default").
+                emit(null)
+            }
+            .distinctUntilChanged()
 
     private fun listenForAlternateBouncerToLockscreenHubAodOrDozing() {
         scope.launch {
