@@ -148,6 +148,7 @@ import android.os.incremental.V4Signature;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings.Global;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.system.ErrnoException;
 import android.system.Int64Ref;
@@ -2364,8 +2365,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotDestroyedLocked("commit of session " + sessionId);
             assertNoWriteFileTransfersOpenLocked();
 
-            final boolean isSecureFrpEnabled =
-                    Global.getInt(mContext.getContentResolver(), Global.SECURE_FRP_MODE, 0) == 1;
+            boolean isSecureFrpEnabled;
+            if (android.security.Flags.frpEnforcement()) {
+                PersistentDataBlockManager pdbManager =
+                        mContext.getSystemService(PersistentDataBlockManager.class);
+                if (pdbManager == null) {
+                    // Some devices may not support FRP. In that case, we can't block the install
+                    // accordingly.
+                    isSecureFrpEnabled = false;
+                } else {
+                    isSecureFrpEnabled = pdbManager.isFactoryResetProtectionActive();
+                }
+            } else {
+                isSecureFrpEnabled = Global.getInt(mContext.getContentResolver(),
+                        Global.SECURE_FRP_MODE, 0) == 1;
+            }
 
             if (isSecureFrpEnabled
                     && !isSecureFrpInstallAllowed(mContext, Binder.getCallingUid())) {
