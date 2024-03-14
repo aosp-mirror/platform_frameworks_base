@@ -172,7 +172,7 @@ public class PromptInfo implements Parcelable {
     }
 
     /**
-     * Returns whether SET_BIOMETRIC_DIALOG_LOGO is contained.
+     * Returns whether SET_BIOMETRIC_DIALOG_ADVANCED is contained.
      */
     public boolean containsSetLogoApiConfigurations() {
         if (mLogoRes != -1) {
