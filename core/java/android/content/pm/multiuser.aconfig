@@ -193,3 +193,10 @@ flag {
     bug: "290333800"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "delete_private_space_from_reset"
+    namespace: "profile_experiences"
+    description: "Add entrypoint in Settings Reset options for deleting private space when lock is forgotten"
+    bug: "329601751"
+}
