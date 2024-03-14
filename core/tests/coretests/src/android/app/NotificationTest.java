@@ -1249,31 +1249,25 @@ public class NotificationTest {
     }
 
     @Test
-    @Ignore // TODO: b/329402256 - Restore or delete
-    public void testBigPictureStyle_setExtras_pictureIconNull_pictureIconKeyNull() {
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureIconKey() {
         Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
         bpStyle.bigPicture((Bitmap) null);
 
         Bundle extras = new Bundle();
         bpStyle.addExtras(extras);
 
-        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isTrue();
-        final Parcelable pictureIcon = extras.getParcelable(EXTRA_PICTURE_ICON);
-        assertThat(pictureIcon).isNull();
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
     }
 
     @Test
-    @Ignore // TODO: b/329402256 - Restore or delete
-    public void testBigPictureStyle_setExtras_pictureIconNull_pictureKeyNull() {
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureKey() {
         Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
         bpStyle.bigPicture((Bitmap) null);
 
         Bundle extras = new Bundle();
         bpStyle.addExtras(extras);
 
-        assertThat(extras.containsKey(EXTRA_PICTURE)).isTrue();
-        final Parcelable picture = extras.getParcelable(EXTRA_PICTURE);
-        assertThat(picture).isNull();
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
     }
 
     @Test
