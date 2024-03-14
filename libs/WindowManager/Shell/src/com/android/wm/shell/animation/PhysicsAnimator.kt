@@ -505,7 +505,6 @@ class PhysicsAnimator<T> private constructor (target: T) {
             // Check for a spring configuration. If one is present, we're either springing, or
             // flinging-then-springing.
             if (springConfig != null) {
-
                 // If there is no corresponding fling config, we're only springing.
                 if (flingConfig == null) {
                     // Apply the configuration and start the animation.
@@ -679,7 +678,6 @@ class PhysicsAnimator<T> private constructor (target: T) {
             value: Float,
             velocity: Float
         ) {
-
             // If this property animation isn't relevant to this listener, ignore it.
             if (!properties.contains(property)) {
                 return
@@ -702,7 +700,6 @@ class PhysicsAnimator<T> private constructor (target: T) {
             finalVelocity: Float,
             isFling: Boolean
         ): Boolean {
-
             // If this property animation isn't relevant to this listener, ignore it.
             if (!properties.contains(property)) {
                 return false
@@ -971,17 +968,18 @@ class PhysicsAnimator<T> private constructor (target: T) {
     companion object {
 
         /**
-         * Constructor to use to for new physics animator instances in [getInstance]. This is
-         * typically the default constructor, but [PhysicsAnimatorTestUtils] can change it so that
-         * all code using the physics animator is given testable instances instead.
+         * Callback to notify that a new animator was created. Used in [PhysicsAnimatorTestUtils]
+         * to be able to keep track of animators and wait for them to finish.
          */
-        internal var instanceConstructor: (Any) -> PhysicsAnimator<*> = ::PhysicsAnimator
+        internal var onAnimatorCreated: (PhysicsAnimator<*>, Any) -> Unit = { _, _ -> }
 
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
         fun <T : Any> getInstance(target: T): PhysicsAnimator<T> {
             if (!animators.containsKey(target)) {
-                animators[target] = instanceConstructor(target)
+                val animator = PhysicsAnimator(target)
+                onAnimatorCreated(animator, target)
+                animators[target] = animator
             }
 
             return animators[target] as PhysicsAnimator<T>
