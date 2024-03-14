@@ -813,7 +813,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DISABLE_CONTINUOUS_SHORTCUT_ON_FORCE_STOP)
     public void testPackagesForceStopped_fromContinuousService_removesButtonTarget() {
         final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
         info_a.setComponentName(COMPONENT_NAME);

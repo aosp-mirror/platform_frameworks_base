@@ -935,34 +935,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     final AccessibilityUserState userState = getUserStateLocked(userId);
 
-                    if (Flags.disableContinuousShortcutOnForceStop()) {
-                        if (doit && onPackagesForceStoppedLocked(packages, userState)) {
-                            onUserStateChangedLocked(userState);
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    } else {
-                        final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
-                        while (it.hasNext()) {
-                            final ComponentName comp = it.next();
-                            final String compPkg = comp.getPackageName();
-                            for (String pkg : packages) {
-                                if (compPkg.equals(pkg)) {
-                                    if (!doit) {
-                                        return true;
-                                    }
-                                    it.remove();
-                                    userState.getBindingServicesLocked().remove(comp);
-                                    userState.getCrashedServicesLocked().remove(comp);
-                                    persistComponentNamesToSettingLocked(
-                                            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                                            userState.mEnabledServices, userId);
-                                    onUserStateChangedLocked(userState);
-                                }
-                            }
-                        }
+                    if (doit && onPackagesForceStoppedLocked(packages, userState)) {
+                        onUserStateChangedLocked(userState);
                         return false;
+                    } else {
+                        return true;
                     }
                 }
             }
