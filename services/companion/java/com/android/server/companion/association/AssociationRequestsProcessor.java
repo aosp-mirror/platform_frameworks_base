@@ -24,6 +24,7 @@ import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.content.ComponentName.createRelative;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 
+import static com.android.server.companion.utils.MetricUtils.logCreateAssociation;
 import static com.android.server.companion.utils.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.utils.PermissionsUtils.enforcePermissionForCreatingAssociation;
 import static com.android.server.companion.utils.RolesUtils.addRoleHolderForAssociation;
@@ -127,16 +128,17 @@ public class AssociationRequestsProcessor {
     private static final long ASSOCIATE_WITHOUT_PROMPT_WINDOW_MS = 60 * 60 * 1000; // 60 min;
 
     private final @NonNull Context mContext;
-    private final @NonNull PackageManagerInternal mPackageManagerInternal;
+    private final @NonNull CompanionDeviceManagerService mService;
+    private final @NonNull PackageManagerInternal mPackageManager;
     private final @NonNull AssociationStore mAssociationStore;
     @NonNull
     private final ComponentName mCompanionDeviceActivity;
 
-    public AssociationRequestsProcessor(@NonNull Context context,
-            @NonNull PackageManagerInternal packageManagerInternal,
+    public AssociationRequestsProcessor(@NonNull CompanionDeviceManagerService service,
             @NonNull AssociationStore associationStore) {
-        mContext = context;
-        mPackageManagerInternal = packageManagerInternal;
+        mContext = service.getContext();
+        mService = service;
+        mPackageManager = service.mPackageManagerInternal;
         mAssociationStore = associationStore;
         mCompanionDeviceActivity = createRelative(
                 mContext.getString(R.string.config_companionDeviceManagerPackage),
@@ -158,7 +160,7 @@ public class AssociationRequestsProcessor {
         requireNonNull(packageName, "Package name MUST NOT be null");
         requireNonNull(callback, "Callback MUST NOT be null");
 
-        final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
+        final int packageUid = mPackageManager.getPackageUid(packageName, 0, userId);
         Slog.d(TAG, "processNewAssociationRequest() " + "request=" + request + ", " + "package=u"
                 + userId + "/" + packageName + " (uid=" + packageUid + ")");
 
@@ -224,7 +226,7 @@ public class AssociationRequestsProcessor {
 
         enforceUsesCompanionDeviceFeature(mContext, userId, packageName);
 
-        final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
+        final int packageUid = mPackageManager.getPackageUid(packageName, 0, userId);
 
         final Bundle extras = new Bundle();
         extras.putBoolean(EXTRA_FORCE_CANCEL_CONFIRMATION, true);
@@ -241,7 +243,7 @@ public class AssociationRequestsProcessor {
             @NonNull ResultReceiver resultReceiver, @Nullable MacAddress macAddress) {
         final String packageName = request.getPackageName();
         final int userId = request.getUserId();
-        final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
+        final int packageUid = mPackageManager.getPackageUid(packageName, 0, userId);
 
         // 1. Need to check permissions again in case something changed, since we first received
         // this request.
@@ -265,12 +267,15 @@ public class AssociationRequestsProcessor {
             @NonNull AssociationRequest request, @NonNull String packageName, @UserIdInt int userId,
             @Nullable MacAddress macAddress, @NonNull IAssociationRequestCallback callback,
             @NonNull ResultReceiver resultReceiver) {
-        Binder.withCleanCallingIdentity(() -> {
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
             createAssociation(userId, packageName, macAddress, request.getDisplayName(),
                     request.getDeviceProfile(), request.getAssociatedDevice(),
                     request.isSelfManaged(),
                     callback, resultReceiver);
-        });
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
     }
 
     /**
@@ -281,7 +286,7 @@ public class AssociationRequestsProcessor {
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
             boolean selfManaged, @Nullable IAssociationRequestCallback callback,
             @Nullable ResultReceiver resultReceiver) {
-        final int id = mAssociationStore.getNextId(userId);
+        final int id = mService.getNewAssociationIdForPackage(userId, packageName);
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
@@ -291,6 +296,10 @@ public class AssociationRequestsProcessor {
 
         // Add role holder for association (if specified) and add new association to store.
         maybeGrantRoleAndStoreAssociation(association, callback, resultReceiver);
+
+        // Don't need to update the mRevokedAssociationsPendingRoleHolderRemoval since
+        // maybeRemoveRoleHolderForAssociation in PackageInactivityListener will handle the case
+        // that there are other devices with the same profile, so the role holder won't be removed.
     }
 
     /**
@@ -302,12 +311,12 @@ public class AssociationRequestsProcessor {
         // If the "Device Profile" is specified, make the companion application a holder of the
         // corresponding role.
         // If it is null, then the operation will succeed without granting any role.
-        addRoleHolderForAssociation(mContext, association, success -> {
+        addRoleHolderForAssociation(mService.getContext(), association, success -> {
             if (success) {
                 Slog.i(TAG, "Added " + association.getDeviceProfile() + " role to userId="
                         + association.getUserId() + ", packageName="
                         + association.getPackageName());
-                mAssociationStore.addAssociation(association);
+                addAssociationToStore(association);
                 sendCallbackAndFinish(association, callback, resultReceiver);
             } else {
                 Slog.e(TAG, "Failed to add u" + association.getUserId()
@@ -336,6 +345,17 @@ public class AssociationRequestsProcessor {
         AssociationInfo updated = (new AssociationInfo.Builder(association))
                 .setSystemDataSyncFlags(association.getSystemDataSyncFlags() & (~flags)).build();
         mAssociationStore.updateAssociation(updated);
+    }
+
+    private void addAssociationToStore(@NonNull AssociationInfo association) {
+        Slog.i(TAG, "New CDM association created=" + association);
+
+        mAssociationStore.addAssociation(association);
+
+        mService.updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
+                association.getPackageName());
+
+        logCreateAssociation(association.getDeviceProfile());
     }
 
     private void sendCallbackAndFinish(@Nullable AssociationInfo association,
@@ -389,22 +409,27 @@ public class AssociationRequestsProcessor {
 
     private PendingIntent createPendingIntent(int packageUid, Intent intent) {
         final PendingIntent pendingIntent;
+        final long token = Binder.clearCallingIdentity();
 
         // Using uid of the application that will own the association (usually the same
         // application that sent the request) allows us to have multiple "pending" association
         // requests at the same time.
         // If the application already has a pending association request, that PendingIntent
         // will be cancelled except application wants to cancel the request by the system.
-        return Binder.withCleanCallingIdentity(() ->
-            PendingIntent.getActivityAsUser(
+        try {
+            pendingIntent = PendingIntent.getActivityAsUser(
                     mContext, /*requestCode */ packageUid, intent,
                     FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
                     ActivityOptions.makeBasic()
                             .setPendingIntentCreatorBackgroundActivityStartMode(
                                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
                             .toBundle(),
-                    UserHandle.CURRENT)
-        );
+                    UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return pendingIntent;
     }
 
     private final ResultReceiver mOnRequestConfirmationReceiver =
@@ -445,7 +470,7 @@ public class AssociationRequestsProcessor {
         // Throttle frequent associations
         final long now = System.currentTimeMillis();
         final List<AssociationInfo> associationForPackage =
-                mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
+                mAssociationStore.getAssociationsForPackage(userId, packageName);
         // Number of "recent" associations.
         int recent = 0;
         for (AssociationInfo association : associationForPackage) {
@@ -461,6 +486,6 @@ public class AssociationRequestsProcessor {
             }
         }
 
-        return PackageUtils.isPackageAllowlisted(mContext, mPackageManagerInternal, packageName);
+        return PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName);
     }
 }

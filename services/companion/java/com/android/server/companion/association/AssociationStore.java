@@ -16,24 +16,15 @@
 
 package com.android.server.companion.association;
 
-import static com.android.server.companion.utils.MetricUtils.logCreateAssociation;
-import static com.android.server.companion.utils.MetricUtils.logRemoveAssociation;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
-import android.companion.IOnAssociationsChangedListener;
-import android.content.pm.UserInfo;
 import android.net.MacAddress;
-import android.os.Binder;
-import android.os.RemoteCallbackList;
-import android.os.RemoteException;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
@@ -42,14 +33,15 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Association store for CRUD.
@@ -117,104 +109,43 @@ public class AssociationStore {
 
     private final Object mLock = new Object();
 
-    private final ExecutorService mExecutor;
-
     @GuardedBy("mLock")
-    private boolean mPersisted = false;
+    private final Map<Integer, AssociationInfo> mIdMap = new HashMap<>();
     @GuardedBy("mLock")
-    private final Map<Integer, AssociationInfo> mIdToAssociationMap = new HashMap<>();
+    private final Map<MacAddress, Set<Integer>> mAddressMap = new HashMap<>();
     @GuardedBy("mLock")
-    private final Map<Integer, Integer> mUserToMaxId = new HashMap<>();
+    private final SparseArray<List<AssociationInfo>> mCachedPerUser = new SparseArray<>();
 
-    @GuardedBy("mLocalListeners")
-    private final Set<OnChangeListener> mLocalListeners = new LinkedHashSet<>();
-    @GuardedBy("mRemoteListeners")
-    private final RemoteCallbackList<IOnAssociationsChangedListener> mRemoteListeners =
-            new RemoteCallbackList<>();
-
-    private final UserManager mUserManager;
-    private final AssociationDiskStore mDiskStore;
-
-    public AssociationStore(UserManager userManager, AssociationDiskStore diskStore) {
-        mUserManager = userManager;
-        mDiskStore = diskStore;
-        mExecutor = Executors.newSingleThreadExecutor();
-    }
-
-    /**
-     * Load all alive users' associations from disk to cache.
-     */
-    public void refreshCache() {
-        Binder.withCleanCallingIdentity(() -> {
-            List<Integer> userIds = new ArrayList<>();
-            for (UserInfo user : mUserManager.getAliveUsers()) {
-                userIds.add(user.id);
-            }
-
-            synchronized (mLock) {
-                mPersisted = false;
-
-                mIdToAssociationMap.clear();
-                mUserToMaxId.clear();
-
-                // The data is stored in DE directories, so we can read the data for all users now
-                // (which would not be possible if the data was stored to CE directories).
-                Map<Integer, Associations> userToAssociationsMap =
-                        mDiskStore.readAssociationsByUsers(userIds);
-                for (Map.Entry<Integer, Associations> entry : userToAssociationsMap.entrySet()) {
-                    for (AssociationInfo association : entry.getValue().getAssociations()) {
-                        mIdToAssociationMap.put(association.getId(), association);
-                    }
-                    mUserToMaxId.put(entry.getKey(), entry.getValue().getMaxId());
-                }
-
-                mPersisted = true;
-            }
-        });
-    }
-
-    /**
-     * Get the current max association id.
-     */
-    public int getMaxId(int userId) {
-        synchronized (mLock) {
-            return mUserToMaxId.getOrDefault(userId, 0);
-        }
-    }
-
-    /**
-     * Get the next available association id.
-     */
-    public int getNextId(int userId) {
-        synchronized (mLock) {
-            return getMaxId(userId) + 1;
-        }
-    }
+    @GuardedBy("mListeners")
+    private final Set<OnChangeListener> mListeners = new LinkedHashSet<>();
 
     /**
      * Add an association.
      */
     public void addAssociation(@NonNull AssociationInfo association) {
-        Slog.i(TAG, "Adding new association=[" + association + "]...");
+        Slog.i(TAG, "Adding new association=" + association);
+
+        // Validity check first.
+        checkNotRevoked(association);
 
         final int id = association.getId();
-        final int userId = association.getUserId();
 
         synchronized (mLock) {
-            if (mIdToAssociationMap.containsKey(id)) {
-                Slog.e(TAG, "Association with id=[" + id + "] already exists.");
+            if (mIdMap.containsKey(id)) {
+                Slog.e(TAG, "Association with id " + id + " already exists.");
                 return;
             }
+            mIdMap.put(id, association);
 
-            mIdToAssociationMap.put(id, association);
-            mUserToMaxId.put(userId, Math.max(mUserToMaxId.getOrDefault(userId, 0), id));
+            final MacAddress address = association.getDeviceMacAddress();
+            if (address != null) {
+                mAddressMap.computeIfAbsent(address, it -> new HashSet<>()).add(id);
+            }
 
-            writeCacheToDisk(userId);
+            invalidateCacheForUserLocked(association.getUserId());
 
             Slog.i(TAG, "Done adding new association.");
         }
-
-        logCreateAssociation(association.getDeviceProfile());
 
         broadcastChange(CHANGE_TYPE_ADDED, association);
     }
@@ -223,16 +154,18 @@ public class AssociationStore {
      * Update an association.
      */
     public void updateAssociation(@NonNull AssociationInfo updated) {
-        Slog.i(TAG, "Updating new association=[" + updated + "]...");
+        Slog.i(TAG, "Updating new association=" + updated);
+        // Validity check first.
+        checkNotRevoked(updated);
 
         final int id = updated.getId();
+
         final AssociationInfo current;
         final boolean macAddressChanged;
-
         synchronized (mLock) {
-            current = mIdToAssociationMap.get(id);
+            current = mIdMap.get(id);
             if (current == null) {
-                Slog.w(TAG, "Can't update association id=[" + id + "]. It does not exist.");
+                Slog.w(TAG, "Can't update association. It does not exist.");
                 return;
             }
 
@@ -241,238 +174,174 @@ public class AssociationStore {
                 return;
             }
 
-            mIdToAssociationMap.put(id, updated);
+            // Update the ID-to-Association map.
+            mIdMap.put(id, updated);
+            // Invalidate the corresponding user cache entry.
+            invalidateCacheForUserLocked(current.getUserId());
 
-            writeCacheToDisk(updated.getUserId());
+            // Update the MacAddress-to-List<Association> map if needed.
+            final MacAddress updatedAddress = updated.getDeviceMacAddress();
+            final MacAddress currentAddress = current.getDeviceMacAddress();
+            macAddressChanged = !Objects.equals(currentAddress, updatedAddress);
+            if (macAddressChanged) {
+                if (currentAddress != null) {
+                    mAddressMap.get(currentAddress).remove(id);
+                }
+                if (updatedAddress != null) {
+                    mAddressMap.computeIfAbsent(updatedAddress, it -> new HashSet<>()).add(id);
+                }
+            }
+            Slog.i(TAG, "Done updating association.");
         }
-
-        Slog.i(TAG, "Done updating association.");
-
-        // Check if the MacAddress has changed.
-        final MacAddress updatedAddress = updated.getDeviceMacAddress();
-        final MacAddress currentAddress = current.getDeviceMacAddress();
-        macAddressChanged = !Objects.equals(currentAddress, updatedAddress);
 
         final int changeType = macAddressChanged ? CHANGE_TYPE_UPDATED_ADDRESS_CHANGED
                 : CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
-
         broadcastChange(changeType, updated);
     }
 
     /**
-     * Remove an association.
+     * Remove an association
      */
     public void removeAssociation(int id) {
-        Slog.i(TAG, "Removing association id=[" + id + "]...");
+        Slog.i(TAG, "Removing association id=" + id);
 
         final AssociationInfo association;
-
         synchronized (mLock) {
-            association = mIdToAssociationMap.remove(id);
+            association = mIdMap.remove(id);
 
             if (association == null) {
-                Slog.w(TAG, "Can't remove association id=[" + id + "]. It does not exist.");
+                Slog.w(TAG, "Can't remove association. It does not exist.");
                 return;
             }
 
-            writeCacheToDisk(association.getUserId());
+            final MacAddress macAddress = association.getDeviceMacAddress();
+            if (macAddress != null) {
+                mAddressMap.get(macAddress).remove(id);
+            }
+
+            invalidateCacheForUserLocked(association.getUserId());
 
             Slog.i(TAG, "Done removing association.");
         }
 
-        logRemoveAssociation(association.getDeviceProfile());
-
         broadcastChange(CHANGE_TYPE_REMOVED, association);
     }
 
-    private void writeCacheToDisk(@UserIdInt int userId) {
-        mExecutor.execute(() -> {
-            Associations associations = new Associations();
-            synchronized (mLock) {
-                associations.setMaxId(mUserToMaxId.getOrDefault(userId, 0));
-                associations.setAssociations(
-                        CollectionUtils.filter(mIdToAssociationMap.values().stream().toList(),
-                                a -> a.getUserId() == userId));
-            }
-            mDiskStore.writeAssociationsForUser(userId, associations);
-        });
-    }
-
     /**
-     * Get a copy of all associations including pending and revoked ones.
-     * Modifying the copy won't modify the actual associations.
-     *
-     * If a cache miss happens, read from disk.
+     * @return a "snapshot" of the current state of the existing associations.
      */
-    @NonNull
-    public List<AssociationInfo> getAssociations() {
+    public @NonNull Collection<AssociationInfo> getAssociations() {
         synchronized (mLock) {
-            if (!mPersisted) {
-                refreshCache();
-            }
-            return List.copyOf(mIdToAssociationMap.values());
+            // IMPORTANT: make and return a COPY of the mIdMap.values(), NOT a "direct" reference.
+            // The HashMap.values() returns a collection which is backed by the HashMap, so changes
+            // to the HashMap are reflected in this collection.
+            // For us this means that if mIdMap is modified while the iteration over mIdMap.values()
+            // is in progress it may lead to "undefined results" (according to the HashMap's
+            // documentation) or cause ConcurrentModificationExceptions in the iterator (according
+            // to the bugreports...).
+            return List.copyOf(mIdMap.values());
         }
     }
 
     /**
-     * Get a copy of active associations.
+     * Get associations for the user.
      */
-    @NonNull
-    public List<AssociationInfo> getActiveAssociations() {
+    public @NonNull List<AssociationInfo> getAssociationsForUser(@UserIdInt int userId) {
         synchronized (mLock) {
-            return CollectionUtils.filter(getAssociations(), AssociationInfo::isActive);
+            return getAssociationsForUserLocked(userId);
         }
     }
 
     /**
-     * Get a copy of all associations by user.
+     * Get associations for the package
      */
-    @NonNull
-    public List<AssociationInfo> getAssociationsByUser(@UserIdInt int userId) {
-        synchronized (mLock) {
-            return CollectionUtils.filter(getAssociations(), a -> a.getUserId() == userId);
-        }
+    public @NonNull List<AssociationInfo> getAssociationsForPackage(
+            @UserIdInt int userId, @NonNull String packageName) {
+        final List<AssociationInfo> associationsForUser = getAssociationsForUser(userId);
+        final List<AssociationInfo> associationsForPackage =
+                CollectionUtils.filter(associationsForUser,
+                        it -> it.getPackageName().equals(packageName));
+        return Collections.unmodifiableList(associationsForPackage);
     }
 
     /**
-     * Get a copy of active associations by user.
+     * Get associations by mac address for the package.
      */
-    @NonNull
-    public List<AssociationInfo> getActiveAssociationsByUser(@UserIdInt int userId) {
-        synchronized (mLock) {
-            return CollectionUtils.filter(getActiveAssociations(), a -> a.getUserId() == userId);
-        }
-    }
-
-    /**
-     * Get a copy of all associations by package.
-     */
-    @NonNull
-    public List<AssociationInfo> getAssociationsByPackage(@UserIdInt int userId,
-            @NonNull String packageName) {
-        synchronized (mLock) {
-            return CollectionUtils.filter(getAssociationsByUser(userId),
-                    a -> a.getPackageName().equals(packageName));
-        }
-    }
-
-    /**
-     * Get a copy of active associations by package.
-     */
-    @NonNull
-    public List<AssociationInfo> getActiveAssociationsByPackage(@UserIdInt int userId,
-            @NonNull String packageName) {
-        synchronized (mLock) {
-            return CollectionUtils.filter(getActiveAssociationsByUser(userId),
-                    a -> a.getPackageName().equals(packageName));
-        }
-    }
-
-    /**
-     * Get the first active association with the mac address.
-     */
-    @Nullable
-    public AssociationInfo getFirstAssociationByAddress(
+    public @Nullable AssociationInfo getAssociationsForPackageWithAddress(
             @UserIdInt int userId, @NonNull String packageName, @NonNull String macAddress) {
-        synchronized (mLock) {
-            return CollectionUtils.find(getActiveAssociationsByPackage(userId, packageName),
-                    a -> a.getDeviceMacAddress() != null && a.getDeviceMacAddress()
-                            .equals(MacAddress.fromString(macAddress)));
-        }
+        final List<AssociationInfo> associations = getAssociationsByAddress(macAddress);
+        return CollectionUtils.find(associations,
+                it -> it.belongsToPackage(userId, packageName));
     }
 
     /**
-     * Get the association by id.
+     * Get association by id.
      */
-    @Nullable
-    public AssociationInfo getAssociationById(int id) {
+    public @Nullable AssociationInfo getAssociationById(int id) {
         synchronized (mLock) {
-            return mIdToAssociationMap.get(id);
+            return mIdMap.get(id);
         }
     }
 
     /**
-     * Get a copy of active associations by mac address.
+     * Get associations by mac address.
      */
     @NonNull
-    public List<AssociationInfo> getActiveAssociationsByAddress(@NonNull String macAddress) {
+    public List<AssociationInfo> getAssociationsByAddress(@NonNull String macAddress) {
+        final MacAddress address = MacAddress.fromString(macAddress);
+
         synchronized (mLock) {
-            return CollectionUtils.filter(getActiveAssociations(),
-                    a -> a.getDeviceMacAddress() != null && a.getDeviceMacAddress()
-                            .equals(MacAddress.fromString(macAddress)));
+            final Set<Integer> ids = mAddressMap.get(address);
+            if (ids == null) return Collections.emptyList();
+
+            final List<AssociationInfo> associations = new ArrayList<>(ids.size());
+            for (Integer id : ids) {
+                associations.add(mIdMap.get(id));
+            }
+
+            return Collections.unmodifiableList(associations);
         }
     }
 
-    /**
-     * Get a copy of revoked associations.
-     */
+    @GuardedBy("mLock")
     @NonNull
-    public List<AssociationInfo> getRevokedAssociations() {
-        synchronized (mLock) {
-            return CollectionUtils.filter(getAssociations(), AssociationInfo::isRevoked);
+    private List<AssociationInfo> getAssociationsForUserLocked(@UserIdInt int userId) {
+        final List<AssociationInfo> cached = mCachedPerUser.get(userId);
+        if (cached != null) {
+            return cached;
+        }
+
+        final List<AssociationInfo> associationsForUser = new ArrayList<>();
+        for (AssociationInfo association : mIdMap.values()) {
+            if (association.getUserId() == userId) {
+                associationsForUser.add(association);
+            }
+        }
+        final List<AssociationInfo> set = Collections.unmodifiableList(associationsForUser);
+        mCachedPerUser.set(userId, set);
+        return set;
+    }
+
+    @GuardedBy("mLock")
+    private void invalidateCacheForUserLocked(@UserIdInt int userId) {
+        mCachedPerUser.delete(userId);
+    }
+
+    /**
+     * Register a listener for association changes.
+     */
+    public void registerListener(@NonNull OnChangeListener listener) {
+        synchronized (mListeners) {
+            mListeners.add(listener);
         }
     }
 
     /**
-     * Get a copy of revoked associations for the package.
+     * Unregister a listener previously registered for association changes.
      */
-    @NonNull
-    public List<AssociationInfo> getRevokedAssociations(@UserIdInt int userId,
-            @NonNull String packageName) {
-        synchronized (mLock) {
-            return CollectionUtils.filter(getAssociations(),
-                    a -> packageName.equals(a.getPackageName()) && a.getUserId() == userId
-                            && a.isRevoked());
-        }
-    }
-
-    /**
-     * Get a copy of active associations.
-     */
-    @NonNull
-    public List<AssociationInfo> getPendingAssociations(@UserIdInt int userId,
-            @NonNull String packageName) {
-        synchronized (mLock) {
-            return CollectionUtils.filter(getAssociations(),
-                    a -> packageName.equals(a.getPackageName()) && a.getUserId() == userId
-                            && a.isPending());
-        }
-    }
-
-    /**
-     * Register a local listener for association changes.
-     */
-    public void registerLocalListener(@NonNull OnChangeListener listener) {
-        synchronized (mLocalListeners) {
-            mLocalListeners.add(listener);
-        }
-    }
-
-    /**
-     * Unregister a local listener previously registered for association changes.
-     */
-    public void unregisterLocalListener(@NonNull OnChangeListener listener) {
-        synchronized (mLocalListeners) {
-            mLocalListeners.remove(listener);
-        }
-    }
-
-    /**
-     * Register a remote listener for association changes.
-     */
-    public void registerRemoteListener(@NonNull IOnAssociationsChangedListener listener,
-            int userId) {
-        synchronized (mRemoteListeners) {
-            mRemoteListeners.register(listener, userId);
-        }
-    }
-
-    /**
-     * Unregister a remote listener previously registered for association changes.
-     */
-    public void unregisterRemoteListener(@NonNull IOnAssociationsChangedListener listener) {
-        synchronized (mRemoteListeners) {
-            mRemoteListeners.unregister(listener);
+    public void unregisterListener(@NonNull OnChangeListener listener) {
+        synchronized (mListeners) {
+            mListeners.remove(listener);
         }
     }
 
@@ -481,39 +350,52 @@ public class AssociationStore {
      */
     public void dump(@NonNull PrintWriter out) {
         out.append("Companion Device Associations: ");
-        if (getActiveAssociations().isEmpty()) {
+        if (getAssociations().isEmpty()) {
             out.append("<empty>\n");
         } else {
             out.append("\n");
-            for (AssociationInfo a : getActiveAssociations()) {
+            for (AssociationInfo a : getAssociations()) {
                 out.append("  ").append(a.toString()).append('\n');
             }
         }
     }
 
     private void broadcastChange(@ChangeType int changeType, AssociationInfo association) {
-        synchronized (mLocalListeners) {
-            for (OnChangeListener listener : mLocalListeners) {
+        synchronized (mListeners) {
+            for (OnChangeListener listener : mListeners) {
                 listener.onAssociationChanged(changeType, association);
             }
         }
-        synchronized (mRemoteListeners) {
-            final int userId = association.getUserId();
-            final List<AssociationInfo> updatedAssociations = getActiveAssociationsByUser(userId);
-            // Notify listeners if ADDED, REMOVED or UPDATED_ADDRESS_CHANGED.
-            // Do NOT notify when UPDATED_ADDRESS_UNCHANGED, which means a minor tweak in
-            // association's configs, which "listeners" won't (and shouldn't) be able to see.
-            if (changeType != CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED) {
-                mRemoteListeners.broadcast((listener, callbackUserId) -> {
-                    int listenerUserId = (int) callbackUserId;
-                    if (listenerUserId == userId || listenerUserId == UserHandle.USER_ALL) {
-                        try {
-                            listener.onAssociationsChanged(updatedAssociations);
-                        } catch (RemoteException ignored) {
-                        }
-                    }
-                });
+    }
+
+    /**
+     * Set associations to cache. It will clear the existing cache.
+     */
+    public void setAssociationsToCache(Collection<AssociationInfo> associations) {
+        // Validity check first.
+        associations.forEach(AssociationStore::checkNotRevoked);
+
+        synchronized (mLock) {
+            mIdMap.clear();
+            mAddressMap.clear();
+            mCachedPerUser.clear();
+
+            for (AssociationInfo association : associations) {
+                final int id = association.getId();
+                mIdMap.put(id, association);
+
+                final MacAddress address = association.getDeviceMacAddress();
+                if (address != null) {
+                    mAddressMap.computeIfAbsent(address, it -> new HashSet<>()).add(id);
+                }
             }
+        }
+    }
+
+    private static void checkNotRevoked(@NonNull AssociationInfo association) {
+        if (association.isRevoked()) {
+            throw new IllegalArgumentException(
+                    "Revoked (removed) associations MUST NOT appear in the AssociationStore");
         }
     }
 }
