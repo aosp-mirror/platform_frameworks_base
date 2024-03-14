@@ -60,10 +60,3 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
-
-flag {
-    namespace: "backstage_power"
-    name: "defer_outgoing_bcasts"
-    description: "Defer outgoing broadcasts from processes in freezable state"
-    bug: "327496592"
-}
