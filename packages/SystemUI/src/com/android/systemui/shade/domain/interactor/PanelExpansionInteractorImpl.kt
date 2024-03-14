@@ -23,6 +23,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -37,6 +38,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val shadeAnimationInteractor: ShadeAnimationInteractor,
+    private val statusBarStateController: SysuiStatusBarStateController,
 ) : PanelExpansionInteractor {
 
     /**
@@ -99,21 +101,30 @@ constructor(
         "depends on the state you check, use {@link #isShadeFullyExpanded()},\n" +
             "{@link #isOnAod()}, {@link #isOnKeyguard()} instead."
     )
-    override val isFullyExpanded get() = shadeInteractor.isAnyFullyExpanded.value
+    override val isFullyExpanded
+        get() = shadeInteractor.isAnyFullyExpanded.value
 
     @Deprecated("Use !ShadeInteractor.isAnyExpanded instead")
-    override val isFullyCollapsed get() = !shadeInteractor.isAnyExpanded.value
+    override val isFullyCollapsed
+        get() = !shadeInteractor.isAnyExpanded.value
 
     @Deprecated("Use ShadeAnimationInteractor instead")
-    override val isCollapsing get() =
-        shadeAnimationInteractor.isAnyCloseAnimationRunning.value ||
-            shadeAnimationInteractor.isLaunchingActivity.value
+    override val isCollapsing
+        get() =
+            shadeAnimationInteractor.isAnyCloseAnimationRunning.value ||
+                shadeAnimationInteractor.isLaunchingActivity.value
 
     @Deprecated("Use sceneInteractor.isTransitionUserInputOngoing instead")
-    override val isTracking get() = sceneInteractor.isTransitionUserInputOngoing.value
+    override val isTracking
+        get() = sceneInteractor.isTransitionUserInputOngoing.value
 
     @Deprecated("Use ShadeInteractor.isAnyExpanded instead.")
-    override val isPanelExpanded get() = shadeInteractor.isAnyExpanded.value
+    override val isPanelExpanded
+        get() = shadeInteractor.isAnyExpanded.value
+
+    @Deprecated("Use SceneInteractor or ShadeInteractor instead")
+    override val barState
+        get() = statusBarStateController.state
 
     private fun SceneKey.isExpandable(): Boolean {
         return this == Scenes.Shade || this == Scenes.QuickSettings

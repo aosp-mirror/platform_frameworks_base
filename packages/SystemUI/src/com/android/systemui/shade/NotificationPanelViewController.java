@@ -3574,12 +3574,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ViewGroupFadeHelper.reset(mView);
     }
 
-    @Override
     public void addOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().addOnGlobalLayoutListener(listener);
     }
 
-    @Override
     public void removeOnGlobalLayoutListener(ViewTreeObserver.OnGlobalLayoutListener listener) {
         mView.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
     }

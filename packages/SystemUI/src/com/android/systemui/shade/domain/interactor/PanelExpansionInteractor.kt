@@ -69,4 +69,7 @@ interface PanelExpansionInteractor {
 
     /** Returns whether the shade is tracking touches for expand/collapse of the shade or QS. */
     @Deprecated("Use sceneInteractor.isTransitionUserInputOngoing instead") val isTracking: Boolean
+
+    /** Returns the StatusBarState. Note: System UI was formerly known simply as Status Bar. */
+    @Deprecated("Use SceneInteractor or ShadeInteractor instead") val barState: Int
 }

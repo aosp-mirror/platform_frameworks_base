@@ -30,7 +30,7 @@ class ShadeLockscreenInteractorImpl
 @Inject
 constructor(
     @Background private val scope: CoroutineScope,
-    shadeInteractor: ShadeInteractor,
+    private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
     private val lockIconViewController: LockIconViewController,
 ) : ShadeLockscreenInteractor {
@@ -38,7 +38,8 @@ constructor(
         changeToShadeScene()
     }
 
-    override val isExpanded = shadeInteractor.isAnyExpanded.value
+    override val isExpanded
+        get() = shadeInteractor.isAnyExpanded.value
 
     override fun startBouncerPreHideAnimation() {
         // TODO("b/324280998") Implement replacement or delete
