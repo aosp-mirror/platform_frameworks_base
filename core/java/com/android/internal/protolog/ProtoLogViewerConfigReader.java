@@ -4,6 +4,7 @@ import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MESSAGES;
 import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData.MESSAGE;
 import static perfetto.protos.PerfettoTrace.ProtoLogViewerConfig.MessageData.MESSAGE_ID;
 
+import android.util.ArrayMap;
 import android.util.proto.ProtoInputStream;
 
 import com.android.internal.protolog.common.ILogger;
@@ -57,6 +58,7 @@ public class ProtoLogViewerConfigReader {
     }
 
     private void doLoadViewerConfig() throws IOException {
+        mLogMessageMap = new ArrayMap<>();
         final ProtoInputStream pis = mViewerConfigInputStreamProvider.getInputStream();
 
         while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
