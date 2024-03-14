@@ -173,6 +173,25 @@ public class CompatConfigTest {
     }
 
     @Test
+    public void testGetLoggableChanges() throws Exception {
+        final long disabledChangeId = 1234L;
+        final long enabledLatestChangeId = 2345L;
+        final long enabledOlderChangeId = 3456L;
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                // Disabled changes should not be logged.
+                .addDisabledChangeWithId(disabledChangeId)
+                // A change targeting the latest sdk should be logged.
+                .addEnableSinceSdkChangeWithId(3, enabledLatestChangeId)
+                // A change targeting an old sdk should not be logged.
+                .addEnableSinceSdkChangeWithId(1, enabledOlderChangeId)
+                .build();
+
+        assertThat(compatConfig.getLoggableChanges(
+                ApplicationInfoBuilder.create().withTargetSdk(3).build()))
+                    .asList().containsExactly(enabledLatestChangeId);
+    }
+
+    @Test
     public void testPackageOverrideEnabled() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addDisabledChangeWithId(1234L)
