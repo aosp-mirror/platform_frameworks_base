@@ -73,7 +73,7 @@ class RadiiAnimator {
             @Override
             public void onAnimationRepeat(@NonNull Animator animation) {}
         });
-        mAnimationDriver.setInterpolator(new android.view.animation.BounceInterpolator());
+        mAnimationDriver.setInterpolator(new android.view.animation.DecelerateInterpolator());
     }
 
     void startAnimation(float[] endValues) {
