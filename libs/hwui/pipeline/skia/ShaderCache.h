@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <FileBlobCache.h>
 #include <GrContextOptions.h>
 #include <SkRefCnt.h>
 #include <cutils/compiler.h>
@@ -32,7 +33,6 @@ class SkData;
 namespace android {
 
 class BlobCache;
-class FileBlobCache;
 
 namespace uirenderer {
 namespace skiapipeline {
