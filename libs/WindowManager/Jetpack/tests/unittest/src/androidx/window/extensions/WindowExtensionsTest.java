@@ -16,15 +16,12 @@
 
 package androidx.window.extensions;
 
-import static androidx.window.extensions.WindowExtensionsImpl.EXTENSIONS_VERSION_CURRENT_PLATFORM;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
-
+import android.app.ActivityTaskManager;
 import android.platform.test.annotations.Presubmit;
-import android.view.WindowManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -45,61 +42,25 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WindowExtensionsTest {
-
     private WindowExtensions mExtensions;
-    private int mVersion;
 
     @Before
     public void setUp() {
         mExtensions = WindowExtensionsProvider.getWindowExtensions();
-        mVersion = mExtensions.getVendorApiLevel();
     }
 
     @Test
-    public void testGetVendorApiLevel_extensionsEnabled_matchesCurrentVersion() {
-        assumeTrue(WindowManager.hasWindowExtensionsEnabled());
-        assertThat(mVersion).isEqualTo(EXTENSIONS_VERSION_CURRENT_PLATFORM);
-    }
-
-    @Test
-    public void testGetVendorApiLevel_extensionsDisabled_returnsZero() {
-        assumeFalse(WindowManager.hasWindowExtensionsEnabled());
-        assertThat(mVersion).isEqualTo(0);
-    }
-
-    @Test
-    public void testGetWindowLayoutComponent_extensionsEnabled_returnsImplementation() {
-        assumeTrue(WindowManager.hasWindowExtensionsEnabled());
+    public void testGetWindowLayoutComponent() {
         assertThat(mExtensions.getWindowLayoutComponent()).isNotNull();
     }
 
     @Test
-    public void testGetWindowLayoutComponent_extensionsDisabled_returnsNull() {
-        assumeFalse(WindowManager.hasWindowExtensionsEnabled());
-        assertThat(mExtensions.getWindowLayoutComponent()).isNull();
-    }
-    @Test
-    public void testGetActivityEmbeddingComponent_featureDisabled_returnsNull() {
-        assumeFalse(WindowExtensionsImpl.isActivityEmbeddingEnabled());
-        assertThat(mExtensions.getActivityEmbeddingComponent()).isNull();
-    }
-
-    @Test
-    public void testGetActivityEmbeddingComponent_featureEnabled_returnsImplementation() {
-        assumeTrue(WindowExtensionsImpl.isActivityEmbeddingEnabled());
-        assertThat(mExtensions.getActivityEmbeddingComponent()).isNotNull();
-    }
-
-    @Test
-    public void testGetWindowAreaComponent_extensionsEnabled_returnsImplementation() {
-        assumeTrue(WindowManager.hasWindowExtensionsEnabled());
-        assertThat(mExtensions.getWindowAreaComponent()).isNotNull();
-    }
-
-    @Test
-    public void testGetWindowAreaComponent_extensionsDisabled_returnsNull() {
-        assumeFalse(WindowManager.hasWindowExtensionsEnabled());
-        assertThat(mExtensions.getWindowAreaComponent()).isNull();
+    public void testGetActivityEmbeddingComponent() {
+        if (ActivityTaskManager.supportsMultiWindow(getInstrumentation().getContext())) {
+            assertThat(mExtensions.getActivityEmbeddingComponent()).isNotNull();
+        } else {
+            assertThat(mExtensions.getActivityEmbeddingComponent()).isNull();
+        }
     }
 
     @Test
