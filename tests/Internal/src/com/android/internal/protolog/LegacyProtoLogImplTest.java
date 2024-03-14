@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 /**
  * Test class for {@link ProtoLogImpl}.
@@ -89,7 +90,7 @@ public class LegacyProtoLogImplTest {
         //noinspection ResultOfMethodCallIgnored
         mFile.delete();
         mProtoLog = new LegacyProtoLogImpl(mFile, mViewerConfigFilename,
-                1024 * 1024, mReader, 1024);
+                1024 * 1024, mReader, 1024, new TreeMap<>());
     }
 
     @After

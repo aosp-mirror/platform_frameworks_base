@@ -39,7 +39,7 @@ import android.view.Surface;
 interface IFaceService {
 
     // Creates a test session with the specified sensorId
-    @EnforcePermission("TEST_BIOMETRIC")
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
 
     // Requests a proto dump of the specified sensor
@@ -47,7 +47,7 @@ interface IFaceService {
     byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
 
     // Retrieve static sensor properties for all face sensors
-    @EnforcePermission(anyOf = {"USE_BIOMETRIC_INTERNAL", "USE_BACKGROUND_FACE_AUTHENTICATION"})
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
 
     // Retrieve static sensor properties for the specified sensor
@@ -57,11 +57,6 @@ interface IFaceService {
     // Authenticate with a face. A requestId is returned that can be used to cancel this operation.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     long authenticate(IBinder token, long operationId, IFaceServiceReceiver receiver,
-            in FaceAuthenticateOptions options);
-
-    // Authenticate with a face. A requestId is returned that can be used to cancel this operation.
-    @EnforcePermission("USE_BACKGROUND_FACE_AUTHENTICATION")
-    long authenticateInBackground(IBinder token, long operationId, IFaceServiceReceiver receiver,
             in FaceAuthenticateOptions options);
 
     // Uses the face hardware to detect for the presence of a face, without giving details
@@ -138,7 +133,7 @@ interface IFaceService {
     void revokeChallenge(IBinder token, int sensorId, int userId, String opPackageName, long challenge);
 
     // Determine if a user has at least one enrolled face
-    @EnforcePermission(anyOf = {"USE_BIOMETRIC_INTERNAL", "USE_BACKGROUND_FACE_AUTHENTICATION"})
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     boolean hasEnrolledFaces(int sensorId, int userId, String opPackageName);
 
     // Return the LockoutTracker status for the specified user
