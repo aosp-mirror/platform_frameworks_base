@@ -222,4 +222,9 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
             )
         verify(factory, never()).create(any<ScreenCapturePermissionDialogDelegate>())
     }
+
+    @Test
+    fun startButton_isDisabled_beforeIssueTypeIsSelected() {
+        assertThat(dialog.getButton(Dialog.BUTTON_POSITIVE).isEnabled).isFalse()
+    }
 }
