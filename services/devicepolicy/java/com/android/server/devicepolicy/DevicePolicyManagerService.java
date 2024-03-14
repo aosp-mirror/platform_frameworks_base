@@ -18460,7 +18460,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         new CalculateHasIncompatibleAccountsTask().executeOnExecutor(
-                calculateHasIncompatibleAccountsExecutor, null);
+                calculateHasIncompatibleAccountsExecutor);
     }
 
     @Nullable
