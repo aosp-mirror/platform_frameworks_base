@@ -106,7 +106,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         checkBleState();
         registerBluetoothStateBroadcastReceiver(context);
 
-        mAssociationStore.registerListener(this);
+        mAssociationStore.registerLocalListener(this);
     }
 
     @MainThread
@@ -183,7 +183,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
 
         // Collect MAC addresses from all associations.
         final Set<String> macAddresses = new HashSet<>();
-        for (AssociationInfo association : mAssociationStore.getAssociations()) {
+        for (AssociationInfo association : mAssociationStore.getActiveAssociations()) {
             if (!association.isNotifyOnDeviceNearby()) continue;
 
             // Beware that BT stack does not consider low-case MAC addresses valid, while
@@ -255,7 +255,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         if (DEBUG) Log.i(TAG, "notifyDevice_Found()" + btDeviceToString(device));
 
         final List<AssociationInfo> associations =
-                mAssociationStore.getAssociationsByAddress(device.getAddress());
+                mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
         if (DEBUG) Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
 
         for (AssociationInfo association : associations) {
@@ -268,7 +268,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
         if (DEBUG) Log.i(TAG, "notifyDevice_Lost()" + btDeviceToString(device));
 
         final List<AssociationInfo> associations =
-                mAssociationStore.getAssociationsByAddress(device.getAddress());
+                mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
         if (DEBUG) Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
 
         for (AssociationInfo association : associations) {
@@ -319,7 +319,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
                 Log.v(TAG, "  > scanResult=" + result);
 
                 final List<AssociationInfo> associations =
-                        mAssociationStore.getAssociationsByAddress(device.getAddress());
+                        mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
                 Log.v(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
             }
 
