@@ -33,3 +33,10 @@ flag {
     bug: "327383546"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "storage_test_mission_1"
+    namespace: "core_experiments_team_internal"
+    description: "If this flag is detected as true on boot, writes a logfile to track storage migration correctness."
+    bug: "328444881"
+}
