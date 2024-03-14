@@ -28,7 +28,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
-import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -136,7 +135,7 @@ object SharedNotificationContainerBinder {
                             .collect { controller.setMaxDisplayedNotifications(it) }
                     }
 
-                    if (!sceneContainerFlags.flexiNotifsEnabled()) {
+                    if (!sceneContainerFlags.isEnabled()) {
                         launch {
                             viewModel.bounds.collect {
                                 val animate =

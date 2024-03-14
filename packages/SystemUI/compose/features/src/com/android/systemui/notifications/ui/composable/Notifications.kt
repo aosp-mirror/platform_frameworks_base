@@ -42,7 +42,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -355,18 +354,7 @@ private fun SceneScope.NotificationPlaceholder(
                     )
                 }
     ) {
-        content {
-            if (viewModel.isPlaceholderTextVisible) {
-                Box(Modifier.fillMaxSize()) {
-                    Text(
-                        text = "Notifications",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.align(Alignment.Center),
-                    )
-                }
-            }
-        }
+        content {}
     }
 }
 
