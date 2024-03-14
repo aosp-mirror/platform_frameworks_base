@@ -88,7 +88,7 @@ import androidx.annotation.Nullable;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.extensions.WindowExtensionsImpl;
+import androidx.window.extensions.WindowExtensions;
 import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.core.util.function.Predicate;
@@ -410,7 +410,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Registers the split organizer callback to notify about changes to active splits.
      *
      * @deprecated Use {@link #setSplitInfoCallback(Consumer)} starting with
-     * {@link WindowExtensionsImpl#getVendorApiLevel()} 2.
+     * {@link WindowExtensions#getVendorApiLevel()} 2.
      */
     @Deprecated
     @Override
@@ -423,7 +423,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * Registers the split organizer callback to notify about changes to active splits.
      *
-     * @since {@link WindowExtensionsImpl#getVendorApiLevel()} 2
+     * @since {@link WindowExtensions#getVendorApiLevel()} 2
      */
     @Override
     public void setSplitInfoCallback(Consumer<List<SplitInfo>> callback) {
