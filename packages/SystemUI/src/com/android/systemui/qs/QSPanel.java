@@ -127,8 +127,9 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     }
 
-    void initialize(QSLogger qsLogger) {
+    void initialize(QSLogger qsLogger, boolean usingMediaPlayer) {
         mQsLogger = qsLogger;
+        mUsingMediaPlayer = usingMediaPlayer;
         mTileLayout = getOrCreateTileLayout();
 
         if (mUsingMediaPlayer) {
@@ -163,22 +164,25 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     protected void setHorizontalContentContainerClipping() {
-        mHorizontalContentContainer.setClipChildren(true);
-        mHorizontalContentContainer.setClipToPadding(false);
-        // Don't clip on the top, that way, secondary pages tiles can animate up
-        // Clipping coordinates should be relative to this view, not absolute (parent coordinates)
-        mHorizontalContentContainer.addOnLayoutChangeListener(
-                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    if ((right - left) != (oldRight - oldLeft)
-                            || ((bottom - top) != (oldBottom - oldTop))) {
-                        mClippingRect.right = right - left;
-                        mClippingRect.bottom = bottom - top;
-                        mHorizontalContentContainer.setClipBounds(mClippingRect);
-                    }
-                });
-        mClippingRect.left = 0;
-        mClippingRect.top = -1000;
-        mHorizontalContentContainer.setClipBounds(mClippingRect);
+        if (mHorizontalContentContainer != null) {
+            mHorizontalContentContainer.setClipChildren(true);
+            mHorizontalContentContainer.setClipToPadding(false);
+            // Don't clip on the top, that way, secondary pages tiles can animate up
+            // Clipping coordinates should be relative to this view, not absolute
+            // (parent coordinates)
+            mHorizontalContentContainer.addOnLayoutChangeListener(
+                    (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                        if ((right - left) != (oldRight - oldLeft)
+                                || ((bottom - top) != (oldBottom - oldTop))) {
+                            mClippingRect.right = right - left;
+                            mClippingRect.bottom = bottom - top;
+                            mHorizontalContentContainer.setClipBounds(mClippingRect);
+                        }
+                    });
+            mClippingRect.left = 0;
+            mClippingRect.top = -1000;
+            mHorizontalContentContainer.setClipBounds(mClippingRect);
+        }
     }
 
     /**
@@ -412,7 +416,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     private void updateHorizontalLinearLayoutMargins() {
-        if (mHorizontalLinearLayout != null && !displayMediaMarginsOnMedia()) {
+        if (mUsingMediaPlayer && mHorizontalLinearLayout != null && !displayMediaMarginsOnMedia()) {
             LayoutParams lp = (LayoutParams) mHorizontalLinearLayout.getLayoutParams();
             lp.bottomMargin = Math.max(mMediaTotalBottomMargin - getPaddingBottom(), 0);
             mHorizontalLinearLayout.setLayoutParams(lp);
@@ -461,6 +465,11 @@ public class QSPanel extends LinearLayout implements Tunable {
     /** Call when orientation has changed and MediaHost needs to be adjusted. */
     private void reAttachMediaHost(ViewGroup hostView, boolean horizontal) {
         if (!mUsingMediaPlayer) {
+            // If the host view was attached, detach it.
+            ViewGroup parent = (ViewGroup) hostView.getParent();
+            if (parent != null) {
+                parent.removeView(hostView);
+            }
             return;
         }
         mMediaHostView = hostView;
@@ -616,7 +625,10 @@ public class QSPanel extends LinearLayout implements Tunable {
         if (horizontal != mUsingHorizontalLayout || force) {
             Log.d(getDumpableTag(), "setUsingHorizontalLayout: " + horizontal + ", " + force);
             mUsingHorizontalLayout = horizontal;
-            ViewGroup newParent = horizontal ? mHorizontalContentContainer : this;
+            // The tile layout should be reparented if horizontal and we are using media. If not
+            // using media, the parent should always be this.
+            ViewGroup newParent =
+                    horizontal && mUsingMediaPlayer ? mHorizontalContentContainer : this;
             switchAllContentToParent(newParent, mTileLayout);
             reAttachMediaHost(mediaHostView, horizontal);
             if (needsDynamicRowsAndColumns()) {
@@ -624,7 +636,9 @@ public class QSPanel extends LinearLayout implements Tunable {
                 mTileLayout.setMaxColumns(horizontal ? 2 : 4);
             }
             updateMargins(mediaHostView);
-            mHorizontalLinearLayout.setVisibility(horizontal ? View.VISIBLE : View.GONE);
+            if (mHorizontalLinearLayout != null) {
+                mHorizontalLinearLayout.setVisibility(horizontal ? View.VISIBLE : View.GONE);
+            }
         }
     }
 
