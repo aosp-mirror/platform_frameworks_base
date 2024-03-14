@@ -229,9 +229,10 @@ public final class CameraExtensionCharacteristics {
                                                      StreamConfigurationMap streamMap) {
         ArrayList<Size> ret = getSupportedSizes(sizesList, format);
 
-        if (format == ImageFormat.JPEG || format == ImageFormat.YUV_420_888) {
+        if (format == ImageFormat.JPEG || format == ImageFormat.YUV_420_888 ||
+                format == ImageFormat.PRIVATE) {
             // Per API contract it is assumed that the extension is able to support all
-            // camera advertised sizes for JPEG and YUV_420_888 in case it doesn't return
+            // camera advertised sizes for JPEG, YUV_420_888 and PRIVATE in case it doesn't return
             // a valid non-empty size list.
             Size[] supportedSizes = streamMap.getOutputSizes(format);
             if ((ret.isEmpty()) && (supportedSizes != null)) {

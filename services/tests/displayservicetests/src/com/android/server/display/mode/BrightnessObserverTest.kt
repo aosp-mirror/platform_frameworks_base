@@ -95,9 +95,9 @@ class BrightnessObserverTest {
     ) {
         ALL_ENABLED(true, true, CombinedVote(
                 listOf(DisableRefreshRateSwitchingVote(true),
-                        SupportedModesVote(
-                                listOf(SupportedModesVote.SupportedMode(60f, 60f),
-                                        SupportedModesVote.SupportedMode(120f, 120f)))))),
+                        SupportedRefreshRatesVote(
+                                listOf(SupportedRefreshRatesVote.RefreshRates(60f, 60f),
+                                        SupportedRefreshRatesVote.RefreshRates(120f, 120f)))))),
         VRR_NOT_SUPPORTED(false, true, DisableRefreshRateSwitchingVote(true)),
         VSYNC_VOTE_DISABLED(true, false, DisableRefreshRateSwitchingVote(true))
     }

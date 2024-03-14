@@ -62,7 +62,7 @@ constructor(
         conflatedCallbackFlow {
                 val callback =
                     DeviceStateManager.DeviceStateCallback { state ->
-                        trySend(deviceStateToPosture(state))
+                        trySend(deviceStateToPosture(state.identifier))
                     }
                 deviceStateManager.registerCallback(executor, callback)
                 awaitClose { deviceStateManager.unregisterCallback(callback) }

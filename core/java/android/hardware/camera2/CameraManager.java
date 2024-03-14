@@ -47,6 +47,7 @@ import android.hardware.camera2.params.StreamConfiguration;
 import android.hardware.camera2.utils.CameraIdAndSessionConfiguration;
 import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
 import android.hardware.camera2.utils.ExceptionUtils;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
@@ -204,14 +205,12 @@ public final class CameraManager {
             mDeviceStateListeners.add(new WeakReference<>(listener));
         }
 
+        @SuppressWarnings("FlaggedApi")
         @Override
-        public final void onBaseStateChanged(int state) {
-            handleStateChange(state);
-        }
-
-        @Override
-        public final void onStateChanged(int state) {
-            handleStateChange(state);
+        public void onDeviceStateChanged(DeviceState state) {
+            // Suppressing the FlaggedAPI warning as this specific API isn't new, just moved to
+            // system API which requires it to be flagged.
+            handleStateChange(state.getIdentifier());
         }
     }
 

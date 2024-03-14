@@ -62,12 +62,9 @@ object PhysicsAnimatorTestUtils {
      */
     @JvmStatic
     fun prepareForTest() {
-        val defaultConstructor = PhysicsAnimator.instanceConstructor
-        PhysicsAnimator.instanceConstructor = fun(target: Any): PhysicsAnimator<*> {
-            val animator = defaultConstructor(target)
+        PhysicsAnimator.onAnimatorCreated = { animator, target ->
             allAnimatedObjects.add(target)
             animatorTestHelpers[animator] = AnimatorTestHelper(animator)
-            return animator
         }
 
         timeoutMs = 2000
@@ -158,12 +155,12 @@ object PhysicsAnimatorTestUtils {
     @Throws(InterruptedException::class)
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> blockUntilAnimationsEnd(
-        properties: FloatPropertyCompat<in T>
+        vararg properties: FloatPropertyCompat<in T>
     ) {
         for (target in allAnimatedObjects) {
             try {
                 blockUntilAnimationsEnd(
-                        PhysicsAnimator.getInstance(target) as PhysicsAnimator<T>, properties)
+                        PhysicsAnimator.getInstance(target) as PhysicsAnimator<T>, *properties)
             } catch (e: ClassCastException) {
                 // Keep checking the other objects for ones whose types match the provided
                 // properties.
@@ -267,10 +264,8 @@ object PhysicsAnimatorTestUtils {
 
         // Loop through the updates from the testable animator.
         for (update in framesForProperty) {
-
             // Check whether this frame satisfies the current matcher.
             if (curMatcher(update)) {
-
                 // If that was the last unsatisfied matcher, we're good here. 'Verify' all remaining
                 // frames and return without failing.
                 if (matchers.size == 0) {

@@ -142,8 +142,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             "/sys/class/android_usb/android0/state";
     private static final String RNDIS_ETH_ADDR_PATH =
             "/sys/class/android_usb/android0/f_rndis/ethaddr";
-    private static final String AUDIO_SOURCE_PCM_PATH =
-            "/sys/class/android_usb/android0/f_audio_source/pcm";
     private static final String MIDI_ALSA_PATH =
             "/sys/class/android_usb/android0/f_midi/alsa";
 
@@ -171,8 +169,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private static final int MSG_INCREASE_SENDSTRING_COUNT = 21;
     private static final int MSG_UPDATE_USB_SPEED = 22;
     private static final int MSG_UPDATE_HAL_VERSION = 23;
-
-    private static final int AUDIO_MODE_SOURCE = 1;
 
     // Delay for debouncing USB disconnects.
     // We often get rapid connect/disconnect events when enabling USB functions,
@@ -464,7 +460,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         int operationId = sUsbOperationCount.incrementAndGet();
 
         mAccessoryStrings = nativeGetAccessoryStrings();
-        boolean enableAudio = (nativeGetAudioMode() == AUDIO_MODE_SOURCE);
         // don't start accessory mode if our mandatory strings have not been set
         boolean enableAccessory = (mAccessoryStrings != null &&
                 mAccessoryStrings[UsbAccessory.MANUFACTURER_STRING] != null &&
@@ -473,9 +468,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         long functions = UsbManager.FUNCTION_NONE;
         if (enableAccessory) {
             functions |= UsbManager.FUNCTION_ACCESSORY;
-        }
-        if (enableAudio) {
-            functions |= UsbManager.FUNCTION_AUDIO_SOURCE;
         }
 
         if (functions != UsbManager.FUNCTION_NONE) {
@@ -2490,6 +2482,4 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private native FileDescriptor nativeOpenControl(String usbFunction);
 
     private native boolean nativeIsStartRequested();
-
-    private native int nativeGetAudioMode();
 }

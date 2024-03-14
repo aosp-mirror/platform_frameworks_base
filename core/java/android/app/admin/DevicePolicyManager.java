@@ -45,11 +45,11 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
-import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
+import static android.Manifest.permission.QUERY_DEVICE_STOLEN_STATE;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
@@ -5952,7 +5952,8 @@ public class DevicePolicyManager {
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to set a value on the parent
-     * profile.
+     * profile. This allows a profile wipe after too many incorrect device-unlock password have
+     * been entered on the parent profile even if each profile has a separate challenge.
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password is always empty and this method has no effect - i.e. the policy is not set.
      *
@@ -9979,16 +9980,21 @@ public class DevicePolicyManager {
     /**
      * Called by a profile owner or device owner or holder of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}. to set a default activity
-     * that the system selects to handle intents that match the given {@link IntentFilter}.
+     * that the system selects to handle intents that match the given {@link IntentFilter} instead
+     * of showing the default disambiguation mechanism.
      * This activity will remain the default intent handler even if the set of potential event
      * handlers for the intent filter changes and if the intent preferences are reset.
      * <p>
-     * Note that the caller should still declare the activity in the manifest, the API just sets
-     * the activity to be the default one to handle the given intent filter.
+     * Note that the target application should still declare the activity in the manifest, the API
+     * just sets the activity to be the default one to handle the given intent filter.
      * <p>
      * The default disambiguation mechanism takes over if the activity is not installed (anymore).
      * When the activity is (re)installed, it is automatically reset as default intent handler for
      * the filter.
+     * <p>
+     * Note that calling this API to set a default intent handler, only allow to avoid the default
+     * disambiguation mechanism. Implicit intents that do not trigger this mechanism (like invoking
+     * the browser) cannot be configured as they are controlled by other configurations.
      * <p>
      * The calling device admin must be a profile owner or device owner. If it is not, a security
      * exception will be thrown.
@@ -17152,15 +17158,15 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(value = MANAGE_DEVICE_POLICY_THEFT_DETECTION)
+    @RequiresPermission(value = QUERY_DEVICE_STOLEN_STATE)
     @FlaggedApi(FLAG_DEVICE_THEFT_API_ENABLED)
-    public boolean isTheftDetectionTriggered() {
-        throwIfParentInstance("isTheftDetectionTriggered");
+    public boolean isDevicePotentiallyStolen() {
+        throwIfParentInstance("isDevicePotentiallyStolen");
         if (mService == null) {
             return false;
         }
         try {
-            return mService.isTheftDetectionTriggered(mContext.getPackageName());
+            return mService.isDevicePotentiallyStolen(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

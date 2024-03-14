@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
@@ -67,6 +68,8 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var shadeViewController: ShadeViewController
     @Mock
+    private lateinit var panelExpansionInteractor: PanelExpansionInteractor
+    @Mock
     private lateinit var notifShadeWindowController: NotificationShadeWindowController
     @Mock
     private lateinit var lightRevealScrim: LightRevealScrim
@@ -87,17 +90,18 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         controller = UnlockedScreenOffAnimationController(
-                context,
-                wakefulnessLifecycle,
-                statusBarStateController,
-                { keyguardViewMediator },
-                keyguardStateController,
-                { dozeParameters },
-                globalSettings,
-                { notifShadeWindowController },
-                interactionJankMonitor,
-                powerManager,
-                handler = handler
+            context,
+            wakefulnessLifecycle,
+            statusBarStateController,
+            { keyguardViewMediator },
+            keyguardStateController,
+            { dozeParameters },
+            globalSettings,
+            { notifShadeWindowController },
+            interactionJankMonitor,
+            powerManager,
+            { panelExpansionInteractor },
+            handler,
         )
         controller.initialize(centralSurfaces, shadeViewController, lightRevealScrim)
     }

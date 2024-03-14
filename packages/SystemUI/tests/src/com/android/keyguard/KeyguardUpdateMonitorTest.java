@@ -135,6 +135,7 @@ import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStat
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus;
 import com.android.systemui.deviceentry.shared.model.FailedFaceAuthenticationStatus;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
@@ -195,7 +196,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
             TEST_CARRIER_ID, PROFILE_CLASS_PROVISIONING);
     private static final int FINGERPRINT_SENSOR_ID = 1;
-
+    private KosmosJavaAdapter mKosmos;
     @Mock
     private UserTracker mUserTracker;
     @Mock
@@ -240,7 +241,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private TelephonyListenerManager mTelephonyListenerManager;
-    @Mock
     private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private LatencyTracker mLatencyTracker;
@@ -300,6 +300,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Before
     public void setup() throws RemoteException {
+        mKosmos = new KosmosJavaAdapter(this);
+        mInteractionJankMonitor = mKosmos.getInteractionJankMonitor();
         MockitoAnnotations.initMocks(this);
         when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
 

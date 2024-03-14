@@ -30,6 +30,7 @@ import static android.view.WindowInsets.Type.statusBars;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.compatui.AppCompatUtils.isSingleTopActivityTranslucent;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
@@ -75,6 +76,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -1053,6 +1055,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
         if (mDesktopModeKeyguardChangeListener.isKeyguardVisibleAndOccluded()
                 && taskInfo.isFocused) {
+            return false;
+        }
+        if (Flags.enableDesktopWindowingModalsPolicy()
+                && isSingleTopActivityTranslucent(taskInfo)) {
             return false;
         }
         return DesktopModeStatus.isEnabled()

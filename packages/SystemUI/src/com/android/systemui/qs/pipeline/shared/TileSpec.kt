@@ -37,7 +37,11 @@ sealed class TileSpec private constructor(open val spec: String) {
     data class PlatformTileSpec
     internal constructor(
         override val spec: String,
-    ) : TileSpec(spec)
+    ) : TileSpec(spec) {
+        override fun toString(): String {
+            return "P($spec)"
+        }
+    }
 
     /**
      * Container for the spec of a tile provided by an app.
@@ -50,7 +54,7 @@ sealed class TileSpec private constructor(open val spec: String) {
         val componentName: ComponentName,
     ) : TileSpec(spec) {
         override fun toString(): String {
-            return "CustomTileSpec(${componentName.toShortString()})"
+            return "C(${componentName.flattenToShortString()})"
         }
     }
 

@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.media.BluetoothMediaDevice
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.spatializerInteractor
@@ -37,6 +38,7 @@ import com.android.systemui.volume.localMediaRepository
 import com.android.systemui.volume.mediaController
 import com.android.systemui.volume.mediaControllerRepository
 import com.android.systemui.volume.mediaOutputInteractor
+import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioAvailabilityModel
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -74,16 +76,6 @@ class SpatialAudioComponentInteractorTest : SysuiTestCase() {
 
             mediaControllerRepository.setActiveLocalMediaController(mediaController)
 
-            spatializerRepository.setIsSpatialAudioAvailable(
-                AudioDeviceAttributes(
-                    AudioDeviceAttributes.ROLE_OUTPUT,
-                    AudioDeviceInfo.TYPE_BLE_HEADSET,
-                    "test_address"
-                ),
-                true
-            )
-            spatializerRepository.defaultHeadTrackingAvailable = true
-
             underTest =
                 SpatialAudioComponentInteractor(
                     mediaOutputInteractor,
@@ -97,6 +89,7 @@ class SpatialAudioComponentInteractorTest : SysuiTestCase() {
     fun setEnabled_changesIsEnabled() {
         with(kosmos) {
             testScope.runTest {
+                spatializerRepository.setIsSpatialAudioAvailable(headset, true)
                 val values by collectValues(underTest.isEnabled)
 
                 underTest.setEnabled(SpatialAudioEnabledModel.Disabled)
@@ -116,5 +109,93 @@ class SpatialAudioComponentInteractorTest : SysuiTestCase() {
                     .inOrder()
             }
         }
+    }
+
+    @Test
+    fun connectedDeviceSupports_isAvailable_SpatialAudio() {
+        with(kosmos) {
+            testScope.runTest {
+                spatializerRepository.setIsSpatialAudioAvailable(headset, true)
+
+                val isAvailable by collectLastValue(underTest.isAvailable)
+
+                assertThat(isAvailable)
+                    .isInstanceOf(SpatialAudioAvailabilityModel.SpatialAudio::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun connectedDeviceSupportsHeadTracking_isAvailable_HeadTracking() {
+        with(kosmos) {
+            testScope.runTest {
+                spatializerRepository.setIsSpatialAudioAvailable(headset, true)
+                spatializerRepository.setIsHeadTrackingAvailable(headset, true)
+
+                val isAvailable by collectLastValue(underTest.isAvailable)
+
+                assertThat(isAvailable)
+                    .isInstanceOf(SpatialAudioAvailabilityModel.HeadTracking::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun connectedDeviceDoesntSupport_isAvailable_Unavailable() {
+        with(kosmos) {
+            testScope.runTest {
+                spatializerRepository.setIsSpatialAudioAvailable(headset, false)
+
+                val isAvailable by collectLastValue(underTest.isAvailable)
+
+                assertThat(isAvailable)
+                    .isInstanceOf(SpatialAudioAvailabilityModel.Unavailable::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun noConnectedDeviceBuiltinSupports_isAvailable_SpatialAudio() {
+        with(kosmos) {
+            testScope.runTest {
+                localMediaRepository.updateCurrentConnectedDevice(null)
+                spatializerRepository.setIsSpatialAudioAvailable(builtinSpeaker, true)
+
+                val isAvailable by collectLastValue(underTest.isAvailable)
+
+                assertThat(isAvailable)
+                    .isInstanceOf(SpatialAudioAvailabilityModel.SpatialAudio::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun noConnectedDeviceBuiltinDoesntSupport_isAvailable_Unavailable() {
+        with(kosmos) {
+            testScope.runTest {
+                localMediaRepository.updateCurrentConnectedDevice(null)
+                spatializerRepository.setIsSpatialAudioAvailable(builtinSpeaker, false)
+
+                val isAvailable by collectLastValue(underTest.isAvailable)
+
+                assertThat(isAvailable)
+                    .isInstanceOf(SpatialAudioAvailabilityModel.Unavailable::class.java)
+            }
+        }
+    }
+
+    private companion object {
+        val headset =
+            AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_OUTPUT,
+                AudioDeviceInfo.TYPE_BLE_HEADSET,
+                "test_address"
+            )
+        val builtinSpeaker =
+            AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_OUTPUT,
+                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
+                ""
+            )
     }
 }

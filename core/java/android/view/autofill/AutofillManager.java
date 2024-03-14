@@ -3056,19 +3056,17 @@ public final class AutofillManager {
     }
 
     @GuardedBy("mLock")
-    private void handleFailedIdsLocked(ArrayList<AutofillId> failedIds) {
-        if (failedIds != null && !failedIds.isEmpty()) {
-            if (sVerbose) {
-                Log.v(TAG, "autofill(): total failed views: " + failedIds);
-            }
-            try {
-                mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
-            } catch (RemoteException e) {
-                // In theory, we could ignore this error since it's not a big deal, but
-                // in reality, we rather crash the app anyways, as the failure could be
-                // a consequence of something going wrong on the server side...
-                throw e.rethrowFromSystemServer();
-            }
+    private void handleFailedIdsLocked(@NonNull ArrayList<AutofillId> failedIds) {
+        if (!failedIds.isEmpty() && sVerbose) {
+            Log.v(TAG, "autofill(): total failed views: " + failedIds);
+        }
+        try {
+            mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
+        } catch (RemoteException e) {
+            // In theory, we could ignore this error since it's not a big deal, but
+            // in reality, we rather crash the app anyways, as the failure could be
+            // a consequence of something going wrong on the server side...
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3090,7 +3088,7 @@ public final class AutofillManager {
             final View[] views = client.autofillClientFindViewsByAutofillIdTraversal(
                     Helper.toArray(ids));
 
-            ArrayList<AutofillId> failedIds = null;
+            ArrayList<AutofillId> failedIds = new ArrayList<>();
 
             for (int i = 0; i < itemCount; i++) {
                 final AutofillId id = ids.get(i);
@@ -3101,9 +3099,6 @@ public final class AutofillManager {
                     // the service; this is fine, but we need to update the view status in the
                     // server side so it can be triggered again.
                     Log.d(TAG, "autofill(): no View with id " + id);
-                    if (failedIds == null) {
-                        failedIds = new ArrayList<>();
-                    }
                     failedIds.add(id);
                     continue;
                 }

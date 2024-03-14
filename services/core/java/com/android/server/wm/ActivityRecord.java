@@ -328,6 +328,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.service.contentcapture.ActivityEvent;
@@ -1002,6 +1003,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // Whether the Activity allows state sharing in untrusted embedding
     private final boolean mAllowUntrustedEmbeddingStateSharing;
+
+    // TODO(b/329378309): Remove this once the overview handles the configuration correctly.
+    private static final boolean OVERRIDE_OVERVIEW_CONFIGURATION =
+            SystemProperties.getBoolean("persist.wm.debug.override_overview_configuration", true);
 
     // Records whether client has overridden the WindowAnimation_(Open/Close)(Enter/Exit)Animation.
     private CustomAppTransition mCustomOpenTransition;
@@ -8608,7 +8613,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
             rotation = mDisplayContent.getRotation();
         }
-        if (!mWmService.mFlags.mInsetsDecoupledConfiguration
+        final int activityType = inOutConfig.windowConfiguration.getActivityType();
+        if (OVERRIDE_OVERVIEW_CONFIGURATION
+                && (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS)) {
+            // Do not early return and provide the override. This should be removed shortly as we
+            // don't override 1P components.
+        } else if (!mWmService.mFlags.mInsetsDecoupledConfiguration
                 || info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
                 || getCompatDisplayInsets() != null
                 || isFloating(parentWindowingMode) || fullBounds == null

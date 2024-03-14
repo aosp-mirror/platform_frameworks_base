@@ -17,8 +17,10 @@
 package com.android.wm.shell.bubbles.bar
 
 import android.annotation.SuppressLint
+import android.graphics.RectF
 import android.view.MotionEvent
 import android.view.View
+import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.common.bubbles.BubbleBarLocation
 import com.android.wm.shell.common.bubbles.DismissView
@@ -43,6 +45,8 @@ class BubbleBarExpandedViewDragController(
     private val magnetizedExpandedView: MagnetizedObject<BubbleBarExpandedView> =
         MagnetizedObject.magnetizeView(expandedView)
     private val magnetizedDismissTarget: MagnetizedObject.MagneticTarget
+    private val dismissZoneHeight: Int
+    private val dismissZoneWidth: Int
 
     init {
         magnetizedExpandedView.magnetListener = MagnetListener()
@@ -74,6 +78,11 @@ class BubbleBarExpandedViewDragController(
             }
             return@setOnTouchListener dragMotionEventHandler.onTouch(view, event) || magnetConsumed
         }
+
+        dismissZoneHeight =
+            dismissView.resources.getDimensionPixelSize(R.dimen.bubble_bar_dismiss_zone_height)
+        dismissZoneWidth =
+            dismissView.resources.getDimensionPixelSize(R.dimen.bubble_bar_dismiss_zone_width)
     }
 
     /** Listener to receive callback about dragging events */
@@ -97,12 +106,23 @@ class BubbleBarExpandedViewDragController(
         private var isMoving = false
         private var screenCenterX: Int = -1
         private var isOnLeft = false
+        private val dismissZone = RectF()
 
         override fun onDown(v: View, ev: MotionEvent): Boolean {
             // While animating, don't allow new touch events
             if (expandedView.isAnimating) return false
-            screenCenterX = bubblePositioner.screenRect.centerX()
             isOnLeft = bubblePositioner.isBubbleBarOnLeft
+
+            val screenRect = bubblePositioner.screenRect
+            screenCenterX = screenRect.centerX()
+            val screenBottom = screenRect.bottom
+
+            dismissZone.set(
+                screenCenterX - dismissZoneWidth / 2f,
+                (screenBottom - dismissZoneHeight).toFloat(),
+                screenCenterX + dismissZoneHeight / 2f,
+                screenBottom.toFloat()
+            )
             return true
         }
 
@@ -121,6 +141,11 @@ class BubbleBarExpandedViewDragController(
             expandedView.translationX = expandedViewInitialTranslationX + dx
             expandedView.translationY = expandedViewInitialTranslationY + dy
             dismissView.show()
+
+            // Check if we are in the zone around dismiss view where drag can only lead to dismiss
+            if (dismissZone.contains(ev.rawX, ev.rawY)) {
+                return
+            }
 
             if (isOnLeft && ev.rawX > screenCenterX) {
                 isOnLeft = false

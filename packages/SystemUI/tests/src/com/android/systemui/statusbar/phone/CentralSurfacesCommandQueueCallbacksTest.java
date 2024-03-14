@@ -49,9 +49,8 @@ import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
-import com.android.systemui.shade.domain.interactor.PanelExpansionInteractorImpl;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -79,7 +78,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private CommandQueue mCommandQueue;
     @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private ShadeViewController mShadeViewController;
-    @Mock private PanelExpansionInteractorImpl mPanelExpansionInteractor;
+    @Mock private PanelExpansionInteractor mPanelExpansionInteractor;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -129,7 +128,6 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mStatusBarHideIconsForBouncerManager,
                 mPowerManager,
                 Optional.of(mVibrator),
-                new DisableFlagsLogger(),
                 DEFAULT_DISPLAY,
                 mCameraLauncherLazy,
                 mUserTracker,

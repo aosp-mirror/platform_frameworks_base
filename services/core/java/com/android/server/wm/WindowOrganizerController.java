@@ -1770,6 +1770,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 throw new RuntimeException("Reparenting leaf Tasks is not supported now. " + task);
             }
         } else {
+            if (hop.getToTop() && task.isRootTask()) {
+                final ActivityRecord pipCandidate = task.findEnterPipOnTaskSwitchCandidate(
+                        task.getDisplayArea().getTopRootTask());
+                task.enableEnterPipOnTaskSwitch(pipCandidate, task, null /* toFrontActivity */,
+                        null /* options */);
+            }
+
             task.getParent().positionChildAt(
                     hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
                     task, false /* includingParents */);

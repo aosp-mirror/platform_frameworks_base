@@ -37,12 +37,9 @@ import static android.os.UserHandle.getCallingUserId;
 import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-import static com.android.server.companion.association.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
-import static com.android.server.companion.utils.AssociationUtils.getFirstAssociationIdForUser;
-import static com.android.server.companion.utils.AssociationUtils.getLastAssociationIdForUser;
-import static com.android.server.companion.utils.PackageUtils.isRestrictedSettingsAllowed;
 import static com.android.server.companion.utils.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.utils.PackageUtils.getPackageInfo;
+import static com.android.server.companion.utils.PackageUtils.isRestrictedSettingsAllowed;
 import static com.android.server.companion.utils.PermissionsUtils.checkCallerCanManageCompanionDevice;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerCanObservingDevicePresenceByUuid;
@@ -82,20 +79,16 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.UserInfo;
 import android.hardware.power.Mode;
 import android.net.MacAddress;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelUuid;
+import android.os.PowerExemptionManager;
 import android.os.PowerManagerInternal;
-import android.os.PowerWhitelistManager;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -105,13 +98,9 @@ import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.infra.PerUser;
 import com.android.internal.notification.NotificationAccessConfirmationActivityContract;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
@@ -121,8 +110,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.association.AssociationDiskStore;
 import com.android.server.companion.association.AssociationRequestsProcessor;
-import com.android.server.companion.association.AssociationRevokeProcessor;
 import com.android.server.companion.association.AssociationStore;
+import com.android.server.companion.association.DisassociationProcessor;
 import com.android.server.companion.association.InactiveAssociationsRemovalService;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
@@ -139,7 +128,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -164,80 +152,51 @@ public class CompanionDeviceManagerService extends SystemService {
     private static final long ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT = DAYS.toMillis(90);
     private static final int MAX_CN_LENGTH = 500;
 
-    private final ActivityManager mActivityManager;
-    private AssociationDiskStore mAssociationDiskStore;
-    private final PersistUserStateHandler mUserPersistenceHandler;
-
-    private final AssociationStore mAssociationStore;
-    private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
-    private AssociationRequestsProcessor mAssociationRequestsProcessor;
-    private SystemDataTransferProcessor mSystemDataTransferProcessor;
-    private BackupRestoreProcessor mBackupRestoreProcessor;
-    private CompanionDevicePresenceMonitor mDevicePresenceMonitor;
-    private CompanionApplicationController mCompanionAppController;
-    private CompanionTransportManager mTransportManager;
-    private AssociationRevokeProcessor mAssociationRevokeProcessor;
-
     private final ActivityTaskManagerInternal mAtmInternal;
     private final ActivityManagerInternal mAmInternal;
     private final IAppOpsService mAppOpsManager;
-    private final PowerWhitelistManager mPowerWhitelistManager;
-    private final UserManager mUserManager;
-    public final PackageManagerInternal mPackageManagerInternal;
+    private final PowerExemptionManager mPowerExemptionManager;
+    private final PackageManagerInternal mPackageManagerInternal;
     private final PowerManagerInternal mPowerManagerInternal;
 
-    /**
-     * A structure that consists of two nested maps, and effectively maps (userId + packageName) to
-     * a list of IDs that have been previously assigned to associations for that package.
-     * We maintain this structure so that we never re-use association IDs for the same package
-     * (until it's uninstalled).
-     */
-    @GuardedBy("mPreviouslyUsedIds")
-    private final SparseArray<Map<String, Set<Integer>>> mPreviouslyUsedIds = new SparseArray<>();
-
-    private final RemoteCallbackList<IOnAssociationsChangedListener> mListeners =
-            new RemoteCallbackList<>();
-
-    private CrossDeviceSyncController mCrossDeviceSyncController;
-
-    private ObservableUuidStore mObservableUuidStore;
+    private final AssociationStore mAssociationStore;
+    private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
+    private final ObservableUuidStore mObservableUuidStore;
+    private final AssociationRequestsProcessor mAssociationRequestsProcessor;
+    private final SystemDataTransferProcessor mSystemDataTransferProcessor;
+    private final BackupRestoreProcessor mBackupRestoreProcessor;
+    private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
+    private final CompanionApplicationController mCompanionAppController;
+    private final CompanionTransportManager mTransportManager;
+    private final DisassociationProcessor mDisassociationProcessor;
+    private final CrossDeviceSyncController mCrossDeviceSyncController;
 
     public CompanionDeviceManagerService(Context context) {
         super(context);
 
-        mActivityManager = context.getSystemService(ActivityManager.class);
-        mPowerWhitelistManager = context.getSystemService(PowerWhitelistManager.class);
+        final ActivityManager activityManager = context.getSystemService(ActivityManager.class);
+        mPowerExemptionManager = context.getSystemService(PowerExemptionManager.class);
         mAppOpsManager = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mUserManager = context.getSystemService(UserManager.class);
-
-        mUserPersistenceHandler = new PersistUserStateHandler();
-        mAssociationStore = new AssociationStore();
-        mSystemDataTransferRequestStore = new SystemDataTransferRequestStore();
-
+        final UserManager userManager = context.getSystemService(UserManager.class);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+
+        final AssociationDiskStore associationDiskStore = new AssociationDiskStore();
+        mAssociationStore = new AssociationStore(userManager, associationDiskStore);
+        mSystemDataTransferRequestStore = new SystemDataTransferRequestStore();
         mObservableUuidStore = new ObservableUuidStore();
-    }
 
-    @Override
-    public void onStart() {
-        final Context context = getContext();
+        // Init processors
+        mAssociationRequestsProcessor = new AssociationRequestsProcessor(context,
+                mPackageManagerInternal, mAssociationStore);
+        mBackupRestoreProcessor = new BackupRestoreProcessor(context, mPackageManagerInternal,
+                mAssociationStore, associationDiskStore, mSystemDataTransferRequestStore,
+                mAssociationRequestsProcessor);
 
-        mAssociationDiskStore = new AssociationDiskStore();
-        mAssociationRequestsProcessor = new AssociationRequestsProcessor(
-                /* cdmService */ this, mAssociationStore);
-        mBackupRestoreProcessor = new BackupRestoreProcessor(
-                /* cdmService */ this, mAssociationStore, mAssociationDiskStore,
-                mSystemDataTransferRequestStore, mAssociationRequestsProcessor);
-
-        mObservableUuidStore.getObservableUuidsForUser(getContext().getUserId());
-
-        mAssociationStore.registerListener(mAssociationStoreChangeListener);
-
-        mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(mUserManager,
+        mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(userManager,
                 mAssociationStore, mObservableUuidStore, mDevicePresenceCallback);
 
         mCompanionAppController = new CompanionApplicationController(
@@ -246,11 +205,9 @@ public class CompanionDeviceManagerService extends SystemService {
 
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
 
-        mAssociationRevokeProcessor = new AssociationRevokeProcessor(this, mAssociationStore,
-                mPackageManagerInternal, mDevicePresenceMonitor, mCompanionAppController,
-                mSystemDataTransferRequestStore, mTransportManager);
-
-        loadAssociationsFromDisk();
+        mDisassociationProcessor = new DisassociationProcessor(context, activityManager,
+                mAssociationStore, mPackageManagerInternal, mDevicePresenceMonitor,
+                mCompanionAppController, mSystemDataTransferRequestStore, mTransportManager);
 
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
                 mPackageManagerInternal, mAssociationStore,
@@ -258,6 +215,16 @@ public class CompanionDeviceManagerService extends SystemService {
 
         // TODO(b/279663946): move context sync to a dedicated system service
         mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);
+    }
+
+    @Override
+    public void onStart() {
+        // Init association stores
+        mAssociationStore.refreshCache();
+        mAssociationStore.registerLocalListener(mAssociationStoreChangeListener);
+
+        // Init UUID store
+        mObservableUuidStore.getObservableUuidsForUser(getContext().getUserId());
 
         // Publish "binder" service.
         final CompanionDeviceManagerImpl impl = new CompanionDeviceManagerImpl();
@@ -265,50 +232,6 @@ public class CompanionDeviceManagerService extends SystemService {
 
         // Publish "local" service.
         LocalServices.addService(CompanionDeviceManagerServiceInternal.class, new LocalService());
-    }
-
-    void loadAssociationsFromDisk() {
-        final Set<AssociationInfo> allAssociations = new ArraySet<>();
-        synchronized (mPreviouslyUsedIds) {
-            List<Integer> userIds = new ArrayList<>();
-            for (UserInfo user : mUserManager.getAliveUsers()) {
-                userIds.add(user.id);
-            }
-            // The data is stored in DE directories, so we can read the data for all users now
-            // (which would not be possible if the data was stored to CE directories).
-            mAssociationDiskStore.readStateForUsers(userIds, allAssociations, mPreviouslyUsedIds);
-        }
-
-        final Set<AssociationInfo> activeAssociations =
-                new ArraySet<>(/* capacity */ allAssociations.size());
-        // A set contains the userIds that need to persist state after remove the app
-        // from the list of role holders.
-        final Set<Integer> usersToPersistStateFor = new ArraySet<>();
-
-        for (AssociationInfo association : allAssociations) {
-            if (association.isPending()) {
-                mBackupRestoreProcessor.addToPendingAppInstall(association);
-            } else if (!association.isRevoked()) {
-                activeAssociations.add(association);
-            } else if (mAssociationRevokeProcessor.maybeRemoveRoleHolderForAssociation(
-                    association)) {
-                // Nothing more to do here, but we'll need to persist all the associations to the
-                // disk afterwards.
-                usersToPersistStateFor.add(association.getUserId());
-            } else {
-                mAssociationRevokeProcessor.addToPendingRoleHolderRemoval(association);
-            }
-        }
-
-        mAssociationStore.setAssociationsToCache(activeAssociations);
-
-        // IMPORTANT: only do this AFTER mAssociationStore.setAssociations(), because
-        // persistStateForUser() queries AssociationStore.
-        // (If persistStateForUser() is invoked before mAssociationStore.setAssociations() it
-        // would effectively just clear-out all the persisted associations).
-        for (int userId : usersToPersistStateFor) {
-            persistStateForUser(userId);
-        }
     }
 
     @Override
@@ -329,8 +252,10 @@ public class CompanionDeviceManagerService extends SystemService {
 
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
+        Slog.d(TAG, "onUserUnlocking...");
         final int userId = user.getUserIdentifier();
-        final List<AssociationInfo> associations = mAssociationStore.getAssociationsForUser(userId);
+        final List<AssociationInfo> associations = mAssociationStore.getActiveAssociationsByUser(
+                userId);
 
         if (associations.isEmpty()) return;
 
@@ -359,7 +284,8 @@ public class CompanionDeviceManagerService extends SystemService {
                         ? Collections.emptyList() : Arrays.asList(bluetoothDeviceUuids);
 
                 for (AssociationInfo ai :
-                        mAssociationStore.getAssociationsByAddress(bluetoothDevice.getAddress())) {
+                        mAssociationStore.getActiveAssociationsByAddress(
+                                bluetoothDevice.getAddress())) {
                     Slog.i(TAG, "onUserUnlocked, device id( " + ai.getId() + " ) is connected");
                     mDevicePresenceMonitor.onBluetoothCompanionDeviceConnected(ai.getId());
                 }
@@ -379,7 +305,7 @@ public class CompanionDeviceManagerService extends SystemService {
     @NonNull
     AssociationInfo getAssociationWithCallerChecks(
             @UserIdInt int userId, @NonNull String packageName, @NonNull String macAddress) {
-        AssociationInfo association = mAssociationStore.getAssociationsForPackageWithAddress(
+        AssociationInfo association = mAssociationStore.getFirstAssociationByAddress(
                 userId, packageName, macAddress);
         association = sanitizeWithCallerChecks(getContext(), association);
         if (association != null) {
@@ -533,7 +459,7 @@ public class CompanionDeviceManagerService extends SystemService {
      */
     private boolean shouldBindPackage(@UserIdInt int userId, @NonNull String packageName) {
         final List<AssociationInfo> packageAssociations =
-                mAssociationStore.getAssociationsForPackage(userId, packageName);
+                mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
         final List<ObservableUuid> observableUuids =
                 mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
 
@@ -551,77 +477,6 @@ public class CompanionDeviceManagerService extends SystemService {
         return false;
     }
 
-    private void onAssociationChangedInternal(
-            @AssociationStore.ChangeType int changeType, AssociationInfo association) {
-        final int id = association.getId();
-        final int userId = association.getUserId();
-        final String packageName = association.getPackageName();
-
-        if (changeType == AssociationStore.CHANGE_TYPE_REMOVED) {
-            markIdAsPreviouslyUsedForPackage(id, userId, packageName);
-        }
-
-        final List<AssociationInfo> updatedAssociations =
-                mAssociationStore.getAssociationsForUser(userId);
-
-        mUserPersistenceHandler.postPersistUserState(userId);
-
-        // Notify listeners if ADDED, REMOVED or UPDATED_ADDRESS_CHANGED.
-        // Do NOT notify when UPDATED_ADDRESS_UNCHANGED, which means a minor tweak in association's
-        // configs, which "listeners" won't (and shouldn't) be able to see.
-        if (changeType != CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED) {
-            notifyListeners(userId, updatedAssociations);
-        }
-        updateAtm(userId, updatedAssociations);
-    }
-
-    void persistStateForUser(@UserIdInt int userId) {
-        // We want to store both active associations and the revoked (removed) association that we
-        // are keeping around for the final clean-up (delayed role holder removal).
-        final List<AssociationInfo> allAssociations;
-        // Start with the active associations - these we can get from the AssociationStore.
-        allAssociations = new ArrayList<>(
-                mAssociationStore.getAssociationsForUser(userId));
-        // ... and add the revoked (removed) association, that are yet to be permanently removed.
-        allAssociations.addAll(
-                mAssociationRevokeProcessor.getPendingRoleHolderRemovalAssociationsForUser(userId));
-        // ... and add the restored associations that are pending missing package installation.
-        allAssociations.addAll(mBackupRestoreProcessor
-                .getAssociationsPendingAppInstallForUser(userId));
-
-        final Map<String, Set<Integer>> usedIdsForUser = getPreviouslyUsedIdsForUser(userId);
-
-        mAssociationDiskStore.persistStateForUser(userId, allAssociations, usedIdsForUser);
-    }
-
-    private void notifyListeners(
-            @UserIdInt int userId, @NonNull List<AssociationInfo> associations) {
-        mListeners.broadcast((listener, callbackUserId) -> {
-            int listenerUserId = (int) callbackUserId;
-            if (listenerUserId == userId || listenerUserId == UserHandle.USER_ALL) {
-                try {
-                    listener.onAssociationsChanged(associations);
-                } catch (RemoteException ignored) {
-                }
-            }
-        });
-    }
-
-    private void markIdAsPreviouslyUsedForPackage(
-            int associationId, @UserIdInt int userId, @NonNull String packageName) {
-        synchronized (mPreviouslyUsedIds) {
-            Map<String, Set<Integer>> usedIdsForUser = mPreviouslyUsedIds.get(userId);
-            if (usedIdsForUser == null) {
-                usedIdsForUser = new HashMap<>();
-                mPreviouslyUsedIds.put(userId, usedIdsForUser);
-            }
-
-            final Set<Integer> usedIdsForPackage =
-                    usedIdsForUser.computeIfAbsent(packageName, it -> new HashSet<>());
-            usedIdsForPackage.add(associationId);
-        }
-    }
-
     private void onPackageRemoveOrDataClearedInternal(
             @UserIdInt int userId, @NonNull String packageName) {
         if (DEBUG) {
@@ -629,19 +484,20 @@ public class CompanionDeviceManagerService extends SystemService {
                     + packageName);
         }
 
-        // Clear associations.
+        // Clear all associations for the package.
         final List<AssociationInfo> associationsForPackage =
-                mAssociationStore.getAssociationsForPackage(userId, packageName);
+                mAssociationStore.getAssociationsByPackage(userId, packageName);
+        if (!associationsForPackage.isEmpty()) {
+            Slog.i(TAG, "Package removed or data cleared for user=[" + userId + "], package=["
+                    + packageName + "]. Cleaning up CDM data...");
+        }
+        for (AssociationInfo association : associationsForPackage) {
+            mDisassociationProcessor.disassociate(association.getId());
+        }
+
+        // Clear observable UUIDs for the package.
         final List<ObservableUuid> uuidsTobeObserved =
                 mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
-        for (AssociationInfo association : associationsForPackage) {
-            mAssociationStore.removeAssociation(association.getId());
-        }
-        // Clear role holders
-        for (AssociationInfo association : associationsForPackage) {
-            mAssociationRevokeProcessor.maybeRemoveRoleHolderForAssociation(association);
-        }
-        // Clear the uuids to be observed.
         for (ObservableUuid uuid : uuidsTobeObserved) {
             mObservableUuidStore.removeObservableUuid(userId, uuid.getUuid(), packageName);
         }
@@ -652,31 +508,13 @@ public class CompanionDeviceManagerService extends SystemService {
     private void onPackageModifiedInternal(@UserIdInt int userId, @NonNull String packageName) {
         if (DEBUG) Log.i(TAG, "onPackageModified() u" + userId + "/" + packageName);
 
-        final List<AssociationInfo> associationsForPackage =
-                mAssociationStore.getAssociationsForPackage(userId, packageName);
-        for (AssociationInfo association : associationsForPackage) {
-            updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
-                    association.getPackageName());
-        }
+        updateSpecialAccessPermissionForAssociatedPackage(userId, packageName);
 
         mCompanionAppController.onPackagesChanged(userId);
     }
 
     private void onPackageAddedInternal(@UserIdInt int userId, @NonNull String packageName) {
-        if (DEBUG) Log.i(TAG, "onPackageAddedInternal() u" + userId + "/" + packageName);
-
-        Set<AssociationInfo> associationsPendingAppInstall = mBackupRestoreProcessor
-                .getAssociationsPendingAppInstallForUser(userId);
-        for (AssociationInfo association : associationsPendingAppInstall) {
-            if (!packageName.equals(association.getPackageName())) continue;
-
-            AssociationInfo newAssociation = new AssociationInfo.Builder(association)
-                    .setPending(false)
-                    .build();
-            mAssociationRequestsProcessor.maybeGrantRoleAndStoreAssociation(newAssociation,
-                    null, null);
-            mBackupRestoreProcessor.removeFromPendingAppInstall(association);
-        }
+        mBackupRestoreProcessor.restorePendingAssociations(userId, packageName);
     }
 
     // Revoke associations if the selfManaged companion device does not connect for 3 months.
@@ -698,7 +536,7 @@ public class CompanionDeviceManagerService extends SystemService {
             final int id = association.getId();
 
             Slog.i(TAG, "Removing inactive self-managed association id=" + id);
-            mAssociationRevokeProcessor.disassociateInternal(id);
+            mDisassociationProcessor.disassociate(id);
         }
     }
 
@@ -750,7 +588,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 enforceUsesCompanionDeviceFeature(getContext(), userId, packageName);
             }
 
-            return mAssociationStore.getAssociationsForPackage(userId, packageName);
+            return mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
         }
 
         @Override
@@ -761,9 +599,9 @@ public class CompanionDeviceManagerService extends SystemService {
             enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
 
             if (userId == UserHandle.USER_ALL) {
-                return List.copyOf(mAssociationStore.getAssociations());
+                return mAssociationStore.getActiveAssociations();
             }
-            return mAssociationStore.getAssociationsForUser(userId);
+            return mAssociationStore.getActiveAssociationsByUser(userId);
         }
 
         @Override
@@ -773,7 +611,8 @@ public class CompanionDeviceManagerService extends SystemService {
             addOnAssociationsChangedListener_enforcePermission();
 
             enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
-            mListeners.register(listener, userId);
+
+            mAssociationStore.registerRemoteListener(listener, userId);
         }
 
         @Override
@@ -784,7 +623,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
 
-            mListeners.unregister(listener);
+            mAssociationStore.unregisterRemoteListener(listener);
         }
 
         @Override
@@ -843,16 +682,16 @@ public class CompanionDeviceManagerService extends SystemService {
 
             final AssociationInfo association =
                     getAssociationWithCallerChecks(userId, packageName, deviceMacAddress);
-            mAssociationRevokeProcessor.disassociateInternal(association.getId());
+            mDisassociationProcessor.disassociate(association.getId());
         }
 
         @Override
         public void disassociate(int associationId) {
-            Log.i(TAG, "disassociate() associationId=" + associationId);
+            Slog.i(TAG, "disassociate() associationId=" + associationId);
 
             final AssociationInfo association =
                     getAssociationWithCallerChecks(associationId);
-            mAssociationRevokeProcessor.disassociateInternal(association.getId());
+            mDisassociationProcessor.disassociate(association.getId());
         }
 
         @Override
@@ -867,8 +706,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 throw new IllegalArgumentException("Component name is too long.");
             }
 
-            final long identity = Binder.clearCallingIdentity();
-            try {
+            return Binder.withCleanCallingIdentity(() -> {
                 if (!isRestrictedSettingsAllowed(getContext(), callingPackage, callingUid)) {
                     Slog.e(TAG, "Side loaded app must enable restricted "
                             + "setting before request the notification access");
@@ -882,9 +720,7 @@ public class CompanionDeviceManagerService extends SystemService {
                                 | PendingIntent.FLAG_CANCEL_CURRENT,
                         null /* options */,
                         new UserHandle(userId));
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            });
         }
 
         /**
@@ -912,7 +748,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 return true;
             }
 
-            return any(mAssociationStore.getAssociationsForPackage(userId, packageName),
+            return any(mAssociationStore.getActiveAssociationsByPackage(userId, packageName),
                     a -> a.isLinkedTo(macAddress));
         }
 
@@ -1166,7 +1002,7 @@ public class CompanionDeviceManagerService extends SystemService {
             final int userId = getCallingUserId();
             enforceCallerIsSystemOr(userId, packageName);
 
-            AssociationInfo association = mAssociationStore.getAssociationsForPackageWithAddress(
+            AssociationInfo association = mAssociationStore.getFirstAssociationByAddress(
                     userId, packageName, deviceAddress);
 
             if (association == null) {
@@ -1239,14 +1075,15 @@ public class CompanionDeviceManagerService extends SystemService {
 
             enforceUsesCompanionDeviceFeature(getContext(), userId, callingPackage);
             checkState(!ArrayUtils.isEmpty(
-                            mAssociationStore.getAssociationsForPackage(userId, callingPackage)),
+                            mAssociationStore.getActiveAssociationsByPackage(userId,
+                                    callingPackage)),
                     "App must have an association before calling this API");
         }
 
         @Override
         public boolean canPairWithoutPrompt(String packageName, String macAddress, int userId) {
             final AssociationInfo association =
-                    mAssociationStore.getAssociationsForPackageWithAddress(
+                    mAssociationStore.getFirstAssociationByAddress(
                             userId, packageName, macAddress);
             if (association == null) {
                 return false;
@@ -1269,13 +1106,11 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public byte[] getBackupPayload(int userId) {
-            Log.i(TAG, "getBackupPayload() userId=" + userId);
             return mBackupRestoreProcessor.getBackupPayload(userId);
         }
 
         @Override
         public void applyRestoredPayload(byte[] payload, int userId) {
-            Log.i(TAG, "applyRestoredPayload() userId=" + userId);
             mBackupRestoreProcessor.applyRestoredPayload(payload, userId);
         }
 
@@ -1286,7 +1121,7 @@ public class CompanionDeviceManagerService extends SystemService {
             return new CompanionDeviceShellCommand(CompanionDeviceManagerService.this,
                     mAssociationStore, mDevicePresenceMonitor, mTransportManager,
                     mSystemDataTransferProcessor, mAssociationRequestsProcessor,
-                    mBackupRestoreProcessor, mAssociationRevokeProcessor)
+                    mBackupRestoreProcessor, mDisassociationProcessor)
                     .exec(this, in.getFileDescriptor(), out.getFileDescriptor(),
                             err.getFileDescriptor(), args);
         }
@@ -1314,88 +1149,6 @@ public class CompanionDeviceManagerService extends SystemService {
                 /* callback */ null, /* resultReceiver */ null);
     }
 
-    @NonNull
-    private Map<String, Set<Integer>> getPreviouslyUsedIdsForUser(@UserIdInt int userId) {
-        synchronized (mPreviouslyUsedIds) {
-            return getPreviouslyUsedIdsForUserLocked(userId);
-        }
-    }
-
-    @GuardedBy("mPreviouslyUsedIds")
-    @NonNull
-    private Map<String, Set<Integer>> getPreviouslyUsedIdsForUserLocked(@UserIdInt int userId) {
-        final Map<String, Set<Integer>> usedIdsForUser = mPreviouslyUsedIds.get(userId);
-        if (usedIdsForUser == null) {
-            return Collections.emptyMap();
-        }
-        return deepUnmodifiableCopy(usedIdsForUser);
-    }
-
-    @GuardedBy("mPreviouslyUsedIds")
-    @NonNull
-    private Set<Integer> getPreviouslyUsedIdsForPackageLocked(
-            @UserIdInt int userId, @NonNull String packageName) {
-        // "Deeply unmodifiable" map: the map itself and the Set<Integer> values it contains are all
-        // unmodifiable.
-        final Map<String, Set<Integer>> usedIdsForUser = getPreviouslyUsedIdsForUserLocked(userId);
-        final Set<Integer> usedIdsForPackage = usedIdsForUser.get(packageName);
-
-        if (usedIdsForPackage == null) {
-            return Collections.emptySet();
-        }
-
-        //The set is already unmodifiable.
-        return usedIdsForPackage;
-    }
-
-    /**
-     * Get a new association id for the package.
-     */
-    public int getNewAssociationIdForPackage(@UserIdInt int userId, @NonNull String packageName) {
-        synchronized (mPreviouslyUsedIds) {
-            // First: collect all IDs currently in use for this user's Associations.
-            final SparseBooleanArray usedIds = new SparseBooleanArray();
-
-            // We should really only be checking associations for the given user (i.e.:
-            // mAssociationStore.getAssociationsForUser(userId)), BUT in the past we've got in a
-            // state where association IDs were not assigned correctly in regard to
-            // user-to-association-ids-range (e.g. associations with IDs from 1 to 100,000 should
-            // always belong to u0), so let's check all the associations.
-            for (AssociationInfo it : mAssociationStore.getAssociations()) {
-                usedIds.put(it.getId(), true);
-            }
-
-            // Some IDs may be reserved by associations that aren't stored yet due to missing
-            // package after a backup restoration. We don't want the ID to have been taken by
-            // another association by the time when it is activated from the package installation.
-            final Set<AssociationInfo> pendingAssociations = mBackupRestoreProcessor
-                    .getAssociationsPendingAppInstallForUser(userId);
-            for (AssociationInfo it : pendingAssociations) {
-                usedIds.put(it.getId(), true);
-            }
-
-            // Second: collect all IDs that have been previously used for this package (and user).
-            final Set<Integer> previouslyUsedIds =
-                    getPreviouslyUsedIdsForPackageLocked(userId, packageName);
-
-            int id = getFirstAssociationIdForUser(userId);
-            final int lastAvailableIdForUser = getLastAssociationIdForUser(userId);
-
-            // Find first ID that isn't used now AND has never been used for the given package.
-            while (usedIds.get(id) || previouslyUsedIds.contains(id)) {
-                // Increment and try again
-                id++;
-                // ... but first check if the ID is valid (within the range allocated to the user).
-                if (id > lastAvailableIdForUser) {
-                    throw new RuntimeException("Cannot create a new Association ID for "
-                            + packageName + " for user " + userId);
-                }
-            }
-
-            return id;
-        }
-    }
-
     /**
      * Update special access for the association's package
      */
@@ -1403,20 +1156,27 @@ public class CompanionDeviceManagerService extends SystemService {
         final PackageInfo packageInfo =
                 getPackageInfo(getContext(), userId, packageName);
 
-        Binder.withCleanCallingIdentity(() -> updateSpecialAccessPermissionAsSystem(packageInfo));
+        Binder.withCleanCallingIdentity(() -> updateSpecialAccessPermissionAsSystem(packageInfo,
+                userId, packageName));
     }
 
-    private void updateSpecialAccessPermissionAsSystem(PackageInfo packageInfo) {
+    private void updateSpecialAccessPermissionAsSystem(PackageInfo packageInfo, int userId,
+            String packageName) {
         if (packageInfo == null) {
             return;
         }
+
+        List<AssociationInfo> associations = mAssociationStore.getActiveAssociationsByPackage(
+                userId, packageName);
+
         if (containsEither(packageInfo.requestedPermissions,
                 android.Manifest.permission.RUN_IN_BACKGROUND,
-                android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
-            mPowerWhitelistManager.addToWhitelist(packageInfo.packageName);
+                android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)
+                && !associations.isEmpty()) {
+            mPowerExemptionManager.addToPermanentAllowList(packageInfo.packageName);
         } else {
             try {
-                mPowerWhitelistManager.removeFromWhitelist(packageInfo.packageName);
+                mPowerExemptionManager.removeFromPermanentAllowList(packageInfo.packageName);
             } catch (UnsupportedOperationException e) {
                 Slog.w(TAG, packageInfo.packageName + " can't be removed from power save"
                         + " whitelist. It might due to the package is whitelisted by the system.");
@@ -1427,7 +1187,8 @@ public class CompanionDeviceManagerService extends SystemService {
         try {
             if (containsEither(packageInfo.requestedPermissions,
                     android.Manifest.permission.USE_DATA_IN_BACKGROUND,
-                    android.Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)) {
+                    android.Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)
+                    && !associations.isEmpty()) {
                 networkPolicyManager.addUidPolicy(
                         packageInfo.applicationInfo.uid,
                         NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
@@ -1487,7 +1248,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             try {
                 final List<AssociationInfo> associations =
-                        mAssociationStore.getAssociationsForUser(userId);
+                        mAssociationStore.getActiveAssociationsByUser(userId);
                 for (AssociationInfo a : associations) {
                     try {
                         int uid = pm.getPackageUidAsUser(a.getPackageName(), userId);
@@ -1506,7 +1267,16 @@ public class CompanionDeviceManagerService extends SystemService {
             new AssociationStore.OnChangeListener() {
                 @Override
                 public void onAssociationChanged(int changeType, AssociationInfo association) {
-                    onAssociationChangedInternal(changeType, association);
+                    Slog.d(TAG, "onAssociationChanged changeType=[" + changeType
+                            + "], association=[" + association);
+
+                    final int userId = association.getUserId();
+                    final List<AssociationInfo> updatedAssociations =
+                            mAssociationStore.getActiveAssociationsByUser(userId);
+
+                    updateAtm(userId, updatedAssociations);
+                    updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
+                            association.getPackageName());
                 }
             };
 
@@ -1632,66 +1402,6 @@ public class CompanionDeviceManagerService extends SystemService {
                     CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
                 mCrossDeviceSyncController.removeSelfOwnedCallId(callId);
             }
-        }
-    }
-
-    /**
-     * This method must only be called from {@link CompanionDeviceShellCommand} for testing
-     * purposes only!
-     */
-    void persistState() {
-        mUserPersistenceHandler.clearMessages();
-        for (UserInfo user : mUserManager.getAliveUsers()) {
-            persistStateForUser(user.id);
-        }
-    }
-
-    /**
-     * This class is dedicated to handling requests to persist user state.
-     */
-    @SuppressLint("HandlerLeak")
-    private class PersistUserStateHandler extends Handler {
-        PersistUserStateHandler() {
-            super(BackgroundThread.get().getLooper());
-        }
-
-        /**
-         * Persists user state unless there is already an outstanding request for the given user.
-         */
-        synchronized void postPersistUserState(@UserIdInt int userId) {
-            if (!hasMessages(userId)) {
-                sendMessage(obtainMessage(userId));
-            }
-        }
-
-        /**
-         * Clears *ALL* outstanding persist requests for *ALL* users.
-         */
-        synchronized void clearMessages() {
-            removeCallbacksAndMessages(null);
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            final int userId = msg.what;
-            persistStateForUser(userId);
-        }
-    }
-
-    /**
-     * Persist associations
-     */
-    public void postPersistUserState(@UserIdInt int userId) {
-        mUserPersistenceHandler.postPersistUserState(userId);
-    }
-
-    /**
-     * Set to store associations
-     */
-    public static class PerUserAssociationSet extends PerUser<Set<AssociationInfo>> {
-        @Override
-        protected @NonNull Set<AssociationInfo> create(int userId) {
-            return new ArraySet<>();
         }
     }
 }

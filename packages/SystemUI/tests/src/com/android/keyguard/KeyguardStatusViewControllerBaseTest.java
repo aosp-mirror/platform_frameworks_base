@@ -20,16 +20,18 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.power.data.repository.FakePowerRepository;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.res.R;
@@ -46,6 +48,7 @@ import org.mockito.MockitoAnnotations;
 
 public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
 
+    private KosmosJavaAdapter mKosmos;
     @Mock protected KeyguardStatusView mKeyguardStatusView;
 
     @Mock protected KeyguardSliceViewController mKeyguardSliceViewController;
@@ -57,7 +60,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ScreenOffAnimationController mScreenOffAnimationController;
     @Mock protected KeyguardLogger mKeyguardLogger;
     @Mock protected KeyguardStatusViewController mControllerMock;
-    @Mock protected InteractionJankMonitor mInteractionJankMonitor;
     @Mock protected ViewTreeObserver mViewTreeObserver;
     @Mock protected DumpManager mDumpManager;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
@@ -71,6 +73,7 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mKosmos = new KosmosJavaAdapter(this);
         MockitoAnnotations.initMocks(this);
 
         KeyguardInteractorFactory.WithDependencies deps = KeyguardInteractorFactory.create();
@@ -87,7 +90,7 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
                 mDozeParameters,
                 mScreenOffAnimationController,
                 mKeyguardLogger,
-                mInteractionJankMonitor,
+                mKosmos.getInteractionJankMonitor(),
                 deps.getKeyguardInteractor(),
                 mDumpManager,
                 PowerInteractorFactory.create(

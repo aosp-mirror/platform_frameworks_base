@@ -3358,7 +3358,7 @@
     <string name="microphone_blocked_dream_overlay_content_description">Microphone blocked</string>
 
     <!-- Content description for priority mode icon on dream [CHAR LIMIT=NONE] -->
-    <string name="priority_mode_dream_overlay_content_description">Priority mode on</string>
+    <string name="priority_mode_dream_overlay_content_description">Do not disturb</string>
 
     <!-- Content description for when assistant attention is active [CHAR LIMIT=NONE] -->
     <string name="assistant_attention_content_description">User presence is detected</string>

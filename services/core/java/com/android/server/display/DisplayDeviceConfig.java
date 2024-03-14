@@ -57,6 +57,9 @@ import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.HighBrightnessMode;
+import com.android.server.display.config.IdleScreenRefreshRateTimeout;
+import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
+import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholds;
 import com.android.server.display.config.IntegerArray;
 import com.android.server.display.config.LuxThrottling;
 import com.android.server.display.config.NitsMap;
@@ -553,6 +556,18 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <minorVersion>0</minorVersion>
  *     </usiVersion>
  *     <screenBrightnessCapForWearBedtimeMode>0.1</screenBrightnessCapForWearBedtimeMode>
+ *     <idleScreenRefreshRateTimeout>
+ *          <luxThresholds>
+ *              <point>
+ *                  <lux>6</lux>
+ *                  <timeout>1000</timeout>
+ *              </point>
+ *              <point>
+ *                  <lux>10</lux>
+ *                  <timeout>800</timeout>
+ *              </point>
+ *          </luxThresholds>
+ *     </idleScreenRefreshRateTimeout>
  *    </displayConfiguration>
  *  }
  *  </pre>
@@ -842,6 +857,14 @@ public class DisplayDeviceConfig {
 
     private final Map<BrightnessLimitMapType, Map<Float, Float>>
             mLuxThrottlingData = new HashMap<>();
+
+    /**
+     * The idle screen timeout configuration for switching to lower refresh rate
+     */
+    @NonNull
+    private List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
+            mIdleScreenRefreshRateTimeoutLuxThresholds = new ArrayList<>();
+
 
     @Nullable
     private HostUsiVersion mHostUsiVersion;
@@ -1999,6 +2022,7 @@ public class DisplayDeviceConfig {
                 loadUsiVersion(config);
                 mHdrBrightnessData = HdrBrightnessData.loadConfig(config);
                 loadBrightnessCapForWearBedtimeMode(config);
+                loadIdleScreenRefreshRateTimeoutConfigs(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -2024,6 +2048,7 @@ public class DisplayDeviceConfig {
         loadAutoBrightnessAvailableFromConfigXml();
         loadRefreshRateSetting(null);
         loadBrightnessCapForWearBedtimeModeFromConfigXml();
+        loadIdleScreenRefreshRateTimeoutConfigs(null);
         mLoadedFrom = "<config.xml>";
     }
 
@@ -3324,6 +3349,47 @@ public class DisplayDeviceConfig {
         if (configShortHorizon != null) {
             mAmbientHorizonShort = configShortHorizon.intValue();
         }
+    }
+
+    private void loadIdleScreenRefreshRateTimeoutConfigs(@Nullable DisplayConfiguration config) {
+        if (mFlags.isIdleScreenRefreshRateTimeoutEnabled()
+                && config != null && config.getIdleScreenRefreshRateTimeout() != null) {
+            validateIdleScreenRefreshRateTimeoutConfig(
+                    config.getIdleScreenRefreshRateTimeout());
+            mIdleScreenRefreshRateTimeoutLuxThresholds = config
+                    .getIdleScreenRefreshRateTimeout().getLuxThresholds().getPoint();
+        }
+    }
+
+    private void validateIdleScreenRefreshRateTimeoutConfig(
+            IdleScreenRefreshRateTimeout idleScreenRefreshRateTimeoutConfig) {
+        IdleScreenRefreshRateTimeoutLuxThresholds idleScreenRefreshRateTimeoutLuxThresholds =
+                idleScreenRefreshRateTimeoutConfig.getLuxThresholds();
+
+        if (idleScreenRefreshRateTimeoutLuxThresholds != null) {
+            int previousLux = -1;
+            // Validate that the lux values are in the increasing order
+            for (IdleScreenRefreshRateTimeoutLuxThresholdPoint point :
+                    idleScreenRefreshRateTimeoutLuxThresholds.getPoint()) {
+                int newLux = point.getLux().intValue();
+                if (previousLux >= newLux) {
+                    throw new RuntimeException("Lux values should be in ascending order in the"
+                            + " idle screen refresh rate timeout config");
+                }
+                previousLux = newLux;
+            }
+        }
+    }
+
+    /**
+     * Gets the idle screen refresh rate timeout(in ms) configuration list. For each entry, the lux
+     * value represent the lower bound of the lux range, and the value of the lux in the next
+     * point(INF if not present) represents the upper bound for the corresponding timeout(in ms)
+     */
+    @NonNull
+    public List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
+            getIdleScreenRefreshRateTimeoutLuxThresholdPoint() {
+        return mIdleScreenRefreshRateTimeoutLuxThresholds;
     }
 
     /**

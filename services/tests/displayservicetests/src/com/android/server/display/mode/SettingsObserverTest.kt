@@ -85,9 +85,9 @@ class SettingsObserverTest {
             internal val expectedVote: Vote?
     ) {
         ALL_ENABLED(true, true, true,
-                SupportedModesVote(listOf(
-                        SupportedModesVote.SupportedMode(60f, 240f),
-                        SupportedModesVote.SupportedMode(60f, 60f)
+                SupportedRefreshRatesVote(listOf(
+                        SupportedRefreshRatesVote.RefreshRates(60f, 240f),
+                        SupportedRefreshRatesVote.RefreshRates(60f, 60f)
                 ))),
         LOW_POWER_OFF(true, true, false, null),
         DVRR_NOT_SUPPORTED_LOW_POWER_ON(false, true, true,

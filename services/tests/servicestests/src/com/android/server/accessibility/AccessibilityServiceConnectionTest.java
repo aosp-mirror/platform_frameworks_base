@@ -208,7 +208,6 @@ public class AccessibilityServiceConnectionTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ADD_WINDOW_TOKEN_WITHOUT_LOCK)
     public void onServiceConnected_addsWindowTokens() {
         setServiceBinding(COMPONENT_NAME);
         mConnection.bindLocked();

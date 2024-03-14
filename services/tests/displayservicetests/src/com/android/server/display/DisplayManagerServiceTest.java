@@ -78,6 +78,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
@@ -721,7 +722,9 @@ public class DisplayManagerServiceTest {
         IDisplayManagerCallback displayChangesCallback = registerDisplayChangeCallback(
                 displayManager);
 
-        listener.onStateChanged(123);
+        listener.onDeviceStateChanged(new DeviceState(
+                new DeviceState.Configuration.Builder(123 /* identifier */,
+                        "TEST" /* name */).build()));
         waitForIdleHandler(handler);
 
         InOrder inOrder = inOrder(mMockWindowManagerInternal, displayChangesCallback);

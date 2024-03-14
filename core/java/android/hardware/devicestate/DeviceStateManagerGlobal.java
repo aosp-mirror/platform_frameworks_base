@@ -90,33 +90,6 @@ public final class DeviceStateManagerGlobal {
     }
 
     /**
-     * Returns the set of supported device states.
-     *
-     * @see DeviceStateManager#getSupportedStates()
-     */
-    // TODO(b/325124054): Remove unused methods when clients are migrated.
-    public int[] getSupportedStates() {
-        synchronized (mLock) {
-            final DeviceStateInfo currentInfo;
-            if (mLastReceivedInfo != null) {
-                // If we have mLastReceivedInfo a callback is registered for this instance and it
-                // is receiving the most recent info from the server. Use that info here.
-                currentInfo = mLastReceivedInfo;
-            } else {
-                // If mLastReceivedInfo is null there is no registered callback so we manually
-                // fetch the current info.
-                try {
-                    currentInfo = mDeviceStateManager.getDeviceStateInfo();
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
-            }
-
-            return getSupportedStateIdentifiersLocked(currentInfo.supportedStates);
-        }
-    }
-
-    /**
      * Returns {@link List} of supported {@link DeviceState}s.
      *
      * @see DeviceStateManager#getSupportedDeviceStates()
@@ -264,14 +237,8 @@ public final class DeviceStateManagerGlobal {
             mCallbacks.add(wrapper);
 
             if (mLastReceivedInfo != null) {
-                // Copy the array to prevent the callback from modifying the internal state.
-                final int[] supportedStates = getSupportedStateIdentifiersLocked(
-                        mLastReceivedInfo.supportedStates);
-                wrapper.notifySupportedStatesChanged(supportedStates);
                 wrapper.notifySupportedDeviceStatesChanged(
                         List.copyOf(mLastReceivedInfo.supportedStates));
-                wrapper.notifyBaseStateChanged(mLastReceivedInfo.baseState.getIdentifier());
-                wrapper.notifyStateChanged(mLastReceivedInfo.currentState.getIdentifier());
                 wrapper.notifyDeviceStateChanged(mLastReceivedInfo.currentState);
             }
         }
@@ -330,15 +297,6 @@ public final class DeviceStateManagerGlobal {
         return -1;
     }
 
-    @GuardedBy("mLock")
-    private int[] getSupportedStateIdentifiersLocked(List<DeviceState> states) {
-        int[] identifiers = new int[states.size()];
-        for (int i = 0; i < states.size(); i++) {
-            identifiers[i] = states.get(i).getIdentifier();
-        }
-        return identifiers;
-    }
-
     @Nullable
     private IBinder findRequestTokenLocked(@NonNull DeviceStateRequest request) {
         for (int i = 0; i < mRequests.size(); i++) {
@@ -353,12 +311,10 @@ public final class DeviceStateManagerGlobal {
     private void handleDeviceStateInfoChanged(@NonNull DeviceStateInfo info) {
         ArrayList<DeviceStateCallbackWrapper> callbacks;
         DeviceStateInfo oldInfo;
-        int[] supportedStateIdentifiers;
         synchronized (mLock) {
             oldInfo = mLastReceivedInfo;
             mLastReceivedInfo = info;
             callbacks = new ArrayList<>(mCallbacks);
-            supportedStateIdentifiers = getSupportedStateIdentifiersLocked(info.supportedStates);
         }
 
         final int diff = oldInfo == null ? ~0 : info.diff(oldInfo);
@@ -366,18 +322,11 @@ public final class DeviceStateManagerGlobal {
             for (int i = 0; i < callbacks.size(); i++) {
                 callbacks.get(i).notifySupportedDeviceStatesChanged(
                         List.copyOf(info.supportedStates));
-                callbacks.get(i).notifySupportedStatesChanged(supportedStateIdentifiers);
-            }
-        }
-        if ((diff & DeviceStateInfo.CHANGED_BASE_STATE) > 0) {
-            for (int i = 0; i < callbacks.size(); i++) {
-                callbacks.get(i).notifyBaseStateChanged(info.baseState.getIdentifier());
             }
         }
         if ((diff & DeviceStateInfo.CHANGED_CURRENT_STATE) > 0) {
             for (int i = 0; i < callbacks.size(); i++) {
                 callbacks.get(i).notifyDeviceStateChanged(info.currentState);
-                callbacks.get(i).notifyStateChanged(info.currentState.getIdentifier());
             }
         }
     }
@@ -439,24 +388,9 @@ public final class DeviceStateManagerGlobal {
             mExecutor = executor;
         }
 
-        void notifySupportedStatesChanged(int[] newSupportedStates) {
-            mExecutor.execute(() ->
-                    mDeviceStateCallback.onSupportedStatesChanged(newSupportedStates));
-        }
-
         void notifySupportedDeviceStatesChanged(List<DeviceState> newSupportedDeviceStates) {
             mExecutor.execute(() ->
                     mDeviceStateCallback.onSupportedStatesChanged(newSupportedDeviceStates));
-        }
-
-        void notifyBaseStateChanged(int newBaseState) {
-            execute("notifyBaseStateChanged",
-                    () -> mDeviceStateCallback.onBaseStateChanged(newBaseState));
-        }
-
-        void notifyStateChanged(int newDeviceState) {
-            execute("notifyStateChanged",
-                    () -> mDeviceStateCallback.onStateChanged(newDeviceState));
         }
 
         void notifyDeviceStateChanged(DeviceState newDeviceState) {

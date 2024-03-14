@@ -44,8 +44,8 @@ import android.view.SurfaceView
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
 import androidx.test.filters.SmallTest
-import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
+import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -65,11 +65,14 @@ import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
+import java.util.Optional
+import java.util.function.Supplier
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -78,15 +81,14 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
-import java.util.Optional
-import java.util.function.Supplier
-import org.mockito.Mockito
-import org.mockito.kotlin.spy
 
-
-/** Tests of [DesktopModeWindowDecorViewModel]  */
+/**
+ * Tests of [DesktopModeWindowDecorViewModel]
+ * Usage: atest WMShellUnitTests:DesktopModeWindowDecorViewModelTests
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -291,6 +293,19 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    fun testDescorationIsNotCreatedForTopTranslucentActivities() {
+        setFlagsRule.enableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
+            isTopActivityTransparent = true
+            numActivities = 1
+        }
+        onTaskOpening(task)
+
+        verify(mockDesktopModeWindowDecorFactory, never())
+                .create(any(), any(), any(), eq(task), any(), any(), any(), any(), any())
+    }
+
+    @Test
     fun testRelayoutRunsWhenStatusBarsInsetsSourceVisibilityChanges() {
         val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
         val decoration = setUpMockDecorationForTask(task)
@@ -470,7 +485,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     private fun setUpMockDecorationForTask(task: RunningTaskInfo): DesktopModeWindowDecoration {
         val decoration = mock(DesktopModeWindowDecoration::class.java)
-        whenever(mockDesktopModeWindowDecorFactory.create(
+        whenever(
+            mockDesktopModeWindowDecorFactory.create(
                 any(), any(), any(), eq(task), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
@@ -489,7 +505,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 "testEventReceiversOnMultipleDisplays",
                 /*width=*/ 400,
                 /*height=*/ 400,
-                /*densityDpi=*/320,
+                /*densityDpi=*/ 320,
                 surfaceView.holder.surface,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
         )

@@ -392,8 +392,6 @@
   <java-symbol type="string" name="config_hdmiCecSetMenuLanguageActivity" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_lowRam" />
-  <java-symbol type="integer" name="config_minNumVisibleRecentTasks_grid" />
-  <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_grid" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks" />
   <java-symbol type="integer" name="config_maxNumVisibleRecentTasks" />
   <java-symbol type="integer" name="config_activeTaskDurationHours" />

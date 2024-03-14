@@ -16,6 +16,7 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.Nullable;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -39,7 +40,11 @@ final class VoteSummary {
     public boolean disableRefreshRateSwitching;
     public float appRequestBaseModeRefreshRate;
 
-    public List<SupportedModesVote.SupportedMode> supportedModes;
+    @Nullable
+    public List<SupportedRefreshRatesVote.RefreshRates> supportedRefreshRates;
+
+    @Nullable
+    public List<Integer> supportedModeIds;
 
     final boolean mIsDisplayResolutionRangeVotingEnabled;
 
@@ -112,6 +117,9 @@ final class VoteSummary {
         boolean missingBaseModeRefreshRate = appRequestBaseModeRefreshRate > 0f;
 
         for (Display.Mode mode : modes) {
+            if (!validateRefreshRatesSupported(mode)) {
+                continue;
+            }
             if (!validateModeSupported(mode)) {
                 continue;
             }
@@ -253,21 +261,37 @@ final class VoteSummary {
     }
 
     private boolean validateModeSupported(Display.Mode mode) {
-        if (supportedModes == null || !mSupportedModesVoteEnabled) {
+        if (supportedModeIds == null || !mSupportedModesVoteEnabled) {
             return true;
         }
-        for (SupportedModesVote.SupportedMode supportedMode : supportedModes) {
-            if (equalsWithinFloatTolerance(mode.getRefreshRate(), supportedMode.mPeakRefreshRate)
-                    && equalsWithinFloatTolerance(mode.getVsyncRate(), supportedMode.mVsyncRate)) {
+        if (supportedModeIds.contains(mode.getModeId())) {
+            return true;
+        }
+        if (mLoggingEnabled) {
+            Slog.w(TAG, "Discarding mode " + mode.getModeId()
+                    + ", supportedMode not found"
+                    + ": mode.modeId=" + mode.getModeId()
+                    + ", supportedModeIds=" + supportedModeIds);
+        }
+        return false;
+    }
+
+    private boolean validateRefreshRatesSupported(Display.Mode mode) {
+        if (supportedRefreshRates == null || !mSupportedModesVoteEnabled) {
+            return true;
+        }
+        for (SupportedRefreshRatesVote.RefreshRates refreshRates : this.supportedRefreshRates) {
+            if (equalsWithinFloatTolerance(mode.getRefreshRate(), refreshRates.mPeakRefreshRate)
+                    && equalsWithinFloatTolerance(mode.getVsyncRate(), refreshRates.mVsyncRate)) {
                 return true;
             }
         }
         if (mLoggingEnabled) {
             Slog.w(TAG, "Discarding mode " + mode.getModeId()
-                    + ", supportedMode not found"
+                    + ", supportedRefreshRates not found"
                     + ": mode.refreshRate=" + mode.getRefreshRate()
                     + ", mode.vsyncRate=" + mode.getVsyncRate()
-                    + ", supportedModes=" + supportedModes);
+                    + ", supportedRefreshRates=" + supportedRefreshRates);
         }
         return false;
     }
@@ -298,7 +322,8 @@ final class VoteSummary {
             return false;
         }
 
-        if (supportedModes != null && mSupportedModesVoteEnabled && supportedModes.isEmpty()) {
+        if (supportedRefreshRates != null && mSupportedModesVoteEnabled
+                && supportedRefreshRates.isEmpty()) {
             if (mLoggingEnabled) {
                 Slog.w(TAG, "Vote summary resulted in empty set (empty supportedModes)");
             }
@@ -345,7 +370,8 @@ final class VoteSummary {
         minHeight = 0;
         disableRefreshRateSwitching = false;
         appRequestBaseModeRefreshRate = 0f;
-        supportedModes = null;
+        supportedRefreshRates = null;
+        supportedModeIds = null;
         if (mLoggingEnabled) {
             Slog.i(TAG, "Summary reset: " + this);
         }
@@ -367,7 +393,8 @@ final class VoteSummary {
                 + ", minHeight=" + minHeight
                 + ", disableRefreshRateSwitching=" + disableRefreshRateSwitching
                 + ", appRequestBaseModeRefreshRate=" + appRequestBaseModeRefreshRate
-                + ", supportedModes=" + supportedModes
+                + ", supportedRefreshRates=" + supportedRefreshRates
+                + ", supportedModeIds=" + supportedModeIds
                 + ", mIsDisplayResolutionRangeVotingEnabled="
                 + mIsDisplayResolutionRangeVotingEnabled
                 + ", mSupportedModesVoteEnabled=" + mSupportedModesVoteEnabled

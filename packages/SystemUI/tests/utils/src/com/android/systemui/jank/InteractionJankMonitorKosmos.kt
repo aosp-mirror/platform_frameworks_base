@@ -16,9 +16,24 @@
 
 package com.android.systemui.jank
 
+import android.os.HandlerThread
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.internal.jank.InteractionJankMonitor.Configuration.Builder
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.any
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.spy
 
-val Kosmos.interactionJankMonitor by Fixture<InteractionJankMonitor> { mock() }
+val Kosmos.interactionJankMonitor by
+    Fixture<InteractionJankMonitor> {
+        spy(InteractionJankMonitor(HandlerThread("InteractionJankMonitor-Kosmos"))).apply {
+            doReturn(true).`when`(this).shouldMonitor()
+            doReturn(true).`when`(this).begin(any(), anyInt())
+            doReturn(true).`when`(this).begin(any<Builder>())
+            doReturn(true).`when`(this).end(anyInt())
+            doReturn(true).`when`(this).cancel(anyInt())
+            doReturn(true).`when`(this).cancel(anyInt(), anyInt())
+        }
+    }

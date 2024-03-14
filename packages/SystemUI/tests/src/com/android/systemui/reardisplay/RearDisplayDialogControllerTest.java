@@ -19,7 +19,6 @@ package com.android.systemui.reardisplay;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.reset;
@@ -28,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -38,9 +38,7 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.res.R;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CommandQueue;
@@ -176,6 +174,6 @@ public class RearDisplayDialogControllerTest extends SysuiTestCase {
             DeviceStateManager.DeviceStateCallback {
 
         @Override
-        public void onStateChanged(int state) { }
+        public void onDeviceStateChanged(DeviceState state) { }
     }
 }

@@ -76,7 +76,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -397,11 +396,10 @@ public final class DeviceStateManagerService extends SystemService {
     @NonNull
     private DeviceStateInfo getDeviceStateInfoLocked() {
         final List<DeviceState> supportedStates = getSupportedStatesLocked();
-        final DeviceState baseState = mBaseState.orElse(null);
-        final DeviceState currentState = mCommittedState.orElse(null);
+        final DeviceState baseState = mBaseState.orElse(INVALID_DEVICE_STATE);
+        final DeviceState currentState = mCommittedState.orElse(INVALID_DEVICE_STATE);
 
-        return new DeviceStateInfo(supportedStates,
-                baseState != null ? baseState : INVALID_DEVICE_STATE,
+        return new DeviceStateInfo(supportedStates, baseState,
                 createMergedDeviceState(currentState, baseState));
     }
 
@@ -412,7 +410,7 @@ public final class DeviceStateManagerService extends SystemService {
      */
     private DeviceState createMergedDeviceState(@Nullable DeviceState committedState,
             @Nullable DeviceState baseState) {
-        if (committedState == null) {
+        if (committedState.equals(INVALID_DEVICE_STATE)) {
             return INVALID_DEVICE_STATE;
         }
 
@@ -420,8 +418,7 @@ public final class DeviceStateManagerService extends SystemService {
                 committedState.getConfiguration().getSystemProperties();
 
         Set<@DeviceState.DeviceStateProperties Integer> physicalProperties =
-                baseState != null ? baseState.getConfiguration().getPhysicalProperties()
-                        : Collections.emptySet();
+                baseState.getConfiguration().getPhysicalProperties();
 
         DeviceState.Configuration deviceStateConfiguration = new DeviceState.Configuration.Builder(
                 committedState.getIdentifier(), committedState.getName())

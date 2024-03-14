@@ -3189,6 +3189,7 @@ public class UserManager {
             conditional = true)
     @UserHandleAware
     public boolean canAddPrivateProfile() {
+        if (!android.multiuser.Flags.enablePrivateSpaceFeatures()) return false;
         if (android.multiuser.Flags.blockPrivateSpaceCreation()) {
             try {
                 return mService.canAddPrivateProfile(mUserId);

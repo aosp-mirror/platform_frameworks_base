@@ -54,6 +54,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.server.display.config.HdrBrightnessData;
+import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -108,6 +109,7 @@ public final class DisplayDeviceConfigTest {
         when(mContext.getResources()).thenReturn(mResources);
         when(mFlags.areAutoBrightnessModesEnabled()).thenReturn(true);
         when(mFlags.isSensorBasedBrightnessThrottlingEnabled()).thenReturn(true);
+        when(mFlags.isIdleScreenRefreshRateTimeoutEnabled()).thenReturn(true);
         mockDeviceConfigs();
     }
 
@@ -146,6 +148,8 @@ public final class DisplayDeviceConfigTest {
         assertNull(mDisplayDeviceConfig.getProximitySensor().type);
         assertNull(mDisplayDeviceConfig.getProximitySensor().name);
         assertEquals(TEMPERATURE_TYPE_SKIN, mDisplayDeviceConfig.getTempSensor().type);
+        assertEquals(List.of(), mDisplayDeviceConfig
+                .getIdleScreenRefreshRateTimeoutLuxThresholdPoint());
         assertNull(mDisplayDeviceConfig.getTempSensor().name);
         assertTrue(mDisplayDeviceConfig.isAutoBrightnessAvailable());
     }
@@ -226,6 +230,19 @@ public final class DisplayDeviceConfigTest {
         assertNotNull(mDisplayDeviceConfig.getHostUsiVersion());
         assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
         assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMinorVersion(), 0);
+
+        List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
+                idleScreenRefreshRateTimeoutLuxThresholdPoints =
+                mDisplayDeviceConfig.getIdleScreenRefreshRateTimeoutLuxThresholdPoint();
+        assertEquals(2, idleScreenRefreshRateTimeoutLuxThresholdPoints.size());
+        assertEquals(6, idleScreenRefreshRateTimeoutLuxThresholdPoints.get(0).getLux()
+                .intValue());
+        assertEquals(1000, idleScreenRefreshRateTimeoutLuxThresholdPoints.get(0)
+                .getTimeout().intValue());
+        assertEquals(10, idleScreenRefreshRateTimeoutLuxThresholdPoints.get(1)
+                .getLux().intValue());
+        assertEquals(800, idleScreenRefreshRateTimeoutLuxThresholdPoints.get(1)
+                .getTimeout().intValue());
     }
 
     @Test
@@ -734,6 +751,8 @@ public final class DisplayDeviceConfigTest {
 
         assertEquals(brightnessIntToFloat(35),
                 mDisplayDeviceConfig.getBrightnessCapForWearBedtimeMode(), ZERO_DELTA);
+        assertEquals(List.of(), mDisplayDeviceConfig
+                .getIdleScreenRefreshRateTimeoutLuxThresholdPoint());
     }
 
     @Test
@@ -1587,6 +1606,18 @@ public final class DisplayDeviceConfigTest {
                 +   "<screenBrightnessCapForWearBedtimeMode>"
                 +       "0.1"
                 +   "</screenBrightnessCapForWearBedtimeMode>"
+                +   "<idleScreenRefreshRateTimeout>"
+                +       "<luxThresholds>"
+                +           "<point>"
+                +               "<lux>6</lux>"
+                +               "<timeout>1000</timeout>"
+                +           "</point>"
+                +           "<point>"
+                +               "<lux>10</lux>"
+                +               "<timeout>800</timeout>"
+                +           "</point>"
+                +       "</luxThresholds>"
+                +   "</idleScreenRefreshRateTimeout>"
                 + "</displayConfiguration>\n";
     }
 

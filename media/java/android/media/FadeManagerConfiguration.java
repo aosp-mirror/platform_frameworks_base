@@ -694,7 +694,8 @@ public final class FadeManagerConfiguration implements Parcelable {
     }
 
     private static boolean isUsageValid(int usage) {
-        return AudioAttributes.isSdkUsage(usage) || AudioAttributes.isSystemUsage(usage);
+        return AudioAttributes.isSdkUsage(usage) || AudioAttributes.isSystemUsage(usage)
+                || AudioAttributes.isHiddenUsage(usage);
     }
 
     private void ensureFadingIsEnabled() {

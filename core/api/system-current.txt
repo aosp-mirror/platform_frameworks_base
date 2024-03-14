@@ -198,7 +198,6 @@ package android {
     field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final String MANAGE_DEVICE_POLICY_APP_EXEMPTIONS = "android.permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS";
     field @FlaggedApi("android.app.admin.flags.security_log_v2_enabled") public static final String MANAGE_DEVICE_POLICY_AUDIT_LOGGING = "android.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING";
-    field @FlaggedApi("android.app.admin.flags.device_theft_api_enabled") public static final String MANAGE_DEVICE_POLICY_THEFT_DETECTION = "android.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION";
     field @FlaggedApi("android.permission.flags.enhanced_confirmation_mode_apis_enabled") public static final String MANAGE_ENHANCED_CONFIRMATION_STATES = "android.permission.MANAGE_ENHANCED_CONFIRMATION_STATES";
     field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
@@ -282,6 +281,7 @@ package android {
     field @FlaggedApi("android.content.pm.quarantined_enabled") public static final String QUARANTINE_APPS = "android.permission.QUARANTINE_APPS";
     field public static final String QUERY_ADMIN_POLICY = "android.permission.QUERY_ADMIN_POLICY";
     field public static final String QUERY_CLONED_APPS = "android.permission.QUERY_CLONED_APPS";
+    field @FlaggedApi("android.app.admin.flags.device_theft_api_enabled") public static final String QUERY_DEVICE_STOLEN_STATE = "android.permission.QUERY_DEVICE_STOLEN_STATE";
     field @Deprecated public static final String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
     field public static final String QUERY_USERS = "android.permission.QUERY_USERS";
     field public static final String RADIO_SCAN_WITHOUT_LOCATION = "android.permission.RADIO_SCAN_WITHOUT_LOCATION";
@@ -1328,12 +1328,12 @@ package android.app.admin {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public int getUserProvisioningState();
     method @FlaggedApi("android.app.admin.flags.security_log_v2_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_AUDIT_LOGGING) public boolean isAuditLogEnabled();
     method public boolean isDeviceManaged();
+    method @FlaggedApi("android.app.admin.flags.device_theft_api_enabled") @RequiresPermission(android.Manifest.permission.QUERY_DEVICE_STOLEN_STATE) public boolean isDevicePotentiallyStolen();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioned();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioningConfigApplied();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean isDpcDownloaded();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public boolean isManagedKiosk();
     method public boolean isSecondaryLockscreenEnabled(@NonNull android.os.UserHandle);
-    method @FlaggedApi("android.app.admin.flags.device_theft_api_enabled") @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION) public boolean isTheftDetectionTriggered();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public boolean isUnattendedManagedKiosk();
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long);
     method @RequiresPermission("android.permission.NOTIFY_PENDING_SYSTEM_UPDATE") public void notifyPendingSystemUpdate(long, boolean);
@@ -5006,7 +5006,7 @@ package android.hardware.devicestate {
   }
 
   public static interface DeviceStateManager.DeviceStateCallback {
-    method public default void onDeviceStateChanged(@NonNull android.hardware.devicestate.DeviceState);
+    method public void onDeviceStateChanged(@NonNull android.hardware.devicestate.DeviceState);
     method public default void onSupportedStatesChanged(@NonNull java.util.List<android.hardware.devicestate.DeviceState>);
   }
 
@@ -13936,9 +13936,8 @@ package android.telecom {
   }
 
   @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final class DisconnectCause.Builder {
-    ctor public DisconnectCause.Builder();
+    ctor public DisconnectCause.Builder(int);
     method @NonNull public android.telecom.DisconnectCause build();
-    method @NonNull public android.telecom.DisconnectCause.Builder setCode(int);
     method @NonNull public android.telecom.DisconnectCause.Builder setDescription(@Nullable CharSequence);
     method @NonNull public android.telecom.DisconnectCause.Builder setImsReasonInfo(@Nullable android.telephony.ims.ImsReasonInfo);
     method @NonNull public android.telecom.DisconnectCause.Builder setLabel(@Nullable CharSequence);

@@ -255,6 +255,12 @@ sealed interface TransitionState {
          */
         val overscrollScope: OverscrollScope
 
+        /**
+         * The scene around which the transition is currently bouncing. When not `null`, this
+         * transition is currently oscillating around this scene and will soon settle to that scene.
+         */
+        val bouncingScene: SceneKey?
+
         companion object {
             const val DistanceUnspecified = 0f
         }
@@ -287,9 +293,10 @@ internal abstract class BaseSceneTransitionLayoutState(
             val transition = currentTransition ?: return null
             if (transition !is TransitionState.HasOverscrollProperties) return null
             val progress = transition.progress
+            val bouncingScene = transition.bouncingScene
             return when {
-                progress < 0f -> fromOverscrollSpec
-                progress > 1f -> toOverscrollSpec
+                progress < 0f || bouncingScene == transition.fromScene -> fromOverscrollSpec
+                progress > 1f || bouncingScene == transition.toScene -> toOverscrollSpec
                 else -> null
             }
         }

@@ -93,8 +93,8 @@ public final class RolesUtils {
 
         Slog.i(TAG, "Removing CDM role=" + deviceProfile
                 + " for userId=" + userId + ", packageName=" + packageName);
-        final long identity = Binder.clearCallingIdentity();
-        try {
+
+        Binder.withCleanCallingIdentity(() ->
             roleManager.removeRoleHolderAsUser(deviceProfile, packageName,
                     MANAGE_HOLDERS_FLAG_DONT_KILL_APP, userHandle, context.getMainExecutor(),
                     success -> {
@@ -103,11 +103,9 @@ public final class RolesUtils {
                                     + packageName + " from the list of " + deviceProfile
                                     + " holders.");
                         }
-                    });
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+                    })
+        );
     }
 
-    private RolesUtils() {};
+    private RolesUtils() {}
 }

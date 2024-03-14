@@ -71,6 +71,10 @@ constructor(
         listenForGoneToDreamingLockscreenHosted()
     }
 
+    fun showKeyguard() {
+        scope.launch { startTransitionTo(KeyguardState.LOCKSCREEN) }
+    }
+
     // Primarily for when the user chooses to lock down the device
     private fun listenForGoneToLockscreenOrHub() {
         if (KeyguardWmStateRefactor.isEnabled) {

@@ -61,6 +61,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val repository by lazy { kosmos.fakeKeyguardRepository }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val fromGoneTransitionInteractor by lazy { kosmos.fromGoneTransitionInteractor }
     private val commandQueue by lazy { FakeCommandQueue() }
     private val bouncerRepository = FakeKeyguardBouncerRepository()
     private val shadeRepository = FakeShadeRepository()
@@ -79,6 +80,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             shadeRepository = shadeRepository,
             keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
             sceneInteractorProvider = { sceneInteractor },
+            fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
         )
     }
 

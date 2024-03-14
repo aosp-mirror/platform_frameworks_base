@@ -59,7 +59,6 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -97,7 +96,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final PowerManager mPowerManager;
     private final Optional<Vibrator> mVibratorOptional;
-    private final DisableFlagsLogger mDisableFlagsLogger;
     private final int mDisplayId;
     private final UserTracker mUserTracker;
     private final boolean mVibrateOnOpening;
@@ -137,7 +135,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             PowerManager powerManager,
             Optional<Vibrator> vibratorOptional,
-            DisableFlagsLogger disableFlagsLogger,
             @DisplayId int displayId,
             Lazy<CameraLauncher> cameraLauncherLazy,
             UserTracker userTracker,
@@ -165,7 +162,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mPowerManager = powerManager;
         mVibratorOptional = vibratorOptional;
-        mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
         mCameraLauncherLazy = cameraLauncherLazy;
         mUserTracker = userTracker;
@@ -489,7 +485,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void togglePanel() {
-        if (mShadeViewController.isPanelExpanded()) {
+        if (mPanelExpansionInteractor.isPanelExpanded()) {
             mShadeController.animateCollapseShade();
         } else {
             mShadeController.animateExpandShade();

@@ -168,6 +168,10 @@
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessCapForWearBedtimeMode">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Timeout after which we reduce the refresh rate if the screen has been idle, in order to save power. -->
+                <xs:element type="idleScreenRefreshRateTimeout" name="idleScreenRefreshRateTimeout" minOccurs="0">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -770,6 +774,30 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="idleScreenRefreshRateTimeout">
+        <xs:element name="luxThresholds" type="idleScreenRefreshRateTimeoutLuxThresholds" minOccurs="0">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <!-- Lux based timeout after which we reduce the refresh rate if the screen has been idle, in order to save power. -->
+    <xs:complexType name="idleScreenRefreshRateTimeoutLuxThresholds">
+        <xs:sequence>
+            <xs:element name="point" type="idleScreenRefreshRateTimeoutLuxThresholdPoint" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Represents a tuple of lux and timeout(in ms), which represents the timeout value for the lux in
+    the [luxValue, nextLuxValue (INF if missing))  -->
+    <xs:complexType name="idleScreenRefreshRateTimeoutLuxThresholdPoint">
+        <xs:element name="lux" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="timeout" type="xs:nonNegativeInteger">
+            <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <!-- Predefined type names as defined by
