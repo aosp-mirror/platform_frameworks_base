@@ -39,13 +39,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -66,7 +63,6 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
-import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -109,8 +105,6 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private ShellExecutor mMainExecutor;
     @Mock private LaunchAdjacentController mLaunchAdjacentController;
     @Mock private DefaultMixedHandler mMixedHandler;
-    @Mock private SplitScreen.SplitInvocationListener mInvocationListener;
-    private final TestShellExecutor mTestShellExecutor = new TestShellExecutor();
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
     private SideStage mSideStage;
@@ -153,7 +147,6 @@ public class SplitTransitionTests extends ShellTestCase {
                 .setParentTaskId(mSideStage.mRootTaskInfo.taskId).build();
         doReturn(mock(SplitDecorManager.class)).when(mMainStage).getSplitDecorManager();
         doReturn(mock(SplitDecorManager.class)).when(mSideStage).getSplitDecorManager();
-        mStageCoordinator.registerSplitAnimationListener(mInvocationListener, mTestShellExecutor);
     }
 
     @Test
@@ -457,15 +450,6 @@ public class SplitTransitionTests extends ShellTestCase {
                 mock(SurfaceControl.Transaction.class),
                 mock(Transitions.TransitionFinishCallback.class));
         mMainStage.activate(new WindowContainerTransaction(), true /* includingTopTask */);
-    }
-
-    @Test
-    @UiThreadTest
-    public void testSplitInvocationCallback() {
-        enterSplit();
-        mTestShellExecutor.flushAll();
-        verify(mInvocationListener, times(1))
-                .onSplitAnimationInvoked(eq(true));
     }
 
     private boolean containsSplitEnter(@NonNull WindowContainerTransaction wct) {

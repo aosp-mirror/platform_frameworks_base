@@ -55,7 +55,6 @@ import com.android.wm.shell.transition.OneShotRemoteHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 
 /** Manages transition animations for split-screen. */
 class SplitScreenTransitions {
@@ -80,8 +79,6 @@ class SplitScreenTransitions {
 
     private Transitions.TransitionFinishCallback mFinishCallback = null;
     private SurfaceControl.Transaction mFinishTransaction;
-    private SplitScreen.SplitInvocationListener mSplitInvocationListener;
-    private Executor mSplitInvocationListenerExecutor;
 
     SplitScreenTransitions(@NonNull TransactionPool pool, @NonNull Transitions transitions,
             @NonNull Runnable onFinishCallback, StageCoordinator stageCoordinator) {
@@ -356,10 +353,6 @@ class SplitScreenTransitions {
                     + " skip to start enter split transition since it already exist. ");
             return null;
         }
-        if (mSplitInvocationListenerExecutor != null && mSplitInvocationListener != null) {
-            mSplitInvocationListenerExecutor.execute(() -> mSplitInvocationListener
-                    .onSplitAnimationInvoked(true /*animationRunning*/));
-        }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
         setEnterTransition(transition, remoteTransition, extraTransitType, resizeAnim);
         return transition;
@@ -534,12 +527,6 @@ class SplitScreenTransitions {
         });
         mAnimations.add(va);
         mTransitions.getAnimExecutor().execute(va::start);
-    }
-
-    public void registerSplitAnimListener(@NonNull SplitScreen.SplitInvocationListener listener,
-            @NonNull Executor executor) {
-        mSplitInvocationListener = listener;
-        mSplitInvocationListenerExecutor = executor;
     }
 
     /** Calls when the transition got consumed. */
