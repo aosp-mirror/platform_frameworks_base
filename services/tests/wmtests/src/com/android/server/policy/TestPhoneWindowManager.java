@@ -66,6 +66,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -246,6 +247,13 @@ class TestPhoneWindowManager {
         }
     }
 
+    /**
+     * {@link TestPhoneWindowManager}'s constructor.
+     *
+     * @param context The {@Context} to be used in any Context-related actions.
+     * @param supportSettingsUpdate {@code true} if this object should read and listen to provider
+     *      settings values.
+     */
     TestPhoneWindowManager(Context context, boolean supportSettingsUpdate) {
         MockitoAnnotations.initMocks(this);
         mHandler = new Handler(mTestLooper.getLooper());
@@ -414,6 +422,13 @@ class TestPhoneWindowManager {
 
     void dispatchUnhandledKey(KeyEvent event) {
         mPhoneWindowManager.dispatchUnhandledKey(mInputToken, event, FLAG_INTERACTIVE);
+    }
+
+    /**
+     * Provide access to the SettingsObserver so that tests can manually trigger Settings changes.
+     */
+    ContentObserver getSettingsObserver() {
+        return mPhoneWindowManager.mSettingsObserver;
     }
 
     long getCurrentTime() {

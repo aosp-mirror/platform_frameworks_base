@@ -43,9 +43,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
 
+import static org.mockito.ArgumentMatchers.eq;
+
 import static java.util.Collections.unmodifiableMap;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.view.InputDevice;
@@ -57,6 +60,7 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.RuleChain;
 
@@ -70,9 +74,10 @@ class ShortcutKeyTestBase {
     @Rule
     public RuleChain rules = RuleChain.outerRule(mSettingsProviderRule).around(mSetFlagsRule);
 
+    private Resources mResources;
     TestPhoneWindowManager mPhoneWindowManager;
     DispatchedKeyHandler mDispatchedKeyHandler = event -> false;
-    final Context mContext = spy(getInstrumentation().getTargetContext());
+    Context mContext;
 
     /** Modifier key to meta state */
     protected static final Map<Integer, Integer> MODIFIER;
@@ -90,6 +95,16 @@ class ShortcutKeyTestBase {
         MODIFIER = unmodifiableMap(map);
     }
 
+    @Before
+    public void setup() {
+        mContext = spy(getInstrumentation().getTargetContext());
+        mResources = spy(mContext.getResources());
+        doReturn(mResources).when(mContext).getResources();
+        doReturn(mSettingsProviderRule.mockContentResolver(mContext))
+                .when(mContext).getContentResolver();
+    }
+
+
     /** Same as {@link setUpPhoneWindowManager(boolean)}, without supporting settings update. */
     protected final void setUpPhoneWindowManager() {
         setUpPhoneWindowManager(/* supportSettingsUpdate= */ false);
@@ -101,12 +116,14 @@ class ShortcutKeyTestBase {
      * <p>Subclasses must call this at the start of the test if they intend to interact with phone
      * window manager.
      *
-     * @param supportSettingsUpdate {@code true} if this test should read and listen to provider
-     *      settings values.
+     * @param supportSettingsUpdate {@code true} to have PWM respond to any Settings changes upon
+     *    instantiation. Although this is supposed to also allow a test to listen to any Settings
+     *    changes after instantiation, MockContentResolver in this class's setup stubs out
+     *    notifyChange(), which prevents SettingsObserver from getting notified of events. So
+     *    we're effectively always instantiating TestPhoneWindowManager with
+     *    supportSettingsUpdate=false.
      */
     protected final void setUpPhoneWindowManager(boolean supportSettingsUpdate) {
-        doReturn(mSettingsProviderRule.mockContentResolver(mContext))
-                .when(mContext).getContentResolver();
         mPhoneWindowManager = new TestPhoneWindowManager(mContext, supportSettingsUpdate);
     }
 
@@ -185,6 +202,23 @@ class ShortcutKeyTestBase {
 
     void sendKey(int keyCode, boolean longPress) {
         sendKeyCombination(new int[]{keyCode}, 0 /*durationMillis*/, longPress, DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Since we use SettingsProviderRule to mock the ContentResolver in these
+     * tests, the settings observer registered by PhoneWindowManager will not
+     * be triggered automatically by the mock. Use this method to force the
+     * settings observer change after modifying any settings.
+     */
+    void triggerSettingsObserverChange() {
+        mPhoneWindowManager.getSettingsObserver().onChange(
+                // This boolean doesn't matter. This observer does the same thing regardless.
+                /*selfChange=*/true);
+    }
+
+    /** Override a resource's return value. */
+    void overrideResource(int resId, int expectedBehavior) {
+        doReturn(expectedBehavior).when(mResources).getInteger(eq(resId));
     }
 
     private void interceptKey(KeyEvent keyEvent) {
