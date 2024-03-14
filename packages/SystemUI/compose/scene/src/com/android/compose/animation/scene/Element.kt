@@ -588,7 +588,8 @@ private inline fun <T> computeValue(
             // TODO(b/290184746): Make sure that we don't overflow transformations associated to a
             // range.
             val directionSign = if (transition.isUpOrLeft) -1 else 1
-            val overscrollProgress = transition.progress.let { if (it > 1f) it - 1f else it }
+            val isToScene = overscroll.scene == transition.toScene
+            val overscrollProgress = transition.progress.let { if (isToScene) it - 1f else it }
             val progress = directionSign * overscrollProgress
             val rangeProgress = propertySpec.range?.progress(progress) ?: progress
 

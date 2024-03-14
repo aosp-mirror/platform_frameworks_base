@@ -16,6 +16,8 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
@@ -751,5 +753,56 @@ class ElementTest {
         assertThat(transition.progress).isEqualTo(2.5f)
         assertThat(state.currentOverscrollSpec).isNotNull()
         fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * 1.5f)
+    }
+
+    @Test
+    fun elementTransitionWithDistanceDuringOverscrollBouncing() {
+        val layoutWidth = 200.dp
+        val layoutHeight = 400.dp
+        val state =
+            setupOverscrollScenario(
+                layoutWidth = layoutWidth,
+                layoutHeight = layoutHeight,
+                sceneTransitions = {
+                    defaultSwipeSpec =
+                        spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow,
+                        )
+
+                    overscroll(TestScenes.SceneB, Orientation.Vertical) {
+                        // On overscroll 100% -> Foo should translate by layoutHeight
+                        translate(TestElements.Foo, y = { absoluteDistance })
+                    }
+                },
+                firstScroll = 1f, // 100% scroll
+            )
+
+        val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
+        fooElement.assertTopPositionInRootIsEqualTo(0.dp)
+
+        rule.onRoot().performTouchInput {
+            // Scroll another 50%
+            moveBy(Offset(0f, layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
+        }
+
+        val transition = state.currentTransition
+        assertThat(transition).isNotNull()
+        transition as TransitionState.HasOverscrollProperties
+
+        // Scroll 150% (100% scroll + 50% overscroll)
+        assertThat(transition.progress).isEqualTo(1.5f)
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * (transition.progress - 1f))
+
+        // finger raised
+        rule.onRoot().performTouchInput { up() }
+
+        // The target value is 1f, but the spring (defaultSwipeSpec) allows you to go to a lower
+        // value.
+        rule.waitUntil(timeoutMillis = 10_000) { transition.progress < 1f }
+
+        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(transition.bouncingScene).isEqualTo(transition.toScene)
     }
 }
