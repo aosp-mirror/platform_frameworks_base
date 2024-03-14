@@ -43,6 +43,12 @@ interface PanelExpansionInteractor {
     @Deprecated("Use SceneInteractor.currentScene instead.") val legacyPanelExpansion: Flow<Float>
 
     /**
+     * Returns whether the shade height is greater than zero or the shade is expecting a synthesized
+     * down event.
+     */
+    @Deprecated("Use ShadeInteractor.isAnyExpanded instead.") val isPanelExpanded: Boolean
+
+    /**
      * This method should not be used anymore, you should probably use [.isShadeFullyOpen] instead.
      * It was overused as indicating if shade is open or we're on keyguard/AOD. Moving forward we
      * should be explicit about the what state we're checking.

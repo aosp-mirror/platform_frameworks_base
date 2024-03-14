@@ -31,12 +31,6 @@ import java.util.function.Consumer
  * @see NotificationPanelViewController
  */
 interface ShadeViewController {
-    /**
-     * Returns whether the shade height is greater than zero or the shade is expecting a synthesized
-     * down event.
-     */
-    val isPanelExpanded: Boolean
-
     /** Returns whether the shade is tracking touches for expand/collapse of the shade or QS. */
     val isTracking: Boolean
 
