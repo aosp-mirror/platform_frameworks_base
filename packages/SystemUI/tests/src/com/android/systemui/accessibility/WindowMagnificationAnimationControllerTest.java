@@ -181,7 +181,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             throws RemoteException {
         enableWindowMagnificationAndWaitAnimating(mWaitAnimationDuration, mAnimationCallback);
 
-        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, atLeast(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -220,7 +220,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                 mWaitAnimationDuration, /* targetScale= */ 1.0f,
                 DEFAULT_CENTER_X, DEFAULT_CENTER_Y, mAnimationCallback);
 
-        verify(mSpyController).enableWindowMagnificationInternal(1.0f, DEFAULT_CENTER_X,
+        verify(mSpyController).updateWindowMagnificationInternal(1.0f, DEFAULT_CENTER_X,
                 DEFAULT_CENTER_Y, 0f, 0f);
         verify(mAnimationCallback).onResult(true);
     }
@@ -244,7 +244,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             advanceTimeBy(mWaitAnimationDuration);
         });
 
-        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, atLeast(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -299,7 +299,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             advanceTimeBy(mWaitAnimationDuration);
         });
 
-        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, atLeast(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -341,7 +341,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             advanceTimeBy(mWaitAnimationDuration);
         });
 
-        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, atLeast(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -377,7 +377,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             advanceTimeBy(mWaitAnimationDuration);
         });
 
-        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, atLeast(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -439,7 +439,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         enableWindowMagnificationAndWaitAnimating(
                 mWaitAnimationDuration, Float.NaN, Float.NaN, Float.NaN, mAnimationCallback2);
 
-        verify(mSpyController, never()).enableWindowMagnificationInternal(anyFloat(), anyFloat(),
+        verify(mSpyController, never()).updateWindowMagnificationInternal(anyFloat(), anyFloat(),
                 anyFloat());
         verify(mAnimationCallback).onResult(false);
         verify(mAnimationCallback2).onResult(true);
@@ -479,7 +479,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         // Verify the method is called in
         // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
         // {@link Animator.AnimatorListener#onAnimationEnd} once in {@link ValueAnimator#end()}
-        verify(mSpyController, times(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, times(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -526,7 +526,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         enableWindowMagnificationAndWaitAnimating(mWaitAnimationDuration, Float.NaN,
                 Float.NaN, Float.NaN, mAnimationCallback2);
 
-        verify(mSpyController, never()).enableWindowMagnificationInternal(anyFloat(), anyFloat(),
+        verify(mSpyController, never()).updateWindowMagnificationInternal(anyFloat(), anyFloat(),
                 anyFloat());
         verify(mSpyController, never()).deleteWindowMagnification();
         verify(mAnimationCallback).onResult(false);
@@ -551,7 +551,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             advanceTimeBy(mWaitAnimationDuration);
         });
 
-        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, atLeast(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -720,7 +720,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
 
         enableWindowMagnificationAndWaitAnimating(mWaitAnimationDuration, mAnimationCallback);
 
-        verify(mSpyController, never()).enableWindowMagnificationInternal(anyFloat(), anyFloat(),
+        verify(mSpyController, never()).updateWindowMagnificationInternal(anyFloat(), anyFloat(),
                 anyFloat());
         verify(mAnimationCallback).onResult(true);
     }
@@ -733,7 +733,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         resetMockObjects();
         deleteWindowMagnificationAndWaitAnimating(mWaitAnimationDuration, mAnimationCallback);
 
-        verify(mSpyController, atLeast(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, atLeast(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -790,7 +790,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         // Verify the method is called in
         // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
         // {@link Animator.AnimatorListener#onAnimationEnd} once in {@link ValueAnimator#end()}
-        verify(mSpyController, times(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, times(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -835,7 +835,7 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         // {@link ValueAnimator.AnimatorUpdateListener#onAnimationUpdate} once and
         // {@link Animator.AnimatorListener#onAnimationEnd} once when running the animation at
         // the final duration time.
-        verify(mSpyController, times(2)).enableWindowMagnificationInternal(
+        verify(mSpyController, times(2)).updateWindowMagnificationInternal(
                 mScaleCaptor.capture(),
                 mCenterXCaptor.capture(), mCenterYCaptor.capture(),
                 mOffsetXCaptor.capture(), mOffsetYCaptor.capture());
@@ -1040,17 +1040,17 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         }
 
         @Override
-        void enableWindowMagnificationInternal(float scale, float centerX, float centerY) {
-            super.enableWindowMagnificationInternal(scale, centerX, centerY);
-            mSpyController.enableWindowMagnificationInternal(scale, centerX, centerY);
+        void updateWindowMagnificationInternal(float scale, float centerX, float centerY) {
+            super.updateWindowMagnificationInternal(scale, centerX, centerY);
+            mSpyController.updateWindowMagnificationInternal(scale, centerX, centerY);
         }
 
         @Override
-        void enableWindowMagnificationInternal(float scale, float centerX, float centerY,
+        void updateWindowMagnificationInternal(float scale, float centerX, float centerY,
                 float magnificationOffsetFrameRatioX, float magnificationOffsetFrameRatioY) {
-            super.enableWindowMagnificationInternal(scale, centerX, centerY,
+            super.updateWindowMagnificationInternal(scale, centerX, centerY,
                     magnificationOffsetFrameRatioX, magnificationOffsetFrameRatioY);
-            mSpyController.enableWindowMagnificationInternal(scale, centerX, centerY,
+            mSpyController.updateWindowMagnificationInternal(scale, centerX, centerY,
                     magnificationOffsetFrameRatioX, magnificationOffsetFrameRatioY);
         }
 

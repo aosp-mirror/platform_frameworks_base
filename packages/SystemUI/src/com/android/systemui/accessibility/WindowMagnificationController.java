@@ -148,7 +148,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     /**
      * SourceBound is the bound of the magnified region which projects the magnified content.
      * SourceBound's center is equal to the parameters centerX and centerY in
-     * {@link WindowMagnificationController#enableWindowMagnificationInternal(float, float, float)}}
+     * {@link WindowMagnificationController#updateWindowMagnificationInternal(float, float, float)}}
      * but it is calculated from {@link #mMagnificationFrame}'s center in the runtime.
      */
     private final Rect mSourceBounds = new Rect();
@@ -566,7 +566,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         // window size changed not caused by rotation.
         if (isActivated() && reCreateWindow) {
             deleteWindowMagnification();
-            enableWindowMagnificationInternal(Float.NaN, Float.NaN, Float.NaN);
+            updateWindowMagnificationInternal(Float.NaN, Float.NaN, Float.NaN);
         }
     }
 
@@ -1317,7 +1317,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     /**
-     * Wraps {@link WindowMagnificationController#enableWindowMagnificationInternal(float, float,
+     * Wraps {@link WindowMagnificationController#updateWindowMagnificationInternal(float, float,
      * float, float, float)}
      * with transition animation. If the window magnification is not enabled, the scale will start
      * from 1.0 and the center won't be changed during the animation. If animator is
@@ -1344,10 +1344,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     /**
-     * Enables window magnification with specified parameters. If the given scale is <strong>less
-     * than or equal to 1.0f</strong>, then
+     * Updates window magnification status with specified parameters. If the given scale is
+     * <strong>less than 1.0f</strong>, then
      * {@link WindowMagnificationController#deleteWindowMagnification()} will be called instead to
-     * be consistent with the behavior of display magnification.
+     * be consistent with the behavior of display magnification. If the given scale is
+     * <strong>larger than or equal to 1.0f</strong>, and the window magnification is not activated
+     * yet, window magnification will be enabled.
      *
      * @param scale   the target scale, or {@link Float#NaN} to leave unchanged
      * @param centerX the screen-relative X coordinate around which to center for magnification,
@@ -1355,16 +1357,17 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      * @param centerY the screen-relative Y coordinate around which to center for magnification,
      *                or {@link Float#NaN} to leave unchanged.
      */
-    void enableWindowMagnificationInternal(float scale, float centerX, float centerY) {
-        enableWindowMagnificationInternal(scale, centerX, centerY, Float.NaN, Float.NaN);
+    void updateWindowMagnificationInternal(float scale, float centerX, float centerY) {
+        updateWindowMagnificationInternal(scale, centerX, centerY, Float.NaN, Float.NaN);
     }
 
     /**
-     * Enables window magnification with specified parameters. If the given scale is <strong>less
-     * than 1.0f</strong>, then
+     * Updates window magnification status with specified parameters. If the given scale is
+     * <strong>less than 1.0f</strong>, then
      * {@link WindowMagnificationController#deleteWindowMagnification()} will be called instead to
-     * be consistent with the behavior of display magnification.
-     *
+     * be consistent with the behavior of display magnification. If the given scale is
+     * <strong>larger than or equal to 1.0f</strong>, and the window magnification is not activated
+     * yet, window magnification will be enabled.
      * @param scale   the target scale, or {@link Float#NaN} to leave unchanged
      * @param centerX the screen-relative X coordinate around which to center for magnification,
      *                or {@link Float#NaN} to leave unchanged.
@@ -1377,7 +1380,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      *                                       between frame position Y and centerY,
      *                                       or {@link Float#NaN} to leave unchanged.
      */
-    void enableWindowMagnificationInternal(float scale, float centerX, float centerY,
+    void updateWindowMagnificationInternal(float scale, float centerX, float centerY,
                 float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY) {
         if (Float.compare(scale, 1.0f) < 0) {
             deleteWindowMagnification();
@@ -1433,7 +1436,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return;
         }
 
-        enableWindowMagnificationInternal(scale, Float.NaN, Float.NaN);
+        updateWindowMagnificationInternal(scale, Float.NaN, Float.NaN);
         mHandler.removeCallbacks(mUpdateStateDescriptionRunnable);
         mHandler.postDelayed(mUpdateStateDescriptionRunnable, UPDATE_STATE_DESCRIPTION_DELAY_MS);
     }
