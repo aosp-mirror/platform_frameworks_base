@@ -129,7 +129,6 @@ public class TransitionAnimation {
     private final int mDefaultWindowAnimationStyleResId;
 
     private final boolean mDebug;
-    private final boolean mGridLayoutRecentsEnabled;
     private final boolean mLowRamRecentsEnabled;
 
     public TransitionAnimation(Context context, boolean debug, String tag) {
@@ -166,7 +165,6 @@ public class TransitionAnimation {
         mConfigShortAnimTime = context.getResources().getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
 
-        mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
         mLowRamRecentsEnabled = ActivityManager.isLowRamDeviceStatic();
 
         final TypedArray windowStyle = mContext.getTheme().obtainStyledAttributes(
@@ -768,10 +766,8 @@ public class TransitionAnimation {
                         // We scale the width and clip to the top/left square
                         float scale =
                                 thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
-                        if (!mGridLayoutRecentsEnabled) {
-                            int unscaledThumbHeight = (int) (thumbHeight / scale);
-                            mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
-                        }
+                        int unscaledThumbHeight = (int) (thumbHeight / scale);
+                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
 
                         Animation scaleAnim = new ScaleAnimation(
                                 scaleUp ? scale : 1, scaleUp ? 1 : scale,
@@ -887,12 +883,6 @@ public class TransitionAnimation {
             toY = appRect.height() / 2 * (1 - 1 / scaleW) + appRect.top;
             pivotX = mTmpRect.width() / 2;
             pivotY = appRect.height() / 2 / scaleW;
-            if (mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header is displayed above the thumbnail instead of
-                // overlapping it.
-                fromY -= thumbHeightI;
-                toY -= thumbHeightI * scaleW;
-            }
         } else {
             pivotX = 0;
             pivotY = 0;
@@ -936,10 +926,7 @@ public class TransitionAnimation {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
+            set.addAnimation(alpha);
             set.addAnimation(translate);
             set.addAnimation(clipAnim);
             a = set;
@@ -958,10 +945,7 @@ public class TransitionAnimation {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
+            set.addAnimation(alpha);
             set.addAnimation(translate);
             a = set;
 
@@ -1081,8 +1065,7 @@ public class TransitionAnimation {
      * @return whether the transition should show the thumbnail being scaled down.
      */
     private boolean shouldScaleDownThumbnailTransition(int orientation) {
-        return mGridLayoutRecentsEnabled
-                || orientation == Configuration.ORIENTATION_PORTRAIT;
+        return orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     private static int updateToTranslucentAnimIfNeeded(int anim, @TransitionOldType int transit) {

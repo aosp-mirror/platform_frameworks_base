@@ -228,10 +228,7 @@ public class AppTransition implements Dump {
     private int mAppTransitionState = APP_STATE_IDLE;
 
     private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
-    private KeyguardExitAnimationStartListener mKeyguardExitAnimationStartListener;
     private final ExecutorService mDefaultExecutor = Executors.newSingleThreadExecutor();
-
-    private final boolean mGridLayoutRecentsEnabled;
 
     private final int mDefaultWindowAnimationStyleResId;
     private boolean mOverrideTaskTransition;
@@ -248,8 +245,6 @@ public class AppTransition implements Dump {
         mDisplayContent = displayContent;
         mTransitionAnimation = new TransitionAnimation(
                 context, ProtoLog.isEnabled(WM_DEBUG_ANIM), TAG);
-
-        mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
 
         final TypedArray windowStyle = mContext.getTheme().obtainStyledAttributes(
                 com.android.internal.R.styleable.Window);
@@ -491,11 +486,6 @@ public class AppTransition implements Dump {
 
     void unregisterListener(AppTransitionListener listener) {
         mListeners.remove(listener);
-    }
-
-    void registerKeygaurdExitAnimationStartListener(
-            KeyguardExitAnimationStartListener listener) {
-        mKeyguardExitAnimationStartListener = listener;
     }
 
     public void notifyAppTransitionFinishedLocked(IBinder token) {
@@ -1593,14 +1583,6 @@ public class AppTransition implements Dump {
 
     boolean containsTransitRequest(@TransitionType int transit) {
         return mNextAppTransitionRequests.contains(transit);
-    }
-
-    /**
-     * @return whether the transition should show the thumbnail being scaled down.
-     */
-    private boolean shouldScaleDownThumbnailTransition(int uiMode, int orientation) {
-        return mGridLayoutRecentsEnabled
-                || orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     private void handleAppTransitionTimeout() {

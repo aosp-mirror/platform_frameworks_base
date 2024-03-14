@@ -620,14 +620,6 @@ public abstract class WindowManagerInternal {
     public abstract void unregisterTaskSystemBarsListener(TaskSystemBarsListener listener);
 
     /**
-     * Registers a listener to be notified to start the keyguard exit animation.
-     *
-     * @param listener The listener to register.
-     */
-    public abstract void registerKeyguardExitAnimationStartListener(
-            KeyguardExitAnimationStartListener listener);
-
-    /**
      * Reports that the password for the given user has changed.
      */
     public abstract void reportPasswordChanged(int userId);
