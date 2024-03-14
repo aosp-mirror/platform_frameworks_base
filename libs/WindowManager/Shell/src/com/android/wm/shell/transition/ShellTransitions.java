@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 /**
  * Interface to manage remote transitions.

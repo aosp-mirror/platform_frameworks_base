@@ -18,7 +18,7 @@ package com.android.wm.shell.pip;
 
 import android.graphics.Rect;
 
-import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.shared.annotations.ExternalThread;
 
 import java.util.function.Consumer;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.common.annotations;
+package com.android.wm.shell.shared.annotations;
 
 
 import java.lang.annotation.Documented;
@@ -24,10 +24,10 @@ import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Qualifier;
 
-/** Annotates a method or qualifies a provider that runs on the Shell splashscreen-thread */
+/** Annotates a method or qualifies a provider that runs on the shared background thread */
 @Documented
 @Inherited
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ShellSplashscreenThread {
+public @interface ShellBackgroundThread {
 }
