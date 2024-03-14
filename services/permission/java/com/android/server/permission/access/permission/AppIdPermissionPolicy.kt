@@ -268,14 +268,33 @@ class AppIdPermissionPolicy : SchemePolicy() {
         } else {
             newFlags = newFlags andInv PermissionFlags.RESTRICTION_REVOKED
         }
-        newFlags =
-            if (
-                permission.isSoftRestricted && !isExempt &&
-                    !anyPackageInAppId(appId) {
-                        permissionName in it.androidPackage!!.requestedPermissions &&
-                            isSoftRestrictedPermissionExemptForPackage(it, permissionName)
+        val isSoftRestricted =
+            if (permission.isSoftRestricted && !isExempt) {
+                val targetSdkVersion =
+                    reducePackageInAppId(appId, Build.VERSION_CODES.CUR_DEVELOPMENT) {
+                        targetSdkVersion,
+                        packageState ->
+                        if (permissionName in packageState.androidPackage!!.requestedPermissions) {
+                            targetSdkVersion.coerceAtMost(
+                                packageState.androidPackage!!.targetSdkVersion
+                            )
+                        } else {
+                            targetSdkVersion
+                        }
                     }
-            ) {
+                !anyPackageInAppId(appId) {
+                    permissionName in it.androidPackage!!.requestedPermissions &&
+                        isSoftRestrictedPermissionExemptForPackage(
+                            it,
+                            targetSdkVersion,
+                            permissionName
+                        )
+                }
+            } else {
+                false
+            }
+        newFlags =
+            if (isSoftRestricted) {
                 newFlags or PermissionFlags.SOFT_RESTRICTED
             } else {
                 newFlags andInv PermissionFlags.SOFT_RESTRICTED
@@ -1159,9 +1178,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
                 }
             newFlags =
                 if (
-                    permission.isSoftRestricted && !isExempt &&
+                    permission.isSoftRestricted &&
+                        !isExempt &&
                         !requestingPackageStates.anyIndexed { _, it ->
-                            isSoftRestrictedPermissionExemptForPackage(it, permissionName)
+                            isSoftRestrictedPermissionExemptForPackage(
+                                it,
+                                targetSdkVersion,
+                                permissionName
+                            )
                         }
                 ) {
                     newFlags or PermissionFlags.SOFT_RESTRICTED
@@ -1444,13 +1468,20 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     // See also SoftRestrictedPermissionPolicy.mayGrantPermission()
+    // Note: we need the appIdTargetSdkVersion parameter here because we are OR-ing the exempt
+    // status for all packages in a shared UID, but the storage soft restriction logic needs to NOT
+    // exempt when the target SDK version is low, which is the opposite of what most of our code do,
+    // and thus can't check the individual package's target SDK version and rely on the OR among
+    // them.
     private fun isSoftRestrictedPermissionExemptForPackage(
         packageState: PackageState,
+        appIdTargetSdkVersion: Int,
         permissionName: String
     ): Boolean =
         when (permissionName) {
-            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE ->
-                packageState.androidPackage!!.targetSdkVersion >= Build.VERSION_CODES.Q
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE ->
+                appIdTargetSdkVersion >= Build.VERSION_CODES.Q
             else -> false
         }
 
