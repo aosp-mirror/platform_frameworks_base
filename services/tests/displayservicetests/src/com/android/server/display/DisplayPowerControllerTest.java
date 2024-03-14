@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -79,6 +78,8 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.LightSensorController;
+import com.android.server.display.brightness.TestUtilsKt;
 import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.brightness.clamper.HdrClamper;
 import com.android.server.display.color.ColorDisplayService;
@@ -1161,30 +1162,19 @@ public final class DisplayPowerControllerTest {
                 any(AutomaticBrightnessController.Callbacks.class),
                 any(Looper.class),
                 eq(mSensorManagerMock),
-                /* lightSensor= */ any(),
                 /* brightnessMappingStrategyMap= */ any(SparseArray.class),
-                /* lightSensorWarmUpTime= */ anyInt(),
                 /* brightnessMin= */ anyFloat(),
                 /* brightnessMax= */ anyFloat(),
                 /* dozeScaleFactor */ anyFloat(),
-                /* lightSensorRate= */ anyInt(),
-                /* initialLightSensorRate= */ anyInt(),
-                /* brighteningLightDebounceConfig */ anyLong(),
-                /* darkeningLightDebounceConfig */ anyLong(),
-                /* brighteningLightDebounceConfigIdle= */ anyLong(),
-                /* darkeningLightDebounceConfigIdle= */ anyLong(),
-                /* resetAmbientLuxAfterWarmUpConfig= */ anyBoolean(),
-                any(HysteresisLevels.class),
-                any(HysteresisLevels.class),
                 any(HysteresisLevels.class),
                 any(HysteresisLevels.class),
                 eq(mContext),
                 any(BrightnessRangeController.class),
                 any(BrightnessThrottler.class),
-                /* ambientLightHorizonShort= */ anyInt(),
-                /* ambientLightHorizonLong= */ anyInt(),
                 eq(lux),
                 eq(nits),
+                eq(DISPLAY_ID),
+                any(LightSensorController.LightSensorControllerConfig.class),
                 any(BrightnessClamperController.class)
         );
     }
@@ -2107,22 +2097,22 @@ public final class DisplayPowerControllerTest {
         }
 
         @Override
+        LightSensorController.LightSensorControllerConfig getLightSensorControllerConfig(
+                Context context, DisplayDeviceConfig displayDeviceConfig) {
+            return TestUtilsKt.createLightSensorControllerConfig();
+        }
+
+        @Override
         AutomaticBrightnessController getAutomaticBrightnessController(
                 AutomaticBrightnessController.Callbacks callbacks, Looper looper,
-                SensorManager sensorManager, Sensor lightSensor,
+                SensorManager sensorManager,
                 SparseArray<BrightnessMappingStrategy> brightnessMappingStrategyMap,
-                int lightSensorWarmUpTime, float brightnessMin, float brightnessMax,
-                float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
-                long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
-                long brighteningLightDebounceConfigIdle, long darkeningLightDebounceConfigIdle,
-                boolean resetAmbientLuxAfterWarmUpConfig,
-                HysteresisLevels ambientBrightnessThresholds,
+                float brightnessMin, float brightnessMax, float dozeScaleFactor,
                 HysteresisLevels screenBrightnessThresholds,
-                HysteresisLevels ambientBrightnessThresholdsIdle,
                 HysteresisLevels screenBrightnessThresholdsIdle, Context context,
                 BrightnessRangeController brightnessRangeController,
-                BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
-                int ambientLightHorizonLong, float userLux, float userNits,
+                BrightnessThrottler brightnessThrottler, float userLux, float userNits,
+                int displayId, LightSensorController.LightSensorControllerConfig config,
                 BrightnessClamperController brightnessClamperController) {
             return mAutomaticBrightnessController;
         }
@@ -2135,18 +2125,12 @@ public final class DisplayPowerControllerTest {
         }
 
         @Override
-        HysteresisLevels getHysteresisLevels(float[] brighteningThresholdsPercentages,
-                float[] darkeningThresholdsPercentages, float[] brighteningThresholdLevels,
-                float[] darkeningThresholdLevels, float minDarkeningThreshold,
-                float minBrighteningThreshold) {
+        HysteresisLevels getBrightnessThresholdsIdleHysteresisLevels(DisplayDeviceConfig ddc) {
             return mHysteresisLevels;
         }
 
         @Override
-        HysteresisLevels getHysteresisLevels(float[] brighteningThresholdsPercentages,
-                float[] darkeningThresholdsPercentages, float[] brighteningThresholdLevels,
-                float[] darkeningThresholdLevels, float minDarkeningThreshold,
-                float minBrighteningThreshold, boolean potentialOldBrightnessRange) {
+        HysteresisLevels getBrightnessThresholdsHysteresisLevels(DisplayDeviceConfig ddc) {
             return mHysteresisLevels;
         }
 
