@@ -272,10 +272,15 @@ class ContextImpl extends Context {
 
     @UnsupportedAppUsage
     private Context mOuterContext;
+
+    private final Object mThemeLock = new Object();
     @UnsupportedAppUsage
+    @GuardedBy("mThemeLock")
     private int mThemeResource = 0;
     @UnsupportedAppUsage
+    @GuardedBy("mThemeLock")
     private Resources.Theme mTheme = null;
+
     @UnsupportedAppUsage
     private PackageManager mPackageManager;
     private Context mReceiverRestrictedContext = null;
@@ -288,7 +293,6 @@ class ContextImpl extends Context {
 
     private ContentCaptureOptions mContentCaptureOptions = null;
 
-    private final Object mSync = new Object();
     /**
      * Indicates this {@link Context} can not handle UI components properly and is not associated
      * with a {@link Display} instance.
@@ -340,20 +344,21 @@ class ContextImpl extends Context {
      */
     private boolean mOwnsToken = false;
 
-    @GuardedBy("mSync")
+    private final Object mDirsLock = new Object();
+    @GuardedBy("mDirsLock")
     private File mDatabasesDir;
-    @GuardedBy("mSync")
+    @GuardedBy("mDirsLock")
     @UnsupportedAppUsage
     private File mPreferencesDir;
-    @GuardedBy("mSync")
+    @GuardedBy("mDirsLock")
     private File mFilesDir;
-    @GuardedBy("mSync")
+    @GuardedBy("mDirsLock")
     private File mCratesDir;
-    @GuardedBy("mSync")
+    @GuardedBy("mDirsLock")
     private File mNoBackupFilesDir;
-    @GuardedBy("mSync")
+    @GuardedBy("mDirsLock")
     private File mCacheDir;
-    @GuardedBy("mSync")
+    @GuardedBy("mDirsLock")
     private File mCodeCacheDir;
 
     // The system service cache for the system services that are cached per-ContextImpl.
@@ -458,7 +463,7 @@ class ContextImpl extends Context {
 
     @Override
     public void setTheme(int resId) {
-        synchronized (mSync) {
+        synchronized (mThemeLock) {
             if (mThemeResource != resId) {
                 mThemeResource = resId;
                 initializeTheme();
@@ -468,14 +473,14 @@ class ContextImpl extends Context {
 
     @Override
     public int getThemeResId() {
-        synchronized (mSync) {
+        synchronized (mThemeLock) {
             return mThemeResource;
         }
     }
 
     @Override
     public Resources.Theme getTheme() {
-        synchronized (mSync) {
+        synchronized (mThemeLock) {
             if (mTheme != null) {
                 return mTheme;
             }
@@ -737,7 +742,7 @@ class ContextImpl extends Context {
 
     @UnsupportedAppUsage
     private File getPreferencesDir() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             if (mPreferencesDir == null) {
                 mPreferencesDir = new File(getDataDir(), "shared_prefs");
             }
@@ -826,7 +831,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getFilesDir() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             if (mFilesDir == null) {
                 mFilesDir = new File(getDataDir(), "files");
             }
@@ -841,7 +846,7 @@ class ContextImpl extends Context {
         final Path absoluteNormalizedCratePath = cratesRootPath.resolve(crateId)
                 .toAbsolutePath().normalize();
 
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             if (mCratesDir == null) {
                 mCratesDir = cratesRootPath.toFile();
             }
@@ -854,7 +859,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getNoBackupFilesDir() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             if (mNoBackupFilesDir == null) {
                 mNoBackupFilesDir = new File(getDataDir(), "no_backup");
             }
@@ -871,7 +876,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalFilesDirs(String type) {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppFilesDirs(getPackageName());
             if (type != null) {
                 dirs = Environment.buildPaths(dirs, type);
@@ -889,7 +894,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getObbDirs() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
             return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
@@ -897,7 +902,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getCacheDir() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             if (mCacheDir == null) {
                 mCacheDir = new File(getDataDir(), "cache");
             }
@@ -907,7 +912,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getCodeCacheDir() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             if (mCodeCacheDir == null) {
                 mCodeCacheDir = getCodeCacheDirBeforeBind(getDataDir());
             }
@@ -933,7 +938,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalCacheDirs() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppCacheDirs(getPackageName());
             // We don't try to create cache directories in-process, because they need special
             // setup for accurate quota tracking. This ensures the cache dirs are always
@@ -944,7 +949,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalMediaDirs() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
             return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
@@ -1046,7 +1051,7 @@ class ContextImpl extends Context {
     }
 
     private File getDatabasesDir() {
-        synchronized (mSync) {
+        synchronized (mDirsLock) {
             if (mDatabasesDir == null) {
                 if ("android".equals(getPackageName())) {
                     mDatabasesDir = new File("/data/system");
