@@ -195,6 +195,7 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
             colorBackground = null,
             isForegroundTask = false,
             userType = userType,
+            splitBounds = null
         )
 
     private fun createSingleTask(
