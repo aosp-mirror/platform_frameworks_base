@@ -28,6 +28,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.Trace;
+import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.IWindow;
 import android.view.InsetsState;
@@ -40,6 +41,8 @@ import java.util.Objects;
  * @hide
  */
 public class WindowStateResizeItem extends ClientTransactionItem {
+
+    private static final String TAG = "WindowStateResizeItem";
 
     private IWindow mWindow;
     private ClientWindowFrames mFrames;
@@ -65,7 +68,9 @@ public class WindowStateResizeItem extends ClientTransactionItem {
                     mAlwaysConsumeSystemBars, mDisplayId, mSyncSeqId, mDragResizing);
         } catch (RemoteException e) {
             // Should be a local call.
-            throw new RuntimeException(e);
+            // An exception could happen if the process is restarted. It is safe to ignore since
+            // the window should no longer exist.
+            Log.w(TAG, "The original window no longer exists in the new process", e);
         }
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
