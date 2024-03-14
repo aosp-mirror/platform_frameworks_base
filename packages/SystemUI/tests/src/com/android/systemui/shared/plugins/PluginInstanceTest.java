@@ -28,7 +28,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
-
+import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+@FlakyTest(bugId = 327655994) // Also b/324682425
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class PluginInstanceTest extends SysuiTestCase {

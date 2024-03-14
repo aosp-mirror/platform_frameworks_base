@@ -88,6 +88,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.compatibility.common.util.TestUtils;
 import com.android.internal.R;
+import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.accessibility.common.ShortcutConstants;
 import com.android.internal.accessibility.common.ShortcutConstants.FloatingMenuSize;
 import com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
@@ -1318,6 +1319,152 @@ public class AccessibilityManagerServiceTest {
         }
     }
 
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_statusBarServiceNotGranted_throwsException() {
+        mTestableContext.getTestablePermissions().setPermission(
+                Manifest.permission.STATUS_BAR_SERVICE, PackageManager.PERMISSION_DENIED);
+        mockManageAccessibilityGranted(mTestableContext);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.notifyQuickSettingsTilesChanged(
+                        mA11yms.getCurrentUserState().mUserId,
+                        List.of(
+                                AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME)));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_manageAccessibilityNotGranted_throwsException() {
+        mockStatusBarServiceGranted(mTestableContext);
+        mTestableContext.getTestablePermissions().setPermission(
+                Manifest.permission.STATUS_BAR_SERVICE, PackageManager.PERMISSION_DENIED);
+
+        assertThrows(SecurityException.class,
+                () -> mA11yms.notifyQuickSettingsTilesChanged(
+                        mA11yms.getCurrentUserState().mUserId,
+                        List.of(
+                                AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME)));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_qsTileChanges_updateA11yTilesInQsPanel() {
+        mockStatusBarServiceGranted(mTestableContext);
+        mockManageAccessibilityGranted(mTestableContext);
+        List<ComponentName> tiles = List.of(
+                AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME,
+                AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME
+        );
+
+        mA11yms.notifyQuickSettingsTilesChanged(
+                mA11yms.getCurrentUserState().mUserId,
+                tiles
+        );
+
+        assertThat(
+                mA11yms.getCurrentUserState().getA11yQsTilesInQsPanel()
+        ).containsExactlyElementsIn(tiles);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_sameQsTiles_noUpdateToA11yTilesInQsPanel() {
+        notifyQuickSettingsTilesChanged_qsTileChanges_updateA11yTilesInQsPanel();
+        List<ComponentName> tiles =
+                mA11yms.getCurrentUserState().getA11yQsTilesInQsPanel().stream().toList();
+
+        mA11yms.notifyQuickSettingsTilesChanged(
+                mA11yms.getCurrentUserState().mUserId,
+                tiles
+        );
+
+        assertThat(
+                mA11yms.getCurrentUserState().getA11yQsTilesInQsPanel()
+        ).containsExactlyElementsIn(tiles);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_serviceWarningRequired_qsShortcutRemainDisabled() {
+        mockStatusBarServiceGranted(mTestableContext);
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+        ComponentName tile = new ComponentName(
+                TARGET_ALWAYS_ON_A11Y_SERVICE.getPackageName(),
+                TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS);
+
+        mA11yms.notifyQuickSettingsTilesChanged(
+                mA11yms.getCurrentUserState().mUserId,
+                List.of(tile)
+        );
+
+        assertThat(mA11yms.getCurrentUserState().getA11yQsTargets()).doesNotContain(tile);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_serviceWarningNotRequired_qsShortcutEnabled() {
+        mockStatusBarServiceGranted(mTestableContext);
+        mockManageAccessibilityGranted(mTestableContext);
+        setupShortcutTargetServices();
+        final AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mAccessibilityButtonTargets.clear();
+        userState.mAccessibilityButtonTargets.add(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString());
+        ComponentName tile = new ComponentName(
+                TARGET_ALWAYS_ON_A11Y_SERVICE.getPackageName(),
+                TARGET_ALWAYS_ON_A11Y_SERVICE_TILE_CLASS);
+
+        mA11yms.notifyQuickSettingsTilesChanged(
+                mA11yms.getCurrentUserState().mUserId,
+                List.of(tile)
+        );
+
+        assertThat(mA11yms.getCurrentUserState().getA11yQsTargets())
+                .contains(TARGET_ALWAYS_ON_A11Y_SERVICE.flattenToString());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_addFrameworkTile_qsShortcutEnabled() {
+        mockStatusBarServiceGranted(mTestableContext);
+        mockManageAccessibilityGranted(mTestableContext);
+        List<ComponentName> tiles = List.of(
+                AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME,
+                AccessibilityShortcutController.COLOR_INVERSION_TILE_COMPONENT_NAME
+        );
+
+        mA11yms.notifyQuickSettingsTilesChanged(
+                mA11yms.getCurrentUserState().mUserId,
+                tiles
+        );
+
+        assertThat(
+                mA11yms.getCurrentUserState().getA11yQsTargets()
+        ).containsExactlyElementsIn(List.of(
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString(),
+                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString())
+        );
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void notifyQuickSettingsTilesChanged_removeFrameworkTile_qsShortcutDisabled() {
+        notifyQuickSettingsTilesChanged_addFrameworkTile_qsShortcutEnabled();
+        Set<ComponentName> qsTiles = mA11yms.getCurrentUserState().getA11yQsTilesInQsPanel();
+        qsTiles.remove(AccessibilityShortcutController.DALTONIZER_TILE_COMPONENT_NAME);
+
+        mA11yms.notifyQuickSettingsTilesChanged(
+                mA11yms.getCurrentUserState().mUserId,
+                qsTiles.stream().toList()
+        );
+
+        assertThat(
+                mA11yms.getCurrentUserState().getA11yQsTargets()
+        ).doesNotContain(
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString());
+    }
+
     private static AccessibilityServiceInfo mockAccessibilityServiceInfo(
             ComponentName componentName) {
         return mockAccessibilityServiceInfo(
@@ -1364,6 +1511,11 @@ public class AccessibilityManagerServiceTest {
 
     private void mockManageAccessibilityGranted(TestableContext context) {
         context.getTestablePermissions().setPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
+                PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void mockStatusBarServiceGranted(TestableContext context) {
+        context.getTestablePermissions().setPermission(Manifest.permission.STATUS_BAR_SERVICE,
                 PackageManager.PERMISSION_GRANTED);
     }
 

@@ -16,15 +16,14 @@
 
 package android.app.ondeviceintelligence;
 
-import android.app.ondeviceintelligence.IProcessingSignal;
 import android.os.PersistableBundle;
 
 /**
- * Interface for Download callback to passed onto service implementation,
+ * Interface for Download callback to be passed onto service implementation,
  *
  * @hide
  */
-oneway interface IDownloadCallback {
+interface IDownloadCallback {
   void onDownloadStarted(long bytesToDownload) = 1;
   void onDownloadProgress(long bytesDownloaded) = 2;
   void onDownloadFailed(int failureStatus, String errorMessage, in PersistableBundle errorParams) = 3;

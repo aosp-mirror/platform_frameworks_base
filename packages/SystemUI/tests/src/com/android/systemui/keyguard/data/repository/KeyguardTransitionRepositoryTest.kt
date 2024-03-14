@@ -27,7 +27,9 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -37,6 +39,7 @@ import com.google.common.truth.Truth.assertThat
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.UUID
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -224,6 +227,101 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun startingSecondManualTransitionWillCancelPreviousManualTransition() =
+        TestScope().runTest {
+            // Drop initial steps from OFF which are sent in the constructor
+            val steps = mutableListOf<TransitionStep>()
+            val job =
+                underTest.transitions
+                    .dropWhile { step -> step.from == OFF }
+                    .onEach { steps.add(it) }
+                    .launchIn(this)
+
+            val firstUuid =
+                underTest.startTransition(
+                    TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
+                )
+            runCurrent()
+
+            checkNotNull(firstUuid)
+            underTest.updateTransition(firstUuid, 0.5f, TransitionState.RUNNING)
+            runCurrent()
+
+            val secondUuid =
+                underTest.startTransition(
+                    TransitionInfo(OWNER_NAME, AOD, DREAMING, animator = null)
+                )
+            runCurrent()
+
+            checkNotNull(secondUuid)
+            underTest.updateTransition(secondUuid, 0.7f, TransitionState.RUNNING)
+            // Trying to transition the old uuid should be ignored.
+            underTest.updateTransition(firstUuid, 0.6f, TransitionState.RUNNING)
+            runCurrent()
+
+            assertThat(steps)
+                .containsExactly(
+                    TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.RUNNING, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.CANCELED, OWNER_NAME),
+                    TransitionStep(AOD, DREAMING, 0.5f, TransitionState.STARTED, OWNER_NAME),
+                    TransitionStep(AOD, DREAMING, 0.7f, TransitionState.RUNNING, OWNER_NAME),
+                )
+                .inOrder()
+
+            job.cancel()
+        }
+
+    @Test
+    fun startingSecondTransitionWillCancelPreviousManualTransition() =
+        TestScope().runTest {
+            // Drop initial steps from OFF which are sent in the constructor
+            val steps = mutableListOf<TransitionStep>()
+            val job =
+                underTest.transitions
+                    .dropWhile { step -> step.from == OFF }
+                    .onEach { steps.add(it) }
+                    .launchIn(this)
+
+            val uuid =
+                underTest.startTransition(
+                    TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, animator = null)
+                )
+            runCurrent()
+
+            checkNotNull(uuid)
+            underTest.updateTransition(uuid, 0.5f, TransitionState.RUNNING)
+            runCurrent()
+
+            // Start new transition to dreaming, should cancel previous one.
+            runner.startTransition(
+                this,
+                TransitionInfo(
+                    OWNER_NAME,
+                    AOD,
+                    DREAMING,
+                    getAnimator(),
+                    TransitionModeOnCanceled.RESET,
+                ),
+            )
+            runCurrent()
+
+            // Trying to transition the old uuid should be ignored.
+            underTest.updateTransition(uuid, 0.6f, TransitionState.RUNNING)
+            runCurrent()
+
+            assertThat(steps.take(3))
+                .containsExactly(
+                    TransitionStep(AOD, LOCKSCREEN, 0f, TransitionState.STARTED, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.RUNNING, OWNER_NAME),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, TransitionState.CANCELED, OWNER_NAME),
+                )
+                .inOrder()
+
+            job.cancel()
+        }
+
+    @Test
     fun attemptTomanuallyUpdateTransitionWithInvalidUUIDthrowsException() {
         underTest.updateTransition(UUID.randomUUID(), 0f, TransitionState.RUNNING)
         assertThat(wtfHandler.failed).isTrue()
@@ -336,6 +434,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     private class WtfHandler : TerribleFailureHandler {
         var failed = false
+
         override fun onTerribleFailure(tag: String, what: TerribleFailure, system: Boolean) {
             failed = true
         }

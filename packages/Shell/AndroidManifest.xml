@@ -698,6 +698,9 @@
     <!-- Permission required for CTS test - CtsWearableSensingServiceTestCases -->
     <uses-permission android:name="android.permission.MANAGE_WEARABLE_SENSING_SERVICE" />
 
+    <!-- Permission required for CTS test - OnDeviceIntelligenceManagerTest -->
+    <uses-permission android:name="android.permission.USE_ON_DEVICE_INTELLIGENCE" />
+
     <!-- Permission required for CTS test - CallAudioInterceptionTest -->
     <uses-permission android:name="android.permission.CALL_AUDIO_INTERCEPTION" />
 

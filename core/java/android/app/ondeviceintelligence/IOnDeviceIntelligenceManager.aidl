@@ -21,7 +21,7 @@
  import android.os.ParcelFileDescriptor;
  import android.os.PersistableBundle;
  import android.os.RemoteCallback;
- import android.app.ondeviceintelligence.Content;
+ import android.os.Bundle;
  import android.app.ondeviceintelligence.Feature;
  import android.app.ondeviceintelligence.FeatureDetails;
  import android.app.ondeviceintelligence.IDownloadCallback;
@@ -39,7 +39,7 @@
   *
   * @hide
   */
- oneway interface IOnDeviceIntelligenceManager {
+ interface IOnDeviceIntelligenceManager {
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
       void getVersion(in RemoteCallback remoteCallback) = 1;
 
@@ -53,18 +53,20 @@
       void getFeatureDetails(in Feature feature, in IFeatureDetailsCallback featureDetailsCallback) = 4;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void requestFeatureDownload(in Feature feature, ICancellationSignal signal, in IDownloadCallback callback) = 5;
+      void requestFeatureDownload(in Feature feature, in ICancellationSignal signal, in IDownloadCallback callback) = 5;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void requestTokenInfo(in Feature feature, in Content request, in  ICancellationSignal signal,
+      void requestTokenInfo(in Feature feature, in Bundle requestBundle, in  ICancellationSignal signal,
                                                         in ITokenInfoCallback tokenInfocallback) = 6;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void processRequest(in Feature feature, in Content request, int requestType, in  ICancellationSignal cancellationSignal, in IProcessingSignal signal,
-                                                        in IResponseCallback responseCallback) = 7;
+      void processRequest(in Feature feature, in Bundle requestBundle, int requestType, in  ICancellationSignal cancellationSignal,
+                                                in IProcessingSignal signal, in IResponseCallback responseCallback) = 7;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
       void processRequestStreaming(in Feature feature,
-                    in Content request, int requestType, in  ICancellationSignal cancellationSignal, in  IProcessingSignal signal,
+                    in Bundle requestBundle, int requestType, in  ICancellationSignal cancellationSignal, in  IProcessingSignal signal,
                     in IStreamingResponseCallback streamingCallback) = 8;
+
+      String getRemoteServicePackageName() = 9;
  }

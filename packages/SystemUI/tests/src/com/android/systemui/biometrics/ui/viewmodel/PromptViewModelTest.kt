@@ -1338,6 +1338,17 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(logoDescription).isEqualTo(logoDescriptionFromApp)
         }
 
+    @Test
+    fun iconViewLoaded() = runGenericTest {
+        val isIconViewLoaded by collectLastValue(viewModel.isIconViewLoaded)
+        // TODO(b/328677869): Add test for noIcon logic.
+        assertThat(isIconViewLoaded).isFalse()
+
+        viewModel.setIsIconViewLoaded(true)
+
+        assertThat(isIconViewLoaded).isTrue()
+    }
+
     /** Asserts that the selected buttons are visible now. */
     private suspend fun TestScope.assertButtonsVisible(
         tryAgain: Boolean = false,

@@ -131,6 +131,7 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.rotation.RotationButton;
@@ -199,6 +200,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final ShadeViewController mShadeViewController;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
     private final NavigationModeController mNavigationModeController;
@@ -537,6 +539,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             KeyguardStateController keyguardStateController,
             ShadeViewController shadeViewController,
+            PanelExpansionInteractor panelExpansionInteractor,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
             @Main Handler mainHandler,
@@ -575,6 +578,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mKeyguardStateController = keyguardStateController;
         mShadeViewController = shadeViewController;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
@@ -749,7 +753,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         final Display display = mView.getDisplay();
         mView.setComponents(mRecentsOptional);
         if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            mView.setComponents(mShadeViewController);
+            mView.setComponents(mShadeViewController, mPanelExpansionInteractor);
         }
         mView.setDisabledFlags(mDisabledFlags1, mSysUiFlagsContainer);
         mView.setOnVerticalChangedListener(this::onVerticalChanged);

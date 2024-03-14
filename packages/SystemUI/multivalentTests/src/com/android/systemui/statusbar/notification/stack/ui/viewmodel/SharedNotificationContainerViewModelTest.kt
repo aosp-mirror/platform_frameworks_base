@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -38,6 +39,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
+import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
@@ -699,41 +701,57 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun alphaOnFullQsExpansion() =
+        testScope.runTest {
+            val viewState = ViewStateAccessor()
+            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+
+            showLockscreenWithQSExpanded()
+
+            // Alpha fades out as QS expands
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isWithin(0.01f).of(0.5f)
+            shadeRepository.setQsExpansion(0.9f)
+            assertThat(alpha).isWithin(0.01f).of(0.1f)
+
+            // Ensure that alpha is set back to 1f when QS is fully expanded
+            shadeRepository.setQsExpansion(1f)
+            assertThat(alpha).isEqualTo(1f)
+        }
+
+    @Test
     fun shadeCollapseFadeIn() =
         testScope.runTest {
-            val fadeIn by collectLastValue(underTest.shadeCollapseFadeIn)
+            val fadeIn by collectValues(underTest.shadeCollapseFadeIn)
 
             // Start on lockscreen without the shade
-            underTest.setShadeCollapseFadeInComplete(false)
             showLockscreen()
-            assertThat(fadeIn).isEqualTo(false)
+            assertThat(fadeIn[0]).isEqualTo(false)
 
             // ... then the shade expands
             showLockscreenWithShadeExpanded()
-            assertThat(fadeIn).isEqualTo(false)
+            assertThat(fadeIn[0]).isEqualTo(false)
 
             // ... it collapses
             showLockscreen()
-            assertThat(fadeIn).isEqualTo(true)
+            assertThat(fadeIn[1]).isEqualTo(true)
 
-            // ... now send animation complete signal
-            underTest.setShadeCollapseFadeInComplete(true)
-            assertThat(fadeIn).isEqualTo(false)
+            // ... and ensure the value goes back to false
+            assertThat(fadeIn[2]).isEqualTo(false)
         }
 
     @Test
     fun shadeCollapseFadeIn_doesNotRunIfTransitioningToAod() =
         testScope.runTest {
-            val fadeIn by collectLastValue(underTest.shadeCollapseFadeIn)
+            val fadeIn by collectValues(underTest.shadeCollapseFadeIn)
 
             // Start on lockscreen without the shade
-            underTest.setShadeCollapseFadeInComplete(false)
             showLockscreen()
-            assertThat(fadeIn).isEqualTo(false)
+            assertThat(fadeIn[0]).isEqualTo(false)
 
             // ... then the shade expands
             showLockscreenWithShadeExpanded()
-            assertThat(fadeIn).isEqualTo(false)
+            assertThat(fadeIn[0]).isEqualTo(false)
 
             // ... then user hits power to go to AOD
             keyguardTransitionRepository.sendTransitionSteps(
@@ -744,7 +762,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // ... followed by a shade collapse
             showLockscreen()
             // ... does not trigger a fade in
-            assertThat(fadeIn).isEqualTo(false)
+            assertThat(fadeIn[0]).isEqualTo(false)
         }
 
     private suspend fun TestScope.showLockscreen() {

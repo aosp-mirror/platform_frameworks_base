@@ -204,6 +204,7 @@ import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.VisualQueryDetectionService;
 import android.service.wearable.WearableSensingService;
@@ -4518,13 +4519,14 @@ public final class ActiveServices {
     }
 
     // TODO(b/265746493): Special case for HotwordDetectionService,
-    // VisualQueryDetectionService and WearableSensingService.
+    // VisualQueryDetectionService, WearableSensingService and OnDeviceSandboxedInferenceService
     // Need a cleaner way to append this seInfo.
     private String generateAdditionalSeInfoFromService(Intent service) {
         if (service != null && service.getAction() != null
                 && (service.getAction().equals(HotwordDetectionService.SERVICE_INTERFACE)
                 || service.getAction().equals(VisualQueryDetectionService.SERVICE_INTERFACE)
-                || service.getAction().equals(WearableSensingService.SERVICE_INTERFACE))) {
+                || service.getAction().equals(WearableSensingService.SERVICE_INTERFACE)
+            || service.getAction().equals(OnDeviceSandboxedInferenceService.SERVICE_INTERFACE))) {
             return ":isolatedComputeApp";
         }
         return "";

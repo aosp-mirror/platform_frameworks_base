@@ -142,7 +142,7 @@ public final class CameraExtensionCharacteristics {
     /**
      * An extension that aims to lock and stabilize a given region or object of interest.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EXTENSION_EYES_FREE_VIDEOGRAPHY = 5;
 
     /**
@@ -227,14 +227,18 @@ public final class CameraExtensionCharacteristics {
     private static List<Size> generateSupportedSizes(List<SizeList> sizesList,
                                                      Integer format,
                                                      StreamConfigurationMap streamMap) {
-        // Per API contract it is assumed that the extension is able to support all
-        // camera advertised sizes for a given format in case it doesn't return
-        // a valid non-empty size list.
         ArrayList<Size> ret = getSupportedSizes(sizesList, format);
-        Size[] supportedSizes = streamMap.getOutputSizes(format);
-        if ((ret.isEmpty()) && (supportedSizes != null)) {
-            ret.addAll(Arrays.asList(supportedSizes));
+
+        if (format == ImageFormat.JPEG || format == ImageFormat.YUV_420_888) {
+            // Per API contract it is assumed that the extension is able to support all
+            // camera advertised sizes for JPEG and YUV_420_888 in case it doesn't return
+            // a valid non-empty size list.
+            Size[] supportedSizes = streamMap.getOutputSizes(format);
+            if ((ret.isEmpty()) && (supportedSizes != null)) {
+                ret.addAll(Arrays.asList(supportedSizes));
+            }
         }
+
         return ret;
     }
 
@@ -559,7 +563,7 @@ public final class CameraExtensionCharacteristics {
             public ExtensionConnectionManager() {
                 IntArray extensionList = new IntArray(EXTENSION_LIST.length);
                 extensionList.addAll(EXTENSION_LIST);
-                if (Flags.concertMode()) {
+                if (Flags.concertModeApi()) {
                     extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
                 }
 
@@ -762,7 +766,7 @@ public final class CameraExtensionCharacteristics {
 
         IntArray extensionList = new IntArray(EXTENSION_LIST.length);
         extensionList.addAll(EXTENSION_LIST);
-        if (Flags.concertMode()) {
+        if (Flags.concertModeApi()) {
             extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
         }
 
@@ -1544,7 +1548,7 @@ public final class CameraExtensionCharacteristics {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
             CameraCharacteristics.EFV_PADDING_ZOOM_FACTOR_RANGE;
 }

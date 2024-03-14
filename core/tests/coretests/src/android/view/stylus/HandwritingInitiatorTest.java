@@ -23,6 +23,8 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
 import static android.view.stylus.HandwritingTestUtil.createView;
 
+import static com.android.text.flags.Flags.handwritingCursorPosition;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assume.assumeFalse;
@@ -129,6 +131,7 @@ public class HandwritingInitiatorTest {
     public void onTouchEvent_startHandwriting_when_stylusMoveOnce_withinHWArea() {
         mTestView1.setText("hello");
         when(mTestView1.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(4);
+        when(mTestView1.getLineAtCoordinate(anyFloat())).thenReturn(0);
 
         mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
@@ -148,9 +151,51 @@ public class HandwritingInitiatorTest {
         // After IMM.startHandwriting is triggered, onTouchEvent should return true for ACTION_MOVE
         // events so that the events are not dispatched to the view tree.
         assertThat(onTouchEventResult2).isTrue();
-        // Since the stylus down point was inside the TextView's bounds, the handwriting initiator
-        // does not need to set the cursor position.
-        verify(mTestView1, never()).setSelection(anyInt());
+        if (handwritingCursorPosition()) {
+            // Cursor is placed at the end of the text.
+            verify(mTestView1).setSelection(5);
+        } else {
+            // Since the stylus down point was inside the TextView's bounds, the handwriting
+            // initiator does not need to set the cursor position.
+            verify(mTestView1, never()).setSelection(anyInt());
+        }
+    }
+
+    @Test
+    public void onTouchEvent_startHandwriting_multipleParagraphs() {
+        // End of line 0 is offset 10, end of line 1 is offset 20, end of line 2 is offset 30, end
+        // of line 3 is offset 40.
+        mTestView1.setText("line 0    \nline 1   \nline 2   \nline 3   ");
+        mTestView1.layout(0, 0, 500, 500);
+        when(mTestView1.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(4);
+        when(mTestView1.getLineAtCoordinate(anyFloat())).thenReturn(2);
+
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        boolean onTouchEventResult1 = mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + mHandwritingSlop * 2;
+        final int y2 = y1;
+
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        boolean onTouchEventResult2 = mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        // Stylus movement within HandwritingArea should trigger IMM.startHandwriting once.
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
+        assertThat(onTouchEventResult1).isFalse();
+        // After IMM.startHandwriting is triggered, onTouchEvent should return true for ACTION_MOVE
+        // events so that the events are not dispatched to the view tree.
+        assertThat(onTouchEventResult2).isTrue();
+        if (handwritingCursorPosition()) {
+            // Cursor is placed at the end of the paragraph containing line 2.
+            verify(mTestView1).setSelection(30);
+        } else {
+            // Since the stylus down point was inside the TextView's bounds, the handwriting
+            // initiator does not need to set the cursor position.
+            verify(mTestView1, never()).setSelection(anyInt());
+        }
     }
 
     @Test
@@ -197,6 +242,7 @@ public class HandwritingInitiatorTest {
     public void onTouchEvent_startHandwriting_when_stylusMove_withinExtendedHWArea() {
         mTestView1.setText("hello");
         when(mTestView1.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(4);
+        when(mTestView1.getLineAtCoordinate(anyFloat())).thenReturn(0);
 
         if (!mInitiateWithoutConnection) {
             mHandwritingInitiator.onInputConnectionCreated(mTestView1);
@@ -214,9 +260,14 @@ public class HandwritingInitiatorTest {
 
         // Stylus movement within extended HandwritingArea should trigger IMM.startHandwriting once.
         verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
-        // Since the stylus down point was outside the TextView's bounds, the handwriting initiator
-        // sets the cursor position.
-        verify(mTestView1).setSelection(4);
+        if (handwritingCursorPosition()) {
+            // Cursor is placed at the end of the text.
+            verify(mTestView1).setSelection(5);
+        } else {
+            // Since the stylus down point was outside the TextView's bounds, the handwriting
+            // initiator sets the cursor position.
+            verify(mTestView1).setSelection(4);
+        }
     }
 
     @Test
@@ -246,6 +297,8 @@ public class HandwritingInitiatorTest {
     public void onTouchEvent_startHandwriting_servedViewUpdate_stylusMoveInExtendedHWArea() {
         mTestView1.setText("hello");
         when(mTestView1.getOffsetForPosition(anyFloat(), anyFloat())).thenReturn(4);
+        when(mTestView1.getLineAtCoordinate(anyFloat())).thenReturn(0);
+
         // The stylus down point is between mTestView1 and  mTestView2, but it is within the
         // extended handwriting area of both views. It is closer to mTestView1.
         final int x1 = sHwArea1.right + HW_BOUNDS_OFFSETS_RIGHT_PX / 2;
@@ -278,9 +331,14 @@ public class HandwritingInitiatorTest {
         // Handwriting is started for this view since  the stylus down point is closest to this
         // view.
         verify(mHandwritingInitiator).startHandwriting(mTestView1);
-        // Since the stylus down point was outside the TextView's bounds, the handwriting initiator
-        // sets the cursor position.
-        verify(mTestView1).setSelection(4);
+        if (handwritingCursorPosition()) {
+            // Cursor is placed at the end of the text.
+            verify(mTestView1).setSelection(5);
+        } else {
+            // Since the stylus down point was outside the TextView's bounds, the handwriting
+            //  initiator sets the cursor position.
+            verify(mTestView1).setSelection(4);
+        }
     }
 
 

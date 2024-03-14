@@ -244,6 +244,17 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY =
             "ignore_view_state_reset_to_empty";
 
+    /**
+     * Bugfix flag, Autofill should ignore view updates if an Auth intent is showing.
+     *
+     * See frameworks/base/services/autofill/bugfixes.aconfig#relayout
+     * for more information.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING =
+            "ignore_relayout_auth_pending";
+
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -510,6 +521,14 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_IGNORE_VIEW_STATE_RESET_TO_EMPTY,
+                false);
+    }
+
+    /** @hide */
+    public static boolean shouldIgnoreRelayoutWhenAuthPending() {
+        return DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_IGNORE_RELAYOUT_WHEN_AUTH_PENDING,
                 false);
     }
 

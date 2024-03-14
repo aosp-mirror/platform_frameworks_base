@@ -338,6 +338,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
@@ -740,7 +741,7 @@ public class NotificationManagerService extends SystemService {
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
-    static final IBinder ALLOWLIST_TOKEN = new Binder();
+    private static final IBinder ALLOWLIST_TOKEN = new Binder();
     protected RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
@@ -1823,6 +1824,12 @@ public class NotificationManagerService extends SystemService {
                     NotificationRecordLogger.NotificationEvent.NOTIFICATION_SMART_REPLY_VISIBLE,
                     r);
         }
+    }
+
+    protected void logSensitiveAdjustmentReceived(boolean hasPosted,
+            boolean hasSensitiveContent, int lifespanMs) {
+        FrameworkStatsLog.write(FrameworkStatsLog.SENSITIVE_NOTIFICATION_REDACTION, hasPosted,
+                hasSensitiveContent, lifespanMs);
     }
 
     @GuardedBy("mNotificationLock")
@@ -4868,7 +4875,7 @@ public class NotificationManagerService extends SystemService {
                     // Remove background token before returning notification to untrusted app, this
                     // ensures the app isn't able to perform background operations that are
                     // associated with notification interactions.
-                    notification.overrideAllowlistToken(null);
+                    notification.clearAllowlistToken();
                     return new StatusBarNotification(
                             sbn.getPackageName(),
                             sbn.getOpPkg(),
@@ -6384,7 +6391,7 @@ public class NotificationManagerService extends SystemService {
                         if (Objects.equals(adjustment.getKey(), r.getKey())
                                 && Objects.equals(adjustment.getUser(), r.getUserId())
                                 && mAssistants.isSameUser(token, r.getUserId())) {
-                            applyAdjustment(r, adjustment);
+                            applyAdjustmentLocked(r, adjustment, false);
                             r.applyAdjustments();
                             // importance is checked at the beginning of the
                             // PostNotificationRunnable, before the signal extractors are run, so
@@ -6394,7 +6401,7 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                     if (!foundEnqueued) {
-                        applyAdjustmentFromAssistant(token, adjustment);
+                        applyAdjustmentsFromAssistant(token, List.of(adjustment));
                     }
                 }
             } finally {
@@ -6422,7 +6429,7 @@ public class NotificationManagerService extends SystemService {
                     for (Adjustment adjustment : adjustments) {
                         NotificationRecord r = mNotificationsByKey.get(adjustment.getKey());
                         if (r != null && mAssistants.isSameUser(token, r.getUserId())) {
-                            applyAdjustment(r, adjustment);
+                            applyAdjustmentLocked(r, adjustment, true);
                             // If the assistant has blocked the notification, cancel it
                             // This will trigger a sort, so we don't have to explicitly ask for
                             // one here.
@@ -6706,7 +6713,9 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void applyAdjustment(NotificationRecord r, Adjustment adjustment) {
+    @GuardedBy("mNotificationLock")
+    private void applyAdjustmentLocked(NotificationRecord r, Adjustment adjustment,
+            boolean isPosted) {
         if (r == null) {
             return;
         }
@@ -6723,6 +6732,11 @@ public class NotificationManagerService extends SystemService {
                 adjustments.remove(removeKey);
             }
             r.addAdjustment(adjustment);
+            if (adjustment.getSignals().containsKey(Adjustment.KEY_SENSITIVE_CONTENT)) {
+                logSensitiveAdjustmentReceived(isPosted,
+                        adjustment.getSignals().getBoolean(Adjustment.KEY_SENSITIVE_CONTENT),
+                        r.getLifespanMs(System.currentTimeMillis()));
+            }
         }
     }
 
@@ -7869,8 +7883,6 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
-
-        notification.overrideAllowlistToken(ALLOWLIST_TOKEN);
 
         // Remote views? Are they too big?
         checkRemoteViews(pkg, tag, id, notification);

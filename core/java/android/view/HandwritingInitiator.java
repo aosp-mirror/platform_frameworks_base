@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static com.android.text.flags.Flags.handwritingCursorPosition;
+
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -557,7 +559,8 @@ public class HandwritingInitiator {
     }
 
     private void requestFocusWithoutReveal(View view) {
-        if (view instanceof EditText editText && !mState.mStylusDownWithinEditorBounds) {
+        if (!handwritingCursorPosition() && view instanceof EditText editText
+                && !mState.mStylusDownWithinEditorBounds) {
             // If the stylus down point was inside the EditText's bounds, then the EditText will
             // automatically set its cursor position nearest to the stylus down point when it
             // gains focus. If the stylus down point was outside the EditText's bounds (within
@@ -575,6 +578,17 @@ public class HandwritingInitiator {
             view.setRevealOnFocusHint(true);
         } else {
             view.requestFocus();
+        }
+        if (handwritingCursorPosition() && view instanceof EditText editText) {
+            // Move the cursor to the end of the paragraph closest to the stylus down point.
+            view.getLocationInWindow(mTempLocation);
+            int line = editText.getLineAtCoordinate(mState.mStylusDownY - mTempLocation[1]);
+            int paragraphEnd = TextUtils.indexOf(editText.getText(), '\n',
+                    editText.getLayout().getLineStart(line));
+            if (paragraphEnd < 0) {
+                paragraphEnd = editText.getText().length();
+            }
+            editText.setSelection(paragraphEnd);
         }
     }
 

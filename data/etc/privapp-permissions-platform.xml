@@ -553,6 +553,8 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"/>
         <!-- Permission required for CTS test - CtsWearableSensingServiceTestCases -->
         <permission name="android.permission.MANAGE_WEARABLE_SENSING_SERVICE"/>
+        <!-- Permission required for CTS test - OnDeviceIntelligenceManagerTest -->
+        <permission name="android.permission.USE_ON_DEVICE_INTELLIGENCE" />
         <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
         <permission name="android.permission.WRITE_APN_SETTINGS"/>
         <!-- Permission required for GTS test - GtsStatsdHostTestCases -->

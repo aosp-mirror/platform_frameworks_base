@@ -99,6 +99,7 @@ import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
@@ -580,6 +581,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 () -> Optional.of(mCentralSurfaces),
                 mKeyguardStateController,
                 mock(ShadeViewController.class),
+                mock(PanelExpansionInteractor.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),
                 mHandler,

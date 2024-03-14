@@ -109,7 +109,8 @@ constructor(
             biometricSettingsRepository.isFingerprintAuthCurrentlyAllowed.value &&
             !keyguardUpdateMonitor.isFingerprintLockedOut &&
             !keyguardStateController.isUnlocked &&
-            !statusBarStateController.isDozing
+            !statusBarStateController.isDozing &&
+            !bouncerRepository.primaryBouncerShow.value
     }
 
     /**

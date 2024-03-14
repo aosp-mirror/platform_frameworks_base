@@ -21,17 +21,10 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Bundle;
-import android.os.UserHandle;
-import android.provider.Settings;
-import android.provider.SettingsStringUtil;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
@@ -101,6 +94,10 @@ class MenuView extends FrameLayout implements
         loadLayoutResources();
 
         addView(mTargetFeaturesView);
+
+        setClickable(false);
+        setFocusable(false);
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
     @Override
@@ -224,8 +221,7 @@ class MenuView extends FrameLayout implements
         }
 
         // We can skip animating if FAB is not visible
-        if (Flags.floatingMenuImeDisplacementAnimation()
-                && animateMovement && getVisibility() == VISIBLE) {
+        if (animateMovement && getVisibility() == VISIBLE) {
             mMenuAnimationController.moveToPosition(position, /* animateMovement = */ true);
             // onArrivalAtPosition() is called at the end of the animation.
         } else {
@@ -331,7 +327,7 @@ class MenuView extends FrameLayout implements
             mMoveToTuckedListener.onMoveToTuckedChanged(isMoveToTucked);
         }
 
-        if (Flags.floatingMenuOverlapsNavBarsFlag() && !Flags.floatingMenuAnimatedTuck()) {
+        if (!Flags.floatingMenuAnimatedTuck()) {
             if (isMoveToTucked) {
                 final float halfWidth = getMenuWidth() / 2.0f;
                 final boolean isOnLeftSide = mMenuAnimationController.isOnLeftSide();
@@ -431,22 +427,6 @@ class MenuView extends FrameLayout implements
         onPositionChanged();
     }
 
-    void gotoEditScreen() {
-        if (!Flags.floatingMenuDragToEdit()) {
-            return;
-        }
-        mMenuAnimationController.flingMenuThenSpringToEdge(
-                getMenuPosition().x, 100f, 0f);
-
-        Intent intent = getIntentForEditScreen();
-        PackageManager packageManager = getContext().getPackageManager();
-        List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
-                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
-        if (!activities.isEmpty()) {
-            mContext.startActivity(intent);
-        }
-    }
-
     void incrementTexMetricForAllTargets(String metric) {
         if (!Flags.floatingMenuDragToEdit()) {
             return;
@@ -459,23 +439,6 @@ class MenuView extends FrameLayout implements
     @VisibleForTesting
     void incrementTexMetric(String metric, int uid) {
         Counter.logIncrementWithUid(metric, uid);
-    }
-
-    Intent getIntentForEditScreen() {
-        List<String> targets = new SettingsStringUtil.ColonDelimitedSet.OfStrings(
-                mSecureSettings.getStringForUser(
-                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                        UserHandle.USER_CURRENT)).stream().toList();
-
-        Intent intent = new Intent(
-                Settings.ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS);
-        Bundle args = new Bundle();
-        Bundle fragmentArgs = new Bundle();
-        fragmentArgs.putStringArray("targets", targets.toArray(new String[0]));
-        args.putBundle(":settings:show_fragment_args", fragmentArgs);
-        intent.replaceExtras(args);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        return intent;
     }
 
     private InstantInsetLayerDrawable getContainerViewInsetLayer() {

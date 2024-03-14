@@ -1133,16 +1133,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             // Depending on device hardware, we may need to notify the user of a setting change
             SoftApConfiguration storedConfig = mWifiManager.getSoftApConfiguration();
 
-            if (isNeedToNotifyUserConfigurationHasChanged(configInCloud, storedConfig)) {
-                Log.d(TAG, "restored ap configuration requires a conversion, notify the user"
+            if (isConfigurationHasChanged(configInCloud, storedConfig)) {
+                Log.d(TAG, "restored ap configuration requires a conversion: "
                         + ", configInCloud is " + configInCloud + " but storedConfig is "
                         + storedConfig);
-                WifiSoftApConfigChangedNotifier.notifyUserOfConfigConversion(this);
             }
         }
     }
 
-    private boolean isNeedToNotifyUserConfigurationHasChanged(SoftApConfiguration configInCloud,
+    private boolean isConfigurationHasChanged(SoftApConfiguration configInCloud,
             SoftApConfiguration storedConfig) {
         // Check if the cloud configuration was modified when restored to the device.
         // All elements of the configuration are compared except:

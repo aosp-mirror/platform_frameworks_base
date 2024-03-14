@@ -135,7 +135,7 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun streamIsMuted_getStream_volumeZero() {
+    fun streamIsMuted_getStream_volumeMin() {
         with(kosmos) {
             testScope.runTest {
                 val model by collectLastValue(underTest.getAudioStream(audioStream))
@@ -166,7 +166,7 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun ringerModeVibrateAndMuted_getNotificationStream_volumeIsZero() {
+    fun ringerModeVibrateAndMuted_getNotificationStream_volumeIsMin() {
         with(kosmos) {
             testScope.runTest {
                 audioRepository.setRingerMode(RingerMode(AudioManager.RINGER_MODE_VIBRATE))
@@ -184,7 +184,7 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun ringerModeVibrate_getRingerStream_volumeIsZero() {
+    fun ringerModeVibrate_getRingerStream_volumeIsMin() {
         with(kosmos) {
             testScope.runTest {
                 audioRepository.setRingerMode(RingerMode(AudioManager.RINGER_MODE_VIBRATE))

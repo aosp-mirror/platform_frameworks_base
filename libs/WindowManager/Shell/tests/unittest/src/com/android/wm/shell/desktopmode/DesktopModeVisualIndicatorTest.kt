@@ -68,17 +68,17 @@ class DesktopModeVisualIndicatorTest : ShellTestCase() {
         )
         var testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_FULLSCREEN, CAPTION_HEIGHT)
-        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, transitionHeight))
+        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, 2 * STABLE_INSETS.top))
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_FREEFORM, CAPTION_HEIGHT)
         assertThat(testRegion.bounds).isEqualTo(Rect(
             DISPLAY_BOUNDS.width() / 2 - fromFreeformWidth / 2,
             -50,
             DISPLAY_BOUNDS.width() / 2 + fromFreeformWidth / 2,
-            2 * STABLE_INSETS.top))
+            transitionHeight))
         testRegion = visualIndicator.calculateFullscreenRegion(displayLayout,
             WINDOWING_MODE_MULTI_WINDOW, CAPTION_HEIGHT)
-        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, transitionHeight))
+        assertThat(testRegion.bounds).isEqualTo(Rect(0, -50, 2400, 2 * STABLE_INSETS.top))
     }
 
     @Test

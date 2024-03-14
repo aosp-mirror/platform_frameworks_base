@@ -75,9 +75,9 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeControllerImpl;
-import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeAnimationRepository;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -257,7 +257,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         new StatusBarNotificationActivityStarterLogger(logcatLogBuffer()),
                         mOnUserInteractionCallback,
                         mock(NotificationPresenter.class),
-                        mock(ShadeViewController.class),
+                        mock(PanelExpansionInteractor.class),
                         mock(NotificationShadeWindowController.class),
                         mActivityTransitionAnimator,
                         new ShadeAnimationInteractorLegacyImpl(

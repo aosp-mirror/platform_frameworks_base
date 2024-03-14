@@ -3315,6 +3315,18 @@ public class CarrierConfigManager {
             "support_no_reply_timer_for_cfnry_bool";
 
     /**
+     * No reply time value to be sent to network for call forwarding on no reply
+     * (CFNRy 3GPP TS 24.082 version 17.0 section 3).
+     * Controls time in seconds for the no reply condition on in the call forwarding
+     * settings UI.
+     * This is available when {@link #KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL} is true.
+     *
+     * @hide
+     */
+    public static final String KEY_NO_REPLY_TIMER_FOR_CFNRY_SEC_INT =
+            "no_reply_timer_for_cfnry_sec_int";
+
+    /**
      * List of the FAC (feature access codes) to dial as a normal call.
      * @hide
      */
@@ -10666,6 +10678,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_VT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_RTT_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true);
+        sDefaults.putInt(KEY_NO_REPLY_TIMER_FOR_CFNRY_SEC_INT, 20);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL, false);

@@ -77,13 +77,13 @@ class AudioRepositoryTest {
         `when`(audioManager.getStreamMaxVolume(anyInt())).thenReturn(MAX_VOLUME)
         `when`(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
         `when`(audioManager.setStreamVolume(anyInt(), anyInt(), anyInt())).then {
-            val streamType = it.arguments[1] as Int
-            volumeByStream[it.arguments[0] as Int] = streamType
+            val streamType = it.arguments[0] as Int
+            volumeByStream[it.arguments[0] as Int] = it.arguments[1] as Int
             triggerEvent(AudioManagerEvent.StreamVolumeChanged(AudioStream(streamType)))
         }
         `when`(audioManager.adjustStreamVolume(anyInt(), anyInt(), anyInt())).then {
             val streamType = it.arguments[0] as Int
-            isMuteByStream[streamType] = it.arguments[2] == AudioManager.ADJUST_MUTE
+            isMuteByStream[streamType] = it.arguments[1] == AudioManager.ADJUST_MUTE
             triggerEvent(AudioManagerEvent.StreamMuteChanged(AudioStream(streamType)))
         }
         `when`(audioManager.getStreamVolume(anyInt())).thenAnswer {

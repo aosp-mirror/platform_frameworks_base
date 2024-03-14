@@ -1706,20 +1706,101 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    @RequiresPermission(Manifest.permission.STATUS_BAR_SERVICE)
+    @RequiresPermission(allOf = {
+            Manifest.permission.STATUS_BAR_SERVICE,
+            Manifest.permission.MANAGE_ACCESSIBILITY
+    })
     public void notifyQuickSettingsTilesChanged(
-            @UserIdInt int userId, List<ComponentName> tileComponentNames) {
-        mSecurityPolicy.enforceCallingPermission(
+            @UserIdInt int userId, @NonNull List<ComponentName> tileComponentNames) {
+        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
+            return;
+        }
+
+        mContext.enforceCallingPermission(
                 Manifest.permission.STATUS_BAR_SERVICE,
                 /* function= */ "notifyQuickSettingsTilesChanged");
+        mContext.enforceCallingPermission(
+                Manifest.permission.MANAGE_ACCESSIBILITY,
+                /* function= */ "notifyQuickSettingsTilesChanged");
 
-        Slog.d(LOG_TAG, TextUtils.formatSimple(
-                "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
-                        userId, tileComponentNames));
-        // TODO (b/314843909): in the follow up cl
+        if (DEBUG) {
+            Slog.d(LOG_TAG, TextUtils.formatSimple(
+                    "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
+                    userId, tileComponentNames));
+        }
+        final Set<ComponentName> newTileComponentNames = new ArraySet<>(tileComponentNames);
+        final Set<ComponentName> addedTiles;
+        final Set<ComponentName> removedTiles;
+        final Map<ComponentName, AccessibilityServiceInfo> tileServiceToA11yServiceInfo;
+        final Map<ComponentName, ComponentName> a11yFeatureToTileService;
+
         // update in-memory copy of QS_TILES in AccessibilityManager
-        // update Settings.Secure.ACCESSIBILITY_QS_TARGETS and its in-memory copy
-        // show full device control warning if needed (b/314850435)
+        synchronized (mLock) {
+            AccessibilityUserState userState = getUserStateLocked(userId);
+
+            tileServiceToA11yServiceInfo = userState.getTileServiceToA11yServiceInfoMapLocked();
+            a11yFeatureToTileService = userState.getA11yFeatureToTileService();
+
+            ArraySet<ComponentName> currentTiles = userState.getA11yQsTilesInQsPanel();
+            // Find newly added tiles
+            addedTiles = newTileComponentNames
+                    .stream()
+                    .filter(tileComponentName -> !currentTiles.contains(tileComponentName))
+                    .collect(Collectors.toSet());
+            // Find newly removed tiles
+            removedTiles = currentTiles
+                    .stream()
+                    .filter(tileComponentName -> !newTileComponentNames.contains(tileComponentName))
+                    .collect(Collectors.toSet());
+
+            if (addedTiles.isEmpty() && removedTiles.isEmpty()) {
+                return;
+            }
+
+            userState.updateA11yTilesInQsPanelLocked(newTileComponentNames);
+        }
+
+        List<String> a11yFeaturesToEnable = new ArrayList<>();
+        List<String> a11yFeaturesToRemove = new ArrayList<>();
+        // Find the framework features to configure the qs shortcut on/off
+        for (Map.Entry<ComponentName, ComponentName> frameworkFeatureWithTile :
+                ShortcutConstants.A11Y_FEATURE_TO_FRAMEWORK_TILE.entrySet()) {
+            String a11yFeature = frameworkFeatureWithTile.getKey().flattenToString();
+            ComponentName tile = frameworkFeatureWithTile.getValue();
+            if (addedTiles.contains(tile)) {
+                a11yFeaturesToEnable.add(a11yFeature);
+            } else if (removedTiles.contains(tile)) {
+                a11yFeaturesToRemove.add(a11yFeature);
+            }
+        }
+        // Find the accessibility service/activity to configure the qs shortcut on/off
+        for (Map.Entry<ComponentName, ComponentName> a11yFeatureWithTileService :
+                a11yFeatureToTileService.entrySet()) {
+            String a11yFeature = a11yFeatureWithTileService.getKey().flattenToString();
+            ComponentName tileService = a11yFeatureWithTileService.getValue();
+            if (addedTiles.contains(tileService)) {
+                AccessibilityServiceInfo serviceInfo = tileServiceToA11yServiceInfo.getOrDefault(
+                        tileService, null);
+                if (serviceInfo != null && isAccessibilityServiceWarningRequired(serviceInfo)) {
+                    // TODO(b/314850435): show full device control warning if needed after
+                    // SysUI QS Panel can update live
+                    continue;
+                }
+                a11yFeaturesToEnable.add(a11yFeature);
+            } else if (removedTiles.contains(tileService)) {
+                a11yFeaturesToRemove.add(a11yFeature);
+            }
+        }
+        // Turn on/off a11y qs shortcut for the a11y features based on the change in QS Panel
+        if (!a11yFeaturesToEnable.isEmpty()) {
+            enableShortcutForTargets(/* enable= */ true, UserShortcutType.QUICK_SETTINGS,
+                    a11yFeaturesToEnable, userId);
+        }
+
+        if (!a11yFeaturesToRemove.isEmpty()) {
+            enableShortcutForTargets(/* enable= */ false, UserShortcutType.QUICK_SETTINGS,
+                    a11yFeaturesToRemove, userId);
+        }
     }
 
     /**
@@ -3661,18 +3742,35 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     /**
      * Update the Settings.Secure.ACCESSIBILITY_QS_TARGETS so that it only contains valid content,
      * and a side loaded service can't spoof the package name of the default service.
+     * <p>
+     * 1. Remove the target if the target is no longer installed on the device <br/>
+     * 2. Add the target if the target is enabled and the target's tile is in the QS Panel <br/>
+     * </p>
      */
     private void updateAccessibilityQsTargetsLocked(AccessibilityUserState userState) {
-        final Set<String> targets =
-                userState.getShortcutTargetsLocked(UserShortcutType.QUICK_SETTINGS);
-        final int lastSize = targets.size();
-        if (lastSize == 0) {
+        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
             return;
         }
+
+        final Set<String> targets =
+                userState.getShortcutTargetsLocked(UserShortcutType.QUICK_SETTINGS);
 
         // Removes the targets that are no longer installed on the device.
         boolean somethingChanged = targets.removeIf(
                 name -> !userState.isShortcutTargetInstalledLocked(name));
+        // Add the target if the a11y service is enabled and the tile exist in QS panel
+        Set<ComponentName> enabledServices = userState.getEnabledServicesLocked();
+        Map<ComponentName, ComponentName> a11yFeatureToTileService =
+                userState.getA11yFeatureToTileService();
+        Set<ComponentName> currentA11yTilesInQsPanel = userState.getA11yQsTilesInQsPanel();
+        for (ComponentName enabledService : enabledServices) {
+            ComponentName tileService =
+                    a11yFeatureToTileService.getOrDefault(enabledService, null);
+            if (tileService != null && currentA11yTilesInQsPanel.contains(tileService)) {
+                somethingChanged |= targets.add(enabledService.flattenToString());
+            }
+        }
+
         if (!somethingChanged) {
             return;
         }
@@ -3700,14 +3798,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return;
         }
 
-        final List<Pair<Integer, String>> shortcutTypeAndShortcutSetting = List.of(
+        final List<Pair<Integer, String>> shortcutTypeAndShortcutSetting = new ArrayList<>(3);
+        shortcutTypeAndShortcutSetting.add(
                 new Pair<>(ACCESSIBILITY_SHORTCUT_KEY,
-                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE),
+                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE));
+        shortcutTypeAndShortcutSetting.add(
                 new Pair<>(ACCESSIBILITY_BUTTON,
-                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
-                new Pair<>(UserShortcutType.QUICK_SETTINGS,
-                        Settings.Secure.ACCESSIBILITY_QS_TARGETS)
-        );
+                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS));
+        if (android.view.accessibility.Flags.a11yQsShortcut()) {
+            shortcutTypeAndShortcutSetting.add(
+                    new Pair<>(UserShortcutType.QUICK_SETTINGS,
+                            Settings.Secure.ACCESSIBILITY_QS_TARGETS));
+        }
 
         final ComponentName serviceName = service.getComponentName();
         for (Pair<Integer, String> shortcutTypePair : shortcutTypeAndShortcutSetting) {

@@ -18,6 +18,7 @@ package com.android.wm.shell.startingsurface;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NONE;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
 import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
 
@@ -270,21 +271,18 @@ public class StartingSurfaceDrawer {
 
         @Override
         public final boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
-            if (immediately) {
+            if (immediately
+                    // Show the latest content as soon as possible for unlocking to home.
+                    || mActivityType == ACTIVITY_TYPE_HOME
+                    || info.deferRemoveMode == DEFER_MODE_NONE) {
                 removeImmediately();
-            } else {
-                scheduleRemove(info.deferRemoveForImeMode);
-                return false;
+                return true;
             }
-            return true;
+            scheduleRemove(info.deferRemoveMode);
+            return false;
         }
 
         void scheduleRemove(@StartingWindowRemovalInfo.DeferMode int deferRemoveForImeMode) {
-            // Show the latest content as soon as possible for unlocking to home.
-            if (mActivityType == ACTIVITY_TYPE_HOME) {
-                removeImmediately();
-                return;
-            }
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
             final long delayRemovalTime;
             switch (deferRemoveForImeMode) {

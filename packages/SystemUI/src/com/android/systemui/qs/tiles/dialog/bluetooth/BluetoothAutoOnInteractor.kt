@@ -30,7 +30,7 @@ constructor(
     private val bluetoothAutoOnRepository: BluetoothAutoOnRepository,
 ) {
 
-    val isEnabled = bluetoothAutoOnRepository.getValue.map { it == ENABLED }.distinctUntilChanged()
+    val isEnabled = bluetoothAutoOnRepository.isAutoOn.map { it == ENABLED }.distinctUntilChanged()
 
     /**
      * Checks if the auto on value is present in the repository.
@@ -49,7 +49,7 @@ constructor(
             Log.e(TAG, "Trying to set toggle value while feature not available.")
         } else {
             val newValue = if (value) ENABLED else DISABLED
-            bluetoothAutoOnRepository.setValue(newValue)
+            bluetoothAutoOnRepository.setAutoOn(newValue)
         }
     }
 

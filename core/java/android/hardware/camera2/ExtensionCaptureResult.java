@@ -42,7 +42,7 @@ import com.android.internal.camera.flags.Flags;
  * @see CaptureRequest
  * @see CameraExtensionSession
  */
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
+@FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
 public final class ExtensionCaptureResult {
 
    /**
@@ -66,7 +66,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<int[]> EFV_PADDING_REGION = CaptureResult.EFV_PADDING_REGION;
 
     /**
@@ -90,7 +90,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<int[]> EFV_AUTO_ZOOM_PADDING_REGION = CaptureResult.EFV_AUTO_ZOOM_PADDING_REGION;
 
     /**
@@ -113,7 +113,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.graphics.PointF[]> EFV_TARGET_COORDINATES = CaptureResult.EFV_TARGET_COORDINATES;
 
     /**
@@ -147,7 +147,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_PADDING_ZOOM_FACTOR = CaptureResult.EFV_PADDING_ZOOM_FACTOR;
 
     /**
@@ -174,7 +174,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Integer> EFV_STABILIZATION_MODE = CaptureResult.EFV_STABILIZATION_MODE;
 
     /**
@@ -199,7 +199,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Boolean> EFV_AUTO_ZOOM = CaptureResult.EFV_AUTO_ZOOM;
 
     /**
@@ -216,7 +216,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_ROTATE_VIEWPORT = CaptureResult.EFV_ROTATE_VIEWPORT;
 
     /**
@@ -240,7 +240,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Pair<Integer,Integer>> EFV_TRANSLATE_VIEWPORT = CaptureResult.EFV_TRANSLATE_VIEWPORT;
 
     /**
@@ -266,7 +266,7 @@ public final class ExtensionCaptureResult {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<Float> EFV_MAX_PADDING_ZOOM_FACTOR = CaptureResult.EFV_MAX_PADDING_ZOOM_FACTOR;
 
 }

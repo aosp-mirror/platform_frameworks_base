@@ -57,6 +57,7 @@ import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -81,6 +82,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
     private final ShadeViewController mShadeViewController;
+    private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -120,6 +122,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             ShadeController shadeController,
             CommandQueue commandQueue,
             ShadeViewController shadeViewController,
+            PanelExpansionInteractor panelExpansionInteractor,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             MetricsLogger metricsLogger,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -147,6 +150,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
         mShadeViewController = shadeViewController;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
         mMetricsLogger = metricsLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -304,7 +308,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mShadeController.animateCollapseShade();
         } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key.getKeyCode()) {
             mMetricsLogger.action(MetricsEvent.ACTION_SYSTEM_NAVIGATION_KEY_DOWN);
-            if (mShadeViewController.isFullyCollapsed()) {
+            if (mPanelExpansionInteractor.isFullyCollapsed()) {
                 if (mVibrateOnOpening) {
                     vibrateOnNavigationKeyDown();
                 }
@@ -371,7 +375,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                     mStatusBarKeyguardViewManager.reset(true /* hide */);
                 }
                 mCameraLauncherLazy.get().launchCamera(source,
-                        mShadeViewController.isFullyCollapsed());
+                        mPanelExpansionInteractor.isFullyCollapsed());
                 mCentralSurfaces.updateScrimController();
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise

@@ -159,6 +159,11 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         lastAnimator?.cancel()
         lastAnimator = info.animator
 
+        // Cancel any existing manual transitions
+        updateTransitionId?.let { uuid ->
+            updateTransition(uuid, lastStep.value, TransitionState.CANCELED)
+        }
+
         info.animator?.let { animator ->
             // An animator was provided, so use it to run the transition
             animator.setFloatValues(startingValue, 1f)

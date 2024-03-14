@@ -15490,8 +15490,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return x;
     }
 
+    /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    int getLineAtCoordinate(float y) {
+    public int getLineAtCoordinate(float y) {
         y -= getTotalPaddingTop();
         // Clamp the position to inside of the view.
         y = Math.max(0.0f, y);

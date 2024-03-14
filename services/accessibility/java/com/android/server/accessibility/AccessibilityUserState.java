@@ -66,6 +66,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Class that hold states and settings per user and share between
@@ -103,6 +105,15 @@ class AccessibilityUserState {
 
     final ArraySet<String> mAccessibilityButtonTargets = new ArraySet<>();
     private final ArraySet<String> mAccessibilityQsTargets = new ArraySet<>();
+
+    /**
+     * The QuickSettings tiles in the QS Panel. This can be different from
+     * {@link #mAccessibilityQsTargets} in that {@link #mA11yTilesInQsPanel} stores the
+     * TileService's or the a11y framework tile component names (e.g.
+     * {@link AccessibilityShortcutController#COLOR_INVERSION_TILE_COMPONENT_NAME}) instead of the
+     * A11y Feature's component names.
+     */
+    private final ArraySet<ComponentName> mA11yTilesInQsPanel = new ArraySet<>();
 
     private final ServiceInfoChangeListener mServiceInfoChangeListener;
 
@@ -566,7 +577,9 @@ class AccessibilityUserState {
         pw.println("}");
         pw.append("     button target:{").append(mTargetAssignedToAccessibilityButton);
         pw.println("}");
-        pw.append("     qs shortcut targets:" + mAccessibilityQsTargets);
+        pw.append("     qs shortcut targets:").append(mAccessibilityQsTargets.toString());
+        pw.println();
+        pw.append("     a11y tiles in QS panel:").append(mA11yTilesInQsPanel.toString());
         pw.println();
         pw.append("     Bound services:{");
         final int serviceCount = mBoundServices.size();
@@ -1100,10 +1113,46 @@ class AccessibilityUserState {
         return new ArraySet<>(mAccessibilityQsTargets);
     }
 
+    public void updateA11yTilesInQsPanelLocked(Set<ComponentName> componentNames) {
+        mA11yTilesInQsPanel.clear();
+        mA11yTilesInQsPanel.addAll(componentNames);
+    }
+
+    /**
+     * Returns a copy of the a11y tiles that are in the QuickSettings panel
+     */
+    public ArraySet<ComponentName> getA11yQsTilesInQsPanel() {
+        return new ArraySet<>(mA11yTilesInQsPanel);
+    }
+
+    /**
+     * Returns a map of AccessibilityService or AccessibilityShortcut to its provided TileService
+     */
     public Map<ComponentName, ComponentName> getA11yFeatureToTileService() {
         Map<ComponentName, ComponentName> featureToTileServiceMap = new ArrayMap<>();
         featureToTileServiceMap.putAll(mA11yServiceToTileService);
         featureToTileServiceMap.putAll(mA11yActivityToTileService);
         return featureToTileServiceMap;
+    }
+
+    /**
+     * Returns a map of TileService's componentName to the AccessibilityServiceInfo it ties to.
+     */
+    public Map<ComponentName, AccessibilityServiceInfo> getTileServiceToA11yServiceInfoMapLocked() {
+        Map<ComponentName, AccessibilityServiceInfo> tileServiceToA11yServiceInfoMap =
+                new ArrayMap<>();
+        Map<ComponentName, AccessibilityServiceInfo> a11yServiceToServiceInfoMap =
+                mInstalledServices.stream().collect(
+                        Collectors.toMap(
+                                AccessibilityServiceInfo::getComponentName,
+                                Function.identity()));
+        for (Map.Entry<ComponentName, ComponentName> serviceToTile :
+                mA11yServiceToTileService.entrySet()) {
+            if (a11yServiceToServiceInfoMap.containsKey(serviceToTile.getKey())) {
+                tileServiceToA11yServiceInfoMap.put(serviceToTile.getValue(),
+                        a11yServiceToServiceInfoMap.get(serviceToTile.getKey()));
+            }
+        }
+        return tileServiceToA11yServiceInfoMap;
     }
 }

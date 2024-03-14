@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.NotificationHistory.HistoricalNotification;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -35,13 +36,19 @@ import java.util.List;
 import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
+@Presubmit
 public class NotificationHistoryTest {
 
-    private HistoricalNotification getHistoricalNotification(int index) {
+    private static HistoricalNotification getHistoricalNotification(int index) {
         return getHistoricalNotification("package" + index, index);
     }
 
-    private HistoricalNotification getHistoricalNotification(String packageName, int index) {
+    private static HistoricalNotification getHistoricalNotification(String packageName, int index) {
+        return getHistoricalNotification(packageName, index, /* includeIcon= */ true);
+    }
+
+    private static HistoricalNotification getHistoricalNotification(String packageName, int index,
+            boolean includeIcon) {
         String expectedChannelName = "channelName" + index;
         String expectedChannelId = "channelId" + index;
         int expectedUid = 1123456 + index;
@@ -65,7 +72,7 @@ public class NotificationHistoryTest {
                 .setPostedTimeMs(expectedPostTime)
                 .setTitle(expectedTitle)
                 .setText(expectedText)
-                .setIcon(expectedIcon)
+                .setIcon(includeIcon ? expectedIcon : null)
                 .setConversationId(conversationId)
                 .build();
     }
@@ -376,7 +383,8 @@ public class NotificationHistoryTest {
 
         List<HistoricalNotification> expectedEntries = new ArrayList<>();
         for (int i = 10; i >= 1; i--) {
-            HistoricalNotification n = getHistoricalNotification(i);
+            HistoricalNotification n = getHistoricalNotification("packageName" + i,
+                    i, /* includeIcon= */ false);
             expectedEntries.add(n);
             history.addNotificationToWrite(n);
         }

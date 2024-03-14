@@ -60,7 +60,6 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.res.R
@@ -249,9 +248,6 @@ private fun SceneScope.QuickSettingsScene(
                 viewModel = footerActionsViewModel,
                 isCustomizing = isCustomizing,
                 lifecycleOwner = lifecycleOwner,
-                footerActionsModifier = { modifier ->
-                    modifier.element(QuickSettings.Elements.FooterActions)
-                },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
         }

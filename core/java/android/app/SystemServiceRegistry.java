@@ -34,6 +34,8 @@ import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.ecm.EnhancedConfirmationFrameworkInitializer;
 import android.app.job.JobSchedulerFrameworkInitializer;
+import android.app.ondeviceintelligence.IOnDeviceIntelligenceManager;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
 import android.app.people.PeopleManager;
 import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleFrameworkInitializer;
@@ -1588,6 +1590,19 @@ public final class SystemServiceRegistry {
                                 IWearableSensingManager.Stub.asInterface(iBinder);
                         return new WearableSensingManager(ctx.getOuterContext(), manager);
                     }});
+
+        registerService(Context.ON_DEVICE_INTELLIGENCE_SERVICE, OnDeviceIntelligenceManager.class,
+                new CachedServiceFetcher<OnDeviceIntelligenceManager>() {
+                    @Override
+                    public OnDeviceIntelligenceManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                Context.ON_DEVICE_INTELLIGENCE_SERVICE);
+                        IOnDeviceIntelligenceManager manager =
+                                IOnDeviceIntelligenceManager.Stub.asInterface(iBinder);
+                        return new OnDeviceIntelligenceManager(ctx.getOuterContext(), manager);
+                    }
+                });
 
         registerService(Context.GRAMMATICAL_INFLECTION_SERVICE, GrammaticalInflectionManager.class,
                 new CachedServiceFetcher<GrammaticalInflectionManager>() {

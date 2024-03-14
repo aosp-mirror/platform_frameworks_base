@@ -32,11 +32,14 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_UNKNOWN;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_IDLE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INVALID;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_LARGE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_REQUESTED;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_SMALL;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_VELOCITY;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -847,6 +850,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mInsetsAnimationRunning;
 
     private long mPreviousFrameDrawnTime = -1;
+    // The largest view size percentage to the display size. Used on trace to collect metric.
+    private float mLargestChildPercentage = 0.0f;
     // The reason the category was changed.
     private int mFrameRateCategoryChangeReason = 0;
     private String mFrameRateCategoryView;
@@ -4854,6 +4859,10 @@ public final class ViewRootImpl implements ViewParent,
         long fps = NANOS_PER_SEC / timeDiff;
         Trace.setCounter(mFpsTraceName, fps);
         mPreviousFrameDrawnTime = expectedDrawnTime;
+
+        long percentage = (long) (mLargestChildPercentage * 100);
+        Trace.setCounter(mLargestViewTraceName, percentage);
+        mLargestChildPercentage = 0.0f;
     }
 
     private void reportDrawFinished(@Nullable Transaction t, int seqId) {
@@ -6540,6 +6549,8 @@ public final class ViewRootImpl implements ViewParent,
                 case MSG_CHECK_INVALIDATION_IDLE:
                     if (!mHasInvalidation && !mIsFrameRateBoosting && !mIsTouchBoosting) {
                         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                        mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_IDLE;
+                        mFrameRateCategoryView = null;
                         setPreferredFrameRateCategory(mPreferredFrameRateCategory);
                         mHasIdledMessage = false;
                     } else {
@@ -12367,24 +12378,37 @@ public final class ViewRootImpl implements ViewParent,
                 || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
                         && mPreferredFrameRate > 0)) {
             frameRateCategory = FRAME_RATE_CATEGORY_HIGH;
+            if (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE) {
+                // We've received a velocity, so we'll let the velocity control the
+                // frame rate unless we receive additional motion events.
+                mIsTouchBoosting = false;
+                mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_VELOCITY;
+                mFrameRateCategoryView = null;
+            } else {
+                mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_UNKNOWN;
+            }
         }
 
         try {
             if (mLastPreferredFrameRateCategory != frameRateCategory) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    String reason = "none";
-                    switch (mFrameRateCategoryChangeReason) {
-                        case FRAME_RATE_CATEGORY_REASON_INTERMITTENT -> reason = "intermittent";
-                        case FRAME_RATE_CATEGORY_REASON_SMALL -> reason = "small";
-                        case FRAME_RATE_CATEGORY_REASON_LARGE -> reason = "large";
-                        case FRAME_RATE_CATEGORY_REASON_REQUESTED -> reason = "requested";
-                        case FRAME_RATE_CATEGORY_REASON_INVALID -> reason = "invalid frame rate";
-                    }
-                    String sourceView = mFrameRateCategoryView == null ? "No View Given"
+                    String reason = reasonToString(mFrameRateCategoryChangeReason);
+                    String sourceView = mFrameRateCategoryView == null ? "-"
                             : mFrameRateCategoryView;
+                    if (preferredFrameRateCategory == FRAME_RATE_CATEGORY_HIGH_HINT) {
+                        reason = "touch boost";
+                        sourceView = "-";
+                    } else if (categoryFromConflictedFrameRates == frameRateCategory
+                            && frameRateCategory != preferredFrameRateCategory
+                            && mIsFrameRateConflicted
+                    ) {
+                        reason = "conflict";
+                        sourceView = "-";
+                    }
+                    String category = categoryToString(frameRateCategory);
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRateCategory "
-                                    + frameRateCategory + ", reason " + reason + ", "
+                                    + category + ", reason " + reason + ", "
                                     + sourceView);
                 }
                 mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
@@ -12396,6 +12420,35 @@ public final class ViewRootImpl implements ViewParent,
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
+    }
+
+    private static String categoryToString(int frameRateCategory) {
+        String category;
+        switch (frameRateCategory) {
+            case FRAME_RATE_CATEGORY_NO_PREFERENCE -> category = "no preference";
+            case FRAME_RATE_CATEGORY_LOW -> category = "low";
+            case FRAME_RATE_CATEGORY_NORMAL -> category = "normal";
+            case FRAME_RATE_CATEGORY_HIGH_HINT -> category = "high hint";
+            case FRAME_RATE_CATEGORY_HIGH -> category = "high";
+            default -> category = "default";
+        }
+        return category;
+    }
+
+    private static String reasonToString(int reason) {
+        String str;
+        switch (reason) {
+            case FRAME_RATE_CATEGORY_REASON_INTERMITTENT -> str = "intermittent";
+            case FRAME_RATE_CATEGORY_REASON_SMALL -> str = "small";
+            case FRAME_RATE_CATEGORY_REASON_LARGE -> str = "large";
+            case FRAME_RATE_CATEGORY_REASON_REQUESTED -> str = "requested";
+            case FRAME_RATE_CATEGORY_REASON_INVALID -> str = "invalid frame rate";
+            case FRAME_RATE_CATEGORY_REASON_VELOCITY -> str = "velocity";
+            case FRAME_RATE_CATEGORY_REASON_IDLE -> str = "idle";
+            case FRAME_RATE_CATEGORY_REASON_UNKNOWN -> str = "unknown";
+            default -> str = String.valueOf(reason);
+        }
+        return str;
     }
 
     private void setPreferredFrameRate(float preferredFrameRate) {
@@ -12416,17 +12469,6 @@ public final class ViewRootImpl implements ViewParent,
                 mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
                     mFrameRateCompatibility).applyAsyncUnsafe();
                 mLastPreferredFrameRate = preferredFrameRate;
-            }
-            if (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE && mIsTouchBoosting) {
-                // We've received a velocity, so we'll let the velocity control the
-                // frame rate unless we receive additional motion events.
-                mIsTouchBoosting = false;
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    Trace.instant(
-                            Trace.TRACE_TAG_VIEW,
-                            "ViewRootImpl#setFrameRate velocity used, no touch boost on next frame"
-                    );
-                }
             }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate", e);
@@ -12468,7 +12510,7 @@ public final class ViewRootImpl implements ViewParent,
      * @param frameRateCategory the preferred frame rate category of a View
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
-    public void votePreferredFrameRateCategory(int frameRateCategory) {
+    public void votePreferredFrameRateCategory(int frameRateCategory, int reason, View view) {
         if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH) {
             mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
         } else if (frameRateCategory == FRAME_RATE_CATEGORY_HIGH_HINT) {
@@ -12479,6 +12521,7 @@ public final class ViewRootImpl implements ViewParent,
             mFrameRateCategoryLowCount = FRAME_RATE_CATEGORY_COUNT;
         }
 
+        int oldCategory = mPreferredFrameRateCategory;
         if (mFrameRateCategoryHighCount > 0) {
             mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
         } else if (mFrameRateCategoryHighHintCount > 0) {
@@ -12490,6 +12533,13 @@ public final class ViewRootImpl implements ViewParent,
         }
         mHasInvalidation = true;
         checkIdleness();
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)
+                && mPreferredFrameRateCategory != oldCategory
+                && mPreferredFrameRateCategory == frameRateCategory
+        ) {
+            mFrameRateCategoryChangeReason = reason;
+            mFrameRateCategoryView = view.getClass().getSimpleName();
+        }
     }
 
     /**
@@ -12617,12 +12667,10 @@ public final class ViewRootImpl implements ViewParent,
         mWindowlessBackKeyCallback = callback;
     }
 
-    void recordCategory(int category, int reason, View view) {
+    void recordViewPercentage(float percentage) {
         if (!Trace.isEnabled()) return;
-        if (category > mPreferredFrameRateCategory) {
-            mFrameRateCategoryChangeReason = reason;
-            mFrameRateCategoryView = view.getClass().getSimpleName();
-        }
+        // Record the largest view of percentage to the display size.
+        mLargestChildPercentage = Math.max(percentage, mLargestChildPercentage);
     }
 
     /**

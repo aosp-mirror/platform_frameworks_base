@@ -90,12 +90,12 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
         mMenuView = spy(new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,
                 mSecureSettings));
         mMenuView.setTranslationY(halfScreenHeight);
-        doNothing().when(mMenuView).gotoEditScreen();
 
         mMenuViewLayer = spy(new MenuViewLayer(
                 mContext, stubWindowManager, mAccessibilityManager,
                 stubMenuViewModel, stubMenuViewAppearance, mMenuView,
                 mock(IAccessibilityFloatingMenu.class), mSecureSettings));
+        doNothing().when(mMenuViewLayer).gotoEditScreen();
 
         doReturn(mDraggableBounds).when(mMenuView).getMenuDraggableBounds();
         mStubListView = new RecyclerView(mContext);

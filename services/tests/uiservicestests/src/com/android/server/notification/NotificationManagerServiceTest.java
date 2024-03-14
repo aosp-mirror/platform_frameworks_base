@@ -325,7 +325,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -6220,6 +6219,52 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(NOTIFICATION_ADJUSTED, mNotificationRecordLogger.event(1));
         assertEquals(1, mNotificationRecordLogger.get(0).getInstanceId());
         assertEquals(2, mNotificationRecordLogger.get(1).getInstanceId());
+    }
+
+    @Test
+    public void testSensitiveAdjustmentsLogged() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(any(), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+
+        // Set up notifications that will be adjusted
+        final NotificationRecord r1 = spy(generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true));
+        when(r1.getLifespanMs(anyLong())).thenReturn(1);
+
+        r1.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        mService.addEnqueuedNotification(r1);
+
+        // Test an adjustment for an enqueued notification
+        Bundle signals = new Bundle();
+        signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, true);
+        Adjustment adjustment1 = new Adjustment(
+                r1.getSbn().getPackageName(), r1.getKey(), signals, "",
+                r1.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment1);
+        assertTrue(mService.checkLastSensitiveLog(false, true, 1));
+
+        // Set up notifications that will be adjusted
+        final NotificationRecord r2 = spy(generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true));
+        when(r2.getLifespanMs(anyLong())).thenReturn(2);
+
+        r2.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        mService.addNotification(r2);
+        Adjustment adjustment2 = new Adjustment(
+                r2.getSbn().getPackageName(), r2.getKey(), signals, "",
+                r2.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment2);
+        assertTrue(mService.checkLastSensitiveLog(true, true, 2));
+
+        signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, false);
+        Adjustment adjustment3 = new Adjustment(
+                r2.getSbn().getPackageName(), r2.getKey(), signals, "",
+                r2.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment3);
+        assertTrue(mService.checkLastSensitiveLog(true, false, 2));
     }
 
     @Test
@@ -13177,35 +13222,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertSame(0, n.flags & Notification.FLAG_NO_DISMISS);
-    }
-
-    @Test
-    public void fixNotification_customAllowlistToken()
-            throws Exception {
-        Notification n = new Notification.Builder(mContext, "test")
-                .build();
-        try {
-            Field allowlistToken = Class.forName("android.app.Notification").
-                    getDeclaredField("mAllowlistToken");
-            allowlistToken.setAccessible(true);
-            allowlistToken.set(n, new Binder());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
-
-        IBinder actual = null;
-        try {
-            Field allowlistToken = Class.forName("android.app.Notification").
-                    getDeclaredField("mAllowlistToken");
-            allowlistToken.setAccessible(true);
-            actual = (IBinder) allowlistToken.get(n);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        assertTrue(mService.ALLOWLIST_TOKEN == actual);
     }
 
     @Test

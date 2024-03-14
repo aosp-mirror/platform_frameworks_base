@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.AnimationStateHandler;
+import com.android.systemui.statusbar.policy.AvalancheController;
 import com.android.systemui.statusbar.policy.BaseHeadsUpManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
@@ -124,9 +125,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger,
             JavaAdapter javaAdapter,
-            ShadeInteractor shadeInteractor) {
+            ShadeInteractor shadeInteractor,
+            AvalancheController avalancheController) {
         super(context, logger, handler, globalSettings, systemClock, executor,
-                accessibilityManagerWrapper, uiEventLogger);
+                accessibilityManagerWrapper, uiEventLogger, avalancheController);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         statusBarStateController.addCallback(mStatusBarStateListener);
@@ -279,7 +281,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
         if (headsUpEntry != null && headsUpEntry.mRemoteInputActive != remoteInputActive) {
             headsUpEntry.mRemoteInputActive = remoteInputActive;
             if (remoteInputActive) {
-                headsUpEntry.removeAutoRemovalCallbacks("setRemoteInputActive(true)");
+                headsUpEntry.cancelAutoRemovalCallbacks("setRemoteInputActive(true)");
             } else {
                 headsUpEntry.updateEntry(false /* updatePostTime */, "setRemoteInputActive(false)");
             }
@@ -482,7 +484,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
 
             this.mExpanded = expanded;
             if (expanded) {
-                removeAutoRemovalCallbacks("setExpanded(true)");
+                cancelAutoRemovalCallbacks("setExpanded(true)");
             } else {
                 updateEntry(false /* updatePostTime */, "setExpanded(false)");
             }
@@ -495,7 +497,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
 
             mGutsShownPinned = gutsShownPinned;
             if (gutsShownPinned) {
-                removeAutoRemovalCallbacks("setGutsShownPinned(true)");
+                cancelAutoRemovalCallbacks("setGutsShownPinned(true)");
             } else {
                 updateEntry(false /* updatePostTime */, "setGutsShownPinned(false)");
             }

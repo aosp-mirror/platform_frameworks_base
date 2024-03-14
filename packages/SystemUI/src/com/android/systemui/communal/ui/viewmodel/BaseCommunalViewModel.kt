@@ -45,6 +45,10 @@ abstract class BaseCommunalViewModel(
     val selectedKey: StateFlow<String?>
         get() = _selectedKey
 
+    fun signalUserInteraction() {
+        communalInteractor.signalUserInteraction()
+    }
+
     fun onSceneChanged(scene: SceneKey) {
         communalInteractor.onSceneChanged(scene)
     }
