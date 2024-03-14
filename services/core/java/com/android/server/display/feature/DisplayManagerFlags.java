@@ -116,6 +116,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_FAST_HDR_TRANSITIONS,
             Flags::fastHdrTransitions);
 
+    private final FlagState mAlwaysRotateDisplayDevice = new FlagState(
+            Flags.FLAG_ALWAYS_ROTATE_DISPLAY_DEVICE,
+            Flags::alwaysRotateDisplayDevice);
+
     private final FlagState mRefreshRateVotingTelemetry = new FlagState(
             Flags.FLAG_REFRESH_RATE_VOTING_TELEMETRY,
             Flags::refreshRateVotingTelemetry
@@ -260,6 +264,10 @@ public class DisplayManagerFlags {
         return mFastHdrTransitions.isEnabled();
     }
 
+    public boolean isAlwaysRotateDisplayDeviceEnabled() {
+        return mAlwaysRotateDisplayDevice.isEnabled();
+    }
+
     public boolean isRefreshRateVotingTelemetryEnabled() {
         return mRefreshRateVotingTelemetry.isEnabled();
     }
@@ -298,6 +306,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
         pw.println(" " + mAutoBrightnessModesFlagState);
         pw.println(" " + mFastHdrTransitions);
+        pw.println(" " + mAlwaysRotateDisplayDevice);
         pw.println(" " + mRefreshRateVotingTelemetry);
         pw.println(" " + mPixelAnisotropyCorrectionEnabled);
         pw.println(" " + mSensorBasedBrightnessThrottling);

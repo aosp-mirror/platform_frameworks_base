@@ -157,6 +157,10 @@ final class ContentRecorder implements WindowContainerListener {
         }
     }
 
+    void onMirrorOutputSurfaceOrientationChanged() {
+        onConfigurationChanged(mLastOrientation, mLastWindowingMode);
+    }
+
     /**
      * Handle a configuration change on the display content, and resize recording if needed.
      * @param lastOrientation the prior orientation of the configuration

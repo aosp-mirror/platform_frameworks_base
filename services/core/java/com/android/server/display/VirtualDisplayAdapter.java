@@ -366,7 +366,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             if (mSurface == null) {
                 return null;
             }
-            return mSurface.getDefaultSize();
+            final Point surfaceSize = mSurface.getDefaultSize();
+            return isRotatedLocked() ? new Point(surfaceSize.y, surfaceSize.x) : surfaceSize;
         }
 
         @VisibleForTesting
