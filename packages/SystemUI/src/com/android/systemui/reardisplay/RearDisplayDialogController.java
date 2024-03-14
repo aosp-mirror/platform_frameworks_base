@@ -16,12 +16,14 @@
 
 package com.android.systemui.reardisplay;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerGlobal;
 import android.view.LayoutInflater;
@@ -29,7 +31,6 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -179,6 +180,7 @@ public class RearDisplayDialogController implements
      */
     private void initializeValues(int startingBaseState) {
         mRearDisplayEducationDialog = mSystemUIDialogFactory.create();
+        // TODO(b/329170810): Refactor and remove with updated DeviceStateManager values.
         if (mFoldedStates == null) {
             mFoldedStates = mResources.getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
@@ -228,21 +230,19 @@ public class RearDisplayDialogController implements
 
     private class DeviceStateManagerCallback implements DeviceStateManager.DeviceStateCallback {
         @Override
-        public void onBaseStateChanged(int state) {
-            if (mStartedFolded && !isFoldedState(state)) {
+        public void onDeviceStateChanged(@NonNull DeviceState state) {
+            if (mStartedFolded && !state.hasProperty(
+                    DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)) {
                 // We've opened the device, we can close the overlay
                 mRearDisplayEducationDialog.dismiss();
                 closeOverlayAndNotifyService(false);
-            } else if (!mStartedFolded && isFoldedState(state)) {
+            } else if (!mStartedFolded && state.hasProperty(
+                    DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED)) {
                 // We've closed the device, finish activity
                 mRearDisplayEducationDialog.dismiss();
                 closeOverlayAndNotifyService(true);
             }
         }
-
-        // We only care about physical device changes in this scenario
-        @Override
-        public void onStateChanged(int state) {}
     }
 }
 

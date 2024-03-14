@@ -56,6 +56,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.SensorManager;
 import android.hardware.SystemSensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
@@ -7152,9 +7153,10 @@ public final class PowerManagerService extends SystemService
         private int mDeviceState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
         @Override
-        public void onStateChanged(int deviceState) {
-            if (mDeviceState != deviceState) {
-                mDeviceState = deviceState;
+        public void onDeviceStateChanged(@NonNull DeviceState deviceState) {
+            int stateIdentifier = deviceState.getIdentifier();
+            if (mDeviceState != stateIdentifier) {
+                mDeviceState = stateIdentifier;
                 // Device-state interactions are applied to the default display so that they
                 // are reflected only with the default power group.
                 userActivityInternal(Display.DEFAULT_DISPLAY, mClock.uptimeMillis(),

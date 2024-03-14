@@ -20,6 +20,7 @@ import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_IGNORE
 import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_LOCKED;
 
 import android.annotation.Nullable;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Trace;
 import android.util.IndentingPrintWriter;
@@ -120,18 +121,18 @@ public final class DeviceStateRotationLockSettingController
         mDeviceStateRotationLockSettingsManager.updateSetting(deviceState, isRotationLocked);
     }
 
-    private void updateDeviceState(int state) {
-        mLogger.logUpdateDeviceState(mDeviceState, state);
-        if (Trace.isEnabled()) {
-            Trace.traceBegin(
-                    Trace.TRACE_TAG_APP, "updateDeviceState [state=" + state + "]");
-        }
+    private void updateDeviceState(@NonNull DeviceState state) {
+        mLogger.logUpdateDeviceState(mDeviceState, state.getIdentifier());
         try {
-            if (mDeviceState == state) {
+            if (Trace.isEnabled()) {
+                Trace.traceBegin(Trace.TRACE_TAG_APP,
+                        "updateDeviceState [state=" + state.getIdentifier() + "]");
+            }
+            if (mDeviceState == state.getIdentifier()) {
                 return;
             }
 
-            readPersistedSetting("updateDeviceState", state);
+            readPersistedSetting("updateDeviceState", state.getIdentifier());
         } finally {
             Trace.endSection();
         }

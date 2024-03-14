@@ -49,6 +49,7 @@ import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.fingerprint.FingerprintManager;
@@ -1113,10 +1114,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     private void setDeviceState(int state) {
+        DeviceState deviceState = new DeviceState(
+                new DeviceState.Configuration.Builder(state, "TEST").build());
         ArgumentCaptor<DeviceStateManager.DeviceStateCallback> callbackCaptor =
                 ArgumentCaptor.forClass(DeviceStateManager.DeviceStateCallback.class);
         verify(mDeviceStateManager).registerCallback(any(), callbackCaptor.capture());
-        callbackCaptor.getValue().onStateChanged(state);
+        callbackCaptor.getValue().onDeviceStateChanged(deviceState);
     }
 
     private void setGoToSleepStates(int... states) {
