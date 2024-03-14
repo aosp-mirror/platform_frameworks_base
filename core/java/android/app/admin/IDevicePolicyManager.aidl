@@ -581,7 +581,7 @@ interface IDevicePolicyManager {
     void setWifiSsidPolicy(String callerPackageName, in WifiSsidPolicy policy);
     WifiSsidPolicy getWifiSsidPolicy(String callerPackageName);
 
-    boolean isTheftDetectionTriggered(String callerPackageName);
+    boolean isDevicePotentiallyStolen(String callerPackageName);
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);

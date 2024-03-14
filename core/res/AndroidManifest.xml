@@ -3801,12 +3801,12 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_LOCK"
                 android:protectionLevel="internal|role" />
 
-    <!-- Allows an application to manage policy related to theft detection.
+    <!-- Allows an application to query the device stolen state.
         @FlaggedApi("android.app.admin.flags.device_theft_api_enabled")
         @hide
         @SystemApi
     -->
-    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION"
+    <permission android:name="android.permission.QUERY_DEVICE_STOLEN_STATE"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to manage policy related to system apps.

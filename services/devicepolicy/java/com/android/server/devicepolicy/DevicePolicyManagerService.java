@@ -79,7 +79,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_STATUS_BAR;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_DIALOGS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
-import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THEFT_DETECTION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_THREAD_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_TIME;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING;
@@ -93,6 +92,7 @@ import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.MASTER_CLEAR;
 import static android.Manifest.permission.NOTIFY_PENDING_SYSTEM_UPDATE;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
+import static android.Manifest.permission.QUERY_DEVICE_STOLEN_STATE;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
@@ -22128,12 +22128,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isTheftDetectionTriggered(String callerPackageName) {
+    public boolean isDevicePotentiallyStolen(String callerPackageName) {
         final CallerIdentity caller = getCallerIdentity(callerPackageName);
         if (!android.app.admin.flags.Flags.deviceTheftImplEnabled()) {
             return false;
         }
-        enforcePermission(MANAGE_DEVICE_POLICY_THEFT_DETECTION, caller.getPackageName(),
+        enforcePermission(QUERY_DEVICE_STOLEN_STATE, caller.getPackageName(),
                 caller.getUserId());
 
         return mInjector.binderWithCleanCallingIdentity(() ->
