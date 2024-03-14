@@ -19,12 +19,15 @@ package com.android.systemui.qs.ui.composable
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clipScrollableContainer
 import androidx.compose.foundation.gestures.Orientation
@@ -174,6 +177,9 @@ private fun SceneScope.QuickSettingsScene(
                 }
     ) {
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
+        val isCustomizerShowing by viewModel.qsSceneAdapter.isCustomizerShowing.collectAsState()
+        val customizingAnimationDuration by
+            viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsState()
         val screenHeight = LocalRawScreenHeight.current
 
         BackHandler(
@@ -213,6 +219,18 @@ private fun SceneScope.QuickSettingsScene(
         val navBarBottomHeight =
             WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         val density = LocalDensity.current
+        val bottomPadding by
+            animateDpAsState(
+                targetValue = if (isCustomizing) 0.dp else navBarBottomHeight,
+                animationSpec = tween(customizingAnimationDuration),
+                label = "animateQSSceneBottomPaddingAsState"
+            )
+        val topPadding by
+            animateDpAsState(
+                targetValue = if (isCustomizing) ShadeHeader.Dimensions.CollapsedHeight else 0.dp,
+                animationSpec = tween(customizingAnimationDuration),
+                label = "animateQSSceneTopPaddingAsState"
+            )
 
         LaunchedEffect(navBarBottomHeight, density) {
             with(density) {
@@ -232,17 +250,14 @@ private fun SceneScope.QuickSettingsScene(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier =
                 Modifier.fillMaxSize()
-                    .then(
-                        if (isCustomizing) {
-                            Modifier.padding(top = 48.dp)
-                        } else {
-                            Modifier.padding(bottom = navBarBottomHeight)
-                        }
+                    .padding(
+                        top = topPadding.coerceAtLeast(0.dp),
+                        bottom = bottomPadding.coerceAtLeast(0.dp)
                     )
         ) {
             Box(modifier = Modifier.fillMaxSize().weight(1f)) {
                 val shadeHeaderAndQuickSettingsModifier =
-                    if (isCustomizing) {
+                    if (isCustomizerShowing) {
                         Modifier.fillMaxHeight().align(Alignment.TopCenter)
                     } else {
                         Modifier.verticalNestedScrollToScene()
@@ -265,15 +280,22 @@ private fun SceneScope.QuickSettingsScene(
                                 visible = !isCustomizing,
                                 enter =
                                     expandVertically(
-                                        animationSpec = tween(100),
-                                        initialHeight = { collapsedHeaderHeight },
-                                    ) + fadeIn(tween(100)),
+                                        animationSpec = tween(customizingAnimationDuration),
+                                        expandFrom = Alignment.Top,
+                                    ) +
+                                        slideInVertically(
+                                            animationSpec = tween(customizingAnimationDuration),
+                                        ) +
+                                        fadeIn(tween(customizingAnimationDuration)),
                                 exit =
                                     shrinkVertically(
-                                        animationSpec = tween(100),
-                                        targetHeight = { collapsedHeaderHeight },
+                                        animationSpec = tween(customizingAnimationDuration),
                                         shrinkTowards = Alignment.Top,
-                                    ) + fadeOut(tween(100)),
+                                    ) +
+                                        slideOutVertically(
+                                            animationSpec = tween(customizingAnimationDuration),
+                                        ) +
+                                        fadeOut(tween(customizingAnimationDuration)),
                             ) {
                                 ExpandedShadeHeader(
                                     viewModel = viewModel.shadeHeaderViewModel,
@@ -299,7 +321,7 @@ private fun SceneScope.QuickSettingsScene(
                         viewModel.qsSceneAdapter,
                         { viewModel.qsSceneAdapter.qsHeight },
                         isSplitShade = false,
-                        modifier = Modifier.sysuiResTag("expanded_qs_scroll_view"),
+                        modifier = Modifier.sysuiResTag("expanded_qs_scroll_view")
                     )
 
                     MediaCarousel(
@@ -314,6 +336,7 @@ private fun SceneScope.QuickSettingsScene(
             FooterActionsWithAnimatedVisibility(
                 viewModel = footerActionsViewModel,
                 isCustomizing = isCustomizing,
+                customizingAnimationDuration = customizingAnimationDuration,
                 lifecycleOwner = lifecycleOwner,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )

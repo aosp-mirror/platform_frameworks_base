@@ -17,7 +17,9 @@
 package com.android.systemui.shade.ui.composable
 
 import android.view.ViewGroup
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.clipScrollableContainer
@@ -300,6 +302,9 @@ private fun SceneScope.SplitShade(
     modifier: Modifier = Modifier,
 ) {
     val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
+    val isCustomizerShowing by viewModel.qsSceneAdapter.isCustomizerShowing.collectAsState()
+    val customizingAnimationDuration by
+        viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
     val footerActionsViewModel =
         remember(lifecycleOwner, viewModel) { viewModel.getFooterActionsViewModel(lifecycleOwner) }
@@ -319,6 +324,12 @@ private fun SceneScope.SplitShade(
             .collectAsState(0f)
 
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val bottomPadding by
+        animateDpAsState(
+            targetValue = if (isCustomizing) 0.dp else navBarBottomHeight,
+            animationSpec = tween(customizingAnimationDuration),
+            label = "animateQSSceneBottomPaddingAsState"
+        )
     val density = LocalDensity.current
     LaunchedEffect(navBarBottomHeight, density) {
         with(density) {
@@ -386,16 +397,13 @@ private fun SceneScope.SplitShade(
                     )
                     Column(
                         verticalArrangement = Arrangement.Top,
-                        modifier =
-                            Modifier.fillMaxSize().thenIf(!isCustomizing) {
-                                Modifier.padding(bottom = navBarBottomHeight)
-                            },
+                        modifier = Modifier.fillMaxSize().padding(bottom = bottomPadding),
                     ) {
                         Column(
                             modifier =
                                 Modifier.fillMaxSize()
                                     .weight(1f)
-                                    .thenIf(!isCustomizing) {
+                                    .thenIf(!isCustomizerShowing) {
                                         Modifier.verticalNestedScrollToScene()
                                             .verticalScroll(
                                                 quickSettingsScrollState,
@@ -428,6 +436,7 @@ private fun SceneScope.SplitShade(
                         FooterActionsWithAnimatedVisibility(
                             viewModel = footerActionsViewModel,
                             isCustomizing = isCustomizing,
+                            customizingAnimationDuration = customizingAnimationDuration,
                             lifecycleOwner = lifecycleOwner,
                             modifier =
                                 Modifier.align(Alignment.CenterHorizontally)

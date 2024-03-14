@@ -33,7 +33,7 @@ constructor(
         get() = shadeInteractor.isQsExpanded.value
 
     override val isCustomizing: Boolean
-        get() = qsSceneAdapter.isCustomizing.value
+        get() = qsSceneAdapter.isCustomizerShowing.value
 
     @Deprecated("specific to legacy touch handling")
     override fun shouldQuickSettingsIntercept(x: Float, y: Float, yDiff: Float): Boolean {

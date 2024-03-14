@@ -273,21 +273,56 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun customizing_QS() =
+    fun customizing_QS_noAnimations() =
         testScope.runTest {
-            val customizing by collectLastValue(underTest.isCustomizing)
+            val customizerState by collectLastValue(underTest.customizerState)
 
             underTest.inflate(context)
             runCurrent()
             underTest.setState(QSSceneAdapter.State.QS)
 
-            assertThat(customizing).isFalse()
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
 
             underTest.setCustomizerShowing(true)
-            assertThat(customizing).isTrue()
+            assertThat(customizerState).isEqualTo(CustomizerState.Showing)
 
             underTest.setCustomizerShowing(false)
-            assertThat(customizing).isFalse()
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
+        }
+
+    // This matches the calls made by QSCustomizer
+    @Test
+    fun customizing_QS_animations_correctStates() =
+        testScope.runTest {
+            val customizerState by collectLastValue(underTest.customizerState)
+            val animatingInDuration = 100L
+            val animatingOutDuration = 50L
+
+            underTest.inflate(context)
+            runCurrent()
+            underTest.setState(QSSceneAdapter.State.QS)
+
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
+
+            // Start showing customizer with animation
+            underTest.setCustomizerAnimating(true)
+            underTest.setCustomizerShowing(true, animatingInDuration)
+            assertThat(customizerState)
+                .isEqualTo(CustomizerState.AnimatingIntoCustomizer(animatingInDuration))
+
+            // Finish animation
+            underTest.setCustomizerAnimating(false)
+            assertThat(customizerState).isEqualTo(CustomizerState.Showing)
+
+            // Start closing customizer with animation
+            underTest.setCustomizerAnimating(true)
+            underTest.setCustomizerShowing(false, animatingOutDuration)
+            assertThat(customizerState)
+                .isEqualTo(CustomizerState.AnimatingOutOfCustomizer(animatingOutDuration))
+
+            // Finish animation
+            underTest.setCustomizerAnimating(false)
+            assertThat(customizerState).isEqualTo(CustomizerState.Hidden)
         }
 
     @Test

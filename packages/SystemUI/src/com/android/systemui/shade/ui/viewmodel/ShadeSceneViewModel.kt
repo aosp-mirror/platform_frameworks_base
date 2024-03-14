@@ -72,13 +72,13 @@ constructor(
                 deviceEntryInteractor.isUnlocked,
                 deviceEntryInteractor.canSwipeToEnter,
                 shadeInteractor.shadeMode,
-                qsSceneAdapter.isCustomizing
-            ) { isUnlocked, canSwipeToDismiss, shadeMode, isCustomizing ->
+                qsSceneAdapter.isCustomizerShowing
+            ) { isUnlocked, canSwipeToDismiss, shadeMode, isCustomizerShowing ->
                 destinationScenes(
                     isUnlocked = isUnlocked,
                     canSwipeToDismiss = canSwipeToDismiss,
                     shadeMode = shadeMode,
-                    isCustomizing = isCustomizing
+                    isCustomizing = isCustomizerShowing
                 )
             }
             .stateIn(
@@ -89,7 +89,7 @@ constructor(
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
                         shadeMode = shadeInteractor.shadeMode.value,
-                        isCustomizing = qsSceneAdapter.isCustomizing.value,
+                        isCustomizing = qsSceneAdapter.isCustomizerShowing.value,
                     ),
             )
 
