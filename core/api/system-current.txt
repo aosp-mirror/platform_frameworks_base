@@ -12979,11 +12979,11 @@ package android.service.persistentdata {
     method public long getMaximumDataBlockSize();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public boolean getOemUnlockEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE) public String getPersistentDataPackageName();
-    method public byte[] read();
+    method @Nullable public byte[] read();
     method @FlaggedApi("android.security.frp_enforcement") public boolean setFactoryResetProtectionSecret(@NonNull byte[]);
     method @Deprecated @RequiresPermission("android.permission.OEM_UNLOCK_STATE") public void setOemUnlockEnabled(boolean);
     method @RequiresPermission("android.permission.OEM_UNLOCK_STATE") public void wipe();
-    method public int write(byte[]);
+    method public int write(@Nullable byte[]);
     field public static final int FLASH_LOCK_LOCKED = 1; // 0x1
     field public static final int FLASH_LOCK_UNKNOWN = -1; // 0xffffffff
     field public static final int FLASH_LOCK_UNLOCKED = 0; // 0x0
