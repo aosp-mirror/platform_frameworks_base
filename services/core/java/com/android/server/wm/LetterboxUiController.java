@@ -22,7 +22,6 @@ import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION_TO_USER;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
@@ -132,7 +131,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -196,8 +194,7 @@ final class LetterboxUiController {
     private final boolean mIsOverrideCameraCompatDisableRefreshEnabled;
     // Corresponds to OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE
     private final boolean mIsOverrideCameraCompatEnableRefreshViaPauseEnabled;
-    // Corresponds to OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT
-    private final boolean mIsOverrideCameraCompatDisableFreeformWindowingTreatmentEnabled;
+
     // Corresponds to OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION
     private final boolean mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled;
     // Corresponds to OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED
@@ -324,15 +321,15 @@ final class LetterboxUiController {
                         PROPERTY_COMPAT_ENABLE_FAKE_FOCUS);
         mBooleanPropertyCameraCompatAllowForceRotation =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isCameraCompatTreatmentEnabled,
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
                         PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION);
         mBooleanPropertyCameraCompatAllowRefresh =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isCameraCompatTreatmentEnabled,
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
                         PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH);
         mBooleanPropertyCameraCompatEnableRefreshViaPause =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isCameraCompatTreatmentEnabled,
+                        () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(),
                         PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
 
         mBooleanPropertyAllowOrientationOverride =
@@ -354,11 +351,11 @@ final class LetterboxUiController {
 
         mBooleanPropertyAllowUserAspectRatioOverride =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isUserAppAspectRatioSettingsEnabled,
+                        () -> mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled(),
                         PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
         mBooleanPropertyAllowUserAspectRatioFullscreenOverride =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
-                        mLetterboxConfiguration::isUserAppAspectRatioFullscreenEnabled,
+                        () -> mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled(),
                         PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
@@ -383,8 +380,6 @@ final class LetterboxUiController {
                 isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH);
         mIsOverrideCameraCompatEnableRefreshViaPauseEnabled =
                 isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
-        mIsOverrideCameraCompatDisableFreeformWindowingTreatmentEnabled =
-                isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
 
         mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION);
@@ -764,7 +759,8 @@ final class LetterboxUiController {
      */
     boolean shouldRefreshActivityForCameraCompat() {
         return shouldEnableWithOptOutOverrideAndProperty(
-                /* gatingCondition */ mLetterboxConfiguration::isCameraCompatTreatmentEnabled,
+                /* gatingCondition */ () -> mLetterboxConfiguration
+                        .isCameraCompatTreatmentEnabled(),
                 mIsOverrideCameraCompatDisableRefreshEnabled,
                 mBooleanPropertyCameraCompatAllowRefresh);
     }
@@ -785,7 +781,8 @@ final class LetterboxUiController {
      */
     boolean shouldRefreshActivityViaPauseForCameraCompat() {
         return shouldEnableWithOverrideAndProperty(
-                /* gatingCondition */ mLetterboxConfiguration::isCameraCompatTreatmentEnabled,
+                /* gatingCondition */ () -> mLetterboxConfiguration
+                        .isCameraCompatTreatmentEnabled(),
                 mIsOverrideCameraCompatEnableRefreshViaPauseEnabled,
                 mBooleanPropertyCameraCompatEnableRefreshViaPause);
     }
@@ -803,32 +800,10 @@ final class LetterboxUiController {
      */
     boolean shouldForceRotateForCameraCompat() {
         return shouldEnableWithOptOutOverrideAndProperty(
-                /* gatingCondition */ mLetterboxConfiguration::isCameraCompatTreatmentEnabled,
+                /* gatingCondition */ () -> mLetterboxConfiguration
+                        .isCameraCompatTreatmentEnabled(),
                 mIsOverrideCameraCompatDisableForceRotationEnabled,
                 mBooleanPropertyCameraCompatAllowForceRotation);
-    }
-
-    /**
-     * Whether activity is eligible for camera compatibility free-form treatment.
-     *
-     * <p>The treatment is applied to a fixed-orientation camera activity in free-form windowing
-     * mode. The treatment letterboxes or pillarboxes the activity to the expected orientation and
-     * provides changes to the camera and display orientation signals to match those expected on a
-     * portrait device in that orientation (for example, on a standard phone).
-     *
-     * <p>The treatment is enabled when the following conditions are met:
-     * <ul>
-     * <li>Property gating the camera compatibility free-form treatment is enabled.
-     * <li>Activity isn't opted out by the device manufacturer with override or by the app
-     * developers with the component property.
-     * </ul>
-     */
-    boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return shouldEnableWithOptOutOverrideAndProperty(
-                /* gatingCondition */ ()-> Flags.cameraCompatForFreeform(),
-                mIsOverrideCameraCompatDisableFreeformWindowingTreatmentEnabled,
-                // TODO(b/328616176): add a manifest override for developers.
-                null);
     }
 
     private boolean isCameraCompatTreatmentActive() {

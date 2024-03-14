@@ -21,7 +21,6 @@ import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION_TO_USER;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
-import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
@@ -64,7 +63,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.LetterboxUiController.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
 import static com.android.server.wm.LetterboxUiController.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -83,7 +81,6 @@ import android.content.pm.PackageManager.Property;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.RoundedCorner;
@@ -104,11 +101,11 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
-/**
+ /**
  * Test class for {@link LetterboxUiControllerTest}.
  *
  * Build/Install/Run:
- * atest WmTests:LetterboxUiControllerTest
+ *  atest WmTests:LetterboxUiControllerTest
  */
 @SmallTest
 @Presubmit
@@ -125,8 +122,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private ActivityRecord mActivity;
     private Task mTask;
@@ -471,48 +466,10 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertTrue(mController.shouldForceRotateForCameraCompat());
     }
 
-    // shouldApplyFreeformTreatmentForCameraCompat
-
-    @Test
-    public void testShouldApplyCameraCompatFreeformTreatment_flagIsDisabled_returnsFalse() {
-        mSetFlagsRule.disableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        assertFalse(mController.shouldApplyFreeformTreatmentForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
-    public void testShouldApplyCameraCompatFreeformTreatment_overrideEnabled_returnsFalse() {
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        assertFalse(mController.shouldApplyFreeformTreatmentForCameraCompat());
-    }
-
-    @Test
-    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
-    public void testShouldApplyCameraCompatFreeformTreatment_disabledByOverride_returnsFalse()
-            throws Exception {
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertFalse(mController.shouldApplyFreeformTreatmentForCameraCompat());
-    }
-
-    @Test
-    public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue()
-            throws Exception {
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
-
-        mController = new LetterboxUiController(mWm, mActivity);
-
-        assertTrue(mController.shouldApplyFreeformTreatmentForCameraCompat());
-    }
-
     @Test
     public void testGetCropBoundsIfNeeded_handleCropForTransparentActivityBasedOnOpaqueBounds() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
-                WindowInsets.Type.navigationBars());
+                 WindowInsets.Type.navigationBars());
         taskbar.setFlags(FLAG_INSETS_ROUNDED_CORNER, FLAG_INSETS_ROUNDED_CORNER);
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
         final Rect opaqueBounds = new Rect(0, 0, 500, 300);
@@ -769,7 +726,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
             throws Exception {
         mDisplayContent.setIgnoreOrientationRequest(false);
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
+             /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
     }
 
     @Test
@@ -779,7 +736,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         prepareActivityThatShouldApplyUserMinAspectRatioOverride();
 
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, mController.overrideOrientationIfNeeded(
-                /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
+             /* candidate */ SCREEN_ORIENTATION_PORTRAIT));
     }
 
     @Test
@@ -902,7 +859,6 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_USER, mController.overrideOrientationIfNeeded(
                 /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED));
     }
-
     @Test
     public void testOverrideOrientationIfNeeded_respectOrientationRequestOverUserFullScreen() {
         spyOn(mController);
@@ -1424,7 +1380,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     private void mockThatProperty(String propertyName, boolean value) throws Exception {
         Property property = new Property(propertyName, /* value */ value, /* packageName */ "",
-                /* className */ "");
+                 /* className */ "");
         PackageManager pm = mWm.mContext.getPackageManager();
         spyOn(pm);
         doReturn(property).when(pm).getProperty(eq(propertyName), anyString());
