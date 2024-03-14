@@ -196,7 +196,8 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
                 keyguardTransitionInteractor,
-                () -> sceneInteractor);
+                () -> sceneInteractor,
+                () -> mKosmos.getFromGoneTransitionInteractor());
         CommunalInteractor communalInteractor = mKosmos.getCommunalInteractor();
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();

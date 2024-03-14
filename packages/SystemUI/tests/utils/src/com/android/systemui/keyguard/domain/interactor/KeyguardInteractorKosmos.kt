@@ -26,7 +26,7 @@ import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.statusbar.commandQueue
 
-val Kosmos.keyguardInteractor by
+val Kosmos.keyguardInteractor: KeyguardInteractor by
     Kosmos.Fixture {
         KeyguardInteractor(
             repository = keyguardRepository,
@@ -38,5 +38,6 @@ val Kosmos.keyguardInteractor by
             shadeRepository = shadeRepository,
             keyguardTransitionInteractor = keyguardTransitionInteractor,
             sceneInteractorProvider = { sceneInteractor },
+            fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
         )
     }

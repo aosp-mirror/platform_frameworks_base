@@ -51,6 +51,7 @@ object KeyguardInteractorFactory {
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
         shadeRepository: FakeShadeRepository = FakeShadeRepository(),
         sceneInteractor: SceneInteractor = mock(),
+        fromGoneTransitionInteractor: FromGoneTransitionInteractor = mock(),
         powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
     ): WithDependencies {
         // Mock this until the class is replaced by kosmos
@@ -77,6 +78,7 @@ object KeyguardInteractorFactory {
                 sceneInteractorProvider = { sceneInteractor },
                 keyguardTransitionInteractor = keyguardTransitionInteractor,
                 powerInteractor = powerInteractor,
+                fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
             ),
         )
     }
