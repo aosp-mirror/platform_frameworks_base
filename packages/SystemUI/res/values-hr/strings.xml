@@ -74,7 +74,7 @@
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"šalje sliku"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Spremanje snimke zaslona..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Spremanje snimke zaslona na poslovni profil…"</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"Snimka zaslona spremljena"</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"Snimka zaslona je spremljena"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Snimka zaslona nije spremljena"</string>
     <string name="screenshot_failed_external_display_indication" msgid="6555673132061101936">"Vanjski prikaz"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Uređaj mora biti otključan da bi se snimka zaslona mogla spremiti"</string>

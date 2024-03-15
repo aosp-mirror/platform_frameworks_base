@@ -742,7 +742,7 @@
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Execução de várias tarefas em simultâneo no sistema"</string>
     <string name="system_multitasking_rhs" msgid="2454557648974553729">"Aceder ao ecrã dividido com a app atual para RHS"</string>
     <string name="system_multitasking_lhs" msgid="3516599774920979402">"Aceder ao ecrã dividido com a app atual para LHS"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Mude de ecrã dividido para ecrã inteiro"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Mudar de ecrã dividido para ecrã inteiro"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Durante o ecrã dividido: substituir uma app por outra"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Mudar para idioma seguinte"</string>

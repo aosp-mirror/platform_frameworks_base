@@ -731,7 +731,7 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Retour"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Accéder à l\'écran d\'accueil"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Afficher les applis récentes"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Aller vers les applications récentes"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Avancer dans les applications récentes"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Revenir sur les applications récentes"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ouvrir la liste d\'applications"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Afficher la barre des tâches"</string>
@@ -746,7 +746,7 @@
     <string name="system_multitasking_replace" msgid="7410071959803642125">"En mode écran partagé : Remplacer une appli par une autre"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Saisie"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Passer à la langue suivante"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Passer à la langue précédente"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Revenir à la langue précédente"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Accéder aux emoji"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Accéder à la saisie vocale"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Applications"</string>
@@ -887,7 +887,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Vous n\'aurez pas accès aux données mobiles ni à Internet via <xliff:g id="CARRIER">%s</xliff:g>. Vous ne pourrez accéder à Internet que par Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"votre opérateur"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Rebasculer sur <xliff:g id="CARRIER">%s</xliff:g> ?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobile selon la disponibilité"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobiles selon la disponibilité"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Non, merci"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, rebasculer"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"L\'application Paramètres ne peut pas valider votre réponse, car une application masque la demande d\'autorisation."</string>
