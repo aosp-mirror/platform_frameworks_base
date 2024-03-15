@@ -1672,9 +1672,10 @@ final class AutofillManagerServiceImpl
 
         @Override // from InlineSuggestionRenderCallbacksImpl
         public void onServiceDied(@NonNull RemoteInlineSuggestionRenderService service) {
-            // Don't do anything; eventually the system will bind to it again...
             Slog.w(TAG, "remote service died: " + service);
-            mRemoteInlineSuggestionRenderService = null;
+            synchronized (mLock) {
+                resetExtServiceLocked();
+            }
         }
     }
 
