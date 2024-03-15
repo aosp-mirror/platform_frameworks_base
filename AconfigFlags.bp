@@ -625,6 +625,12 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+cc_aconfig_library {
+    name: "android.database.sqlite-aconfig-cc",
+    aconfig_declarations: "android.database.sqlite-aconfig",
+    host_supported: true,
+}
+
 // Biometrics
 aconfig_declarations {
     name: "android.hardware.biometrics.flags-aconfig",
