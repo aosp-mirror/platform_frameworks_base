@@ -71,6 +71,8 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.HapticFeedbackConstants;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -355,6 +357,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final QuickSettingsControllerImpl mQsController;
     private final NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
     private final TouchHandler mTouchHandler = new TouchHandler();
+    private final KeyHandler mKeyHandler = new KeyHandler();
 
     private long mDownTime;
     private boolean mTouchSlopExceededBeforeDown;
@@ -816,6 +819,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mView.addOnLayoutChangeListener(new ShadeLayoutChangeListener());
         mView.setOnTouchListener(getTouchHandler());
+        mView.setOnKeyListener(getKeyHandler());
         mView.setOnConfigurationChangedListener(config -> loadDimens());
 
         mResources = mView.getResources();
@@ -3590,6 +3594,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return mTouchHandler;
     }
 
+    @VisibleForTesting
+    KeyHandler getKeyHandler() {
+        return mKeyHandler;
+    }
+
     @Override
     public void disableHeader(int state1, int state2, boolean animated) {
         mShadeHeaderController.disable(state1, state2, animated);
@@ -5239,6 +5248,21 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     break;
             }
             return !mGestureWaitForTouchSlop || isTracking();
+        }
+    }
+
+    /** Handles KeyEvents for the Shade. */
+    public final class KeyHandler implements View.OnKeyListener {
+        @Override
+        public boolean onKey(View v, int keyCode, KeyEvent event) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                final InputDevice d = event.getDevice();
+                // Trigger user activity if the event comes from a full external keyboard
+                if (d != null && d.isFullKeyboard() && d.isExternal()) {
+                    mCentralSurfaces.userActivity();
+                }
+            }
+            return false;
         }
     }
 
