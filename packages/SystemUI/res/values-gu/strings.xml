@@ -271,10 +271,8 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ડિસ્કનેક્ટ કરો"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"સક્રિય કરો"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"આવતીકાલે ફરીથી ઑટોમૅટિક રીતે ચાલુ કરો"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"ક્વિક શેર, Find My Device અને ડિવાઇસના લોકેશન જેવી સુવિધાઓ બ્લૂટૂથનો ઉપયોગ કરે છે"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"બ્લૂટૂથ આવતીકાલે સવારે 5 વાગ્યે ચાલુ થશે"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> બૅટરી"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ઑડિયો"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"હૅડસેટ"</string>
@@ -439,6 +437,12 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"કાઢી નાખો"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"વિજેટ ઉમેરો"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"થઈ ગયું"</string>
+    <!-- no translation found for dialog_title_to_allow_any_widget (1004820948962675644) -->
+    <skip />
+    <!-- no translation found for button_text_to_open_settings (1987729256950941628) -->
+    <skip />
+    <string name="work_mode_off_title" msgid="5794818421357835873">"ઑફિસની થોભાવેલી ઍપ ચાલુ કરીએ?"</string>
+    <string name="work_mode_turn_on" msgid="907813741770247267">"ફરી ચાલુ કરો"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"વપરાશકર્તા સ્વિચ કરો"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"પુલડાઉન મેનૂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
@@ -581,26 +585,36 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"મ્યૂટ કરો"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"કાસ્ટ કરો"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"રિંગ મ્યૂટ કરી હોવાના કારણે અનુપલબ્ધ છે"</string>
+    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
+    <skip />
+    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. અનમ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. વાઇબ્રેટ પર સેટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. કંપન પર સેટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"અવાજનું નિયંત્રણ"</string>
-    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
-    <skip />
+    <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"સ્પેશલ ઑડિયો"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"બંધ કરો"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ફિક્સ્ડ"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"હેડ ટ્રૅકિંગ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"રિંગર મોડ બદલવા માટે ટૅપ કરો"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"મ્યૂટ કરો"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"અનમ્યૂટ કરો"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"વાઇબ્રેટ"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s વૉલ્યૂમ નિયંત્રણો"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"કૉલ અને નોટિફિકેશનની રિંગ (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) પર વાગશે"</string>
+    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
+    <skip />
+    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
+    <skip />
+    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> વગાડી રહ્યાં છીએ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ઑડિયો આની પર વાગશે"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"સિસ્ટમ UI ટ્યૂનર"</string>
@@ -1236,12 +1250,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"વધુ રિઝોલ્યુશન માટે, ફોનને ફ્લિપ કરો"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ અનફોલ્ડ કરવામાં આવી રહ્યું છે"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ ફ્લિપ કરવામાં આવી રહ્યું છે"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"ફોલ્ડ કરેલું"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"અનફોલ્ડ કરેલું"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> બૅટરી બાકી છે"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"તમારા સ્ટાઇલસને ચાર્જર સાથે કનેક્ટ કરો"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"સ્ટાઇલસની બૅટરીમાં ચાર્જ ઓછો છે"</string>
@@ -1257,7 +1268,8 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"કૅમેરા બ્લૉક કરેલો છે"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"કૅમેરા અને માઇક્રોફોન બ્લૉક કરેલા છે"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"માઇક્રોફોન બ્લૉક કરેલો છે"</string>
-    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"પ્રાધાન્યતા મોડ ચાલુ છે"</string>
+    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
+    <skip />
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"વપરાશકર્તાની હાજરીની ભાળ મળી છે"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"સેટિંગમાં નોંધની ડિફૉલ્ટ ઍપ સેટ કરો"</string>
     <string name="install_app" msgid="5066668100199613936">"ઍપ ઇન્સ્ટૉલ કરો"</string>
