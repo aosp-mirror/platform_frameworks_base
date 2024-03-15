@@ -86,6 +86,10 @@ void WebViewFunctor_release(int functor) {
     WebViewFunctorManager::instance().releaseFunctor(functor);
 }
 
+void WebViewFunctor_reportRenderingThreads(int functor, const int32_t* thread_ids, size_t size) {
+    WebViewFunctorManager::instance().reportRenderingThreads(functor, thread_ids, size);
+}
+
 static std::atomic_int sNextId{1};
 
 WebViewFunctor::WebViewFunctor(void* data, const WebViewFunctorCallbacks& callbacks,
@@ -260,6 +264,10 @@ void WebViewFunctor::reparentSurfaceControl(ASurfaceControl* parent) {
     funcs.transactionDeleteFunc(transaction);
 }
 
+void WebViewFunctor::reportRenderingThreads(const int32_t* thread_ids, size_t size) {
+    // TODO(b/329219352): Pass the threads to HWUI and update the ADPF session.
+}
+
 WebViewFunctorManager& WebViewFunctorManager::instance() {
     static WebViewFunctorManager sInstance;
     return sInstance;
@@ -342,6 +350,17 @@ void WebViewFunctorManager::destroyFunctor(int functor) {
                 mFunctors.erase(iter);
                 break;
             }
+        }
+    }
+}
+
+void WebViewFunctorManager::reportRenderingThreads(int functor, const int32_t* thread_ids,
+                                                   size_t size) {
+    std::lock_guard _lock{mLock};
+    for (auto& iter : mFunctors) {
+        if (iter->id() == functor) {
+            iter->reportRenderingThreads(thread_ids, size);
+            break;
         }
     }
 }
