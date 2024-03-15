@@ -58,7 +58,6 @@ constructor(
         if (currentClock?.smallClock?.view == null) {
             return
         }
-        viewModel.clock = currentClock
 
         val context = LocalContext.current
         MovableElement(key = smallClockElementKey, modifier = modifier) {
@@ -89,7 +88,6 @@ constructor(
     @Composable
     fun SceneScope.LargeClock(modifier: Modifier = Modifier) {
         val currentClock by viewModel.currentClock.collectAsState()
-        viewModel.clock = currentClock
         if (currentClock?.largeClock?.view == null) {
             return
         }

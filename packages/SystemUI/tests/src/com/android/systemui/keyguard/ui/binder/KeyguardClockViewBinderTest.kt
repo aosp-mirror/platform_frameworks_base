@@ -131,7 +131,6 @@ class KeyguardClockViewBinderTest : SysuiTestCase() {
         whenever(clock.smallClock).thenReturn(smallClock)
         whenever(largeClock.layout).thenReturn(largeClockFaceLayout)
         whenever(smallClock.layout).thenReturn(smallClockFaceLayout)
-        whenever(clockViewModel.clock).thenReturn(clock)
         currentClock.value = clock
     }
 }

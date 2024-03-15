@@ -216,7 +216,9 @@ class ClockSizeTransition(
             captureSmartspace = !viewModel.useLargeClock && smartspaceViewModel.isSmartspaceEnabled
 
             if (viewModel.useLargeClock) {
-                viewModel.clock?.let { it.largeClock.layout.views.forEach { addTarget(it) } }
+                viewModel.currentClock.value?.let {
+                    it.largeClock.layout.views.forEach { addTarget(it) }
+                }
             } else {
                 addTarget(R.id.lockscreen_clock_view)
             }
@@ -276,7 +278,9 @@ class ClockSizeTransition(
             if (viewModel.useLargeClock) {
                 addTarget(R.id.lockscreen_clock_view)
             } else {
-                viewModel.clock?.let { it.largeClock.layout.views.forEach { addTarget(it) } }
+                viewModel.currentClock.value?.let {
+                    it.largeClock.layout.views.forEach { addTarget(it) }
+                }
             }
         }
 
