@@ -18,6 +18,7 @@ package com.android.server.companion.virtual;
 
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
@@ -48,6 +49,8 @@ import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.modules.expresslog.Counter;
 
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A controller to control the policies of the windows that can be displayed on the virtual display.
@@ -121,8 +124,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private final ComponentName mPermissionDialogComponent;
     private final Object mGenericWindowPolicyControllerLock = new Object();
     @Nullable private final ActivityBlockedCallback mActivityBlockedCallback;
+
+    // Do not access mDisplayId and mIsMirrorDisplay directly, instead use waitAndGetDisplayId()
+    // and waitAndGetIsMirrorDisplay()
     private int mDisplayId = Display.INVALID_DISPLAY;
     private boolean mIsMirrorDisplay = false;
+    private final CountDownLatch mDisplayIdSetLatch = new CountDownLatch(1);
 
     @NonNull
     @GuardedBy("mGenericWindowPolicyControllerLock")
@@ -214,6 +221,33 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     void setDisplayId(int displayId, boolean isMirrorDisplay) {
         mDisplayId = displayId;
         mIsMirrorDisplay = isMirrorDisplay;
+        mDisplayIdSetLatch.countDown();
+    }
+
+    private int waitAndGetDisplayId() {
+        try {
+            if (!mDisplayIdSetLatch.await(10, TimeUnit.SECONDS)) {
+                Slog.e(TAG, "Timed out while waiting for GWPC displayId to be set.");
+                return INVALID_DISPLAY;
+            }
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Interrupted while waiting for GWPC displayId to be set.");
+            return INVALID_DISPLAY;
+        }
+        return mDisplayId;
+    }
+
+    private boolean waitAndGetIsMirrorDisplay() {
+        try {
+            if (!mDisplayIdSetLatch.await(10, TimeUnit.SECONDS)) {
+                Slog.e(TAG, "Timed out while waiting for GWPC isMirrorDisplay to be set.");
+                return false;
+            }
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Interrupted while waiting for GWPC isMirrorDisplay to be set.");
+            return false;
+        }
+        return mIsMirrorDisplay;
     }
 
     /**
@@ -281,7 +315,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
             boolean isNewTask) {
         // Mirror displays cannot contain activities.
-        if (mIsMirrorDisplay) {
+        if (waitAndGetIsMirrorDisplay()) {
             Slog.d(TAG, "Mirror virtual displays cannot contain activities.");
             return false;
         }
@@ -341,11 +375,13 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @SuppressWarnings("AndroidFrameworkRequiresPermission")
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
+        int displayId = waitAndGetDisplayId();
         // The callback is fired only when windowFlags are changed. To let VirtualDevice owner
         // aware that the virtual display has a secure window on top.
-        if ((windowFlags & FLAG_SECURE) != 0 && mSecureWindowCallback != null) {
+        if ((windowFlags & FLAG_SECURE) != 0 && mSecureWindowCallback != null
+                && displayId != INVALID_DISPLAY) {
             // Post callback on the main thread, so it doesn't block activity launching.
-            mHandler.post(() -> mSecureWindowCallback.onSecureWindowShown(mDisplayId,
+            mHandler.post(() -> mSecureWindowCallback.onSecureWindowShown(displayId,
                     activityInfo.applicationInfo.uid));
         }
 
@@ -365,13 +401,14 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public void onTopActivityChanged(ComponentName topActivity, int uid, @UserIdInt int userId) {
+        int displayId = waitAndGetDisplayId();
         // Don't send onTopActivityChanged() callback when topActivity is null because it's defined
         // as @NonNull in ActivityListener interface. Sends onDisplayEmpty() callback instead when
         // there is no activity running on virtual display.
-        if (mActivityListener != null && topActivity != null) {
+        if (mActivityListener != null && topActivity != null && displayId != INVALID_DISPLAY) {
             // Post callback on the main thread so it doesn't block activity launching
             mHandler.post(() ->
-                    mActivityListener.onTopActivityChanged(mDisplayId, topActivity, userId));
+                    mActivityListener.onTopActivityChanged(displayId, topActivity, userId));
         }
     }
 
@@ -380,9 +417,11 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         synchronized (mGenericWindowPolicyControllerLock) {
             mRunningUids.clear();
             mRunningUids.addAll(runningUids);
-            if (mActivityListener != null && mRunningUids.isEmpty()) {
+            int displayId = waitAndGetDisplayId();
+            if (mActivityListener != null && mRunningUids.isEmpty()
+                    && displayId != INVALID_DISPLAY) {
                 // Post callback on the main thread so it doesn't block activity launching
-                mHandler.post(() -> mActivityListener.onDisplayEmpty(mDisplayId));
+                mHandler.post(() -> mActivityListener.onDisplayEmpty(displayId));
             }
             if (!mRunningAppsChangedListeners.isEmpty()) {
                 final ArraySet<RunningAppsChangedListener> listeners =
@@ -438,10 +477,12 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     private void notifyActivityBlocked(ActivityInfo activityInfo) {
+        int displayId = waitAndGetDisplayId();
         // Don't trigger activity blocked callback for mirror displays, because we can't show
         // any activity or presentation on it anyway.
-        if (!mIsMirrorDisplay && mActivityBlockedCallback != null) {
-            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
+        if (!waitAndGetIsMirrorDisplay() && mActivityBlockedCallback != null
+                && displayId != INVALID_DISPLAY) {
+            mActivityBlockedCallback.onActivityBlocked(displayId, activityInfo);
         }
         if (android.companion.virtualdevice.flags.Flags.metricsCollection()) {
             Counter.logIncrementWithUid(
