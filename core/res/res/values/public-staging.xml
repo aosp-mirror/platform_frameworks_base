@@ -167,6 +167,8 @@
     <public name="shiftDrawingOffsetForStartOverhang" />
     <!-- @FlaggedApi("android.view.flags.toolkit_set_frame_rate_read_only") -->
     <public name="windowIsFrameRatePowerSavingsBalanced"/>
+    <!-- @FlaggedApi("android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM") -->
+    <public name="dreamCategory"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
