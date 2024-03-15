@@ -18,12 +18,12 @@ package com.android.server.pm;
 
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.app.ActivityOptions.KEY_SPLASH_SCREEN_THEME;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_ARCHIVE_ICON_OVERLAY;
 import static android.app.AppOpsManager.OP_UNARCHIVAL_CONFIRMATION;
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -555,18 +555,19 @@ public class LauncherAppsService extends SystemService {
                     return false;
                 }
 
-                if (!mRoleManager
-                        .getRoleHoldersAsUser(
-                                RoleManager.ROLE_HOME, UserHandle.getUserHandleForUid(callingUid))
-                        .contains(callingPackage.getPackageName())) {
-                    return false;
-                }
                 if (mContext.checkPermission(
                                 Manifest.permission.ACCESS_HIDDEN_PROFILES_FULL,
                                 callingPid,
                                 callingUid)
                         == PackageManager.PERMISSION_GRANTED) {
                     return true;
+                }
+
+                if (!mRoleManager
+                        .getRoleHoldersAsUser(
+                                RoleManager.ROLE_HOME, UserHandle.getUserHandleForUid(callingUid))
+                        .contains(callingPackage.getPackageName())) {
+                    return false;
                 }
 
                 // TODO(b/321988638): add option to disable with a flag
