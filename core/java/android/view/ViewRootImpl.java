@@ -11100,7 +11100,7 @@ public final class ViewRootImpl implements ViewParent,
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-                boolean dragResizing) {
+                boolean dragResizing, @Nullable ActivityWindowInfo activityWindowInfo) {
             final boolean isFromResizeItem = mIsFromResizeItem;
             mIsFromResizeItem = false;
             // Although this is a AIDL method, it will only be triggered in local process through
@@ -11109,9 +11109,6 @@ public final class ViewRootImpl implements ViewParent,
             if (viewAncestor == null) {
                 return;
             }
-            // TODO(b/26595351): update WindowStateResizeItem
-            final ActivityWindowInfo activityWindowInfo = viewAncestor
-                    .mLastReportedActivityWindowInfo;
             if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
                 ImeTracing.getInstance().triggerClientDump("ViewRootImpl.W#resized",
                         viewAncestor.getInsetsController().getHost().getInputMethodManager(),
