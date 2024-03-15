@@ -32,6 +32,7 @@ import android.window.TransitionInfo;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
+import com.android.wm.shell.shared.IHomeTransitionListener;
 import com.android.wm.shell.shared.TransitionUtil;
 
 /**
