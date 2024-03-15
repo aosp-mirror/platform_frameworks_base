@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION_TO_USER;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
@@ -130,6 +131,7 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 import com.android.server.wm.utils.OptPropFactory;
 import com.android.server.wm.utils.OptPropFactory.OptProp;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -350,7 +352,6 @@ final class LetterboxUiController {
                 isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
         mIsOverrideRespectRequestedOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
-
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -712,6 +713,25 @@ final class LetterboxUiController {
     boolean shouldForceRotateForCameraCompat() {
         return mCameraCompatAllowForceRotationOptProp.shouldEnableWithOptOutOverrideAndProperty(
                 isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION));
+    }
+
+    /**
+     * Whether activity is eligible for camera compatibility free-form treatment.
+     *
+     * <p>The treatment is applied to a fixed-orientation camera activity in free-form windowing
+     * mode. The treatment letterboxes or pillarboxes the activity to the expected orientation and
+     * provides changes to the camera and display orientation signals to match those expected on a
+     * portrait device in that orientation (for example, on a standard phone).
+     *
+     * <p>The treatment is enabled when the following conditions are met:
+     * <ul>
+     * <li>Property gating the camera compatibility free-form treatment is enabled.
+     * <li>Activity isn't opted out by the device manufacturer with override.
+     * </ul>
+     */
+    boolean shouldApplyFreeformTreatmentForCameraCompat() {
+        return Flags.cameraCompatForFreeform() && !isCompatChangeEnabled(
+                        OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
     }
 
     private boolean isCameraCompatTreatmentActive() {
