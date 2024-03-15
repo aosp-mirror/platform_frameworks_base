@@ -191,6 +191,15 @@ public class PromptInfo implements Parcelable {
     public boolean shouldUseParentProfileForDeviceCredential() {
         return mUseParentProfileForDeviceCredential;
     }
+
+    /**
+     * Returns if the PromptContentViewWithMoreOptionsButton is set.
+     */
+    public boolean isContentViewMoreOptionsButtonUsed() {
+        return Flags.customBiometricPrompt() && mContentView != null
+                && mContentView instanceof PromptContentViewWithMoreOptionsButton;
+    }
+
     // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/BiometricPrompt.java)
 
     // Setters

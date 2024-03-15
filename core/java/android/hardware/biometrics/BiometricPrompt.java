@@ -135,7 +135,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     @Retention(RetentionPolicy.SOURCE)
     public @interface DismissedReason {}
 
-    private static class ButtonInfo {
+    static class ButtonInfo {
         Executor executor;
         DialogInterface.OnClickListener listener;
         ButtonInfo(Executor ex, DialogInterface.OnClickListener l) {
@@ -150,6 +150,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public static class Builder {
         private PromptInfo mPromptInfo;
         private ButtonInfo mNegativeButtonInfo;
+        private ButtonInfo mContentViewMoreOptionsButtonInfo;
         private Context mContext;
         private IAuthService mService;
 
@@ -301,6 +302,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public BiometricPrompt.Builder setContentView(@NonNull PromptContentView view) {
             mPromptInfo.setContentView(view);
+
+            if (mPromptInfo.isContentViewMoreOptionsButtonUsed()) {
+                mContentViewMoreOptionsButtonInfo =
+                        ((PromptContentViewWithMoreOptionsButton) view).getButtonInfo();
+            }
+
             return this;
         }
 
@@ -619,7 +626,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             }
             mService = (mService == null) ? IAuthService.Stub.asInterface(
                     ServiceManager.getService(Context.AUTH_SERVICE)) : mService;
-            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo, mService);
+            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo,
+                    mContentViewMoreOptionsButtonInfo, mService);
         }
     }
 
@@ -646,6 +654,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private final IAuthService mService;
     private final PromptInfo mPromptInfo;
     private final ButtonInfo mNegativeButtonInfo;
+    // TODO(b/328843028): add callback onContentViewMoreOptionsButtonClicked() in
+    //  IBiometricServiceReceiver.
+    private final ButtonInfo mContentViewMoreOptionsButtonInfo;
 
     private CryptoObject mCryptoObject;
     private Executor mExecutor;
@@ -751,10 +762,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private boolean mIsPromptShowing;
 
     private BiometricPrompt(Context context, PromptInfo promptInfo, ButtonInfo negativeButtonInfo,
-            IAuthService service) {
+            ButtonInfo contentViewMoreOptionsButtonInfo, IAuthService service) {
         mContext = context;
         mPromptInfo = promptInfo;
         mNegativeButtonInfo = negativeButtonInfo;
+        mContentViewMoreOptionsButtonInfo = contentViewMoreOptionsButtonInfo;
         mService = service;
         mIsPromptShowing = false;
     }
