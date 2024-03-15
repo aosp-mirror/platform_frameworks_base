@@ -252,14 +252,6 @@ public final class AssociationInfo implements Parcelable {
     }
 
     /**
-     * @return true if the association is not revoked nor pending
-     * @hide
-     */
-    public boolean isActive() {
-        return !mRevoked && !mPending;
-    }
-
-    /**
      * @return the last time self reported disconnected for selfManaged only.
      * @hide
      */

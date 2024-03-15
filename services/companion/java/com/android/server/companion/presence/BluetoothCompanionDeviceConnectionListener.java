@@ -93,7 +93,7 @@ public class BluetoothCompanionDeviceConnectionListener
 
         btAdapter.registerBluetoothConnectionCallback(
                 new HandlerExecutor(Handler.getMain()), /* callback */this);
-        mAssociationStore.registerLocalListener(this);
+        mAssociationStore.registerListener(this);
     }
 
     /**
@@ -168,7 +168,7 @@ public class BluetoothCompanionDeviceConnectionListener
     private void onDeviceConnectivityChanged(@NonNull BluetoothDevice device, boolean connected) {
         int userId = UserHandle.myUserId();
         final List<AssociationInfo> associations =
-                mAssociationStore.getActiveAssociationsByAddress(device.getAddress());
+                mAssociationStore.getAssociationsByAddress(device.getAddress());
         final List<ObservableUuid> observableUuids =
                 mObservableUuidStore.getObservableUuidsForUser(userId);
         final ParcelUuid[] bluetoothDeviceUuids = device.getUuids();

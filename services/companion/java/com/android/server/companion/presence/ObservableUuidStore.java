@@ -90,8 +90,6 @@ public class ObservableUuidStore {
      * Remove the observable uuid.
      */
     public void removeObservableUuid(@UserIdInt int userId, ParcelUuid uuid, String packageName) {
-        Slog.i(TAG, "Removing uuid=[" + uuid.getUuid() + "] from store...");
-
         List<ObservableUuid> cachedObservableUuids;
 
         synchronized (mLock) {
@@ -110,7 +108,7 @@ public class ObservableUuidStore {
      * Write the observable uuid.
      */
     public void writeObservableUuid(@UserIdInt int userId, ObservableUuid uuid) {
-        Slog.i(TAG, "Writing uuid=[" + uuid.getUuid() + "] to store...");
+        Slog.i(TAG, "Writing uuid=" + uuid.getUuid() + " to store.");
 
         List<ObservableUuid> cachedObservableUuids;
         synchronized (mLock) {

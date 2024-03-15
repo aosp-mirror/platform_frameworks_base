@@ -18,8 +18,7 @@ package com.android.server.companion;
 
 import static android.os.UserHandle.getCallingUserId;
 
-import static com.android.server.companion.association.AssociationDiskStore.readAssociationsFromPayload;
-import static com.android.server.companion.utils.RolesUtils.addRoleHolderForAssociation;
+import static com.android.server.companion.CompanionDeviceManagerService.PerUserAssociationSet;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -27,50 +26,62 @@ import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.companion.Flags;
 import android.companion.datatransfer.SystemDataTransferRequest;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
+import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.companion.association.AssociationDiskStore;
 import com.android.server.companion.association.AssociationRequestsProcessor;
 import com.android.server.companion.association.AssociationStore;
-import com.android.server.companion.association.Associations;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 @SuppressLint("LongLogTag")
 class BackupRestoreProcessor {
-    private static final String TAG = "CDM_BackupRestoreProcessor";
+    static final String TAG = "CDM_BackupRestoreProcessor";
     private static final int BACKUP_AND_RESTORE_VERSION = 0;
 
-    private final Context mContext;
     @NonNull
-    private final PackageManagerInternal mPackageManagerInternal;
+    private final CompanionDeviceManagerService mService;
+    @NonNull
+    private final PackageManagerInternal mPackageManager;
     @NonNull
     private final AssociationStore mAssociationStore;
     @NonNull
-    private final AssociationDiskStore mAssociationDiskStore;
+    private final AssociationDiskStore mPersistentStore;
     @NonNull
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     @NonNull
     private final AssociationRequestsProcessor mAssociationRequestsProcessor;
 
-    BackupRestoreProcessor(@NonNull Context context,
-                           @NonNull PackageManagerInternal packageManagerInternal,
+    /**
+     * A structure that consists of a set of restored associations that are pending corresponding
+     * companion app to be installed.
+     */
+    @GuardedBy("mAssociationsPendingAppInstall")
+    private final PerUserAssociationSet mAssociationsPendingAppInstall =
+            new PerUserAssociationSet();
+
+    BackupRestoreProcessor(@NonNull CompanionDeviceManagerService service,
                            @NonNull AssociationStore associationStore,
-                           @NonNull AssociationDiskStore associationDiskStore,
+                           @NonNull AssociationDiskStore persistentStore,
                            @NonNull SystemDataTransferRequestStore systemDataTransferRequestStore,
                            @NonNull AssociationRequestsProcessor associationRequestsProcessor) {
-        mContext = context;
-        mPackageManagerInternal = packageManagerInternal;
+        mService = service;
+        mPackageManager = service.mPackageManagerInternal;
         mAssociationStore = associationStore;
-        mAssociationDiskStore = associationDiskStore;
+        mPersistentStore = persistentStore;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mAssociationRequestsProcessor = associationRequestsProcessor;
     }
@@ -82,9 +93,9 @@ class BackupRestoreProcessor {
      * | (4) SystemDataTransferRequest length | SystemDataTransferRequest XML (without userId)|
      */
     byte[] getBackupPayload(int userId) {
-        Slog.i(TAG, "getBackupPayload() userId=[" + userId + "].");
-
-        byte[] associationsPayload = mAssociationDiskStore.getBackupPayload(userId);
+        // Persist state first to generate an up-to-date XML file
+        mService.persistStateForUser(userId);
+        byte[] associationsPayload = mPersistentStore.getBackupPayload(userId);
         int associationsPayloadLength = associationsPayload.length;
 
         // System data transfer requests are persisted up-to-date already
@@ -108,9 +119,6 @@ class BackupRestoreProcessor {
      * Create new associations and system data transfer request consents using backed up payload.
      */
     void applyRestoredPayload(byte[] payload, int userId) {
-        Slog.i(TAG, "applyRestoredPayload() userId=[" + userId + "], payload size=["
-                + payload.length + "].");
-
         ByteBuffer buffer = ByteBuffer.wrap(payload);
 
         // Make sure that payload version matches current version to ensure proper deserialization
@@ -123,8 +131,9 @@ class BackupRestoreProcessor {
         // Read the bytes containing backed-up associations
         byte[] associationsPayload = new byte[buffer.getInt()];
         buffer.get(associationsPayload);
-        final Associations restoredAssociations = readAssociationsFromPayload(
-                associationsPayload, userId);
+        final Set<AssociationInfo> restoredAssociations = new HashSet<>();
+        mPersistentStore.readStateFromPayload(associationsPayload, userId,
+                restoredAssociations, new HashMap<>());
 
         // Read the bytes containing backed-up system data transfer requests user consent
         byte[] requestsPayload = new byte[buffer.getInt()];
@@ -133,13 +142,13 @@ class BackupRestoreProcessor {
                 mSystemDataTransferRequestStore.readRequestsFromPayload(requestsPayload, userId);
 
         // Get a list of installed packages ahead of time.
-        List<ApplicationInfo> installedApps = mPackageManagerInternal.getInstalledApplications(
+        List<ApplicationInfo> installedApps = mPackageManager.getInstalledApplications(
                 0, userId, getCallingUserId());
 
         // Restored device may have a different user ID than the backed-up user's user-ID. Since
         // association ID is dependent on the user ID, restored associations must account for
         // this potential difference on their association IDs.
-        for (AssociationInfo restored : restoredAssociations.getAssociations()) {
+        for (AssociationInfo restored : restoredAssociations) {
             // Don't restore a revoked association. Since they weren't added to the device being
             // restored in the first place, there is no need to worry about revoking a role that
             // was never granted either.
@@ -159,9 +168,10 @@ class BackupRestoreProcessor {
 
             // Create a new association reassigned to this user and a valid association ID
             final String packageName = restored.getPackageName();
-            final int newId = mAssociationStore.getNextId(userId);
-            AssociationInfo newAssociation = new AssociationInfo.Builder(newId, userId, packageName,
-                    restored).build();
+            final int newId = mService.getNewAssociationIdForPackage(userId, packageName);
+            AssociationInfo newAssociation =
+                    new AssociationInfo.Builder(newId, userId, packageName, restored)
+                            .build();
 
             // Check if the companion app for this association is already installed, then do one
             // of the following:
@@ -169,15 +179,13 @@ class BackupRestoreProcessor {
             // the role attached to this association to the app.
             // (2) If the app isn't yet installed, then add this association to the list of pending
             // associations to be added when the package is installed in the future.
-            boolean isPackageInstalled = installedApps.stream().anyMatch(
-                    app -> packageName.equals(app.packageName));
+            boolean isPackageInstalled = installedApps.stream()
+                    .anyMatch(app -> packageName.equals(app.packageName));
             if (isPackageInstalled) {
                 mAssociationRequestsProcessor.maybeGrantRoleAndStoreAssociation(newAssociation,
                         null, null);
             } else {
-                newAssociation = (new AssociationInfo.Builder(newAssociation)).setPending(true)
-                        .build();
-                mAssociationStore.addAssociation(newAssociation);
+                addToPendingAppInstall(newAssociation);
             }
 
             // Re-map restored system data transfer requests to newly created associations
@@ -187,27 +195,32 @@ class BackupRestoreProcessor {
                 mSystemDataTransferRequestStore.writeRequest(userId, newRequest);
             }
         }
+
+        // Persist restored state.
+        mService.persistStateForUser(userId);
     }
 
-    public void restorePendingAssociations(int userId, String packageName) {
-        List<AssociationInfo> pendingAssociations = mAssociationStore.getPendingAssociations(userId,
-                packageName);
-        if (!pendingAssociations.isEmpty()) {
-            Slog.i(TAG, "Found pending associations for package=[" + packageName
-                    + "]. Restoring...");
+    void addToPendingAppInstall(@NonNull AssociationInfo association) {
+        association = (new AssociationInfo.Builder(association))
+                .setPending(true)
+                .build();
+
+        synchronized (mAssociationsPendingAppInstall) {
+            mAssociationsPendingAppInstall.forUser(association.getUserId()).add(association);
         }
-        for (AssociationInfo association : pendingAssociations) {
-            AssociationInfo newAssociation = new AssociationInfo.Builder(association)
-                    .setPending(false)
-                    .build();
-            addRoleHolderForAssociation(mContext, newAssociation, success -> {
-                if (success) {
-                    mAssociationStore.updateAssociation(newAssociation);
-                    Slog.i(TAG, "Association=[" + association + "] is restored.");
-                } else {
-                    Slog.e(TAG, "Failed to restore association=[" + association + "].");
-                }
-            });
+    }
+
+    void removeFromPendingAppInstall(@NonNull AssociationInfo association) {
+        synchronized (mAssociationsPendingAppInstall) {
+            mAssociationsPendingAppInstall.forUser(association.getUserId()).remove(association);
+        }
+    }
+
+    @NonNull
+    Set<AssociationInfo> getAssociationsPendingAppInstallForUser(@UserIdInt int userId) {
+        synchronized (mAssociationsPendingAppInstall) {
+            // Return a copy.
+            return new ArraySet<>(mAssociationsPendingAppInstall.forUser(userId));
         }
     }
 
@@ -218,7 +231,7 @@ class BackupRestoreProcessor {
     private boolean handleCollision(@UserIdInt int userId,
             AssociationInfo restored,
             List<SystemDataTransferRequest> restoredRequests) {
-        List<AssociationInfo> localAssociations = mAssociationStore.getActiveAssociationsByPackage(
+        List<AssociationInfo> localAssociations = mAssociationStore.getAssociationsForPackage(
                 restored.getUserId(), restored.getPackageName());
         Predicate<AssociationInfo> isSameDevice = associationInfo -> {
             boolean matchesMacAddress = Objects.equals(
@@ -235,7 +248,7 @@ class BackupRestoreProcessor {
             return false;
         }
 
-        Slog.d(TAG, "Conflict detected with association id=" + local.getId()
+        Log.d(TAG, "Conflict detected with association id=" + local.getId()
                 + " while restoring CDM backup. Keeping local association.");
 
         List<SystemDataTransferRequest> localRequests = mSystemDataTransferRequestStore
@@ -253,8 +266,8 @@ class BackupRestoreProcessor {
                 continue;
             }
 
-            Slog.d(TAG, "Restoring " + restoredRequest.getClass().getSimpleName()
-                    + " to an existing association id=[" + local.getId() + "].");
+            Log.d(TAG, "Restoring " + restoredRequest.getClass().getSimpleName()
+                    + " to an existing association id=" + local.getId() + ".");
 
             SystemDataTransferRequest newRequest =
                     restoredRequest.copyWithNewId(local.getId());
