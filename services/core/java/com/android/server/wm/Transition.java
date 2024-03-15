@@ -2468,15 +2468,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             for (WindowContainer<?> p = getAnimatableParent(wc); p != null;
                     p = getAnimatableParent(p)) {
                 final ChangeInfo parentChange = changes.get(p);
-                if (parentChange == null) {
-                    break;
-                }
-                if (!parentChange.hasChanged()) {
-                    // In case the target is collected after the parent has been changed, it could
-                    // be too late to snapshot the parent change. Skip to see if there is any
-                    // parent window further up to be considered as change parent.
-                    continue;
-                }
+                if (parentChange == null || !parentChange.hasChanged()) break;
                 if (p.mRemoteToken == null) {
                     // Intermediate parents must be those that has window to be managed by Shell.
                     continue;
