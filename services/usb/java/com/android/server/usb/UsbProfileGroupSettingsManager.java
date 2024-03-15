@@ -978,8 +978,14 @@ public class UsbProfileGroupSettingsManager {
 
         shouldRestrictOverlayActivities = filteredAppProcessInfos.stream().anyMatch(pkg -> {
             try {
-                return mPackageManager.getProperty(PROPERTY_RESTRICT_USB_OVERLAY_ACTIVITIES, pkg)
-                        .getBoolean();
+                boolean restrictUsbOverlayActivitiesForPackage = mPackageManager
+                        .getProperty(PROPERTY_RESTRICT_USB_OVERLAY_ACTIVITIES, pkg).getBoolean();
+
+                if (restrictUsbOverlayActivitiesForPackage) {
+                    Slog.d(TAG, "restricting usb overlay activities as package " + pkg
+                            + " is in foreground");
+                }
+                return restrictUsbOverlayActivitiesForPackage;
             } catch (NameNotFoundException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "property PROPERTY_RESTRICT_USB_OVERLAY_ACTIVITIES "
@@ -989,8 +995,8 @@ public class UsbProfileGroupSettingsManager {
             }
         });
 
-        if (shouldRestrictOverlayActivities) {
-            Slog.d(TAG, "restricting starting of usb overlay activities");
+        if (!shouldRestrictOverlayActivities) {
+            Slog.d(TAG, "starting of usb overlay activities");
         }
         return shouldRestrictOverlayActivities;
     }
