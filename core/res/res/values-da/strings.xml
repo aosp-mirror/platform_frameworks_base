@@ -338,7 +338,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"foretage og administrere telefonopkald"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Kropssensorer"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"få adgang til sensordata om dine livstegn"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"få adgang til sensordata om dine vitale værdier"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Notifikationer"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"vise notifikationer"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Hente indholdet i vinduet"</string>
@@ -2393,6 +2393,5 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kan sende og modtage beskeder uden et mobil- eller Wi-Fi-netværk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Åbn Beskeder"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Sådan fungerer det"</string>
-    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
-    <skip />
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"Afventer…"</string>
 </resources>

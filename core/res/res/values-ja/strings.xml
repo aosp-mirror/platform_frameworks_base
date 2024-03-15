@@ -2175,7 +2175,7 @@
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"ヘッドセット: フック"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"画面上のユーザー補助機能のショートカット"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"画面上のユーザー補助機能のショートカットの選択メニュー"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助機能のショートカット"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ユーザー補助のショートカット"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"通知シェードを閉じる"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"D-pad: 上"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"D-pad: 下"</string>
