@@ -34,7 +34,6 @@ import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
-import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackAppearanceViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
@@ -115,7 +114,7 @@ constructor(
             )
         )
 
-        if (sceneContainerFlags.flexiNotifsEnabled()) {
+        if (sceneContainerFlags.isEnabled()) {
             disposableHandles.add(
                 NotificationStackAppearanceViewBinder.bind(
                     context,
