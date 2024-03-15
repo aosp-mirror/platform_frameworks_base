@@ -16,16 +16,30 @@
 
 package com.google.android.test.windowinsetstests;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.systemBars;
 
-public class WindowInsetsTestsMainActivity extends Activity {
+import android.content.Intent;
+import android.graphics.Insets;
+import android.os.Bundle;
+import android.view.WindowInsets;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class WindowInsetsTestsMainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        setSupportActionBar(findViewById(R.id.toolbar));
+
+        findViewById(R.id.root).setOnApplyWindowInsetsListener(
+                (v, insets) -> {
+                    final Insets i = insets.getInsets(systemBars() | displayCutout());
+                    v.setPadding(i.left, i.top, i.right, i.bottom);
+                    return WindowInsets.CONSUMED;
+                });
 
         findViewById(R.id.chat_button).setOnClickListener(
                 v -> startActivity(new Intent(this, ChatActivity.class)));
