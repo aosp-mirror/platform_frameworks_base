@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.selection.DisabledProviderData;
+import android.credentials.selection.IntentCreationResult;
 import android.credentials.selection.IntentFactory;
 import android.credentials.selection.ProviderData;
 import android.credentials.selection.RequestInfo;
@@ -36,6 +37,8 @@ import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.service.credentials.CredentialProviderInfoFactory;
+
+import com.android.server.credentials.metrics.RequestSessionMetric;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -159,7 +162,8 @@ public class CredentialManagerUi {
      * @param providerDataList       the list of provider data from remote providers
      */
     public PendingIntent createPendingIntent(
-            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList) {
+            RequestInfo requestInfo, ArrayList<ProviderData> providerDataList,
+            RequestSessionMetric requestSessionMetric) {
         List<CredentialProviderInfo> allProviders =
                 CredentialProviderInfoFactory.getCredentialProviderServices(
                         mContext,
@@ -174,10 +178,12 @@ public class CredentialManagerUi {
                 .map(disabledProvider -> new DisabledProviderData(
                         disabledProvider.getComponentName().flattenToString())).toList();
 
-        Intent intent;
-        intent = IntentFactory.createCredentialSelectorIntent(
-                mContext, requestInfo, providerDataList,
-                new ArrayList<>(disabledProviderDataList), mResultReceiver);
+        IntentCreationResult intentCreationResult = IntentFactory
+                .createCredentialSelectorIntentForCredMan(mContext, requestInfo, providerDataList,
+                        new ArrayList<>(disabledProviderDataList), mResultReceiver);
+        requestSessionMetric.collectUiConfigurationResults(
+                mContext, intentCreationResult, mUserId);
+        Intent intent = intentCreationResult.getIntent();
         intent.setAction(UUID.randomUUID().toString());
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents
@@ -197,10 +203,15 @@ public class CredentialManagerUi {
      * of the pinned entry.
      *
      * @param requestInfo            the information about the request
+     * @param requestSessionMetric   the metric object for logging
      */
-    public Intent createIntentForAutofill(RequestInfo requestInfo) {
-        return IntentFactory.createCredentialSelectorIntentForAutofill(
-                mContext, requestInfo, new ArrayList<>(),
-                mResultReceiver);
+    public Intent createIntentForAutofill(RequestInfo requestInfo,
+            RequestSessionMetric requestSessionMetric) {
+        IntentCreationResult intentCreationResult = IntentFactory
+                .createCredentialSelectorIntentForAutofill(mContext, requestInfo, new ArrayList<>(),
+                        mResultReceiver);
+        requestSessionMetric.collectUiConfigurationResults(
+                mContext, intentCreationResult, mUserId);
+        return intentCreationResult.getIntent();
     }
 }
