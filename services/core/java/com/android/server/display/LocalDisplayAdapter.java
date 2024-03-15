@@ -37,6 +37,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.DisplayUtils;
 import android.util.LongSparseArray;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -78,6 +79,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private static final String UNIQUE_ID_PREFIX = "local:";
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
+    // Min and max strengths for even dimmer feature.
+    private static final float EVEN_DIMMER_MIN_STRENGTH = 0.0f;
+    private static final float EVEN_DIMMER_MAX_STRENGTH = 70.0f; // not too dim yet.
+    private static final float BRIGHTNESS_MIN = 0.0f;
+    // The brightness at which we start using color matrices rather than backlight,
+    // to dim the display
+    private static final float BACKLIGHT_COLOR_TRANSITION_POINT = 0.1f;
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
@@ -90,6 +98,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private final DisplayNotificationManager mDisplayNotificationManager;
 
     private Context mOverlayContext;
+
+    private int mEvenDimmerStrength = -1;
 
     // Called with SyncRoot lock held.
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
@@ -928,6 +938,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             final float nits = backlightToNits(backlight);
                             final float sdrNits = backlightToNits(sdrBacklight);
 
+                            if (getFeatureFlags().isEvenDimmerEnabled()) {
+                                applyColorMatrixBasedDimming(brightnessState);
+                            }
+
                             mBacklightAdapter.setBacklight(sdrBacklight, sdrNits, backlight, nits);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness",
@@ -973,6 +987,22 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                 updateDeviceInfoLocked();
                             }
                         }
+                    }
+
+                    private void applyColorMatrixBasedDimming(float brightnessState) {
+                        int strength = (int) (MathUtils.constrainedMap(
+                                EVEN_DIMMER_MAX_STRENGTH, EVEN_DIMMER_MIN_STRENGTH, // to this range
+                                BRIGHTNESS_MIN, BACKLIGHT_COLOR_TRANSITION_POINT, // from this range
+                                brightnessState) + 0.5); // map this (+ rounded up)
+
+                        if (mEvenDimmerStrength < 0 // uninitialised
+                                || MathUtils.abs(mEvenDimmerStrength - strength) > 1
+                                || strength <= 1) {
+                            mEvenDimmerStrength = strength;
+                        }
+
+                        // TODO: use `enabled` and `mRbcStrength` to set color matrices here
+                        // TODO: boolean enabled = mEvenDimmerStrength > 0.0f;
                     }
                 };
             }

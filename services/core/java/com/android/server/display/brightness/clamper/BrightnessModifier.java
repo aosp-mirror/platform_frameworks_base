@@ -68,4 +68,9 @@ abstract class BrightnessModifier implements BrightnessStateModifier {
     public void stop() {
         // do nothing
     }
+
+    @Override
+    public void onAmbientLuxChange(float ambientLux) {
+        // do nothing
+    }
 }
