@@ -494,6 +494,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     StatusBarManagerInternal mStatusBar;
 
+    @Mock
+    NotificationAttentionHelper mAttentionHelper;
+
     private NotificationManagerService.WorkerHandler mWorkerHandler;
 
     private class TestableToastCallback extends ITransientNotification.Stub {
@@ -661,7 +664,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // TODO (b/291907312): remove feature flag
         // NOTE: Prefer using the @EnableFlag annotation where possible. Do not add any android.app
         //  flags here.
-        mSetFlagsRule.disableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER,
+        mSetFlagsRule.disableFlags(
                 Flags.FLAG_POLITE_NOTIFICATIONS, Flags.FLAG_AUTOGROUP_SUMMARY_ICON_UPDATE);
 
         initNMS();
@@ -695,10 +698,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
                 mAppUsageStats, mDevicePolicyManager, mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager,
-                mock(TelephonyManager.class),
                 mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
                 mTelecomManager, mLogger, mTestFlagResolver, mPermissionManager,
                 mPowerManager, mPostNotificationTrackerFactory);
+
+        mService.setAttentionHelper(mAttentionHelper);
 
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
@@ -713,13 +717,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         if (upToBootPhase >= SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
             verify(mHistoryManager).onBootPhaseAppsCanStart();
-        }
-
-        // TODO b/291907312: remove feature flag
-        if (Flags.refactorAttentionHelper()) {
-            mService.mAttentionHelper.setAudioManager(mAudioManager);
-        } else {
-            mService.setAudioManager(mAudioManager);
         }
 
         mStrongAuthTracker = mService.new StrongAuthTrackerFake(mContext);
@@ -1808,23 +1805,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(tag, call.r.getSbn().getTag());
         assertEquals(1, call.getInstanceId());  // Fake instance IDs are assigned in order
         assertThat(call.postDurationMillisLogged).isGreaterThan(0);
-    }
-
-    @Test
-    public void testEnqueueNotificationWithTag_WritesExpectedLogs_NAHRefactor() throws Exception {
-        // TODO b/291907312: remove feature flag
-        mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
-        // Cleanup NMS before re-initializing
-        if (mService != null) {
-            try {
-                mService.onDestroy();
-            } catch (IllegalStateException | IllegalArgumentException e) {
-                // can throw if a broadcast receiver was never registered
-            }
-        }
-        initNMS();
-
-        testEnqueueNotificationWithTag_WritesExpectedLogs();
     }
 
     @Test
@@ -10103,13 +10083,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testOnBubbleMetadataChangedToSuppressNotification_soundStopped()
             throws RemoteException {
-        IRingtonePlayer mockPlayer = mock(IRingtonePlayer.class);
-        when(mAudioManager.getRingtonePlayer()).thenReturn(mockPlayer);
-        // Set up volume to be above 0, and for AudioManager to signal playback should happen,
-        // for the sound to actually play
-        when(mAudioManager.getStreamVolume(anyInt())).thenReturn(10);
-        when(mAudioManager.shouldNotificationSoundPlay(any(android.media.AudioAttributes.class)))
-                .thenReturn(true);
 
         setUpPrefsForBubbles(PKG, mUid,
                 true /* global */,
@@ -10128,25 +10101,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         // Check audio is stopped
-        verify(mockPlayer).stopAsync();
-    }
-
-    @Test
-    public void testOnBubbleMetadataChangedToSuppressNotification_soundStopped_NAHRefactor()
-        throws Exception {
-        // TODO b/291907312: remove feature flag
-        mSetFlagsRule.enableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER);
-        // Cleanup NMS before re-initializing
-        if (mService != null) {
-            try {
-                mService.onDestroy();
-            } catch (IllegalStateException | IllegalArgumentException e) {
-                // can throw if a broadcast receiver was never registered
-            }
-        }
-        initNMS();
-
-        testOnBubbleMetadataChangedToSuppressNotification_soundStopped();
+        verify(mAttentionHelper).clearEffectsLocked(nr.getKey());
     }
 
     @Test
