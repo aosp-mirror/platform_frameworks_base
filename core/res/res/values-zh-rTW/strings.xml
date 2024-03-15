@@ -1586,7 +1586,7 @@
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"完成"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"模式變更"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift 鍵"</string>
-    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter 鍵"</string>
+    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"選擇應用程式"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"無法啟動 <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"分享對象："</string>
@@ -2393,6 +2393,5 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"你可以收發訊息，沒有行動/Wi-Fi 網路也無妨"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」應用程式"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
-    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
-    <skip />
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
 </resources>
