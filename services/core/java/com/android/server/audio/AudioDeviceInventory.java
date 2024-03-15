@@ -42,7 +42,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -50,9 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -77,49 +74,31 @@ public class AudioDeviceInventory {
 
     private final Object mDeviceInventoryLock = new Object();
     @GuardedBy("mDeviceInventoryLock")
-    private final HashMap<Pair<Integer, String>, AdiDeviceState> mDeviceInventory = new HashMap<>();
+    private final ArrayList<AdiDeviceState> mDeviceInventory = new ArrayList<>(0);
+
 
     List<AdiDeviceState> getImmutableDeviceInventory() {
         synchronized (mDeviceInventoryLock) {
-            return new ArrayList<AdiDeviceState>(mDeviceInventory.values());
+            return List.copyOf(mDeviceInventory);
         }
     }
 
     void addDeviceStateToInventory(AdiDeviceState deviceState) {
         synchronized (mDeviceInventoryLock) {
-            mDeviceInventory.put(deviceState.getDeviceId(), deviceState);
+            mDeviceInventory.add(deviceState);
         }
-    }
-
-    /**
-     * Adds a new entry in mDeviceInventory if the AudioDeviceAttributes passed is an sink
-     * Bluetooth device and no corresponding entry already exists.
-     * @param ada the device to add if needed
-     */
-    void addAudioDeviceInInventoryIfNeeded(AudioDeviceAttributes ada) {
-        if (!AudioSystem.isBluetoothOutDevice(ada.getInternalType())) {
-            return;
-        }
-        synchronized (mDeviceInventoryLock) {
-            if (findDeviceStateForAudioDeviceAttributes(ada, ada.getType()) != null) {
-                return;
-            }
-            AdiDeviceState ads = new AdiDeviceState(
-                    ada.getType(), ada.getInternalType(), ada.getAddress());
-            mDeviceInventory.put(ads.getDeviceId(), ads);
-        }
-        mDeviceBroker.persistAudioDeviceSettings();
     }
 
     AdiDeviceState findDeviceStateForAudioDeviceAttributes(AudioDeviceAttributes ada,
             int canonicalDeviceType) {
         final boolean isWireless = isBluetoothDevice(ada.getInternalType());
+
         synchronized (mDeviceInventoryLock) {
-            for (AdiDeviceState deviceState : mDeviceInventory.values()) {
-                if (deviceState.getDeviceType() == canonicalDeviceType
+            for (AdiDeviceState deviceSetting : mDeviceInventory) {
+                if (deviceSetting.getDeviceType() == canonicalDeviceType
                         && (!isWireless || ada.getAddress().equals(
-                        deviceState.getDeviceAddress()))) {
-                    return deviceState;
+                        deviceSetting.getDeviceAddress()))) {
+                    return deviceSetting;
                 }
             }
         }
@@ -320,7 +299,7 @@ public class AudioDeviceInventory {
                     + " devices:" + devices); });
         pw.println("\ndevices:\n");
         synchronized (mDeviceInventoryLock) {
-            for (AdiDeviceState device : mDeviceInventory.values()) {
+            for (AdiDeviceState device : mDeviceInventory) {
                 pw.println("\t" + device + "\n");
             }
         }
@@ -749,8 +728,8 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
-            @NonNull IStrategyPreferredDevicesDispatcher dispatcher, boolean isPrivileged) {
-        mPrefDevDispatchers.register(dispatcher, isPrivileged);
+            @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
+        mPrefDevDispatchers.register(dispatcher);
     }
 
     /*package*/ void unregisterStrategyPreferredDevicesDispatcher(
@@ -784,8 +763,8 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ void registerCapturePresetDevicesRoleDispatcher(
-            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher, boolean isPrivileged) {
-        mDevRoleCapturePresetDispatchers.register(dispatcher, isPrivileged);
+            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
+        mDevRoleCapturePresetDispatchers.register(dispatcher);
     }
 
     /*package*/ void unregisterCapturePresetDevicesRoleDispatcher(
@@ -840,7 +819,6 @@ public class AudioDeviceInventory {
                 mConnectedDevices.put(deviceKey, new DeviceInfo(
                         device, deviceName, address, AudioSystem.AUDIO_FORMAT_DEFAULT));
                 mDeviceBroker.postAccessoryPlugMediaUnmute(device);
-                addAudioDeviceInInventoryIfNeeded(new AudioDeviceAttributes(device, address));
                 mmi.set(MediaMetrics.Property.STATE, MediaMetrics.Value.CONNECTED).record();
                 return true;
             } else if (!connect && isConnected) {
@@ -1059,10 +1037,7 @@ public class AudioDeviceInventory {
 
         mDeviceBroker.postAccessoryPlugMediaUnmute(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
         setCurrentAudioRouteNameIfPossible(name, true /*fromA2dp*/);
-        addAudioDeviceInInventoryIfNeeded(new AudioDeviceAttributes(
-                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
     }
-
 
     @GuardedBy("mDevicesLock")
     private void makeA2dpDeviceUnavailableNow(String address, int a2dpCodec) {
@@ -1166,8 +1141,6 @@ public class AudioDeviceInventory {
         mDeviceBroker.postApplyVolumeOnDevice(streamType,
                 AudioSystem.DEVICE_OUT_HEARING_AID, "makeHearingAidDeviceAvailable");
         setCurrentAudioRouteNameIfPossible(name, false /*fromA2dp*/);
-        addAudioDeviceInInventoryIfNeeded(new AudioDeviceAttributes(
-                AudioSystem.DEVICE_OUT_HEARING_AID, address));
         new MediaMetrics.Item(mMetricsId + "makeHearingAidDeviceAvailable")
                 .set(MediaMetrics.Property.ADDRESS, address != null ? address : "")
                 .set(MediaMetrics.Property.DEVICE,
@@ -1449,9 +1422,6 @@ public class AudioDeviceInventory {
         final int nbDispatchers = mPrefDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
-                if (!((Boolean) mPrefDevDispatchers.getBroadcastCookie(i))) {
-                    devices = mDeviceBroker.anonymizeAudioDeviceAttributesListUnchecked(devices);
-                }
                 mPrefDevDispatchers.getBroadcastItem(i).dispatchPrefDevicesChanged(
                         strategy, devices);
             } catch (RemoteException e) {
@@ -1465,9 +1435,6 @@ public class AudioDeviceInventory {
         final int nbDispatchers = mDevRoleCapturePresetDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; ++i) {
             try {
-                if (!((Boolean) mDevRoleCapturePresetDispatchers.getBroadcastCookie(i))) {
-                    devices = mDeviceBroker.anonymizeAudioDeviceAttributesListUnchecked(devices);
-                }
                 mDevRoleCapturePresetDispatchers.getBroadcastItem(i).dispatchDevicesRoleChanged(
                         capturePreset, role, devices);
             } catch (RemoteException e) {
@@ -1480,20 +1447,19 @@ public class AudioDeviceInventory {
         int deviceCatalogSize = 0;
         synchronized (mDeviceInventoryLock) {
             deviceCatalogSize = mDeviceInventory.size();
-
-            final StringBuilder settingsBuilder = new StringBuilder(
+        }
+        final StringBuilder settingsBuilder = new StringBuilder(
                 deviceCatalogSize * AdiDeviceState.getPeristedMaxSize());
 
-            Iterator<AdiDeviceState> iterator = mDeviceInventory.values().iterator();
-            if (iterator.hasNext()) {
-                settingsBuilder.append(iterator.next().toPersistableString());
+        synchronized (mDeviceInventoryLock) {
+            for (int i = 0; i < mDeviceInventory.size(); i++) {
+                settingsBuilder.append(mDeviceInventory.get(i).toPersistableString());
+                if (i != mDeviceInventory.size() - 1) {
+                    settingsBuilder.append(SETTING_DEVICE_SEPARATOR_CHAR);
+                }
             }
-            while (iterator.hasNext()) {
-                settingsBuilder.append(SETTING_DEVICE_SEPARATOR_CHAR);
-                settingsBuilder.append(iterator.next().toPersistableString());
-            }
-            return settingsBuilder.toString();
         }
+        return settingsBuilder.toString();
     }
 
     /*package*/ void setDeviceSettings(String settings) {
