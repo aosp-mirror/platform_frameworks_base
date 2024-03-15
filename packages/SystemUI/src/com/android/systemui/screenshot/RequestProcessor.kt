@@ -21,16 +21,6 @@ import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
-/** Processes a screenshot request sent from [ScreenshotHelper]. */
-interface ScreenshotRequestProcessor {
-    /**
-     * Inspects the incoming ScreenshotData, potentially modifying it based upon policy.
-     *
-     * @param screenshot the screenshot to process
-     */
-    suspend fun process(screenshot: ScreenshotData): ScreenshotData
-}
-
 /** Implementation of [ScreenshotRequestProcessor] */
 @SysUISingleton
 class RequestProcessor
@@ -75,6 +65,3 @@ constructor(
 }
 
 private const val TAG = "RequestProcessor"
-
-/** Exception thrown by [RequestProcessor] if something goes wrong. */
-class RequestProcessorException(message: String) : IllegalStateException(message)
