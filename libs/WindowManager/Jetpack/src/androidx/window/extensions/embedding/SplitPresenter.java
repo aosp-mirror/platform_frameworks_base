@@ -18,6 +18,7 @@ package androidx.window.extensions.embedding;
 
 import static android.content.pm.PackageManager.MATCH_ALL;
 
+import static androidx.window.extensions.embedding.DividerPresenter.getBoundsOffsetForDivider;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
 import android.app.Activity;
@@ -85,10 +86,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     })
     private @interface Position {}
 
-    private static final int CONTAINER_POSITION_LEFT = 0;
-    private static final int CONTAINER_POSITION_TOP = 1;
-    private static final int CONTAINER_POSITION_RIGHT = 2;
-    private static final int CONTAINER_POSITION_BOTTOM = 3;
+    static final int CONTAINER_POSITION_LEFT = 0;
+    static final int CONTAINER_POSITION_TOP = 1;
+    static final int CONTAINER_POSITION_RIGHT = 2;
+    static final int CONTAINER_POSITION_BOTTOM = 3;
 
     @IntDef(value = {
             CONTAINER_POSITION_LEFT,
@@ -96,7 +97,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             CONTAINER_POSITION_RIGHT,
             CONTAINER_POSITION_BOTTOM,
     })
-    private @interface ContainerPosition {}
+    @interface ContainerPosition {}
 
     /**
      * Result of {@link #expandSplitContainerIfNeeded(WindowContainerTransaction, SplitContainer,
@@ -738,6 +739,15 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     private SplitAttributes sanitizeSplitAttributes(@NonNull TaskProperties taskProperties,
             @NonNull SplitAttributes splitAttributes,
             @Nullable Pair<Size, Size> minDimensionsPair) {
+        // Sanitize the DividerAttributes and set default values.
+        if (splitAttributes.getDividerAttributes() != null) {
+            splitAttributes = new SplitAttributes.Builder(splitAttributes)
+                    .setDividerAttributes(
+                            DividerPresenter.sanitizeDividerAttributes(
+                                    splitAttributes.getDividerAttributes())
+                    ).build();
+        }
+
         if (minDimensionsPair == null) {
             return splitAttributes;
         }
@@ -930,18 +940,18 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      */
     private static SplitAttributes updateSplitAttributesType(
             @NonNull SplitAttributes splitAttributes, @NonNull SplitType splitTypeToUpdate) {
-        return new SplitAttributes.Builder()
+        return new SplitAttributes.Builder(splitAttributes)
                 .setSplitType(splitTypeToUpdate)
-                .setLayoutDirection(splitAttributes.getLayoutDirection())
-                .setAnimationBackground(splitAttributes.getAnimationBackground())
                 .build();
     }
 
     @NonNull
     private Rect getLeftContainerBounds(@NonNull Configuration taskConfiguration,
             @NonNull SplitAttributes splitAttributes, @Nullable FoldingFeature foldingFeature) {
+        final int dividerOffset = getBoundsOffsetForDivider(
+                splitAttributes, CONTAINER_POSITION_LEFT);
         final int right = computeBoundaryBetweenContainers(taskConfiguration, splitAttributes,
-                CONTAINER_POSITION_LEFT, foldingFeature);
+                CONTAINER_POSITION_LEFT, foldingFeature) + dividerOffset;
         final Rect taskBounds = taskConfiguration.windowConfiguration.getBounds();
         return new Rect(taskBounds.left, taskBounds.top, right, taskBounds.bottom);
     }
@@ -949,8 +959,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     @NonNull
     private Rect getRightContainerBounds(@NonNull Configuration taskConfiguration,
             @NonNull SplitAttributes splitAttributes, @Nullable FoldingFeature foldingFeature) {
+        final int dividerOffset = getBoundsOffsetForDivider(
+                splitAttributes, CONTAINER_POSITION_RIGHT);
         final int left = computeBoundaryBetweenContainers(taskConfiguration, splitAttributes,
-                CONTAINER_POSITION_RIGHT, foldingFeature);
+                CONTAINER_POSITION_RIGHT, foldingFeature) + dividerOffset;
         final Rect parentBounds = taskConfiguration.windowConfiguration.getBounds();
         return new Rect(left, parentBounds.top, parentBounds.right, parentBounds.bottom);
     }
@@ -958,8 +970,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     @NonNull
     private Rect getTopContainerBounds(@NonNull Configuration taskConfiguration,
             @NonNull SplitAttributes splitAttributes, @Nullable FoldingFeature foldingFeature) {
+        final int dividerOffset = getBoundsOffsetForDivider(
+                splitAttributes, CONTAINER_POSITION_TOP);
         final int bottom = computeBoundaryBetweenContainers(taskConfiguration, splitAttributes,
-                CONTAINER_POSITION_TOP, foldingFeature);
+                CONTAINER_POSITION_TOP, foldingFeature) + dividerOffset;
         final Rect parentBounds = taskConfiguration.windowConfiguration.getBounds();
         return new Rect(parentBounds.left, parentBounds.top, parentBounds.right, bottom);
     }
@@ -967,8 +981,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     @NonNull
     private Rect getBottomContainerBounds(@NonNull Configuration taskConfiguration,
             @NonNull SplitAttributes splitAttributes, @Nullable FoldingFeature foldingFeature) {
+        final int dividerOffset = getBoundsOffsetForDivider(
+                splitAttributes, CONTAINER_POSITION_BOTTOM);
         final int top = computeBoundaryBetweenContainers(taskConfiguration, splitAttributes,
-                CONTAINER_POSITION_BOTTOM, foldingFeature);
+                CONTAINER_POSITION_BOTTOM, foldingFeature) + dividerOffset;
         final Rect parentBounds = taskConfiguration.windowConfiguration.getBounds();
         return new Rect(parentBounds.left, top, parentBounds.right, parentBounds.bottom);
     }
