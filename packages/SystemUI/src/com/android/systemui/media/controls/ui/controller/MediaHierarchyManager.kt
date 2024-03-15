@@ -36,7 +36,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.traceSection
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -58,7 +58,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
-import com.android.systemui.util.kotlin.BooleanFlowOperators.and
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -102,7 +101,7 @@ constructor(
     private val mediaManager: MediaDataManager,
     private val keyguardViewController: KeyguardViewController,
     private val dreamOverlayStateController: DreamOverlayStateController,
-    private val communalInteractor: CommunalInteractor,
+    communalTransitionViewModel: CommunalTransitionViewModel,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
     shadeInteractor: ShadeInteractor,
@@ -587,11 +586,10 @@ constructor(
         // Listen to the communal UI state. Make sure that communal UI is showing and hub itself is
         // available, ie. not disabled and able to be shown.
         coroutineScope.launch {
-            and(communalInteractor.isCommunalShowing, communalInteractor.isCommunalAvailable)
-                .collect { value ->
-                    isCommunalShowing = value
-                    updateDesiredLocation()
-                }
+            communalTransitionViewModel.isUmoOnCommunal.collect { value ->
+                isCommunalShowing = value
+                updateDesiredLocation(forceNoAnimation = true)
+            }
         }
     }
 

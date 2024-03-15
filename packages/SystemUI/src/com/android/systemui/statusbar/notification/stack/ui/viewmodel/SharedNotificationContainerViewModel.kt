@@ -448,9 +448,12 @@ constructor(
                 isOnGlanceableHubWithoutShade,
                 isOnLockscreen,
                 merge(
-                    lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
-                    glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
-                )
+                        lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
+                        glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
+                    )
+                    // Manually emit on start because [notificationAlpha] only starts emitting
+                    // when transitions start.
+                    .onStart { emit(1f) }
             ) { isOnGlanceableHubWithoutShade, isOnLockscreen, alpha,
                 ->
                 if (isOnGlanceableHubWithoutShade && !isOnLockscreen) {
