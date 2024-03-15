@@ -28,6 +28,7 @@ import static org.mockito.AdditionalMatchers.and;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -130,6 +131,50 @@ public class ImeInsetsSourceConsumerTest {
                     WindowInsets.Type.ime(), mLeash, false, new Point(), Insets.NONE);
             mController.onControlsChanged(new InsetsSourceControl[] { control });
             // IME show animation should be triggered when control becomes available.
+            verify(mController).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
+                    and(not(eq(statsToken)), notNull()));
+            verify(mController, never()).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(false) /* fromIme */,
+                    and(not(eq(statsToken)), notNull()));
+        });
+    }
+
+    @Test
+    public void testImeRequestedVisibleAwaitingLeash() {
+        // Set null control, then request show.
+        mController.onControlsChanged(new InsetsSourceControl[] { null });
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // Request IME visible before control is available.
+            final var statsToken = ImeTracker.Token.empty();
+            mImeConsumer.onWindowFocusGained(true);
+            mController.show(WindowInsets.Type.ime(), true /* fromIme */, statsToken);
+            // Called once through the show flow.
+            verify(mController).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */,
+                    eq(statsToken));
+            // Clear previous invocations to verify this is never called with control without leash.
+            clearInvocations(mController);
+
+            // set control without leash and verify visibility is not applied.
+            InsetsSourceControl control = new InsetsSourceControl(ID_IME,
+                    WindowInsets.Type.ime(), null /* leash */, false, new Point(), Insets.NONE);
+            mController.onControlsChanged(new InsetsSourceControl[] { control });
+            // IME show animation should not be triggered when control becomes available,
+            // as we have no leash.
+            verify(mController, never()).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
+                    and(not(eq(statsToken)), notNull()));
+            verify(mController, never()).applyAnimation(
+                    eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(false) /* fromIme */,
+                    and(not(eq(statsToken)), notNull()));
+
+            // set control with leash and verify visibility is applied.
+            InsetsSourceControl controlWithLeash = new InsetsSourceControl(ID_IME,
+                    WindowInsets.Type.ime(), mLeash, false, new Point(), Insets.NONE);
+            mController.onControlsChanged(new InsetsSourceControl[] { controlWithLeash });
+            // IME show animation should be triggered when control with leash becomes available.
             verify(mController).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
                     and(not(eq(statsToken)), notNull()));

@@ -49,9 +49,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     /**
      * Tracks whether we have an outstanding request from the IME to show, but weren't able to
-     * execute it because we didn't have control yet.
+     * execute it because we didn't have control yet, or we didn't have a leash on the control yet.
      */
-    private boolean mIsRequestedVisibleAwaitingControl;
+    private boolean mIsRequestedVisibleAwaitingLeash;
 
     public ImeInsetsSourceConsumer(
             int id, InsetsState state, Supplier<Transaction> transactionSupplier,
@@ -68,7 +68,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         }
         final boolean insetsChanged = super.onAnimationStateChanged(running);
         if (!isShowRequested()) {
-            mIsRequestedVisibleAwaitingControl = false;
+            mIsRequestedVisibleAwaitingLeash = false;
             if (!running && !mHasPendingRequest) {
                 final var statsToken = ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
                         ImeTracker.ORIGIN_CLIENT,
@@ -91,8 +91,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void onWindowFocusGained(boolean hasViewFocus) {
         super.onWindowFocusGained(hasViewFocus);
         getImm().registerImeConsumer(this);
-        if ((mController.getRequestedVisibleTypes() & getType()) != 0 && getControl() == null) {
-            mIsRequestedVisibleAwaitingControl = true;
+        if ((mController.getRequestedVisibleTypes() & getType()) != 0 && !hasLeash()) {
+            mIsRequestedVisibleAwaitingLeash = true;
         }
     }
 
@@ -100,7 +100,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void onWindowFocusLost() {
         super.onWindowFocusLost();
         getImm().unregisterImeConsumer(this);
-        mIsRequestedVisibleAwaitingControl = false;
+        mIsRequestedVisibleAwaitingLeash = false;
     }
 
     @Override
@@ -130,15 +130,15 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         ImeTracker.forLogging().onProgress(statsToken,
                 ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_REQUEST_SHOW);
 
-        if (getControl() == null) {
-            // If control is null, schedule to show IME when control is available.
-            mIsRequestedVisibleAwaitingControl = true;
+        if (!hasLeash()) {
+            // If control or leash is null, schedule to show IME when both available.
+            mIsRequestedVisibleAwaitingLeash = true;
         }
         // If we had a request before to show from IME (tracked with mImeRequestedShow), reaching
         // this code here means that we now got control, so we can start the animation immediately.
         // If client window is trying to control IME and IME is already visible, it is immediate.
         if (fromIme
-                || (mState.isSourceOrDefaultVisible(getId(), getType()) && getControl() != null)) {
+                || (mState.isSourceOrDefaultVisible(getId(), getType()) && hasLeash())) {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 
@@ -148,9 +148,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
 
     void requestHide(boolean fromIme, @Nullable ImeTracker.Token statsToken) {
         if (!fromIme) {
-            // Create a new token to track the hide request when we have control,
+            // Create a new token to track the hide request when we have control and leash,
             // as we use the passed in token for the insets animation already.
-            final var notifyStatsToken = getControl() != null
+            final var notifyStatsToken = hasLeash()
                     ? ImeTracker.forLogging().onStart(ImeTracker.TYPE_HIDE,
                         ImeTracker.ORIGIN_CLIENT,
                         SoftInputShowHideReason.HIDE_SOFT_INPUT_REQUEST_HIDE_WITH_CONTROL,
@@ -176,7 +176,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                 ImeTracker.PHASE_CLIENT_INSETS_CONSUMER_NOTIFY_HIDDEN);
 
         getImm().notifyImeHidden(mController.getHost().getWindowToken(), statsToken);
-        mIsRequestedVisibleAwaitingControl = false;
+        mIsRequestedVisibleAwaitingLeash = false;
         Trace.asyncTraceEnd(TRACE_TAG_VIEW, "IC.hideRequestFromApi", 0);
     }
 
@@ -196,19 +196,28 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         if (!super.setControl(control, showTypes, hideTypes)) {
             return false;
         }
-        if (control == null && !mIsRequestedVisibleAwaitingControl) {
+        final boolean hasLeash = control != null && control.getLeash() != null;
+        if (!hasLeash && !mIsRequestedVisibleAwaitingLeash) {
             mController.setRequestedVisibleTypes(0 /* visibleTypes */, getType());
             removeSurface();
         }
-        if (control != null) {
-            mIsRequestedVisibleAwaitingControl = false;
+        if (hasLeash) {
+            mIsRequestedVisibleAwaitingLeash = false;
         }
         return true;
     }
 
     @Override
     protected boolean isRequestedVisibleAwaitingControl() {
-        return super.isRequestedVisibleAwaitingControl() || mIsRequestedVisibleAwaitingControl;
+        return super.isRequestedVisibleAwaitingControl() || mIsRequestedVisibleAwaitingLeash;
+    }
+
+    /**
+     * Checks whether the consumer has an insets source control with a leash.
+     */
+    private boolean hasLeash() {
+        final var control = getControl();
+        return control != null && control.getLeash() != null;
     }
 
     @Override
@@ -224,7 +233,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, INSETS_SOURCE_CONSUMER);
-        proto.write(IS_REQUESTED_VISIBLE_AWAITING_CONTROL, mIsRequestedVisibleAwaitingControl);
+        proto.write(IS_REQUESTED_VISIBLE_AWAITING_CONTROL, mIsRequestedVisibleAwaitingLeash);
         proto.write(HAS_PENDING_REQUEST, mHasPendingRequest);
         proto.end(token);
     }
