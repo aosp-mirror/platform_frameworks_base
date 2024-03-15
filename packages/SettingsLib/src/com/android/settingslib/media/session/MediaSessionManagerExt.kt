@@ -17,6 +17,7 @@
 package com.android.settingslib.media.session
 
 import android.media.session.MediaController
+import android.media.session.MediaSession
 import android.media.session.MediaSessionManager
 import android.os.UserHandle
 import androidx.concurrent.futures.DirectExecutor
@@ -40,5 +41,26 @@ val MediaSessionManager.activeMediaChanges: Flow<Collection<MediaController>?>
                     listener,
                 )
                 awaitClose { removeOnActiveSessionsChangedListener(listener) }
+            }
+            .buffer(capacity = Channel.CONFLATED)
+
+/** [Flow] for [MediaSessionManager.RemoteSessionCallback]. */
+val MediaSessionManager.remoteSessionChanges: Flow<MediaSession.Token?>
+    get() =
+        callbackFlow {
+                val callback =
+                    object : MediaSessionManager.RemoteSessionCallback {
+                        override fun onVolumeChanged(sessionToken: MediaSession.Token, flags: Int) {
+                            launch { send(sessionToken) }
+                        }
+
+                        override fun onDefaultRemoteSessionChanged(
+                            sessionToken: MediaSession.Token?
+                        ) {
+                            launch { send(sessionToken) }
+                        }
+                    }
+                registerRemoteSessionCallback(DirectExecutor.INSTANCE, callback)
+                awaitClose { unregisterRemoteSessionCallback(callback) }
             }
             .buffer(capacity = Channel.CONFLATED)

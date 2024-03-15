@@ -16,16 +16,16 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.domain.model
 
-import android.media.session.MediaSession
+/** Models a pair of local and remote [MediaDeviceSession]s. */
+data class MediaDeviceSessions(
+    val local: MediaDeviceSession?,
+    val remote: MediaDeviceSession?,
+) {
 
-/** Represents media playing on the connected device. */
-data class MediaDeviceSession(
-    val appLabel: CharSequence,
-    val packageName: String,
-    val sessionToken: MediaSession.Token,
-    val canAdjustVolume: Boolean,
-)
-
-/** Returns true when [other] controls the same sessions as [this]. */
-fun MediaDeviceSession.isTheSameSession(other: MediaDeviceSession?): Boolean =
-    sessionToken == other?.sessionToken
+    companion object {
+        /** Returns [MediaDeviceSessions.local]. */
+        val Local: (MediaDeviceSessions) -> MediaDeviceSession? = { it.local }
+        /** Returns [MediaDeviceSessions.remote]. */
+        val Remote: (MediaDeviceSessions) -> MediaDeviceSession? = { it.remote }
+    }
+}

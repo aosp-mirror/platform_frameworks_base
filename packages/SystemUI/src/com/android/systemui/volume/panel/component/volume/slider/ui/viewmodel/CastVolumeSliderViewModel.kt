@@ -17,11 +17,11 @@
 package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.Context
-import com.android.settingslib.volume.domain.model.RoutingSession
+import android.media.session.MediaController.PlaybackInfo
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
-import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
-import com.android.systemui.volume.panel.component.volume.domain.interactor.CastVolumeInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
+import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSession
 import com.android.systemui.volume.panel.component.volume.domain.interactor.VolumeSliderInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -30,30 +30,29 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class CastVolumeSliderViewModel
 @AssistedInject
 constructor(
-    @Assisted private val routingSession: RoutingSession,
+    @Assisted private val session: MediaDeviceSession,
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
-    mediaOutputInteractor: MediaOutputInteractor,
+    private val mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
     private val volumeSliderInteractor: VolumeSliderInteractor,
-    private val castVolumeInteractor: CastVolumeInteractor,
 ) : SliderViewModel {
 
-    private val volumeRange = 0..routingSession.routingSessionInfo.volumeMax
-
     override val slider: StateFlow<SliderState> =
-        combine(mediaOutputInteractor.currentConnectedDevice) { _ -> getCurrentState() }
-            .stateIn(coroutineScope, SharingStarted.Eagerly, getCurrentState())
+        mediaDeviceSessionInteractor
+            .playbackInfo(session)
+            .mapNotNull { it?.getCurrentState() }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
 
     override fun onValueChanged(state: SliderState, newValue: Float) {
         coroutineScope.launch {
-            castVolumeInteractor.setVolume(routingSession, newValue.roundToInt())
+            mediaDeviceSessionInteractor.setSessionVolume(session, newValue.roundToInt())
         }
     }
 
@@ -61,15 +60,16 @@ constructor(
         // do nothing because this action isn't supported for Cast sliders.
     }
 
-    private fun getCurrentState(): State =
-        State(
-            value = routingSession.routingSessionInfo.volume.toFloat(),
+    private fun PlaybackInfo.getCurrentState(): State {
+        val volumeRange = 0..maxVolume
+        return State(
+            value = currentVolume.toFloat(),
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
             icon = Icon.Resource(R.drawable.ic_cast, null),
             valueText =
                 SliderViewModel.formatValue(
                     volumeSliderInteractor.processVolumeToValue(
-                        volume = routingSession.routingSessionInfo.volume,
+                        volume = currentVolume,
                         volumeRange = volumeRange,
                     )
                 ),
@@ -77,6 +77,7 @@ constructor(
             isEnabled = true,
             a11yStep = 1
         )
+    }
 
     private data class State(
         override val value: Float,
@@ -95,7 +96,7 @@ constructor(
     interface Factory {
 
         fun create(
-            routingSession: RoutingSession,
+            session: MediaDeviceSession,
             coroutineScope: CoroutineScope,
         ): CastVolumeSliderViewModel
     }
