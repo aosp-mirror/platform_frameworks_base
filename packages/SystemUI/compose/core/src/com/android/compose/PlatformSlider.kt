@@ -241,6 +241,7 @@ private fun Track(
         measurePolicy =
             TrackMeasurePolicy(
                 sliderState = sliderState,
+                enabled = enabled,
                 thumbSize = LocalDensity.current.run { thumbSize.roundToPx() },
                 isRtl = isRtl,
                 onDrawingStateMeasured = { drawingState = it }
@@ -304,6 +305,7 @@ private fun TrackBackground(
 /** Measures track components sizes and calls [onDrawingStateMeasured] when it's done. */
 private class TrackMeasurePolicy(
     private val sliderState: SliderState,
+    private val enabled: Boolean,
     private val thumbSize: Int,
     private val isRtl: Boolean,
     private val onDrawingStateMeasured: (DrawingState) -> Unit,
@@ -334,7 +336,7 @@ private class TrackMeasurePolicy(
                 )
 
         val iconSize = iconPlaceable?.width ?: 0
-        val labelMaxWidth = (desiredWidth - iconSize) / 2
+        val labelMaxWidth = if (enabled) (desiredWidth - iconSize) / 2 else desiredWidth - iconSize
         val labelPlaceable: Placeable? =
             measurables
                 .fastFirstOrNull { it.layoutId == TrackComponent.Label }

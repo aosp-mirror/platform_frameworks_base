@@ -16,11 +16,7 @@
 
 package com.android.systemui.volume.panel.component.volume.ui.composable
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -107,7 +103,7 @@ fun VolumeSlider(
         },
         colors = sliderColors,
         label = {
-            Column(modifier = Modifier.animateContentSize()) {
+            Column(modifier = Modifier) {
                 Text(
                     modifier = Modifier.basicMarquee(),
                     text = state.label,
@@ -116,12 +112,8 @@ fun VolumeSlider(
                     maxLines = 1,
                 )
 
-                state.disabledMessage?.let { message ->
-                    AnimatedVisibility(
-                        !state.isEnabled,
-                        enter = slideInVertically { it },
-                        exit = slideOutVertically { it },
-                    ) {
+                if (!state.isEnabled) {
+                    state.disabledMessage?.let { message ->
                         Text(
                             modifier = Modifier.basicMarquee(),
                             text = message,
