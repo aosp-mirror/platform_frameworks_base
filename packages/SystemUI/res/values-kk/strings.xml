@@ -271,10 +271,8 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ажырату"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"іске қосу"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Ертең автоматты түрде қосылсын"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Quick Share, Find My Device сияқты функциялар мен құрылғы локациясы Bluetooth пайдаланады."</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth ертең таңғы сағат 5-те қосылады."</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Батарея деңгейі: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Aудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -439,6 +437,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Өшіру"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Виджет қосу"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Дайын"</string>
+    <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Құлыптаулы экранда кез келген виджетке рұқсат беру керек пе?"</string>
+    <string name="button_text_to_open_settings" msgid="1987729256950941628">"Параметрлерді ашу"</string>
+    <string name="work_mode_off_title" msgid="5794818421357835873">"Жұмыс қолданбаларын қайта қосасыз ба?"</string>
+    <string name="work_mode_turn_on" msgid="907813741770247267">"Қайта қосу"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Пайдаланушыны ауыстыру"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ашылмалы мәзір"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Осы сеанстағы барлық қолданба мен дерек жойылады."</string>
@@ -581,26 +583,36 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Дыбысын өшіру"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Трансляциялау"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Қолжетімді емес, шылдырлату өшірулі."</string>
+    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
+    <skip />
+    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Дыбысын қосу үшін түртіңіз."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Діріл режимін орнату үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Дыбысын өшіру үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Діріл режимін орнату үшін түртіңіз."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Дыбысын өшіру үшін түртіңіз."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Шуды реттеу"</string>
-    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
-    <skip />
+    <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Кеңістіктік дыбыс"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Өшіру"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Бекітілген"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Бас қимылын қадағалау"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Қоңырау режимін өзгерту үшін түртіңіз."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"дыбысын өшіру"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"дыбысын қосу"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"дірілдету"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Дыбысты басқару элементтері: %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Қоңыраулар мен хабарландырулар дыбысы қосулы (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
+    <skip />
+    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
+    <skip />
+    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ойнатылатын құрылғы:"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Аудио ойнатылатын құрылғы:"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Жүйелік пайдаланушылық интерфейс тюнері"</string>
@@ -1254,7 +1266,8 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера блокталған."</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон блокталған."</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон блокталған."</string>
-    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\"Маңызды\" режимі қосулы."</string>
+    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
+    <skip />
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Пайдаланушы анықталды."</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Параметрлерден әдепкі жазба қолданбасын орнатыңыз."</string>
     <string name="install_app" msgid="5066668100199613936">"Қолданбаны орнату"</string>
