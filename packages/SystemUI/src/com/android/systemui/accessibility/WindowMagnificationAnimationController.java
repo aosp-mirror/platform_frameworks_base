@@ -302,6 +302,14 @@ class WindowMagnificationAnimationController implements ValueAnimator.AnimatorUp
         if (mEndAnimationCanceled || mController == null) {
             return;
         }
+
+        // If the animation is playing backwards, mStartSpec will be the final spec we would
+        // like to reach.
+        AnimationSpec spec = isReverse ? mStartSpec : mEndSpec;
+        mController.enableWindowMagnificationInternal(
+                spec.mScale, spec.mCenterX, spec.mCenterY,
+                mMagnificationFrameOffsetRatioX, mMagnificationFrameOffsetRatioY);
+
         if (mState == STATE_DISABLING) {
             mController.deleteWindowMagnification();
         }
