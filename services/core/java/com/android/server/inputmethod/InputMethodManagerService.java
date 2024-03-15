@@ -2156,6 +2156,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             prepareClientSwitchLocked(cs);
         }
 
+        final boolean connectionWasActive = mCurInputConnection != null;
+
         // Bump up the sequence for this client and attach it.
         advanceSequenceNumberLocked();
         mCurClient = cs;
@@ -2173,6 +2175,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
         mCurEditorInfo = editorInfo;
+
+        // Notify input manager if the connection state changes.
+        final boolean connectionIsActive = mCurInputConnection != null;
+        if (connectionIsActive != connectionWasActive) {
+            mInputManagerInternal.notifyInputMethodConnectionActive(connectionIsActive);
+        }
 
         // If configured, we want to avoid starting up the IME if it is not supposed to be showing
         if (shouldPreventImeStartupLocked(selectedMethodId, startInputFlags,

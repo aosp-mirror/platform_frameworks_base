@@ -2854,6 +2854,12 @@ static void nativeSetAccessibilityStickyKeysEnabled(JNIEnv* env, jobject nativeI
     }
 }
 
+static void nativeSetInputMethodConnectionIsActive(JNIEnv* env, jobject nativeImplObj,
+                                                   jboolean isActive) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->getInputManager()->getDispatcher().setInputMethodConnectionIsActive(isActive);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2964,6 +2970,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetAccessibilitySlowKeysThreshold},
         {"setAccessibilityStickyKeysEnabled", "(Z)V",
          (void*)nativeSetAccessibilityStickyKeysEnabled},
+        {"setInputMethodConnectionIsActive", "(Z)V", (void*)nativeSetInputMethodConnectionIsActive},
 };
 
 #define FIND_CLASS(var, className) \

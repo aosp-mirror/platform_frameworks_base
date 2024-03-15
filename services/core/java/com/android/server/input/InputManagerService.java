@@ -3301,6 +3301,11 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
+        public void notifyInputMethodConnectionActive(boolean connectionIsActive) {
+            mNative.setInputMethodConnectionIsActive(connectionIsActive);
+        }
+
+        @Override
         public InputChannel createInputChannel(String inputChannelName) {
             return InputManagerService.this.createInputChannel(inputChannelName);
         }
