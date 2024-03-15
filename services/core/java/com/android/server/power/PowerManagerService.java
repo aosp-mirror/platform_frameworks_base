@@ -3933,7 +3933,7 @@ public final class PowerManagerService extends SystemService
             UserspaceRebootLogger.noteUserspaceRebootWasRequested();
         }
         if (mHandler == null || !mSystemReady) {
-            if (RescueParty.isAttemptingFactoryReset()) {
+            if (RescueParty.isRecoveryTriggeredReboot()) {
                 // If we're stuck in a really low-level reboot loop, and a
                 // rescue party is trying to prompt the user for a factory data
                 // reset, we must GET TO DA CHOPPA!
