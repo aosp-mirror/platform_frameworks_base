@@ -84,6 +84,7 @@ cc_library_shared {
         "libinput",
         "libutils",
         "libbinder",
+        "libbinder_ndk",
         "libui",
         "libgui",
         "libharfbuzz_ng", // Only for including hb.h via minikin
@@ -101,6 +102,7 @@ cc_library_shared {
         "android.hardware.configstore-utils",
         "android.os.flags-aconfig-cc",
         "libnativedisplay",
+        "libfmq",
     ],
 
     static_libs: [

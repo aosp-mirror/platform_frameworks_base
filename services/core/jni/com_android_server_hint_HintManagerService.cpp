@@ -19,8 +19,11 @@
 //#define LOG_NDEBUG 0
 
 #include <aidl/android/hardware/power/IPower.h>
+#include <aidl/android/os/IHintManager.h>
 #include <android-base/stringprintf.h>
-#include <inttypes.h>
+#include <android/binder_manager.h>
+#include <android/binder_parcel.h>
+#include <android/binder_parcel_utils.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <powermanager/PowerHalController.h>
@@ -43,15 +46,16 @@ namespace android {
 static struct {
     jclass clazz{};
     jfieldID workPeriodStartTimestampNanos{};
-    jfieldID actualTotalDurationNanos{};
-    jfieldID actualCpuDurationNanos{};
-    jfieldID actualGpuDurationNanos{};
-    jfieldID timestampNanos{};
+    jfieldID durationNanos{};
+    jfieldID cpuDurationNanos{};
+    jfieldID gpuDurationNanos{};
+    jfieldID timeStampNanos{};
 } gWorkDurationInfo;
 
 static power::PowerHalController gPowerHalController;
-static std::unordered_map<jlong, std::shared_ptr<PowerHintSessionWrapper>> gSessionMap;
 static std::mutex gSessionMapLock;
+static std::unordered_map<jlong, std::shared_ptr<PowerHintSessionWrapper>> gSessionMap
+        GUARDED_BY(gSessionMapLock);
 
 static int64_t getHintSessionPreferredRate() {
     int64_t rate = -1;
@@ -63,15 +67,15 @@ static int64_t getHintSessionPreferredRate() {
 }
 
 static jlong createHintSession(JNIEnv* env, int32_t tgid, int32_t uid,
-                               std::vector<int32_t> threadIds, int64_t durationNanos) {
+                               std::vector<int32_t>& threadIds, int64_t durationNanos) {
     auto result = gPowerHalController.createHintSession(tgid, uid, threadIds, durationNanos);
     if (result.isOk()) {
-        auto session_ptr = reinterpret_cast<jlong>(result.value().get());
-        {
-            std::unique_lock<std::mutex> sessionLock(gSessionMapLock);
-            auto res = gSessionMap.insert({session_ptr, result.value()});
-            return res.second ? session_ptr : 0;
-        }
+        jlong session_ptr = reinterpret_cast<jlong>(result.value().get());
+        std::scoped_lock sessionLock(gSessionMapLock);
+        auto res = gSessionMap.insert({session_ptr, result.value()});
+        return res.second ? session_ptr : 0;
+    } else if (result.isFailed()) {
+        ALOGW("createHintSession failed with message: %s", result.errorMessage());
     }
     return 0;
 }
@@ -89,7 +93,7 @@ static void resumeHintSession(JNIEnv* env, int64_t session_ptr) {
 static void closeHintSession(JNIEnv* env, int64_t session_ptr) {
     auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->close();
-    std::unique_lock<std::mutex> sessionLock(gSessionMapLock);
+    std::scoped_lock sessionLock(gSessionMapLock);
     gSessionMap.erase(session_ptr);
 }
 
@@ -135,11 +139,8 @@ static jlong nativeCreateHintSession(JNIEnv* env, jclass /* clazz */, jint tgid,
         ALOGW("GetIntArrayElements returns nullptr.");
         return 0;
     }
-    std::vector<int32_t> threadIds(tidArray.size());
-    for (size_t i = 0; i < tidArray.size(); i++) {
-        threadIds[i] = tidArray[i];
-    }
-    return createHintSession(env, tgid, uid, std::move(threadIds), durationNanos);
+    std::vector<int32_t> threadIds(tidArray.get(), tidArray.get() + tidArray.size());
+    return createHintSession(env, tgid, uid, threadIds, durationNanos);
 }
 
 static void nativePauseHintSession(JNIEnv* env, jclass /* clazz */, jlong session_ptr) {
@@ -177,12 +178,9 @@ static void nativeSendHint(JNIEnv* env, jclass /* clazz */, jlong session_ptr, j
 }
 
 static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jintArray tids) {
-    ScopedIntArrayRO arrayThreadIds(env, tids);
+    ScopedIntArrayRO tidArray(env, tids);
 
-    std::vector<int32_t> threadIds(arrayThreadIds.size());
-    for (size_t i = 0; i < arrayThreadIds.size(); i++) {
-        threadIds[i] = arrayThreadIds[i];
-    }
+    std::vector<int32_t> threadIds(tidArray.get(), tidArray.get() + tidArray.size());
     setThreads(session_ptr, threadIds);
 }
 
@@ -200,13 +198,13 @@ static void nativeReportActualWorkDuration2(JNIEnv* env, jclass /* clazz */, jlo
         workDurations[i].workPeriodStartTimestampNanos =
                 env->GetLongField(workDuration, gWorkDurationInfo.workPeriodStartTimestampNanos);
         workDurations[i].durationNanos =
-                env->GetLongField(workDuration, gWorkDurationInfo.actualTotalDurationNanos);
+                env->GetLongField(workDuration, gWorkDurationInfo.durationNanos);
         workDurations[i].cpuDurationNanos =
-                env->GetLongField(workDuration, gWorkDurationInfo.actualCpuDurationNanos);
+                env->GetLongField(workDuration, gWorkDurationInfo.cpuDurationNanos);
         workDurations[i].gpuDurationNanos =
-                env->GetLongField(workDuration, gWorkDurationInfo.actualGpuDurationNanos);
+                env->GetLongField(workDuration, gWorkDurationInfo.gpuDurationNanos);
         workDurations[i].timeStampNanos =
-                env->GetLongField(workDuration, gWorkDurationInfo.timestampNanos);
+                env->GetLongField(workDuration, gWorkDurationInfo.timeStampNanos);
     }
     reportActualWorkDuration(session_ptr, workDurations);
 }
@@ -225,22 +223,22 @@ static const JNINativeMethod sHintManagerServiceMethods[] = {
         {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
         {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
         {"nativeSetMode", "(JIZ)V", (void*)nativeSetMode},
-        {"nativeReportActualWorkDuration", "(J[Landroid/os/WorkDuration;)V",
+        {"nativeReportActualWorkDuration", "(J[Landroid/hardware/power/WorkDuration;)V",
          (void*)nativeReportActualWorkDuration2},
 };
 
 int register_android_server_HintManagerService(JNIEnv* env) {
-    gWorkDurationInfo.clazz = env->FindClass("android/os/WorkDuration");
+    gWorkDurationInfo.clazz = env->FindClass("android/hardware/power/WorkDuration");
     gWorkDurationInfo.workPeriodStartTimestampNanos =
-            env->GetFieldID(gWorkDurationInfo.clazz, "mWorkPeriodStartTimestampNanos", "J");
-    gWorkDurationInfo.actualTotalDurationNanos =
-            env->GetFieldID(gWorkDurationInfo.clazz, "mActualTotalDurationNanos", "J");
-    gWorkDurationInfo.actualCpuDurationNanos =
-            env->GetFieldID(gWorkDurationInfo.clazz, "mActualCpuDurationNanos", "J");
-    gWorkDurationInfo.actualGpuDurationNanos =
-            env->GetFieldID(gWorkDurationInfo.clazz, "mActualGpuDurationNanos", "J");
-    gWorkDurationInfo.timestampNanos =
-            env->GetFieldID(gWorkDurationInfo.clazz, "mTimestampNanos", "J");
+            env->GetFieldID(gWorkDurationInfo.clazz, "workPeriodStartTimestampNanos", "J");
+    gWorkDurationInfo.durationNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "durationNanos", "J");
+    gWorkDurationInfo.cpuDurationNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "cpuDurationNanos", "J");
+    gWorkDurationInfo.gpuDurationNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "gpuDurationNanos", "J");
+    gWorkDurationInfo.timeStampNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "timeStampNanos", "J");
 
     return jniRegisterNativeMethods(env,
                                     "com/android/server/power/hint/"

@@ -39,12 +39,12 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
+import android.hardware.power.WorkDuration;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
-import android.os.WorkDuration;
 import android.util.Log;
 
 import com.android.server.FgThread;
@@ -76,6 +76,18 @@ import java.util.concurrent.locks.LockSupport;
 public class HintManagerServiceTest {
     private static final String TAG = "HintManagerServiceTest";
 
+    private static WorkDuration makeWorkDuration(
+            long timestamp, long duration, long workPeriodStartTime,
+            long cpuDuration, long gpuDuration) {
+        WorkDuration out = new WorkDuration();
+        out.timeStampNanos = timestamp;
+        out.durationNanos = duration;
+        out.workPeriodStartTimestampNanos = workPeriodStartTime;
+        out.cpuDurationNanos = cpuDuration;
+        out.gpuDurationNanos = gpuDuration;
+        return out;
+    }
+
     private static final long DEFAULT_HINT_PREFERRED_RATE = 16666666L;
     private static final long DEFAULT_TARGET_DURATION = 16666666L;
     private static final long CONCURRENCY_TEST_DURATION_SEC = 10;
@@ -91,11 +103,11 @@ public class HintManagerServiceTest {
     private static final long[] TIMESTAMPS_ZERO = new long[] {};
     private static final long[] TIMESTAMPS_TWO = new long[] {1L, 2L};
     private static final WorkDuration[] WORK_DURATIONS_FIVE = new WorkDuration[] {
-        new WorkDuration(1L, 11L, 8L, 4L, 1L),
-        new WorkDuration(2L, 13L, 8L, 6L, 2L),
-        new WorkDuration(3L, 333333333L, 8L, 333333333L, 3L),
-        new WorkDuration(2L, 13L, 0L, 6L, 2L),
-        new WorkDuration(2L, 13L, 8L, 0L, 2L),
+        makeWorkDuration(1L, 11L, 1L, 8L, 4L),
+        makeWorkDuration(2L, 13L, 2L, 8L, 6L),
+        makeWorkDuration(3L, 333333333L, 3L, 8L, 333333333L),
+        makeWorkDuration(2L, 13L, 2L, 0L, 6L),
+        makeWorkDuration(2L, 13L, 2L, 8L, 0L),
     };
 
     @Mock private Context mContext;
@@ -621,20 +633,20 @@ public class HintManagerServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> {
             a.reportActualWorkDuration2(
-                    new WorkDuration[] {new WorkDuration(-1L, 11L, 8L, 4L, 1L)});
+                    new WorkDuration[] {makeWorkDuration(1L, 11L, -1L, 8L, 4L)});
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            a.reportActualWorkDuration2(new WorkDuration[] {new WorkDuration(1L, 0L, 8L, 4L, 1L)});
+            a.reportActualWorkDuration2(new WorkDuration[] {makeWorkDuration(1L, 0L, 1L, 8L, 4L)});
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            a.reportActualWorkDuration2(new WorkDuration[] {new WorkDuration(1L, 11L, 0L, 0L, 1L)});
+            a.reportActualWorkDuration2(new WorkDuration[] {makeWorkDuration(1L, 11L, 1L, 0L, 0L)});
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
             a.reportActualWorkDuration2(
-                    new WorkDuration[] {new WorkDuration(1L, 11L, 8L, -1L, 1L)});
+                    new WorkDuration[] {makeWorkDuration(1L, 11L, 1L, 8L, -1L)});
         });
 
         reset(mNativeWrapperMock);
