@@ -33,8 +33,8 @@ import android.util.Base64;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.companion.association.AssociationRequestsProcessor;
-import com.android.server.companion.association.AssociationRevokeProcessor;
 import com.android.server.companion.association.AssociationStore;
+import com.android.server.companion.association.DisassociationProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
@@ -49,7 +49,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
     private static final String TAG = "CDM_CompanionDeviceShellCommand";
 
     private final CompanionDeviceManagerService mService;
-    private final AssociationRevokeProcessor mRevokeProcessor;
+    private final DisassociationProcessor mDisassociationProcessor;
     private final AssociationStore mAssociationStore;
     private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private final CompanionTransportManager mTransportManager;
@@ -65,7 +65,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
             SystemDataTransferProcessor systemDataTransferProcessor,
             AssociationRequestsProcessor associationRequestsProcessor,
             BackupRestoreProcessor backupRestoreProcessor,
-            AssociationRevokeProcessor revokeProcessor) {
+            DisassociationProcessor disassociationProcessor) {
         mService = service;
         mAssociationStore = associationStore;
         mDevicePresenceMonitor = devicePresenceMonitor;
@@ -73,7 +73,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
         mSystemDataTransferProcessor = systemDataTransferProcessor;
         mAssociationRequestsProcessor = associationRequestsProcessor;
         mBackupRestoreProcessor = backupRestoreProcessor;
-        mRevokeProcessor = revokeProcessor;
+        mDisassociationProcessor = disassociationProcessor;
     }
 
     @Override
@@ -105,12 +105,15 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 case "list": {
                     final int userId = getNextIntArgRequired();
                     final List<AssociationInfo> associationsForUser =
-                            mAssociationStore.getAssociationsForUser(userId);
+                            mAssociationStore.getActiveAssociationsByUser(userId);
+                    final int maxId = mAssociationStore.getMaxId(userId);
+                    out.println("Max ID: " + maxId);
+                    out.println("Association ID | Package Name | Mac Address");
                     for (AssociationInfo association : associationsForUser) {
                         // TODO(b/212535524): use AssociationInfo.toShortString(), once it's not
                         //  longer referenced in tests.
-                        out.println(association.getPackageName() + " "
-                                + association.getDeviceMacAddress() + " " + association.getId());
+                        out.println(association.getId() + " | " + association.getPackageName()
+                                + " | " + association.getDeviceMacAddress());
                     }
                 }
                 break;
@@ -132,28 +135,24 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     final String address = getNextArgRequired();
                     final AssociationInfo association =
                             mService.getAssociationWithCallerChecks(userId, packageName, address);
-                    if (association != null) {
-                        mRevokeProcessor.disassociateInternal(association.getId());
-                    }
+                    mDisassociationProcessor.disassociate(association.getId());
                 }
                 break;
 
                 case "disassociate-all": {
                     final int userId = getNextIntArgRequired();
-                    final String packageName = getNextArgRequired();
                     final List<AssociationInfo> userAssociations =
-                            mAssociationStore.getAssociationsForPackage(userId, packageName);
+                            mAssociationStore.getAssociationsByUser(userId);
                     for (AssociationInfo association : userAssociations) {
                         if (sanitizeWithCallerChecks(mService.getContext(), association) != null) {
-                            mRevokeProcessor.disassociateInternal(association.getId());
+                            mDisassociationProcessor.disassociate(association.getId());
                         }
                     }
                 }
                 break;
 
-                case "clear-association-memory-cache":
-                    mService.persistState();
-                    mService.loadAssociationsFromDisk();
+                case "refresh-cache":
+                    mAssociationStore.refreshCache();
                     break;
 
                 case "simulate-device-appeared":
