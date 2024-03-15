@@ -157,7 +157,7 @@ fun SceneScope.NotificationScrollingStack(
 
     val contentHeight = viewModel.intrinsicContentHeight.collectAsState()
 
-    val stackRounding = viewModel.stackRounding.collectAsState()
+    val stackRounding = viewModel.stackRounding.collectAsState(StackRounding())
 
     // the offset for the notifications scrim. Its upper bound is 0, and its lower bound is
     // calculated in minScrimOffset. The scrim is the same height as the screen minus the

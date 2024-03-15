@@ -363,7 +363,8 @@ private fun SceneScope.SplitShade(
                 NotificationScrollingStack(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier =
+                        Modifier.weight(1f).fillMaxHeight().padding(bottom = navBarBottomHeight),
                 )
             }
         }

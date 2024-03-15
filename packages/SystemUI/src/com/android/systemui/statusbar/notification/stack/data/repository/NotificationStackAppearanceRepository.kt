@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification.stack.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
-import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -28,10 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class NotificationStackAppearanceRepository @Inject constructor() {
     /** The bounds of the notification stack in the current scene. */
     val stackBounds = MutableStateFlow(StackBounds())
-
-    /** The whether the corners of the notification stack should be rounded */
-    // TODO: replace with the logic from QSController
-    val stackRounding = MutableStateFlow(StackRounding(roundTop = true, roundBottom = false))
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of

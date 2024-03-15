@@ -18,10 +18,12 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.data.repository.notificationStackAppearanceRepository
 
 val Kosmos.notificationStackAppearanceInteractor by Fixture {
     NotificationStackAppearanceInteractor(
         repository = notificationStackAppearanceRepository,
+        shadeInteractor = shadeInteractor,
     )
 }
