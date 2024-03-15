@@ -54,7 +54,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         // Reset all listeners to animator.
         animator.removeAllListeners()
         animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 onAnimationEnd?.run()
                 isStarted = false
             }
@@ -86,7 +86,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
             invalidate()
         }
         animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 animation?.let { visibility = GONE }
                 onAnimationEnd?.run()
                 isStarted = false

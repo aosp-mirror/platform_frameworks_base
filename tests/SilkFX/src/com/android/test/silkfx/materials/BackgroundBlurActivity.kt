@@ -132,7 +132,7 @@ class BackgroundBlurActivity : Activity(), SeekBar.OnSeekBarChangeListener  {
         mBlurForceDisabled = disabled
         Settings.Global.putInt(getContentResolver(), Settings.Global.DISABLE_WINDOW_BLURS,
                 if (mBlurForceDisabled) 1 else 0)
-        (findViewById(R.id.toggle_blur_enabled) as Button)
+        (requireViewById(R.id.toggle_blur_enabled) as Button)
                 .setText(if (mBlurForceDisabled) "Enable blurs" else "Disable blurs")
     }
 
@@ -142,13 +142,13 @@ class BackgroundBlurActivity : Activity(), SeekBar.OnSeekBarChangeListener  {
 
     fun setBackgroundBlur(radius: Int) {
         mBackgroundBlurRadius = radius
-        (findViewById(R.id.background_blur_radius) as TextView).setText(radius.toString())
+        (requireViewById(R.id.background_blur_radius) as TextView).setText(radius.toString())
         window.setBackgroundBlurRadius(mBackgroundBlurRadius)
     }
 
     fun setBlurBehind(radius: Int) {
         mBlurBehindRadius = radius
-        (findViewById(R.id.blur_behind_radius) as TextView).setText(radius.toString())
+        (requireViewById(R.id.blur_behind_radius) as TextView).setText(radius.toString())
         window.getAttributes().setBlurBehindRadius(mBlurBehindRadius)
         window.setAttributes(window.getAttributes())
     }
@@ -159,7 +159,7 @@ class BackgroundBlurActivity : Activity(), SeekBar.OnSeekBarChangeListener  {
         } else {
             mDimAmountNoBlur = amount
         }
-        (findViewById(R.id.dim_amount) as TextView).setText("%.2f".format(amount))
+        (requireViewById(R.id.dim_amount) as TextView).setText("%.2f".format(amount))
         window.getAttributes().dimAmount = amount
         window.setAttributes(window.getAttributes())
     }
@@ -168,7 +168,7 @@ class BackgroundBlurActivity : Activity(), SeekBar.OnSeekBarChangeListener  {
         mBatterySavingModeOn = on
         Settings.Global.putInt(getContentResolver(),
             Settings.Global.LOW_POWER_MODE, if (on) 1 else 0)
-        (findViewById(R.id.toggle_battery_saving_mode) as Button).setText(
+        (requireViewById(R.id.toggle_battery_saving_mode) as Button).setText(
             if (on) "Exit low power mode" else "Enter low power mode")
     }
 
@@ -182,7 +182,7 @@ class BackgroundBlurActivity : Activity(), SeekBar.OnSeekBarChangeListener  {
         } else {
             mAlphaNoBlur = alpha
         }
-        (findViewById(R.id.background_alpha) as TextView).setText("%.2f".format(alpha))
+        (requireViewById(R.id.background_alpha) as TextView).setText("%.2f".format(alpha))
         mBackgroundDrawable.setAlpha((alpha * 255f).toInt())
         getWindowManager().updateViewLayout(window.getDecorView(), window.getAttributes())
     }
