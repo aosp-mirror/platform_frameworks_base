@@ -361,6 +361,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Return the total number of active queues contained inside
      * {@link #mRunning}.
      */
+    @GuardedBy("mService")
     private int getRunningSize() {
         int size = 0;
         for (int i = 0; i < mRunning.length; i++) {
@@ -372,6 +373,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     /**
      * Return the number of active queues that are delivering "urgent" broadcasts
      */
+    @GuardedBy("mService")
     private int getRunningUrgentCount() {
         int count = 0;
         for (int i = 0; i < mRunning.length; i++) {
@@ -386,6 +388,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Return the first index of the given value contained inside
      * {@link #mRunning}, otherwise {@code -1}.
      */
+    @GuardedBy("mService")
     private int getRunningIndexOf(@Nullable BroadcastProcessQueue test) {
         for (int i = 0; i < mRunning.length; i++) {
             if (mRunning[i] == test) return i;
@@ -585,6 +588,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         traceEnd(cookie);
     }
 
+    @GuardedBy("mService")
     private boolean isPendingColdStartValid() {
         if (mRunningColdStart.app.getPid() > 0) {
             // If the process has already started, check if it wasn't killed.
@@ -595,6 +599,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void clearInvalidPendingColdStart() {
         logw("Clearing invalid pending cold start: " + mRunningColdStart);
         if (mRunningColdStart.wasActiveBroadcastReEnqueued()) {
@@ -629,6 +634,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void finishOrReEnqueueActiveBroadcast(@NonNull BroadcastProcessQueue queue) {
         checkState(queue.isActive(), "isActive");
 
@@ -646,6 +652,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     @Override
     public boolean onApplicationAttachedLocked(@NonNull ProcessRecord app)
             throws BroadcastRetryException {
@@ -689,16 +696,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return didSomething;
     }
 
+    @GuardedBy("mService")
     @Override
     public void onApplicationTimeoutLocked(@NonNull ProcessRecord app) {
         onApplicationCleanupLocked(app);
     }
 
+    @GuardedBy("mService")
     @Override
     public void onApplicationProblemLocked(@NonNull ProcessRecord app) {
         onApplicationCleanupLocked(app);
     }
 
+    @GuardedBy("mService")
     @Override
     public void onApplicationCleanupLocked(@NonNull ProcessRecord app) {
         if (DEBUG_BROADCAST) {
@@ -735,6 +745,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void clearRunningColdStart() {
         mRunningColdStart.traceProcessEnd();
 
@@ -746,12 +757,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         enqueueUpdateRunningList();
     }
 
+    @GuardedBy("mService")
     @Override
     public void onProcessFreezableChangedLocked(@NonNull ProcessRecord app) {
         mLocalHandler.removeMessages(MSG_PROCESS_FREEZABLE_CHANGED, app);
         mLocalHandler.obtainMessage(MSG_PROCESS_FREEZABLE_CHANGED, app).sendToTarget();
     }
 
+    @GuardedBy("mService")
     @Override
     public int getPreferredSchedulingGroupLocked(@NonNull ProcessRecord app) {
         final BroadcastProcessQueue queue = getProcessQueue(app);
@@ -761,6 +774,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return ProcessList.SCHED_GROUP_UNDEFINED;
     }
 
+    @GuardedBy("mService")
     @Override
     public void enqueueBroadcastLocked(@NonNull BroadcastRecord r) {
         // TODO: Apply delivery group policies and FLAG_REPLACE_PENDING to collapse the
@@ -846,6 +860,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         traceEnd(cookie);
     }
 
+    @GuardedBy("mService")
     private void skipAndCancelReplacedBroadcasts(ArraySet<BroadcastRecord> replacedBroadcasts) {
         for (int i = 0; i < replacedBroadcasts.size(); ++i) {
             final BroadcastRecord r = replacedBroadcasts.valueAt(i);
@@ -858,6 +873,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void applyDeliveryGroupPolicy(@NonNull BroadcastRecord r) {
         if (mService.shouldIgnoreDeliveryGroupPolicy(r.intent.getAction())) {
             return;
@@ -921,6 +937,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mRecordsLookupCache.compareAndSet(null, recordsLookupCache);
     }
 
+    @GuardedBy("mService")
     @NonNull
     private ArrayMap<BroadcastRecord, Boolean> getRecordsLookupCache() {
         ArrayMap<BroadcastRecord, Boolean> recordsLookupCache =
@@ -931,6 +948,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return recordsLookupCache;
     }
 
+    @GuardedBy("mService")
     private boolean containsAllReceivers(@NonNull BroadcastRecord record,
             @NonNull BroadcastRecord testRecord,
             @NonNull ArrayMap<BroadcastRecord, Boolean> recordsLookupCache) {
@@ -1064,6 +1082,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Consults {@link BroadcastSkipPolicy} and the receiver process state to decide whether or
      * not the broadcast to a receiver can be skipped.
      */
+    @GuardedBy("mService")
     private String shouldSkipReceiver(@NonNull BroadcastProcessQueue queue,
             @NonNull BroadcastRecord r, int index) {
         final int oldDeliveryState = getDeliveryState(r, index);
@@ -1104,6 +1123,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      *         finishReceiver() to be called before moving to the next broadcast. Otherwise,
      *         {@code false}.
      */
+    @GuardedBy("mService")
     @CheckResult
     private boolean dispatchReceivers(@NonNull BroadcastProcessQueue queue,
             @NonNull BroadcastRecord r, int index) throws BroadcastRetryException {
@@ -1215,6 +1235,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Schedule the final {@link BroadcastRecord#resultTo} delivery for an
      * ordered broadcast; assumes the sender is still a warm process.
      */
+    @GuardedBy("mService")
     private void scheduleResultTo(@NonNull BroadcastRecord r) {
         if (r.resultTo == null) return;
         final ProcessRecord app = r.resultToApp;
@@ -1248,6 +1269,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     // Required when Flags.anrTimerServiceEnabled is false.  This function can be replaced with a
     // single call to {@code mAnrTimer.start()} if and when the flag is fused on.
+    @GuardedBy("mService")
     private void startDeliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue,
             int softTimeoutMillis) {
         if (mAnrTimer.serviceEnabled()) {
@@ -1261,6 +1283,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     // Required when Flags.anrTimerServiceEnabled is false. This function can be replaced with a
     // single call to {@code mAnrTimer.cancel()} if and when the flag is fused on.
+    @GuardedBy("mService")
     private void cancelDeliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
         mAnrTimer.cancel(queue);
         if (!mAnrTimer.serviceEnabled()) {
@@ -1270,6 +1293,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     // Required when Flags.anrTimerServiceEnabled is false.  This function can be deleted entirely
     // if and when the flag is fused on.
+    @GuardedBy("mService")
     private void deliveryTimeoutSoftLocked(@NonNull BroadcastProcessQueue queue,
             int softTimeoutMillis) {
         if (queue.app != null) {
@@ -1292,6 +1316,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         traceEnd(cookie);
     }
 
+    @GuardedBy("mService")
     private void deliveryTimeoutLocked(@NonNull BroadcastProcessQueue queue) {
         finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_TIMEOUT,
                 "deliveryTimeoutLocked");
@@ -1309,6 +1334,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     @Override
     public boolean finishReceiverLocked(@NonNull ProcessRecord app, int resultCode,
             @Nullable String resultData, @Nullable Bundle resultExtras, boolean resultAbort,
@@ -1369,6 +1395,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     /**
      * Return true if there are no more broadcasts in the queue or if the queue is not runnable.
      */
+    @GuardedBy("mService")
     private boolean shouldRetire(@NonNull BroadcastProcessQueue queue) {
         // If we've made reasonable progress, periodically retire ourselves to
         // avoid starvation of other processes and stack overflow when a
@@ -1392,6 +1419,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     /**
      * Terminate all active broadcasts on the queue.
      */
+    @GuardedBy("mService")
     private void finishReceiverActiveLocked(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState, @NonNull String reason) {
         if (!queue.isActive()) {
@@ -1493,6 +1521,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Set the delivery state on the given broadcast, then apply any additional
      * bookkeeping related to ordered broadcasts.
      */
+    @GuardedBy("mService")
     private void setDeliveryState(@Nullable BroadcastProcessQueue queue,
             @Nullable ProcessRecord app, @NonNull BroadcastRecord r, int index,
             @NonNull Object receiver, @DeliveryState int newDeliveryState,
@@ -1558,10 +1587,12 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         traceEnd(cookie);
     }
 
+    @GuardedBy("mService")
     private @DeliveryState int getDeliveryState(@NonNull BroadcastRecord r, int index) {
         return r.getDeliveryState(index);
     }
 
+    @GuardedBy("mService")
     @Override
     public boolean cleanupDisabledPackageReceiversLocked(@Nullable String packageName,
             @Nullable Set<String> filterByClasses, int userId) {
@@ -1627,6 +1658,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Typical consumer that will skip the given broadcast, usually as a result
      * of it matching a predicate.
      */
+    @GuardedBy("mService")
     private final BroadcastConsumer mBroadcastConsumerSkip = (r, i) -> {
         setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED,
                 "mBroadcastConsumerSkip");
@@ -1636,6 +1668,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Typical consumer that will both skip the given broadcast and mark it as
      * cancelled, usually as a result of it matching a predicate.
      */
+    @GuardedBy("mService")
     private final BroadcastConsumer mBroadcastConsumerSkipAndCanceled = (r, i) -> {
         setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_SKIPPED,
                 "mBroadcastConsumerSkipAndCanceled");
@@ -1645,23 +1678,27 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     };
 
     @VisibleForTesting
+    @GuardedBy("mService")
     final BroadcastConsumer mBroadcastConsumerDeferApply = (r, i) -> {
         setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_DEFERRED,
                 "mBroadcastConsumerDeferApply");
     };
 
     @VisibleForTesting
+    @GuardedBy("mService")
     final BroadcastConsumer mBroadcastConsumerDeferClear = (r, i) -> {
         setDeliveryState(null, null, r, i, r.receivers.get(i), BroadcastRecord.DELIVERY_PENDING,
                 "mBroadcastConsumerDeferClear");
     };
 
+    @GuardedBy("mService")
     final BroadcastRecordConsumer mBroadcastRecordConsumerEnqueue = this::enqueueBroadcastLocked;
 
     /**
      * Verify that all known {@link #mProcessQueues} are in the state tested by
      * the given {@link Predicate}.
      */
+    @GuardedBy("mService")
     private boolean testAllProcessQueues(@NonNull Predicate<BroadcastProcessQueue> test,
             @NonNull String label, @NonNull PrintWriter pw) {
         for (int i = 0; i < mProcessQueues.size(); i++) {
@@ -1685,6 +1722,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return true;
     }
 
+    @GuardedBy("mService")
     private boolean forEachMatchingBroadcast(
             @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
             @NonNull BroadcastPredicate broadcastPredicate,
@@ -1709,6 +1747,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return didSomething;
     }
 
+    @GuardedBy("mService")
     private boolean forEachMatchingQueue(
             @NonNull Predicate<BroadcastProcessQueue> queuePredicate,
             @NonNull Consumer<BroadcastProcessQueue> queueConsumer) {
@@ -1730,6 +1769,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return didSomething;
     }
 
+    @GuardedBy("mService")
     @Override
     public void start(@NonNull ContentResolver resolver) {
         mFgConstants.startObserving(mHandler, resolver);
@@ -1750,35 +1790,42 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
     }
 
+    @GuardedBy("mService")
     @Override
     public boolean isIdleLocked() {
         return isIdleLocked(LOG_WRITER_INFO);
     }
 
+    @GuardedBy("mService")
     public boolean isIdleLocked(@NonNull PrintWriter pw) {
         return testAllProcessQueues(q -> q.isIdle(), "idle", pw);
     }
 
+    @GuardedBy("mService")
     @Override
     public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime) {
         return isBeyondBarrierLocked(barrierTime, LOG_WRITER_INFO);
     }
 
+    @GuardedBy("mService")
     public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime,
             @NonNull PrintWriter pw) {
         return testAllProcessQueues(q -> q.isBeyondBarrierLocked(barrierTime), "barrier", pw);
     }
 
+    @GuardedBy("mService")
     @Override
     public boolean isDispatchedLocked(@NonNull Intent intent) {
         return isDispatchedLocked(intent, LOG_WRITER_INFO);
     }
 
+    @GuardedBy("mService")
     public boolean isDispatchedLocked(@NonNull Intent intent, @NonNull PrintWriter pw) {
         return testAllProcessQueues(q -> q.isDispatched(intent),
                 "dispatch of " + intent, pw);
     }
 
+    @GuardedBy("mService")
     @Override
     public void waitForIdle(@NonNull PrintWriter pw) {
         waitFor(() -> isIdleLocked(pw));
@@ -1801,6 +1848,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     @Override
     public void waitForDispatched(@NonNull Intent intent, @NonNull PrintWriter pw) {
         waitFor(() -> isDispatchedLocked(intent, pw));
@@ -1819,6 +1867,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void checkAndRemoveWaitingFor() {
         if (!mWaitingFor.isEmpty()) {
             mWaitingFor.removeIf((pair) -> {
@@ -1854,6 +1903,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return false;
     }
 
+    @GuardedBy("mService")
     @Override
     public void backgroundServicesFinishedLocked(int userId) {
         // Modern queue does not alter the broadcasts delivery behavior based on background
@@ -1866,6 +1916,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void checkHealthLocked() {
         try {
             assertHealthLocked();
@@ -1888,6 +1939,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * current state once and stop future health checks to avoid spamming.
      */
     @VisibleForTesting
+    @GuardedBy("mService")
     void assertHealthLocked() {
         // Verify all runnable queues are sorted
         BroadcastProcessQueue prev = null;
@@ -1927,6 +1979,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @SuppressWarnings("CheckResult")
+    @GuardedBy("mService")
     private void updateWarmProcess(@NonNull BroadcastProcessQueue queue) {
         if (!queue.isProcessWarm()) {
             // This is a bit awkward; we're in the middle of traversing the
@@ -1946,6 +1999,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * {@link BroadcastProcessQueue}. Also updates any runnable status that
      * might have changed as a side-effect.
      */
+    @GuardedBy("mService")
     private void setQueueProcess(@NonNull BroadcastProcessQueue queue,
             @Nullable ProcessRecord app) {
         if (queue.setProcessAndUidState(app, mUidForeground.get(queue.uid, false),
@@ -2008,6 +2062,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Inform other parts of OS that the given broadcast queue has started
      * running, typically for internal bookkeeping.
      */
+    @GuardedBy("mService")
     private void notifyStartedRunning(@NonNull BroadcastProcessQueue queue) {
         if (queue.app != null) {
             queue.app.mReceivers.incrementCurReceivers();
@@ -2032,6 +2087,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Inform other parts of OS that the given broadcast queue has stopped
      * running, typically for internal bookkeeping.
      */
+    @GuardedBy("mService")
     private void notifyStoppedRunning(@NonNull BroadcastProcessQueue queue) {
         if (queue.app != null) {
             queue.app.mReceivers.decrementCurReceivers();
@@ -2046,6 +2102,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Inform other parts of OS that the given broadcast was just scheduled for
      * a registered receiver, typically for internal bookkeeping.
      */
+    @GuardedBy("mService")
     private void notifyScheduleRegisteredReceiver(@NonNull ProcessRecord app,
             @NonNull BroadcastRecord r, @NonNull BroadcastFilter receiver) {
         reportUsageStatsBroadcastDispatched(app, r);
@@ -2055,6 +2112,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Inform other parts of OS that the given broadcast was just scheduled for
      * a manifest receiver, typically for internal bookkeeping.
      */
+    @GuardedBy("mService")
     private void notifyScheduleReceiver(@NonNull ProcessRecord app,
             @NonNull BroadcastRecord r, @NonNull ResolveInfo receiver) {
         reportUsageStatsBroadcastDispatched(app, r);
@@ -2077,6 +2135,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 receiverPackageName, r.userId, r.callerPackage, r.toString());
     }
 
+    @GuardedBy("mService")
     private void reportUsageStatsBroadcastDispatched(@NonNull ProcessRecord app,
             @NonNull BroadcastRecord r) {
         final long idForResponseEvent = (r.options != null)
@@ -2102,6 +2161,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * Inform other parts of OS that the given broadcast was just finished,
      * typically for internal bookkeeping.
      */
+    @GuardedBy("mService")
     private void notifyFinishReceiver(@Nullable BroadcastProcessQueue queue,
             @Nullable ProcessRecord app, @NonNull BroadcastRecord r, int index,
             @NonNull Object receiver) {
@@ -2115,6 +2175,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void logBroadcastDeliveryEventReported(@Nullable BroadcastProcessQueue queue,
             @Nullable ProcessRecord app, @NonNull BroadcastRecord r, int index,
             @NonNull Object receiver) {
@@ -2165,6 +2226,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         }
     }
 
+    @GuardedBy("mService")
     private void notifyFinishBroadcast(@NonNull BroadcastRecord r) {
         mService.notifyBroadcastFinishedLocked(r);
         r.finishTime = SystemClock.uptimeMillis();
@@ -2193,11 +2255,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @VisibleForTesting
+    @GuardedBy("mService")
     @NonNull BroadcastProcessQueue getOrCreateProcessQueue(@NonNull ProcessRecord app) {
         return getOrCreateProcessQueue(app.processName, app.info.uid);
     }
 
     @VisibleForTesting
+    @GuardedBy("mService")
     @NonNull BroadcastProcessQueue getOrCreateProcessQueue(@NonNull String processName,
             int uid) {
         BroadcastProcessQueue leaf = mProcessQueues.get(uid);
@@ -2222,11 +2286,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @VisibleForTesting
+    @GuardedBy("mService")
     @Nullable BroadcastProcessQueue getProcessQueue(@NonNull ProcessRecord app) {
         return getProcessQueue(app.processName, app.info.uid);
     }
 
     @VisibleForTesting
+    @GuardedBy("mService")
     @Nullable BroadcastProcessQueue getProcessQueue(@NonNull String processName, int uid) {
         BroadcastProcessQueue leaf = mProcessQueues.get(uid);
         while (leaf != null) {
@@ -2239,11 +2305,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @VisibleForTesting
+    @GuardedBy("mService")
     @Nullable BroadcastProcessQueue removeProcessQueue(@NonNull ProcessRecord app) {
         return removeProcessQueue(app.processName, app.info.uid);
     }
 
     @VisibleForTesting
+    @GuardedBy("mService")
     @Nullable BroadcastProcessQueue removeProcessQueue(@NonNull String processName,
             int uid) {
         BroadcastProcessQueue prev = null;
@@ -2267,6 +2335,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return null;
     }
 
+    @GuardedBy("mService")
     private void logBootCompletedBroadcastCompletionLatencyIfPossible(BroadcastRecord r) {
         // Only log after last receiver.
         // In case of split BOOT_COMPLETED broadcast, make sure only call this method on the
@@ -2322,6 +2391,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     @NeverCompile
+    @GuardedBy("mService")
     public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(BroadcastQueueProto.QUEUE_NAME, mQueueName);
@@ -2331,6 +2401,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     @Override
     @NeverCompile
+    @GuardedBy("mService")
     public boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
             @NonNull String[] args, int opti, boolean dumpConstants, boolean dumpHistory,
             boolean dumpAll, @Nullable String dumpPackage, boolean needSep) {
