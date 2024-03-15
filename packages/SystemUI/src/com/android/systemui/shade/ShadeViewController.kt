@@ -105,16 +105,6 @@ interface ShadeViewController {
     @Deprecated("No longer supported. Do not add new calls to this.")
     fun finishInputFocusTransfer(velocity: Float)
 
-    /**
-     * Performs haptic feedback from a view with a haptic feedback constant.
-     *
-     * The implementation of this method should use the [android.view.View.performHapticFeedback]
-     * method with the provided constant.
-     *
-     * @param[constant] One of [android.view.HapticFeedbackConstants]
-     */
-    fun performHapticFeedback(constant: Int)
-
     /** Returns the ShadeHeadsUpTracker. */
     val shadeHeadsUpTracker: ShadeHeadsUpTracker
 
