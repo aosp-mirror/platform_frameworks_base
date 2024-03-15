@@ -22,11 +22,16 @@ import android.graphics.drawable.Animatable2
 import android.util.Size
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
+import android.view.WindowInsets
 import android.widget.ImageView
 import androidx.core.animation.CycleInterpolator
 import androidx.core.animation.ObjectAnimator
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.core.view.marginLeft
+import androidx.core.view.marginRight
+import androidx.core.view.marginTop
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -113,6 +118,38 @@ object KeyguardBottomAreaViewBinder {
         val overlayContainer: View = view.requireViewById(R.id.overlay_container)
         val settingsMenu: LaunchableLinearLayout =
             view.requireViewById(R.id.keyguard_settings_button)
+
+        startButton.setOnApplyWindowInsetsListener { inView, windowInsets ->
+            val bottomInset = windowInsets.displayCutout?.safeInsetBottom ?: 0
+            val marginBottom =
+                inView.resources.getDimension(R.dimen.keyguard_affordance_vertical_offset).toInt()
+            inView.layoutParams =
+                (inView.layoutParams as MarginLayoutParams).apply {
+                    setMargins(
+                        inView.marginLeft,
+                        inView.marginTop,
+                        inView.marginRight,
+                        marginBottom + bottomInset
+                    )
+                }
+            WindowInsets.CONSUMED
+        }
+
+        endButton.setOnApplyWindowInsetsListener { inView, windowInsets ->
+            val bottomInset = windowInsets.displayCutout?.safeInsetBottom ?: 0
+            val marginBottom =
+                inView.resources.getDimension(R.dimen.keyguard_affordance_vertical_offset).toInt()
+            inView.layoutParams =
+                (inView.layoutParams as MarginLayoutParams).apply {
+                    setMargins(
+                        inView.marginLeft,
+                        inView.marginTop,
+                        inView.marginRight,
+                        marginBottom + bottomInset
+                    )
+                }
+            WindowInsets.CONSUMED
+        }
 
         view.clipChildren = false
         view.clipToPadding = false
