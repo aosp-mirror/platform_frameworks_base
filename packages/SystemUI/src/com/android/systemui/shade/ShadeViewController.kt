@@ -58,13 +58,14 @@ interface ShadeViewController {
     fun setAlphaChangeAnimationEndAction(r: Runnable)
 
     /** Sets Qs ScrimEnabled and updates QS state. */
+    @Deprecated("Does nothing when scene container is enabled.")
     fun setQsScrimEnabled(qsScrimEnabled: Boolean)
 
     /** Sets the top spacing for the ambient indicator. */
     fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean)
 
     /** Updates notification panel-specific flags on [SysUiState]. */
-    fun updateSystemUiStateFlags()
+    @Deprecated("Does nothing when scene container is enabled.") fun updateSystemUiStateFlags()
 
     /** Ensures that the touchable region is updated. */
     fun updateTouchableRegion()
