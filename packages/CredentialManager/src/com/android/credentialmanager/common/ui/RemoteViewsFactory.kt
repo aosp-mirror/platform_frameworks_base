@@ -17,7 +17,6 @@
 package com.android.credentialmanager.common.ui
 
 import android.content.Context
-import android.content.res.Configuration
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.android.credentialmanager.model.get.CredentialEntryInfo
@@ -27,10 +26,12 @@ import android.graphics.drawable.Icon
 class RemoteViewsFactory {
 
     companion object {
-        private const val setAdjustViewBoundsMethodName = "setAdjustViewBounds"
-        private const val setMaxHeightMethodName = "setMaxHeight"
-        private const val setBackgroundResourceMethodName = "setBackgroundResource"
-        private const val bulletPoint = "\u2022"
+        private const val SET_ADJUST_VIEW_BOUNDS_METHOD_NAME = "setAdjustViewBounds"
+        private const val SET_MAX_HEIGHT_METHOD_NAME = "setMaxHeight"
+        private const val SET_BACKGROUND_RESOURCE_METHOD_NAME = "setBackgroundResource"
+        private const val BULLET_POINT = "\u2022"
+        // TODO(jbabs): RemoteViews#setViewPadding renders this as 8dp on the display. Debug why.
+        private const val END_ITEMS_PADDING = 28
 
         fun createDropdownPresentation(
             context: Context,
@@ -50,18 +51,18 @@ class RemoteViewsFactory {
             val secondaryText =
                 if (credentialEntryInfo.displayName != null
                     && (credentialEntryInfo.displayName != credentialEntryInfo.userName))
-                    (credentialEntryInfo.userName + " " + bulletPoint + " "
+                    (credentialEntryInfo.userName + " " + BULLET_POINT + " "
                             + credentialEntryInfo.credentialTypeDisplayName
-                            + " " + bulletPoint + " " + credentialEntryInfo.providerDisplayName)
-                else (credentialEntryInfo.credentialTypeDisplayName + " " + bulletPoint + " "
+                            + " " + BULLET_POINT + " " + credentialEntryInfo.providerDisplayName)
+                else (credentialEntryInfo.credentialTypeDisplayName + " " + BULLET_POINT + " "
                         + credentialEntryInfo.providerDisplayName)
             remoteViews.setTextViewText(android.R.id.text2, secondaryText)
             remoteViews.setImageViewIcon(android.R.id.icon1, icon);
             remoteViews.setBoolean(
-                android.R.id.icon1, setAdjustViewBoundsMethodName, true);
+                android.R.id.icon1, SET_ADJUST_VIEW_BOUNDS_METHOD_NAME, true);
             remoteViews.setInt(
                 android.R.id.icon1,
-                setMaxHeightMethodName,
+                SET_MAX_HEIGHT_METHOD_NAME,
                 context.resources.getDimensionPixelSize(
                     com.android.credentialmanager.R.dimen.autofill_icon_size));
             remoteViews.setContentDescription(android.R.id.icon1, credentialEntryInfo
@@ -71,11 +72,11 @@ class RemoteViewsFactory {
                     com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_one else
                     com.android.credentialmanager.R.drawable.fill_dialog_dynamic_list_item_middle
             remoteViews.setInt(
-                android.R.id.content, setBackgroundResourceMethodName, drawableId);
+                android.R.id.content, SET_BACKGROUND_RESOURCE_METHOD_NAME, drawableId);
             if (isFirstEntry) remoteViews.setViewPadding(
                 com.android.credentialmanager.R.id.credential_card,
                 /* left=*/0,
-                /* top=*/8,
+                /* top=*/END_ITEMS_PADDING,
                 /* right=*/0,
                 /* bottom=*/0)
             if (isLastEntry) remoteViews.setViewPadding(
@@ -83,7 +84,7 @@ class RemoteViewsFactory {
                 /*left=*/0,
                 /* top=*/0,
                 /* right=*/0,
-                /* bottom=*/8)
+                /* bottom=*/END_ITEMS_PADDING)
             return remoteViews
         }
 
@@ -95,16 +96,16 @@ class RemoteViewsFactory {
                 com.android.credentialmanager
                         .R.string.dropdown_presentation_more_sign_in_options_text))
             remoteViews.setBoolean(
-                android.R.id.icon1, setAdjustViewBoundsMethodName, true);
+                android.R.id.icon1, SET_ADJUST_VIEW_BOUNDS_METHOD_NAME, true);
             remoteViews.setInt(
                 android.R.id.icon1,
-                setMaxHeightMethodName,
+                SET_MAX_HEIGHT_METHOD_NAME,
                 context.resources.getDimensionPixelSize(
                     com.android.credentialmanager.R.dimen.autofill_icon_size));
             val drawableId =
                 com.android.credentialmanager.R.drawable.more_options_list_item
             remoteViews.setInt(
-                android.R.id.content, setBackgroundResourceMethodName, drawableId);
+                android.R.id.content, SET_BACKGROUND_RESOURCE_METHOD_NAME, drawableId);
             return remoteViews
         }
     }
