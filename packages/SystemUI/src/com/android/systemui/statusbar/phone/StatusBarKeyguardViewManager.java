@@ -106,6 +106,8 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -115,7 +117,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import kotlin.Unit;
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.Job;
@@ -168,6 +169,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private Job mListenForAlternateBouncerTransitionSteps = null;
     private Job mListenForKeyguardAuthenticatedBiometricsHandled = null;
+    private Job mListenForCanShowAlternateBouncer = null;
 
     // Local cache of expansion events, to avoid duplicates
     private float mFraction = -1f;
@@ -505,6 +507,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mListenForKeyguardAuthenticatedBiometricsHandled.cancel(null);
         }
         mListenForKeyguardAuthenticatedBiometricsHandled = null;
+        if (mListenForCanShowAlternateBouncer != null) {
+            mListenForCanShowAlternateBouncer.cancel(null);
+        }
+        mListenForCanShowAlternateBouncer = null;
         if (!DeviceEntryUdfpsRefactor.isEnabled()) {
             mListenForAlternateBouncerTransitionSteps = mJavaAdapter.alwaysCollectFlow(
                     mKeyguardTransitionInteractor.transitionStepsFromState(
@@ -515,6 +521,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mListenForKeyguardAuthenticatedBiometricsHandled = mJavaAdapter.alwaysCollectFlow(
                     mPrimaryBouncerInteractor.getKeyguardAuthenticatedBiometricsHandled(),
                     this::consumeKeyguardAuthenticatedBiometricsHandled
+            );
+        } else {
+            mListenForCanShowAlternateBouncer = mJavaAdapter.alwaysCollectFlow(
+                    mAlternateBouncerInteractor.getCanShowAlternateBouncer(),
+                    this::consumeCanShowAlternateBouncer
             );
         }
 
@@ -555,6 +566,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 hide(0, 0);
             }
         }
+    }
+
+    private void consumeCanShowAlternateBouncer(boolean canShow) {
+        // do nothing, we only are registering for the flow to ensure that there's at least
+        // one subscriber that will update AlternateBouncerInteractor.canShowAlternateBouncer.value
     }
 
     /** Register a callback, to be invoked by the Predictive Back system. */
@@ -722,6 +738,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      *                 {@see KeyguardBouncer#show(boolean, boolean)}
      */
     public void showBouncer(boolean scrimmed) {
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
+            if (mAlternateBouncerInteractor.canShowAlternateBouncerForFingerprint()) {
+                mAlternateBouncerInteractor.forceShow();
+                updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
+            } else {
+                showPrimaryBouncer(scrimmed);
+            }
+            return;
+        }
+
         if (!mAlternateBouncerInteractor.show()) {
             showPrimaryBouncer(scrimmed);
         } else {
@@ -833,7 +859,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                         mKeyguardGoneCancelAction = null;
                     }
 
-                    updateAlternateBouncerShowing(mAlternateBouncerInteractor.show());
+                    if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                        mAlternateBouncerInteractor.forceShow();
+                        updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
+                    } else {
+                        updateAlternateBouncerShowing(mAlternateBouncerInteractor.show());
+                    }
                     setKeyguardMessage(message, null, null);
                     return;
                 }
