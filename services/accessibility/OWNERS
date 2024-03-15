@@ -1,6 +1,13 @@
-pweaver@google.com
-sallyyuen@google.com
-ryanlwlin@google.com
-fuego@google.com
+# Bug component: 44215
+
+# Android Accessibility Framework owners
 danielnorman@google.com
 aarmaly@google.com
+chunkulin@google.com
+fuego@google.com
+sallyyuen@google.com
+
+# Android Accessibility members who have OWNERS but should not be sent
+# day-to-day changes for code review:
+pweaver@google.com #{LAST_RESORT_SUGGESTION}
+ryanlwlin@google.com #{LAST_RESORT_SUGGESTION}
