@@ -185,11 +185,7 @@ class MenuView extends FrameLayout implements
         final GradientDrawable gradientDrawable = getContainerViewGradient();
         gradientDrawable.setStroke(mMenuViewAppearance.getMenuStrokeWidth(),
                 mMenuViewAppearance.getMenuStrokeColor());
-        if (Flags.floatingMenuRadiiAnimation()) {
-            mMenuAnimationController.startRadiiAnimation(mMenuViewAppearance.getMenuRadii());
-        } else {
-            gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuRadii());
-        }
+        mMenuAnimationController.startRadiiAnimation(mMenuViewAppearance.getMenuRadii());
     }
 
     void setRadii(float[] radii) {
@@ -402,13 +398,8 @@ class MenuView extends FrameLayout implements
         getContainerViewInsetLayer().setLayerInset(INDEX_MENU_ITEM, insets[0], insets[1], insets[2],
                 insets[3]);
 
-        if (Flags.floatingMenuRadiiAnimation()) {
-            mMenuAnimationController.startRadiiAnimation(
-                    mMenuViewAppearance.getMenuMovingStateRadii());
-        } else {
-            final GradientDrawable gradientDrawable = getContainerViewGradient();
-            gradientDrawable.setCornerRadii(mMenuViewAppearance.getMenuMovingStateRadii());
-        }
+        mMenuAnimationController.startRadiiAnimation(
+                mMenuViewAppearance.getMenuMovingStateRadii());
     }
 
     void onBoundsInParentChanged(int newLeft, int newTop) {
