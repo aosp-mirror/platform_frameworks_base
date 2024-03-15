@@ -48,11 +48,13 @@ object NotificationStackAppearanceViewBinder {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     viewModel.stackBounds.collect { bounds ->
+                        val viewLeft = controller.view.left
+                        val viewTop = controller.view.top
                         controller.setRoundedClippingBounds(
-                            bounds.left.roundToInt(),
-                            bounds.top.roundToInt(),
-                            bounds.right.roundToInt(),
-                            bounds.bottom.roundToInt(),
+                            bounds.left.roundToInt() - viewLeft,
+                            bounds.top.roundToInt() - viewTop,
+                            bounds.right.roundToInt() - viewLeft,
+                            bounds.bottom.roundToInt() - viewTop,
                             SCRIM_CORNER_RADIUS.dpToPx(context),
                             0,
                         )
