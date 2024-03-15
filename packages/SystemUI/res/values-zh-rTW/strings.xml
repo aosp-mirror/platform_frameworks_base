@@ -982,7 +982,7 @@
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"要移除「<xliff:g id="APPNAME">%s</xliff:g>」的控制項嗎？"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"已加入收藏"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已加入收藏，位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"從收藏中移除"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"未加入收藏"</string>
     <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"加入收藏"</string>
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"從收藏中移除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移到位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -1223,12 +1223,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"如要提高解析度，請切換至手機後置鏡頭"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"正在展開的折疊式裝置"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"正在翻轉折疊式裝置"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"已摺疊"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"已展開"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"剩餘電量：<xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"將觸控筆接上充電器"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"觸控筆電力不足"</string>

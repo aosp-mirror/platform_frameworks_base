@@ -539,7 +539,7 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Overlay teks"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktifkan"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"nonaktifkan"</string>
-    <string name="sound_settings" msgid="8874581353127418308">"Suara &amp; getaran"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"Suara dan getaran"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Setelan"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Teks Otomatis"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume diturunkan ke level yang lebih aman"</string>
@@ -982,9 +982,9 @@
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Hapus kontrol untuk <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Difavoritkan"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Difavoritkan, posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Batal difavoritkan"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Tidak difavoritkan"</string>
     <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"favorit"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"batal favoritkan"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"tidak memfavoritkan"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Pindah ke posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrol"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Pilih kontrol perangkat untuk mengakses dengan cepat"</string>

@@ -730,9 +730,9 @@
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"显示快捷键"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"返回"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"前往主屏幕"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"查看最近运行过的应用"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"向前循环浏览近期使用的应用"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"向后循环浏览近期使用的应用"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"查看最近用过的应用"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"向前循环浏览最近用过的应用"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"向后循环浏览最近用过的应用"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"打开应用列表"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"显示任务栏"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"打开设置"</string>

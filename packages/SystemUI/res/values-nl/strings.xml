@@ -605,7 +605,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Ontgrendelen om te gebruiken"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Er is een probleem opgetreden bij het ophalen van je kaarten. Probeer het later opnieuw."</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Instellingen voor vergrendelscherm"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR-codescanner"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR-code-scanner"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Updaten"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Werkprofiel"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Vliegtuig­modus"</string>
@@ -727,7 +727,7 @@
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Snelkoppelingen voor de huidige app tonen"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Meldingen bekijken"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Screenshot maken"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Snelkoppelingen tonen"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Sneltoetsen tonen"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Terug"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Naar het startscherm gaan"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Recente apps bekijken"</string>
