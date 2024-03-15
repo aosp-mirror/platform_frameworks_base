@@ -136,14 +136,20 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val lockscreenToGoneTransitionRunning: Flow<Boolean> =
+        keyguardTransitionInteractor
+            .isInTransitionWhere { from, to -> from == LOCKSCREEN && to == GONE }
+            .onStart { emit(false) }
+
     private val alphaOnShadeExpansion: Flow<Float> =
         combineTransform(
+                lockscreenToGoneTransitionRunning,
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) { isOnLockscreen, qsExpansion, shadeExpansion ->
+            ) { lockscreenToGoneTransitionRunning, isOnLockscreen, qsExpansion, shadeExpansion ->
                 // Fade out quickly as the shade expands
-                if (isOnLockscreen) {
+                if (isOnLockscreen && !lockscreenToGoneTransitionRunning) {
                     val alpha =
                         1f -
                             MathUtils.constrainedMap(
