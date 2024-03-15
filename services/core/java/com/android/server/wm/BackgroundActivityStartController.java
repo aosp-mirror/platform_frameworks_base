@@ -853,8 +853,7 @@ public class BackgroundActivityStartController {
         }
 
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
-        if (ActivityTaskManagerService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND,
-                callingPid, callingUid) == PERMISSION_GRANTED) {
+        if (hasBalPermission(callingUid, callingPid)) {
             return new BalVerdict(BAL_ALLOW_PERMISSION,
                     /*background*/ true,
                     "START_ACTIVITIES_FROM_BACKGROUND permission granted");
@@ -919,9 +918,7 @@ public class BackgroundActivityStartController {
     BalVerdict checkBackgroundActivityStartAllowedBySender(BalState state) {
 
         if (state.isPendingIntentBalAllowedByPermission()
-                && ActivityManager.checkComponentPermission(
-                android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
-                state.mRealCallingUid, NO_PROCESS_UID, true) == PackageManager.PERMISSION_GRANTED) {
+                && hasBalPermission(state.mRealCallingUid, state.mRealCallingPid)) {
             return new BalVerdict(BAL_ALLOW_PERMISSION,
                     /*background*/ false,
                     "realCallingUid has BAL permission.");
@@ -978,6 +975,11 @@ public class BackgroundActivityStartController {
 
         // If we are here, it means all exemptions based on PI sender failed
         return BalVerdict.BLOCK;
+    }
+
+    @VisibleForTesting boolean hasBalPermission(int uid, int pid) {
+        return ActivityTaskManagerService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND,
+                pid, uid) == PERMISSION_GRANTED;
     }
 
     /**
