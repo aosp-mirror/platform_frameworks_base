@@ -441,7 +441,8 @@ public class BubblesTest extends SysuiTestCase {
                 new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
                 keyguardTransitionInteractor,
-                () -> sceneInteractor);
+                () -> sceneInteractor,
+                () -> mKosmos.getFromGoneTransitionInteractor());
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
         mFromPrimaryBouncerTransitionInteractor =

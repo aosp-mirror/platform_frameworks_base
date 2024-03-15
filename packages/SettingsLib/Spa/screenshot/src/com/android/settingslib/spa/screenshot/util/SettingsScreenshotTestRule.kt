@@ -50,19 +50,15 @@ class SettingsScreenshotTestRule(
             )
         )
     private val composeRule = createAndroidComposeRule<ComponentActivity>()
-    private val roboRule =
-        RuleChain.outerRule(deviceEmulationRule)
-            .around(screenshotRule)
-            .around(composeRule)
     private val delegateRule =
         RuleChain.outerRule(colorsRule)
-            .around(roboRule)
+            .around(deviceEmulationRule)
+            .around(screenshotRule)
+            .around(composeRule)
     private val matcher = UnitTestBitmapMatcher
-    private val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
 
     override fun apply(base: Statement, description: Description): Statement {
-        val ruleToApply = if (isRobolectric) roboRule else delegateRule
-        return ruleToApply.apply(base, description)
+        return delegateRule.apply(base, description)
     }
 
     /**

@@ -22,6 +22,7 @@ import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
+import static android.Manifest.permission.RESTRICT_DISPLAY_MODES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.hardware.display.DisplayManager.EventsMask;
@@ -75,6 +76,7 @@ import android.graphics.Point;
 import android.hardware.OverlayProperties;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerInternal;
 import android.hardware.display.AmbientBrightnessDayStats;
@@ -4530,6 +4532,14 @@ public final class DisplayManagerService extends SystemService {
             disableConnectedDisplay_enforcePermission();
             DisplayManagerService.this.enableConnectedDisplay(displayId, false);
         }
+
+        @EnforcePermission(RESTRICT_DISPLAY_MODES)
+        @Override // Binder call
+        public void requestDisplayModes(IBinder token, int displayId, @Nullable int[] modeIds) {
+            requestDisplayModes_enforcePermission();
+            DisplayManagerService.this.mDisplayModeDirector.requestDisplayModes(
+                    token, displayId, modeIds);
+        }
     }
 
     private static boolean isValidBrightness(float brightness) {
@@ -5034,29 +5044,21 @@ public final class DisplayManagerService extends SystemService {
      * Listens to changes in device state and reports the state to LogicalDisplayMapper.
      */
     class DeviceStateListener implements DeviceStateManager.DeviceStateCallback {
-        // Base state corresponds to the physical state of the device
-        private int mBaseState = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
         @Override
-        public void onStateChanged(int deviceState) {
-            boolean isDeviceStateOverrideActive = deviceState != mBaseState;
+        public void onDeviceStateChanged(DeviceState deviceState) {
             synchronized (mSyncRoot) {
                 // Notify WindowManager that we are about to handle new device state, this should
                 // be sent before any work related to the device state in DisplayManager, so
                 // WindowManager could do implement that depends on the device state and display
                 // changes (serializes device state update and display change events)
                 Message msg = mHandler.obtainMessage(MSG_RECEIVED_DEVICE_STATE);
-                msg.arg1 = deviceState;
+                msg.arg1 = deviceState.getIdentifier();
                 mHandler.sendMessage(msg);
 
                 mLogicalDisplayMapper
-                        .setDeviceStateLocked(deviceState, isDeviceStateOverrideActive);
+                        .setDeviceStateLocked(deviceState.getIdentifier());
             }
-        }
-
-        @Override
-        public void onBaseStateChanged(int state) {
-            mBaseState = state;
         }
     };
 

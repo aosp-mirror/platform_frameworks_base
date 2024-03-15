@@ -364,11 +364,6 @@ class RecentTasks {
                     com.android.internal.R.integer.config_minNumVisibleRecentTasks_lowRam);
             mMaxNumVisibleTasks = res.getInteger(
                     com.android.internal.R.integer.config_maxNumVisibleRecentTasks_lowRam);
-        } else if (SystemProperties.getBoolean("ro.recents.grid", false)) {
-            mMinNumVisibleTasks = res.getInteger(
-                    com.android.internal.R.integer.config_minNumVisibleRecentTasks_grid);
-            mMaxNumVisibleTasks = res.getInteger(
-                    com.android.internal.R.integer.config_maxNumVisibleRecentTasks_grid);
         } else {
             mMinNumVisibleTasks = res.getInteger(
                     com.android.internal.R.integer.config_minNumVisibleRecentTasks);

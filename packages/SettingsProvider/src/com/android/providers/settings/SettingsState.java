@@ -60,10 +60,12 @@ import libcore.io.IoUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -160,6 +162,11 @@ final class SettingsState {
 
     private static final String APEX_DIR = "/apex";
     private static final String APEX_ACONFIG_PATH_SUFFIX = "/etc/aconfig_flags.pb";
+
+    private static final String STORAGE_MIGRATION_FLAG =
+            "core_experiments_team_internal/com.android.providers.settings.storage_test_mission_1";
+    private static final String STORAGE_MIGRATION_LOG =
+            "/metadata/aconfig/flags/storage_migration.log";
 
     /**
      * This tag is applied to all aconfig default value-loaded flags.
@@ -1436,6 +1443,20 @@ final class SettingsState {
                     if (name.startsWith(CONFIG_STAGED_PREFIX)) {
                         name = createRealFlagName(name);
                         flagsWithStagedValueApplied.add(name);
+                    }
+                }
+
+                if (name != null && name.equals(STORAGE_MIGRATION_FLAG) && value.equals("true")) {
+                    File file = new File(STORAGE_MIGRATION_LOG);
+                    if (!file.exists()) {
+                        try (BufferedWriter writer =
+                                new BufferedWriter(new FileWriter(STORAGE_MIGRATION_LOG))) {
+                            final long timestamp = System.currentTimeMillis();
+                            String entry = String.format("%d | Log init", timestamp);
+                            writer.write(entry);
+                        } catch (IOException e) {
+                            Slog.e(LOG_TAG, "failed to write storage migration file", e);
+                        }
                     }
                 }
 

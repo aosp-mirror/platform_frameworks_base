@@ -8094,15 +8094,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void registerKeyguardExitAnimationStartListener(
-                KeyguardExitAnimationStartListener listener) {
-            synchronized (mGlobalLock) {
-                getDefaultDisplayContentLocked().mAppTransition
-                        .registerKeygaurdExitAnimationStartListener(listener);
-            }
-        }
-
-        @Override
         public void reportPasswordChanged(int userId) {
             mKeyguardDisableHandler.updateKeyguardEnabled(userId);
         }

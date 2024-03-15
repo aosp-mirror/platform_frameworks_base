@@ -83,6 +83,7 @@ constructor(
     shadeRepository: ShadeRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
+    private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
 ) {
     // TODO(b/296118689): move to a repository
     private val _sharedNotificationContainerBounds = MutableStateFlow(NotificationContainerBounds())
@@ -381,6 +382,11 @@ constructor(
 
     fun setTopClippingBounds(top: Int?) {
         repository.topClippingBounds.value = top
+    }
+
+    /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
+    fun showKeyguard() {
+        fromGoneTransitionInteractor.get().showKeyguard()
     }
 
     companion object {

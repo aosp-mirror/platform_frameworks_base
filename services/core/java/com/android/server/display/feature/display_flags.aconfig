@@ -130,9 +130,9 @@ flag {
 }
 
 flag {
-    name: "enable_external_vsync_proximity_vote"
+    name: "enable_restrict_display_modes"
     namespace: "display_manager"
-    description: "Feature flag for external vsync proximity vote"
+    description: "Feature flag for restriction display modes api"
     bug: "284866750"
     is_fixed_read_only: true
 }
@@ -178,6 +178,17 @@ flag {
 }
 
 flag {
+    name: "always_rotate_display_device"
+    namespace: "display_manager"
+    description: "Use rotation from WindowManager no matter whether FLAG_ROTATES_WITH_CONTENT is set or not"
+    bug: "302326003"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "refresh_rate_voting_telemetry"
     namespace: "display_manager"
     description: "Feature flag for enabling telemetry for refresh rate voting in DisplayManager"
@@ -206,5 +217,13 @@ flag {
     namespace: "display_manager"
     description: "Feature flag for refactoring   the DisplayPowerController and associated components"
     bug: "294444204"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "idle_screen_refresh_rate_timeout"
+    namespace: "display_manager"
+    description: "Feature flag for reducing the refresh rate when the screen is idle after a timeout"
+    bug: "310026579"
     is_fixed_read_only: true
 }

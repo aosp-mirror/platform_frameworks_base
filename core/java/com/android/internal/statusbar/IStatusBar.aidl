@@ -376,6 +376,12 @@ oneway interface IStatusBar
     void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop);
 
     /**
+     * Set the split screen focus to the left / top app or the right / bottom app based on
+     * {@param leftOrTop}.
+     */
+    void setSplitscreenFocus(boolean leftOrTop);
+
+    /**
      * Shows the media output switcher dialog.
      *
      * @param packageName of the session for which the output switcher is shown.

@@ -86,13 +86,23 @@ constructor(
     val faceIconHeight: Int =
         context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
 
-    val fingerprintSensorDiameter: Flow<Int> =
+    val fingerprintSensorWidth: Flow<Int> =
         combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
             ->
             if (modalities.hasUdfps) {
                 overlayParams.sensorBounds.width()
             } else {
                 fingerprintIconWidth
+            }
+        }
+
+    val fingerprintSensorHeight: Flow<Int> =
+        combine(modalities, udfpsOverlayInteractor.udfpsOverlayParams) { modalities, overlayParams
+            ->
+            if (modalities.hasUdfps) {
+                overlayParams.sensorBounds.height()
+            } else {
+                fingerprintIconHeight
             }
         }
 
@@ -342,7 +352,7 @@ constructor(
             position,
             message,
         ) { size, _, message ->
-            size.isNotSmall && message.message.isNotBlank()
+            size.isMedium && message.message.isNotBlank()
         }
 
     /** If the auth is pending confirmation and the confirm button should be shown. */

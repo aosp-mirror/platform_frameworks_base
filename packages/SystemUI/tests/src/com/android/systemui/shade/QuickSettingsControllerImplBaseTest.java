@@ -17,7 +17,6 @@
 package com.android.systemui.shade;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -223,7 +222,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 new ConfigurationInteractor(configurationRepository),
                 mShadeRepository,
                 keyguardTransitionInteractor,
-                () -> sceneInteractor);
+                () -> sceneInteractor,
+                () -> mKosmos.getFromGoneTransitionInteractor());
 
         mFromLockscreenTransitionInteractor = mKosmos.getFromLockscreenTransitionInteractor();
         mFromPrimaryBouncerTransitionInteractor =
@@ -289,10 +289,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
 
         when(mNotificationRemoteInputManager.isRemoteInputActive())
                 .thenReturn(false);
-        when(mInteractionJankMonitor.begin(any(), anyInt()))
-                .thenReturn(true);
-        when(mInteractionJankMonitor.end(anyInt()))
-                .thenReturn(true);
 
         when(mPanelView.getParent()).thenReturn(mPanelViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);

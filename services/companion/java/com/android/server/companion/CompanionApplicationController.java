@@ -397,7 +397,7 @@ public class CompanionApplicationController {
         // First, disable hint mode for Auto profile and mark not BOUND for primary service ONLY.
         if (isPrimary) {
             final List<AssociationInfo> associations =
-                    mAssociationStore.getAssociationsForPackage(userId, packageName);
+                    mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
 
             for (AssociationInfo association : associations) {
                 final String deviceProfile = association.getDeviceProfile();
@@ -442,7 +442,7 @@ public class CompanionApplicationController {
                 mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
 
         for (AssociationInfo ai :
-                mAssociationStore.getAssociationsForPackage(userId, packageName)) {
+                mAssociationStore.getActiveAssociationsByPackage(userId, packageName)) {
             final int associationId = ai.getId();
             stillAssociated = true;
             if (ai.isSelfManaged()) {

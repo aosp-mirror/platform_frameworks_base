@@ -650,7 +650,6 @@ public class LogicalDisplayMapperTest {
     public void testDeviceShouldBePutToSleep() {
         assertTrue(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
                 DEVICE_STATE_OPEN,
-                /* isOverrideActive= */false,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));
     }
@@ -661,7 +660,6 @@ public class LogicalDisplayMapperTest {
 
         assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
                 DEVICE_STATE_OPEN,
-                /* isOverrideActive= */false,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));
     }
@@ -670,21 +668,10 @@ public class LogicalDisplayMapperTest {
     public void testDeviceShouldNotBePutToSleep() {
         assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_OPEN,
                 DEVICE_STATE_CLOSED,
-                /* isOverrideActive= */false,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));
         assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
                 INVALID_DEVICE_STATE_IDENTIFIER,
-                /* isOverrideActive= */false,
-                /* isInteractive= */true,
-                /* isBootCompleted= */true));
-    }
-
-    @Test
-    public void testDeviceShouldNotBePutToSleepDifferentBaseState() {
-        assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
-                DEVICE_STATE_OPEN,
-                /* isOverrideActive= */true,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));
     }
@@ -750,7 +737,7 @@ public class LogicalDisplayMapperTest {
         // We can only have one default display
         assertEquals(DEFAULT_DISPLAY, id(display1));
 
-        mLogicalDisplayMapper.setDeviceStateLocked(0, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(0);
         advanceTime(1000);
         // The new state is not applied until the boot is completed
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device1).isEnabledLocked());
@@ -771,7 +758,7 @@ public class LogicalDisplayMapperTest {
         assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device2)
                 .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
 
-        mLogicalDisplayMapper.setDeviceStateLocked(1, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(1);
         advanceTime(1000);
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isEnabledLocked());
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
@@ -784,7 +771,7 @@ public class LogicalDisplayMapperTest {
                 mLogicalDisplayMapper.getDisplayLocked(device2)
                         .getDisplayInfoLocked().thermalBrightnessThrottlingDataId);
 
-        mLogicalDisplayMapper.setDeviceStateLocked(2, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(2);
         advanceTime(1000);
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isEnabledLocked());
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
@@ -861,7 +848,7 @@ public class LogicalDisplayMapperTest {
         // 3) Send DISPLAY_DEVICE_EVENT_CHANGE to inform the mapper of the new display state
         // 4) Dispatch handler events.
         mLogicalDisplayMapper.onBootCompleted();
-        mLogicalDisplayMapper.setDeviceStateLocked(0, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(0);
         mDisplayDeviceRepo.onDisplayDeviceEvent(device3, DISPLAY_DEVICE_EVENT_CHANGED);
         advanceTime(1000);
         final int[] allDisplayIds = mLogicalDisplayMapper.getDisplayIdsLocked(
@@ -891,7 +878,7 @@ public class LogicalDisplayMapperTest {
                 /* includeDisabled= */ false));
 
         // Now do it again to go back to state 1
-        mLogicalDisplayMapper.setDeviceStateLocked(1, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(1);
         mDisplayDeviceRepo.onDisplayDeviceEvent(device3, DISPLAY_DEVICE_EVENT_CHANGED);
         advanceTime(1000);
         final int[] threeDisplaysEnabled = mLogicalDisplayMapper.getDisplayIdsLocked(
@@ -945,7 +932,7 @@ public class LogicalDisplayMapperTest {
         // We can only have one default display
         assertEquals(DEFAULT_DISPLAY, id(display1));
 
-        mLogicalDisplayMapper.setDeviceStateLocked(0, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(0);
         advanceTime(1000);
         mLogicalDisplayMapper.onBootCompleted();
         advanceTime(1000);
@@ -964,11 +951,11 @@ public class LogicalDisplayMapperTest {
     /////////////////
 
     private void finishBootAndFoldDevice() {
-        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_OPEN, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_OPEN);
         advanceTime(1000);
         mLogicalDisplayMapper.onBootCompleted();
         advanceTime(1000);
-        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_CLOSED, false);
+        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_CLOSED);
         advanceTime(1000);
     }
 

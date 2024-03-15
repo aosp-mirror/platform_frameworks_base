@@ -23,6 +23,7 @@ import android.graphics.Outline
 import android.graphics.Rect
 import android.transition.AutoTransition
 import android.transition.TransitionManager
+import android.util.TypedValue
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
@@ -54,13 +55,10 @@ import com.android.systemui.biometrics.ui.viewmodel.isNullOrNotSmall
 import com.android.systemui.biometrics.ui.viewmodel.isRight
 import com.android.systemui.biometrics.ui.viewmodel.isSmall
 import com.android.systemui.biometrics.ui.viewmodel.isTop
-import com.android.systemui.keyguard.ui.view.layout.sections.setVisibility
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
-import kotlin.math.abs
 import kotlin.math.min
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Helper for [BiometricViewBinder] to handle resize transitions. */
@@ -106,6 +104,13 @@ object BiometricViewSizeBinder {
             val iconHolderView = view.requireViewById<View>(R.id.biometric_icon)
             val panelView = view.requireViewById<View>(R.id.panel)
             val cornerRadius = view.resources.getDimension(R.dimen.biometric_dialog_corner_size)
+            val cornerRadiusPx =
+                TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        cornerRadius,
+                        view.resources.displayMetrics
+                    )
+                    .toInt()
 
             // ConstraintSets for animating between prompt sizes
             val mediumConstraintSet = ConstraintSet()
@@ -116,9 +121,10 @@ object BiometricViewSizeBinder {
 
             val largeConstraintSet = ConstraintSet()
             largeConstraintSet.clone(mediumConstraintSet)
-            largeConstraintSet.setGuidelineBegin(leftGuideline.id, 0)
-            largeConstraintSet.setGuidelineEnd(rightGuideline.id, 0)
-            largeConstraintSet.setGuidelineEnd(bottomGuideline.id, 0)
+            largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
+            largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
+            largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
+            largeConstraintSet.setVisibility(R.id.scrollView, View.GONE)
 
             // TODO: Investigate better way to handle 180 rotations
             val flipConstraintSet = ConstraintSet()
@@ -141,7 +147,13 @@ object BiometricViewSizeBinder {
             panelView.outlineProvider =
                 object : ViewOutlineProvider() {
                     override fun getOutline(view: View, outline: Outline) {
-                        outline.setRoundRect(0, 0, view.width, view.height, cornerRadius)
+                        outline.setRoundRect(
+                            0,
+                            0,
+                            view.width,
+                            view.height + cornerRadiusPx,
+                            cornerRadiusPx.toFloat()
+                        )
                     }
                 }
 
@@ -164,35 +176,81 @@ object BiometricViewSizeBinder {
 
                     when {
                         position.isTop -> {
+                            // Round bottom corners
+                            panelView.outlineProvider =
+                                object : ViewOutlineProvider() {
+                                    override fun getOutline(view: View, outline: Outline) {
+                                        outline.setRoundRect(
+                                            0,
+                                            -cornerRadiusPx,
+                                            view.width,
+                                            view.height,
+                                            cornerRadiusPx.toFloat()
+                                        )
+                                    }
+                                }
                             left = windowBounds.centerX() - width / 2 + viewModel.promptMargin
                             right = windowBounds.centerX() - width / 2 + viewModel.promptMargin
                             bottom = iconHolderView.centerY() * 2 - iconHolderView.centerY() / 4
                         }
                         position.isBottom -> {
-                            left = windowBounds.centerX() - width / 2 + viewModel.promptMargin
-                            right = windowBounds.centerX() - width / 2 + viewModel.promptMargin
-                            bottom = viewModel.promptMargin
+                            // Round top corners
+                            panelView.outlineProvider =
+                                object : ViewOutlineProvider() {
+                                    override fun getOutline(view: View, outline: Outline) {
+                                        outline.setRoundRect(
+                                            0,
+                                            0,
+                                            view.width,
+                                            view.height + cornerRadiusPx,
+                                            cornerRadiusPx.toFloat()
+                                        )
+                                    }
+                                }
+
+                            left = windowBounds.centerX() - width / 2
+                            right = windowBounds.centerX() - width / 2
+                            bottom = if (view.isLandscape()) bottomInset else 0
                         }
                         position.isLeft -> {
-                            left = viewModel.promptMargin
-                            mid =
-                                abs(
-                                    windowBounds.width() - iconHolderView.centerX() * 2 +
-                                        viewModel.promptMargin
-                                )
+                            // Round right corners
+                            panelView.outlineProvider =
+                                object : ViewOutlineProvider() {
+                                    override fun getOutline(view: View, outline: Outline) {
+                                        outline.setRoundRect(
+                                            -cornerRadiusPx,
+                                            0,
+                                            view.width,
+                                            view.height,
+                                            cornerRadiusPx.toFloat()
+                                        )
+                                    }
+                                }
+
+                            left = 0
+                            mid = (windowBounds.width() * .85).toInt() / 2
                             right = windowBounds.width() - (windowBounds.width() * .85).toInt()
-                            bottom = bottomInset + viewModel.promptMargin
+                            bottom = if (view.isLandscape()) bottomInset else 0
                         }
                         position.isRight -> {
+                            // Round left corners
+                            panelView.outlineProvider =
+                                object : ViewOutlineProvider() {
+                                    override fun getOutline(view: View, outline: Outline) {
+                                        outline.setRoundRect(
+                                            0,
+                                            0,
+                                            view.width + cornerRadiusPx,
+                                            view.height,
+                                            cornerRadiusPx.toFloat()
+                                        )
+                                    }
+                                }
+
                             left = windowBounds.width() - (windowBounds.width() * .85).toInt()
-                            right = viewModel.promptMargin
-                            bottom = bottomInset + viewModel.promptMargin
-                            mid =
-                                abs(
-                                    iconHolderView.centerX() -
-                                        (windowBounds.width() - iconHolderView.centerX()) -
-                                        viewModel.promptMargin
-                                )
+                            right = 0
+                            bottom = if (view.isLandscape()) bottomInset else 0
+                            mid = windowBounds.width() - (windowBounds.width() * .85).toInt() / 2
                         }
                     }
 
@@ -226,16 +284,8 @@ object BiometricViewSizeBinder {
                     }
                 }
 
-                fun setConstraintSetVisibility() {
-                    viewsToHideWhenSmall.forEach {
-                        mediumConstraintSet.setVisibility(it.id, it.showContentOrHide())
-                        largeConstraintSet.setVisibility(it.id, View.GONE)
-                        smallConstraintSet.setVisibility(it.id, View.GONE)
-                    }
-
-                    largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-                    largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
-                    largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
+                fun setVisibilities(size: PromptSize) {
+                    viewsToHideWhenSmall.forEach { it.showContentOrHide(forceHide = size.isSmall) }
 
                     if (viewModel.showBpWithoutIconForCredential.value) {
                         smallConstraintSet.setVisibility(iconHolderView.id, View.GONE)
@@ -261,7 +311,7 @@ object BiometricViewSizeBinder {
                                 }
 
                                 measureBounds(position)
-                                setConstraintSetVisibility()
+                                setVisibilities(size)
                                 when {
                                     size.isSmall -> {
                                         val ratio =
@@ -353,7 +403,7 @@ object BiometricViewSizeBinder {
 
                             // prepare for animated size transitions
                             for (v in viewsToHideWhenSmall) {
-                                v.visibility = v.showContentOrHide(forceHide = size.isSmall)
+                                v.showContentOrHide(forceHide = size.isSmall)
                             }
 
                             if (viewModel.showBpWithoutIconForCredential.value) {
@@ -490,14 +540,15 @@ private fun View.isLandscape(): Boolean {
     }
 }
 
-private fun View.showContentOrHide(forceHide: Boolean = false): Int {
+private fun View.showContentOrHide(forceHide: Boolean = false) {
     val isTextViewWithBlankText = this is TextView && this.text.isBlank()
     val isImageViewWithoutImage = this is ImageView && this.drawable == null
-    return if (forceHide || isTextViewWithBlankText || isImageViewWithoutImage) {
-        View.GONE
-    } else {
-        View.VISIBLE
-    }
+    visibility =
+        if (forceHide || isTextViewWithBlankText || isImageViewWithoutImage) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
 }
 
 private fun View.centerX(): Int {

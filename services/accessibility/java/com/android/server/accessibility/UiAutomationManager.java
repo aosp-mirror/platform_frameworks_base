@@ -136,9 +136,6 @@ class UiAutomationManager {
             return;
         }
 
-        if (!Flags.addWindowTokenWithoutLock()) {
-            mUiAutomationService.addWindowTokensForAllDisplays();
-        }
         // UiAutomationService#connectServiceUnknownThread posts to a handler
         // so this call should return immediately.
         mUiAutomationService.connectServiceUnknownThread();
@@ -286,9 +283,7 @@ class UiAutomationManager {
                     // If the serviceInterface is null, the UiAutomation has been shut down on
                     // another thread.
                     if (serviceInterface != null) {
-                        if (Flags.addWindowTokenWithoutLock()) {
-                            mUiAutomationService.addWindowTokensForAllDisplays();
-                        }
+                        mUiAutomationService.addWindowTokensForAllDisplays();
                         if (mTrace.isA11yTracingEnabledForTypes(
                                 AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT)) {
                             mTrace.logTrace("UiAutomationService.connectServiceUnknownThread",

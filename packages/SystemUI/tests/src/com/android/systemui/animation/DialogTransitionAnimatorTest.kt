@@ -18,6 +18,8 @@ import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.DecorView
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.jank.interactionJankMonitor
+import com.android.systemui.kosmos.Kosmos
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
@@ -31,7 +33,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
@@ -43,7 +44,7 @@ class DialogTransitionAnimatorTest : SysuiTestCase() {
     private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     private val attachedViews = mutableSetOf<View>()
 
-    @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
+    val interactionJankMonitor = Kosmos().interactionJankMonitor
     @get:Rule val rule = MockitoJUnit.rule()
 
     @Before

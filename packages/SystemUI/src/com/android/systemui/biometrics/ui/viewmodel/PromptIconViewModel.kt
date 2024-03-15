@@ -21,6 +21,7 @@ import android.annotation.DrawableRes
 import android.annotation.RawRes
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.hardware.face.Face
 import android.util.RotationUtils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
@@ -65,9 +66,10 @@ constructor(
      */
     val activeAuthType: Flow<AuthType> =
         combine(
+            promptViewModel.size,
             promptViewModel.modalities.distinctUntilChanged(),
             promptViewModel.faceMode.distinctUntilChanged()
-        ) { modalities, faceMode ->
+        ) { _, modalities, faceMode ->
             if (modalities.hasFaceAndFingerprint && !faceMode) {
                 AuthType.Coex
             } else if (modalities.hasFaceOnly || faceMode) {
@@ -158,13 +160,18 @@ constructor(
     /** Tracks whether a face iconView last pulsed light to dark (vs. dark to light) */
     val lastPulseLightToDark: Flow<Boolean> = _lastPulseLightToDark.asStateFlow()
 
-    /** Layout params for fingerprint iconView */
-    val fingerprintIconWidth: Flow<Int> = promptViewModel.fingerprintSensorDiameter
-    val fingerprintIconHeight: Flow<Int> = promptViewModel.fingerprintSensorDiameter
-
-    /** Layout params for face iconView */
-    val faceIconWidth: Int = promptViewModel.faceIconWidth
-    val faceIconHeight: Int = promptViewModel.faceIconHeight
+    val iconSize: Flow<Pair<Int, Int>> =
+        combine(
+            activeAuthType,
+            promptViewModel.fingerprintSensorWidth,
+            promptViewModel.fingerprintSensorHeight,
+        ) { activeAuthType, fingerprintSensorWidth, fingerprintSensorHeight ->
+            if (activeAuthType == AuthType.Face) {
+                Pair(promptViewModel.faceIconWidth, promptViewModel.faceIconHeight)
+            } else {
+                Pair(fingerprintSensorWidth, fingerprintSensorHeight)
+            }
+        }
 
     /** Current BiometricPromptLayout.iconView asset. */
     val iconAsset: Flow<Int> =

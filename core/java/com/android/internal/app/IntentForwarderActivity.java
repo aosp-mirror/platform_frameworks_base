@@ -659,6 +659,7 @@ public class IntentForwarderActivity extends Activity  {
 
     private boolean privateSpaceFlagsEnabled() {
         return android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()
                 && android.multiuser.Flags.enablePrivateSpaceIntentRedirection();
     }
 

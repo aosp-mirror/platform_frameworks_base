@@ -145,7 +145,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             Log.w(TAG, "BluetoothAdapter is NOT available.");
         }
 
-        mAssociationStore.registerListener(this);
+        mAssociationStore.registerLocalListener(this);
     }
 
     /**
@@ -481,7 +481,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
      * BT connected and BLE presence and are not pending to report BLE lost.
      */
     private boolean canStopBleScan() {
-        for (AssociationInfo ai : mAssociationStore.getAssociations()) {
+        for (AssociationInfo ai : mAssociationStore.getActiveAssociations()) {
             int id = ai.getId();
             synchronized (mBtDisconnectedDevices) {
                 if (ai.isNotifyOnDeviceNearby() && !(isBtConnected(id)

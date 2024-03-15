@@ -67,7 +67,6 @@ public class AppOpsStartedWatcherTest {
         // Start some ops
         appOpsManager.startOp(AppOpsManager.OP_FINE_LOCATION);
         appOpsManager.startOp(AppOpsManager.OP_CAMERA);
-        appOpsManager.startOp(AppOpsManager.OP_RECORD_AUDIO);
 
         // Verify that we got called for the ops being started
         final InOrder inOrder = inOrder(listener);

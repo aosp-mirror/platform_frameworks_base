@@ -204,6 +204,13 @@ final class LogicalDisplay {
             new SparseArray<>();
 
     /**
+     * If enabled, will not check for {@link Display#FLAG_ROTATES_WITH_CONTENT} in LogicalDisplay
+     * and simply use the {@link DisplayInfo#rotation} supplied by WindowManager via
+     * {@link #setDisplayInfoOverrideFromWindowManagerLocked}
+     */
+    private boolean mAlwaysRotateDisplayDeviceEnabled;
+
+    /**
      * If the aspect ratio of the resolution of the display does not match the physical aspect
      * ratio of the display, then without this feature enabled, picture would appear stretched to
      * the user. This is because applications assume that they are rendered on square pixels
@@ -220,11 +227,11 @@ final class LogicalDisplay {
     private final boolean mIsAnisotropyCorrectionEnabled;
 
     LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
-        this(displayId, layerStack, primaryDisplayDevice, false);
+        this(displayId, layerStack, primaryDisplayDevice, false, false);
     }
 
     LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice,
-            boolean isAnisotropyCorrectionEnabled) {
+            boolean isAnisotropyCorrectionEnabled, boolean isAlwaysRotateDisplayDeviceEnabled) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
         mPrimaryDisplayDevice = primaryDisplayDevice;
@@ -236,6 +243,7 @@ final class LogicalDisplay {
         mPowerThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
         mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
         mIsAnisotropyCorrectionEnabled = isAnisotropyCorrectionEnabled;
+        mAlwaysRotateDisplayDeviceEnabled = isAlwaysRotateDisplayDeviceEnabled;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -672,7 +680,12 @@ final class LogicalDisplay {
         // The orientation specifies how the physical coordinate system of the display
         // is rotated when the contents of the logical display are rendered.
         int orientation = Surface.ROTATION_0;
-        if ((displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0) {
+
+        // FLAG_ROTATES_WITH_CONTENT is now handled in DisplayContent. When the flag
+        // mAlwaysRotateDisplayDeviceEnabled is removed, we should also remove this check for
+        // ROTATES_WITH_CONTENT here and always set the orientation.
+        if ((displayDeviceInfo.flags & DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT) != 0
+                    || mAlwaysRotateDisplayDeviceEnabled) {
             orientation = displayInfo.rotation;
         }
 

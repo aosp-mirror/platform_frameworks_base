@@ -16,6 +16,8 @@
 
 package com.android.server.display.mode;
 
+import android.annotation.NonNull;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +30,7 @@ class CombinedVote implements Vote {
     }
 
     @Override
-    public void updateSummary(VoteSummary summary) {
+    public void updateSummary(@NonNull VoteSummary summary) {
         mVotes.forEach(vote -> vote.updateSummary(summary));
     }
 

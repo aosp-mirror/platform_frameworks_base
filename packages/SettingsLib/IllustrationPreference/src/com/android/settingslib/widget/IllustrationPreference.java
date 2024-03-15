@@ -24,6 +24,7 @@ import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -33,16 +34,18 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.RawRes;
+import androidx.annotation.StringRes;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
+
+import com.android.settingslib.widget.preference.illustration.R;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieDrawable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import com.android.settingslib.widget.preference.illustration.R;
 
 /**
  * IllustrationPreference is a preference that can play lottie format animation
@@ -62,8 +65,8 @@ public class IllustrationPreference extends Preference {
     private Drawable mImageDrawable;
     private View mMiddleGroundView;
     private OnBindListener mOnBindListener;
-
     private boolean mLottieDynamicColor;
+    private CharSequence mContentDescription;
 
     /**
      * Interface to listen in on when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
@@ -123,7 +126,10 @@ public class IllustrationPreference extends Preference {
                 (FrameLayout) holder.findViewById(R.id.middleground_layout);
         final LottieAnimationView illustrationView =
                 (LottieAnimationView) holder.findViewById(R.id.lottie_view);
-
+        if (illustrationView != null && !TextUtils.isEmpty(mContentDescription)) {
+            illustrationView.setContentDescription(mContentDescription);
+            illustrationView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        }
         // To solve the problem of non-compliant illustrations, we set the frame height
         // to 300dp and set the length of the short side of the screen to
         // the width of the frame.
@@ -205,6 +211,29 @@ public class IllustrationPreference extends Preference {
             mImageResId = resId;
             notifyChanged();
         }
+    }
+
+    /**
+     * To set content description of the {@link Illustration Preference}. This can use for talkback
+     * environment if developer wants to have a customization content.
+     *
+     * @param contentDescription The CharSequence of the content description.
+     */
+    public void setContentDescription(CharSequence contentDescription) {
+        if (!TextUtils.equals(mContentDescription, contentDescription)) {
+            mContentDescription = contentDescription;
+            notifyChanged();
+        }
+    }
+
+    /**
+     * To set content description of the {@link Illustration Preference}. This can use for talkback
+     * environment if developer wants to have a customization content.
+     *
+     * @param contentDescriptionResId The resource id of the content description.
+     */
+    public void setContentDescription(@StringRes int contentDescriptionResId) {
+        setContentDescription(getContext().getText(contentDescriptionResId));
     }
 
     /**

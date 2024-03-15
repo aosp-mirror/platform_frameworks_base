@@ -20,6 +20,7 @@ import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STA
 
 import android.app.Activity;
 import android.content.Context;
+import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateRequest;
 import android.hardware.display.DisplayManager;
@@ -40,6 +41,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -101,7 +103,9 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         mDisplayManager = context.getSystemService(DisplayManager.class);
         mExecutor = context.getMainExecutor();
 
-        mCurrentSupportedDeviceStates = mDeviceStateManager.getSupportedStates();
+        // TODO(b/329436166): Update the usage of device state manager API's
+        mCurrentSupportedDeviceStates = getSupportedStateIdentifiers(
+                mDeviceStateManager.getSupportedDeviceStates());
         mFoldedDeviceStates = context.getResources().getIntArray(
                 R.array.config_foldedDeviceStates);
 
@@ -446,9 +450,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     }
 
     @Override
-    public void onSupportedStatesChanged(int[] supportedStates) {
+    public void onSupportedStatesChanged(@NonNull List<DeviceState> supportedStates) {
         synchronized (mLock) {
-            mCurrentSupportedDeviceStates = supportedStates;
+            // TODO(b/329436166): Update the usage of device state manager API's
+            mCurrentSupportedDeviceStates = getSupportedStateIdentifiers(supportedStates);
             updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
             updateRearDisplayPresentationStatusListeners(
                     getCurrentRearDisplayPresentationModeStatus());
@@ -456,9 +461,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     }
 
     @Override
-    public void onStateChanged(int state) {
+    public void onDeviceStateChanged(@NonNull DeviceState state) {
         synchronized (mLock) {
-            mCurrentDeviceState = state;
+            // TODO(b/329436166): Update the usage of device state manager API's
+            mCurrentDeviceState = state.getIdentifier();
             updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
             updateRearDisplayPresentationStatusListeners(
                     getCurrentRearDisplayPresentationModeStatus());
@@ -480,6 +486,15 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         }
 
         return WindowAreaComponent.STATUS_AVAILABLE;
+    }
+
+    // TODO(b/329436166): Remove and update the usage of device state manager API's
+    private int[] getSupportedStateIdentifiers(@NonNull List<DeviceState> states) {
+        int[] identifiers = new int[states.size()];
+        for (int i = 0; i < states.size(); i++) {
+            identifiers[i] = states.get(i).getIdentifier();
+        }
+        return identifiers;
     }
 
     /**

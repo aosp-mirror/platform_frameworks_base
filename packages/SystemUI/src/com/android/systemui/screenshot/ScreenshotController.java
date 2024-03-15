@@ -87,6 +87,10 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
+import com.android.systemui.screenshot.scroll.LongScreenshotActivity;
+import com.android.systemui.screenshot.scroll.LongScreenshotData;
+import com.android.systemui.screenshot.scroll.ScrollCaptureClient;
+import com.android.systemui.screenshot.scroll.ScrollCaptureController;
 import com.android.systemui.util.Assert;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -200,7 +204,7 @@ public class ScreenshotController {
         void onActionsReady(ScreenshotController.QuickShareData quickShareData);
     }
 
-    interface TransitionDestination {
+    public interface TransitionDestination {
         /**
          * Allows the long screenshot activity to call back with a destination location (the bounds
          * on screen of the destination for the transitioning view) and a Runnable to be run once

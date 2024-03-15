@@ -222,7 +222,10 @@ public abstract class OnDeviceIntelligenceService extends Service {
 
     /**
      * Invoked by the {@link OnDeviceIntelligenceService} inorder to send updates to the inference
-     * service if there is a state change to be performed.
+     * service if there is a state change to be performed. State change could be config updates,
+     * performing initialization or cleanup tasks in the remote inference service.
+     * The Bundle passed in here is expected to be read-only and will be rejected if it has any
+     * writable fields as detailed under {@link InferenceParams}.
      *
      * @param processingState  the updated state to be applied.
      * @param callbackExecutor executor to the run status callback on.

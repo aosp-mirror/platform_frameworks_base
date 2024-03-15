@@ -295,7 +295,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * called.
          *
          * @param view The customized view information.
-         * @return This builder.re
+         * @return This builder.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
         @NonNull

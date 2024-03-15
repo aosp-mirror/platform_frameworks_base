@@ -27,6 +27,7 @@ fun transition(
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Boolean = false,
     isUpOrLeft: Boolean = false,
+    bouncingScene: SceneKey? = null,
     orientation: Orientation = Orientation.Horizontal,
 ): TransitionState.Transition {
     return object : TransitionState.Transition(from, to), TransitionState.HasOverscrollProperties {
@@ -37,6 +38,7 @@ fun transition(
         override val isInitiatedByUserInput: Boolean = isInitiatedByUserInput
         override val isUserInputOngoing: Boolean = isUserInputOngoing
         override val isUpOrLeft: Boolean = isUpOrLeft
+        override val bouncingScene: SceneKey? = bouncingScene
         override val orientation: Orientation = orientation
         override val overscrollScope: OverscrollScope =
             object : OverscrollScope {

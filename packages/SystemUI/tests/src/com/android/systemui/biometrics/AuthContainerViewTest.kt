@@ -39,6 +39,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
@@ -375,6 +376,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowBiometricUI() {
+        mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
         val container = initializeFingerprintContainer()
 
         waitForIdleSync()
@@ -397,6 +399,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     @Ignore("b/302735104")
     fun testShowCredentialUI_withCustomBp() {
+        mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
         val container = initializeFingerprintContainer(
                 authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
                 isUsingContentView = true

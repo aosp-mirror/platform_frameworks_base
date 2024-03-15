@@ -33,7 +33,7 @@ import com.android.server.companion.CompanionDeviceManagerServiceInternal;
  * A Job Service responsible for clean up idle self-managed associations.
  *
  * The job will be executed only if the device is charging and in idle mode due to the application
- * will be killed if association/role are revoked. See {@link AssociationRevokeProcessor}
+ * will be killed if association/role are revoked. See {@link DisassociationProcessor}
  */
 public class InactiveAssociationsRemovalService extends JobService {
 

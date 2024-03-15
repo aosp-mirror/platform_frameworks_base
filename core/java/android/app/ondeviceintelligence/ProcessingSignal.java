@@ -75,7 +75,11 @@ public final class ProcessingSignal {
 
 
     /**
-     * Sends a custom signal with the provided parameters. It also signals the remote callback
+     * Sends a custom signal with the provided parameters. If there are multiple concurrent
+     * requests to this method, the actionParams are queued in a blocking fashion, in the order they
+     * are received.
+     *
+     * It also signals the remote callback
      * with the same params if already configured, if not the action is queued to be sent when a
      * remote is configured. Similarly, on the receiver side, the callback will be invoked if
      * already set, if not all actions are queued to be sent to callback when it is set.
@@ -159,9 +163,9 @@ public final class ProcessingSignal {
      * Sets the remote transport.
      *
      * If there are actions queued from {@link ProcessingSignal#sendSignal}, they are also
-     * sequentially sent to the remote.
+     * sequentially sent to the configured remote.
      *
-     * This method is guaranteed that the remote transport will not be called after it
+     * This method guarantees that the remote transport will not be called after it
      * has been removed.
      *
      * @param remote The remote transport, or null to remove.

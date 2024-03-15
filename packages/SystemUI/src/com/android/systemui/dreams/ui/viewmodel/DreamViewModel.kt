@@ -21,7 +21,6 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dock.DockManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToGlanceableHubTransitionViewModel
@@ -47,7 +46,6 @@ constructor(
     fromGlanceableHubTransitionInteractor: GlanceableHubToDreamingTransitionViewModel,
     private val toGlanceableHubTransitionViewModel: DreamingToGlanceableHubTransitionViewModel,
     private val toLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
-    private val dockManager: DockManager,
     private val communalInteractor: CommunalInteractor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val userTracker: UserTracker,
@@ -55,8 +53,7 @@ constructor(
 
     fun startTransitionFromDream() {
         val showGlanceableHub =
-            dockManager.isDocked &&
-                communalInteractor.isCommunalEnabled.value &&
+            communalInteractor.isCommunalEnabled.value &&
                 !keyguardUpdateMonitor.isEncryptedOrLockdown(userTracker.userId)
         if (showGlanceableHub) {
             toGlanceableHubTransitionViewModel.startTransition()

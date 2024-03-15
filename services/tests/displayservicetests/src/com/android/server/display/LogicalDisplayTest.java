@@ -107,8 +107,7 @@ public class LogicalDisplayTest {
 
     @Test
     public void testLetterbox() {
-        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
-                /*isAnisotropyCorrectionEnabled=*/ false);
+        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
         mDisplayDeviceInfo.xDpi = 0.5f;
         mDisplayDeviceInfo.yDpi = 1.0f;
 
@@ -146,7 +145,8 @@ public class LogicalDisplayTest {
     @Test
     public void testNoLetterbox_anisotropyCorrection() {
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
-                /*isAnisotropyCorrectionEnabled=*/ true);
+                /*isAnisotropyCorrectionEnabled=*/ true,
+                /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
 
         // In case of Anisotropy of pixels, then the content should be rescaled so it would adjust
         // to using the whole screen. This is because display will rescale it back to fill the
@@ -173,7 +173,8 @@ public class LogicalDisplayTest {
     @Test
     public void testLetterbox_anisotropyCorrectionYDpi() {
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
-                /*isAnisotropyCorrectionEnabled=*/ true);
+                /*isAnisotropyCorrectionEnabled=*/ true,
+                /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
 
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.logicalWidth = DISPLAY_WIDTH;
@@ -191,8 +192,7 @@ public class LogicalDisplayTest {
 
     @Test
     public void testPillarbox() {
-        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
-                /*isAnisotropyCorrectionEnabled=*/ false);
+        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice);
         mDisplayDeviceInfo.xDpi = 0.5f;
         mDisplayDeviceInfo.yDpi = 1.0f;
 
@@ -230,7 +230,8 @@ public class LogicalDisplayTest {
     @Test
     public void testPillarbox_anisotropyCorrection() {
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
-                /*isAnisotropyCorrectionEnabled=*/ true);
+                /*isAnisotropyCorrectionEnabled=*/ true,
+                /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
 
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.logicalWidth = DISPLAY_WIDTH;
@@ -257,7 +258,8 @@ public class LogicalDisplayTest {
     @Test
     public void testNoPillarbox_anisotropyCorrectionYDpi() {
         mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
-                /*isAnisotropyCorrectionEnabled=*/ true);
+                /*isAnisotropyCorrectionEnabled=*/ true,
+                /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
 
         // In case of Anisotropy of pixels, then the content should be rescaled so it would adjust
         // to using the whole screen. This is because display will rescale it back to fill the
@@ -298,6 +300,47 @@ public class LogicalDisplayTest {
         displayInfo.logicalWidth = DISPLAY_WIDTH;
         displayInfo.logicalHeight = DISPLAY_HEIGHT;
         // Rotation doesn't matter when the FLAG_ROTATES_WITH_CONTENT is absent.
+        displayInfo.rotation = Surface.ROTATION_90;
+        mLogicalDisplay.setDisplayInfoOverrideFromWindowManagerLocked(displayInfo);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
+
+        expectedPosition.set(40, -20);
+        mDisplayDeviceInfo.flags = DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        displayInfo.logicalWidth = DISPLAY_HEIGHT;
+        displayInfo.logicalHeight = DISPLAY_WIDTH;
+        displayInfo.rotation = Surface.ROTATION_90;
+        mLogicalDisplay.setDisplayInfoOverrideFromWindowManagerLocked(displayInfo);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
+    }
+
+    @Test
+    public void testGetDisplayPositionAlwaysRotateDisplayEnabled() {
+        mLogicalDisplay = new LogicalDisplay(DISPLAY_ID, LAYER_STACK, mDisplayDevice,
+                /*isAnisotropyCorrectionEnabled=*/ true,
+                /*isAlwaysRotateDisplayDeviceEnabled=*/ true);
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        Point expectedPosition = new Point();
+
+        SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
+
+        expectedPosition.set(20, 40);
+        mLogicalDisplay.setDisplayOffsetsLocked(20, 40);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
+
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = DISPLAY_WIDTH;
+        displayInfo.logicalHeight = DISPLAY_HEIGHT;
+        // Rotation sent from WindowManager is always taken into account by LogicalDisplay
+        // not matter whether FLAG_ROTATES_WITH_CONTENT is set or not.
+        // This is because WindowManager takes care of rotation and expects that LogicalDisplay
+        // will follow the rotation supplied by WindowManager
+        expectedPosition.set(115, -20);
         displayInfo.rotation = Surface.ROTATION_90;
         mLogicalDisplay.setDisplayInfoOverrideFromWindowManagerLocked(displayInfo);
         mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);

@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
@@ -38,7 +39,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -65,7 +66,7 @@ public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private ShadeController mShadeController;
     @Mock
-    private ShadeViewController mShadeViewController;
+    private PanelExpansionInteractor mPanelExpansionInteractor;
     @Mock
     private Optional<Recents> mRecentsOptional;
     @Mock
@@ -87,7 +88,7 @@ public class SystemActionsTest extends SysuiTestCase {
                 mNotificationShadeController,
                 mKeyguardStateController,
                 mShadeController,
-                () -> mShadeViewController,
+                () -> mPanelExpansionInteractor,
                 mRecentsOptional,
                 mDisplayTracker);
     }

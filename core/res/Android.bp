@@ -161,6 +161,7 @@ android_app {
         "camera_platform_flags",
         "android.net.platform.flags-aconfig",
         "com.android.window.flags.window-aconfig",
+        "android.permission.flags-aconfig",
     ],
 }
 
