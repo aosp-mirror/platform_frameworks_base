@@ -398,6 +398,9 @@ public abstract class OnDeviceIntelligenceService extends Service {
                 Slog.e(TAG, "Cannot open file. No ParcelFileDescriptor returned.");
             } finally {
                 future.complete(pfd);
+                if (pfd != null) {
+                    pfd.close();
+                }
             }
         });
     }
