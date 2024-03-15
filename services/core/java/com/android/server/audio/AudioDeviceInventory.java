@@ -121,26 +121,6 @@ public class AudioDeviceInventory {
     }
 
     /**
-     * Adds a new entry in mDeviceInventory if the AudioDeviceAttributes passed is an sink
-     * Bluetooth device and no corresponding entry already exists.
-     * @param ada the device to add if needed
-     */
-    void addAudioDeviceInInventoryIfNeeded(AudioDeviceAttributes ada) {
-        if (!AudioSystem.isBluetoothOutDevice(ada.getInternalType())) {
-            return;
-        }
-        synchronized (mDeviceInventoryLock) {
-            if (findDeviceStateForAudioDeviceAttributes(ada, ada.getType()) != null) {
-                return;
-            }
-            AdiDeviceState ads = new AdiDeviceState(
-                    ada.getType(), ada.getInternalType(), ada.getAddress());
-            mDeviceInventory.put(ads.getDeviceId(), ads);
-        }
-        mDeviceBroker.persistAudioDeviceSettings();
-    }
-
-    /**
      * Adds a new AdiDeviceState or updates the audio device cateogory of the matching
      * AdiDeviceState in the {@link AudioDeviceInventory#mDeviceInventory} list.
      * @param deviceState the device to update
@@ -1012,8 +992,8 @@ public class AudioDeviceInventory {
 
 
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
-            @NonNull IStrategyPreferredDevicesDispatcher dispatcher, boolean isPrivileged) {
-        mPrefDevDispatchers.register(dispatcher, isPrivileged);
+            @NonNull IStrategyPreferredDevicesDispatcher dispatcher) {
+        mPrefDevDispatchers.register(dispatcher);
     }
 
     /*package*/ void unregisterStrategyPreferredDevicesDispatcher(
@@ -1022,8 +1002,8 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ void registerStrategyNonDefaultDevicesDispatcher(
-            @NonNull IStrategyNonDefaultDevicesDispatcher dispatcher, boolean isPrivileged) {
-        mNonDefDevDispatchers.register(dispatcher, isPrivileged);
+            @NonNull IStrategyNonDefaultDevicesDispatcher dispatcher) {
+        mNonDefDevDispatchers.register(dispatcher);
     }
 
     /*package*/ void unregisterStrategyNonDefaultDevicesDispatcher(
@@ -1104,8 +1084,8 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ void registerCapturePresetDevicesRoleDispatcher(
-            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher, boolean isPrivileged) {
-        mDevRoleCapturePresetDispatchers.register(dispatcher, isPrivileged);
+            @NonNull ICapturePresetDevicesRoleDispatcher dispatcher) {
+        mDevRoleCapturePresetDispatchers.register(dispatcher);
     }
 
     /*package*/ void unregisterCapturePresetDevicesRoleDispatcher(
@@ -1434,8 +1414,6 @@ public class AudioDeviceInventory {
                     updateBluetoothPreferredModes_l(connect ? btDevice : null /*connectedDevice*/);
                     if (!connect) {
                         purgeDevicesRoles_l();
-                    } else {
-                        addAudioDeviceInInventoryIfNeeded(attributes);
                     }
                 }
                 mmi.set(MediaMetrics.Property.STATE, MediaMetrics.Value.CONNECTED).record();
@@ -1724,7 +1702,6 @@ public class AudioDeviceInventory {
         setCurrentAudioRouteNameIfPossible(name, true /*fromA2dp*/);
 
         updateBluetoothPreferredModes_l(btInfo.mDevice /*connectedDevice*/);
-        addAudioDeviceInInventoryIfNeeded(ada);
     }
 
     static final int[] CAPTURE_PRESETS = new int[] {AudioSource.MIC, AudioSource.CAMCORDER,
@@ -2029,9 +2006,9 @@ public class AudioDeviceInventory {
         final int hearingAidVolIndex = mDeviceBroker.getVssVolumeForDevice(streamType,
                 AudioSystem.DEVICE_OUT_HEARING_AID);
         mDeviceBroker.postSetHearingAidVolumeIndex(hearingAidVolIndex, streamType);
-        AudioDeviceAttributes ada = new AudioDeviceAttributes(
-                AudioSystem.DEVICE_OUT_HEARING_AID, address, name);
-        mAudioSystem.setDeviceConnectionState(ada,
+
+        mAudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                AudioSystem.DEVICE_OUT_HEARING_AID, address, name),
                 AudioSystem.DEVICE_STATE_AVAILABLE,
                 AudioSystem.AUDIO_FORMAT_DEFAULT);
         mConnectedDevices.put(
@@ -2041,7 +2018,6 @@ public class AudioDeviceInventory {
         mDeviceBroker.postApplyVolumeOnDevice(streamType,
                 AudioSystem.DEVICE_OUT_HEARING_AID, "makeHearingAidDeviceAvailable");
         setCurrentAudioRouteNameIfPossible(name, false /*fromA2dp*/);
-        addAudioDeviceInInventoryIfNeeded(ada);
         new MediaMetrics.Item(mMetricsId + "makeHearingAidDeviceAvailable")
                 .set(MediaMetrics.Property.ADDRESS, address != null ? address : "")
                 .set(MediaMetrics.Property.DEVICE,
@@ -2152,7 +2128,6 @@ public class AudioDeviceInventory {
                             sensorUuid));
             mDeviceBroker.postAccessoryPlugMediaUnmute(device);
             setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
-            addAudioDeviceInInventoryIfNeeded(ada);
         }
 
         if (streamType == AudioSystem.STREAM_DEFAULT) {
@@ -2487,9 +2462,6 @@ public class AudioDeviceInventory {
         final int nbDispatchers = mPrefDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
-                if (!((Boolean) mPrefDevDispatchers.getBroadcastCookie(i))) {
-                    devices = mDeviceBroker.anonymizeAudioDeviceAttributesListUnchecked(devices);
-                }
                 mPrefDevDispatchers.getBroadcastItem(i).dispatchPrefDevicesChanged(
                         strategy, devices);
             } catch (RemoteException e) {
@@ -2503,9 +2475,6 @@ public class AudioDeviceInventory {
         final int nbDispatchers = mNonDefDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
             try {
-                if (!((Boolean) mNonDefDevDispatchers.getBroadcastCookie(i))) {
-                    devices = mDeviceBroker.anonymizeAudioDeviceAttributesListUnchecked(devices);
-                }
                 mNonDefDevDispatchers.getBroadcastItem(i).dispatchNonDefDevicesChanged(
                         strategy, devices);
             } catch (RemoteException e) {
@@ -2519,9 +2488,6 @@ public class AudioDeviceInventory {
         final int nbDispatchers = mDevRoleCapturePresetDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; ++i) {
             try {
-                if (!((Boolean) mDevRoleCapturePresetDispatchers.getBroadcastCookie(i))) {
-                    devices = mDeviceBroker.anonymizeAudioDeviceAttributesListUnchecked(devices);
-                }
                 mDevRoleCapturePresetDispatchers.getBroadcastItem(i).dispatchDevicesRoleChanged(
                         capturePreset, role, devices);
             } catch (RemoteException e) {
