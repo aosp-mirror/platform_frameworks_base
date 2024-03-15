@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -31,6 +30,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
+import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
@@ -64,7 +64,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
     @Test
     fun updateBounds() =
         testScope.runTest {
-            val bounds by collectLastValue(appearanceViewModel.stackBounds)
+            val clipping by collectLastValue(appearanceViewModel.stackClipping)
 
             val top = 200f
             val left = 0f
@@ -76,15 +76,8 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 right = right,
                 bottom = bottom
             )
-            assertThat(bounds)
-                .isEqualTo(
-                    NotificationContainerBounds(
-                        left = left,
-                        top = top,
-                        right = right,
-                        bottom = bottom
-                    )
-                )
+            assertThat(clipping?.bounds)
+                .isEqualTo(StackBounds(left = left, top = top, right = right, bottom = bottom))
         }
 
     @Test

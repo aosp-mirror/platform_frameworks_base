@@ -72,6 +72,7 @@ import com.android.systemui.notifications.ui.composable.Notifications.Transition
 import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader
+import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackAppearanceViewBinder.SCRIM_CORNER_RADIUS
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
@@ -156,6 +157,8 @@ fun SceneScope.NotificationScrollingStack(
 
     val contentHeight = viewModel.intrinsicContentHeight.collectAsState()
 
+    val stackRounding = viewModel.stackRounding.collectAsState()
+
     // the offset for the notifications scrim. Its upper bound is 0, and its lower bound is
     // calculated in minScrimOffset. The scrim is the same height as the screen minus the
     // height of the Shade Header, and at rest (scrimOffset = 0) its top bound is at maxScrimStartY.
@@ -226,12 +229,7 @@ fun SceneScope.NotificationScrollingStack(
                                 { expansionFraction },
                                 layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)
                             )
-                            .let {
-                                RoundedCornerShape(
-                                    topStart = it,
-                                    topEnd = it,
-                                )
-                            }
+                            .let { stackRounding.value.toRoundedCornerShape(it) }
                     clip = true
                 }
     ) {
@@ -367,7 +365,7 @@ private fun calculateCornerRadius(
         lerp(
                 start = screenCornerRadius.value,
                 stop = SCRIM_CORNER_RADIUS,
-                fraction = (expansionFraction() / EXPANSION_FOR_MAX_CORNER_RADIUS).coerceAtMost(1f),
+                fraction = (expansionFraction() / EXPANSION_FOR_MAX_CORNER_RADIUS).coerceIn(0f, 1f),
             )
             .dp
     } else {
@@ -393,6 +391,17 @@ private fun Modifier.debugBackground(
     } else {
         this
     }
+
+fun StackRounding.toRoundedCornerShape(radius: Dp): RoundedCornerShape {
+    val topRadius = if (roundTop) radius else 0.dp
+    val bottomRadius = if (roundBottom) radius else 0.dp
+    return RoundedCornerShape(
+        topStart = topRadius,
+        topEnd = topRadius,
+        bottomStart = bottomRadius,
+        bottomEnd = bottomRadius,
+    )
+}
 
 private const val TAG = "FlexiNotifs"
 private val DEBUG_COLOR = Color(1f, 0f, 0f, 0.2f)
