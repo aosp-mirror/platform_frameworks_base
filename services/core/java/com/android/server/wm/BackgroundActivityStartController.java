@@ -449,7 +449,48 @@ public class BackgroundActivityStartController {
             this.mResultForRealCaller = resultForRealCaller;
         }
 
-        private String dump() {
+        public boolean isPendingIntentBalAllowedByPermission() {
+            return PendingIntentRecord.isPendingIntentBalAllowedByPermission(mCheckedOptions);
+        }
+
+        public boolean callerExplicitOptInOrAutoOptIn() {
+            if (mAutoOptInCaller) {
+                return !callerExplicitOptOut();
+            }
+            return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+        }
+
+        public boolean realCallerExplicitOptInOrAutoOptIn() {
+            if (mAutoOptInReason != null) {
+                return !realCallerExplicitOptOut();
+            }
+            return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+        }
+
+        public boolean callerExplicitOptOut() {
+            return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_DENIED;
+        }
+
+        public boolean realCallerExplicitOptOut() {
+            return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                    == MODE_BACKGROUND_ACTIVITY_START_DENIED;
+        }
+
+        public boolean callerExplicitOptInOrOut() {
+            return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                    != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        }
+
+        public boolean realCallerExplicitOptInOrOut() {
+            return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
+                    != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        }
+
+        @Override
+        public String toString() {
             StringBuilder sb = new StringBuilder(2048);
             sb.append("[callingPackage: ")
                     .append(getDebugPackageName(mCallingPackage, mCallingUid));
@@ -500,51 +541,6 @@ public class BackgroundActivityStartController {
             }
             sb.append("]");
             return sb.toString();
-        }
-
-        public boolean isPendingIntentBalAllowedByPermission() {
-            return PendingIntentRecord.isPendingIntentBalAllowedByPermission(mCheckedOptions);
-        }
-
-        public boolean callerExplicitOptInOrAutoOptIn() {
-            if (mAutoOptInCaller) {
-                return !callerExplicitOptOut();
-            }
-            return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-        }
-
-        public boolean realCallerExplicitOptInOrAutoOptIn() {
-            if (mAutoOptInReason != null) {
-                return !realCallerExplicitOptOut();
-            }
-            return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                    == MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
-        }
-
-        public boolean callerExplicitOptOut() {
-            return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                    == MODE_BACKGROUND_ACTIVITY_START_DENIED;
-        }
-
-        public boolean realCallerExplicitOptOut() {
-            return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                    == MODE_BACKGROUND_ACTIVITY_START_DENIED;
-        }
-
-        public boolean callerExplicitOptInOrOut() {
-            return mCheckedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                    != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
-        }
-
-        public boolean realCallerExplicitOptInOrOut() {
-            return mCheckedOptions.getPendingIntentBackgroundActivityStartMode()
-                    != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
-        }
-
-        @Override
-        public String toString() {
-            return dump();
         }
     }
 
@@ -700,8 +696,7 @@ public class BackgroundActivityStartController {
         if (!state.hasRealCaller()) {
             if (resultForCaller.allows()) {
                 if (DEBUG_ACTIVITY_STARTS) {
-                    Slog.d(TAG, "Background activity start allowed. "
-                            + state.dump());
+                    Slog.d(TAG, "Background activity start allowed. " + state);
                 }
                 return allowBasedOnCaller(state);
             }
@@ -729,15 +724,13 @@ public class BackgroundActivityStartController {
         // Handle cases with explicit opt-in
         if (resultForCaller.allows() && state.callerExplicitOptInOrAutoOptIn()) {
             if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Activity start explicitly allowed by caller. "
-                        + state.dump());
+                Slog.d(TAG, "Activity start explicitly allowed by caller. " + state);
             }
             return allowBasedOnCaller(state);
         }
         if (resultForRealCaller.allows() && state.realCallerExplicitOptInOrAutoOptIn()) {
             if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Activity start explicitly allowed by real caller. "
-                        + state.dump());
+                Slog.d(TAG, "Activity start explicitly allowed by real caller. " + state);
             }
             return allowBasedOnRealCaller(state);
         }
@@ -750,7 +743,7 @@ public class BackgroundActivityStartController {
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG, "With Android 15 BAL hardening this activity start may be blocked"
                         + " if the PI creator upgrades target_sdk to 35+! "
-                        + " (missing opt in by PI creator)!" + state.dump());
+                        + " (missing opt in by PI creator)!" + state);
                 return allowBasedOnCaller(state);
             }
         }
@@ -759,7 +752,7 @@ public class BackgroundActivityStartController {
             if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG, "With Android 14 BAL hardening this activity start will be blocked"
                         + " if the PI sender upgrades target_sdk to 34+! "
-                        + " (missing opt in by PI sender)!" + state.dump());
+                        + " (missing opt in by PI sender)!" + state);
                 return allowBasedOnRealCaller(state);
             }
         }
@@ -773,23 +766,20 @@ public class BackgroundActivityStartController {
 
     private BalVerdict allowBasedOnCaller(BalState state) {
         if (DEBUG_ACTIVITY_STARTS) {
-            Slog.d(TAG, "Background activity launch allowed based on caller. "
-                    + state.dump());
+            Slog.d(TAG, "Background activity launch allowed based on caller. " + state);
         }
         return statsLog(state.mResultForCaller, state);
     }
 
     private BalVerdict allowBasedOnRealCaller(BalState state) {
         if (DEBUG_ACTIVITY_STARTS) {
-            Slog.d(TAG, "Background activity launch allowed based on real caller. "
-                    + state.dump());
+            Slog.d(TAG, "Background activity launch allowed based on real caller. " + state);
         }
         return statsLog(state.mResultForRealCaller, state);
     }
 
     private BalVerdict abortLaunch(BalState state) {
-        Slog.wtf(TAG, "Background activity launch blocked! "
-                + state.dump());
+        Slog.wtf(TAG, "Background activity launch blocked! " + state);
         if (balShowToastsBlocked()
                 && (state.mResultForCaller.allows() || state.mResultForRealCaller.allows())) {
             // only show a toast if either caller or real caller could launch if they opted in
