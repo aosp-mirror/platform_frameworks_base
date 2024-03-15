@@ -54,7 +54,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -182,10 +181,6 @@ constructor(
 
     /** Last point that the root view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition
-
-    /** the shared notification container bounds *on the lockscreen* */
-    val notificationBounds: StateFlow<NotificationContainerBounds> =
-        keyguardInteractor.notificationContainerBounds
 
     /**
      * The keyguard root view can be clipped as the shade is pulled down, typically only for
