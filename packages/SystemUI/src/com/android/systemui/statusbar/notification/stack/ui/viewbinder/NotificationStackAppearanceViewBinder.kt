@@ -82,6 +82,8 @@ object NotificationStackAppearanceViewBinder {
                         wasExpanding = nowExpanding
                     }
                 }
+
+                launch { viewModel.isScrollable.collect { controller.setScrollingEnabled(it) } }
             }
         }
     }

@@ -20,23 +20,28 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.Scenes.Shade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
 class NotificationStackAppearanceViewModel
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     dumpManager: DumpManager,
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
@@ -83,4 +88,8 @@ constructor(
 
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val contentTop: StateFlow<Float> = stackAppearanceInteractor.contentTop.dumpValue("contentTop")
+
+    /** Whether the notification stack is scrollable or not. */
+    val isScrollable: Flow<Boolean> =
+        sceneInteractor.currentScene.map { it == Shade }.dumpWhileCollecting("isScrollable")
 }
