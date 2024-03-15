@@ -204,6 +204,30 @@ sealed interface TransitionState {
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
 
+        /**
+         * The current [TransformationSpecImpl] and [OverscrollSpecImpl] associated to this
+         * transition.
+         *
+         * Important: These will be set exactly once, when this transition is
+         * [started][BaseSceneTransitionLayoutState.startTransition].
+         */
+        internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
+        private var fromOverscrollSpec: OverscrollSpecImpl? = null
+        private var toOverscrollSpec: OverscrollSpecImpl? = null
+
+        /** The current [OverscrollSpecImpl], if this transition is currently overscrolling. */
+        internal val currentOverscrollSpec: OverscrollSpecImpl?
+            get() {
+                if (this !is HasOverscrollProperties) return null
+                val progress = progress
+                val bouncingScene = bouncingScene
+                return when {
+                    progress < 0f || bouncingScene == fromScene -> fromOverscrollSpec
+                    progress > 1f || bouncingScene == toScene -> toOverscrollSpec
+                    else -> null
+                }
+            }
+
         init {
             check(fromScene != toScene)
         }
@@ -231,6 +255,14 @@ sealed interface TransitionState {
         fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
             return isTransitioning(from = scene, to = other) ||
                 isTransitioning(from = other, to = scene)
+        }
+
+        internal fun updateOverscrollSpecs(
+            fromSpec: OverscrollSpecImpl?,
+            toSpec: OverscrollSpecImpl?,
+        ) {
+            fromOverscrollSpec = fromSpec
+            toOverscrollSpec = toSpec
         }
     }
 
@@ -275,32 +307,6 @@ internal abstract class BaseSceneTransitionLayoutState(
         mutableStateOf(TransitionState.Idle(initialScene))
         protected set
 
-    /**
-     * The current [transformationSpec] associated to [transitionState]. Accessing this value makes
-     * sense only if [transitionState] is a [TransitionState.Transition].
-     */
-    internal var transformationSpec: TransformationSpecImpl = TransformationSpec.Empty
-
-    private var fromOverscrollSpec: OverscrollSpecImpl? = null
-    private var toOverscrollSpec: OverscrollSpecImpl? = null
-
-    /**
-     * @return the overscroll [OverscrollSpecImpl] if it is defined for the current
-     *   [transitionState] and we are currently over scrolling.
-     */
-    internal val currentOverscrollSpec: OverscrollSpecImpl?
-        get() {
-            val transition = currentTransition ?: return null
-            if (transition !is TransitionState.HasOverscrollProperties) return null
-            val progress = transition.progress
-            val bouncingScene = transition.bouncingScene
-            return when {
-                progress < 0f || bouncingScene == transition.fromScene -> fromOverscrollSpec
-                progress > 1f || bouncingScene == transition.toScene -> toOverscrollSpec
-                else -> null
-            }
-        }
-
     private val activeTransitionLinks = mutableMapOf<StateLink, LinkedTransition>()
 
     /** Whether we can transition to the given [scene]. */
@@ -333,12 +339,24 @@ internal abstract class BaseSceneTransitionLayoutState(
         val fromScene = transition.fromScene
         val toScene = transition.toScene
         val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
-        transformationSpec =
+
+        // Update the transition specs.
+        transition.transformationSpec =
             transitions.transitionSpec(fromScene, toScene, key = transitionKey).transformationSpec()
-        fromOverscrollSpec = orientation?.let { transitions.overscrollSpec(fromScene, it) }
-        toOverscrollSpec = orientation?.let { transitions.overscrollSpec(toScene, it) }
+        if (orientation != null) {
+            transition.updateOverscrollSpecs(
+                fromSpec = transitions.overscrollSpec(fromScene, orientation),
+                toSpec = transitions.overscrollSpec(toScene, orientation),
+            )
+        } else {
+            transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
+        }
+
+        // Handle transition links.
         cancelActiveTransitionLinks()
         setupTransitionLinks(transition)
+
+        // Set the current transition.
         transitionState = transition
     }
 

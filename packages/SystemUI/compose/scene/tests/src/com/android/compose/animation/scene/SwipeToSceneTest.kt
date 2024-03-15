@@ -547,12 +547,12 @@ class SwipeToSceneTest {
         }
 
         assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
-        assertThat(state.transformationSpec.transformations).hasSize(1)
+        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(1)
 
         // Move the pointer up to swipe to scene B using the new transition.
         rule.onRoot().performTouchInput { moveBy(Offset(0f, -1.dp.toPx()), delayMillis = 1_000) }
         assertThat(state.isTransitioning(from = TestScenes.SceneA, to = TestScenes.SceneB)).isTrue()
-        assertThat(state.transformationSpec.transformations).hasSize(2)
+        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(2)
     }
 
     @Test

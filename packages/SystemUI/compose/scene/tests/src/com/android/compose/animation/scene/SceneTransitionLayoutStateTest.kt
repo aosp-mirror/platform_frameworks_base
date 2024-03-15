@@ -29,7 +29,6 @@ import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
@@ -303,7 +302,7 @@ class SceneTransitionLayoutStateTest {
 
         // Default transition from A to B.
         assertThat(state.setTargetScene(SceneB, coroutineScope = this)).isNotNull()
-        assertThat(state.transformationSpec.transformations).hasSize(1)
+        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(1)
 
         // Go back to A.
         state.setTargetScene(SceneA, coroutineScope = this)
@@ -320,7 +319,7 @@ class SceneTransitionLayoutStateTest {
                 )
             )
             .isNotNull()
-        assertThat(state.transformationSpec.transformations).hasSize(2)
+        assertThat(state.currentTransition?.transformationSpec?.transformations).hasSize(2)
     }
 
     @Test
@@ -435,23 +434,23 @@ class SceneTransitionLayoutStateTest {
                         overscroll(SceneB, Orientation.Vertical) { fade(TestElements.Foo) }
                     }
             )
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // overscroll for SceneA is NOT defined
         progress.value = -0.1f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // scroll from SceneA to SceneB
         progress.value = 0.5f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         progress.value = 1f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // overscroll for SceneB is defined
         progress.value = 1.1f
-        assertThat(state.currentOverscrollSpec).isNotNull()
-        assertThat(state.currentOverscrollSpec?.scene).isEqualTo(SceneB)
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec?.scene).isEqualTo(SceneB)
     }
 
     @Test
@@ -465,23 +464,23 @@ class SceneTransitionLayoutStateTest {
                         overscroll(SceneA, Orientation.Vertical) { fade(TestElements.Foo) }
                     }
             )
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // overscroll for SceneA is defined
         progress.value = -0.1f
-        assertThat(state.currentOverscrollSpec).isNotNull()
-        assertThat(state.currentOverscrollSpec?.scene).isEqualTo(SceneA)
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec?.scene).isEqualTo(SceneA)
 
         // scroll from SceneA to SceneB
         progress.value = 0.5f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         progress.value = 1f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // overscroll for SceneB is NOT defined
         progress.value = 1.1f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
     }
 
     @Test
@@ -492,21 +491,21 @@ class SceneTransitionLayoutStateTest {
                 progress = { progress.value },
                 sceneTransitions = transitions {}
             )
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // overscroll for SceneA is NOT defined
         progress.value = -0.1f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // scroll from SceneA to SceneB
         progress.value = 0.5f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         progress.value = 1f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // overscroll for SceneB is NOT defined
         progress.value = 1.1f
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
     }
 }

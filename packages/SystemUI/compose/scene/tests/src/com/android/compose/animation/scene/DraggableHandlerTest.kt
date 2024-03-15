@@ -984,14 +984,14 @@ class DraggableHandlerTest {
         val scene = layoutState.transitionState.currentScene
         // We should have overscroll spec for scene C
         assertThat(layoutState.transitions.overscrollSpec(scene, Orientation.Vertical)).isNotNull()
-        assertThat(layoutState.currentOverscrollSpec).isNull()
+        assertThat(layoutState.currentTransition?.currentOverscrollSpec).isNull()
 
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
         nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
 
         // We scrolled down, under scene C there is nothing, so we can use the overscroll spec
-        assertThat(layoutState.currentOverscrollSpec).isNotNull()
-        assertThat(layoutState.currentOverscrollSpec?.scene).isEqualTo(SceneC)
+        assertThat(layoutState.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(layoutState.currentTransition?.currentOverscrollSpec?.scene).isEqualTo(SceneC)
         val transition = layoutState.currentTransition
         assertThat(transition).isNotNull()
         assertThat(transition!!.progress).isEqualTo(-0.1f)
