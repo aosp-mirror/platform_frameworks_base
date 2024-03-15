@@ -35,6 +35,7 @@ import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -264,25 +265,41 @@ public final class MediaCas implements AutoCloseable {
     public static final int PLUGIN_STATUS_SESSION_NUMBER_CHANGED =
             android.hardware.cas.StatusEvent.PLUGIN_SESSION_NUMBER_CHANGED;
 
-    private static final Singleton<IMediaCasService> sService =
-            new Singleton<IMediaCasService>() {
+    private static IMediaCasService sService = null;
+    private static Object sAidlLock = new Object();
+
+    /** DeathListener for AIDL service */
+    private static IBinder.DeathRecipient sDeathListener =
+            new IBinder.DeathRecipient() {
                 @Override
-                protected IMediaCasService create() {
-                    try {
-                        Log.d(TAG, "Trying to get AIDL service");
-                        IMediaCasService serviceAidl =
-                                IMediaCasService.Stub.asInterface(
-                                        ServiceManager.waitForDeclaredService(
-                                                IMediaCasService.DESCRIPTOR + "/default"));
-                        if (serviceAidl != null) {
-                            return serviceAidl;
-                        }
-                    } catch (Exception eAidl) {
-                        Log.d(TAG, "Failed to get cas AIDL service");
+                public void binderDied() {
+                    synchronized (sAidlLock) {
+                        Log.d(TAG, "The service is dead");
+                        sService.asBinder().unlinkToDeath(sDeathListener, 0);
+                        sService = null;
                     }
-                    return null;
                 }
             };
+
+    static IMediaCasService getService() {
+        synchronized (sAidlLock) {
+            if (sService == null || !sService.asBinder().isBinderAlive()) {
+                try {
+                    Log.d(TAG, "Trying to get AIDL service");
+                    sService =
+                            IMediaCasService.Stub.asInterface(
+                                    ServiceManager.waitForDeclaredService(
+                                            IMediaCasService.DESCRIPTOR + "/default"));
+                    if (sService != null) {
+                        sService.asBinder().linkToDeath(sDeathListener, 0);
+                    }
+                } catch (Exception eAidl) {
+                    Log.d(TAG, "Failed to get cas AIDL service");
+                }
+            }
+            return sService;
+        }
+    }
 
     private static final Singleton<android.hardware.cas.V1_0.IMediaCasService> sServiceHidl =
             new Singleton<android.hardware.cas.V1_0.IMediaCasService>() {
@@ -322,10 +339,6 @@ public final class MediaCas implements AutoCloseable {
                     return null;
                 }
             };
-
-    static IMediaCasService getService() {
-        return sService.get();
-    }
 
     static android.hardware.cas.V1_0.IMediaCasService getServiceHidl() {
         return sServiceHidl.get();
@@ -756,7 +769,7 @@ public final class MediaCas implements AutoCloseable {
      * @return Whether the specified CA system is supported on this device.
      */
     public static boolean isSystemIdSupported(int CA_system_id) {
-        IMediaCasService service = sService.get();
+        IMediaCasService service = getService();
         if (service != null) {
             try {
                 return service.isSystemIdSupported(CA_system_id);
@@ -781,7 +794,7 @@ public final class MediaCas implements AutoCloseable {
      * @return an array of descriptors for the available CA plugins.
      */
     public static PluginDescriptor[] enumeratePlugins() {
-        IMediaCasService service = sService.get();
+        IMediaCasService service = getService();
         if (service != null) {
             try {
                 AidlCasPluginDescriptor[] descriptors = service.enumeratePlugins();
