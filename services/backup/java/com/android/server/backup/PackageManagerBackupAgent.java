@@ -99,6 +99,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // The version info of each backed-up app as read from the state file
     private HashMap<String, Metadata> mStateVersions = new HashMap<String, Metadata>();
 
+    // The ancestral record version as read from the state file
+    private int mStoredAncestralRecordVersion;
+
     private final HashSet<String> mExisting = new HashSet<String>();
     private int mStoredSdkVersion;
     private String mStoredIncrementalVersion;
@@ -233,17 +236,32 @@ public class PackageManagerBackupAgent extends BackupAgent {
          * int ancestralRecordVersion -- the version of the format in which this backup set is
          *                               produced
          */
+        boolean upgradingAncestralRecordVersion = false;
         try {
-            if (DEBUG) Slog.v(TAG, "Storing ancestral record version key");
-            outputBufferStream.writeInt(ANCESTRAL_RECORD_VERSION);
-            writeEntity(data, ANCESTRAL_RECORD_KEY, outputBuffer.toByteArray());
-        } catch (IOException e) {
-            // Real error writing data
-            Slog.e(TAG, "Unable to write package backup data file!");
-            return;
-        }
+            if (!mExisting.contains(ANCESTRAL_RECORD_KEY)) {
+                // The old state does not store info on ancestral record
+                Slog.v(
+                        TAG,
+                        "No ancestral record version in the old state. Storing "
+                                + "ancestral record version key");
+                outputBufferStream.writeInt(ANCESTRAL_RECORD_VERSION);
+                writeEntity(data, ANCESTRAL_RECORD_KEY, outputBuffer.toByteArray());
+                upgradingAncestralRecordVersion = true;
+            } else if (mStoredAncestralRecordVersion != ANCESTRAL_RECORD_VERSION) {
+                // The current ancestral record version has changed from the old state
+                Slog.v(
+                        TAG,
+                        "Ancestral record version has changed from old state. Storing"
+                                + "ancestral record version key");
+                outputBufferStream.writeInt(ANCESTRAL_RECORD_VERSION);
+                writeEntity(data, ANCESTRAL_RECORD_KEY, outputBuffer.toByteArray());
+                upgradingAncestralRecordVersion = true;
+                mExisting.remove(ANCESTRAL_RECORD_KEY);
+            } else {
+                if (DEBUG) Slog.v(TAG, "Ancestral record version has not changed");
+                mExisting.remove(ANCESTRAL_RECORD_KEY);
+            }
 
-        try {
             /*
              * Global metadata:
              *
@@ -286,13 +304,16 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     }
 
                     if (mExisting.contains(packName)) {
-                        // We have backed up this app before.  Check whether the version
-                        // of the backup matches the version of the current app; if they
+                        // We have backed up this app before.  If the current ancestral record
+                        // version is the same as what is in the old state, check whether the
+                        // version of the backup matches the version of the current app; if they
                         // don't match, the app has been updated and we need to store its
                         // metadata again.  In either case, take it out of mExisting so that
                         // we don't consider it deleted later.
                         mExisting.remove(packName);
-                        if (info.getLongVersionCode() == mStateVersions.get(packName).versionCode) {
+                        if (!upgradingAncestralRecordVersion
+                                && info.getLongVersionCode()
+                                        == mStateVersions.get(packName).versionCode) {
                             continue;
                         }
                     }
@@ -346,18 +367,35 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
             // At this point, the only entries in 'existing' are apps that were
             // mentioned in the saved state file, but appear to no longer be present
-            // on the device.  We want to preserve the entry for them, however,
-            // because we want the right thing to happen if the user goes through
-            // a backup / uninstall / backup / reinstall sequence.
-            if (DEBUG) {
-                if (mExisting.size() > 0) {
-                    StringBuilder sb = new StringBuilder(64);
-                    sb.append("Preserving metadata for deleted packages:");
-                    for (String app : mExisting) {
-                        sb.append(' ');
-                        sb.append(app);
+            // on the device.
+            if (!mExisting.isEmpty()) {
+                // If the ancestral record version has changed from the previous state we delete the
+                // existing keys for apps that are no longer installed. We should do this, otherwise
+                // we'd leave a key/value pair behind in the old format which could cause problems.
+                if (upgradingAncestralRecordVersion) {
+                    for (String pkgName : mExisting) {
+                        Slog.i(
+                                TAG,
+                                "Ancestral state updated - Deleting uninstalled package: "
+                                        + pkgName
+                                        + " from existing backup");
+                        data.writeEntityHeader(pkgName, -1);
                     }
-                    Slog.v(TAG, sb.toString());
+                    mExisting.clear();
+                } else {
+                    // If the ancestral record version is unchanged from the previous state, we
+                    // don't to anything to preserve the key/value entry for them. We do this
+                    // because we want the right thing to happen if the user goes through a
+                    // backup / uninstall / backup / reinstall sequence.
+                    if (DEBUG) {
+                        StringBuilder sb = new StringBuilder(64);
+                        sb.append("Preserving metadata for deleted packages:");
+                        for (String app : mExisting) {
+                            sb.append(' ');
+                            sb.append(app);
+                        }
+                        Slog.v(TAG, sb.toString());
+                    }
                 }
             }
         } catch (IOException e) {
@@ -506,6 +544,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         mStoredHomeComponent = null;
         mStoredHomeVersion = 0;
         mStoredHomeSigHashes = null;
+        mStoredAncestralRecordVersion = UNDEFINED_ANCESTRAL_RECORD_VERSION;
 
         // The state file is just the list of app names we have stored signatures for
         // with the exception of the metadata block, to which is also appended the
@@ -541,7 +580,25 @@ public class PackageManagerBackupAgent extends BackupAgent {
                 ignoreExisting = true;
             }
 
-            // First comes the preferred home app data, if any, headed by the DEFAULT_HOME_KEY tag
+            // First comes the ancestral record block headed by the ANCESTRAL_RECORD_KEY tag
+            if (pkg.equals(ANCESTRAL_RECORD_KEY)) {
+                mStoredAncestralRecordVersion = in.readInt();
+                if (!ignoreExisting) {
+                    mExisting.add(ANCESTRAL_RECORD_KEY);
+                }
+                pkg = in.readUTF(); // set up for the next block of state
+            } else {
+                // This is an old version of the state file in which ANCESTRAL_RECORD_KEY is not
+                // stored. In this case onBackup will write the ANCESTRAL_KEY_VALUE to the new
+                // state.
+                Slog.i(
+                        TAG,
+                        "Older version of saved state - does not contain ancestral record "
+                                + "version");
+            }
+
+            // Then comes the preferred home app data, if any, headed by the DEFAULT_HOME_KEY tag
+            // Note that Default home app data is no longer backed up by this agent.
             if (pkg.equals(DEFAULT_HOME_KEY)) {
                 // flattened component name, version, signature of the home app
                 mStoredHomeComponent = ComponentName.unflattenFromString(in.readUTF());
@@ -605,6 +662,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // state file version header
             out.writeUTF(STATE_FILE_HEADER);
             out.writeInt(STATE_FILE_VERSION);
+
+            // Record the ancestral record
+            out.writeUTF(ANCESTRAL_RECORD_KEY);
+            out.writeInt(ANCESTRAL_RECORD_VERSION);
 
             // Conclude with the metadata block
             out.writeUTF(GLOBAL_METADATA_KEY);
