@@ -304,6 +304,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
+import android.window.ActivityWindowInfo;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
 import android.window.IGlobalDragListener;
@@ -2213,7 +2214,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
             InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outSyncIdBundle) {
+            Bundle outBundle) {
         if (outActiveControls != null) {
             outActiveControls.set(null);
         }
@@ -2544,6 +2545,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (outFrames != null && outMergedConfiguration != null) {
                 win.fillClientWindowFramesAndConfiguration(outFrames, outMergedConfiguration,
                         false /* useLatestConfig */, shouldRelayout);
+                if (Flags.activityWindowInfoFlag() && outBundle != null
+                        && win.mActivityRecord != null) {
+                    final ActivityWindowInfo activityWindowInfo = win.mActivityRecord
+                            .getActivityWindowInfo();
+                    outBundle.putParcelable(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                            activityWindowInfo);
+                }
 
                 // Set resize-handled here because the values are sent back to the client.
                 win.onResizeHandled();
@@ -2573,7 +2581,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.isVisible() /* visible */, false /* removed */);
             }
 
-            if (outSyncIdBundle != null) {
+            if (outBundle != null) {
                 final int maybeSyncSeqId;
                 if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
                         && win.mSyncSeqId > lastSyncSeqId) {
@@ -2582,7 +2590,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } else {
                     maybeSyncSeqId = -1;
                 }
-                outSyncIdBundle.putInt("seqid", maybeSyncSeqId);
+                outBundle.putInt(IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID, maybeSyncSeqId);
             }
 
             if (configChanged) {
