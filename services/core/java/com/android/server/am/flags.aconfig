@@ -52,6 +52,14 @@ flag {
 
 flag {
     namespace: "backstage_power"
+    name: "defer_outgoing_broadcasts"
+    description: "Defer outgoing broadcasts from processes in freezable state"
+    bug: "327496592"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "backstage_power"
     name: "avoid_repeated_bcast_re_enqueues"
     description: "Avoid re-enqueueing a broadcast repeatedly"
     bug: "319225224"
