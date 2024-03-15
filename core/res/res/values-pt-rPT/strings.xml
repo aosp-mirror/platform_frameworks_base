@@ -1418,7 +1418,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"PARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECUSAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Escolher o método de entrada"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Manter no ecrã enquanto o teclado físico estiver ativo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Mantê-lo no ecrã enquanto o teclado físico estiver ativo"</string>
     <string name="hardware" msgid="3611039921284836033">"Usar o teclado no ecrã"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configure o dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configure teclados físicos"</string>

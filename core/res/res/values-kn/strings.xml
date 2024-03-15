@@ -1861,7 +1861,7 @@
     <string name="write_fail_reason_cannot_write" msgid="432118118378451508">"ವಿಷಯವನ್ನು ಬರೆಯುವಲ್ಲಿ ದೋಷ ಎದುರಾಗಿದೆ"</string>
     <string name="reason_unknown" msgid="5599739807581133337">"ಅಪರಿಚಿತ"</string>
     <string name="reason_service_unavailable" msgid="5288405248063804713">"ಮುದ್ರಣ ಸೇವೆ ಸಕ್ರಿಯಗೊಂಡಿಲ್ಲ"</string>
-    <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> ಸೇವೆಯನ್ನು ಸ್ಥಾಪಿಸಲಾಗಿದೆ"</string>
+    <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> ಸೇವೆಯನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"ಸಕ್ರಿಯಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"ನಿರ್ವಾಹಕ ಪಿನ್ ನಮೂದಿಸಿ"</string>
     <string name="restr_pin_enter_pin" msgid="373139384161304555">"ಪಿನ್‌ ನಮೂದಿಸಿ"</string>
