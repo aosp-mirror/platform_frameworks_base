@@ -19,9 +19,11 @@
 package com.android.systemui.scene.shared.flag
 
 import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
+import com.android.systemui.Flags.keyguardWmStateRefactor
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.Flags.sceneContainer
 import com.android.systemui.dagger.SysUISingleton
@@ -46,7 +48,8 @@ object SceneContainerFlag {
                 keyguardBottomAreaRefactor() &&
                 migrateClocksToBlueprint() &&
                 ComposeLockscreen.isEnabled &&
-                MediaInSceneContainerFlag.isEnabled
+                MediaInSceneContainerFlag.isEnabled &&
+                keyguardWmStateRefactor()
     // NOTE: Changes should also be made in getSecondaryFlags and @EnableSceneContainer
 
     /**
@@ -65,6 +68,7 @@ object SceneContainerFlag {
         sequenceOf(
             FlagToken(FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR, keyguardBottomAreaRefactor()),
             FlagToken(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT, migrateClocksToBlueprint()),
+            FlagToken(FLAG_KEYGUARD_WM_STATE_REFACTOR, keyguardWmStateRefactor()),
             ComposeLockscreen.token,
             MediaInSceneContainerFlag.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer
