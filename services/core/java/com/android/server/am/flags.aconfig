@@ -68,3 +68,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "log_excessive_binder_proxies"
+    description: "Log the excessive incoming binder proxies into statsd"
+    bug: "298263955"
+}
