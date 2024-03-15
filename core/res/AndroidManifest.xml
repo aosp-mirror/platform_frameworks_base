@@ -6776,11 +6776,12 @@
     <permission android:name="android.permission.MANAGE_BIOMETRIC_DIALOG"
                 android:protectionLevel="signature" />
 
-    <!-- Allows an application to set the BiometricDialog (SystemUI) logo .
+    <!-- Allows an application to set the advanced features on BiometricDialog (SystemUI), including
+         logo, logo description.
          <p>Not for use by third-party applications.
          @FlaggedApi("android.hardware.biometrics.custom_biometric_prompt")
     -->
-    <permission android:name="android.permission.SET_BIOMETRIC_DIALOG_LOGO"
+    <permission android:name="android.permission.SET_BIOMETRIC_DIALOG_ADVANCED"
                 android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
