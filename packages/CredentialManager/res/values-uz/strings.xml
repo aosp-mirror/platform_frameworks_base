@@ -61,7 +61,7 @@
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ta parol"</string>
     <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> ta kalit"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> hisobi maʼlumotlari"</string>
-    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Kod"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Kirish kaliti"</string>
     <string name="another_device" msgid="5147276802037801217">"Boshqa qurilma"</string>
     <string name="other_password_manager" msgid="565790221427004141">"Boshqa parol menejerlari"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Varaqni yopish"</string>
