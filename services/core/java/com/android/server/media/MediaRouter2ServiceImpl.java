@@ -33,6 +33,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -115,6 +116,7 @@ class MediaRouter2ServiceImpl {
     private final Context mContext;
     private final UserManagerInternal mUserManagerInternal;
     private final Object mLock = new Object();
+    private final AppOpsManager mAppOpsManager;
     final AtomicInteger mNextRouterOrManagerId = new AtomicInteger(1);
     final ActivityManager mActivityManager;
     final PowerManager mPowerManager;
@@ -152,7 +154,30 @@ class MediaRouter2ServiceImpl {
         }
     };
 
-    @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
+    private final AppOpsManager.OnOpChangedListener mOnOpChangedListener =
+            new AppOpsManager.OnOpChangedListener() {
+                @Override
+                public void onOpChanged(String op, String packageName) {
+                    // Do nothing.
+                }
+
+                @Override
+                public void onOpChanged(
+                        @NonNull String op, @NonNull String packageName, int userId) {
+                    if (!TextUtils.equals(op, AppOpsManager.OPSTR_MEDIA_ROUTING_CONTROL)) {
+                        return;
+                    }
+                    synchronized (mLock) {
+                        revokeManagerRecordAccessIfNeededLocked(packageName, userId);
+                    }
+                }
+            };
+
+    @RequiresPermission(
+            allOf = {
+                Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS,
+                Manifest.permission.WATCH_APPOPS
+            })
     /* package */ MediaRouter2ServiceImpl(Context context) {
         mContext = context;
         mActivityManager = mContext.getSystemService(ActivityManager.class);
@@ -160,6 +185,7 @@ class MediaRouter2ServiceImpl {
                 REQUIRED_PACKAGE_IMPORTANCE_FOR_SCANNING);
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
 
         if (!Flags.disableScreenOffBroadcastReceiver()) {
             IntentFilter screenOnOffIntentFilter = new IntentFilter();
@@ -167,6 +193,12 @@ class MediaRouter2ServiceImpl {
             screenOnOffIntentFilter.addAction(ACTION_SCREEN_OFF);
             mContext.registerReceiver(mScreenOnOffReceiver, screenOnOffIntentFilter);
         }
+
+        // Passing null package name to listen to all events.
+        mAppOpsManager.startWatchingMode(
+                AppOpsManager.OP_MEDIA_ROUTING_CONTROL,
+                /* packageName */ null,
+                mOnOpChangedListener);
 
         mContext.getPackageManager().addOnPermissionsChangeListener(this::onPermissionsChanged);
     }
@@ -523,7 +555,6 @@ class MediaRouter2ServiceImpl {
         final int callerPid = Binder.getCallingPid();
         final UserHandle callerUser = Binder.getCallingUserHandle();
 
-        // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
         enforcePrivilegedRoutingPermissions(callerUid, callerPid, callerPackageName);
 
         final long token = Binder.clearCallingIdentity();
@@ -564,7 +595,6 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
 
         try {
-            // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
             enforcePrivilegedRoutingPermissions(callerUid, callerPid, callerPackageName);
             enforceCrossUserPermissions(callerUid, callerPid, targetUser);
             if (!verifyPackageExistsForUser(targetPackageName, targetUser)) {
@@ -835,9 +865,7 @@ class MediaRouter2ServiceImpl {
             })
     private void enforcePrivilegedRoutingPermissions(
             int callerUid, int callerPid, @Nullable String callerPackageName) {
-        if (mContext.checkPermission(
-                        Manifest.permission.MEDIA_CONTENT_CONTROL, callerPid, callerUid)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (hasMediaContentControlPermission(callerUid, callerPid)) {
             return;
         }
 
@@ -849,6 +877,13 @@ class MediaRouter2ServiceImpl {
             throw new SecurityException(
                     "Must hold MEDIA_CONTENT_CONTROL or MEDIA_ROUTING_CONTROL permissions.");
         }
+    }
+
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    private boolean hasMediaContentControlPermission(int callerUid, int callerPid) {
+        return mContext.checkPermission(
+                        Manifest.permission.MEDIA_CONTENT_CONTROL, callerPid, callerUid)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private boolean checkMediaRoutingControlPermission(
@@ -964,6 +999,68 @@ class MediaRouter2ServiceImpl {
     @GuardedBy("mLock")
     private boolean isUserActiveLocked(int userId) {
         return mUserManagerInternal.getProfileParentId(userId) == mCurrentActiveUserId;
+    }
+
+    @GuardedBy("mLock")
+    private void revokeManagerRecordAccessIfNeededLocked(@NonNull String packageName, int userId) {
+        UserRecord userRecord = mUserRecords.get(userId);
+        if (userRecord == null) {
+            return;
+        }
+
+        List<ManagerRecord> managers =
+                userRecord.mManagerRecords.stream()
+                        .filter(r -> !r.mHasMediaContentControl)
+                        .filter(r -> TextUtils.equals(r.mOwnerPackageName, packageName))
+                        .collect(Collectors.toList());
+
+        if (managers.isEmpty()) {
+            return;
+        }
+
+        ManagerRecord record = managers.getFirst();
+
+        // Uid and package name are shared across all manager records in the list.
+        boolean isAppOpAllowed =
+                mAppOpsManager.unsafeCheckOp(
+                                AppOpsManager.OPSTR_MEDIA_ROUTING_CONTROL,
+                                record.mOwnerUid,
+                                record.mOwnerPackageName)
+                        == AppOpsManager.MODE_ALLOWED;
+
+        if (isAppOpAllowed) {
+            return;
+        }
+
+        for (ManagerRecord manager : managers) {
+            boolean isRegularPermission =
+                    mContext.checkPermission(
+                                    Manifest.permission.MEDIA_ROUTING_CONTROL,
+                                    manager.mOwnerPid,
+                                    manager.mOwnerUid)
+                            == PackageManager.PERMISSION_GRANTED;
+
+            if (isRegularPermission) {
+                // We should check the regular permission for all manager records, as different PIDs
+                // might yield different permission results.
+                continue;
+            }
+
+            Log.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Revoking access to manager record id: %d, package: %s, userId:"
+                                    + " %d",
+                            manager.mManagerId, manager.mOwnerPackageName, userRecord.mUserId));
+
+            unregisterManagerLocked(manager.mManager, /* died */ false);
+
+            try {
+                manager.mManager.invalidateInstance();
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify manager= " + manager + " of permission revocation.");
+            }
+        }
     }
 
     // Start of locked methods that are used by MediaRouter2.
@@ -1423,6 +1520,8 @@ class MediaRouter2ServiceImpl {
         boolean hasMediaRoutingControl =
                 checkMediaRoutingControlPermission(callerUid, callerPid, callerPackageName);
 
+        boolean hasMediaContentControl = hasMediaContentControlPermission(callerUid, callerPid);
+
         Slog.i(
                 TAG,
                 TextUtils.formatSimple(
@@ -1446,7 +1545,8 @@ class MediaRouter2ServiceImpl {
                         callerPid,
                         callerPackageName,
                         targetPackageName,
-                        hasMediaRoutingControl);
+                        hasMediaRoutingControl,
+                        hasMediaContentControl);
         try {
             binder.linkToDeath(managerRecord, 0);
         } catch (RemoteException ex) {
@@ -2123,6 +2223,7 @@ class MediaRouter2ServiceImpl {
         @Nullable public final String mTargetPackageName;
 
         public final boolean mHasMediaRoutingControl;
+        public final boolean mHasMediaContentControl;
         @Nullable public SessionCreationRequest mLastSessionCreationRequest;
 
         public @ScanningState int mScanningState = SCANNING_STATE_NOT_SCANNING;
@@ -2134,7 +2235,8 @@ class MediaRouter2ServiceImpl {
                 int ownerPid,
                 @NonNull String ownerPackageName,
                 @Nullable String targetPackageName,
-                boolean hasMediaRoutingControl) {
+                boolean hasMediaRoutingControl,
+                boolean hasMediaContentControl) {
             mUserRecord = userRecord;
             mManager = manager;
             mOwnerUid = ownerUid;
@@ -2143,6 +2245,7 @@ class MediaRouter2ServiceImpl {
             mTargetPackageName = targetPackageName;
             mManagerId = mNextRouterOrManagerId.getAndIncrement();
             mHasMediaRoutingControl = hasMediaRoutingControl;
+            mHasMediaContentControl = hasMediaContentControl;
         }
 
         public void dispose() {
