@@ -1368,7 +1368,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * Handles all changes to the PictureInPictureParams.
      */
     protected void applyNewPictureInPictureParams(@NonNull PictureInPictureParams params) {
-        if (mDeferredTaskInfo != null || PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
+        if (PipUtils.aspectRatioChanged(params.getAspectRatioFloat(),
                 mPictureInPictureParams.getAspectRatioFloat())) {
             if (mPipBoundsAlgorithm.isValidPictureInPictureAspectRatio(
                     params.getAspectRatioFloat())) {
@@ -1381,8 +1381,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                         TAG, params.hasSetAspectRatio(), params.getAspectRatioFloat());
             }
         }
-        if (mDeferredTaskInfo != null
-                || PipUtils.remoteActionsChanged(params.getActions(),
+        if (PipUtils.remoteActionsChanged(params.getActions(),
                 mPictureInPictureParams.getActions())
                 || !PipUtils.remoteActionsMatch(params.getCloseAction(),
                 mPictureInPictureParams.getCloseAction())) {
