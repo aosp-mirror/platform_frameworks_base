@@ -1210,9 +1210,11 @@ public class RecentTasksTest extends WindowTestsBase {
     @Test
     public void addTask_tasksAreAddedAccordingToZOrder() {
         final Task firstTask = new TaskBuilder(mSupervisor).setTaskId(1)
-                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setCreateActivity(true).build();
         final Task secondTask = new TaskBuilder(mSupervisor).setTaskId(2)
-                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+                .setWindowingMode(WINDOWING_MODE_FREEFORM)
+                .setCreateActivity(true).build();
 
         assertEquals(-1, firstTask.compareTo(secondTask));
 
