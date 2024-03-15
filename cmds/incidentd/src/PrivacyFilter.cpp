@@ -195,7 +195,9 @@ status_t FieldStripper::strip(const uint8_t privacyPolicy) {
         ProtoOutputStream proto(mEncodedBuffer);
 
         // Optimization when no strip happens.
-        if (mRestrictions == NULL || spec.RequireAll()) {
+        if (mRestrictions == NULL || spec.RequireAll()
+                // Do not iterate through fields if primitive data
+                || !mRestrictions->children /* != FieldDescriptor::TYPE_MESSAGE */) {
             if (spec.CheckPremission(mRestrictions)) {
                 mSize = mData->size();
             }
