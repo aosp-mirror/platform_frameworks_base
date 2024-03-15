@@ -154,6 +154,7 @@
     <protected-broadcast android:name="android.app.backup.intent.INIT" />
 
     <protected-broadcast android:name="android.bluetooth.intent.DISCOVERABLE_TIMEOUT" />
+    <protected-broadcast android:name="android.bluetooth.action.AUTO_ON_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.SCAN_MODE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
