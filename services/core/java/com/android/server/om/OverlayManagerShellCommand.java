@@ -147,7 +147,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
         out.println("  fabricate [--user USER_ID] [--target-name OVERLAYABLE] --target PACKAGE");
         out.println("            --name NAME [--file FILE] ");
-        out.println("            PACKAGE:TYPE/NAME ENCODED-TYPE-ID/TYPE-NAME ENCODED-VALUE");
+        out.println("            PACKAGE:TYPE/NAME ENCODED-TYPE-ID|TYPE-NAME ENCODED-VALUE");
         out.println("    Create an overlay from a single resource. Caller must be root. Example:");
         out.println("      fabricate --target android --name LighterGray \\");
         out.println("                android:color/lighter_gray 0x1c 0xffeeeeee");
