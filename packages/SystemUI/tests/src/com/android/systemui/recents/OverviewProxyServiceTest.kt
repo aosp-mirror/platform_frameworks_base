@@ -21,7 +21,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.PowerManager
-import android.os.Process;
+import android.os.Process
 import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableContext
@@ -34,8 +34,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
@@ -96,7 +94,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private val displayTracker = FakeDisplayTracker(mContext)
     private val fakeSystemClock = FakeSystemClock()
     private val sysUiState = SysUiState(displayTracker, kosmos.sceneContainerPlugin)
-    private val featureFlags = FakeFeatureFlags()
     private val wakefulnessLifecycle =
         WakefulnessLifecycle(mContext, null, fakeSystemClock, dumpManager)
 
@@ -121,8 +118,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock
     private lateinit var unfoldTransitionProgressForwarder:
         Optional<UnfoldTransitionProgressForwarder>
-    @Mock
-    private lateinit var broadcastDispatcher: BroadcastDispatcher
+    @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
 
     @Before
     fun setUp() {
@@ -205,16 +201,14 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
     @Test
     fun connectToOverviewService_primaryUser_expectBindService() {
-        val mockitoSession = ExtendedMockito.mockitoSession()
-                .spyStatic(Process::class.java)
-                .startMocking()
+        val mockitoSession =
+            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
         try {
             `when`(Process.myUserHandle()).thenReturn(UserHandle.SYSTEM)
             val spyContext = spy(context)
             val ops = createOverviewProxyService(spyContext)
             ops.startConnectionToCurrentUser()
-            verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(),
-                anyInt(), any())
+            verify(spyContext, atLeast(1)).bindServiceAsUser(any(), any(), anyInt(), any())
         } finally {
             mockitoSession.finishMocking()
         }
@@ -222,22 +216,20 @@ class OverviewProxyServiceTest : SysuiTestCase() {
 
     @Test
     fun connectToOverviewService_nonPrimaryUser_expectNoBindService() {
-        val mockitoSession = ExtendedMockito.mockitoSession()
-                .spyStatic(Process::class.java)
-                .startMocking()
+        val mockitoSession =
+            ExtendedMockito.mockitoSession().spyStatic(Process::class.java).startMocking()
         try {
             `when`(Process.myUserHandle()).thenReturn(UserHandle.of(12345))
             val spyContext = spy(context)
             val ops = createOverviewProxyService(spyContext)
             ops.startConnectionToCurrentUser()
-            verify(spyContext, times(0)).bindServiceAsUser(any(), any(),
-                anyInt(), any())
+            verify(spyContext, times(0)).bindServiceAsUser(any(), any(), anyInt(), any())
         } finally {
             mockitoSession.finishMocking()
         }
     }
 
-    private fun createOverviewProxyService(ctx: Context) : OverviewProxyService {
+    private fun createOverviewProxyService(ctx: Context): OverviewProxyService {
         return OverviewProxyService(
             ctx,
             executor,
@@ -257,7 +249,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
             sysuiUnlockAnimationController,
             inWindowLauncherUnlockAnimationManager,
             assistUtils,
-            featureFlags,
             FakeSceneContainerFlags(),
             dumpManager,
             unfoldTransitionProgressForwarder,

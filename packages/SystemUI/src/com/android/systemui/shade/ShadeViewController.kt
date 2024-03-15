@@ -44,6 +44,7 @@ interface ShadeViewController {
     fun disableHeader(state1: Int, state2: Int, animated: Boolean)
 
     /** If the latency tracker is enabled, begins tracking expand latency. */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun startExpandLatencyTracking()
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
