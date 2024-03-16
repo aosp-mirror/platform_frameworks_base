@@ -445,7 +445,9 @@ class PackageSessionTests {
                     Manifest.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION)
         }
         handlerThread = HandlerThread("PackageSessionTests")
-        handlerThread?.start()
-        handler = Handler(handlerThread?.looper)
+        handlerThread?.let {
+            it.start()
+            handler = Handler(it.looper)
+        }
     }
 }
