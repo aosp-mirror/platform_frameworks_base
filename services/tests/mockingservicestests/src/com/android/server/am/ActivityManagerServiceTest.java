@@ -29,6 +29,8 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.content.ContentResolver.SCHEME_CONTENT;
+import static android.os.UserHandle.USER_ALL;
 import static android.util.DebugUtils.valueToString;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -39,6 +41,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.Injector;
+import static com.android.server.am.Flags.FLAG_AVOID_RESOLVING_TYPE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
 import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
@@ -66,6 +69,9 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -83,14 +89,18 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.SyncNotedAppOp;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -181,10 +191,14 @@ public class ActivityManagerServiceTest {
     private static final String APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = ":isSdkSandboxNext";
     private static final int TEST_UID = 11111;
     private static final int TEST_PID = 22222;
+    private static final String TEST_PACKAGE = "com.test.package";
     private static final int USER_ID = 666;
 
     private static final long TEST_PROC_STATE_SEQ1 = 555;
     private static final long TEST_PROC_STATE_SEQ2 = 556;
+
+    private static final String TEST_AUTHORITY = "test_authority";
+    private static final String TEST_MIME_TYPE = "application/test_type";
 
     private static final int[] UID_RECORD_CHANGES = {
         UidRecord.CHANGE_PROCSTATE,
@@ -214,7 +228,7 @@ public class ActivityManagerServiceTest {
     @Mock private PackageManagerInternal mPackageManagerInternal;
     @Mock private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     @Mock private NotificationManagerInternal mNotificationManagerInternal;
-
+    @Mock private ContentResolver mContentResolver;
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
@@ -246,7 +260,7 @@ public class ActivityManagerServiceTest {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
         mHandler = new TestHandler(mHandlerThread.getLooper());
-        mInjector = new TestInjector(mContext);
+        mInjector = new TestInjector(new TestContext(mContext, mContentResolver));
         doAnswer(invocation -> {
             final int userId = invocation.getArgument(2);
             return userId;
@@ -495,20 +509,27 @@ public class ActivityManagerServiceTest {
 
     @SuppressWarnings("GuardedBy")
     private UidRecord addUidRecord(int uid) {
+        return addUidRecord(uid, "");
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private UidRecord addUidRecord(int uid, String packageName) {
         final UidRecord uidRec = new UidRecord(uid, mAms);
         uidRec.procStateSeqWaitingForNetwork = 1;
         uidRec.hasInternetPermission = true;
         mAms.mProcessList.mActiveUids.put(uid, uidRec);
 
         ApplicationInfo info = new ApplicationInfo();
-        info.packageName = "";
+        info.packageName = packageName;
+        info.processName = packageName;
         info.uid = uid;
 
-        final ProcessRecord appRec = new ProcessRecord(mAms, info, TAG, uid);
+        final ProcessRecord appRec = new ProcessRecord(mAms, info, info.processName, uid);
         final ProcessStatsService tracker = mAms.mProcessStats;
         final IApplicationThread appThread = mock(IApplicationThread.class);
         doReturn(mock(IBinder.class)).when(appThread).asBinder();
         appRec.makeActive(appThread, tracker);
+        mAms.mProcessList.addProcessNameLocked(appRec);
         mAms.mProcessList.getLruProcessesLSP().add(appRec);
 
         return uidRec;
@@ -877,31 +898,71 @@ public class ActivityManagerServiceTest {
 
         broadcastIntent(intent1, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
+                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                        null));
         assertNull(mAms.getStickyBroadcastsForTest(TEST_ACTION2, TEST_USER));
         assertNull(mAms.getStickyBroadcastsForTest(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent2, options.toBundle(), true);
         assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
+                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                        null));
         assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN));
+                StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                        null));
         assertNull(mAms.getStickyBroadcastsForTest(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent3, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
+                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                        null));
         assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN));
+                StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                        null));
         assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION3, TEST_USER),
-                StickyBroadcast.create(intent3, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
+                StickyBroadcast.create(intent3, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                        null));
+    }
+
+    @RequiresFlagsEnabled(FLAG_AVOID_RESOLVING_TYPE)
+    @Test
+    @SuppressWarnings("GuardedBy")
+    public void testBroadcastStickyIntent_verifyTypeNotResolved() throws Exception {
+        final Intent intent = new Intent(TEST_ACTION1);
+        final Uri uri = new Uri.Builder()
+                .scheme(SCHEME_CONTENT)
+                .authority(TEST_AUTHORITY)
+                .path("green")
+                .build();
+        intent.setData(uri);
+        broadcastIntent(intent, null, true, TEST_MIME_TYPE, USER_ALL);
+        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, USER_ALL),
+                StickyBroadcast.create(intent, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                        TEST_MIME_TYPE));
+        when(mContentResolver.getType(uri)).thenReturn(TEST_MIME_TYPE);
+
+        addUidRecord(TEST_UID, TEST_PACKAGE);
+        final ProcessRecord procRecord = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
+        final IntentFilter intentFilter = new IntentFilter(TEST_ACTION1);
+        intentFilter.addDataType(TEST_MIME_TYPE);
+        final Intent resultIntent = mAms.registerReceiverWithFeature(procRecord.getThread(),
+                TEST_PACKAGE, null, null, null, intentFilter, null, TEST_USER,
+                Context.RECEIVER_EXPORTED);
+        assertNotNull(resultIntent);
+        verify(mContentResolver, never()).getType(any());
     }
 
     @SuppressWarnings("GuardedBy")
     private void broadcastIntent(Intent intent, Bundle options, boolean sticky) {
-        final int res = mAms.broadcastIntentLocked(null, null, null, intent, null, null, 0,
+        broadcastIntent(intent, options, sticky, null, TEST_USER);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void broadcastIntent(Intent intent, Bundle options, boolean sticky,
+            String resolvedType, int userId) {
+        final int res = mAms.broadcastIntentLocked(null, null, null, intent, resolvedType, null, 0,
                 null, null, null, null, null, 0, options, false, sticky,
-                Process.myPid(), Process.myUid(), Process.myUid(), Process.myPid(), TEST_USER);
+                Process.myPid(), Process.myUid(), Process.myUid(), Process.myPid(), userId);
         assertEquals(ActivityManager.BROADCAST_SUCCESS, res);
     }
 
@@ -928,6 +989,9 @@ public class ActivityManagerServiceTest {
             return false;
         }
         if (a.originalCallingUid != b.originalCallingUid) {
+            return false;
+        }
+        if (!Objects.equals(a.resolvedDataType, b.resolvedDataType)) {
             return false;
         }
         return true;
@@ -1457,6 +1521,20 @@ public class ActivityManagerServiceTest {
         @Override
         public BatteryStatsService getBatteryStatsService() {
             return mBatteryStatsService;
+        }
+    }
+
+    private static class TestContext extends ContextWrapper {
+        private final ContentResolver mContentResolver;
+
+        TestContext(Context context, ContentResolver contentResolver) {
+            super(context);
+            mContentResolver = contentResolver;
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mContentResolver;
         }
     }
 
