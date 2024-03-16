@@ -38,9 +38,9 @@ import java.util.Objects;
  * {@link SurfaceControlViewHost} or {@link android.view.SurfaceControl} that has an input channel.
  * <p>
  * The {@link android.view.SurfaceControl} needs to have been registered for input via
- * {@link android.view.WindowManager#registerUnbatchedSurfaceControlInputReceiver(int,
+ * {@link android.view.WindowManager#registerUnbatchedSurfaceControlInputReceiver(
  * InputTransferToken, SurfaceControl, Looper, SurfaceControlInputReceiver)} or
- * {@link android.view.WindowManager#registerBatchedSurfaceControlInputReceiver(int,
+ * {@link android.view.WindowManager#registerBatchedSurfaceControlInputReceiver(
  * InputTransferToken, SurfaceControl, Choreographer, SurfaceControlInputReceiver)} and the
  * returned token can be used to call
  * {@link android.view.WindowManager#transferTouchGesture(InputTransferToken, InputTransferToken)}

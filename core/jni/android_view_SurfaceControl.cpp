@@ -254,6 +254,8 @@ static struct {
 static struct {
     jclass clazz;
     jfieldID mNativeObject;
+    jfieldID mName;
+    jmethodID ctor;
     jmethodID invokeReleaseCallback;
 } gSurfaceControlClassInfo;
 
@@ -2177,6 +2179,20 @@ SurfaceControl* android_view_SurfaceControl_getNativeSurfaceControl(JNIEnv* env,
     }
 }
 
+jobject android_view_SurfaceControl_getJavaSurfaceControl(JNIEnv* env,
+                                                          const SurfaceControl& surfaceControl) {
+    jobject surfaceControlObj =
+            env->NewObject(gSurfaceControlClassInfo.clazz, gSurfaceControlClassInfo.ctor);
+    env->SetLongField(surfaceControlObj, gSurfaceControlClassInfo.mNativeObject,
+                      reinterpret_cast<jlong>(&surfaceControl));
+    env->SetObjectField(surfaceControlObj, gSurfaceControlClassInfo.mName,
+                        ScopedLocalRef<jobject>(env,
+                                                env->NewStringUTF(surfaceControl.getName().c_str()))
+                                .get());
+    surfaceControl.incStrong((void*)nativeCreate);
+    return surfaceControlObj;
+}
+
 SurfaceComposerClient::Transaction* android_view_SurfaceTransaction_getNativeSurfaceTransaction(
         JNIEnv* env, jobject surfaceTransactionObj) {
     if (!!surfaceTransactionObj &&
@@ -2652,6 +2668,9 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gSurfaceControlClassInfo.clazz = MakeGlobalRefOrDie(env, surfaceControlClazz);
     gSurfaceControlClassInfo.mNativeObject =
             GetFieldIDOrDie(env, gSurfaceControlClassInfo.clazz, "mNativeObject", "J");
+    gSurfaceControlClassInfo.mName =
+            GetFieldIDOrDie(env, gSurfaceControlClassInfo.clazz, "mName", "Ljava/lang/String;");
+    gSurfaceControlClassInfo.ctor = GetMethodIDOrDie(env, surfaceControlClazz, "<init>", "()V");
     gSurfaceControlClassInfo.invokeReleaseCallback =
             GetStaticMethodIDOrDie(env, surfaceControlClazz, "invokeReleaseCallback",
                                    "(Ljava/util/function/Consumer;J)V");

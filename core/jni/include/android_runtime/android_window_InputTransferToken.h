@@ -26,7 +26,7 @@ extern InputTransferToken* android_window_InputTransferToken_getNativeInputTrans
         JNIEnv* env, jobject inputTransferTokenObj);
 
 extern jobject android_window_InputTransferToken_getJavaInputTransferToken(
-        JNIEnv* env, const InputTransferToken* inputTransferToken);
+        JNIEnv* env, const InputTransferToken& inputTransferToken);
 
 } // namespace android
 

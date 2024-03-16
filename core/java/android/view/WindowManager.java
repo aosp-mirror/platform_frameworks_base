@@ -6193,9 +6193,6 @@ public interface WindowManager extends ViewManager {
      * caller must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to clean up
      * the resources when no longer needing to use the {@link SurfaceControlInputReceiver}
      *
-     * @param displayId              The display that the SurfaceControl will be placed on. Input
-     *                               will only work if SurfaceControl is on that display and that
-     *                               display  was touched.
      * @param surfaceControl         The SurfaceControl to register the InputChannel for
      * @param hostInputTransferToken The host token to link the embedded. This is used to handle
      *                               transferring touch gesture from host to embedded and for ANRs
@@ -6210,7 +6207,7 @@ public interface WindowManager extends ViewManager {
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
     @NonNull
-    default InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
+    default InputTransferToken registerBatchedSurfaceControlInputReceiver(
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Choreographer choreographer,
             @NonNull SurfaceControlInputReceiver receiver) {
@@ -6221,15 +6218,12 @@ public interface WindowManager extends ViewManager {
     /**
      * Registers a {@link SurfaceControlInputReceiver} for a {@link SurfaceControl} that will
      * receive every input event. This is different than calling
-     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerBatchedSurfaceControlInputReceiver(InputTransferToken, SurfaceControl,
      * Choreographer, SurfaceControlInputReceiver)} in that the input events are received
      * unbatched.
      * The caller must invoke {@link #unregisterSurfaceControlInputReceiver(SurfaceControl)} to
      * clean up the resources when no longer needing to use the {@link SurfaceControlInputReceiver}
      *
-     * @param displayId              The display that the SurfaceControl will be placed on. Input
-     *                               will only work if SurfaceControl is on that display and that
-     *                               display  was touched.
      * @param surfaceControl         The SurfaceControl to register the InputChannel for
      * @param hostInputTransferToken The host token to link the embedded. This is used to handle
      *                               transferring touch gesture from host to embedded and for ANRs
@@ -6243,7 +6237,7 @@ public interface WindowManager extends ViewManager {
      */
     @FlaggedApi(Flags.FLAG_SURFACE_CONTROL_INPUT_RECEIVER)
     @NonNull
-    default InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    default InputTransferToken registerUnbatchedSurfaceControlInputReceiver(
             @NonNull InputTransferToken hostInputTransferToken,
             @NonNull SurfaceControl surfaceControl, @NonNull Looper looper,
             @NonNull SurfaceControlInputReceiver receiver) {
@@ -6256,9 +6250,9 @@ public interface WindowManager extends ViewManager {
      * specified token.
      * <p>
      * Must be called on the same {@link Looper} thread to which was passed to the
-     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerBatchedSurfaceControlInputReceiver(InputTransferToken, SurfaceControl,
      * Choreographer, SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(InputTransferToken, SurfaceControl,
      * Looper, SurfaceControlInputReceiver)}
      *
      * @param surfaceControl The SurfaceControl to remove and unregister the input channel for.
@@ -6272,9 +6266,9 @@ public interface WindowManager extends ViewManager {
     /**
      * Returns the input client token for the {@link SurfaceControl}. This will only return non
      * null if the SurfaceControl was registered for input via
-     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerBatchedSurfaceControlInputReceiver(InputTransferToken, SurfaceControl,
      * Choreographer, SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(InputTransferToken,
      * SurfaceControl, Looper, SurfaceControlInputReceiver)}.
      * <p>
      * This is helpful for testing to ensure the test waits for the layer to be registered with
@@ -6304,9 +6298,9 @@ public interface WindowManager extends ViewManager {
      * </li>
      * <li>
      * Registering a SurfaceControl for input and passing the host's token to either
-     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerBatchedSurfaceControlInputReceiver(InputTransferToken, SurfaceControl,
      * Choreographer, SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken,
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(InputTransferToken,
      * SurfaceControl, Looper, SurfaceControlInputReceiver)}.
      * </li>
      * </ul>
@@ -6321,9 +6315,9 @@ public interface WindowManager extends ViewManager {
      * When the host wants to transfer touch gesture to the embedded, it can retrieve the embedded
      * token via {@link SurfaceControlViewHost.SurfacePackage#getInputTransferToken()} or use the
      * value returned from either
-     * {@link #registerBatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerBatchedSurfaceControlInputReceiver(InputTransferToken, SurfaceControl,
      * Choreographer, SurfaceControlInputReceiver)} or
-     * {@link #registerUnbatchedSurfaceControlInputReceiver(int, InputTransferToken, SurfaceControl,
+     * {@link #registerUnbatchedSurfaceControlInputReceiver(InputTransferToken, SurfaceControl,
      * Looper, SurfaceControlInputReceiver)} and pass its own token as the transferFromToken.
      * <p>
      * When the embedded wants to transfer touch gesture to the host, it can pass in its own
