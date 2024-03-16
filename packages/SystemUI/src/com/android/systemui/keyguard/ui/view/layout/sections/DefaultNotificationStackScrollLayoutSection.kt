@@ -31,11 +31,10 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import dagger.Lazy
 import javax.inject.Inject
@@ -50,8 +49,7 @@ constructor(
     notificationPanelView: NotificationPanelView,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
-    notificationStackAppearanceViewModel: NotificationStackAppearanceViewModel,
-    ambientState: AmbientState,
+    notificationStackViewBinder: NotificationStackViewBinder,
     controller: NotificationStackScrollLayoutController,
     notificationStackSizeCalculator: NotificationStackSizeCalculator,
     private val largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
@@ -63,8 +61,7 @@ constructor(
         notificationPanelView,
         sharedNotificationContainer,
         sharedNotificationContainerViewModel,
-        notificationStackAppearanceViewModel,
-        ambientState,
+        notificationStackViewBinder,
         controller,
         notificationStackSizeCalculator,
         mainDispatcher,

@@ -57,6 +57,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -70,10 +71,10 @@ import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadi
 import com.android.systemui.notifications.ui.composable.Notifications.Form
 import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
 import com.android.systemui.notifications.ui.composable.Notifications.TransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader
 import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
-import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackAppearanceViewBinder.SCRIM_CORNER_RADIUS
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
 
@@ -140,6 +141,7 @@ fun SceneScope.NotificationScrollingStack(
 ) {
     val density = LocalDensity.current
     val screenCornerRadius = LocalScreenCornerRadius.current
+    val scrimCornerRadius = dimensionResource(R.dimen.notification_scrim_corner_radius)
     val scrollState = rememberScrollState()
     val syntheticScroll = viewModel.syntheticScroll.collectAsState(0f)
     val expansionFraction by viewModel.expandFraction.collectAsState(0f)
@@ -225,6 +227,7 @@ fun SceneScope.NotificationScrollingStack(
                 .graphicsLayer {
                     shape =
                         calculateCornerRadius(
+                                scrimCornerRadius,
                                 screenCornerRadius,
                                 { expansionFraction },
                                 layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade)
@@ -357,6 +360,7 @@ private fun SceneScope.NotificationPlaceholder(
 }
 
 private fun calculateCornerRadius(
+    scrimCornerRadius: Dp,
     screenCornerRadius: Dp,
     expansionFraction: () -> Float,
     transitioning: Boolean,
@@ -364,12 +368,12 @@ private fun calculateCornerRadius(
     return if (transitioning) {
         lerp(
                 start = screenCornerRadius.value,
-                stop = SCRIM_CORNER_RADIUS,
+                stop = scrimCornerRadius.value,
                 fraction = (expansionFraction() / EXPANSION_FOR_MAX_CORNER_RADIUS).coerceIn(0f, 1f),
             )
             .dp
     } else {
-        SCRIM_CORNER_RADIUS.dp
+        scrimCornerRadius
     }
 }
 
