@@ -1344,7 +1344,8 @@ public final class OverlayManagerService extends SystemService {
 
             ApkAssets apkAssets = null;
             try {
-                apkAssets = ApkAssets.loadFromPath(pkg.getSplits().get(0).getPath());
+                apkAssets = ApkAssets.loadFromPath(pkg.getSplits().get(0).getPath(),
+                        ApkAssets.PROPERTY_ONLY_OVERLAYABLES);
                 return apkAssets.definesOverlayable();
             } finally {
                 if (apkAssets != null) {
