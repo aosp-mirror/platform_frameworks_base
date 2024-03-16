@@ -21,6 +21,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
+import androidx.annotation.VisibleForTesting
+import androidx.core.animation.Animator
+import androidx.core.animation.AnimatorListenerAdapter
+import androidx.core.animation.ObjectAnimator
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.common.bubbles.BubbleBarLocation
@@ -33,6 +37,7 @@ class BubbleBarDropTargetController(
 ) {
 
     private var dropTargetView: View? = null
+    private var animator: ObjectAnimator? = null
     private val tempRect: Rect by lazy(LazyThreadSafetyMode.NONE) { Rect() }
 
     /**
@@ -57,7 +62,8 @@ class BubbleBarDropTargetController(
     /**
      * Set the view hidden or not
      *
-     * Requires the drop target to be first shown by calling [show]. Otherwise does not do anything.
+     * Requires the drop target to be first shown by calling [animateIn]. Otherwise does not do
+     * anything.
      */
     fun setHidden(hidden: Boolean) {
         val targetView = dropTargetView ?: return
@@ -106,20 +112,40 @@ class BubbleBarDropTargetController(
     }
 
     private fun View.animateIn() {
-        animate().alpha(1f).setDuration(DROP_TARGET_ALPHA_IN_DURATION).start()
+        animator?.cancel()
+        animator =
+            ObjectAnimator.ofFloat(this, View.ALPHA, 1f)
+                .setDuration(DROP_TARGET_ALPHA_IN_DURATION)
+                .addEndAction { animator = null }
+        animator?.start()
     }
 
     private fun View.animateOut(endAction: Runnable? = null) {
-        animate()
-            .alpha(0f)
-            .setDuration(DROP_TARGET_ALPHA_OUT_DURATION)
-            .withEndAction(endAction)
-            .start()
+        animator?.cancel()
+        animator =
+            ObjectAnimator.ofFloat(this, View.ALPHA, 0f)
+                .setDuration(DROP_TARGET_ALPHA_OUT_DURATION)
+                .addEndAction {
+                    endAction?.run()
+                    animator = null
+                }
+        animator?.start()
+    }
+
+    private fun <T : Animator> T.addEndAction(runnable: Runnable): T {
+        addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    runnable.run()
+                }
+            }
+        )
+        return this
     }
 
     companion object {
-        private const val DROP_TARGET_ALPHA_IN_DURATION = 150L
-        private const val DROP_TARGET_ALPHA_OUT_DURATION = 100L
-        private const val DROP_TARGET_SCALE = 0.9f
+        @VisibleForTesting const val DROP_TARGET_ALPHA_IN_DURATION = 150L
+        @VisibleForTesting const val DROP_TARGET_ALPHA_OUT_DURATION = 100L
+        @VisibleForTesting const val DROP_TARGET_SCALE = 0.9f
     }
 }
