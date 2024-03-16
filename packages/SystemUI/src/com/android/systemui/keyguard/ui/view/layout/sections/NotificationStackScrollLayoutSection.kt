@@ -29,26 +29,22 @@ import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
-import com.android.systemui.util.kotlin.DisposableHandles
+import kotlinx.coroutines.DisposableHandle
 
 abstract class NotificationStackScrollLayoutSection
 constructor(
     protected val context: Context,
-    private val sceneContainerFlags: SceneContainerFlags,
     private val notificationPanelView: NotificationPanelView,
     private val sharedNotificationContainer: SharedNotificationContainer,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     private val sharedNotificationContainerBinder: SharedNotificationContainerBinder,
-    private val notificationStackViewBinder: NotificationStackViewBinder,
 ) : KeyguardSection() {
     private val placeHolderId = R.id.nssl_placeholder
-    private val disposableHandles = DisposableHandles()
+    private var disposableHandle: DisposableHandle? = null
 
     /**
      * Align the notification placeholder bottom to the top of either the lock icon or the ambient
@@ -94,20 +90,17 @@ constructor(
             return
         }
 
-        disposableHandles.dispose()
-        disposableHandles +=
+        disposableHandle?.dispose()
+        disposableHandle =
             sharedNotificationContainerBinder.bind(
                 sharedNotificationContainer,
                 sharedNotificationContainerViewModel,
             )
-
-        if (sceneContainerFlags.isEnabled()) {
-            disposableHandles += notificationStackViewBinder.bindWhileAttached()
-        }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        disposableHandles.dispose()
+        disposableHandle?.dispose()
+        disposableHandle = null
         constraintLayout.removeView(placeHolderId)
     }
 }
