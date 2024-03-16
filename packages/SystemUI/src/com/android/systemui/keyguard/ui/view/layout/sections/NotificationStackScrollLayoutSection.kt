@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificat
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
-import kotlinx.coroutines.DisposableHandle
+import com.android.systemui.util.kotlin.DisposableHandles
 
 abstract class NotificationStackScrollLayoutSection
 constructor(
@@ -48,7 +48,7 @@ constructor(
     private val notificationStackViewBinder: NotificationStackViewBinder,
 ) : KeyguardSection() {
     private val placeHolderId = R.id.nssl_placeholder
-    private val disposableHandles: MutableList<DisposableHandle> = mutableListOf()
+    private val disposableHandles = DisposableHandles()
 
     /**
      * Align the notification placeholder bottom to the top of either the lock icon or the ambient
@@ -94,26 +94,20 @@ constructor(
             return
         }
 
-        disposeHandles()
-        disposableHandles.add(
+        disposableHandles.dispose()
+        disposableHandles +=
             sharedNotificationContainerBinder.bind(
                 sharedNotificationContainer,
                 sharedNotificationContainerViewModel,
             )
-        )
 
         if (sceneContainerFlags.isEnabled()) {
-            disposableHandles.add(notificationStackViewBinder.bindWhileAttached())
+            disposableHandles += notificationStackViewBinder.bindWhileAttached()
         }
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        disposeHandles()
+        disposableHandles.dispose()
         constraintLayout.removeView(placeHolderId)
-    }
-
-    private fun disposeHandles() {
-        disposableHandles.forEach { it.dispose() }
-        disposableHandles.clear()
     }
 }

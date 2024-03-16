@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import com.android.systemui.util.kotlin.DisposableHandles
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
@@ -54,7 +55,9 @@ constructor(
         view: SharedNotificationContainer,
         viewModel: SharedNotificationContainerViewModel,
     ): DisposableHandle {
-        val disposableHandle =
+        val disposables = DisposableHandles()
+
+        disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
@@ -77,24 +80,6 @@ constructor(
                 }
             }
 
-        // Required to capture keyguard media changes and ensure the notification count is correct
-        val layoutChangeListener =
-            object : View.OnLayoutChangeListener {
-                override fun onLayoutChange(
-                    view: View,
-                    left: Int,
-                    top: Int,
-                    right: Int,
-                    bottom: Int,
-                    oldLeft: Int,
-                    oldTop: Int,
-                    oldRight: Int,
-                    oldBottom: Int
-                ) {
-                    viewModel.notificationStackChanged()
-                }
-            }
-
         val burnInParams = MutableStateFlow(BurnInParameters())
         val viewState =
             ViewStateAccessor(
@@ -105,7 +90,7 @@ constructor(
          * For animation sensitive coroutines, immediately run just like applicationScope does
          * instead of doing a post() to the main thread. This extra delay can cause visible jitter.
          */
-        val disposableHandleMainImmediate =
+        disposables +=
             view.repeatWhenAttached(mainImmediateDispatcher) {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
@@ -172,7 +157,8 @@ constructor(
                 }
             }
 
-        controller.setOnHeightChangedRunnable(Runnable { viewModel.notificationStackChanged() })
+        controller.setOnHeightChangedRunnable { viewModel.notificationStackChanged() }
+        disposables += DisposableHandle { controller.setOnHeightChangedRunnable(null) }
 
         view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
             val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
@@ -181,16 +167,16 @@ constructor(
             }
             insets
         }
-        view.addOnLayoutChangeListener(layoutChangeListener)
+        disposables += DisposableHandle { view.setOnApplyWindowInsetsListener(null) }
 
-        return object : DisposableHandle {
-            override fun dispose() {
-                disposableHandle.dispose()
-                disposableHandleMainImmediate.dispose()
-                controller.setOnHeightChangedRunnable(null)
-                view.setOnApplyWindowInsetsListener(null)
-                view.removeOnLayoutChangeListener(layoutChangeListener)
+        // Required to capture keyguard media changes and ensure the notification count is correct
+        val layoutChangeListener =
+            View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                viewModel.notificationStackChanged()
             }
-        }
+        view.addOnLayoutChangeListener(layoutChangeListener)
+        disposables += DisposableHandle { view.removeOnLayoutChangeListener(layoutChangeListener) }
+
+        return disposables
     }
 }
