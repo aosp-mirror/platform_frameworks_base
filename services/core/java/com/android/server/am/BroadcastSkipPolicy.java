@@ -61,20 +61,6 @@ public class BroadcastSkipPolicy {
     /**
      * Determine if the given {@link BroadcastRecord} is eligible to be sent to
      * the given {@link BroadcastFilter} or {@link ResolveInfo}.
-     */
-    public boolean shouldSkip(@NonNull BroadcastRecord r, @NonNull Object target) {
-        final String msg = shouldSkipMessage(r, target);
-        if (msg != null) {
-            Slog.w(TAG, msg);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Determine if the given {@link BroadcastRecord} is eligible to be sent to
-     * the given {@link BroadcastFilter} or {@link ResolveInfo}.
      *
      * @return message indicating why the argument should be skipped, otherwise
      *         {@code null} if it can proceed.
