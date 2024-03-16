@@ -20315,12 +20315,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Settings.Global.BROADCAST_BG_CONSTANTS);
             backConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
 
-            final BroadcastConstants offloadConstants = new BroadcastConstants(
-                    Settings.Global.BROADCAST_OFFLOAD_CONSTANTS);
-            offloadConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
-            // by default, no "slow" policy in this queue
-            offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
-
             return new BroadcastQueueModernImpl(service, service.mHandler,
                         foreConstants, backConstants);
         }

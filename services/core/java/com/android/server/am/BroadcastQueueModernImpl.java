@@ -1893,13 +1893,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         return getRunningSize() + " running";
     }
 
-    @Override
-    public boolean isDelayBehindServices() {
-        // Modern queue does not alter the broadcasts delivery behavior based on background
-        // services, so ignore.
-        return false;
-    }
-
     @GuardedBy("mService")
     @Override
     public void backgroundServicesFinishedLocked(int userId) {
