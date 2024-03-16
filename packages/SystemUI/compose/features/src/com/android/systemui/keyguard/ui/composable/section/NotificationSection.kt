@@ -22,33 +22,27 @@ import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.notifications.ui.composable.NotificationStack
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 
 @SysUISingleton
 class NotificationSection
 @Inject
 constructor(
     private val viewModel: NotificationsPlaceholderViewModel,
-    controller: NotificationStackScrollLayoutController,
     sceneContainerFlags: SceneContainerFlags,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     stackScrollLayout: NotificationStackScrollLayout,
-    notificationStackSizeCalculator: NotificationStackSizeCalculator,
+    sharedNotificationContainerBinder: SharedNotificationContainerBinder,
     notificationStackViewBinder: NotificationStackViewBinder,
-    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) {
 
     init {
@@ -67,13 +61,9 @@ constructor(
             sharedNotificationContainer.addNotificationStackScrollLayout(stackScrollLayout)
         }
 
-        SharedNotificationContainerBinder.bind(
+        sharedNotificationContainerBinder.bind(
             sharedNotificationContainer,
             sharedNotificationContainerViewModel,
-            sceneContainerFlags,
-            controller,
-            notificationStackSizeCalculator,
-            mainImmediateDispatcher = mainImmediateDispatcher,
         )
 
         if (sceneContainerFlags.isEnabled()) {
