@@ -34,13 +34,13 @@ import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteract
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
 import com.android.systemui.biometrics.domain.model.SideFpsSensorLocation
-import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.LottieCallback
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.DeviceEntrySideFpsOverlayInteractor
 import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
 import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -179,12 +179,9 @@ constructor(
 
     /** List of LottieCallbacks use for adding dynamic color to the overlayView */
     val lottieCallbacks: Flow<List<LottieCallback>> =
-        combine(
-            biometricStatusInteractor.sfpsAuthenticationReason,
-            deviceEntrySideFpsOverlayInteractor.showIndicatorForDeviceEntry,
-            sideFpsProgressBarViewModel.isVisible
-        ) { reason: AuthenticationReason, showIndicatorForDeviceEntry: Boolean, progressBarIsVisible
-            ->
+        _lottieBounds.sample(deviceEntrySideFpsOverlayInteractor.showIndicatorForDeviceEntry) {
+            _,
+            showIndicatorForDeviceEntry: Boolean ->
             val callbacks = mutableListOf<LottieCallback>()
             if (showIndicatorForDeviceEntry) {
                 val indicatorColor =

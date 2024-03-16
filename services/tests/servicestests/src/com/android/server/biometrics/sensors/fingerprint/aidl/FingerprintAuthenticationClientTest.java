@@ -19,6 +19,9 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import static android.adaptiveauth.Flags.FLAG_REPORT_BIOMETRIC_AUTH_ATTEMPTS;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_TOO_FAST;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
 
 import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
 
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.same;
@@ -41,8 +45,17 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationFailedInfo;
+import android.hardware.biometrics.events.AuthenticationHelpInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
+import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
@@ -62,6 +75,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
@@ -78,6 +92,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -155,6 +170,20 @@ public class FingerprintAuthenticationClientTest {
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mStartHalConsumerCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationAcquiredInfo> mAuthenticationAcquiredCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationErrorInfo> mAuthenticationErrorCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationFailedInfo> mAuthenticationFailedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationHelpInfo> mAuthenticationHelpCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStartedInfo> mAuthenticationStartedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStoppedInfo> mAuthenticationStoppedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationSucceededInfo> mAuthenticationSucceededCaptor;
 
     private final TestLooper mLooper = new TestLooper();
 
@@ -162,6 +191,12 @@ public class FingerprintAuthenticationClientTest {
     public void setup() {
         mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.fingerprint_error_hw_not_available, "hw not available");
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.fingerprint_error_lockout_permanent, "lockout permanent");
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.fingerprint_acquired_too_fast, "too fast");
         when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
         when(mBiometricLogger.getAmbientLightProbe(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
@@ -455,22 +490,115 @@ public class FingerprintAuthenticationClientTest {
         client.start(mCallback);
 
         verify(mUdfpsOverlayController).showUdfpsOverlay(eq(REQUEST_ID), anyInt(), anyInt(), any());
-        verify(mAuthenticationStateListeners).onAuthenticationStarted(anyInt());
+        verify(mAuthenticationStateListeners).onAuthenticationStarted(
+                mAuthenticationStartedCaptor.capture());
+
+        assertThat(mAuthenticationStartedCaptor.getValue()).isEqualTo(
+                new AuthenticationStartedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP).build()
+        );
+
 
         block.accept(client);
 
         verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
-        verify(mAuthenticationStateListeners).onAuthenticationStopped();
+        verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP).build()
+        );
     }
 
     @Test
-    public void testAuthenticationStateListeners_onAuthenticationAcquired()
+    public void testAuthenticationStateListeners_onAuthenticationAcquired_onAuthenticationHelp()
             throws RemoteException {
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
         client.onAcquired(FINGERPRINT_ACQUIRED_START, 0);
 
-        verify(mAuthenticationStateListeners).onAuthenticationAcquired(any(), anyInt(), anyInt());
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationAcquired(
+                mAuthenticationAcquiredCaptor.capture());
+
+        assertThat(mAuthenticationAcquiredCaptor.getValue()).isEqualTo(
+                new AuthenticationAcquiredInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP, FINGERPRINT_ACQUIRED_START)
+                        .build()
+        );
+
+        client.onAcquired(FINGERPRINT_ACQUIRED_TOO_FAST, 0);
+
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationAcquired(
+                mAuthenticationAcquiredCaptor.capture());
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationHelp(
+                mAuthenticationHelpCaptor.capture());
+
+        assertThat(mAuthenticationAcquiredCaptor.getValue()).isEqualTo(
+                new AuthenticationAcquiredInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP, FINGERPRINT_ACQUIRED_TOO_FAST)
+                        .build()
+        );
+        assertThat(mAuthenticationHelpCaptor.getValue()).isEqualTo(
+                new AuthenticationHelpInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP,
+                        mContext.getString(R.string.fingerprint_acquired_too_fast),
+                        FINGERPRINT_ACQUIRED_TOO_FAST)
+                        .build()
+        );
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onError()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onError(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0);
+
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationError(
+                mAuthenticationErrorCaptor.capture());
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationErrorCaptor.getValue()).isEqualTo(
+                new AuthenticationErrorInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP,
+                        mContext.getString(R.string.fingerprint_error_hw_not_available),
+                        FINGERPRINT_ERROR_HW_UNAVAILABLE).build()
+        );
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP).build()
+        );
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onLockoutPermanent()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+        client.onLockoutPermanent();
+
+        InOrder inOrder = inOrder(mAuthenticationStateListeners);
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationError(
+                mAuthenticationErrorCaptor.capture());
+        inOrder.verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationErrorCaptor.getValue()).isEqualTo(
+                new AuthenticationErrorInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP,
+                        mContext.getString(R.string.fingerprint_error_lockout_permanent),
+                        FINGERPRINT_ERROR_LOCKOUT_PERMANENT).build()
+        );
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP).build()
+        );
     }
 
     @Test
@@ -482,7 +610,13 @@ public class FingerprintAuthenticationClientTest {
         client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
                 2 /* deviceId */), true /* authenticated */, new ArrayList<>());
 
-        verify(mAuthenticationStateListeners).onAuthenticationSucceeded(anyInt(), anyInt());
+        verify(mAuthenticationStateListeners).onAuthenticationSucceeded(
+                mAuthenticationSucceededCaptor.capture());
+        assertThat(mAuthenticationSucceededCaptor.getValue()).isEqualTo(
+                new AuthenticationSucceededInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP, true, USER_ID)
+                        .build()
+        );
     }
 
     @Test
@@ -493,7 +627,12 @@ public class FingerprintAuthenticationClientTest {
         client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */,
                 2 /* deviceId */), false /* authenticated */, new ArrayList<>());
 
-        verify(mAuthenticationStateListeners).onAuthenticationFailed(anyInt(), anyInt());
+        verify(mAuthenticationStateListeners).onAuthenticationFailed(
+                mAuthenticationFailedCaptor.capture());
+        assertThat(mAuthenticationFailedCaptor.getValue()).isEqualTo(
+                new AuthenticationFailedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_BP, USER_ID).build()
+        );
     }
 
     @Test

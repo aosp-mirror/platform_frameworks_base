@@ -36,6 +36,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.AuthenticationStateListener;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.events.AuthenticationFailedInfo;
+import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -194,8 +197,8 @@ public class AdaptiveAuthServiceTest {
     @Test
     public void testReportAuthAttempt_biometricAuthSucceeded()
             throws RemoteException {
-        mAuthenticationStateListenerCaptor.getValue()
-                .onAuthenticationSucceeded(REASON_UNKNOWN, PRIMARY_USER_ID);
+        mAuthenticationStateListenerCaptor.getValue().onAuthenticationSucceeded(
+                authSuccessInfo(PRIMARY_USER_ID));
         waitForAuthCompletion();
 
         verifyNotLockDevice(DEFAULT_COUNT_FAILED_AUTH_ATTEMPTS /* expectedCntFailedAttempts */,
@@ -205,8 +208,8 @@ public class AdaptiveAuthServiceTest {
     @Test
     public void testReportAuthAttempt_biometricAuthFailed_once()
             throws RemoteException {
-        mAuthenticationStateListenerCaptor.getValue()
-                .onAuthenticationFailed(REASON_UNKNOWN, PRIMARY_USER_ID);
+        mAuthenticationStateListenerCaptor.getValue().onAuthenticationFailed(
+                authFailedInfo(PRIMARY_USER_ID));
         waitForAuthCompletion();
 
         verifyNotLockDevice(1 /* expectedCntFailedAttempts */, PRIMARY_USER_ID);
@@ -220,8 +223,8 @@ public class AdaptiveAuthServiceTest {
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
 
         for (int i = 0; i < MAX_ALLOWED_FAILED_AUTH_ATTEMPTS; i++) {
-            mAuthenticationStateListenerCaptor.getValue()
-                    .onAuthenticationFailed(REASON_UNKNOWN, PRIMARY_USER_ID);
+            mAuthenticationStateListenerCaptor.getValue().onAuthenticationFailed(
+                    authFailedInfo(PRIMARY_USER_ID));
         }
         waitForAuthCompletion();
 
@@ -237,8 +240,8 @@ public class AdaptiveAuthServiceTest {
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(false);
 
         for (int i = 0; i < MAX_ALLOWED_FAILED_AUTH_ATTEMPTS; i++) {
-            mAuthenticationStateListenerCaptor.getValue()
-                    .onAuthenticationFailed(REASON_UNKNOWN, PRIMARY_USER_ID);
+            mAuthenticationStateListenerCaptor.getValue().onAuthenticationFailed(
+                    authFailedInfo(PRIMARY_USER_ID));
         }
         waitForAuthCompletion();
 
@@ -250,8 +253,8 @@ public class AdaptiveAuthServiceTest {
             throws RemoteException {
         // Three failed biometric auth attempts
         for (int i = 0; i < 3; i++) {
-            mAuthenticationStateListenerCaptor.getValue()
-                    .onAuthenticationFailed(REASON_UNKNOWN, PRIMARY_USER_ID);
+            mAuthenticationStateListenerCaptor.getValue().onAuthenticationFailed(
+                    authFailedInfo(PRIMARY_USER_ID));
         }
         // One successful primary auth attempt
         mLockSettingsStateListenerCaptor.getValue().onAuthenticationSucceeded(PRIMARY_USER_ID);
@@ -269,8 +272,8 @@ public class AdaptiveAuthServiceTest {
             mLockSettingsStateListenerCaptor.getValue().onAuthenticationFailed(PRIMARY_USER_ID);
         }
         // One successful biometric auth attempt
-        mAuthenticationStateListenerCaptor.getValue()
-                .onAuthenticationSucceeded(REASON_UNKNOWN, PRIMARY_USER_ID);
+        mAuthenticationStateListenerCaptor.getValue().onAuthenticationSucceeded(
+                authSuccessInfo(PRIMARY_USER_ID));
         waitForAuthCompletion();
 
         verifyNotLockDevice(DEFAULT_COUNT_FAILED_AUTH_ATTEMPTS /* expectedCntFailedAttempts */,
@@ -286,8 +289,8 @@ public class AdaptiveAuthServiceTest {
         }
         // Two failed biometric auth attempts
         for (int i = 0; i < 2; i++) {
-            mAuthenticationStateListenerCaptor.getValue()
-                    .onAuthenticationFailed(REASON_UNKNOWN, PRIMARY_USER_ID);
+            mAuthenticationStateListenerCaptor.getValue().onAuthenticationFailed(
+                    authFailedInfo(PRIMARY_USER_ID));
         }
         waitForAuthCompletion();
 
@@ -304,8 +307,8 @@ public class AdaptiveAuthServiceTest {
         }
         // Two failed biometric auth attempts
         for (int i = 0; i < 2; i++) {
-            mAuthenticationStateListenerCaptor.getValue()
-                    .onAuthenticationFailed(REASON_UNKNOWN, MANAGED_PROFILE_USER_ID);
+            mAuthenticationStateListenerCaptor.getValue().onAuthenticationFailed(
+                    authFailedInfo(MANAGED_PROFILE_USER_ID));
         }
         waitForAuthCompletion();
 
@@ -338,4 +341,16 @@ public class AdaptiveAuthServiceTest {
     private static void waitForAuthCompletion() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
+
+    private AuthenticationSucceededInfo authSuccessInfo(int userId) {
+        return new AuthenticationSucceededInfo.Builder(BiometricSourceType.FINGERPRINT,
+                REASON_UNKNOWN, true, userId).build();
+    }
+
+
+    private AuthenticationFailedInfo authFailedInfo(int userId) {
+        return new AuthenticationFailedInfo.Builder(BiometricSourceType.FINGERPRINT, REASON_UNKNOWN,
+                userId).build();
+    }
+
 }

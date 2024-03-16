@@ -26,7 +26,11 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.IUdfpsOverlayController;
@@ -43,6 +47,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.OperationContextExt;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
@@ -71,6 +76,8 @@ public class FingerprintDetectClientTest {
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
+    @Mock
     private ISession mHal;
     @Mock
     private IBinder mToken;
@@ -92,6 +99,10 @@ public class FingerprintDetectClientTest {
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mStartHalConsumerCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStartedInfo> mAuthenticationStartedCaptor;
+    @Captor
+    private ArgumentCaptor<AuthenticationStoppedInfo> mAuthenticationStoppedCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -146,7 +157,7 @@ public class FingerprintDetectClientTest {
                         .setSensorId(1)
                         .setOpPackageName("a-test")
                         .build(),
-                mBiometricLogger, mBiometricContext,
+                mBiometricLogger, mBiometricContext, mAuthenticationStateListeners,
                 mUdfpsOverlayController, true /* isStrongBiometric */);
         client.start(mCallback);
         client.onInteractionDetected();
@@ -169,7 +180,30 @@ public class FingerprintDetectClientTest {
                         .setSensorId(1)
                         .setOpPackageName("a-test")
                         .build(),
-                mBiometricLogger, mBiometricContext,
+                mBiometricLogger, mBiometricContext, mAuthenticationStateListeners,
                 mUdfpsOverlayController, true /* isStrongBiometric */);
+    }
+
+    @Test
+    public void testAuthenticationStateListeners_onAuthenticationStartedAndStopped()
+            throws RemoteException {
+        final FingerprintDetectClient client = createClient();
+        client.start(mCallback);
+        verify(mAuthenticationStateListeners).onAuthenticationStarted(
+                mAuthenticationStartedCaptor.capture());
+
+        assertThat(mAuthenticationStartedCaptor.getValue()).isEqualTo(
+                new AuthenticationStartedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
+
+        client.stopHalOperation();
+        verify(mAuthenticationStateListeners).onAuthenticationStopped(
+                mAuthenticationStoppedCaptor.capture());
+
+        assertThat(mAuthenticationStoppedCaptor.getValue()).isEqualTo(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
     }
 }

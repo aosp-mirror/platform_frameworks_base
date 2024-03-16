@@ -16,6 +16,9 @@
 
 package com.android.systemui.biometrics.shared.model
 
+import android.hardware.biometrics.BiometricFaceConstants
+import android.hardware.biometrics.BiometricFingerprintConstants
+import android.hardware.biometrics.BiometricRequestConstants
 import android.hardware.biometrics.BiometricSourceType
 
 /**
@@ -24,34 +27,113 @@ import android.hardware.biometrics.BiometricSourceType
  * authentication.
  */
 sealed interface AuthenticationState {
+    /**
+     * Indicates [AuthenticationReason] from [BiometricRequestConstants.RequestReason] for
+     * requesting auth
+     */
     val requestReason: AuthenticationReason
 
     /**
-     * Authentication started
-     *
-     * @param requestReason [AuthenticationReason] for starting authentication
-     */
-    data class AuthenticationStarted(override val requestReason: AuthenticationReason) :
-        AuthenticationState
-
-    /**
-     * Authentication stopped
-     *
-     * @param requestReason [AuthenticationReason.NotRunning]
-     */
-    data class AuthenticationStopped(override val requestReason: AuthenticationReason) :
-        AuthenticationState
-
-    /**
-     * Authentication acquired
+     * AuthenticationState when a biometric has been acquired.
      *
      * @param biometricSourceType indicates [BiometricSourceType] of acquired authentication
-     * @param requestReason indicates [AuthenticationReason] for requesting auth
-     * @param acquiredInfo indicates
+     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
+     * @param acquiredInfo [BiometricFaceConstants.FaceAcquired] or
+     *   [BiometricFingerprintConstants.FingerprintAcquired] int corresponding to a known acquired
+     *   message.
      */
-    data class AuthenticationAcquired(
+    data class Acquired(
         val biometricSourceType: BiometricSourceType,
         override val requestReason: AuthenticationReason,
         val acquiredInfo: Int
+    ) : AuthenticationState
+
+    /**
+     * AuthenticationState when an unrecoverable error is encountered during authentication.
+     *
+     * @param biometricSourceType identifies [BiometricSourceType] for auth error
+     * @param errString authentication error string shown on the UI
+     * @param errCode [BiometricFaceConstants.FaceError] or
+     *   [BiometricFingerprintConstants.FingerprintError] int identifying the error message for an
+     *   authentication error
+     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
+     */
+    data class Error(
+        val biometricSourceType: BiometricSourceType,
+        val errString: String?,
+        val errCode: Int,
+        override val requestReason: AuthenticationReason,
+    ) : AuthenticationState
+
+    /**
+     * AuthenticationState when a biometric couldn't be authenticated.
+     *
+     * @param biometricSourceType identifies [BiometricSourceType] for failed auth
+     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
+     * @param userId The user id for the requested authentication
+     */
+    data class Failed(
+        val biometricSourceType: BiometricSourceType,
+        override val requestReason: AuthenticationReason,
+        val userId: Int
+    ) : AuthenticationState
+
+    /**
+     * AuthenticationState when a recoverable error is encountered during authentication.
+     *
+     * @param biometricSourceType identifies [BiometricSourceType] for failed auth
+     * @param helpString helpString guidance help string shown on the UI
+     * @param helpCode An integer identifying the help message
+     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
+     */
+    data class Help(
+        val biometricSourceType: BiometricSourceType,
+        val helpString: String?,
+        val helpCode: Int,
+        override val requestReason: AuthenticationReason,
+    ) : AuthenticationState
+
+    /**
+     * Authentication state when no auth is running
+     *
+     * @param requestReason [AuthenticationReason.NotRunning]
+     */
+    data class Idle(override val requestReason: AuthenticationReason) : AuthenticationState
+
+    /**
+     * AuthenticationState when auth is started
+     *
+     * @param biometricSourceType identifies [BiometricSourceType] for auth
+     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
+     */
+    data class Started(
+        val biometricSourceType: BiometricSourceType,
+        override val requestReason: AuthenticationReason
+    ) : AuthenticationState
+
+    /**
+     * Authentication state when auth is stopped
+     *
+     * @param biometricSourceType identifies [BiometricSourceType] for auth stopped
+     * @param requestReason [AuthenticationReason.NotRunning]
+     */
+    data class Stopped(
+        val biometricSourceType: BiometricSourceType,
+        override val requestReason: AuthenticationReason
+    ) : AuthenticationState
+
+    /**
+     * AuthenticationState when a biometric is successfully authenticated.
+     *
+     * @param biometricSourceType identifies [BiometricSourceType] of successful auth
+     * @param isStrongBiometric indicates whether auth was from strong biometric
+     * @param requestReason reason from [BiometricRequestConstants.RequestReason] for authentication
+     * @param userId The user id for the requested authentication
+     */
+    data class Succeeded(
+        val biometricSourceType: BiometricSourceType,
+        val isStrongBiometric: Boolean,
+        override val requestReason: AuthenticationReason,
+        val userId: Int
     ) : AuthenticationState
 }

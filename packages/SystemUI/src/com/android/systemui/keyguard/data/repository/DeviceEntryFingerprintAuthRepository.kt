@@ -259,7 +259,6 @@ constructor(
                                 if (biometricSourceType != BiometricSourceType.FINGERPRINT) {
                                     return
                                 }
-
                                 trySendWithFailureLogging(
                                     authenticationStatus,
                                     TAG,

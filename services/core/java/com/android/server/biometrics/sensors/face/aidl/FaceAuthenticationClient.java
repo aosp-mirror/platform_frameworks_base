@@ -17,6 +17,10 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static android.adaptiveauth.Flags.reportBiometricAuthAttempts;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_VENDOR;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_VENDOR_BASE;
+import static android.hardware.face.FaceManager.getAuthHelpMessage;
+import static android.hardware.face.FaceManager.getErrorString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,7 +31,15 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
+import android.hardware.biometrics.events.AuthenticationErrorInfo;
+import android.hardware.biometrics.events.AuthenticationFailedInfo;
+import android.hardware.biometrics.events.AuthenticationHelpInfo;
+import android.hardware.biometrics.events.AuthenticationStartedInfo;
+import android.hardware.biometrics.events.AuthenticationStoppedInfo;
+import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceAuthenticationFrame;
@@ -63,11 +75,11 @@ public class FaceAuthenticationClient
         extends AuthenticationClient<AidlSession, FaceAuthenticateOptions>
         implements LockoutConsumer {
     private static final String TAG = "FaceAuthenticationClient";
-
     @NonNull
     private final UsageStats mUsageStats;
     @NonNull
     private final AuthSessionCoordinator mAuthSessionCoordinator;
+    private final boolean mIsStrongBiometric;
     private final int[] mBiometricPromptIgnoreList;
     private final int[] mBiometricPromptIgnoreListVendor;
     private final int[] mKeyguardIgnoreList;
@@ -118,6 +130,7 @@ public class FaceAuthenticationClient
                 allowBackgroundAuthentication, false /* shouldVibrate */,
                 biometricStrength);
         setRequestId(requestId);
+        mIsStrongBiometric = isStrongBiometric;
         mUsageStats = usageStats;
         mSensorPrivacyManager = sensorPrivacyManager;
         mAuthSessionCoordinator = biometricContext.getAuthSessionCoordinator();
@@ -149,6 +162,9 @@ public class FaceAuthenticationClient
 
     @Override
     protected void startHalOperation() {
+        mAuthenticationStateListeners.onAuthenticationStarted(new AuthenticationStartedInfo.Builder(
+                BiometricSourceType.FACE, getRequestReason()).build()
+        );
         try {
             if (mSensorPrivacyManager != null
                     && mSensorPrivacyManager
@@ -196,6 +212,9 @@ public class FaceAuthenticationClient
 
     @Override
     protected void stopHalOperation() {
+        mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                .Builder(BiometricSourceType.FACE, getRequestReason()).build()
+        );
         unsubscribeBiometricContext();
 
         if (mCancellationSignal != null) {
@@ -226,6 +245,9 @@ public class FaceAuthenticationClient
         // 3) Authenticated == false
         // 4) onLockout
         // 5) onLockoutTimed
+        mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                .Builder(BiometricSourceType.FACE, getRequestReason()).build()
+        );
         mCallback.onClientFinished(this, true /* success */);
     }
 
@@ -245,11 +267,15 @@ public class FaceAuthenticationClient
 
         if (reportBiometricAuthAttempts()) {
             if (authenticated) {
-                mAuthenticationStateListeners.onAuthenticationSucceeded(getRequestReason(),
-                        getTargetUserId());
+                mAuthenticationStateListeners.onAuthenticationSucceeded(
+                    new AuthenticationSucceededInfo.Builder(BiometricSourceType.FACE,
+                            getRequestReason(), mIsStrongBiometric, getTargetUserId()).build()
+                );
             } else {
-                mAuthenticationStateListeners.onAuthenticationFailed(getRequestReason(),
-                        getTargetUserId());
+                mAuthenticationStateListeners.onAuthenticationFailed(
+                        new AuthenticationFailedInfo.Builder(BiometricSourceType.FACE,
+                                getRequestReason(), getTargetUserId()).build()
+                );
             }
         }
     }
@@ -263,8 +289,14 @@ public class FaceAuthenticationClient
                 error,
                 vendorCode,
                 getTargetUserId()));
-
+        mAuthenticationStateListeners.onAuthenticationError(
+                new AuthenticationErrorInfo.Builder(BiometricSourceType.FACE, getRequestReason(),
+                        getErrorString(getContext(), error, vendorCode), error).build()
+        );
         super.onError(error, vendorCode);
+        mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                .Builder(BiometricSourceType.FACE, getRequestReason()).build()
+        );
     }
 
     private int[] getAcquireIgnorelist() {
@@ -276,7 +308,7 @@ public class FaceAuthenticationClient
     }
 
     private boolean shouldSendAcquiredMessage(int acquireInfo, int vendorCode) {
-        return acquireInfo == FaceManager.FACE_ACQUIRED_VENDOR
+        return acquireInfo == FACE_ACQUIRED_VENDOR
                 ? !Utils.listContains(getAcquireVendorIgnorelist(), vendorCode)
                 : !Utils.listContains(getAcquireIgnorelist(), acquireInfo);
     }
@@ -285,6 +317,20 @@ public class FaceAuthenticationClient
     public void onAcquired(int acquireInfo, int vendorCode) {
         mLastAcquire = acquireInfo;
         final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
+        if (shouldSend) {
+            mAuthenticationStateListeners.onAuthenticationAcquired(
+                    new AuthenticationAcquiredInfo.Builder(BiometricSourceType.FACE,
+                            getRequestReason(), acquireInfo).build()
+            );
+            final String helpMessage = getAuthHelpMessage(getContext(), acquireInfo, vendorCode);
+            if (helpMessage != null) {
+                final int helpCode = getHelpCode(acquireInfo, vendorCode);
+                mAuthenticationStateListeners.onAuthenticationHelp(
+                        new AuthenticationHelpInfo.Builder(BiometricSourceType.FACE,
+                                getRequestReason(), helpMessage, helpCode).build()
+                );
+            }
+        }
         onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
 
         //Check if it is AIDL (lockoutTracker = null) or if it there is no lockout for HIDL
@@ -310,9 +356,27 @@ public class FaceAuthenticationClient
         final boolean shouldSend = shouldSendAcquiredMessage(acquireInfo, vendorCode);
         if (shouldSend) {
             try {
+                if (shouldSend) {
+                    mAuthenticationStateListeners.onAuthenticationAcquired(
+                            new AuthenticationAcquiredInfo.Builder(BiometricSourceType.FACE,
+                                    getRequestReason(), acquireInfo).build()
+                    );
+                    final String helpMessage = getAuthHelpMessage(getContext(), acquireInfo,
+                            vendorCode);
+                    if (helpMessage != null) {
+                        final int helpCode = getHelpCode(acquireInfo, vendorCode);
+                        mAuthenticationStateListeners.onAuthenticationHelp(
+                                new AuthenticationHelpInfo.Builder(BiometricSourceType.FACE,
+                                        getRequestReason(), helpMessage, helpCode).build()
+                        );
+                    }
+                }
                 getListener().onAuthenticationFrame(frame);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to send authentication frame", e);
+                mAuthenticationStateListeners.onAuthenticationStopped(new AuthenticationStoppedInfo
+                        .Builder(BiometricSourceType.FACE, getRequestReason()).build()
+                );
                 mCallback.onClientFinished(this, false /* success */);
             }
         }
@@ -329,7 +393,6 @@ public class FaceAuthenticationClient
 
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementTimedLockoutForUser(getTargetUserId());
-
         onError(error, 0 /* vendorCode */);
     }
 
@@ -344,7 +407,12 @@ public class FaceAuthenticationClient
 
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementPermanentLockoutForUser(getTargetUserId());
-
         onError(error, 0 /* vendorCode */);
+    }
+
+    private static int getHelpCode(int acquireInfo, int vendorCode) {
+        return acquireInfo == FACE_ACQUIRED_VENDOR
+                ? vendorCode + FACE_ACQUIRED_VENDOR_BASE
+                : acquireInfo;
     }
 }
