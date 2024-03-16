@@ -54,8 +54,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -125,13 +125,36 @@ constructor(
             .onStart { emit(false) }
             .distinctUntilChanged()
 
-    private val alphaOnShadeExpansion: Flow<Float> =
+    private val isOnLockscreen: Flow<Boolean> =
         combine(
+                keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
+                keyguardTransitionInteractor
+                    .isInTransitionWhere { from, to -> from == LOCKSCREEN || to == LOCKSCREEN }
+                    .onStart { emit(false) }
+            ) { onLockscreen, transitioningToOrFromLockscreen ->
+                onLockscreen || transitioningToOrFromLockscreen
+            }
+            .distinctUntilChanged()
+
+    private val alphaOnShadeExpansion: Flow<Float> =
+        combineTransform(
+                isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) { qsExpansion, shadeExpansion ->
+            ) { isOnLockscreen, qsExpansion, shadeExpansion ->
                 // Fade out quickly as the shade expands
-                1f - MathUtils.constrainedMap(0f, 1f, 0f, 0.2f, max(qsExpansion, shadeExpansion))
+                if (isOnLockscreen) {
+                    val alpha =
+                        1f -
+                            MathUtils.constrainedMap(
+                                /* rangeMin = */ 0f,
+                                /* rangeMax = */ 1f,
+                                /* valueMin = */ 0f,
+                                /* valueMax = */ 0.2f,
+                                /* value = */ max(qsExpansion, shadeExpansion)
+                            )
+                    emit(alpha)
+                }
             }
             .distinctUntilChanged()
 
@@ -158,10 +181,6 @@ constructor(
 
     /** Last point that the root view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition
-
-    /** the shared notification container bounds *on the lockscreen* */
-    val notificationBounds: StateFlow<NotificationContainerBounds> =
-        keyguardInteractor.notificationContainerBounds
 
     /**
      * The keyguard root view can be clipped as the shade is pulled down, typically only for
@@ -235,11 +254,7 @@ constructor(
         burnInJob?.cancel()
 
         burnInJob =
-            scope.launch {
-                aodBurnInViewModel.movement(params).collect {
-                    burnInModel.value = it
-                }
-            }
+            scope.launch { aodBurnInViewModel.movement(params).collect { burnInModel.value = it } }
     }
 
     val scale: Flow<BurnInScaleViewModel> =

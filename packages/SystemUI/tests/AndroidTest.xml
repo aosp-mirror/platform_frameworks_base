@@ -32,4 +32,11 @@
         <option name="test-filter-dir" value="/data/data/com.android.systemui.tests" />
         <option name="hidden-api-checks" value="false"/>
     </test>
+
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="directory-keys"
+            value="/data/user/0/com.android.systemui.tests/files"/>
+        <option name="collect-on-run-ended-only" value="true"/>
+        <option name="clean-up" value="true"/>
+    </metrics_collector>
 </configuration>

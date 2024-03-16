@@ -31,6 +31,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.DeviceConfigProxy;
 
+import java.util.concurrent.Executor;
+
 import javax.inject.Inject;
 
 @SysUISingleton
@@ -60,18 +62,18 @@ public final class SmartReplyConstants {
     private volatile int mMaxNumActions;
     private volatile long mOnClickInitDelay;
 
-    private final Handler mHandler;
+    private final Executor mMainExecutor;
     private final Context mContext;
     private final DeviceConfigProxy mDeviceConfig;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     @Inject
     public SmartReplyConstants(
-            @Main Handler handler,
+            @Main Executor mainExecutor,
             Context context,
             DeviceConfigProxy deviceConfig
     ) {
-        mHandler = handler;
+        mMainExecutor = mainExecutor;
         mContext = context;
         final Resources resources = mContext.getResources();
         mDefaultEnabled = resources.getBoolean(
@@ -104,7 +106,7 @@ public final class SmartReplyConstants {
     }
 
     private void postToHandler(Runnable r) {
-        this.mHandler.post(r);
+        this.mMainExecutor.execute(r);
     }
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =

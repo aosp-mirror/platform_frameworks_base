@@ -24,6 +24,7 @@ java_library {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.core_core",
+        "libmonet",
     ],
     srcs: [
         "src/**/*.java",

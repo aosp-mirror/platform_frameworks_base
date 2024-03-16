@@ -29,6 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -70,6 +71,17 @@ constructor(
             onStep = { 1f - it },
             name = "DREAMING->GLANCEABLE_HUB: dreamOverlayAlpha",
         )
+
+    // Show UMO once the transition starts.
+    val showUmo: Flow<Boolean> =
+        transitionAnimation
+            .sharedFlow(
+                duration = TO_GLANCEABLE_HUB_DURATION,
+                onStep = { it },
+                onCancel = { 0f },
+                onFinish = { 1f },
+            )
+            .map { step -> step != 0f }
 
     private companion object {
         val TO_GLANCEABLE_HUB_DURATION = 1.seconds

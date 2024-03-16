@@ -512,6 +512,7 @@ public class EuiccManager {
             EUICC_ACTIVATION_TYPE_BACKUP,
             EUICC_ACTIVATION_TYPE_TRANSFER,
             EUICC_ACTIVATION_TYPE_ACCOUNT_REQUIRED,
+            EUICC_ACTIVATION_TYPE_TRANSFER_FINAL_HOLD,
     })
     public @interface EuiccActivationType{}
 
@@ -553,6 +554,15 @@ public class EuiccManager {
      */
     @SystemApi
     public static final int EUICC_ACTIVATION_TYPE_ACCOUNT_REQUIRED = 4;
+
+    /**
+     * The activation flow of eSIM transfer to block the transfer process before B&R flow.
+     * This is needed to avoid connection overlapping between eSIM connection B&R connection.
+     *
+     * @hide
+     */
+     // TODO(b/329212614): add system api annotation during the allowed api timeline.
+     public static final int EUICC_ACTIVATION_TYPE_TRANSFER_FINAL_HOLD = 5;
 
     /**
      * Euicc OTA update status which can be got by {@link #getOtaStatus}

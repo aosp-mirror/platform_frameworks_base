@@ -14,17 +14,32 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.domain.interactor
+package com.android.server.inputmethod;
 
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.internal.annotations.GuardedBy;
 
-val Kosmos.statusBarKeyguardViewManagerInteractor by
-    Kosmos.Fixture {
-        StatusBarKeyguardViewManagerInteractor(
-            keyguardTransitionInteractor = this.keyguardTransitionInteractor,
-            keyguardOcclusionInteractor = this.keyguardOcclusionInteractor,
-            powerInteractor = this.powerInteractor,
-        )
+/**
+ * A sequence number utility class that only generate positive numbers.
+ */
+final class Sequence {
+
+    private final Object mLock = new Object();
+
+    private int mSequence;
+
+    int getSequenceNumber() {
+        synchronized (mLock) {
+            return mSequence;
+        }
     }
+
+    @GuardedBy("ImfLock.class")
+    void advanceSequenceNumber() {
+        synchronized (mLock) {
+            mSequence++;
+            if (mSequence <= 0) {
+                mSequence = 1;
+            }
+        }
+    }
+}

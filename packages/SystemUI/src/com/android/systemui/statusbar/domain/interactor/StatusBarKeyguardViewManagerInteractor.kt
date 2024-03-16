@@ -18,12 +18,16 @@ package com.android.systemui.statusbar.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardOcclusionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -46,6 +50,8 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
     powerInteractor: PowerInteractor,
+    wmLockscreenVisibilityInteractor: WindowManagerLockscreenVisibilityInteractor,
+    surfaceBehindInteractor: KeyguardSurfaceBehindInteractor,
 ) {
     /** Occlusion state to apply whenever a keyguard transition is STARTED, if any. */
     private val occlusionStateFromStartedStep: Flow<OccludedState> =
@@ -98,11 +104,21 @@ constructor(
                 OccludedState(occluded = occluded, animate = false)
             }
 
-    /** Occlusion state to apply to SKBVM's setOccluded call. */
+    /** Occlusion state to apply to SBKVM's setOccluded call. */
     val keyguardViewOcclusionState =
         merge(occlusionStateFromStartedStep, occlusionStateFromFinishedStep)
             .distinctUntilChangedBy {
                 // Don't switch 'animate' values mid-transition.
                 it.occluded
             }
+
+    /** Visibility state to apply to SBKVM via show() and hide(). */
+    val keyguardViewVisibility =
+        combine(
+                wmLockscreenVisibilityInteractor.lockscreenVisibility,
+                surfaceBehindInteractor.isAnimatingSurface,
+            ) { lockscreenVisible, animatingSurface ->
+                lockscreenVisible || animatingSurface
+            }
+            .distinctUntilChanged()
 }

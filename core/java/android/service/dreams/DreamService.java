@@ -18,7 +18,9 @@ package android.service.dreams;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
+import android.annotation.IntDef;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,6 +49,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.service.controls.flags.Flags;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -76,6 +79,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.function.Consumer;
 
 /**
@@ -216,6 +221,33 @@ public class DreamService extends Service implements Window.Callback {
      * @hide
      */
     public static final boolean DEFAULT_SHOW_COMPLICATIONS = false;
+
+    /**
+     * The default value for dream category
+     * @hide
+     */
+    public static final int DREAM_CATEGORY_DEFAULT = 0;
+
+    /**
+     * Dream category for Low Light Dream
+     * @hide
+     */
+    public static final int DREAM_CATEGORY_LOW_LIGHT = 1 << 0;
+
+    /**
+     * Dream category for Home Panel Dream
+     * @hide
+     */
+    public static final int DREAM_CATEGORY_HOME_PANEL = 1 << 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"DREAM_CATEGORY"}, value = {
+        DREAM_CATEGORY_DEFAULT,
+        DREAM_CATEGORY_LOW_LIGHT,
+        DREAM_CATEGORY_HOME_PANEL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DreamCategory {}
 
     private final IDreamManager mDreamManager;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -1122,12 +1154,15 @@ public class DreamService extends Service implements Window.Callback {
         try (TypedArray rawMetadata = readMetadata(pm, serviceInfo)) {
             if (rawMetadata == null) return null;
             return new DreamMetadata(
-                    convertToComponentName(rawMetadata.getString(
+                    convertToComponentName(
+                    rawMetadata.getString(
                             com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
                     rawMetadata.getDrawable(
                             com.android.internal.R.styleable.Dream_previewImage),
                     rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
-                            DEFAULT_SHOW_COMPLICATIONS));
+                            DEFAULT_SHOW_COMPLICATIONS),
+                    rawMetadata.getInt(R.styleable.Dream_dreamCategory, DREAM_CATEGORY_DEFAULT)
+                    );
         }
     }
 
@@ -1543,11 +1578,23 @@ public class DreamService extends Service implements Window.Callback {
         @NonNull
         public final boolean showComplications;
 
-        DreamMetadata(ComponentName settingsActivity, Drawable previewImage,
-                boolean showComplications) {
+        @NonNull
+        @FlaggedApi(Flags.FLAG_HOME_PANEL_DREAM)
+        public final int dreamCategory;
+
+        DreamMetadata(
+                ComponentName settingsActivity,
+                Drawable previewImage,
+                boolean showComplications,
+                int dreamCategory) {
             this.settingsActivity = settingsActivity;
             this.previewImage = previewImage;
             this.showComplications = showComplications;
+            if (Flags.homePanelDream()) {
+                this.dreamCategory = dreamCategory;
+            } else {
+                this.dreamCategory = DREAM_CATEGORY_DEFAULT;
+            }
         }
     }
 }

@@ -400,6 +400,9 @@
     <string name="scCellularNetworkSecurityTitle">Cellular network security</string>
     <!-- Summary of the cellular network security safety center source's status. -->
     <string name="scCellularNetworkSecuritySummary">Review settings</string>
+    <!-- Link passed to safety center for the Learn More button on notifications -->
+    <!-- DO NOT TRANSLATE -->
+    <string name="scCellularNetworkSecurityLearnMore" translatable="false"></string>
     <!-- Title of the safety center issue and notification when the phone's identifier is shared over the network. -->
     <string name="scIdentifierDisclosureIssueTitle">Device identifier accessed</string>
     <!-- Summary of the safety center issue and notification when the phone's identifier is shared over the network. -->

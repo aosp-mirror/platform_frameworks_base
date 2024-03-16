@@ -117,21 +117,6 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         return HeadsUpManagerTestUtil.createEntry(id, notif);
     }
 
-    private PendingIntent createFullScreenIntent() {
-        return PendingIntent.getActivity(
-                getContext(), 0, new Intent(getContext(), this.getClass()),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
-    }
-
-    private NotificationEntry createFullScreenIntentEntry(int id) {
-        final Notification notif = new Notification.Builder(mContext, "")
-                .setSmallIcon(R.drawable.ic_person)
-                .setFullScreenIntent(createFullScreenIntent(), /* highPriority */ true)
-                .build();
-        return HeadsUpManagerTestUtil.createEntry(id, notif);
-    }
-
-
     private void useAccessibilityTimeout(boolean use) {
         if (use) {
             doReturn(TEST_A11Y_AUTO_DISMISS_TIME).when(mAccessibilityMgr)
@@ -239,7 +224,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUpBecomePinned_hasFSI_notUnpinned_true() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createFullScreenIntentEntry(/* id = */ 0);
+        final NotificationEntry notifEntry =
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
 
         // Add notifEntry to ANM mAlertEntries map and make it NOT unpinned
         hum.showNotification(notifEntry);
@@ -254,7 +240,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUpBecomePinned_wasUnpinned_false() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createFullScreenIntentEntry(/* id = */ 0);
+        final NotificationEntry notifEntry =
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
 
         // Add notifEntry to ANM mAlertEntries map and make it unpinned
         hum.showNotification(notifEntry);
@@ -443,7 +430,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testIsSticky_hasFullScreenIntent_true() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createFullScreenIntentEntry(/* id = */ 0);
+        final NotificationEntry notifEntry =
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
 
         hum.showNotification(notifEntry);
 
@@ -554,7 +542,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
         // Needs full screen intent in order to be pinned
         final BaseHeadsUpManager.HeadsUpEntry entryToPin = hum.new HeadsUpEntry();
-        entryToPin.setEntry(createFullScreenIntentEntry(/* id = */ 0));
+        entryToPin.setEntry(
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext));
 
         // Note: the standard way to show a notification would be calling showNotification rather
         // than onAlertEntryAdded. However, in practice showNotification in effect adds

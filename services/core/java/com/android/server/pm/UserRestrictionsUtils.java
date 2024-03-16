@@ -217,8 +217,7 @@ public class UserRestrictionsUtils {
     private static final Set<String> IMMUTABLE_BY_OWNERS = Sets.newArraySet(
             UserManager.DISALLOW_RECORD_AUDIO,
             UserManager.DISALLOW_WALLPAPER,
-            UserManager.DISALLOW_OEM_UNLOCK,
-            UserManager.DISALLOW_ADD_PRIVATE_PROFILE
+            UserManager.DISALLOW_OEM_UNLOCK
     );
 
     /**
@@ -293,7 +292,8 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_USB_FILE_TRANSFER,
                     UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA,
                     UserManager.DISALLOW_UNMUTE_MICROPHONE,
-                    UserManager.DISALLOW_CONFIG_DEFAULT_APPS
+                    UserManager.DISALLOW_CONFIG_DEFAULT_APPS,
+                    UserManager.DISALLOW_ADD_PRIVATE_PROFILE
     );
 
     /**

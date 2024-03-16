@@ -271,10 +271,8 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ניתוק"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"הפעלה"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"החיבור יופעל שוב אוטומטית מחר"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"‏תכונות כמו \'שיתוף מהיר\', \'איפה המכשיר שלי\' ומיקום המכשיר משתמשות בחיבור Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"‏‫Bluetooth יופעל מחר בשעה 5 בבוקר"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"אודיו"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"אוזניות"</string>
@@ -439,6 +437,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"הסרה"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"הוספת ווידג\'ט"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"סיום"</string>
+    <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"לאפשר להציג כל ווידג\'ט במסך הנעילה?"</string>
+    <string name="button_text_to_open_settings" msgid="1987729256950941628">"לפתיחת ההגדרות"</string>
+    <string name="work_mode_off_title" msgid="5794818421357835873">"להפעיל את האפליקציות לעבודה?"</string>
+    <string name="work_mode_turn_on" msgid="907813741770247267">"ביטול ההשהיה"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
@@ -581,26 +583,36 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"השתקה"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"‏הפעלת Cast"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"לא זמין כי הצלצול מושתק"</string>
+    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
+    <skip />
+    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. יש להקיש כדי לבטל את ההשתקה."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. צריך להקיש כדי להגדיר רטט. ייתכן ששירותי הנגישות מושתקים."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. יש להקיש כדי להשתיק. ייתכן ששירותי הנגישות יושתקו."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"‏%1$s. יש להקיש כדי להעביר למצב רטט."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"‏%1$s. יש להקיש כדי להשתיק."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"בקרת הרעש"</string>
-    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
-    <skip />
+    <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"אודיו מרחבי"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"השבתה"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"מצב קבוע"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"מעקב אחר תנועות הראש"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"יש להקיש כדי לשנות את מצב תוכנת הצלצול"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"השתקה"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ביטול ההשתקה"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"רטט"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"‏בקרי עוצמת קול של %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"הטלפון יצלצל כשמתקבלות שיחות והתראות (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
+    <skip />
+    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
+    <skip />
+    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"הפעלה של <xliff:g id="LABEL">%s</xliff:g> במכשיר"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"האודיו יופעל במכשיר"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
@@ -1254,7 +1266,8 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"המצלמה חסומה"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"המצלמה והמיקרופון חסומים"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"המיקרופון חסום"</string>
-    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"מצב \'עדיפות\' מופעל"</string>
+    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
+    <skip />
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"נוכחות המשתמש זוהתה"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"צריך להגדיר את אפליקציית ברירת המחדל לפתקים ב\'הגדרות\'"</string>
     <string name="install_app" msgid="5066668100199613936">"התקנת האפליקציה"</string>

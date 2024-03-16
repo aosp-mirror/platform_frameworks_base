@@ -172,6 +172,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                     if ((profile == BluetoothProfile.LE_AUDIO_BROADCAST)
                             && mIsBroadcastProfileReady) {
                         mIsBroadcastProfileReady = false;
+                        notifyBroadcastStateChange(BROADCAST_STATE_OFF);
                         unregisterServiceCallBack(mBroadcastCallback);
                         mCachedBroadcastCallbackExecutorMap.clear();
                     }
@@ -1118,6 +1119,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         Intent intent = new Intent(ACTION_LE_AUDIO_SHARING_STATE_CHANGE);
         intent.putExtra(EXTRA_LE_AUDIO_SHARING_STATE, state);
         intent.setPackage(mContext.getPackageName());
+        Log.e(TAG, "notifyBroadcastStateChange for state = " + state);
         mContext.sendBroadcast(intent);
     }
 }

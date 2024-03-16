@@ -1509,6 +1509,8 @@ public final class StreamConfigurationMap {
                 return HAL_DATASPACE_HEIF;
             case ImageFormat.JPEG_R:
                 return HAL_DATASPACE_JPEG_R;
+            case ImageFormat.YUV_420_888:
+                return HAL_DATASPACE_JFIF;
             default:
                 return HAL_DATASPACE_UNKNOWN;
         }
@@ -2025,6 +2027,10 @@ public final class StreamConfigurationMap {
      * @hide
      */
     public static final int HAL_DATASPACE_JPEG_R = 0x1005;
+    /**
+     * @hide
+     */
+    public static final int HAL_DATASPACE_JFIF = 0x8C20000;
     private static final long DURATION_20FPS_NS = 50000000L;
     /**
      * @see #getDurations(int, int)

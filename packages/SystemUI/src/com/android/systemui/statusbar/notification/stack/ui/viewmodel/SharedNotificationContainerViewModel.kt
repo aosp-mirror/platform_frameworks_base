@@ -448,9 +448,12 @@ constructor(
                 isOnGlanceableHubWithoutShade,
                 isOnLockscreen,
                 merge(
-                    lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
-                    glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
-                )
+                        lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
+                        glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
+                    )
+                    // Manually emit on start because [notificationAlpha] only starts emitting
+                    // when transitions start.
+                    .onStart { emit(1f) }
             ) { isOnGlanceableHubWithoutShade, isOnLockscreen, alpha,
                 ->
                 if (isOnGlanceableHubWithoutShade && !isOnLockscreen) {
@@ -506,6 +509,12 @@ constructor(
             )
             .dumpWhileCollecting("translationX")
 
+    private val availableHeight: Flow<Float> =
+        bounds
+            .map { it.bottom - it.top }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("availableHeight")
+
     /**
      * When on keyguard, there is limited space to display notifications so calculate how many could
      * be shown. Otherwise, there is no limit since the vertical space will be scrollable.
@@ -527,19 +536,19 @@ constructor(
                 showLimitedNotifications,
                 showUnlimitedNotifications,
                 shadeInteractor.isUserInteracting,
-                bounds,
+                availableHeight,
                 interactor.notificationStackChanged.onStart { emit(Unit) },
                 interactor.useExtraShelfSpace,
             ) { flows ->
                 val showLimitedNotifications = flows[0] as Boolean
                 val showUnlimitedNotifications = flows[1] as Boolean
                 val isUserInteracting = flows[2] as Boolean
-                val bounds = flows[3] as NotificationContainerBounds
+                val availableHeight = flows[3] as Float
                 val useExtraShelfSpace = flows[5] as Boolean
 
                 if (!isUserInteracting) {
                     if (showLimitedNotifications) {
-                        emit(calculateSpace(bounds.bottom - bounds.top, useExtraShelfSpace))
+                        emit(calculateSpace(availableHeight, useExtraShelfSpace))
                     } else if (showUnlimitedNotifications) {
                         emit(-1)
                     }

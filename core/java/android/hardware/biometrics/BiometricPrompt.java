@@ -16,7 +16,7 @@
 
 package android.hardware.biometrics;
 
-import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_LOGO;
+import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_ADVANCED;
 import static android.Manifest.permission.TEST_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
@@ -135,7 +135,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     @Retention(RetentionPolicy.SOURCE)
     public @interface DismissedReason {}
 
-    private static class ButtonInfo {
+    static class ButtonInfo {
         Executor executor;
         DialogInterface.OnClickListener listener;
         ButtonInfo(Executor ex, DialogInterface.OnClickListener l) {
@@ -150,6 +150,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     public static class Builder {
         private PromptInfo mPromptInfo;
         private ButtonInfo mNegativeButtonInfo;
+        private ButtonInfo mContentViewMoreOptionsButtonInfo;
         private Context mContext;
         private IAuthService mService;
 
@@ -175,7 +176,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return This builder.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+        @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoRes(@DrawableRes int logoRes) {
             mPromptInfo.setLogoRes(logoRes);
@@ -194,7 +195,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return This builder.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+        @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoBitmap(@NonNull Bitmap logoBitmap) {
             mPromptInfo.setLogoBitmap(logoBitmap);
@@ -213,7 +214,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return This builder.
          */
         @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-        @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+        @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
         @NonNull
         public BiometricPrompt.Builder setLogoDescription(@NonNull String logoDescription) {
             mPromptInfo.setLogoDescription(logoDescription);
@@ -301,6 +302,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public BiometricPrompt.Builder setContentView(@NonNull PromptContentView view) {
             mPromptInfo.setContentView(view);
+
+            if (mPromptInfo.isContentViewMoreOptionsButtonUsed()) {
+                mContentViewMoreOptionsButtonInfo =
+                        ((PromptContentViewWithMoreOptionsButton) view).getButtonInfo();
+            }
+
             return this;
         }
 
@@ -619,7 +626,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             }
             mService = (mService == null) ? IAuthService.Stub.asInterface(
                     ServiceManager.getService(Context.AUTH_SERVICE)) : mService;
-            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo, mService);
+            return new BiometricPrompt(mContext, mPromptInfo, mNegativeButtonInfo,
+                    mContentViewMoreOptionsButtonInfo, mService);
         }
     }
 
@@ -646,6 +654,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private final IAuthService mService;
     private final PromptInfo mPromptInfo;
     private final ButtonInfo mNegativeButtonInfo;
+    // TODO(b/328843028): add callback onContentViewMoreOptionsButtonClicked() in
+    //  IBiometricServiceReceiver.
+    private final ButtonInfo mContentViewMoreOptionsButtonInfo;
 
     private CryptoObject mCryptoObject;
     private Executor mExecutor;
@@ -751,10 +762,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     private boolean mIsPromptShowing;
 
     private BiometricPrompt(Context context, PromptInfo promptInfo, ButtonInfo negativeButtonInfo,
-            IAuthService service) {
+            ButtonInfo contentViewMoreOptionsButtonInfo, IAuthService service) {
         mContext = context;
         mPromptInfo = promptInfo;
         mNegativeButtonInfo = negativeButtonInfo;
+        mContentViewMoreOptionsButtonInfo = contentViewMoreOptionsButtonInfo;
         mService = service;
         mIsPromptShowing = false;
     }
@@ -766,7 +778,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @return The drawable resource of the logo, or -1 if the prompt has no logo resource set.
      */
     @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+    @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
     @DrawableRes
     public int getLogoRes() {
         return mPromptInfo.getLogoRes();
@@ -779,7 +791,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @return The logo bitmap of the prompt, or null if the prompt has no logo bitmap set.
      */
     @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+    @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
     @Nullable
     public Bitmap getLogoBitmap() {
         return mPromptInfo.getLogoBitmap();
@@ -794,7 +806,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * set.
      */
     @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
-    @RequiresPermission(SET_BIOMETRIC_DIALOG_LOGO)
+    @RequiresPermission(SET_BIOMETRIC_DIALOG_ADVANCED)
     @Nullable
     public String getLogoDescription() {
         return mPromptInfo.getLogoDescription();
@@ -932,14 +944,29 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @see Builder#setAllowedAuthenticators(int)
      */
     public static final class CryptoObject extends android.hardware.biometrics.CryptoObject {
+        /**
+         * Create from a {@link Signature} object.
+         *
+         * @param signature a {@link Signature} object.
+         */
         public CryptoObject(@NonNull Signature signature) {
             super(signature);
         }
 
+        /**
+         * Create from a {@link Cipher} object.
+         *
+         * @param cipher a {@link Cipher} object.
+         */
         public CryptoObject(@NonNull Cipher cipher) {
             super(cipher);
         }
 
+        /**
+         * Create from a {@link Mac} object.
+         *
+         * @param mac a {@link Mac} object.
+         */
         public CryptoObject(@NonNull Mac mac) {
             super(mac);
         }
@@ -955,13 +982,34 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             super(credential);
         }
 
+        /**
+         * Create from a {@link PresentationSession} object.
+         *
+         * @param session a {@link PresentationSession} object.
+         */
         public CryptoObject(@NonNull PresentationSession session) {
             super(session);
         }
 
+        /**
+         * Create from a {@link KeyAgreement} object.
+         *
+         * @param keyAgreement a {@link KeyAgreement} object.
+         */
         @FlaggedApi(FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT)
         public CryptoObject(@NonNull KeyAgreement keyAgreement) {
             super(keyAgreement);
+        }
+
+        /**
+         * Create from an operation handle.
+         * @see CryptoObject#getOperationHandle()
+         *
+         * @param operationHandle the operation handle associated with this object.
+         */
+        @FlaggedApi(FLAG_GET_OP_ID_CRYPTO_OBJECT)
+        public CryptoObject(long operationHandle) {
+            super(operationHandle);
         }
 
         /**
@@ -1016,7 +1064,20 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
-         * Get the operation handle associated with this object or 0 if none.
+         * Returns the {@code operationHandle} associated with this object or 0 if none.
+         * The {@code operationHandle} is the underlying identifier associated with
+         * the {@code CryptoObject}.
+         *
+         * <p> The {@code operationHandle} can be used to reconstruct a {@code CryptoObject}
+         * instance. This is useful for any cross-process communication as the {@code CryptoObject}
+         * class is not {@link android.os.Parcelable}. Hence, if the {@code CryptoObject} is
+         * constructed in one process, and needs to be propagated to another process,
+         * before calling the
+         * {@link BiometricPrompt#authenticate(CryptoObject, CancellationSignal, Executor,
+         * AuthenticationCallback)} API in the second process, the recommendation is to retrieve the
+         * {@code operationHandle} using this API, and then reconstruct the
+         * {@code CryptoObject}using the constructor that takes in an {@code operationHandle}, and
+         * pass that in to the {@code authenticate} API mentioned above.
          */
         @FlaggedApi(FLAG_GET_OP_ID_CRYPTO_OBJECT)
         public long getOperationHandle() {

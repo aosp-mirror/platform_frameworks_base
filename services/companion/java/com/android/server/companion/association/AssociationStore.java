@@ -216,7 +216,9 @@ public class AssociationStore {
 
         logCreateAssociation(association.getDeviceProfile());
 
-        broadcastChange(CHANGE_TYPE_ADDED, association);
+        if (association.isActive()) {
+            broadcastChange(CHANGE_TYPE_ADDED, association);
+        }
     }
 
     /**
@@ -248,15 +250,20 @@ public class AssociationStore {
 
         Slog.i(TAG, "Done updating association.");
 
-        // Check if the MacAddress has changed.
-        final MacAddress updatedAddress = updated.getDeviceMacAddress();
-        final MacAddress currentAddress = current.getDeviceMacAddress();
-        macAddressChanged = !Objects.equals(currentAddress, updatedAddress);
+        if (current.isActive() && !updated.isActive()) {
+            broadcastChange(CHANGE_TYPE_REMOVED, updated);
+            return;
+        }
 
-        final int changeType = macAddressChanged ? CHANGE_TYPE_UPDATED_ADDRESS_CHANGED
-                : CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
+        if (updated.isActive()) {
+            // Check if the MacAddress has changed.
+            final MacAddress updatedAddress = updated.getDeviceMacAddress();
+            final MacAddress currentAddress = current.getDeviceMacAddress();
+            macAddressChanged = !Objects.equals(currentAddress, updatedAddress);
 
-        broadcastChange(changeType, updated);
+            broadcastChange(macAddressChanged ? CHANGE_TYPE_UPDATED_ADDRESS_CHANGED
+                    : CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED, updated);
+        }
     }
 
     /**
@@ -282,7 +289,9 @@ public class AssociationStore {
 
         logRemoveAssociation(association.getDeviceProfile());
 
-        broadcastChange(CHANGE_TYPE_REMOVED, association);
+        if (association.isActive()) {
+            broadcastChange(CHANGE_TYPE_REMOVED, association);
+        }
     }
 
     private void writeCacheToDisk(@UserIdInt int userId) {
@@ -492,6 +501,8 @@ public class AssociationStore {
     }
 
     private void broadcastChange(@ChangeType int changeType, AssociationInfo association) {
+        Slog.i(TAG, "Broadcasting association changes - changeType=[" + changeType + "]...");
+
         synchronized (mLocalListeners) {
             for (OnChangeListener listener : mLocalListeners) {
                 listener.onAssociationChanged(changeType, association);

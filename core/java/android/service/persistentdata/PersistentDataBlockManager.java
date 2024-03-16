@@ -19,6 +19,7 @@ package android.service.persistentdata;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -100,7 +101,7 @@ public class PersistentDataBlockManager {
      */
     @SystemApi
     @SuppressLint("RequiresPermission")
-    public int write(byte[] data) {
+    public int write(@Nullable byte[] data) {
         try {
             return sService.write(data);
         } catch (RemoteException e) {
@@ -115,7 +116,7 @@ public class PersistentDataBlockManager {
      */
     @SystemApi
     @SuppressLint("RequiresPermission")
-    public byte[] read() {
+    public @Nullable byte[] read() {
         try {
             return sService.read();
         } catch (RemoteException e) {

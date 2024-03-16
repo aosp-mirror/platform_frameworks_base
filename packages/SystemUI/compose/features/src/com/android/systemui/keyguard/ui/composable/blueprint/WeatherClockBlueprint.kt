@@ -112,7 +112,7 @@ constructor(
 
                         with(mediaCarouselSection) { MediaCarousel() }
 
-                        if (viewModel.areNotificationsVisible(resources = resources)) {
+                        if (viewModel.areNotificationsVisible) {
                             with(notificationSection) {
                                 Notifications(
                                     modifier = Modifier.fillMaxWidth().weight(weight = 1f)

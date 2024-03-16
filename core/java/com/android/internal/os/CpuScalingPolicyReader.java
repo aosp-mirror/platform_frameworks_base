@@ -129,6 +129,9 @@ public class CpuScalingPolicyReader {
             String[] strings = contents.split(" ");
             intArray.clear();
             for (String s : strings) {
+                if (s.isBlank()) {
+                    continue;
+                }
                 try {
                     intArray.add(Integer.parseInt(s));
                 } catch (NumberFormatException e) {

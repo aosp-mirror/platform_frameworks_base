@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.app.contextualsearch;
 
-parcelable WorkDuration cpp_header "android/WorkDuration.h";
+import android.os.ParcelableException;
+import android.app.contextualsearch.ContextualSearchState;
+/**
+ * @hide
+ */
+oneway interface IContextualSearchCallback {
+    void onResult(in ContextualSearchState state);
+    void onError(in ParcelableException error);
+}

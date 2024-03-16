@@ -271,10 +271,8 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"afbryd forbindelse"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivér"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Aktivér automatisk igen i morgen"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Funktioner som f.eks. Quick Share, Find min enhed og enhedslokation anvender Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth aktiveres i morgen kl. 5.00"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batteri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Lyd"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -439,6 +437,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Fjern"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tilføj widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Udfør"</string>
+    <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Vil du tillade alle widgets på låseskærmen?"</string>
+    <string name="button_text_to_open_settings" msgid="1987729256950941628">"Åbn Indstillinger"</string>
+    <string name="work_mode_off_title" msgid="5794818421357835873">"Vil du genoptage arbejdsapps?"</string>
+    <string name="work_mode_turn_on" msgid="907813741770247267">"Genoptag"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Skift bruger"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rullemenu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apps og data i denne session slettes."</string>
@@ -581,26 +583,36 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Slå lyden fra"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Cast"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Ikke muligt, da ringetonen er slået fra"</string>
+    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
+    <skip />
+    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tryk for at slå lyden til."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tryk for at konfigurere til at vibrere. Tilgængelighedstjenester kan blive deaktiveret."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tryk for at slå lyden fra. Lyden i tilgængelighedstjenester kan blive slået fra."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Tryk for at aktivere vibration."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tryk for at slå lyden fra."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Støjstyring"</string>
-    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
-    <skip />
+    <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Rumlig lyd"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Fra"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fast"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Reg. af hovedbevægelser"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tryk for at ændre ringetilstand"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"slå lyden fra"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"slå lyden til"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrer"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s lydstyrkeknapper"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Der afspilles lyd ved opkald og notifikationer (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
+    <skip />
+    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
+    <skip />
+    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"Afspiller <xliff:g id="LABEL">%s</xliff:g> på"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Lyden afspilles på"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
@@ -992,7 +1004,7 @@
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vil du tilføje <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> kan vælge, hvilke styringselementer og hvilket indhold der skal vises her."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne styringselementerne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne sty­rings­ele­men­ter­ne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Angivet som favorit. Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Fjernet fra favoritter"</string>
@@ -1254,7 +1266,8 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kameraet er blokeret"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Der er blokeret for kameraet og mikrofonen"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofonen er blokeret"</string>
-    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioritetstilstand er aktiveret"</string>
+    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
+    <skip />
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Brugertilstedeværelse er registreret"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Angiv standardapp til noter i Indstillinger"</string>
     <string name="install_app" msgid="5066668100199613936">"Installer app"</string>

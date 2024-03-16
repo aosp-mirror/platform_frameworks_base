@@ -28,10 +28,15 @@ import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
+import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.util.DebugUtils.valueToString;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.Injector;
 import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
@@ -52,28 +57,40 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
+import android.app.ForegroundServiceDelegationOptions;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.SyncNotedAppOp;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ServiceInfo;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -84,6 +101,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.permission.IPermissionManager;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -105,18 +123,20 @@ import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
 import com.android.server.am.UidObserverController.ChangeRecord;
 import com.android.server.appop.AppOpsService;
+import com.android.server.notification.NotificationManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
+import org.mockito.verification.VerificationMode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -127,13 +147,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
  * Test class for {@link ActivityManagerService}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:ActivityManagerServiceTest
+ *  atest FrameworksMockingServicesTests:ActivityManagerServiceTest
  */
 @Presubmit
 @SmallTest
@@ -148,6 +170,9 @@ public class ActivityManagerServiceTest {
 
     private static final String TEST_EXTRA_KEY1 = "com.android.server.am.TEST_EXTRA_KEY1";
     private static final String TEST_EXTRA_VALUE1 = "com.android.server.am.TEST_EXTRA_VALUE1";
+
+    private static final String TEST_PACKAGE_NAME = "com.android.server.am.testpackage";
+
     private static final String PROPERTY_APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS =
             "apply_sdk_sandbox_audit_restrictions";
     private static final String PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS =
@@ -155,6 +180,7 @@ public class ActivityManagerServiceTest {
     private static final String APPLY_SDK_SANDBOX_AUDIT_RESTRICTIONS = ":isSdkSandboxAudit";
     private static final String APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = ":isSdkSandboxNext";
     private static final int TEST_UID = 11111;
+    private static final int TEST_PID = 22222;
     private static final int USER_ID = 666;
 
     private static final long TEST_PROC_STATE_SEQ1 = 555;
@@ -169,21 +195,7 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_CAPABILITY,
     };
 
-    private static PackageManagerInternal sPackageManagerInternal;
     private static ProcessList.ProcessListSettingsListener sProcessListSettingsListener;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sPackageManagerInternal = mock(PackageManagerInternal.class);
-        doReturn(new ComponentName("", "")).when(sPackageManagerInternal)
-                .getSystemUiServiceComponent();
-        LocalServices.addService(PackageManagerInternal.class, sPackageManagerInternal);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-    }
 
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
@@ -196,14 +208,40 @@ public class ActivityManagerServiceTest {
 
     @Mock private AppOpsService mAppOpsService;
     @Mock private UserController mUserController;
+    @Mock private IPackageManager mPackageManager;
+    @Mock private IPermissionManager mPermissionManager;
+    @Mock private BatteryStatsService mBatteryStatsService;
+    @Mock private PackageManagerInternal mPackageManagerInternal;
+    @Mock private ActivityTaskManagerInternal mActivityTaskManagerInternal;
+    @Mock private NotificationManagerInternal mNotificationManagerInternal;
+
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
+    private ActiveServices mActiveServices;
     private HandlerThread mHandlerThread;
     private TestHandler mHandler;
+    private MockitoSession mMockingSession;
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        mMockingSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(AppGlobals.class)
+                .strictness(Strictness.LENIENT)
+                .startMocking();
         MockitoAnnotations.initMocks(this);
+
+        LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
+        LocalServices.addService(ActivityTaskManagerInternal.class, mActivityTaskManagerInternal);
+        LocalServices.addService(NotificationManagerInternal.class, mNotificationManagerInternal);
+
+        doReturn(new ComponentName("", "")).when(mPackageManagerInternal)
+                .getSystemUiServiceComponent();
+
+        doReturn(mPackageManager).when(AppGlobals::getPackageManager);
+        doReturn(mPermissionManager).when(AppGlobals::getPermissionManager);
+        doReturn(new String[]{""}).when(mPackageManager).getPackagesForUid(eq(Process.myUid()));
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
@@ -220,6 +258,7 @@ public class ActivityManagerServiceTest {
         mAms.mConstants.mNetworkAccessTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
+        mAms.mAtmInternal = mActivityTaskManagerInternal;
         mHandler.setRunnablesToIgnore(
                 List.of(mAms.mUidObserverController.getDispatchRunnableForTest()));
 
@@ -249,6 +288,15 @@ public class ActivityManagerServiceTest {
             .dropShellPermissionIdentity();
         if (sProcessListSettingsListener != null) {
             sProcessListSettingsListener.unregisterObserver();
+        }
+        clearInvocations(mNotificationManagerInternal);
+
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
+        LocalServices.removeServiceForTest(NotificationManagerInternal.class);
+
+        if (mMockingSession != null) {
+            mMockingSession.finishMocking();
         }
     }
 
@@ -445,6 +493,7 @@ public class ActivityManagerServiceTest {
         }
     }
 
+    @SuppressWarnings("GuardedBy")
     private UidRecord addUidRecord(int uid) {
         final UidRecord uidRec = new UidRecord(uid, mAms);
         uidRec.procStateSeqWaitingForNetwork = 1;
@@ -453,10 +502,13 @@ public class ActivityManagerServiceTest {
 
         ApplicationInfo info = new ApplicationInfo();
         info.packageName = "";
+        info.uid = uid;
 
         final ProcessRecord appRec = new ProcessRecord(mAms, info, TAG, uid);
-        final ProcessStatsService tracker = new ProcessStatsService(mAms, mContext.getCacheDir());
-        appRec.makeActive(mock(IApplicationThread.class), tracker);
+        final ProcessStatsService tracker = mAms.mProcessStats;
+        final IApplicationThread appThread = mock(IApplicationThread.class);
+        doReturn(mock(IBinder.class)).when(appThread).asBinder();
+        appRec.makeActive(appThread, tracker);
         mAms.mProcessList.getLruProcessesLSP().add(appRec);
 
         return uidRec;
@@ -1209,6 +1261,108 @@ public class ActivityManagerServiceTest {
         mAms.mUidObserverController.getPendingUidChangesForTest().clear();
     }
 
+    @Test
+    public void testStartForegroundServiceDelegateWithNotification() throws Exception {
+        testStartForegroundServiceDelegate(true);
+    }
+
+    @Test
+    public void testStartForegroundServiceDelegateWithoutNotification() throws Exception {
+        testStartForegroundServiceDelegate(false);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void testStartForegroundServiceDelegate(boolean withNotification) throws Exception {
+        mockNoteOperation();
+
+        final int notificationId = 42;
+        final Notification notification = mock(Notification.class);
+
+        addUidRecord(TEST_UID);
+        final ProcessRecord app = mAms.mProcessList.getLruProcessesLSP().get(0);
+        app.mPid = TEST_PID;
+        app.info.packageName = TEST_PACKAGE_NAME;
+        app.info.processName = TEST_PACKAGE_NAME;
+
+        doReturn(app.info).when(mPackageManager).getApplicationInfo(
+                eq(app.info.packageName), anyLong(), anyInt());
+
+        doReturn(true).when(mActiveServices)
+                .canStartForegroundServiceLocked(anyInt(), anyInt(), anyString());
+        doReturn(REASON_DENIED).when(mActiveServices)
+                .shouldAllowFgsWhileInUsePermissionLocked(anyString(), anyInt(), anyInt(),
+                        any(ProcessRecord.class), any(BackgroundStartPrivileges.class));
+
+        doReturn(true).when(mNotificationManagerInternal).areNotificationsEnabledForPackage(
+                anyString(), anyInt());
+        doReturn(mock(Icon.class)).when(notification).getSmallIcon();
+        doReturn("").when(notification).getChannelId();
+        doReturn(mock(NotificationChannel.class)).when(mNotificationManagerInternal)
+                .getNotificationChannel(anyString(), anyInt(), anyString());
+
+        mAms.mAppProfiler.mCachedAppsWatermarkData.mCachedAppHighWatermark = Integer.MAX_VALUE;
+
+        final ForegroundServiceDelegationOptions.Builder optionsBuilder =
+                new ForegroundServiceDelegationOptions.Builder()
+                .setClientPid(app.mPid)
+                .setClientUid(app.uid)
+                .setClientPackageName(app.info.packageName)
+                .setClientAppThread(app.getThread())
+                .setSticky(false)
+                .setClientInstanceName(
+                        "SystemExemptedFgsDelegate_"
+                        + Process.myUid()
+                        + "_"
+                        + app.uid
+                        + "_"
+                        + app.info.packageName)
+                .setForegroundServiceTypes(ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED)
+                .setDelegationService(
+                        ForegroundServiceDelegationOptions.DELEGATION_SERVICE_SYSTEM_EXEMPTED);
+        if (withNotification) {
+            optionsBuilder.setClientNotification(notificationId, notification);
+        }
+        final ForegroundServiceDelegationOptions options = optionsBuilder.build();
+
+        final CountDownLatch[] latchHolder = new CountDownLatch[1];
+        final ServiceConnection conn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                latchHolder[0].countDown();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                latchHolder[0].countDown();
+            }
+        };
+
+        latchHolder[0] = new CountDownLatch(1);
+        mAms.mInternal.startForegroundServiceDelegate(options, conn);
+
+        assertThat(latchHolder[0].await(5, TimeUnit.SECONDS)).isTrue();
+        assertEquals(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE,
+                app.mState.getCurProcState());
+        final long timeoutMs = 5000L;
+        final VerificationMode mode = withNotification
+                ? timeout(timeoutMs) : after(timeoutMs).atMost(0);
+        verify(mNotificationManagerInternal, mode)
+                .enqueueNotification(eq(app.info.packageName), eq(app.info.packageName),
+                        eq(app.info.uid), eq(app.mPid), eq(null),
+                        eq(notificationId), eq(notification), anyInt(), eq(true));
+
+        latchHolder[0] = new CountDownLatch(1);
+        mAms.mInternal.stopForegroundServiceDelegate(options);
+
+        assertThat(latchHolder[0].await(5, TimeUnit.SECONDS)).isTrue();
+        assertEquals(ActivityManager.PROCESS_STATE_CACHED_EMPTY,
+                app.mState.getCurProcState());
+        verify(mNotificationManagerInternal, mode)
+                .cancelNotification(eq(app.info.packageName), eq(app.info.packageName),
+                        eq(app.info.uid), eq(app.mPid), eq(null),
+                        eq(notificationId), anyInt());
+    }
+
     private static class TestHandler extends Handler {
         private static final long WAIT_FOR_MSG_TIMEOUT_MS = 4000; // 4 sec
         private static final long WAIT_FOR_MSG_INTERVAL_MS = 400; // 0.4 sec
@@ -1290,6 +1444,19 @@ public class ActivityManagerServiceTest {
                 IProgressListener unlockProgressListener) {
             usersStartedOnSecondaryDisplays.add(new Pair<>(userId, displayId));
             return returnValueForstartUserOnSecondaryDisplay;
+        }
+
+        @Override
+        public ActiveServices getActiveServices(ActivityManagerService service) {
+            if (mActiveServices == null) {
+                mActiveServices = spy(new ActiveServices(service));
+            }
+            return mActiveServices;
+        }
+
+        @Override
+        public BatteryStatsService getBatteryStatsService() {
+            return mBatteryStatsService;
         }
     }
 

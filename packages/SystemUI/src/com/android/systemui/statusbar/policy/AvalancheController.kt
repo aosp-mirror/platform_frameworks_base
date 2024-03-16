@@ -131,21 +131,37 @@ class AvalancheController @Inject constructor() {
     }
 
     /**
-     * Returns true if given HeadsUpEntry is the last one tracked by AvalancheController. Used by
-     * BaseHeadsUpManager.HeadsUpEntry.calculateFinishTime to shorten display duration during active
-     * avalanche.
+     * Returns duration based on
+     * 1) Whether HeadsUpEntry is the last one tracked byAvalancheController
+     * 2) The priority of the top HUN in the next batch Used by
+     *    BaseHeadsUpManager.HeadsUpEntry.calculateFinishTime to shorten display duration.
      */
-    fun shortenDuration(entry: HeadsUpEntry): Boolean {
+    fun getDurationMs(entry: HeadsUpEntry, autoDismissMs: Int): Int {
         if (!NotificationThrottleHun.isEnabled) {
-            // Use default display duration, like we always did before AvalancheController existed
-            return false
+            // Use default duration, like we did before AvalancheController existed
+            return autoDismissMs
         }
         val showingList: MutableList<HeadsUpEntry> = mutableListOf()
         headsUpEntryShowing?.let { showingList.add(it) }
-        val allEntryList = showingList + nextList
 
-        // Shorten duration if not last entry
-        return allEntryList.indexOf(entry) != allEntryList.size - 1
+        val entryList = showingList + nextList
+        if (entryList.indexOf(entry) == entryList.size - 1) {
+            // Use default duration if last entry
+            return autoDismissMs
+        }
+
+        nextList.sort()
+        val nextEntry = nextList[0]
+
+        if (nextEntry.compareNonTimeFields(entry) == -1) {
+            // Next entry is higher priority
+            return 500
+        } else if (nextEntry.compareNonTimeFields(entry) == 0) {
+            // Next entry is same priority
+            return 1000
+        } else {
+            return autoDismissMs
+        }
     }
 
     /**

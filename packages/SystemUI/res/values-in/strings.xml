@@ -32,7 +32,7 @@
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Aktifkan"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Lain kali"</string>
     <string name="standard_battery_saver_text" msgid="6855876746552374119">"Standar"</string>
-    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"Ekstrem"</string>
+    <string name="extreme_battery_saver_text" msgid="8455810156739865335">"Super"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Putar layar otomatis"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Izinkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nAplikasi ini belum diberi izin merekam, tetapi dapat merekam audio melalui perangkat USB ini."</string>
@@ -271,10 +271,8 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"putuskan koneksi"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktifkan"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Otomatis aktifkan lagi besok"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Fitur seperti Quick Share, Temukan Perangkat Saya, dan lokasi perangkat menggunakan Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth akan diaktifkan besok pada pukul 05.00"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -439,6 +437,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Hapus"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Tambahkan widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Selesai"</string>
+    <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Izinkan widget di layar kunci?"</string>
+    <string name="button_text_to_open_settings" msgid="1987729256950941628">"Buka setelan"</string>
+    <string name="work_mode_off_title" msgid="5794818421357835873">"Batalkan jeda aplikasi kerja?"</string>
+    <string name="work_mode_turn_on" msgid="907813741770247267">"Batalkan jeda"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Beralih pengguna"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu pulldown"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua aplikasi dan data dalam sesi ini akan dihapus."</string>
@@ -544,7 +546,7 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Overlay teks"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktifkan"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"nonaktifkan"</string>
-    <string name="sound_settings" msgid="8874581353127418308">"Suara &amp; getaran"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"Suara dan getaran"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Setelan"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Teks Otomatis"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume diturunkan ke level yang lebih aman"</string>
@@ -581,26 +583,36 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Nonaktifkan"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Transmisi"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Tidak tersedia karena volume dering dibisukan"</string>
+    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
+    <skip />
+    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Ketuk untuk menyuarakan."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Ketuk untuk menyetel agar bergetar."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Ketuk untuk menonaktifkan."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Kontrol Bising"</string>
-    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
-    <skip />
+    <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Audio Spasial"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Nonaktif"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Tetap"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Pelacakan Gerak Kepala"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Ketuk untuk mengubah mode pendering"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Tanpa suara"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"aktifkan"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"getar"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s kontrol volume"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Panggilan telepon dan notifikasi akan berdering (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
+    <skip />
+    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
+    <skip />
+    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"Memutar <xliff:g id="LABEL">%s</xliff:g> di"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audio akan diputar di"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Penyetel Antarmuka Pengguna Sistem"</string>
@@ -995,9 +1007,9 @@
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Hapus kontrol untuk <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Difavoritkan"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Difavoritkan, posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Batal difavoritkan"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Tidak difavoritkan"</string>
     <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"favorit"</string>
-    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"batal favoritkan"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"tidak memfavoritkan"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Pindah ke posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrol"</string>
     <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Pilih kontrol perangkat untuk mengakses dengan cepat"</string>
@@ -1254,7 +1266,8 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera diblokir"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera dan mikrofon diblokir"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon diblokir"</string>
-    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Mode prioritas diaktifkan"</string>
+    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
+    <skip />
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"Kehadiran pengguna terdeteksi"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Setel aplikasi catatan default di Setelan"</string>
     <string name="install_app" msgid="5066668100199613936">"Instal aplikasi"</string>

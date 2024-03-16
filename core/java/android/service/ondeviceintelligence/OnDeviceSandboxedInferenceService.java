@@ -27,21 +27,21 @@ import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
-import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
-import android.os.Bundle;
 import android.app.ondeviceintelligence.Feature;
 import android.app.ondeviceintelligence.IProcessingSignal;
 import android.app.ondeviceintelligence.IResponseCallback;
 import android.app.ondeviceintelligence.IStreamingResponseCallback;
 import android.app.ondeviceintelligence.ITokenInfoCallback;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.InferenceParams;
-import android.app.ondeviceintelligence.ProcessingSignal;
 import android.app.ondeviceintelligence.ProcessingCallback;
+import android.app.ondeviceintelligence.ProcessingSignal;
 import android.app.ondeviceintelligence.StreamingProcessingCallback;
 import android.app.ondeviceintelligence.TokenInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -292,15 +292,15 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
 
     /**
      * Provides read-only access to the internal app storage via the
-     * {@link OnDeviceIntelligenceService}. This is an asynchronous implementation for
+     * {@link OnDeviceIntelligenceService}. This is an asynchronous alternative for
      * {@link #openFileInput(String)}.
      *
      * @param fileName       File name relative to the {@link Context#getFilesDir()}.
-     * @param resultConsumer Consumer to populate the corresponding file stream in.
+     * @param resultConsumer Consumer to populate the corresponding file descriptor in.
      */
-    public final void openFileInputAsync(@NonNull String fileName,
+    public final void getReadOnlyFileDescriptor(@NonNull String fileName,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<FileInputStream> resultConsumer) throws FileNotFoundException {
+            @NonNull Consumer<ParcelFileDescriptor> resultConsumer) throws FileNotFoundException {
         AndroidFuture<ParcelFileDescriptor> future = new AndroidFuture<>();
         try {
             mRemoteStorageService.getReadOnlyFileDescriptor(fileName, future);
@@ -314,7 +314,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
                 executor.execute(() -> resultConsumer.accept(null));
             } else {
                 executor.execute(
-                        () -> resultConsumer.accept(new FileInputStream(pfd.getFileDescriptor())));
+                        () -> resultConsumer.accept(pfd));
             }
         }, executor);
     }
@@ -328,12 +328,12 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      * @param resultConsumer Consumer to receive a map of filePath to the corresponding file input
      *                       stream.
      */
-    public final void fetchFeatureFileInputStreamMap(@NonNull Feature feature,
+    public final void fetchFeatureFileDescriptorMap(@NonNull Feature feature,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Map<String, FileInputStream>> resultConsumer) {
+            @NonNull Consumer<Map<String, ParcelFileDescriptor>> resultConsumer) {
         try {
             mRemoteStorageService.getReadOnlyFeatureFileDescriptorMap(feature,
-                    wrapResultReceiverAsReadOnly(resultConsumer, executor));
+                    wrapAsRemoteCallback(resultConsumer, executor));
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -359,22 +359,18 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     }
 
 
-    private RemoteCallback wrapResultReceiverAsReadOnly(
-            @NonNull Consumer<Map<String, FileInputStream>> resultConsumer,
+    private RemoteCallback wrapAsRemoteCallback(
+            @NonNull Consumer<Map<String, ParcelFileDescriptor>> resultConsumer,
             @NonNull Executor executor) {
         return new RemoteCallback(result -> {
             if (result == null) {
                 executor.execute(() -> resultConsumer.accept(new HashMap<>()));
             } else {
-                Map<String, FileInputStream> bundleMap = new HashMap<>();
-                result.keySet().forEach(key -> {
-                    ParcelFileDescriptor pfd = result.getParcelable(key,
-                            ParcelFileDescriptor.class);
-                    if (pfd != null) {
-                        bundleMap.put(key, new FileInputStream(pfd.getFileDescriptor()));
-                    }
-                });
-                executor.execute(() -> resultConsumer.accept(bundleMap));
+                Map<String, ParcelFileDescriptor> pfdMap = new HashMap<>();
+                result.keySet().forEach(key ->
+                        pfdMap.put(key, result.getParcelable(key,
+                                ParcelFileDescriptor.class)));
+                executor.execute(() -> resultConsumer.accept(pfdMap));
             }
         });
     }

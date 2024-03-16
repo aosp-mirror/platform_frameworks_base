@@ -86,15 +86,6 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 
 import com.google.ux.material.libmonet.dynamiccolor.MaterialDynamicColors;
-import com.google.ux.material.libmonet.hct.Hct;
-import com.google.ux.material.libmonet.scheme.DynamicScheme;
-import com.google.ux.material.libmonet.scheme.SchemeExpressive;
-import com.google.ux.material.libmonet.scheme.SchemeFruitSalad;
-import com.google.ux.material.libmonet.scheme.SchemeMonochrome;
-import com.google.ux.material.libmonet.scheme.SchemeNeutral;
-import com.google.ux.material.libmonet.scheme.SchemeRainbow;
-import com.google.ux.material.libmonet.scheme.SchemeTonalSpot;
-import com.google.ux.material.libmonet.scheme.SchemeVibrant;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -150,7 +141,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     // Dominant color extracted from wallpaper, NOT the color used on the overlay
     protected int mMainWallpaperColor = Color.TRANSPARENT;
     // UI contrast as reported by UiModeManager
-    private float mContrast = 0;
+    private double mContrast = 0.0;
     // Theme variant: Vibrant, Tonal, Expressive, etc
     @VisibleForTesting
     protected Style mThemeStyle = Style.TONAL_SPOT;
@@ -170,8 +161,8 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private final JavaAdapter mJavaAdapter;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final UiModeManager mUiModeManager;
-    private DynamicScheme mDynamicSchemeDark;
-    private DynamicScheme mDynamicSchemeLight;
+    private ColorScheme mDarkColorScheme;
+    private ColorScheme mLightColorScheme;
 
     // Defers changing themes until Setup Wizard is done.
     private boolean mDeferredThemeEvaluation;
@@ -210,7 +201,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             boolean currentUser = userId == mUserTracker.getUserId();
             boolean isAsleep = themeOverlayControllerWakefulnessDeprecation()
                     ? mKeyguardTransitionInteractor.isFinishedInStateWhereValue(
-                        state -> KeyguardState.Companion.deviceIsAsleepInState(state))
+                    KeyguardState.Companion::deviceIsAsleepInState)
                     : mWakefulnessLifecycle.getWakefulness() != WAKEFULNESS_ASLEEP;
 
             if (currentUser && !mAcceptColorEvents && isAsleep) {
@@ -483,18 +474,13 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             reevaluateSystemTheme(true /* forceReload */);
         });
 
+        // All wallpaper color and keyguard logic only applies when Monet is enabled.
         if (!mIsMonetEnabled) {
             return;
         }
 
         mUserTracker.addCallback(mUserTrackerCallback, mMainExecutor);
-
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
-
-        // All wallpaper color and keyguard logic only applies when Monet is enabled.
-        if (!mIsMonetEnabled) {
-            return;
-        }
 
         // Upon boot, make sure we have the most up to date colors
         Runnable updateColors = () -> {
@@ -589,29 +575,6 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         return ColorScheme.getSeedColor(wallpaperColors);
     }
 
-    private static DynamicScheme dynamicSchemeFromStyle(Style style, int color,
-            boolean isDark, double contrastLevel) {
-        Hct sourceColorHct = Hct.fromInt(color);
-        switch (style) {
-            case EXPRESSIVE:
-                return new SchemeExpressive(sourceColorHct, isDark, contrastLevel);
-            case SPRITZ:
-                return new SchemeNeutral(sourceColorHct, isDark, contrastLevel);
-            case TONAL_SPOT:
-                return new SchemeTonalSpot(sourceColorHct, isDark, contrastLevel);
-            case FRUIT_SALAD:
-                return new SchemeFruitSalad(sourceColorHct, isDark, contrastLevel);
-            case RAINBOW:
-                return new SchemeRainbow(sourceColorHct, isDark, contrastLevel);
-            case VIBRANT:
-                return new SchemeVibrant(sourceColorHct, isDark, contrastLevel);
-            case MONOCHROMATIC:
-                return new SchemeMonochrome(sourceColorHct, isDark, contrastLevel);
-            default:
-                return null;
-        }
-    }
-
     @VisibleForTesting
     protected boolean isNightMode() {
         return (mResources.getConfiguration().uiMode
@@ -626,22 +589,17 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     @VisibleForTesting
     protected boolean isPrivateProfile(UserHandle userHandle) {
         Context usercontext = mContext.createContextAsUser(userHandle,0);
-        if (usercontext.getSystemService(UserManager.class).isPrivateProfile()) {
-            return true;
-        }
-        return false;
+        return usercontext.getSystemService(UserManager.class).isPrivateProfile();
     }
 
     private void createOverlays(int color) {
-        boolean nightMode = isNightMode();
-        mColorScheme = new ColorScheme(color, nightMode, mThemeStyle);
+        mDarkColorScheme = new ColorScheme(color, true /* isDark */, mThemeStyle, mContrast);
+        mLightColorScheme = new ColorScheme(color, false /* isDark */, mThemeStyle, mContrast);
+        mColorScheme = isNightMode() ? mDarkColorScheme : mLightColorScheme;
+
         mNeutralOverlay = createNeutralOverlay();
         mSecondaryOverlay = createAccentOverlay();
 
-        mDynamicSchemeDark = dynamicSchemeFromStyle(
-                mThemeStyle, color, true /* isDark */, mContrast);
-        mDynamicSchemeLight = dynamicSchemeFromStyle(
-                mThemeStyle, color, false /* isDark */, mContrast);
         mDynamicOverlay = createDynamicOverlay();
     }
 
@@ -682,10 +640,10 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
     private void assignDynamicPaletteToOverlay(FabricatedOverlay overlay, boolean isDark) {
         String suffix = isDark ? "dark" : "light";
-        DynamicScheme scheme = isDark ? mDynamicSchemeDark : mDynamicSchemeLight;
+        ColorScheme scheme = isDark ? mDarkColorScheme : mLightColorScheme;
         DynamicColors.allDynamicColorsMapped(mIsFidelityEnabled).forEach(p -> {
             String resourceName = "android:color/system_" + p.first + "_" + suffix;
-            int colorValue = p.second.getArgb(scheme);
+            int colorValue = p.second.getArgb(scheme.getMaterialScheme());
             overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
                     null /* configuration */);
         });
@@ -694,7 +652,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private void assignFixedColorsToOverlay(FabricatedOverlay overlay) {
         DynamicColors.getFixedColorsMapped(mIsFidelityEnabled).forEach(p -> {
             String resourceName = "android:color/system_" + p.first;
-            int colorValue = p.second.getArgb(mDynamicSchemeLight);
+            int colorValue = p.second.getArgb(mLightColorScheme.getMaterialScheme());
             overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
                     null /* configuration */);
         });
@@ -702,6 +660,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
     /**
      * Checks if the color scheme in mColorScheme matches the current system palettes.
+     *
      * @param managedProfiles List of managed profiles for this user.
      */
     private boolean colorSchemeIsApplied(Set<UserHandle> managedProfiles) {
@@ -723,15 +682,18 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                     && res.getColor(android.R.color.system_neutral2_500, theme)
                     == mColorScheme.getNeutral2().getS500()
                     && res.getColor(android.R.color.system_outline_variant_dark, theme)
-                    == dynamicColors.outlineVariant().getArgb(mDynamicSchemeDark)
+                    == dynamicColors.outlineVariant().getArgb(mDarkColorScheme.getMaterialScheme())
                     && res.getColor(android.R.color.system_outline_variant_light, theme)
-                    == dynamicColors.outlineVariant().getArgb(mDynamicSchemeLight)
+                    == dynamicColors.outlineVariant().getArgb(mLightColorScheme.getMaterialScheme())
                     && res.getColor(android.R.color.system_primary_container_dark, theme)
-                    == dynamicColors.primaryContainer().getArgb(mDynamicSchemeDark)
+                    == dynamicColors.primaryContainer().getArgb(
+                    mDarkColorScheme.getMaterialScheme())
                     && res.getColor(android.R.color.system_primary_container_light, theme)
-                    == dynamicColors.primaryContainer().getArgb(mDynamicSchemeLight)
+                    == dynamicColors.primaryContainer().getArgb(
+                    mLightColorScheme.getMaterialScheme())
                     && res.getColor(android.R.color.system_primary_fixed, theme)
-                    == dynamicColors.primaryFixed().getArgb(mDynamicSchemeLight))) {
+                    == dynamicColors.primaryFixed().getArgb(
+                    mLightColorScheme.getMaterialScheme()))) {
                 return false;
             }
         }

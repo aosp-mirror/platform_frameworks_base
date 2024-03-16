@@ -18,6 +18,7 @@ package android.view;
 
 import static android.content.res.Resources.ID_NULL;
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
@@ -16356,20 +16357,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         ListenerInfo li = mListenerInfo;
         if (li != null && li.mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED) {
             try {
-                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
+                Trace.traceBegin(TRACE_TAG_VIEW, "View.onTouchListener#onTouch");
                 handled = li.mOnTouchListener.onTouch(this, event);
             } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
         }
         if (handled) {
             return true;
         }
         try {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "View#onTouchEvent");
+            Trace.traceBegin(TRACE_TAG_VIEW, "View#onTouchEvent");
             return onTouchEvent(event);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            Trace.traceEnd(TRACE_TAG_VIEW);
         }
     }
 
@@ -23846,14 +23847,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void buildDrawingCache(boolean autoScale) {
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 || (autoScale ?
                 mDrawingCache == null : mUnscaledDrawingCache == null)) {
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+            if (Trace.isTagEnabled(TRACE_TAG_VIEW)) {
+                Trace.traceBegin(TRACE_TAG_VIEW,
                         "buildDrawingCache/SW Layer for " + getClass().getSimpleName());
             }
             try {
                 buildDrawingCacheImpl(autoScale);
             } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
         }
     }
@@ -28980,6 +28981,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         surface.copyFrom(surfaceControl);
         IBinder token = null;
         try {
+            Trace.traceBegin(TRACE_TAG_VIEW, "startDragAndDrop#drawDragShadow");
             final Canvas canvas = isHardwareAccelerated()
                     ? surface.lockHardwareCanvas()
                     : surface.lockCanvas(null);
@@ -28988,33 +28990,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 shadowBuilder.onDrawShadow(canvas);
             } finally {
                 surface.unlockCanvasAndPost(canvas);
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
 
-            token = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, flags, surfaceControl,
-                    root.getLastTouchSource(), root.getLastTouchDeviceId(),
-                    root.getLastTouchPointerId(), lastTouchPoint.x, lastTouchPoint.y,
-                    shadowTouchPoint.x, shadowTouchPoint.y, data);
-            if (ViewDebug.DEBUG_DRAG) {
-                Log.d(VIEW_LOG_TAG, "performDrag returned " + token);
+            Trace.traceBegin(TRACE_TAG_VIEW, "startDragAndDrop#performDrag");
+            try {
+                token = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, flags, surfaceControl,
+                        root.getLastTouchSource(), root.getLastTouchDeviceId(),
+                        root.getLastTouchPointerId(), lastTouchPoint.x, lastTouchPoint.y,
+                        shadowTouchPoint.x, shadowTouchPoint.y, data);
+                if (ViewDebug.DEBUG_DRAG) {
+                    Log.d(VIEW_LOG_TAG, "performDrag returned " + token);
+                }
+                if (token != null) {
+                    if (mAttachInfo.mDragSurface != null) {
+                        mAttachInfo.mDragSurface.release();
+                    }
+                    if (mAttachInfo.mDragData != null) {
+                        // Clean up previous drag data intents
+                        View.cleanUpPendingIntents(mAttachInfo.mDragData);
+                    }
+                    mAttachInfo.mDragSurface = surface;
+                    mAttachInfo.mDragToken = token;
+                    mAttachInfo.mDragData = data;
+                    // Cache the local state object for delivery with DragEvents
+                    root.setLocalDragState(myLocalState);
+                    if (a11yEnabled) {
+                        // Set for AccessibilityEvents
+                        mAttachInfo.mViewRootImpl.setDragStartedViewForAccessibility(this);
+                    }
+                }
+                return token != null;
+            } finally {
+                Trace.traceEnd(TRACE_TAG_VIEW);
             }
-            if (token != null) {
-                if (mAttachInfo.mDragSurface != null) {
-                    mAttachInfo.mDragSurface.release();
-                }
-                if (mAttachInfo.mDragData != null) {
-                    View.cleanUpPendingIntents(mAttachInfo.mDragData);
-                }
-                mAttachInfo.mDragSurface = surface;
-                mAttachInfo.mDragToken = token;
-                mAttachInfo.mDragData = data;
-                // Cache the local state object for delivery with DragEvents
-                root.setLocalDragState(myLocalState);
-                if (a11yEnabled) {
-                    // Set for AccessibilityEvents
-                    mAttachInfo.mViewRootImpl.setDragStartedViewForAccessibility(this);
-                }
-            }
-            return token != null;
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
             return false;

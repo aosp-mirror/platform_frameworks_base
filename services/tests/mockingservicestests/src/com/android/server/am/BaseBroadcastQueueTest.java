@@ -56,6 +56,7 @@ import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.Rule;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
@@ -160,6 +161,7 @@ public abstract class BaseBroadcastQueueTest {
         realAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         realAms.mActivityTaskManager.initialize(null, null, mContext.getMainLooper());
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
+        realAms.mOomAdjuster.mCachedAppOptimizer = Mockito.mock(CachedAppOptimizer.class);
         realAms.mOomAdjuster = spy(realAms.mOomAdjuster);
         ExtendedMockito.doNothing().when(() -> ProcessList.setOomAdj(anyInt(), anyInt(), anyInt()));
         realAms.mPackageManagerInt = mPackageManagerInt;

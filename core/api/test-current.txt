@@ -3065,6 +3065,7 @@ package android.service.dreams {
   }
 
   public static final class DreamService.DreamMetadata {
+    field @FlaggedApi("android.service.controls.flags.home_panel_dream") @NonNull public final int dreamCategory;
     field @Nullable public final android.graphics.drawable.Drawable previewImage;
     field @Nullable public final android.content.ComponentName settingsActivity;
     field @NonNull public final boolean showComplications;

@@ -37,6 +37,39 @@ public class Assert {
         sTestThread = thread;
     }
 
+    /**
+     * Run {@code mainThreadWork} synchronously, ensuring that {@link #isMainThread()} will return
+     * {@code true} while it is running.
+     * <ol>
+     * <li>If {@link #isMainThread()} already passes, the work is simply run.
+     * <li>If the test thread is {@code null}, it will be set, the work run, and then cleared.
+     * <li>If the test thread is already set to a different thread, this call will fail the test to
+     * avoid causing spurious errors on other thread
+     * </ol>
+     */
+    @VisibleForTesting
+    public static void runWithCurrentThreadAsMainThread(Runnable mainThreadWork) {
+        if (sMainLooper.isCurrentThread()) {
+            // Already on the main thread; just run
+            mainThreadWork.run();
+            return;
+        }
+        Thread currentThread = Thread.currentThread();
+        Thread originalThread = sTestThread;
+        if (originalThread == currentThread) {
+            // test thread is already set; just run
+            mainThreadWork.run();
+            return;
+        }
+        if (originalThread != null) {
+            throw new AssertionError("Can't run with current thread (" + currentThread
+                    + ") as main thread; test thread is already set to " + originalThread);
+        }
+        sTestThread = currentThread;
+        mainThreadWork.run();
+        sTestThread = null;
+    }
+
     public static void isMainThread() {
         if (!sMainLooper.isCurrentThread()
                 && (sTestThread == null || sTestThread != Thread.currentThread())) {

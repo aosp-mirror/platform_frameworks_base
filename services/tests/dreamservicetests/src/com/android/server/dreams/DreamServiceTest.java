@@ -48,6 +48,7 @@ public class DreamServiceTest {
         assertThat(metadata.settingsActivity).isEqualTo(
                 ComponentName.unflattenFromString(testSettingsActivity));
         assertFalse(metadata.showComplications);
+        assertThat(metadata.dreamCategory).isEqualTo(DreamService.DREAM_CATEGORY_HOME_PANEL);
     }
 
     @Test
@@ -58,6 +59,7 @@ public class DreamServiceTest {
         final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
 
         assertThat(metadata.settingsActivity).isNull();
+        assertThat(metadata.dreamCategory).isEqualTo(DreamService.DREAM_CATEGORY_DEFAULT);
     }
 
     private DreamService.DreamMetadata getDreamMetadata(String dreamClassName)

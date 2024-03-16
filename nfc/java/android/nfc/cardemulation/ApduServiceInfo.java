@@ -108,6 +108,8 @@ public final class ApduServiceInfo implements Parcelable {
 
     private final Map<String, Boolean> mAutoTransact;
 
+    private final Map<Pattern, Boolean> mAutoTransactPatterns;
+
     /**
      * Whether this service should only be started when the device is unlocked.
      */
@@ -179,7 +181,7 @@ public final class ApduServiceInfo implements Parcelable {
         this(info, onHost, description, staticAidGroups, dynamicAidGroups,
                 requiresUnlock, requiresScreenOn, bannerResource, uid,
                 settingsActivityName, offHost, staticOffHost, isEnabled,
-                new HashMap<String, Boolean>());
+                new HashMap<String, Boolean>(), new HashMap<Pattern, Boolean>());
     }
 
     /**
@@ -189,12 +191,13 @@ public final class ApduServiceInfo implements Parcelable {
             List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost, boolean isEnabled,
-            HashMap<String, Boolean> autoTransact) {
+            Map<String, Boolean> autoTransact, Map<Pattern, Boolean> autoTransactPatterns) {
         this.mService = info;
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
         this.mDynamicAidGroups = new HashMap<String, AidGroup>();
         this.mAutoTransact = autoTransact;
+        this.mAutoTransactPatterns = autoTransactPatterns;
         this.mOffHostName = offHost;
         this.mStaticOffHostName = staticOffHost;
         this.mOnHost = onHost;
@@ -314,6 +317,7 @@ public final class ApduServiceInfo implements Parcelable {
             mStaticAidGroups = new HashMap<String, AidGroup>();
             mDynamicAidGroups = new HashMap<String, AidGroup>();
             mAutoTransact = new HashMap<String, Boolean>();
+            mAutoTransactPatterns = new HashMap<Pattern, Boolean>();
             mOnHost = onHost;
 
             final int depth = parser.getDepth();
@@ -408,6 +412,18 @@ public final class ApduServiceInfo implements Parcelable {
                             false);
                     mAutoTransact.put(plf, autoTransact);
                     a.recycle();
+                } else if (eventType == XmlPullParser.START_TAG
+                        && "polling-loop-pattern-filter".equals(tagName) && currentGroup == null) {
+                    final TypedArray a = res.obtainAttributes(attrs,
+                            com.android.internal.R.styleable.PollingLoopPatternFilter);
+                    String plf = a.getString(
+                            com.android.internal.R.styleable.PollingLoopPatternFilter_name)
+                                    .toUpperCase(Locale.ROOT);
+                    boolean autoTransact = a.getBoolean(
+                            com.android.internal.R.styleable.PollingLoopFilter_autoTransact,
+                            false);
+                    mAutoTransactPatterns.put(Pattern.compile(plf), autoTransact);
+                    a.recycle();
                 }
             }
         } catch (NameNotFoundException e) {
@@ -481,7 +497,30 @@ public final class ApduServiceInfo implements Parcelable {
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public boolean getShouldAutoTransact(@NonNull String plf) {
-        return mAutoTransact.getOrDefault(plf.toUpperCase(Locale.ROOT), false);
+        if (mAutoTransact.getOrDefault(plf.toUpperCase(Locale.ROOT), false)) {
+            return true;
+        }
+        List<Pattern> patternMatches = mAutoTransactPatterns.keySet().stream()
+                .filter(p -> p.matcher(plf).matches()).toList();
+        if (patternMatches == null || patternMatches.size() == 0) {
+            return false;
+        }
+        for (Pattern patternMatch : patternMatches) {
+            if (mAutoTransactPatterns.get(patternMatch)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the current polling loop pattern filters for this service.
+     * @return List of polling loop pattern filters.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    @NonNull
+    public List<Pattern> getPollingLoopPatternFilters() {
+        return new ArrayList<>(mAutoTransactPatterns.keySet());
     }
 
     /**
@@ -683,7 +722,7 @@ public final class ApduServiceInfo implements Parcelable {
      * Add a Polling Loop Filter. Custom NFC polling frames that match this filter will be
      * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this
      * multiple times will cause the value to be overwritten each time.
-     * @param pollingLoopFilter the polling loop filter to add, must be a  valide hexadecimal string
+     * @param pollingLoopFilter the polling loop filter to add, must be a valid hexadecimal string
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopFilter(@NonNull String pollingLoopFilter,
@@ -700,6 +739,31 @@ public final class ApduServiceInfo implements Parcelable {
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void removePollingLoopFilter(@NonNull String pollingLoopFilter) {
         mAutoTransact.remove(pollingLoopFilter.toUpperCase(Locale.ROOT));
+    }
+
+    /**
+     * Add a Polling Loop Pattern Filter. Custom NFC polling frames that match this filter will be
+     * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this
+     * multiple times will cause the value to be overwritten each time.
+     * @param pollingLoopPatternFilter the polling loop pattern filter to add, must be a valid
+     *                                regex to match a hexadecimal string
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void addPollingLoopPatternFilter(@NonNull String pollingLoopPatternFilter,
+            boolean autoTransact) {
+        mAutoTransactPatterns.put(Pattern.compile(pollingLoopPatternFilter), autoTransact);
+
+    }
+
+    /**
+     * Remove a Polling Loop Pattern Filter. Custom NFC polling frames that match this filter will
+     * no longer be delivered to {@link HostApduService#processPollingFrames(List)}.
+     * @param pollingLoopPatternFilter this polling loop filter to add.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
+    public void removePollingLoopPatternFilter(@NonNull String pollingLoopPatternFilter) {
+        mAutoTransactPatterns.remove(
+                Pattern.compile(pollingLoopPatternFilter.toUpperCase(Locale.ROOT)));
     }
 
     /**
@@ -856,6 +920,8 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeInt(mCategoryOtherServiceEnabled ? 1 : 0);
         dest.writeInt(mAutoTransact.size());
         dest.writeMap(mAutoTransact);
+        dest.writeInt(mAutoTransactPatterns.size());
+        dest.writeMap(mAutoTransactPatterns);
     };
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
@@ -889,10 +955,15 @@ public final class ApduServiceInfo implements Parcelable {
                             new HashMap<String, Boolean>(autoTransactSize);
                     source.readMap(autoTransact, getClass().getClassLoader(),
                             String.class, Boolean.class);
+                    int autoTransactPatternSize = source.readInt();
+                    HashMap<Pattern, Boolean> autoTransactPatterns =
+                            new HashMap<Pattern, Boolean>(autoTransactSize);
+                    source.readMap(autoTransactPatterns, getClass().getClassLoader(),
+                            Pattern.class, Boolean.class);
                     return new ApduServiceInfo(info, onHost, description, staticAidGroups,
                             dynamicAidGroups, requiresUnlock, requiresScreenOn, bannerResource, uid,
                             settingsActivityName, offHostName, staticOffHostName,
-                            isEnabled, autoTransact);
+                            isEnabled, autoTransact, autoTransactPatterns);
                 }
 
                 @Override

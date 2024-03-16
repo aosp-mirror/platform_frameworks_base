@@ -954,6 +954,7 @@
   <java-symbol type="string" name="roamingTextSearching" />
   <java-symbol type="string" name="scCellularNetworkSecuritySummary" />
   <java-symbol type="string" name="scCellularNetworkSecurityTitle" />
+  <java-symbol type="string" name="scCellularNetworkSecurityLearnMore" />
   <java-symbol type="string" name="scIdentifierDisclosureIssueSummary" />
   <java-symbol type="string" name="scIdentifierDisclosureIssueTitle" />
   <java-symbol type="string" name="scNullCipherIssueActionLearnMore" />
@@ -5374,4 +5375,7 @@
   <java-symbol type="string" name="config_defaultContextualSearchLegacyEnabled" />
 
   <java-symbol type="string" name="unarchival_session_app_label" />
+
+  <!-- Whether WM DisplayContent supports high performance transitions -->
+  <java-symbol type="bool" name="config_deviceSupportsHighPerfTransitions" />
 </resources>

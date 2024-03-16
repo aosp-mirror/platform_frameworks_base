@@ -5396,6 +5396,19 @@ public abstract class Context {
     public static final String SMARTSPACE_SERVICE = "smartspace";
 
     /**
+     * Used for getting the contextual search service.
+     *
+     * <p><b>NOTE: </b> this service is optional; callers of
+     * {@code Context.getSystemServiceName(CONTEXTUAL_SEARCH_SERVICE)} must check for {@code null}.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @FlaggedApi(android.app.contextualsearch.flags.Flags.FLAG_ENABLE_SERVICE)
+    @SystemApi
+    public static final String CONTEXTUAL_SEARCH_SERVICE = "contextual_search";
+
+    /**
      * Used for getting the cloudsearch service.
      *
      * <p><b>NOTE: </b> this service is optional; callers of

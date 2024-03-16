@@ -1144,12 +1144,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
-        public void registerSplitAnimationListener(@NonNull SplitInvocationListener listener,
-                @NonNull Executor executor) {
-            mStageCoordinator.registerSplitAnimationListener(listener, executor);
-        }
-
-        @Override
         public void onFinishedWakingUp() {
             mMainExecutor.execute(SplitScreenController.this::onFinishedWakingUp);
         }

@@ -18,15 +18,15 @@
 
 #include <aidl/android/hardware/power/SessionHint.h>
 #include <aidl/android/hardware/power/SessionMode.h>
+#include <aidl/android/hardware/power/SessionTag.h>
+#include <aidl/android/hardware/power/WorkDuration.h>
+#include <aidl/android/os/IHintManager.h>
+#include <aidl/android/os/IHintSession.h>
 #include <android-base/stringprintf.h>
-#include <android/WorkDuration.h>
-#include <android/os/IHintManager.h>
-#include <android/os/IHintSession.h>
+#include <android/binder_manager.h>
+#include <android/binder_status.h>
 #include <android/performance_hint.h>
 #include <android/trace.h>
-#include <binder/Binder.h>
-#include <binder/IBinder.h>
-#include <binder/IServiceManager.h>
 #include <inttypes.h>
 #include <performance_hint_private.h>
 #include <utils/SystemClock.h>
@@ -37,22 +37,25 @@
 #include <vector>
 
 using namespace android;
-using namespace android::os;
+using namespace aidl::android::os;
 
 using namespace std::chrono_literals;
 
-using AidlSessionHint = aidl::android::hardware::power::SessionHint;
-using AidlSessionMode = aidl::android::hardware::power::SessionMode;
+using HalSessionHint = aidl::android::hardware::power::SessionHint;
+using HalSessionMode = aidl::android::hardware::power::SessionMode;
+using HalWorkDuration = aidl::android::hardware::power::WorkDuration;
+
 using android::base::StringPrintf;
 
 struct APerformanceHintSession;
 
 constexpr int64_t SEND_HINT_TIMEOUT = std::chrono::nanoseconds(100ms).count();
+struct AWorkDuration : public HalWorkDuration {};
 
 struct APerformanceHintManager {
 public:
     static APerformanceHintManager* getInstance();
-    APerformanceHintManager(sp<IHintManager> service, int64_t preferredRateNanos);
+    APerformanceHintManager(std::shared_ptr<IHintManager> service, int64_t preferredRateNanos);
     APerformanceHintManager() = delete;
     ~APerformanceHintManager() = default;
 
@@ -61,17 +64,28 @@ public:
     int64_t getPreferredRateNanos() const;
 
 private:
-    static APerformanceHintManager* create(sp<IHintManager> iHintManager);
+    // Necessary to create an empty binder object
+    static void* tokenStubOnCreate(void*) {
+        return nullptr;
+    }
+    static void tokenStubOnDestroy(void*) {}
+    static binder_status_t tokenStubOnTransact(AIBinder*, transaction_code_t, const AParcel*,
+                                               AParcel*) {
+        return STATUS_OK;
+    }
 
-    sp<IHintManager> mHintManager;
-    const sp<IBinder> mToken = sp<BBinder>::make();
+    static APerformanceHintManager* create(std::shared_ptr<IHintManager> iHintManager);
+
+    std::shared_ptr<IHintManager> mHintManager;
+    ndk::SpAIBinder mToken;
     const int64_t mPreferredRateNanos;
 };
 
 struct APerformanceHintSession {
 public:
-    APerformanceHintSession(sp<IHintManager> hintManager, sp<IHintSession> session,
-                            int64_t preferredRateNanos, int64_t targetDurationNanos);
+    APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
+                            std::shared_ptr<IHintSession> session, int64_t preferredRateNanos,
+                            int64_t targetDurationNanos);
     APerformanceHintSession() = delete;
     ~APerformanceHintSession();
 
@@ -86,10 +100,10 @@ public:
 private:
     friend struct APerformanceHintManager;
 
-    int reportActualWorkDurationInternal(WorkDuration* workDuration);
+    int reportActualWorkDurationInternal(AWorkDuration* workDuration);
 
-    sp<IHintManager> mHintManager;
-    sp<IHintSession> mHintSession;
+    std::shared_ptr<IHintManager> mHintManager;
+    std::shared_ptr<IHintSession> mHintSession;
     // HAL preferred update rate
     const int64_t mPreferredRateNanos;
     // Target duration for choosing update rate
@@ -101,7 +115,7 @@ private:
     // Last hint reported from sendHint indexed by hint value
     std::vector<int64_t> mLastHintSentTimestamp;
     // Cached samples
-    std::vector<WorkDuration> mActualWorkDurations;
+    std::vector<HalWorkDuration> mActualWorkDurations;
     std::string mSessionName;
     static int32_t sIDCounter;
     // The most recent set of thread IDs
@@ -114,19 +128,24 @@ private:
     void traceTargetDuration(int64_t targetDuration);
 };
 
-static IHintManager* gIHintManagerForTesting = nullptr;
+static std::shared_ptr<IHintManager>* gIHintManagerForTesting = nullptr;
 static APerformanceHintManager* gHintManagerForTesting = nullptr;
 int32_t APerformanceHintSession::sIDCounter = 0;
 
 // ===================================== APerformanceHintManager implementation
-APerformanceHintManager::APerformanceHintManager(sp<IHintManager> manager,
+APerformanceHintManager::APerformanceHintManager(std::shared_ptr<IHintManager> manager,
                                                  int64_t preferredRateNanos)
-      : mHintManager(std::move(manager)), mPreferredRateNanos(preferredRateNanos) {}
+      : mHintManager(std::move(manager)), mPreferredRateNanos(preferredRateNanos) {
+    static AIBinder_Class* tokenBinderClass =
+            AIBinder_Class_define("phm_token", tokenStubOnCreate, tokenStubOnDestroy,
+                                  tokenStubOnTransact);
+    mToken = ndk::SpAIBinder(AIBinder_new(tokenBinderClass, nullptr));
+}
 
 APerformanceHintManager* APerformanceHintManager::getInstance() {
     if (gHintManagerForTesting) return gHintManagerForTesting;
     if (gIHintManagerForTesting) {
-        APerformanceHintManager* manager = create(gIHintManagerForTesting);
+        APerformanceHintManager* manager = create(*gIHintManagerForTesting);
         gIHintManagerForTesting = nullptr;
         return manager;
     }
@@ -134,20 +153,19 @@ APerformanceHintManager* APerformanceHintManager::getInstance() {
     return instance;
 }
 
-APerformanceHintManager* APerformanceHintManager::create(sp<IHintManager> manager) {
+APerformanceHintManager* APerformanceHintManager::create(std::shared_ptr<IHintManager> manager) {
     if (!manager) {
-        manager = interface_cast<IHintManager>(
-                defaultServiceManager()->checkService(String16("performance_hint")));
+        manager = IHintManager::fromBinder(
+                ndk::SpAIBinder(AServiceManager_waitForService("performance_hint")));
     }
     if (manager == nullptr) {
         ALOGE("%s: PerformanceHint service is not ready ", __FUNCTION__);
         return nullptr;
     }
     int64_t preferredRateNanos = -1L;
-    binder::Status ret = manager->getHintSessionPreferredRate(&preferredRateNanos);
+    ndk::ScopedAStatus ret = manager->getHintSessionPreferredRate(&preferredRateNanos);
     if (!ret.isOk()) {
-        ALOGE("%s: PerformanceHint cannot get preferred rate. %s", __FUNCTION__,
-              ret.exceptionMessage().c_str());
+        ALOGE("%s: PerformanceHint cannot get preferred rate. %s", __FUNCTION__, ret.getMessage());
         return nullptr;
     }
     if (preferredRateNanos <= 0) {
@@ -159,8 +177,8 @@ APerformanceHintManager* APerformanceHintManager::create(sp<IHintManager> manage
 APerformanceHintSession* APerformanceHintManager::createSession(
         const int32_t* threadIds, size_t size, int64_t initialTargetWorkDurationNanos) {
     std::vector<int32_t> tids(threadIds, threadIds + size);
-    sp<IHintSession> session;
-    binder::Status ret =
+    std::shared_ptr<IHintSession> session;
+    ndk::ScopedAStatus ret =
             mHintManager->createHintSession(mToken, tids, initialTargetWorkDurationNanos, &session);
     if (!ret.isOk() || !session) {
         return nullptr;
@@ -179,8 +197,8 @@ int64_t APerformanceHintManager::getPreferredRateNanos() const {
 
 // ===================================== APerformanceHintSession implementation
 
-APerformanceHintSession::APerformanceHintSession(sp<IHintManager> hintManager,
-                                                 sp<IHintSession> session,
+APerformanceHintSession::APerformanceHintSession(std::shared_ptr<IHintManager> hintManager,
+                                                 std::shared_ptr<IHintSession> session,
                                                  int64_t preferredRateNanos,
                                                  int64_t targetDurationNanos)
       : mHintManager(hintManager),
@@ -189,17 +207,17 @@ APerformanceHintSession::APerformanceHintSession(sp<IHintManager> hintManager,
         mTargetDurationNanos(targetDurationNanos),
         mFirstTargetMetTimestamp(0),
         mLastTargetMetTimestamp(0) {
-    const std::vector<AidlSessionHint> sessionHintRange{ndk::enum_range<AidlSessionHint>().begin(),
-                                                        ndk::enum_range<AidlSessionHint>().end()};
+    const std::vector<HalSessionHint> sessionHintRange{ndk::enum_range<HalSessionHint>().begin(),
+                                                       ndk::enum_range<HalSessionHint>().end()};
 
     mLastHintSentTimestamp = std::vector<int64_t>(sessionHintRange.size(), 0);
     mSessionName = android::base::StringPrintf("ADPF Session %" PRId32, ++sIDCounter);
 }
 
 APerformanceHintSession::~APerformanceHintSession() {
-    binder::Status ret = mHintSession->close();
+    ndk::ScopedAStatus ret = mHintSession->close();
     if (!ret.isOk()) {
-        ALOGE("%s: HintSession close failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
+        ALOGE("%s: HintSession close failed: %s", __FUNCTION__, ret.getMessage());
     }
 }
 
@@ -208,10 +226,10 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
         ALOGE("%s: targetDurationNanos must be positive", __FUNCTION__);
         return EINVAL;
     }
-    binder::Status ret = mHintSession->updateTargetWorkDuration(targetDurationNanos);
+    ndk::ScopedAStatus ret = mHintSession->updateTargetWorkDuration(targetDurationNanos);
     if (!ret.isOk()) {
         ALOGE("%s: HintSession updateTargetWorkDuration failed: %s", __FUNCTION__,
-              ret.exceptionMessage().c_str());
+              ret.getMessage());
         return EPIPE;
     }
     mTargetDurationNanos = targetDurationNanos;
@@ -228,9 +246,12 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
 }
 
 int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNanos) {
-    WorkDuration workDuration(0, actualDurationNanos, actualDurationNanos, 0);
+    HalWorkDuration workDuration{.durationNanos = actualDurationNanos,
+                                 .workPeriodStartTimestampNanos = 0,
+                                 .cpuDurationNanos = actualDurationNanos,
+                                 .gpuDurationNanos = 0};
 
-    return reportActualWorkDurationInternal(&workDuration);
+    return reportActualWorkDurationInternal(static_cast<AWorkDuration*>(&workDuration));
 }
 
 int APerformanceHintSession::sendHint(SessionHint hint) {
@@ -238,17 +259,17 @@ int APerformanceHintSession::sendHint(SessionHint hint) {
         ALOGE("%s: invalid session hint %d", __FUNCTION__, hint);
         return EINVAL;
     }
-    int64_t now = elapsedRealtimeNano();
+    int64_t now = uptimeNanos();
 
     // Limit sendHint to a pre-detemined rate for safety
     if (now < (mLastHintSentTimestamp[hint] + SEND_HINT_TIMEOUT)) {
         return 0;
     }
 
-    binder::Status ret = mHintSession->sendHint(hint);
+    ndk::ScopedAStatus ret = mHintSession->sendHint(hint);
 
     if (!ret.isOk()) {
-        ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
+        ALOGE("%s: HintSession sendHint failed: %s", __FUNCTION__, ret.getMessage());
         return EPIPE;
     }
     mLastHintSentTimestamp[hint] = now;
@@ -261,12 +282,12 @@ int APerformanceHintSession::setThreads(const int32_t* threadIds, size_t size) {
         return EINVAL;
     }
     std::vector<int32_t> tids(threadIds, threadIds + size);
-    binder::Status ret = mHintManager->setHintSessionThreads(mHintSession, tids);
+    ndk::ScopedAStatus ret = mHintManager->setHintSessionThreads(mHintSession, tids);
     if (!ret.isOk()) {
-        ALOGE("%s: failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
-        if (ret.exceptionCode() == binder::Status::Exception::EX_ILLEGAL_ARGUMENT) {
+        ALOGE("%s: failed: %s", __FUNCTION__, ret.getMessage());
+        if (ret.getExceptionCode() == EX_ILLEGAL_ARGUMENT) {
             return EINVAL;
-        } else if (ret.exceptionCode() == binder::Status::Exception::EX_SECURITY) {
+        } else if (ret.getExceptionCode() == EX_SECURITY) {
             return EPERM;
         }
         return EPIPE;
@@ -279,9 +300,9 @@ int APerformanceHintSession::setThreads(const int32_t* threadIds, size_t size) {
 
 int APerformanceHintSession::getThreadIds(int32_t* const threadIds, size_t* size) {
     std::vector<int32_t> tids;
-    binder::Status ret = mHintManager->getHintSessionThreadIds(mHintSession, &tids);
+    ndk::ScopedAStatus ret = mHintManager->getHintSessionThreadIds(mHintSession, &tids);
     if (!ret.isOk()) {
-        ALOGE("%s: failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
+        ALOGE("%s: failed: %s", __FUNCTION__, ret.getMessage());
         return EPIPE;
     }
 
@@ -301,28 +322,27 @@ int APerformanceHintSession::getThreadIds(int32_t* const threadIds, size_t* size
 }
 
 int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
-    binder::Status ret =
-            mHintSession->setMode(static_cast<int32_t>(AidlSessionMode::POWER_EFFICIENCY), enabled);
+    ndk::ScopedAStatus ret =
+            mHintSession->setMode(static_cast<int32_t>(HalSessionMode::POWER_EFFICIENCY), enabled);
 
     if (!ret.isOk()) {
         ALOGE("%s: HintSession setPreferPowerEfficiency failed: %s", __FUNCTION__,
-              ret.exceptionMessage().c_str());
+              ret.getMessage());
         return EPIPE;
     }
     tracePowerEfficient(enabled);
     return OK;
 }
 
-int APerformanceHintSession::reportActualWorkDuration(AWorkDuration* aWorkDuration) {
-    WorkDuration* workDuration = static_cast<WorkDuration*>(aWorkDuration);
+int APerformanceHintSession::reportActualWorkDuration(AWorkDuration* workDuration) {
     return reportActualWorkDurationInternal(workDuration);
 }
 
-int APerformanceHintSession::reportActualWorkDurationInternal(WorkDuration* workDuration) {
-    int64_t actualTotalDurationNanos = workDuration->actualTotalDurationNanos;
+int APerformanceHintSession::reportActualWorkDurationInternal(AWorkDuration* workDuration) {
+    int64_t actualTotalDurationNanos = workDuration->durationNanos;
     int64_t now = uptimeNanos();
-    workDuration->timestampNanos = now;
-    traceActualDuration(workDuration->actualTotalDurationNanos);
+    workDuration->timeStampNanos = now;
+    traceActualDuration(workDuration->durationNanos);
     mActualWorkDurations.push_back(std::move(*workDuration));
 
     if (actualTotalDurationNanos >= mTargetDurationNanos) {
@@ -346,14 +366,14 @@ int APerformanceHintSession::reportActualWorkDurationInternal(WorkDuration* work
         mLastTargetMetTimestamp = now;
     }
 
-    binder::Status ret = mHintSession->reportActualWorkDuration2(mActualWorkDurations);
+    ndk::ScopedAStatus ret = mHintSession->reportActualWorkDuration2(mActualWorkDurations);
     if (!ret.isOk()) {
         ALOGE("%s: HintSession reportActualWorkDuration failed: %s", __FUNCTION__,
-              ret.exceptionMessage().c_str());
+              ret.getMessage());
         mFirstTargetMetTimestamp = 0;
         mLastTargetMetTimestamp = 0;
         traceBatchSize(mActualWorkDurations.size());
-        return ret.exceptionCode() == binder::Status::EX_ILLEGAL_ARGUMENT ? EINVAL : EPIPE;
+        return ret.getExceptionCode() == EX_ILLEGAL_ARGUMENT ? EINVAL : EPIPE;
     }
     mActualWorkDurations.clear();
     traceBatchSize(0);
@@ -481,18 +501,16 @@ int APerformanceHint_reportActualWorkDuration2(APerformanceHintSession* session,
                                                AWorkDuration* workDurationPtr) {
     VALIDATE_PTR(session)
     VALIDATE_PTR(workDurationPtr)
-    WorkDuration& workDuration = *static_cast<WorkDuration*>(workDurationPtr);
-    VALIDATE_INT(workDuration.workPeriodStartTimestampNanos, > 0)
-    VALIDATE_INT(workDuration.actualTotalDurationNanos, > 0)
-    VALIDATE_INT(workDuration.actualCpuDurationNanos, >= 0)
-    VALIDATE_INT(workDuration.actualGpuDurationNanos, >= 0)
-    VALIDATE_INT(workDuration.actualGpuDurationNanos + workDuration.actualCpuDurationNanos, > 0)
+    VALIDATE_INT(workDurationPtr->durationNanos, > 0)
+    VALIDATE_INT(workDurationPtr->workPeriodStartTimestampNanos, > 0)
+    VALIDATE_INT(workDurationPtr->cpuDurationNanos, >= 0)
+    VALIDATE_INT(workDurationPtr->gpuDurationNanos, >= 0)
+    VALIDATE_INT(workDurationPtr->gpuDurationNanos + workDurationPtr->cpuDurationNanos, > 0)
     return session->reportActualWorkDuration(workDurationPtr);
 }
 
 AWorkDuration* AWorkDuration_create() {
-    WorkDuration* workDuration = new WorkDuration();
-    return static_cast<AWorkDuration*>(workDuration);
+    return new AWorkDuration();
 }
 
 void AWorkDuration_release(AWorkDuration* aWorkDuration) {
@@ -500,37 +518,36 @@ void AWorkDuration_release(AWorkDuration* aWorkDuration) {
     delete aWorkDuration;
 }
 
-void AWorkDuration_setWorkPeriodStartTimestampNanos(AWorkDuration* aWorkDuration,
-                                                    int64_t workPeriodStartTimestampNanos) {
-    VALIDATE_PTR(aWorkDuration)
-    WARN_INT(workPeriodStartTimestampNanos, > 0)
-    static_cast<WorkDuration*>(aWorkDuration)->workPeriodStartTimestampNanos =
-            workPeriodStartTimestampNanos;
-}
-
 void AWorkDuration_setActualTotalDurationNanos(AWorkDuration* aWorkDuration,
                                                int64_t actualTotalDurationNanos) {
     VALIDATE_PTR(aWorkDuration)
     WARN_INT(actualTotalDurationNanos, > 0)
-    static_cast<WorkDuration*>(aWorkDuration)->actualTotalDurationNanos = actualTotalDurationNanos;
+    aWorkDuration->durationNanos = actualTotalDurationNanos;
+}
+
+void AWorkDuration_setWorkPeriodStartTimestampNanos(AWorkDuration* aWorkDuration,
+                                                    int64_t workPeriodStartTimestampNanos) {
+    VALIDATE_PTR(aWorkDuration)
+    WARN_INT(workPeriodStartTimestampNanos, > 0)
+    aWorkDuration->workPeriodStartTimestampNanos = workPeriodStartTimestampNanos;
 }
 
 void AWorkDuration_setActualCpuDurationNanos(AWorkDuration* aWorkDuration,
                                              int64_t actualCpuDurationNanos) {
     VALIDATE_PTR(aWorkDuration)
     WARN_INT(actualCpuDurationNanos, >= 0)
-    static_cast<WorkDuration*>(aWorkDuration)->actualCpuDurationNanos = actualCpuDurationNanos;
+    aWorkDuration->cpuDurationNanos = actualCpuDurationNanos;
 }
 
 void AWorkDuration_setActualGpuDurationNanos(AWorkDuration* aWorkDuration,
                                              int64_t actualGpuDurationNanos) {
     VALIDATE_PTR(aWorkDuration)
     WARN_INT(actualGpuDurationNanos, >= 0)
-    static_cast<WorkDuration*>(aWorkDuration)->actualGpuDurationNanos = actualGpuDurationNanos;
+    aWorkDuration->gpuDurationNanos = actualGpuDurationNanos;
 }
 
 void APerformanceHint_setIHintManagerForTesting(void* iManager) {
     delete gHintManagerForTesting;
     gHintManagerForTesting = nullptr;
-    gIHintManagerForTesting = static_cast<IHintManager*>(iManager);
+    gIHintManagerForTesting = static_cast<std::shared_ptr<IHintManager>*>(iManager);
 }

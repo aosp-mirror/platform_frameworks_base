@@ -24,6 +24,7 @@ import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -74,7 +75,7 @@ public class BubbleFlyoutView extends FrameLayout {
 
     private final int mFlyoutElevation;
     private final int mBubbleElevation;
-    private final int mFloatingBackgroundColor;
+    private int mFloatingBackgroundColor;
     private final float mCornerRadius;
 
     private final ViewGroup mFlyoutTextContainer;
@@ -106,6 +107,9 @@ public class BubbleFlyoutView extends FrameLayout {
 
     /** Color of the 'new' dot that the flyout will transform into. */
     private int mDotColor;
+
+    /** Keeps last used night mode flags **/
+    private int mNightModeFlags;
 
     /** The outline of the triangle, used for elevation shadows. */
     private final Outline mTriangleOutline = new Outline();
@@ -176,11 +180,8 @@ public class BubbleFlyoutView extends FrameLayout {
         mFlyoutElevation = res.getDimensionPixelSize(R.dimen.bubble_flyout_elevation);
 
         final TypedArray ta = mContext.obtainStyledAttributes(
-                new int[] {
-                        com.android.internal.R.attr.materialColorSurfaceContainer,
-                        android.R.attr.dialogCornerRadius});
-        mFloatingBackgroundColor = ta.getColor(0, Color.WHITE);
-        mCornerRadius = ta.getDimensionPixelSize(1, 0);
+                new int[] {android.R.attr.dialogCornerRadius});
+        mCornerRadius = ta.getDimensionPixelSize(0, 0);
         ta.recycle();
 
         // Add padding for the pointer on either side, onDraw will draw it in this space.
@@ -198,19 +199,17 @@ public class BubbleFlyoutView extends FrameLayout {
         // Use locale direction so the text is aligned correctly.
         setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
 
-        mBgPaint.setColor(mFloatingBackgroundColor);
-
         mLeftTriangleShape =
                 new ShapeDrawable(TriangleShape.createHorizontal(
                         mPointerSize, mPointerSize, true /* isPointingLeft */));
         mLeftTriangleShape.setBounds(0, 0, mPointerSize, mPointerSize);
-        mLeftTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
 
         mRightTriangleShape =
                 new ShapeDrawable(TriangleShape.createHorizontal(
                         mPointerSize, mPointerSize, false /* isPointingLeft */));
         mRightTriangleShape.setBounds(0, 0, mPointerSize, mPointerSize);
-        mRightTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
+
+        applyConfigurationColors(getResources().getConfiguration());
     }
 
     @Override
@@ -242,6 +241,13 @@ public class BubbleFlyoutView extends FrameLayout {
             } /* after */ );
         };
         fade(false /* in */, stackPos, hideDot, afterFadeOut);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        if (applyColorsAccordingToConfiguration(newConfig)) {
+            invalidate();
+        }
     }
 
     /*
@@ -421,6 +427,42 @@ public class BubbleFlyoutView extends FrameLayout {
     /** Clamps a float to between 0 and 1. */
     private float clampPercentage(float percent) {
         return Math.min(1f, Math.max(0f, percent));
+    }
+
+    /**
+     * Resolving and applying colors according to the ui mode, remembering most recent mode.
+     *
+     * @return {@code true} if night mode setting has changed since the last invocation,
+     * {@code false} otherwise
+     */
+    boolean applyColorsAccordingToConfiguration(Configuration configuration) {
+        int nightModeFlags = configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean flagsChanged = nightModeFlags != mNightModeFlags;
+        if (flagsChanged) {
+            mNightModeFlags = nightModeFlags;
+            applyConfigurationColors(configuration);
+        }
+        return flagsChanged;
+    }
+
+    private void applyConfigurationColors(Configuration configuration) {
+        int nightModeFlags = configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isNightModeOn = nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+        try (TypedArray ta = mContext.obtainStyledAttributes(
+                new int[]{
+                        com.android.internal.R.attr.materialColorSurfaceContainer,
+                        com.android.internal.R.attr.materialColorOnSurface,
+                        com.android.internal.R.attr.materialColorOnSurfaceVariant})) {
+            mFloatingBackgroundColor = ta.getColor(0,
+                    isNightModeOn ? Color.BLACK : Color.WHITE);
+            mSenderText.setTextColor(ta.getColor(1,
+                    isNightModeOn ? Color.WHITE : Color.BLACK));
+            mMessageText.setTextColor(ta.getColor(2,
+                    isNightModeOn ? Color.WHITE : Color.BLACK));
+            mBgPaint.setColor(mFloatingBackgroundColor);
+            mLeftTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
+            mRightTriangleShape.getPaint().setColor(mFloatingBackgroundColor);
+        }
     }
 
     /**

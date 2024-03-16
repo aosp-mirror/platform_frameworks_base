@@ -271,10 +271,8 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"විසන්ධි කරන්න"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"සක්‍රිය කරන්න"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"හෙට ස්වයංක්‍රීයව නැවත ක්‍රියාත්මක කරන්න"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (8267380591344023327) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (4802071533678400330) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"ඉක්මන් බෙදා ගැනීම, මගේ උපාංගය සෙවීම, සහ උපාංග ස්ථානය වැනි විශේෂාංග බ්ලූටූත් භාවිත කරයි"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"බ්ලූටූත් හෙට පෙ.ව. 5ට ක්‍රියාත්මක වනු ඇත"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ශ්‍රව්‍ය"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"හෙඩ්සෙටය"</string>
@@ -439,6 +437,10 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ඉවත් කරන්න"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"විජට්ටුව එක් කරන්න"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"නිමයි"</string>
+    <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"අගුළු තිරය මත ඕනෑම විජට් එකකට ඉඩ දෙන්න"</string>
+    <string name="button_text_to_open_settings" msgid="1987729256950941628">"සැකසීම් විවෘත කරන්න"</string>
+    <string name="work_mode_off_title" msgid="5794818421357835873">"කාර්ය යෙදුම් විරාම නොකරන්න ද?"</string>
+    <string name="work_mode_turn_on" msgid="907813741770247267">"විරාම නොකරන්න"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"පරිශීලක මාරුව"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"නිපතන මෙනුව"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"මෙම සැසියේ සියළුම යෙදුම් සහ දත්ත මකාවී."</string>
@@ -581,26 +583,36 @@
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"නිහඬ කරන්න"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"විකාශය"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"නාදය නිහඬ කර ඇති නිසා නොලැබේ"</string>
+    <!-- no translation found for stream_alarm_unavailable (4059817189292197839) -->
+    <skip />
+    <!-- no translation found for stream_media_unavailable (6823020894438959853) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. නිහඬ කිරීම ඉවත් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. කම්පනය කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. කම්පනය කිරීමට සකස් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ඝෝෂාව පාලනය"</string>
-    <!-- no translation found for volume_panel_spatial_audio_title (3367048857932040660) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_off (4177490084606772989) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_fixed (3136080137827746046) -->
-    <skip />
-    <!-- no translation found for volume_panel_spatial_audio_tracking (5711115234001762974) -->
-    <skip />
+    <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"අවකාශීය ශ්‍රව්‍ය"</string>
+    <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"ක්‍රියාවිරහිතයි"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"නියම කළ"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"හිස ලුහුබැඳීම"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"නාදකය වෙනස් කිරීමට තට්ටු කරන්න"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"නිහඬ කරන්න"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"නිශ්ශබ්දතාවය ඉවත් කරන්න"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"කම්පනය"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"හඬ පරිමා පාලන %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"ඇමතුම් සහ දැනුම්දීම් (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>) නාද කරනු ඇත"</string>
+    <!-- no translation found for volume_panel_enter_media_output_settings (8824244246272552669) -->
+    <skip />
+    <!-- no translation found for volume_panel_expanded_sliders (1885750987768506271) -->
+    <skip />
+    <!-- no translation found for volume_panel_collapsed_sliders (1413383759434791450) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_mute (6962563028495243738) -->
+    <skip />
+    <!-- no translation found for volume_panel_hint_unmute (7489063242934477382) -->
+    <skip />
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> වාදනය කරන්නේ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ශ්‍රව්‍ය වාදනය වනු ඇත්තේ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"පද්ධති UI සුසරකය"</string>
@@ -1236,12 +1248,9 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ඉහළ විභේදනය සඳහා, දුරකථනය හරවන්න"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"දිග හැරෙමින් පවතින නැමිය හැකි උපාංගය"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"වටා පෙරළෙමින් තිබෙන නැමිය හැකි උපාංගය"</string>
-    <!-- no translation found for quick_settings_rotation_posture_folded (2430280856312528289) -->
-    <skip />
-    <!-- no translation found for quick_settings_rotation_posture_unfolded (6372316273574167114) -->
-    <skip />
-    <!-- no translation found for rotation_tile_with_posture_secondary_label_template (7648496484163318886) -->
-    <skip />
+    <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"නැවූ"</string>
+    <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"නොනැවූ"</string>
+    <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> බැටරිය ඉතිරිව ඇත"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ඔබේ පන්හිඳ චාජරයකට සම්බන්ධ කරන්න"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"පන්හිඳ බැටරිය අඩුයි"</string>
@@ -1257,7 +1266,8 @@
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"කැමරාව අවහිරයි"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"කැමරාව සහ මයික්‍රොෆෝනය අවහිරයි"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"මයික්‍රොෆෝනය අවහිරයි"</string>
-    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ප්‍රමුඛතා මාදිලිය සක්‍රීයයි"</string>
+    <!-- no translation found for priority_mode_dream_overlay_content_description (3361628029609329182) -->
+    <skip />
     <string name="assistant_attention_content_description" msgid="4166330881435263596">"පරිශීලක රූපාකාරය අනාවරණය වේ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"සැකසීම් තුළ පෙරනිමි සටහන් යෙදුම සකසන්න"</string>
     <string name="install_app" msgid="5066668100199613936">"යෙදුම ස්ථාපනය කරන්න"</string>

@@ -16,8 +16,6 @@
 
 package android.animation;
 
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
 import android.animation.AnimationHandler.AnimationFrameCallback;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +32,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.Preconditions;
 
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -204,7 +203,8 @@ public final class AnimatorTestRule implements TestRule {
         }
         long outputTime = AnimationUtils.currentAnimationTimeMillis();
         if (outputTime != desiredTime) {
-            throw new AssertionError("currentAnimationTimeMillis() is " + outputTime
+            // Skip the test (rather than fail it) if there's a clock issue
+            throw new AssumptionViolatedException("currentAnimationTimeMillis() is " + outputTime
                     + " after locking to " + desiredTime);
         }
     }

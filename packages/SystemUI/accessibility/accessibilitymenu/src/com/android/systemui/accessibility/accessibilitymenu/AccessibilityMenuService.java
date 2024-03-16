@@ -280,10 +280,8 @@ public class AccessibilityMenuService extends AccessibilityService
             return;
         }
 
-        if (Flags.a11yMenuHideBeforeTakingAction()) {
-            // Hide the a11y menu UI before performing the following shortcut actions.
-            mA11yMenuLayout.hideMenu();
-        }
+        // Hide the a11y menu UI before performing the following shortcut actions.
+        mA11yMenuLayout.hideMenu();
 
         if (viewTag == ShortcutId.ID_ASSISTANT_VALUE.ordinal()) {
             // Always restart the voice command activity, so that the UI is reloaded.
@@ -299,31 +297,18 @@ public class AccessibilityMenuService extends AccessibilityService
         } else if (viewTag == ShortcutId.ID_RECENT_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_RECENTS);
         } else if (viewTag == ShortcutId.ID_LOCKSCREEN_VALUE.ordinal()) {
-            if (Flags.a11yMenuHideBeforeTakingAction()) {
-                // Delay before locking the screen to give time for the UI to close.
-                mHandler.postDelayed(
-                        () -> performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN),
-                        HIDE_UI_DELAY_MS);
-            } else {
-                performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN);
-            }
+            // Delay before locking the screen to give time for the UI to close.
+            mHandler.postDelayed(
+                    () -> performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN),
+                    HIDE_UI_DELAY_MS);
         } else if (viewTag == ShortcutId.ID_QUICKSETTING_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_QUICK_SETTINGS);
         } else if (viewTag == ShortcutId.ID_NOTIFICATION_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_NOTIFICATIONS);
         } else if (viewTag == ShortcutId.ID_SCREENSHOT_VALUE.ordinal()) {
-            if (Flags.a11yMenuHideBeforeTakingAction()) {
-                // Delay before taking a screenshot to give time for the UI to close.
-                mHandler.postDelayed(
-                        () -> performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT),
-                        HIDE_UI_DELAY_MS);
-            } else {
-                performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
-            }
-        }
-
-        if (!Flags.a11yMenuHideBeforeTakingAction()) {
-            mA11yMenuLayout.hideMenu();
+            mHandler.postDelayed(
+                    () -> performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT),
+                    HIDE_UI_DELAY_MS);
         }
     }
 

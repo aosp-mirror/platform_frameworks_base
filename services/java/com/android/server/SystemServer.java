@@ -408,6 +408,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.searchui.SearchUiManagerService";
     private static final String SMARTSPACE_MANAGER_SERVICE_CLASS =
             "com.android.server.smartspace.SmartspaceManagerService";
+    private static final String CONTEXTUAL_SEARCH_MANAGER_SERVICE_CLASS =
+            "com.android.server.contextualsearch.ContextualSearchManagerService";
     private static final String DEVICE_IDLE_CONTROLLER_CLASS =
             "com.android.server.DeviceIdleController";
     private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
@@ -2014,6 +2016,16 @@ public final class SystemServer implements Dumpable {
                 t.traceEnd();
             } else {
                 Slog.d(TAG, "SmartspaceManagerService not defined by OEM or disabled by flag");
+            }
+
+            // Contextual search manager service
+            if (deviceHasConfigString(context,
+                    R.string.config_defaultContextualSearchPackageName)) {
+                t.traceBegin("StartContextualSearchService");
+                mSystemServiceManager.startService(CONTEXTUAL_SEARCH_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "ContextualSearchManagerService not defined or disabled by flag");
             }
 
             t.traceBegin("InitConnectivityModuleConnector");

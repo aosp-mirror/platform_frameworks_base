@@ -243,25 +243,25 @@ public class PerformanceHintManagerTest {
         assumeNotNull(s);
         s.updateTargetWorkDuration(16);
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(-1, 12, 8, 6, 1));
+            s.reportActualWorkDuration(new WorkDuration(-1, 12, 8, 6));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(0, 12, 8, 6, 1));
+            s.reportActualWorkDuration(new WorkDuration(0, 12, 8, 6));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, -1, 8, 6, 1));
+            s.reportActualWorkDuration(new WorkDuration(1, -1, 8, 6));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 0, 8, 6, 1));
+            s.reportActualWorkDuration(new WorkDuration(1, 0, 8, 6));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 12, -1, 6, 1));
+            s.reportActualWorkDuration(new WorkDuration(1, 12, -1, 6));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 12, 0, 0, 1));
+            s.reportActualWorkDuration(new WorkDuration(1, 12, 0, 0));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            s.reportActualWorkDuration(new WorkDuration(1, 12, 8, -1, 1));
+            s.reportActualWorkDuration(new WorkDuration(1, 12, 8, -1));
         });
     }
 }
