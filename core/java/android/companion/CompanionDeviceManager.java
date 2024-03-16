@@ -720,12 +720,14 @@ public final class CompanionDeviceManager {
             return;
         }
         try {
-            IntentSender intentSender = mService
-                    .requestNotificationAccess(component, mContext.getUserId())
-                    .getIntentSender();
-            if (intentSender == null) {
+            PendingIntent pendingIntent = mService.requestNotificationAccess(
+                    component, mContext.getUserId());
+
+            if (pendingIntent == null) {
                 return;
             }
+            IntentSender intentSender = pendingIntent.getIntentSender();
+
             mContext.startIntentSender(intentSender, null, 0, 0, 0,
                     ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
                             ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle());
