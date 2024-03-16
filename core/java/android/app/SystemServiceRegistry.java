@@ -216,6 +216,7 @@ import android.permission.PermissionManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.provider.E2eeContactKeysManager;
+import android.provider.ProviderFrameworkInitializer;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
@@ -1687,6 +1688,9 @@ public final class SystemServiceRegistry {
             OnDevicePersonalizationFrameworkInitializer.registerServiceWrappers();
             DeviceLockFrameworkInitializer.registerServiceWrappers();
             VirtualizationFrameworkInitializer.registerServiceWrappers();
+            if (com.android.server.telecom.flags.Flags.telecomMainlineBlockedNumbersManager()) {
+                ProviderFrameworkInitializer.registerServiceWrappers();
+            }
             // This code is executed on zygote during preload, where only read-only
             // flags can be used. Do not use mutable flags.
             if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()) {
