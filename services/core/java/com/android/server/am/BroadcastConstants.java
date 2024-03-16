@@ -53,19 +53,11 @@ public class BroadcastConstants {
 
     // Value element names within the Settings record
     static final String KEY_TIMEOUT = "bcast_timeout";
-    static final String KEY_SLOW_TIME = "bcast_slow_time";
-    static final String KEY_DEFERRAL = "bcast_deferral";
-    static final String KEY_DEFERRAL_DECAY_FACTOR = "bcast_deferral_decay_factor";
-    static final String KEY_DEFERRAL_FLOOR = "bcast_deferral_floor";
     static final String KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT =
             "bcast_allow_bg_activity_start_timeout";
 
     // All time intervals are in milliseconds
     private static final long DEFAULT_TIMEOUT = 10_000 * Build.HW_TIMEOUT_MULTIPLIER;
-    private static final long DEFAULT_SLOW_TIME = 5_000 * Build.HW_TIMEOUT_MULTIPLIER;
-    private static final long DEFAULT_DEFERRAL = 5_000 * Build.HW_TIMEOUT_MULTIPLIER;
-    private static final float DEFAULT_DEFERRAL_DECAY_FACTOR = 0.75f;
-    private static final long DEFAULT_DEFERRAL_FLOOR = 0;
     private static final long DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT =
             10_000 * Build.HW_TIMEOUT_MULTIPLIER;
 
@@ -114,15 +106,6 @@ public class BroadcastConstants {
 
     // Timeout period for this broadcast queue
     public long TIMEOUT = DEFAULT_TIMEOUT;
-    // Handling time above which we declare that a broadcast recipient was "slow".  Any
-    // value <= zero is interpreted as disabling broadcast deferral policy entirely.
-    public long SLOW_TIME = DEFAULT_SLOW_TIME;
-    // How long to initially defer broadcasts, if an app is slow to handle one
-    public long DEFERRAL = DEFAULT_DEFERRAL;
-    // Decay factor for successive broadcasts' deferral time
-    public float DEFERRAL_DECAY_FACTOR = DEFAULT_DEFERRAL_DECAY_FACTOR;
-    // Minimum that the deferral time can decay to until the backlog fully clears
-    public long DEFERRAL_FLOOR = DEFAULT_DEFERRAL_FLOOR;
     // For a receiver that has been allowed to start background activities, how long after it
     // started its process can start a background activity.
     public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
@@ -278,7 +261,7 @@ public class BroadcastConstants {
 
     /**
      * For {@link BroadcastRecord}: Default to treating all broadcasts sent by
-     * the system as be {@link BroadcastOptions#DEFERRAL_POLICY_UNTIL_ACTIVE}.
+     * the system as be {@link android.app.BroadcastOptions#DEFERRAL_POLICY_UNTIL_ACTIVE}.
      */
     public boolean CORE_DEFER_UNTIL_ACTIVE = DEFAULT_CORE_DEFER_UNTIL_ACTIVE;
     private static final String KEY_CORE_DEFER_UNTIL_ACTIVE = "bcast_core_defer_until_active";
@@ -361,18 +344,13 @@ public class BroadcastConstants {
 
             // Unspecified fields retain their current value rather than revert to default
             TIMEOUT = mParser.getLong(KEY_TIMEOUT, TIMEOUT);
-            SLOW_TIME = mParser.getLong(KEY_SLOW_TIME, SLOW_TIME);
-            DEFERRAL = mParser.getLong(KEY_DEFERRAL, DEFERRAL);
-            DEFERRAL_DECAY_FACTOR = mParser.getFloat(KEY_DEFERRAL_DECAY_FACTOR,
-                    DEFERRAL_DECAY_FACTOR);
-            DEFERRAL_FLOOR = mParser.getLong(KEY_DEFERRAL_FLOOR, DEFERRAL_FLOOR);
             ALLOW_BG_ACTIVITY_START_TIMEOUT = mParser.getLong(KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT,
                     ALLOW_BG_ACTIVITY_START_TIMEOUT);
         }
     }
 
     /**
-     * Return the {@link SystemProperty} name for the given key in our
+     * Return the {@link SystemProperties} name for the given key in our
      * {@link DeviceConfig} namespace.
      */
     private static @NonNull String propertyFor(@NonNull String key) {
@@ -380,7 +358,7 @@ public class BroadcastConstants {
     }
 
     /**
-     * Return the {@link SystemProperty} name for the given key in our
+     * Return the {@link SystemProperties} name for the given key in our
      * {@link DeviceConfig} namespace, but with a different prefix that can be
      * used to locally override the {@link DeviceConfig} value.
      */
@@ -475,10 +453,6 @@ public class BroadcastConstants {
             pw.println("):");
             pw.increaseIndent();
             pw.print(KEY_TIMEOUT, TimeUtils.formatDuration(TIMEOUT)).println();
-            pw.print(KEY_SLOW_TIME, TimeUtils.formatDuration(SLOW_TIME)).println();
-            pw.print(KEY_DEFERRAL, TimeUtils.formatDuration(DEFERRAL)).println();
-            pw.print(KEY_DEFERRAL_DECAY_FACTOR, DEFERRAL_DECAY_FACTOR).println();
-            pw.print(KEY_DEFERRAL_FLOOR, DEFERRAL_FLOOR).println();
             pw.print(KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT,
                     TimeUtils.formatDuration(ALLOW_BG_ACTIVITY_START_TIMEOUT)).println();
             pw.decreaseIndent();

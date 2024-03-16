@@ -118,6 +118,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -125,10 +126,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED;
 import static android.view.WindowManager.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING;
+import static android.view.WindowManager.ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.hasWindowExtensionsEnabled;
 import static android.window.TransitionInfo.FLAGS_IS_OCCLUDED_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -282,6 +285,7 @@ import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.ActivityId;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -2266,16 +2270,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
-        boolean appActivityEmbeddingEnabled = false;
-        try {
-            appActivityEmbeddingEnabled = WindowManager.hasWindowExtensionsEnabled()
-                    && mAtmService.mContext.getPackageManager()
-                            .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
-                            .getBoolean();
-        } catch (PackageManager.NameNotFoundException e) {
-            // No such property name.
-        }
-        mAppActivityEmbeddingSplitsEnabled = appActivityEmbeddingEnabled;
+        mAppActivityEmbeddingSplitsEnabled = isAppActivityEmbeddingSplitsEnabled();
         mAllowUntrustedEmbeddingStateSharing = getAllowUntrustedEmbeddingStateSharingProperty();
 
         mOptInOnBackInvoked = WindowOnBackInvokedDispatcher
@@ -2292,6 +2287,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             return appContext;
                         });
         mCallerState = new ActivityCallerState(mAtmService);
+    }
+
+    private boolean isAppActivityEmbeddingSplitsEnabled() {
+        if (!hasWindowExtensionsEnabled()) {
+            // WM Extensions disabled.
+            return false;
+        }
+        if (ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15 && !CompatChanges.isChangeEnabled(
+                ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15,
+                info.packageName,
+                UserHandle.getUserHandleForUid(getUid()))) {
+            // Activity Embedding is guarded with Android 15+, but this app is not qualified.
+            return false;
+        }
+        try {
+            return mAtmService.mContext.getPackageManager()
+                    .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
+                    .getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // No such property name.
+            return false;
+        }
     }
 
     /**

@@ -1192,14 +1192,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int originalCallingUid;
         /** The snapshot process state of the app who sent this broadcast */
         public int originalCallingAppProcessState;
+        public String resolvedDataType;
 
         public static StickyBroadcast create(Intent intent, boolean deferUntilActive,
-                int originalCallingUid, int originalCallingAppProcessState) {
+                int originalCallingUid, int originalCallingAppProcessState,
+                String resolvedDataType) {
             final StickyBroadcast b = new StickyBroadcast();
             b.intent = intent;
             b.deferUntilActive = deferUntilActive;
             b.originalCallingUid = originalCallingUid;
             b.originalCallingAppProcessState = originalCallingAppProcessState;
+            b.resolvedDataType = resolvedDataType;
             return b;
         }
 
@@ -1207,7 +1210,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public String toString() {
             return "{intent=" + intent + ", defer=" + deferUntilActive + ", originalCallingUid="
                     + originalCallingUid + ", originalCallingAppProcessState="
-                    + originalCallingAppProcessState + "}";
+                    + originalCallingAppProcessState + ", type=" + resolvedDataType + "}";
         }
     }
 
@@ -14528,7 +14531,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // provider that needs to lock mProviderMap in ActivityThread
                 // and also it may need to wait application response, so we
                 // cannot lock ActivityManagerService here.
-                if (filter.match(resolver, intent, true, TAG) >= 0) {
+                final int match;
+                if (Flags.avoidResolvingType()) {
+                    match = filter.match(intent.getAction(), broadcast.resolvedDataType,
+                        intent.getScheme(), intent.getData(), intent.getCategories(),
+                        TAG, false /* supportsWildcards */, null /* ignoreActions */,
+                        intent.getExtras());
+                } else {
+                    match = filter.match(resolver, intent, true, TAG);
+                }
+                if (match >= 0) {
                     if (allSticky == null) {
                         allSticky = new ArrayList<>();
                     }
@@ -15542,13 +15554,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (intent.filterEquals(list.get(i).intent)) {
                         // This sticky already exists, replace it.
                         list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
-                                callingUid, callerAppProcessState));
+                                callingUid, callerAppProcessState, resolvedType));
                         break;
                     }
                 }
                 if (i >= stickiesCount) {
                     list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive,
-                            callingUid, callerAppProcessState));
+                            callingUid, callerAppProcessState, resolvedType));
                 }
             }
         }
@@ -20302,12 +20314,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             final BroadcastConstants backConstants = new BroadcastConstants(
                     Settings.Global.BROADCAST_BG_CONSTANTS);
             backConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
-
-            final BroadcastConstants offloadConstants = new BroadcastConstants(
-                    Settings.Global.BROADCAST_OFFLOAD_CONSTANTS);
-            offloadConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
-            // by default, no "slow" policy in this queue
-            offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
 
             return new BroadcastQueueModernImpl(service, service.mHandler,
                         foreConstants, backConstants);

@@ -97,6 +97,8 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(0f)
+            val isScrollable by collectLastValue(appearanceViewModel.isScrollable)
+            assertThat(isScrollable).isFalse()
 
             fakeSceneDataSource.pause()
             sceneInteractor.changeScene(Scenes.Shade, "reason")
@@ -119,6 +121,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
             fakeSceneDataSource.unpause(expectedScene = Scenes.Shade)
             assertThat(expandFraction).isWithin(0.01f).of(1f)
+            assertThat(isScrollable).isTrue()
         }
 
     @Test
@@ -131,6 +134,8 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(1f)
+            val isScrollable by collectLastValue(appearanceViewModel.isScrollable)
+            assertThat(isScrollable).isFalse()
         }
 
     @Test
@@ -144,7 +149,12 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(1f)
 
+            fakeSceneDataSource.changeScene(toScene = Scenes.Shade)
+            val isScrollable by collectLastValue(appearanceViewModel.isScrollable)
+            assertThat(isScrollable).isTrue()
+
             fakeSceneDataSource.pause()
+
             sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
             val transitionProgress = MutableStateFlow(0f)
             transitionState.value =
@@ -165,5 +175,6 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
             fakeSceneDataSource.unpause(expectedScene = Scenes.QuickSettings)
             assertThat(expandFraction).isEqualTo(1f)
+            assertThat(isScrollable).isFalse()
         }
 }

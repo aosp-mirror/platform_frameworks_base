@@ -508,7 +508,12 @@ public class CompanionDeviceManagerService extends SystemService {
     private void onPackageModifiedInternal(@UserIdInt int userId, @NonNull String packageName) {
         if (DEBUG) Log.i(TAG, "onPackageModified() u" + userId + "/" + packageName);
 
-        updateSpecialAccessPermissionForAssociatedPackage(userId, packageName);
+        final List<AssociationInfo> associationsForPackage =
+                mAssociationStore.getAssociationsByPackage(userId, packageName);
+        for (AssociationInfo association : associationsForPackage) {
+            updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
+                    association.getPackageName());
+        }
 
         mCompanionAppController.onPackagesChanged(userId);
     }
@@ -1156,23 +1161,19 @@ public class CompanionDeviceManagerService extends SystemService {
         final PackageInfo packageInfo =
                 getPackageInfo(getContext(), userId, packageName);
 
-        Binder.withCleanCallingIdentity(() -> updateSpecialAccessPermissionAsSystem(packageInfo,
-                userId, packageName));
+        Binder.withCleanCallingIdentity(() -> updateSpecialAccessPermissionAsSystem(packageInfo));
     }
 
-    private void updateSpecialAccessPermissionAsSystem(PackageInfo packageInfo, int userId,
-            String packageName) {
+    private void updateSpecialAccessPermissionAsSystem(PackageInfo packageInfo) {
         if (packageInfo == null) {
             return;
         }
 
-        List<AssociationInfo> associations = mAssociationStore.getActiveAssociationsByPackage(
-                userId, packageName);
+        Slog.i(TAG, "Updating special access for package=[" + packageInfo.packageName + "]...");
 
         if (containsEither(packageInfo.requestedPermissions,
                 android.Manifest.permission.RUN_IN_BACKGROUND,
-                android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)
-                && !associations.isEmpty()) {
+                android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
             mPowerExemptionManager.addToPermanentAllowList(packageInfo.packageName);
         } else {
             try {
@@ -1187,8 +1188,7 @@ public class CompanionDeviceManagerService extends SystemService {
         try {
             if (containsEither(packageInfo.requestedPermissions,
                     android.Manifest.permission.USE_DATA_IN_BACKGROUND,
-                    android.Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)
-                    && !associations.isEmpty()) {
+                    android.Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)) {
                 networkPolicyManager.addUidPolicy(
                         packageInfo.applicationInfo.uid,
                         NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);

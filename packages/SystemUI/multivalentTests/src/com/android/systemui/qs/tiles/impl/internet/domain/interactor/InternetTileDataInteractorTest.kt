@@ -127,31 +127,15 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
 
         context.orCreateTestableResources.apply {
             addOverride(com.android.internal.R.drawable.ic_signal_cellular, TestStubDrawable())
-            addOverride(
-                com.android.settingslib.R.drawable.ic_no_internet_wifi_signal_0,
-                TestStubDrawable()
-            )
-            addOverride(
-                com.android.settingslib.R.drawable.ic_no_internet_wifi_signal_1,
-                TestStubDrawable()
-            )
-            addOverride(
-                com.android.settingslib.R.drawable.ic_no_internet_wifi_signal_2,
-                TestStubDrawable()
-            )
-            addOverride(
-                com.android.settingslib.R.drawable.ic_no_internet_wifi_signal_3,
-                TestStubDrawable()
-            )
-            addOverride(
-                com.android.settingslib.R.drawable.ic_no_internet_wifi_signal_4,
-                TestStubDrawable()
-            )
             addOverride(com.android.settingslib.R.drawable.ic_hotspot_phone, TestStubDrawable())
             addOverride(com.android.settingslib.R.drawable.ic_hotspot_laptop, TestStubDrawable())
             addOverride(com.android.settingslib.R.drawable.ic_hotspot_tablet, TestStubDrawable())
             addOverride(com.android.settingslib.R.drawable.ic_hotspot_watch, TestStubDrawable())
             addOverride(com.android.settingslib.R.drawable.ic_hotspot_auto, TestStubDrawable())
+
+            WifiIcons.WIFI_NO_INTERNET_ICONS.forEach { iconId ->
+                addOverride(iconId, TestStubDrawable())
+            }
         }
 
         underTest =

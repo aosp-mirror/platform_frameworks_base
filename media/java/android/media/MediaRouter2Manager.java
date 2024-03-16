@@ -1150,5 +1150,11 @@ public final class MediaRouter2Manager {
                             MediaRouter2Manager.this,
                             routes));
         }
+
+        @Override
+        public void invalidateInstance() {
+            // Should never happen since MediaRouter2Manager should only be used with
+            // MEDIA_CONTENT_CONTROL, which cannot be revoked.
+        }
     }
 }

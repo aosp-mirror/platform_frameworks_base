@@ -417,6 +417,13 @@ flag {
 }
 
 flag {
+    name: "screenshot_private_profile"
+    namespace: "systemui"
+    description: "Private profile support for screenshots"
+    bug: "327613051"
+}
+
+flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."

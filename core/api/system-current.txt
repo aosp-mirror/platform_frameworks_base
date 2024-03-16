@@ -3778,6 +3778,7 @@ package android.content {
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1048576; // 0x100000
     field @Deprecated public static final int BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND = 262144; // 0x40000
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String BLOCKED_NUMBERS_SERVICE = "blocked_numbers";
     field public static final String CLOUDSEARCH_SERVICE = "cloudsearch";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
@@ -7310,6 +7311,7 @@ package android.media {
   public final class MediaRouter2 {
     method @NonNull public java.util.List<android.media.MediaRoute2Info> getAllRoutes();
     method @Nullable public String getClientPackageName();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MEDIA_CONTENT_CONTROL, android.Manifest.permission.MEDIA_ROUTING_CONTROL}) public static android.media.MediaRouter2 getInstance(@NonNull android.content.Context, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void startScan();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void stopScan();
     method @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL) public void transfer(@NonNull android.media.MediaRouter2.RoutingController, @NonNull android.media.MediaRoute2Info);
@@ -11691,25 +11693,25 @@ package android.printservice.recommendation {
 
 package android.provider {
 
-  public static class BlockedNumberContract.BlockedNumbers {
-    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static void endBlockSuppression(@NonNull android.content.Context);
-    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @NonNull @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static android.provider.BlockedNumberContract.BlockedNumbers.BlockSuppressionStatus getBlockSuppressionStatus(@NonNull android.content.Context);
-    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static boolean getBlockedNumberSetting(@NonNull android.content.Context, @NonNull String);
-    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static void notifyEmergencyContact(@NonNull android.content.Context);
-    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static void setBlockedNumberSetting(@NonNull android.content.Context, @NonNull String, boolean);
-    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static boolean shouldShowEmergencyCallNotification(@NonNull android.content.Context);
-    method @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public static int shouldSystemBlockNumber(@NonNull android.content.Context, @NonNull String, int, boolean);
-    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ACTION_BLOCK_SUPPRESSION_STATE_CHANGED = "android.provider.action.BLOCK_SUPPRESSION_STATE_CHANGED";
-    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_PAYPHONE = "block_payphone_calls_setting";
-    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_PRIVATE = "block_private_number_calls_setting";
-    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE = "block_unavailable_calls_setting";
-    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_UNKNOWN = "block_unknown_calls_setting";
-    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED = "block_numbers_not_in_contacts_setting";
-    field @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final String ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION = "show_emergency_call_notification";
+  @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public final class BlockedNumbersManager {
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public void endBlockSuppression();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") @NonNull @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public android.provider.BlockedNumbersManager.BlockSuppressionStatus getBlockSuppressionStatus();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public boolean getBlockedNumberSetting(@NonNull String);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public void notifyEmergencyContact();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public void setBlockedNumberSetting(@NonNull String, boolean);
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public boolean shouldShowEmergencyCallNotification();
+    method @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") @RequiresPermission(allOf={android.Manifest.permission.READ_BLOCKED_NUMBERS, android.Manifest.permission.WRITE_BLOCKED_NUMBERS}) public int shouldSystemBlockNumber(@NonNull String, int, boolean);
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String ACTION_BLOCK_SUPPRESSION_STATE_CHANGED = "android.provider.action.BLOCK_SUPPRESSION_STATE_CHANGED";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String ENHANCED_SETTING_KEY_BLOCK_PAYPHONE = "block_payphone_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String ENHANCED_SETTING_KEY_BLOCK_PRIVATE = "block_private_number_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String ENHANCED_SETTING_KEY_BLOCK_UNAVAILABLE = "block_unavailable_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String ENHANCED_SETTING_KEY_BLOCK_UNKNOWN = "block_unknown_calls_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED = "block_numbers_not_in_contacts_setting";
+    field @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final String ENHANCED_SETTING_KEY_SHOW_EMERGENCY_CALL_NOTIFICATION = "show_emergency_call_notification";
   }
 
-  @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies") public static final class BlockedNumberContract.BlockedNumbers.BlockSuppressionStatus {
-    ctor public BlockedNumberContract.BlockedNumbers.BlockSuppressionStatus(boolean, long);
+  @FlaggedApi("com.android.server.telecom.flags.telecom_mainline_blocked_numbers_manager") public static final class BlockedNumbersManager.BlockSuppressionStatus {
+    ctor public BlockedNumbersManager.BlockSuppressionStatus(boolean, long);
     method public boolean getIsSuppressed();
     method public long getUntilTimestampMillis();
   }
