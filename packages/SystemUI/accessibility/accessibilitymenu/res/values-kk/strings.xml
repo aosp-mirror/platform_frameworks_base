@@ -15,7 +15,7 @@
     <string name="screenshot_label" msgid="863978141223970162">"Скриншот"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"Скриншот жасау"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Дыбысын арттыру"</string>
-    <string name="volume_down_label" msgid="8574981863656447346">"Дыбысын азайту"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"Дыбысты азайту"</string>
     <string name="brightness_up_label" msgid="8010753822854544846">"Жарықтығын арттыру"</string>
     <string name="brightness_down_label" msgid="7115662941913272072">"Жарықтығын азайту"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"Алдыңғы экранға өту"</string>

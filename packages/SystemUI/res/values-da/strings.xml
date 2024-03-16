@@ -979,7 +979,7 @@
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vil du tilføje <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> kan vælge, hvilke styringselementer og hvilket indhold der skal vises her."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne styringselementerne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Vil du fjerne sty­rings­ele­men­ter­ne for <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Angivet som favorit. Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Fjernet fra favoritter"</string>
