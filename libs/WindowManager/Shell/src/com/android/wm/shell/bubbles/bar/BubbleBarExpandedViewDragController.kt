@@ -90,15 +90,26 @@ class BubbleBarExpandedViewDragController(
         /**
          * Bubble bar [BubbleBarLocation] has changed as a result of dragging the expanded view.
          *
-         * Triggered when drag gesture passes the middle of the screen and before touch up.
-         * Can be triggered multiple times per gesture.
+         * Triggered when drag gesture passes the middle of the screen and before touch up. Can be
+         * triggered multiple times per gesture.
          *
          * @param location new location of the bubble bar as a result of the ongoing drag operation
          */
         fun onLocationChanged(location: BubbleBarLocation)
 
-        /** Expanded view has been released in the dismiss target */
-        fun onReleasedInDismiss()
+        /**
+         * Called when bubble bar is moved into or out of the dismiss target
+         *
+         * @param isStuck `true` if view is dragged inside dismiss target
+         */
+        fun onStuckToDismissChanged(isStuck: Boolean)
+
+        /**
+         * Bubble bar was released
+         *
+         * @param inDismiss `true` if view was release in dismiss target
+         */
+        fun onReleased(inDismiss: Boolean)
     }
 
     private inner class HandleDragListener : RelativeTouchListener() {
@@ -177,6 +188,7 @@ class BubbleBarExpandedViewDragController(
         private fun finishDrag() {
             if (!isStuckToDismiss) {
                 animationHelper.animateToRestPosition()
+                dragListener.onReleased(inDismiss = false)
                 dismissView.hide()
             }
             isMoving = false
@@ -189,6 +201,7 @@ class BubbleBarExpandedViewDragController(
             draggedObject: MagnetizedObject<*>
         ) {
             isStuckToDismiss = true
+            dragListener.onStuckToDismissChanged(isStuck = true)
         }
 
         override fun onUnstuckFromTarget(
@@ -200,13 +213,14 @@ class BubbleBarExpandedViewDragController(
         ) {
             isStuckToDismiss = false
             animationHelper.animateUnstuckFromDismissView(target)
+            dragListener.onStuckToDismissChanged(isStuck = false)
         }
 
         override fun onReleasedInTarget(
             target: MagnetizedObject.MagneticTarget,
             draggedObject: MagnetizedObject<*>
         ) {
-            dragListener.onReleasedInDismiss()
+            dragListener.onReleased(inDismiss = true)
             dismissView.hide()
         }
     }
