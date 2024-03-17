@@ -807,7 +807,7 @@
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Vous n\'aurez pas accès aux données mobiles ni à Internet via <xliff:g id="CARRIER">%s</xliff:g>. Vous ne pourrez accéder à Internet que par Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"votre opérateur"</string>
     <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Rebasculer sur <xliff:g id="CARRIER">%s</xliff:g> ?"</string>
-    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobile selon la disponibilité"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Il n\'y aura pas de basculement automatique entre les données mobiles selon la disponibilité"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Non, merci"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Oui, rebasculer"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"L\'application Paramètres ne peut pas valider votre réponse, car une application masque la demande d\'autorisation."</string>

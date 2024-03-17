@@ -201,13 +201,13 @@ open class MediaTttChipControllerReceiver @Inject constructor(
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
-        val packageName = newInfo.routeInfo.clientPackageName
+        val packageName: String? = newInfo.routeInfo.clientPackageName
         var iconInfo = MediaTttUtils.getIconInfoFromPackageName(
             context,
             packageName,
             isReceiver = true,
         ) {
-            logger.logPackageNotFound(packageName)
+            packageName?.let { logger.logPackageNotFound(it) }
         }
 
         if (newInfo.appNameOverride != null) {

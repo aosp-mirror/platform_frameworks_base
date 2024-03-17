@@ -134,7 +134,7 @@ class AnrTest {
     private fun getExitReasons(): List<ApplicationExitInfo> {
         lateinit var infos: List<ApplicationExitInfo>
         instrumentation.runOnMainSync {
-            val am = instrumentation.getContext().getSystemService(ActivityManager::class.java)
+            val am = instrumentation.getContext().getSystemService(ActivityManager::class.java)!!
             infos = am.getHistoricalProcessExitReasons(PACKAGE_NAME, ALL_PIDS, NO_MAX)
         }
         return infos

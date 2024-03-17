@@ -234,7 +234,7 @@ open class PrivacyDotViewController @Inject constructor(
             }
 
             // Set the dot's view gravity to hug the status bar
-            (corner.findViewById<View>(R.id.privacy_dot)
+            (corner.requireViewById<View>(R.id.privacy_dot)
                     .layoutParams as FrameLayout.LayoutParams)
                         .gravity = rotatedCorner.innerGravity()
         }
@@ -255,7 +255,7 @@ open class PrivacyDotViewController @Inject constructor(
         // in every rotation. The only thing we need to check is rtl
         val rtl = state.layoutRtl
         val size = Point()
-        tl.context.display.getRealSize(size)
+        tl.context.display?.getRealSize(size)
         val currentRotation = RotationUtils.getExactRotation(tl.context)
 
         val displayWidth: Int
