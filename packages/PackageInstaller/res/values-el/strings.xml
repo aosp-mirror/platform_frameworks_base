@@ -45,7 +45,7 @@
     <string name="update_anyway" msgid="8792432341346261969">"Να ενημερωθεί ούτως ή άλλως"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Διαχ. εφαρμογών"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Δεν υπάρχει χώρος"</string>
-    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Δεν ήταν δυνατή η εγκατάσταση της εφαρμογής <xliff:g id="APP_NAME">%1$s</xliff:g>. Απελευθερώστε λίγο χώρο και προσπαθήστε ξανά."</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Δεν ήταν δυνατή η εγκατάσταση της εφαρμογής <xliff:g id="APP_NAME">%1$s</xliff:g>. Αποδεσμεύστε λίγο χώρο και προσπαθήστε ξανά."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Η εφαρμογή δεν βρέθηκε"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Η εφαρμογή δεν βρέθηκε στη λίστα εγκατεστημένων εφαρμογών."</string>
     <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Δεν επιτρέπεται"</string>

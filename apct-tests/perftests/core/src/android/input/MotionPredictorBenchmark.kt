@@ -130,7 +130,7 @@ class MotionPredictorBenchmark {
                 eventTime, ACTION_MOVE, /*x=*/eventPosition, /*y=*/eventPosition)
             predictor.record(moveEvent)
             val predictionTime = eventTime + eventInterval
-            val predicted = predictor.predict(predictionTime.toNanos())
+            val predicted = checkNotNull(predictor.predict(predictionTime.toNanos()))
             assertTrue(predicted.eventTime <= (predictionTime + offset).toMillis())
         }
     }

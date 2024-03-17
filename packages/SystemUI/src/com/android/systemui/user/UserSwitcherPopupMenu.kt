@@ -52,22 +52,22 @@ class UserSwitcherPopupMenu(
     override fun show() {
         // need to call show() first in order to construct the listView
         super.show()
-        val listView = getListView()
+        listView?.apply {
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
 
-        listView.setVerticalScrollBarEnabled(false)
-        listView.setHorizontalScrollBarEnabled(false)
+            // Creates a transparent spacer between items
+            val shape = ShapeDrawable()
+            shape.alpha = 0
+            divider = shape
+            dividerHeight = res.getDimensionPixelSize(
+                R.dimen.bouncer_user_switcher_popup_divider_height)
 
-        // Creates a transparent spacer between items
-        val shape = ShapeDrawable()
-        shape.setAlpha(0)
-        listView.setDivider(shape)
-        listView.setDividerHeight(res.getDimensionPixelSize(
-            R.dimen.bouncer_user_switcher_popup_divider_height))
-
-        val height = res.getDimensionPixelSize(R.dimen.bouncer_user_switcher_popup_header_height)
-        listView.addHeaderView(createSpacer(height), null, false)
-        listView.addFooterView(createSpacer(height), null, false)
-        setWidth(findMaxWidth(listView))
+            val height = res.getDimensionPixelSize(R.dimen.bouncer_user_switcher_popup_header_height)
+            addHeaderView(createSpacer(height), null, false)
+            addFooterView(createSpacer(height), null, false)
+            setWidth(findMaxWidth(this))
+        }
 
         super.show()
     }

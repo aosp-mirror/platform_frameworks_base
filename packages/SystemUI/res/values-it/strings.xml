@@ -249,7 +249,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotazione automatica dello schermo"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizzazione"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Salvaschermo"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla videocamera"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla fotocamera"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accesso al microfono"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponibile"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloccato"</string>
@@ -863,7 +863,7 @@
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Punto di manipolazione destro"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Punto di manipolazione inferiore"</string>
     <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Impostazioni di ingrandimento"</string>
-    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Dimensione dell\'ingrandimento"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Dimensione ingrandimento"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zoom"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Medio"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Piccolo"</string>

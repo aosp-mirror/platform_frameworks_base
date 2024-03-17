@@ -162,7 +162,7 @@ constructor(
         logger: MediaTttSenderLogger,
         instanceId: InstanceId,
     ): ChipbarInfo {
-        val packageName = routeInfo.clientPackageName
+        val packageName = checkNotNull(routeInfo.clientPackageName)
         val otherDeviceName =
             if (routeInfo.name.isBlank()) {
                 context.getString(R.string.media_ttt_default_device_type)
