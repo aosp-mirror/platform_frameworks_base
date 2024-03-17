@@ -156,9 +156,9 @@ class WiredChargingRippleController @Inject constructor(
         }
         windowLayoutParams.packageName = context.opPackageName
         rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewDetachedFromWindow(view: View?) {}
+            override fun onViewDetachedFromWindow(view: View) {}
 
-            override fun onViewAttachedToWindow(view: View?) {
+            override fun onViewAttachedToWindow(view: View) {
                 layoutRipple()
                 rippleView.startRipple(Runnable {
                     windowManager.removeView(rippleView)
@@ -176,7 +176,7 @@ class WiredChargingRippleController @Inject constructor(
         val height = bounds.height()
         val maxDiameter = Integer.max(width, height) * 2f
         rippleView.setMaxSize(maxDiameter, maxDiameter)
-        when (context.display.rotation) {
+        when (context.display?.rotation) {
             Surface.ROTATION_0 -> {
                 rippleView.setCenter(
                         width * normalizedPortPosX, height * normalizedPortPosY)

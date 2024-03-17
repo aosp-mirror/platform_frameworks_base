@@ -71,7 +71,7 @@ object BiometricViewSizeBinder {
             }
         }
 
-        val iconHolderView = view.findViewById<View>(R.id.biometric_icon_frame)
+        val iconHolderView = view.requireViewById<View>(R.id.biometric_icon_frame)
         val iconPadding = view.resources.getDimension(R.dimen.biometric_dialog_icon_padding)
         val fullSizeYOffset =
             view.resources.getDimension(R.dimen.biometric_dialog_medium_to_large_translation_offset)
@@ -198,7 +198,7 @@ object BiometricViewSizeBinder {
 }
 
 private fun View.isLandscape(): Boolean {
-    val r = context.display.rotation
+    val r = context.display?.rotation
     return r == Surface.ROTATION_90 || r == Surface.ROTATION_270
 }
 

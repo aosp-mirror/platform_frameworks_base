@@ -66,7 +66,7 @@ class MediaArtworkProcessor @Inject constructor() {
                 inBitmap = oldIn.copy(Bitmap.Config.ARGB_8888, false /* isMutable */)
                 oldIn.recycle()
             }
-            val outBitmap = Bitmap.createBitmap(inBitmap.width, inBitmap.height,
+            val outBitmap = Bitmap.createBitmap(inBitmap?.width ?: 0, inBitmap?.height ?: 0,
                     Bitmap.Config.ARGB_8888)
 
             input = Allocation.createFromBitmap(renderScript, inBitmap,
