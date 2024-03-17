@@ -650,12 +650,12 @@
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"当前应用"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"访问通知栏"</string>
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"截取全屏"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"访问系统/应用快捷方式的列表"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"访问系统/应用快捷键列表"</string>
     <string name="group_system_go_back" msgid="8838454003680364227">"返回：返回到上一个状态（返回按钮）"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"访问主屏幕"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"已开应用概览"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"循环浏览近期使用的应用（向前）"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"循环浏览近期使用的应用（向后）"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"循环浏览最近用过的应用（向前）"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"循环浏览最近用过的应用（向后）"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"访问所有应用的列表并搜索所需应用（即搜索/启动器）"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"隐藏和重新显示任务栏"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"访问系统设置"</string>
