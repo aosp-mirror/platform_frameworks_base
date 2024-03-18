@@ -332,6 +332,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
         ArrayList<ActivityManager.RecentTaskInfo> freeformTasks = new ArrayList<>();
 
+        int mostRecentFreeformTaskIndex = Integer.MAX_VALUE;
+
         // Pull out the pairs as we iterate back in the list
         ArrayList<GroupedRecentTaskInfo> recentTasks = new ArrayList<>();
         for (int i = 0; i < rawList.size(); i++) {
@@ -344,6 +346,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
             if (DesktopModeStatus.isEnabled() && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
+                if (mostRecentFreeformTaskIndex == Integer.MAX_VALUE) {
+                    mostRecentFreeformTaskIndex = recentTasks.size();
+                }
                 freeformTasks.add(taskInfo);
                 continue;
             }
@@ -362,7 +367,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
         // Add a special entry for freeform tasks
         if (!freeformTasks.isEmpty()) {
-            recentTasks.add(0, GroupedRecentTaskInfo.forFreeformTasks(
+            recentTasks.add(mostRecentFreeformTaskIndex, GroupedRecentTaskInfo.forFreeformTasks(
                     freeformTasks.toArray(new ActivityManager.RecentTaskInfo[0])));
         }
 
