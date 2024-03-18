@@ -426,6 +426,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         for (int i = 0; i < NP; i++) {
             mPages.get(i).removeAllViews();
         }
+        if (mPageIndicator != null) {
+            mPageIndicator.setNumPages(numPages);
+        }
         if (NP == numPages) {
             return;
         }
@@ -437,7 +440,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             mLogger.d("Removing page");
             mPages.remove(mPages.size() - 1);
         }
-        mPageIndicator.setNumPages(mPages.size());
         setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
         if (mPageToRestore != NO_PAGE) {
