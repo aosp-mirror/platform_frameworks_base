@@ -8502,6 +8502,19 @@ public final class Settings {
         public static final String ACCESSIBILITY_BUTTON_TARGETS = "accessibility_button_targets";
 
         /**
+         * Setting specifying the accessibility services, shortcut targets or features
+         * to be toggled via the floating accessibility menu
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class
+         * implementing a supported accessibility feature.
+         * @hide
+         */
+        @Readable
+        public static final String ACCESSIBILITY_FLOATING_MENU_TARGETS =
+                "accessibility_floating_menu_targets";
+
+        /**
          * Setting specifying the accessibility services, accessibility shortcut targets,
          * or features to be toggled via a tile in the quick settings panel.
          *
