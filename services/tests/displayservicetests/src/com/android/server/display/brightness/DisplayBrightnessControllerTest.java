@@ -19,6 +19,7 @@ package com.android.server.display.brightness;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -109,8 +110,9 @@ public final class DisplayBrightnessControllerTest {
         DisplayPowerRequest displayPowerRequest = mock(DisplayPowerRequest.class);
         DisplayBrightnessStrategy displayBrightnessStrategy = mock(DisplayBrightnessStrategy.class);
         int targetDisplayState = Display.STATE_DOZE;
-        when(mDisplayBrightnessStrategySelector.selectStrategy(displayPowerRequest,
-                targetDisplayState)).thenReturn(displayBrightnessStrategy);
+        when(mDisplayBrightnessStrategySelector.selectStrategy(
+                eq(new StrategySelectionRequest(displayPowerRequest, targetDisplayState))))
+                .thenReturn(displayBrightnessStrategy);
         mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState);
         verify(displayBrightnessStrategy).updateBrightness(displayPowerRequest);
         assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategy(),
