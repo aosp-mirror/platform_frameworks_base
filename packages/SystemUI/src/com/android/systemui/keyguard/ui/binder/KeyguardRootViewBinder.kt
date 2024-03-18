@@ -44,6 +44,7 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -142,12 +143,14 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    if (keyguardBottomAreaRefactor()) {
+                    if (keyguardBottomAreaRefactor() || DeviceEntryUdfpsRefactor.isEnabled) {
                         launch {
                             viewModel.alpha(viewState).collect { alpha ->
                                 view.alpha = alpha
-                                childViews[statusViewId]?.alpha = alpha
-                                childViews[burnInLayerId]?.alpha = alpha
+                                if (keyguardBottomAreaRefactor()) {
+                                    childViews[statusViewId]?.alpha = alpha
+                                    childViews[burnInLayerId]?.alpha = alpha
+                                }
                             }
                         }
                     }
