@@ -18,6 +18,7 @@ package com.android.settingslib.bluetooth;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -488,5 +489,18 @@ public class BluetoothEventManagerTest {
 
         verify(mErrorListener).onShowError(any(Context.class), eq(DEVICE_NAME),
                 eq(R.string.bluetooth_pairing_pin_error_message));
+    }
+
+    /**
+     * Intent ACTION_AUTO_ON_STATE_CHANGED should dispatch to callback.
+     */
+    @Test
+    public void intentWithExtraState_autoOnStateChangedShouldDispatchToRegisterCallback() {
+        mBluetoothEventManager.registerCallback(mBluetoothCallback);
+        mIntent = new Intent(BluetoothAdapter.ACTION_AUTO_ON_STATE_CHANGED);
+
+        mContext.sendBroadcast(mIntent);
+
+        verify(mBluetoothCallback).onAutoOnStateChanged(anyInt());
     }
 }
