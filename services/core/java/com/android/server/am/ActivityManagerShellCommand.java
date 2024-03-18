@@ -170,6 +170,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private static final DateTimeFormatter LOG_NAME_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.ROOT);
 
+    private static final String PROFILER_OUTPUT_VERSION_FLAG = "--profiler-output-version";
+
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
     final IActivityTaskManager mTaskInterface;
@@ -195,6 +197,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private String mAgent;  // Agent to attach on startup.
     private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
     private int mClockType; // Whether we need thread cpu / wall clock / both.
+    private int mProfilerOutputVersion; // The version of the profiler output.
     private int mDisplayId;
     private int mTaskDisplayAreaFeatureId;
     private int mWindowingMode;
@@ -501,6 +504,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--clock-type")) {
                     String clock_type = getNextArgRequired();
                     mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
+                } else if (opt.equals(PROFILER_OUTPUT_VERSION_FLAG)) {
+                    mProfilerOutputVersion = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--attach-agent")) {
@@ -553,7 +558,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--splashscreen-show-icon")) {
                     mShowSplashScreen = true;
                 } else if (opt.equals("--dismiss-keyguard-if-insecure")
-                      || opt.equals("--dismiss-keyguard")) {
+                        || opt.equals("--dismiss-keyguard")) {
                     mDismissKeyguardIfInsecure = true;
                 } else {
                     return false;
@@ -659,8 +664,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         return 1;
                     }
                 }
-                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
-                        mStreaming, mAgent, mAttachAgentDuringBind, mClockType);
+                profilerInfo =
+                        new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop, mStreaming,
+                                mAgent, mAttachAgentDuringBind, mClockType, mProfilerOutputVersion);
             }
 
             pw.println("Starting: " + intent);
@@ -1003,6 +1009,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mSamplingInterval = 0;
         mStreaming = false;
         mClockType = ProfilerInfo.CLOCK_TYPE_DEFAULT;
+        mProfilerOutputVersion = ProfilerInfo.OUTPUT_VERSION_DEFAULT;
 
         String process = null;
 
@@ -1017,6 +1024,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--clock-type")) {
                     String clock_type = getNextArgRequired();
                     mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
+                } else if (opt.equals(PROFILER_OUTPUT_VERSION_FLAG)) {
+                    mProfilerOutputVersion = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--sampling")) {
@@ -1064,7 +1073,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming,
-                    null, false, mClockType);
+                    null, false, mClockType, mProfilerOutputVersion);
         }
 
         if (!mInterface.profileControl(process, userId, start, profilerInfo, profileType)) {
@@ -4146,6 +4155,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Print this help text.");
             pw.println("  start-activity [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]");
             pw.println("          [--sampling INTERVAL] [--clock-type <TYPE>] [--streaming]");
+            pw.println("          [" + PROFILER_OUTPUT_VERSION_FLAG + " NUMBER]");
             pw.println("          [-R COUNT] [-S] [--track-allocation]");
             pw.println("          [--user <USER_ID> | current] [--suspend] <INTENT>");
             pw.println("      Start an Activity.  Options are:");
@@ -4161,6 +4171,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          The default value is dual. (use with --start-profiler)");
             pw.println("      --streaming: stream the profiling output to the specified file");
             pw.println("          (use with --start-profiler)");
+            pw.println("      " + PROFILER_OUTPUT_VERSION_FLAG + " Specify the version of the");
+            pw.println("          profiling output (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
             pw.println("      --attach-agent <agent>: attach the given agent before binding");
             pw.println("      --attach-agent-bind <agent>: attach the given agent during binding");
@@ -4252,6 +4264,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --dump-file <FILE>: Specify the file the trace should be dumped to.");
             pw.println("  profile start [--user <USER_ID> current]");
             pw.println("          [--clock-type <TYPE>]");
+            pw.println("          [" + PROFILER_OUTPUT_VERSION_FLAG + " VERSION]");
             pw.println("          [--sampling INTERVAL | --streaming] <PROCESS> <FILE>");
             pw.println("      Start profiler on a process.  The given <PROCESS> argument");
             pw.println("        may be either a process name or pid.  Options are:");
@@ -4261,6 +4274,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --clock-type <TYPE>: use the specified clock to report timestamps.");
             pw.println("          The type can be one of wall | thread-cpu | dual. The default");
             pw.println("          value is dual.");
+            pw.println("      " + PROFILER_OUTPUT_VERSION_FLAG + "VERSION: specifies the output");
+            pw.println("          format version");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples.");
             pw.println("      --streaming: stream the profiling output to the specified file.");

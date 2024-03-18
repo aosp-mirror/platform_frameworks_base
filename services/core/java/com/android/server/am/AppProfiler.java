@@ -2482,8 +2482,8 @@ public class AppProfiler {
                     }
                 }
             } else if (instr != null && instr.mProfileFile != null) {
-                profilerInfo = new ProfilerInfo(instr.mProfileFile, null, 0, false, false,
-                        null, false, 0);
+                profilerInfo = new ProfilerInfo(instr.mProfileFile, null, 0, false, false, null,
+                        false, 0, ProfilerInfo.OUTPUT_VERSION_DEFAULT);
             }
             if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
                 // We need to do a debuggable check here. See setAgentApp for why the check is
@@ -2493,7 +2493,8 @@ public class AppProfiler {
                     // Do not overwrite already requested agent.
                     if (profilerInfo == null) {
                         profilerInfo = new ProfilerInfo(null, null, 0, false, false,
-                                mAppAgentMap.get(processName), true, 0);
+                                mAppAgentMap.get(processName), true, 0,
+                                ProfilerInfo.OUTPUT_VERSION_DEFAULT);
                     } else if (profilerInfo.agent == null) {
                         profilerInfo = profilerInfo.setAgent(mAppAgentMap.get(processName), true);
                     }
@@ -2620,14 +2621,16 @@ public class AppProfiler {
                 if (mProfileData.getProfilerInfo() != null) {
                     pw.println("  mProfileFile=" + mProfileData.getProfilerInfo().profileFile
                             + " mProfileFd=" + mProfileData.getProfilerInfo().profileFd);
-                    pw.println("  mSamplingInterval="
-                            + mProfileData.getProfilerInfo().samplingInterval
+                    pw.println(
+                            "  mSamplingInterval=" + mProfileData.getProfilerInfo().samplingInterval
                             + " mAutoStopProfiler="
                             + mProfileData.getProfilerInfo().autoStopProfiler
                             + " mStreamingOutput="
                             + mProfileData.getProfilerInfo().streamingOutput
                             + " mClockType="
-                            + mProfileData.getProfilerInfo().clockType);
+                            + mProfileData.getProfilerInfo().clockType
+                            + " mProfilerOutputVersion="
+                            + mProfileData.getProfilerInfo().profilerOutputVersion);
                     pw.println("  mProfileType=" + mProfileType);
                 }
             }
