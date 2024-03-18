@@ -138,7 +138,9 @@ public final class BroadcastRadioServiceImpl {
 
     /**
      * Constructs BroadcastRadioServiceImpl using AIDL HAL using the list of names of AIDL
-     * BroadcastRadio HAL services {@code serviceNameList}
+     * BroadcastRadio HAL services
+     *
+     * @param serviceNameList list of names of AIDL BroadcastRadio HAL services
      */
     public BroadcastRadioServiceImpl(ArrayList<String> serviceNameList) {
         mNextModuleId = 0;
@@ -169,7 +171,11 @@ public final class BroadcastRadioServiceImpl {
     }
 
     /**
-     * Gets the AIDL RadioModule for the given {@code moduleId}. Null will be returned if not found.
+     * Gets the AIDL RadioModule for the given module Id.
+     *
+     * @param id Id of {@link RadioModule}  of AIDL BroadcastRadio HAL service
+     * @return {@code true} if {@link RadioModule} of AIDL BroadcastRadio HAL service is found,
+     *         {@code false} otherwise
      */
     public boolean hasModule(int id) {
         synchronized (mLock) {
