@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -57,6 +58,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.ApplicationExitInfo;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
@@ -239,6 +241,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         mConstants.TIMEOUT = 200;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
         mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 500;
+        mConstants.MAX_FROZEN_OUTGOING_BROADCASTS = 10;
     }
 
     @After
@@ -2366,6 +2369,34 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final ProcessRecord receiverYellowApp = mAms.getProcessRecordLocked(PACKAGE_YELLOW,
                 getUidForPackage(PACKAGE_YELLOW));
         verifyScheduleReceiver(times(1), receiverYellowApp, timeTick);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DEFER_OUTGOING_BROADCASTS)
+    public void testKillProcess_excessiveOutgoingBroadcastsWhileCached() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        setProcessFreezable(callerApp, true /* pendingFreeze */, false /* frozen */);
+        waitForIdle();
+
+        final int count = mConstants.MAX_FROZEN_OUTGOING_BROADCASTS + 1;
+        for (int i = 0; i < count; ++i) {
+            final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK + "_" + i);
+            enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp, List.of(
+                    makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
+        }
+        // Verify that we invoke the call to freeze the caller app.
+        verify(mAms.mOomAdjuster.mCachedAppOptimizer, atLeastOnce())
+                .freezeAppAsyncImmediateLSP(callerApp);
+
+        // Verify that the caller process is killed
+        assertTrue(callerApp.isKilled());
+        verify(mProcessList).noteAppKill(same(callerApp),
+                eq(ApplicationExitInfo.REASON_OTHER),
+                eq(ApplicationExitInfo.SUBREASON_EXCESSIVE_OUTGOING_BROADCASTS_WHILE_CACHED),
+                any(String.class));
+
+        waitForIdle();
+        assertNull(mAms.getProcessRecordLocked(PACKAGE_BLUE, getUidForPackage(PACKAGE_BLUE)));
     }
 
     private long getReceiverScheduledTime(@NonNull BroadcastRecord r, @NonNull Object receiver) {

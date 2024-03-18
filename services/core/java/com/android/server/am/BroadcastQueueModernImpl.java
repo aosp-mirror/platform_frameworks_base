@@ -166,7 +166,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     /**
      * Map from UID to per-process broadcast queues. If a UID hosts more than
      * one process, each additional process is stored as a linked list using
-     * {@link BroadcastProcessQueue#next}.
+     * {@link BroadcastProcessQueue#processNameNext}.
      *
      * @see #getProcessQueue
      * @see #getOrCreateProcessQueue
@@ -661,6 +661,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final BroadcastProcessQueue queue = getProcessQueue(app);
         if (queue != null) {
             setQueueProcess(queue, app);
+            // Outgoing broadcasts should be cleared when the process dies but there have been
+            // issues due to AMS not always informing the BroadcastQueue of process deaths.
+            // So, clear them when a new process starts as well.
+            queue.clearOutgoingBroadcasts();
         }
 
         boolean didSomething = false;
@@ -730,6 +734,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 demoteFromRunningLocked(queue);
             }
 
+            queue.clearOutgoingBroadcasts();
+
             // Skip any pending registered receivers, since the old process
             // would never be around to receive them
             boolean didSomething = queue.forEachMatchingBroadcast((r, i) -> {
@@ -781,8 +787,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             final BroadcastProcessQueue queue = getOrCreateProcessQueue(
                     r.callerApp.processName, r.callerApp.uid);
             if (queue.getOutgoingBroadcastCount() >= mConstants.MAX_FROZEN_OUTGOING_BROADCASTS) {
-                // TODO: Kill the process if the outgoing broadcasts count is
-                // beyond a certain limit.
+                r.callerApp.killLocked("Too many outgoing broadcasts in cached state",
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_EXCESSIVE_OUTGOING_BROADCASTS_WHILE_CACHED,
+                        true /* noisy */);
+                return;
             }
             queue.enqueueOutgoingBroadcast(r);
             mHistory.onBroadcastFrozenLocked(r);
