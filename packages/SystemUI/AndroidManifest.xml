@@ -277,6 +277,9 @@
     <!-- to change spatial audio -->
     <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS" />
 
+    <!-- to adjust volume in volume panel -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <!-- to access ResolverRankerServices -->
     <uses-permission android:name="android.permission.BIND_RESOLVER_RANKER_SERVICE" />
 
