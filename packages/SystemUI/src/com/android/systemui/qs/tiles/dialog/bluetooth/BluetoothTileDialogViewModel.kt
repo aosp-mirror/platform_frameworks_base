@@ -29,7 +29,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
-import com.android.settingslib.flags.Flags.bluetoothQsTileDialogAutoOnToggle
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -277,7 +276,7 @@ constructor(
 
     @VisibleForTesting
     internal suspend fun isAutoOnToggleFeatureAvailable() =
-        bluetoothQsTileDialogAutoOnToggle() && bluetoothAutoOnInteractor.isValuePresent()
+        bluetoothAutoOnInteractor.isAutoOnSupported()
 
     companion object {
         private const val INTERACTION_JANK_TAG = "bluetooth_tile_dialog"
