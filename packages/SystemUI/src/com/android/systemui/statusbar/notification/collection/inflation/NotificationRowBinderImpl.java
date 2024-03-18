@@ -290,7 +290,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mRowContentBindStage.requestRebind(entry, en -> {
             mLogger.logRebindComplete(entry);
             row.setUsesIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
-            row.setIsLowPriority(isLowPriority);
+            row.setIsMinimized(isLowPriority);
             if (inflationCallback != null) {
                 inflationCallback.onAsyncInflationFinished(en);
             }

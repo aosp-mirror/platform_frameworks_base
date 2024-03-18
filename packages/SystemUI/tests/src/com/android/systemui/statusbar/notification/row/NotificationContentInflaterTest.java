@@ -231,6 +231,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         NotificationContentInflater.applyRemoteView(
                 AsyncTask.SERIAL_EXECUTOR,
                 false /* inflateSynchronously */,
+                /* isMinimized= */ false,
                 result,
                 FLAG_CONTENT_VIEW_EXPANDED,
                 0,

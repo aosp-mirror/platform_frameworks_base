@@ -42,6 +42,8 @@ public final class RowContentBindParams {
 
     /**
      * Set whether content should use a low priority version of its content views.
+     * The low priority here does not equal to the NotificationManager.IMPORTANCE_LOW, but
+     * represents that the notification is minimized (with the priority: IMPORTANCE_MIN).
      */
     public void setUseLowPriority(boolean useLowPriority) {
         if (mUseLowPriority != useLowPriority) {

@@ -210,7 +210,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
                 anyBoolean(),
                 any());
         BindParams usedParams = bindParamsCaptor.getValue();
-        assertTrue(usedParams.isLowPriority);
+        assertTrue(usedParams.isMinimized);
     }
 
     @Test
