@@ -501,8 +501,10 @@ public class QSPanel extends LinearLayout implements Tunable {
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-        if (!mExpanded && mTileLayout instanceof PagedTileLayout) {
-            ((PagedTileLayout) mTileLayout).setCurrentItem(0, false);
+        if (!mExpanded && mTileLayout instanceof PagedTileLayout tilesLayout) {
+            // Use post, so it will wait until the view is attached. If the view is not attached,
+            // it will not populate corresponding views (and will not do it later when attached).
+            tilesLayout.post(() -> tilesLayout.setCurrentItem(0, false));
         }
     }
 
