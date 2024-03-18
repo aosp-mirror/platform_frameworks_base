@@ -496,6 +496,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (mode == TRANSIT_TO_FRONT) {
                 // When the window is moved to front, make sure the crop is updated to prevent it
                 // from using the old crop.
+                t.setPosition(leash, change.getEndRelOffset().x, change.getEndRelOffset().y);
                 t.setWindowCrop(leash, change.getEndAbsBounds().width(),
                         change.getEndAbsBounds().height());
             }
@@ -507,6 +508,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     t.setMatrix(leash, 1, 0, 0, 1);
                     t.setAlpha(leash, 1.f);
                     t.setPosition(leash, change.getEndRelOffset().x, change.getEndRelOffset().y);
+                    t.setWindowCrop(leash, change.getEndAbsBounds().width(),
+                            change.getEndAbsBounds().height());
                 }
                 continue;
             }
