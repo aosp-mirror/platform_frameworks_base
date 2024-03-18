@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -55,7 +56,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
@@ -1018,5 +1022,123 @@ class ElementTest {
         assertThat(state.currentTransitions).isEmpty()
         rule.onNode(isElement(TestElements.Foo)).assertDoesNotExist()
         rule.onNode(isElement(TestElements.Bar)).assertPositionInRootIsEqualTo(100.dp, 100.dp)
+    }
+
+    @Test
+    fun interruption() = runTest {
+        // 4 frames of animation.
+        val duration = 4 * 16
+
+        val state =
+            MutableSceneTransitionLayoutStateImpl(
+                SceneA,
+                transitions {
+                    from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
+                    from(SceneB, to = SceneC) { spec = tween(duration, easing = LinearEasing) }
+                },
+                enableInterruptions = false,
+            )
+
+        val layoutSize = DpSize(200.dp, 100.dp)
+        val fooSize = DpSize(20.dp, 10.dp)
+
+        @Composable
+        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+            Box(modifier.element(TestElements.Foo).size(fooSize))
+        }
+
+        rule.setContent {
+            SceneTransitionLayout(state, Modifier.size(layoutSize)) {
+                // In scene A, Foo is aligned at the TopStart.
+                scene(SceneA) {
+                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.TopStart)) }
+                }
+
+                // In scene B, Foo is aligned at the TopEnd, so it moves horizontally when coming
+                // from A.
+                scene(SceneB) {
+                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.TopEnd)) }
+                }
+
+                // In scene C, Foo is aligned at the BottomEnd, so it moves vertically when coming
+                // from B.
+                scene(SceneC) {
+                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.BottomEnd)) }
+                }
+            }
+        }
+
+        // The offset of Foo when idle in A, B or C.
+        val offsetInA = DpOffset.Zero
+        val offsetInB = DpOffset(layoutSize.width - fooSize.width, 0.dp)
+        val offsetInC =
+            DpOffset(layoutSize.width - fooSize.width, layoutSize.height - fooSize.height)
+
+        // Initial state (idle in A).
+        rule
+            .onNode(isElement(TestElements.Foo, SceneA))
+            .assertPositionInRootIsEqualTo(offsetInA.x, offsetInA.y)
+
+        // Current transition is A => B at 50%.
+        val aToBProgress = 0.5f
+        val aToB =
+            transition(
+                from = SceneA,
+                to = SceneB,
+                progress = { aToBProgress },
+                onFinish = neverFinish(),
+            )
+        val offsetInAToB = lerp(offsetInA, offsetInB, aToBProgress)
+        rule.runOnUiThread { state.startTransition(aToB, transitionKey = null) }
+        rule
+            .onNode(isElement(TestElements.Foo, SceneB))
+            .assertPositionInRootIsEqualTo(offsetInAToB.x, offsetInAToB.y)
+
+        // Start B => C at 0%.
+        var bToCProgress by mutableFloatStateOf(0f)
+        var interruptionProgress by mutableFloatStateOf(1f)
+        val bToC =
+            transition(
+                from = SceneB,
+                to = SceneC,
+                progress = { bToCProgress },
+                interruptionProgress = { interruptionProgress },
+            )
+        rule.runOnUiThread { state.startTransition(bToC, transitionKey = null) }
+
+        // The offset interruption delta, which will be multiplied by the interruption progress then
+        // added to the current transition offset.
+        val interruptionDelta = offsetInAToB - offsetInB
+
+        // Interruption progress is at 100% and bToC is at 0%, so Foo should be at the same offset
+        // as right before the interruption.
+        rule
+            .onNode(isElement(TestElements.Foo, SceneC))
+            .assertPositionInRootIsEqualTo(offsetInAToB.x, offsetInAToB.y)
+
+        // Move the transition forward at 30% and set the interruption progress to 50%.
+        bToCProgress = 0.3f
+        interruptionProgress = 0.5f
+        val offsetInBToC = lerp(offsetInB, offsetInC, bToCProgress)
+        val offsetInBToCWithInterruption =
+            offsetInBToC +
+                DpOffset(
+                    interruptionDelta.x * interruptionProgress,
+                    interruptionDelta.y * interruptionProgress,
+                )
+        rule.waitForIdle()
+        rule
+            .onNode(isElement(TestElements.Foo, SceneC))
+            .assertPositionInRootIsEqualTo(
+                offsetInBToCWithInterruption.x,
+                offsetInBToCWithInterruption.y,
+            )
+
+        // Finish the transition and interruption.
+        bToCProgress = 1f
+        interruptionProgress = 0f
+        rule
+            .onNode(isElement(TestElements.Foo, SceneC))
+            .assertPositionInRootIsEqualTo(offsetInC.x, offsetInC.y)
     }
 }
