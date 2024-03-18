@@ -71,7 +71,7 @@ constructor(
         session: MediaDeviceSession,
         onStart: suspend FlowCollector<MediaControllerChange>.(controller: MediaController) -> Unit,
     ): Flow<MediaControllerChange?> =
-        mediaControllerRepository.activeMediaControllers
+        mediaControllerRepository.activeSessions
             .flatMapLatest { controllers ->
                 val controller: MediaController =
                     findControllerForSession(controllers, session)
@@ -88,7 +88,7 @@ constructor(
         return withContext(backgroundCoroutineContext) {
             val controller =
                 findControllerForSession(
-                    mediaControllerRepository.activeMediaControllers.value,
+                    mediaControllerRepository.activeSessions.value,
                     mediaDeviceSession,
                 )
             if (controller == null) {

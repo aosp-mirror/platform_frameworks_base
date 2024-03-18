@@ -39,8 +39,14 @@ import kotlinx.coroutines.flow.stateIn
 /** Provides controllers for currently active device media sessions. */
 interface MediaControllerRepository {
 
-    /** Current [MediaController]. Null is emitted when there is no active [MediaController]. */
-    val activeMediaControllers: StateFlow<Collection<MediaController>>
+    /**
+     * Get a list of controllers for all ongoing sessions. The controllers will be provided in
+     * priority order with the most important controller at index 0.
+     *
+     * This requires the [android.Manifest.permission.MEDIA_CONTENT_CONTROL] permission be held by
+     * the calling app.
+     */
+    val activeSessions: StateFlow<List<MediaController>>
 }
 
 class MediaControllerRepositoryImpl(
@@ -51,20 +57,17 @@ class MediaControllerRepositoryImpl(
     backgroundContext: CoroutineContext,
 ) : MediaControllerRepository {
 
-    override val activeMediaControllers: StateFlow<Collection<MediaController>> =
+    override val activeSessions: StateFlow<List<MediaController>> =
         merge(
-                mediaSessionManager.activeMediaChanges
-                    .onStart { emit(mediaSessionManager.getActiveSessions(null)) }
-                    .filterNotNull(),
-                localBluetoothManager
-                    ?.headsetAudioModeChanges
-                    ?.onStart { emit(Unit) }
-                    ?.map { mediaSessionManager.getActiveSessions(null) } ?: emptyFlow(),
+                mediaSessionManager.activeMediaChanges.filterNotNull(),
+                localBluetoothManager?.headsetAudioModeChanges?.map {
+                    mediaSessionManager.getActiveSessions(null)
+                } ?: emptyFlow(),
                 audioManagerEventsReceiver.events
                     .filterIsInstance(AudioManagerEvent.StreamDevicesChanged::class)
-                    .onStart { emit(AudioManagerEvent.StreamDevicesChanged) }
                     .map { mediaSessionManager.getActiveSessions(null) },
             )
+            .onStart { emit(mediaSessionManager.getActiveSessions(null)) }
             .flowOn(backgroundContext)
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyList())
 }

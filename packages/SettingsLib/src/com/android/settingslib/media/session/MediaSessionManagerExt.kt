@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
 /** [Flow] for [MediaSessionManager.OnActiveSessionsChangedListener]. */
-val MediaSessionManager.activeMediaChanges: Flow<Collection<MediaController>?>
+val MediaSessionManager.activeMediaChanges: Flow<List<MediaController>?>
     get() =
         callbackFlow {
                 val listener =

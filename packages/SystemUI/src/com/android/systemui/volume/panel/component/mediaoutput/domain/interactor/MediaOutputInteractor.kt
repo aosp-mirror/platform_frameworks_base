@@ -58,7 +58,7 @@ constructor(
 ) {
 
     private val activeMediaControllers: Flow<MediaControllers> =
-        mediaControllerRepository.activeMediaControllers
+        mediaControllerRepository.activeSessions
             .map { getMediaControllers(it) }
             .shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
 
