@@ -119,7 +119,7 @@ public class AutomaticBrightnessStrategy {
                         : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 
         accommodateUserBrightnessChanges(userSetBrightnessChanged, lastUserSetScreenBrightness,
-                policy, mBrightnessConfiguration, autoBrightnessState);
+                policy, targetDisplayState, mBrightnessConfiguration, autoBrightnessState);
     }
 
     public boolean isAutoBrightnessEnabled() {
@@ -372,7 +372,7 @@ public class AutomaticBrightnessStrategy {
      */
     @VisibleForTesting
     void accommodateUserBrightnessChanges(boolean userSetBrightnessChanged,
-            float lastUserSetScreenBrightness, int policy,
+            float lastUserSetScreenBrightness, int policy, int displayState,
             BrightnessConfiguration brightnessConfiguration, int autoBrightnessState) {
         // Update the pending auto-brightness adjustments if any. This typically checks and adjusts
         // the state of the class if the user moves the brightness slider and has settled to a
@@ -390,7 +390,8 @@ public class AutomaticBrightnessStrategy {
                     brightnessConfiguration,
                     lastUserSetScreenBrightness,
                     userSetBrightnessChanged, autoBrightnessAdjustment,
-                    mAutoBrightnessAdjustmentChanged, policy, mShouldResetShortTermModel);
+                    mAutoBrightnessAdjustmentChanged, policy, displayState,
+                    mShouldResetShortTermModel);
             mShouldResetShortTermModel = false;
             // We take note if the user brightness point is still being used in the current
             // auto-brightness model.

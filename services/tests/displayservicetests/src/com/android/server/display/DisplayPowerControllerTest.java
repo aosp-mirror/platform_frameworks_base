@@ -982,7 +982,7 @@ public final class DisplayPowerControllerTest {
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_BRIGHT,
-                /* shouldResetShortTermModel= */ false
+                Display.STATE_ON, /* shouldResetShortTermModel= */ false
         );
         verify(mHolder.hbmController)
                 .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
@@ -1008,7 +1008,7 @@ public final class DisplayPowerControllerTest {
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_DOZE,
-                /* shouldResetShortTermModel= */ false
+                Display.STATE_DOZE, /* shouldResetShortTermModel= */ false
         );
         verify(mHolder.hbmController)
                 .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED);
@@ -1031,7 +1031,7 @@ public final class DisplayPowerControllerTest {
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_BRIGHT,
-                /* shouldResetShortTermModel= */ false
+                Display.STATE_ON, /* shouldResetShortTermModel= */ false
         );
         verify(mHolder.hbmController)
                 .setAutoBrightnessEnabled(AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
@@ -1054,7 +1054,7 @@ public final class DisplayPowerControllerTest {
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_OFF,
-                /* shouldResetShortTermModel= */ false
+                Display.STATE_OFF, /* shouldResetShortTermModel= */ false
         );
         verify(mHolder.hbmController).setAutoBrightnessEnabled(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE);
@@ -1080,7 +1080,7 @@ public final class DisplayPowerControllerTest {
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_DOZE,
-                /* shouldResetShortTermModel= */ false
+                Display.STATE_DOZE, /* shouldResetShortTermModel= */ false
         );
         verify(mHolder.hbmController).setAutoBrightnessEnabled(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE);
@@ -1104,7 +1104,7 @@ public final class DisplayPowerControllerTest {
                 /* configuration= */ null, PowerManager.BRIGHTNESS_INVALID_FLOAT,
                 /* userChangedBrightness= */ false, /* adjustment= */ 0,
                 /* userChangedAutoBrightnessAdjustment= */ false, DisplayPowerRequest.POLICY_BRIGHT,
-                /* shouldResetShortTermModel= */ false
+                Display.STATE_ON, /* shouldResetShortTermModel= */ false
         );
 
         // HBM should be allowed for the follower display
@@ -1697,6 +1697,7 @@ public final class DisplayPowerControllerTest {
                 /* adjustment= */ anyFloat(),
                 /* userChangedAutoBrightnessAdjustment= */ anyBoolean(),
                 /* displayPolicy= */ anyInt(),
+                /* displayState= */ anyInt(),
                 /* shouldResetShortTermModel= */ anyBoolean());
         verify(mBrightnessTrackerMock, never()).notifyBrightnessChanged(
                 /* brightness= */ anyFloat(),
@@ -1815,6 +1816,7 @@ public final class DisplayPowerControllerTest {
                 any(BrightnessEvent.class))).thenReturn(PowerManager.BRIGHTNESS_INVALID_FLOAT);
         when(mHolder.hbmController.getCurrentBrightnessMax())
                 .thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
 
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_DOZE;
