@@ -35,7 +35,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
-import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
+import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
@@ -366,21 +366,33 @@ constructor(
                     }
                 }
             }
-            .onStart { emit(0f) }
+            .onStart { emit(1f) }
             .dumpWhileCollecting("alphaForShadeAndQsExpansion")
 
-    private val alphaWhenGoneAndShadeState: Flow<Float> =
-        combineTransform(
-                keyguardTransitionInteractor.transitions
-                    .map { step -> step.to == GONE && step.transitionState == FINISHED }
-                    .distinctUntilChanged(),
-                keyguardInteractor.statusBarState,
-            ) { isGoneTransitionFinished, statusBarState ->
-                if (isGoneTransitionFinished && statusBarState == SHADE) {
-                    emit(1f)
+    private val isGoneTransitionRunning: Flow<Boolean> =
+        flow {
+                while (currentCoroutineContext().isActive) {
+                    emit(false)
+                    // Ensure start where GONE is inactive
+                    keyguardTransitionInteractor.transitionValue(GONE).first { it == 0f }
+                    // Wait for a GONE transition to begin
+                    keyguardTransitionInteractor.transitionStepsToState(GONE).first {
+                        it.value > 0f && it.transitionState == RUNNING
+                    }
+                    emit(true)
+                    // Now await the signal that SHADE state has been reached or the GONE transition
+                    // was reversed. Until SHADE state has been replaced and merged with GONE, it is
+                    // the only source of when it is considered safe to reset alpha to 1f for HUNs
+                    combine(
+                            keyguardInteractor.statusBarState,
+                            keyguardTransitionInteractor.transitionValue(GONE),
+                        ) { statusBarState, goneValue ->
+                            statusBarState == SHADE || goneValue == 0f
+                        }
+                        .first { it }
                 }
             }
-            .dumpWhileCollecting("alphaWhenGoneAndShadeState")
+            .dumpWhileCollecting("goneTransitionInProgress")
 
     fun keyguardAlpha(viewState: ViewStateAccessor): Flow<Float> {
         // All transition view models are mututally exclusive, and safe to merge
@@ -407,12 +419,11 @@ constructor(
 
         return merge(
                 alphaTransitions,
-                // Sends a final alpha value of 1f when truly gone, to make sure HUNs appear
-                alphaWhenGoneAndShadeState,
                 // These remaining cases handle alpha changes within an existing state, such as
                 // shade expansion or swipe to dismiss
                 combineTransform(
                     isOnLockscreenWithoutShade,
+                    isGoneTransitionRunning,
                     shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     keyguardInteractor.dismissAlpha.dumpWhileCollecting(
@@ -420,6 +431,7 @@ constructor(
                     ),
                 ) {
                     isOnLockscreenWithoutShade,
+                    isGoneTransitionRunning,
                     shadeCollapseFadeIn,
                     alphaForShadeAndQsExpansion,
                     dismissAlpha ->
@@ -427,7 +439,7 @@ constructor(
                         if (!shadeCollapseFadeIn && dismissAlpha != null) {
                             emit(dismissAlpha)
                         }
-                    } else {
+                    } else if (!isGoneTransitionRunning) {
                         emit(alphaForShadeAndQsExpansion)
                     }
                 },
