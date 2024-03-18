@@ -44,3 +44,11 @@ flag {
      description: "Enable device awareness in camera service"
      bug: "305170199"
 }
+
+flag {
+    namespace: "virtual_devices"
+    name: "device_aware_drm"
+    description: "Makes MediaDrm APIs device-aware"
+    bug: "303535376"
+    is_fixed_read_only: true
+}
