@@ -1905,6 +1905,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             accessibilityManager.performSystemAction(
                     AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
         }
+        dismissKeyboardShortcutsMenu();
     }
 
     private void toggleNotificationPanel() {
