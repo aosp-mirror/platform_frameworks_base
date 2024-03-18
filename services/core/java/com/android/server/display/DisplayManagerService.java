@@ -48,6 +48,7 @@ import static android.os.Process.ROOT_UID;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
 
@@ -282,7 +283,7 @@ public final class DisplayManagerService extends SystemService {
     @GuardedBy("mSyncRoot")
     private int[] mUserDisabledHdrTypes = {};
     @Display.HdrCapabilities.HdrType
-    private int[] mSupportedHdrOutputType;
+    private int[] mSupportedHdrOutputTypes;
     @GuardedBy("mSyncRoot")
     private boolean mAreUserDisabledHdrTypesAllowed = true;
 
@@ -297,10 +298,10 @@ public final class DisplayManagerService extends SystemService {
     // HDR conversion mode chosen by user
     @GuardedBy("mSyncRoot")
     private HdrConversionMode mHdrConversionMode = null;
-    // Actual HDR conversion mode, which takes app overrides into account.
-    private HdrConversionMode mOverrideHdrConversionMode = null;
+    // Whether app has disabled HDR conversion
+    private boolean mShouldDisableHdrConversion = false;
     @GuardedBy("mSyncRoot")
-    private int mSystemPreferredHdrOutputType = Display.HdrCapabilities.HDR_TYPE_INVALID;
+    private int mSystemPreferredHdrOutputType = HDR_TYPE_INVALID;
 
 
     // The synchronization root for the display manager.
@@ -1407,7 +1408,8 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void setUserDisabledHdrTypesInternal(int[] userDisabledHdrTypes) {
+    @VisibleForTesting
+    void setUserDisabledHdrTypesInternal(int[] userDisabledHdrTypes) {
         synchronized (mSyncRoot) {
             if (userDisabledHdrTypes == null) {
                 Slog.e(TAG, "Null is not an expected argument to "
@@ -1425,6 +1427,7 @@ public final class DisplayManagerService extends SystemService {
             if (Arrays.equals(mUserDisabledHdrTypes, userDisabledHdrTypes)) {
                 return;
             }
+
             String userDisabledFormatsString = "";
             if (userDisabledHdrTypes.length != 0) {
                 userDisabledFormatsString = TextUtils.join(",",
@@ -1440,6 +1443,15 @@ public final class DisplayManagerService extends SystemService {
                             handleLogicalDisplayChangedLocked(display);
                         });
             }
+            /** Note: it may be expected to reset the Conversion Mode when an HDR type is enabled
+             and the Conversion Mode is set to System Preferred. This is handled in the Settings
+             code because in the special case where HDR is indirectly disabled by Force SDR
+             Conversion, manually enabling HDR is not recognized as an action that reduces the
+             disabled HDR count. Thus, this case needs to be checked in the Settings code when we
+             know we're enabling an HDR mode. If we split checking for SystemConversion and
+             isForceSdr in two places, we may have duplicate calls to resetting to System Conversion
+             and get two black screens.
+             */
         }
     }
 
@@ -1452,19 +1464,20 @@ public final class DisplayManagerService extends SystemService {
         return true;
     }
 
-    private void setAreUserDisabledHdrTypesAllowedInternal(
+    @VisibleForTesting
+    void setAreUserDisabledHdrTypesAllowedInternal(
             boolean areUserDisabledHdrTypesAllowed) {
         synchronized (mSyncRoot) {
             if (mAreUserDisabledHdrTypesAllowed == areUserDisabledHdrTypesAllowed) {
                 return;
             }
             mAreUserDisabledHdrTypesAllowed = areUserDisabledHdrTypesAllowed;
-            if (mUserDisabledHdrTypes.length == 0) {
-                return;
-            }
             Settings.Global.putInt(mContext.getContentResolver(),
                     Settings.Global.ARE_USER_DISABLED_HDR_FORMATS_ALLOWED,
                     areUserDisabledHdrTypesAllowed ? 1 : 0);
+            if (mUserDisabledHdrTypes.length == 0) {
+                return;
+            }
             int userDisabledHdrTypes[] = {};
             if (!mAreUserDisabledHdrTypesAllowed) {
                 userDisabledHdrTypes = mUserDisabledHdrTypes;
@@ -1475,6 +1488,14 @@ public final class DisplayManagerService extends SystemService {
                         display.setUserDisabledHdrTypes(finalUserDisabledHdrTypes);
                         handleLogicalDisplayChangedLocked(display);
                     });
+            // When HDR conversion mode is set to SYSTEM, modification to
+            // areUserDisabledHdrTypesAllowed requires refreshing the HDR conversion mode to tell
+            // the system which HDR types it is not allowed to use.
+            if (getHdrConversionModeInternal().getConversionMode()
+                    == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
+                setHdrConversionModeInternal(
+                        new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+            }
         }
     }
 
@@ -2348,7 +2369,7 @@ public final class DisplayManagerService extends SystemService {
         final int preferredHdrOutputType =
                 hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_FORCE
                         ? hdrConversionMode.getPreferredHdrOutputType()
-                        : Display.HdrCapabilities.HDR_TYPE_INVALID;
+                        : HDR_TYPE_INVALID;
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.HDR_FORCE_CONVERSION_TYPE, preferredHdrOutputType);
     }
@@ -2361,7 +2382,7 @@ public final class DisplayManagerService extends SystemService {
                 ? Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.HDR_FORCE_CONVERSION_TYPE,
                         Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION)
-                : Display.HdrCapabilities.HDR_TYPE_INVALID;
+                : HDR_TYPE_INVALID;
         mHdrConversionMode = new HdrConversionMode(conversionMode, preferredHdrOutputType);
         setHdrConversionModeInternal(mHdrConversionMode);
     }
@@ -2498,22 +2519,38 @@ public final class DisplayManagerService extends SystemService {
         });
     }
 
+    /**
+     * Returns the HDR output types that are supported by the device's HDR conversion capabilities,
+     * stripping out any user-disabled HDR types if mAreUserDisabledHdrTypesAllowed is false.
+     */
     @GuardedBy("mSyncRoot")
-    private int[] getEnabledAutoHdrTypesLocked() {
-        IntArray autoHdrOutputTypesArray = new IntArray();
+    @VisibleForTesting
+    int[] getEnabledHdrOutputTypesLocked() {
+        if (mAreUserDisabledHdrTypesAllowed) {
+            return getSupportedHdrOutputTypesInternal();
+        }
+        // Strip out all HDR formats that are currently user-disabled
+        IntArray enabledHdrOutputTypesArray = new IntArray();
         for (int type : getSupportedHdrOutputTypesInternal()) {
-            boolean isDisabled = false;
+            boolean isEnabled = true;
             for (int disabledType : mUserDisabledHdrTypes) {
                 if (type == disabledType) {
-                    isDisabled = true;
+                    isEnabled = false;
                     break;
                 }
             }
-            if (!isDisabled) {
-                autoHdrOutputTypesArray.add(type);
+            if (isEnabled) {
+                enabledHdrOutputTypesArray.add(type);
             }
         }
-        return autoHdrOutputTypesArray.toArray();
+        return enabledHdrOutputTypesArray.toArray();
+    }
+
+    @VisibleForTesting
+    int[] getEnabledHdrOutputTypes() {
+        synchronized (mSyncRoot) {
+            return getEnabledHdrOutputTypesLocked();
+        }
     }
 
     @GuardedBy("mSyncRoot")
@@ -2522,7 +2559,7 @@ public final class DisplayManagerService extends SystemService {
         final int preferredHdrOutputType =
                 mode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM
                         ? mSystemPreferredHdrOutputType : mode.getPreferredHdrOutputType();
-        if (preferredHdrOutputType != Display.HdrCapabilities.HDR_TYPE_INVALID) {
+        if (preferredHdrOutputType != HDR_TYPE_INVALID) {
             int[] hdrTypesWithLatency = mInjector.getHdrOutputTypesWithLatency();
             return ArrayUtils.contains(hdrTypesWithLatency, preferredHdrOutputType);
         }
@@ -2556,41 +2593,57 @@ public final class DisplayManagerService extends SystemService {
         if (!mInjector.getHdrOutputConversionSupport()) {
             return;
         }
-        int[] autoHdrOutputTypes = null;
+
         synchronized (mSyncRoot) {
             if (hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM
                     && hdrConversionMode.getPreferredHdrOutputType()
-                    != Display.HdrCapabilities.HDR_TYPE_INVALID) {
+                    != HDR_TYPE_INVALID) {
                 throw new IllegalArgumentException("preferredHdrOutputType must not be set if"
                         + " the conversion mode is HDR_CONVERSION_SYSTEM");
             }
             mHdrConversionMode = hdrConversionMode;
             storeHdrConversionModeLocked(mHdrConversionMode);
 
-            // For auto mode, all supported HDR types are allowed except the ones specifically
-            // disabled by the user.
+            // If the HDR conversion is HDR_CONVERSION_SYSTEM, all supported HDR types are allowed
+            // except the ones specifically disabled by the user.
+            int[] enabledHdrOutputTypes = null;
             if (hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
-                autoHdrOutputTypes = getEnabledAutoHdrTypesLocked();
+                enabledHdrOutputTypes = getEnabledHdrOutputTypesLocked();
             }
 
             int conversionMode = hdrConversionMode.getConversionMode();
             int preferredHdrType = hdrConversionMode.getPreferredHdrOutputType();
+
             // If the HDR conversion is disabled by an app through WindowManager.LayoutParams, then
             // set HDR conversion mode to HDR_CONVERSION_PASSTHROUGH.
-            if (mOverrideHdrConversionMode == null) {
-                // HDR_CONVERSION_FORCE with HDR_TYPE_INVALID is used to represent forcing SDR type.
-                // But, internally SDR is selected by using passthrough mode.
-                if (conversionMode == HdrConversionMode.HDR_CONVERSION_FORCE
-                        && preferredHdrType == Display.HdrCapabilities.HDR_TYPE_INVALID) {
-                    conversionMode = HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
-                }
+            if (mShouldDisableHdrConversion) {
+                conversionMode = HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+                preferredHdrType = -1;
+                enabledHdrOutputTypes = null;
             } else {
-                conversionMode = mOverrideHdrConversionMode.getConversionMode();
-                preferredHdrType = mOverrideHdrConversionMode.getPreferredHdrOutputType();
-                autoHdrOutputTypes = null;
+                // HDR_CONVERSION_FORCE with HDR_TYPE_INVALID is used to represent forcing SDR type.
+                // But, internally SDR is forced by using passthrough mode and not reporting any
+                // HDR capabilities to apps.
+                if (conversionMode == HdrConversionMode.HDR_CONVERSION_FORCE
+                        && preferredHdrType == HDR_TYPE_INVALID) {
+                    conversionMode = HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+                    mLogicalDisplayMapper.forEachLocked(
+                            logicalDisplay -> {
+                                if (logicalDisplay.setIsForceSdr(true)) {
+                                    handleLogicalDisplayChangedLocked(logicalDisplay);
+                                }
+                            });
+                } else {
+                    mLogicalDisplayMapper.forEachLocked(
+                            logicalDisplay -> {
+                                if (logicalDisplay.setIsForceSdr(false)) {
+                                    handleLogicalDisplayChangedLocked(logicalDisplay);
+                                }
+                            });
+                }
             }
             mSystemPreferredHdrOutputType = mInjector.setHdrConversionMode(
-                    conversionMode, preferredHdrType, autoHdrOutputTypes);
+                    conversionMode, preferredHdrType, enabledHdrOutputTypes);
         }
     }
 
@@ -2612,8 +2665,8 @@ public final class DisplayManagerService extends SystemService {
         }
         HdrConversionMode mode;
         synchronized (mSyncRoot) {
-            mode = mOverrideHdrConversionMode != null
-                    ? mOverrideHdrConversionMode
+            mode = mShouldDisableHdrConversion
+                    ? new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH)
                     : mHdrConversionMode;
             // Handle default: PASSTHROUGH. Don't include the system-preferred type.
             if (mode == null
@@ -2621,8 +2674,6 @@ public final class DisplayManagerService extends SystemService {
                 return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH);
             }
             // Handle default or current mode: SYSTEM. Include the system preferred type.
-            // mOverrideHdrConversionMode and mHdrConversionMode do not include the system
-            // preferred type, it is kept separately in mSystemPreferredHdrOutputType.
             if (mode == null
                     || mode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
                 return new HdrConversionMode(
@@ -2633,10 +2684,10 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypesInternal() {
-        if (mSupportedHdrOutputType == null) {
-            mSupportedHdrOutputType = mInjector.getSupportedHdrOutputTypes();
+        if (mSupportedHdrOutputTypes == null) {
+            mSupportedHdrOutputTypes = mInjector.getSupportedHdrOutputTypes();
         }
-        return mSupportedHdrOutputType;
+        return mSupportedHdrOutputTypes;
     }
 
     void setShouldAlwaysRespectAppRequestedModeInternal(boolean enabled) {
@@ -2822,15 +2873,9 @@ public final class DisplayManagerService extends SystemService {
             // HDR conversion is disabled in two cases:
             // - HDR conversion introduces latency and minimal post-processing is requested
             // - app requests to disable HDR conversion
-            if (mOverrideHdrConversionMode == null && (disableHdrConversion
-                    || disableHdrConversionForLatency)) {
-                mOverrideHdrConversionMode =
-                            new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH);
-                setHdrConversionModeInternal(mHdrConversionMode);
-                handleLogicalDisplayChangedLocked(display);
-            } else if (mOverrideHdrConversionMode != null && !disableHdrConversion
-                    && !disableHdrConversionForLatency) {
-                mOverrideHdrConversionMode = null;
+            boolean previousShouldDisableHdrConversion = mShouldDisableHdrConversion;
+            mShouldDisableHdrConversion = disableHdrConversion || disableHdrConversionForLatency;
+            if (previousShouldDisableHdrConversion != mShouldDisableHdrConversion) {
                 setHdrConversionModeInternal(mHdrConversionMode);
                 handleLogicalDisplayChangedLocked(display);
             }
@@ -3509,9 +3554,9 @@ public final class DisplayManagerService extends SystemService {
         }
 
         int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
-                int[] autoHdrTypes) {
+                int[] allowedHdrOutputTypes) {
             return DisplayControl.setHdrConversionMode(conversionMode, preferredHdrOutputType,
-                    autoHdrTypes);
+                    allowedHdrOutputTypes);
         }
 
         @Display.HdrCapabilities.HdrType
