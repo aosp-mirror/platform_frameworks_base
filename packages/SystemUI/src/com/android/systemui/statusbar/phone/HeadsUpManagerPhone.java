@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.notification.collection.provider.OnReorder
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.AnimationStateHandler;
 import com.android.systemui.statusbar.policy.AvalancheController;
@@ -94,6 +95,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
 
         @Override
         public HeadsUpEntryPhone acquire() {
+            NotificationsHeadsUpRefactor.assertInLegacyMode();
             if (!mPoolObjects.isEmpty()) {
                 return mPoolObjects.pop();
             }
@@ -102,6 +104,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
 
         @Override
         public boolean release(@NonNull HeadsUpEntryPhone instance) {
+            NotificationsHeadsUpRefactor.assertInLegacyMode();
             mPoolObjects.push(instance);
             return true;
         }
@@ -371,15 +374,24 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  HeadsUpManager utility (protected) methods overrides:
 
+    @NonNull
     @Override
-    protected HeadsUpEntry createHeadsUpEntry() {
-        return mEntryPool.acquire();
+    protected HeadsUpEntry createHeadsUpEntry(NotificationEntry entry) {
+        if (NotificationsHeadsUpRefactor.isEnabled()) {
+            return new HeadsUpEntryPhone(entry);
+        } else {
+            HeadsUpEntryPhone headsUpEntry = mEntryPool.acquire();
+            headsUpEntry.setEntry(entry);
+            return headsUpEntry;
+        }
     }
 
     @Override
     protected void onEntryRemoved(HeadsUpEntry headsUpEntry) {
         super.onEntryRemoved(headsUpEntry);
-        mEntryPool.release((HeadsUpEntryPhone) headsUpEntry);
+        if (!NotificationsHeadsUpRefactor.isEnabled()) {
+            mEntryPool.release((HeadsUpEntryPhone) headsUpEntry);
+        }
     }
 
     @Override
@@ -439,14 +451,22 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
          */
         private boolean extended;
 
-
         @Override
         public boolean isSticky() {
             return super.isSticky() || mGutsShownPinned;
         }
 
-        public void setEntry(@NonNull final NotificationEntry entry) {
-            Runnable removeHeadsUpRunnable = () -> {
+        public HeadsUpEntryPhone() {
+            super();
+        }
+
+        public HeadsUpEntryPhone(NotificationEntry entry) {
+            super(entry);
+        }
+
+        @Override
+        protected Runnable createRemoveRunnable(NotificationEntry entry) {
+            return  () -> {
                 if (!mVisualStabilityProvider.isReorderingAllowed()
                         // We don't want to allow reordering while pulsing, but headsup need to
                         // time out anyway
@@ -460,8 +480,6 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
                     removeEntry(entry.getKey());
                 }
             };
-
-            setEntry(entry, removeHeadsUpRunnable);
         }
 
         @Override

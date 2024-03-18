@@ -54,9 +54,10 @@ class TestableHeadsUpManager extends BaseHeadsUpManager {
         mStickyForSomeTimeAutoDismissTime = BaseHeadsUpManagerTest.TEST_STICKY_AUTO_DISMISS_TIME;
     }
 
+    @NonNull
     @Override
-    protected HeadsUpEntry createHeadsUpEntry() {
-        mLastCreatedEntry = spy(super.createHeadsUpEntry());
+    protected HeadsUpEntry createHeadsUpEntry(NotificationEntry entry) {
+        mLastCreatedEntry = spy(super.createHeadsUpEntry(entry));
         return mLastCreatedEntry;
     }
 

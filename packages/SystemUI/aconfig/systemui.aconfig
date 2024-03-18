@@ -104,6 +104,13 @@ flag {
 }
 
 flag {
+    name: "notifications_heads_up_refactor"
+    namespace: "systemui"
+    description: "Use HeadsUpInteractor to feed HUN updates to the NSSL."
+    bug: "325936094"
+}
+
+flag {
    name: "pss_app_selector_abrupt_exit_fix"
    namespace: "systemui"
    description: "Fixes the app selector abruptly disappearing without an animation, when the"
