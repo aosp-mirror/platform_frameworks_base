@@ -1248,7 +1248,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mService.publishLocalService();
             IInputMethodManager.Stub service;
             if (Flags.useZeroJankProxy()) {
-                service = new ZeroJankProxy(mService.mHandler::post, mService);
+                service =
+                        new ZeroJankProxy(
+                                mService.mHandler::post,
+                                mService,
+                                () -> {
+                                    synchronized (ImfLock.class) {
+                                        return mService.isInputShown();
+                                    }
+                                });
             } else {
                 service = mService;
             }
