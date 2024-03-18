@@ -124,8 +124,8 @@ static void android_os_Trace_nativeInstantForTrack(JNIEnv* env, jclass,
     });
 }
 
-static jboolean android_os_Trace_nativeIsTagEnabled(JNIEnv* env, jlong tag) {
-    return tracing_perfetto::isTagEnabled(tag);
+static jlong android_os_Trace_nativeGetEnabledTags(JNIEnv* env) {
+    return tracing_perfetto::getEnabledCategories();
 }
 
 static void android_os_Trace_nativeRegisterWithPerfetto(JNIEnv* env) {
@@ -157,7 +157,7 @@ static const JNINativeMethod gTraceMethods[] = {
         {"nativeRegisterWithPerfetto", "()V", (void*)android_os_Trace_nativeRegisterWithPerfetto},
 
         // ----------- @CriticalNative  ----------------
-        {"nativeIsTagEnabled", "(J)Z", (void*)android_os_Trace_nativeIsTagEnabled},
+        {"nativeGetEnabledTags", "()J", (void*)android_os_Trace_nativeGetEnabledTags},
 };
 
 int register_android_os_Trace(JNIEnv* env) {
