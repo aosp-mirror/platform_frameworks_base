@@ -127,7 +127,4 @@ public interface ParsedPackage extends AndroidPackage {
     ParsedPackage setDirectBootAware(boolean directBootAware);
 
     ParsedPackage setPersistent(boolean persistent);
-
-    /** Retrieves whether the apk contains a app metadata file. */
-    boolean isAppMetadataFileInApk();
 }

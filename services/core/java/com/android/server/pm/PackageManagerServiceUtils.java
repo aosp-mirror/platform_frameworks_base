@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL_PATH;
 import static android.content.pm.SigningDetails.CertCapabilities.SHARED_USER_ID;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
@@ -29,7 +30,6 @@ import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_RE
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageInstallerSession.APP_METADATA_FILE_ACCESS_MODE;
 import static com.android.server.pm.PackageInstallerSession.getAppMetadataSizeLimit;
-import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_IN_APK_PATH;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
@@ -60,6 +60,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.PackagePartitions;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -111,6 +112,7 @@ import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackageSplit;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
@@ -140,13 +142,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
 /**
  * Class containing helper methods for the PackageManagerService.
@@ -1567,30 +1570,35 @@ public class PackageManagerServiceUtils {
     /**
      * Extract the app.metadata file from apk.
      */
-    public static boolean extractAppMetadataFromApk(String apkPath, File appMetadataFile) {
-        boolean found = false;
-        try (ZipInputStream zipInputStream =
-                     new ZipInputStream(new FileInputStream(new File(apkPath)))) {
-            ZipEntry zipEntry = null;
-            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                if (zipEntry.getName().equals(APP_METADATA_FILE_IN_APK_PATH)) {
-                    found = true;
-                    try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
-                        FileUtils.copy(zipInputStream, out);
-                    }
-                    if (appMetadataFile.length() > getAppMetadataSizeLimit()) {
-                        appMetadataFile.delete();
-                        return false;
-                    }
-                    Os.chmod(appMetadataFile.getAbsolutePath(), APP_METADATA_FILE_ACCESS_MODE);
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            Slog.e(TAG, e.getMessage());
+    public static boolean extractAppMetadataFromApk(AndroidPackage pkg, File appMetadataFile) {
+        Map<String, Property> properties = pkg.getProperties();
+        if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
             return false;
         }
-        return found;
+        Property fileInAPkPathProperty = properties.get(PROPERTY_ANDROID_SAFETY_LABEL_PATH);
+        if (!fileInAPkPathProperty.isString()) {
+            return false;
+        }
+        String fileInApkPath = fileInAPkPathProperty.getString();
+        List<AndroidPackageSplit> splits = pkg.getSplits();
+        for (int i = 0; i < splits.size(); i++) {
+            try (ZipFile zipFile = new ZipFile(splits.get(i).getPath())) {
+                ZipEntry zipEntry = zipFile.getEntry(fileInApkPath);
+                if (zipEntry != null && zipEntry.getSize() <= getAppMetadataSizeLimit()) {
+                    try (InputStream in = zipFile.getInputStream(zipEntry)) {
+                        try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
+                            FileUtils.copy(in, out);
+                            Os.chmod(appMetadataFile.getAbsolutePath(),
+                                    APP_METADATA_FILE_ACCESS_MODE);
+                            return true;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, e.getMessage());
+            }
+        }
+        return false;
     }
 
     public static void linkFilesToOldDirs(@NonNull Installer installer,

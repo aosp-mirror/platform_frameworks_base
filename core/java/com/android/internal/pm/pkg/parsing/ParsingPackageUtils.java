@@ -46,7 +46,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
-import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
@@ -134,7 +133,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.PublicKey;
@@ -164,8 +162,6 @@ public class ParsingPackageUtils {
      * File name in an APK for the Android manifest.
      */
     public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
-
-    public static final String APP_METADATA_FILE_NAME = "app.metadata";
 
     /**
      * Path prefix for apps on expanded storage
@@ -638,12 +634,6 @@ public class ParsingPackageUtils {
                 pkg.setSigningDetails(ret.getResult());
             } else {
                 pkg.setSigningDetails(SigningDetails.UNKNOWN);
-            }
-
-            if (Flags.aslInApkAppMetadataSource()) {
-                try (InputStream in = assets.open(APP_METADATA_FILE_NAME)) {
-                    pkg.setAppMetadataFileInApk(true);
-                } catch (Exception e) { }
             }
 
             return input.success(pkg);
