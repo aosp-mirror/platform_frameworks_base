@@ -4320,6 +4320,19 @@ public final class InputMethodManager {
     }
 
     /**
+     * A test API for CTS to finish the tracking of any pending IME visibility requests. This
+     * won't stop the actual requests, but allows resetting the state when starting up test runs.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    @RequiresPermission(Manifest.permission.TEST_INPUT_METHOD)
+    public void finishTrackingPendingImeVisibilityRequests() {
+        IInputMethodManagerGlobalInvoker.finishTrackingPendingImeVisibilityRequests();
+    }
+
+    /**
      * Show the settings for enabling subtypes of the specified input method.
      *
      * @param imiId An input method, whose subtypes settings will be shown. If imiId is null,

@@ -165,6 +165,15 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         }
     }
 
+    @EnforcePermission(Manifest.permission.TEST_INPUT_METHOD)
+    @Override
+    public void finishTrackingPendingImeVisibilityRequests() {
+        super.finishTrackingPendingImeVisibilityRequests_enforcePermission();
+        synchronized (mLock) {
+            mHistory.mLiveEntries.clear();
+        }
+    }
+
     /**
      * A circular buffer storing the most recent few {@link ImeTracker.Token} entries information.
      */
