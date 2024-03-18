@@ -3486,13 +3486,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
-            case KeyEvent.KEYCODE_T:
-                if (firstDown && event.isMetaPressed()) {
-                    toggleTaskbar();
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.TOGGLE_TASKBAR);
-                    return true;
-                }
-                break;
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_ESCAPE:
                 if (firstDown && event.isMetaPressed()) {
