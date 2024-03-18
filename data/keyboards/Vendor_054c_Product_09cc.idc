@@ -53,3 +53,9 @@ sensor.gyroscope.power = 0.8
 # disable drumroll detection due to speed changes (by setting the speed change
 # threshold very high, since there's no boolean control property).
 gestureProp.Drumroll_Max_Speed_Change_Factor = 1000000000
+
+# Because of the way this touchpad is positioned, touches around the edges are
+# no more likely to be palms than ones in the middle, so remove the edge zones
+# from the palm classifier to increase the usable area of the pad.
+gestureProp.Palm_Edge_Zone_Width = 0
+gestureProp.Tap_Exclusion_Border_Width = 0
