@@ -812,6 +812,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             mDebugTextUsedYPositions.clear();
         }
+
+        mDebugPaint.setColor(Color.DKGRAY);
+        canvas.drawPath(mRoundedClipPath, mDebugPaint);
+
         int y = 0;
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
 
@@ -843,13 +847,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         drawDebugInfo(canvas, y, Color.LTGRAY,
                 /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = " + y);
 
-        y = (int) mAmbientState.getStackY() + mContentHeight;
-        drawDebugInfo(canvas, y, Color.MAGENTA,
-                /* label= */ "mAmbientState.getStackY() + mContentHeight = " + y);
-
         y = (int) (mAmbientState.getStackY() + mIntrinsicContentHeight);
         drawDebugInfo(canvas, y, Color.YELLOW,
                 /* label= */ "mAmbientState.getStackY() + mIntrinsicContentHeight = " + y);
+
+        y = mContentHeight;
+        drawDebugInfo(canvas, y, Color.MAGENTA,
+                /* label= */ "mContentHeight = " + y);
 
         drawDebugInfo(canvas, mRoundedRectClippingBottom, Color.DKGRAY,
                 /* label= */ "mRoundedRectClippingBottom) = " + y);
