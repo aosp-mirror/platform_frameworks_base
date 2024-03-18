@@ -14703,12 +14703,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setSystemSetting(ComponentName who, String setting, String value) {
+    public void setSystemSetting(ComponentName who, String setting, String value, boolean parent) {
         Objects.requireNonNull(who, "ComponentName is null");
         Preconditions.checkStringNotEmpty(setting, "String setting is null or empty");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(
                 isProfileOwner(caller) || isDefaultDeviceOwner(caller));
+        if (Flags.allowScreenBrightnessControlOnCope() && parent) {
+            Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+        }
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_SYSTEM_SETTING);
 
         synchronized (getLockObject()) {
@@ -14716,9 +14719,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException(String.format(
                         "Permission denial: device owners cannot update %1$s", setting));
             }
-
+            int affectedUser;
+            if (Flags.allowScreenBrightnessControlOnCope() && parent) {
+                affectedUser = getProfileParentId(caller.getUserId());
+            } else {
+                affectedUser = caller.getUserId();
+            }
             mInjector.binderWithCleanCallingIdentity(() ->
-                    mInjector.settingsSystemPutStringForUser(setting, value, caller.getUserId()));
+                    mInjector.settingsSystemPutStringForUser(setting, value, affectedUser));
         }
     }
 

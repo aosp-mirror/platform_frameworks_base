@@ -12749,6 +12749,10 @@ public class DevicePolicyManager {
      * <li>{@link android.provider.Settings.System#SCREEN_OFF_TIMEOUT}</li>
      * </ul>
      * <p>
+     * Starting from Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, a
+     * profile owner on an organization-owned device can call this method on the parent
+     * {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} to set system settings on the parent user.
      *
      * @see android.provider.Settings.System#SCREEN_OFF_TIMEOUT
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -12758,10 +12762,9 @@ public class DevicePolicyManager {
      */
     public void setSystemSetting(@NonNull ComponentName admin,
             @NonNull @SystemSettingsWhitelist String setting, String value) {
-        throwIfParentInstance("setSystemSetting");
         if (mService != null) {
             try {
-                mService.setSystemSetting(admin, setting, value);
+                mService.setSystemSetting(admin, setting, value, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
