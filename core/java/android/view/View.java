@@ -8474,8 +8474,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            hierarchy
      * @param refocus when propagate is true, specifies whether to request the
      *            root view place new focus
+     * @hide
      */
-    void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
+    public void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
             clearParentsWantFocus();
