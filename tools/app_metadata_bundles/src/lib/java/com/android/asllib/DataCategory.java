@@ -16,6 +16,10 @@
 
 package com.android.asllib;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,11 +27,17 @@ import java.util.Map;
  * are defined in {@link DataCategoryConstants}, each category has a valid set of types {@link
  * DataType}, which are mapped in {@link DataTypeConstants}
  */
-public class DataCategory {
+public class DataCategory implements AslMarshallable {
+    private final String mCategoryName;
     private final Map<String, DataType> mDataTypes;
 
-    private DataCategory(Map<String, DataType> dataTypes) {
+    public DataCategory(String categoryName, Map<String, DataType> dataTypes) {
+        this.mCategoryName = categoryName;
         this.mDataTypes = dataTypes;
+    }
+
+    public String getCategoryName() {
+        return mCategoryName;
     }
 
     /** Return the type {@link Map} of String type key to {@link DataType} */
@@ -36,8 +46,13 @@ public class DataCategory {
         return mDataTypes;
     }
 
-    /** Creates a {@link DataCategory} given map of {@param dataTypes}. */
-    public static DataCategory create(Map<String, DataType> dataTypes) {
-        return new DataCategory(dataTypes);
+    /** Creates on-device DOM element(s) from the {@link DataCategory}. */
+    @Override
+    public List<Element> toOdDomElements(Document doc) {
+        Element dataCategoryEle = XmlUtils.createPbundleEleWithName(doc, this.getCategoryName());
+        for (DataType dataType : mDataTypes.values()) {
+            XmlUtils.appendChildren(dataCategoryEle, dataType.toOdDomElements(doc));
+        }
+        return List.of(dataCategoryEle);
     }
 }
