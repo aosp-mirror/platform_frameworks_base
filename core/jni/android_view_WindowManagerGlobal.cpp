@@ -48,7 +48,7 @@ std::shared_ptr<InputChannel> createInputChannel(
             surfaceControlObj(env,
                               android_view_SurfaceControl_getJavaSurfaceControl(env,
                                                                                 surfaceControl));
-    jobject clientTokenObj = javaObjectForIBinder(env, clientToken);
+    ScopedLocalRef<jobject> clientTokenObj(env, javaObjectForIBinder(env, clientToken));
     ScopedLocalRef<jobject> clientInputTransferTokenObj(
             env,
             android_window_InputTransferToken_getJavaInputTransferToken(env,
@@ -57,7 +57,7 @@ std::shared_ptr<InputChannel> createInputChannel(
             inputChannelObj(env,
                             env->CallStaticObjectMethod(gWindowManagerGlobal.clazz,
                                                         gWindowManagerGlobal.createInputChannel,
-                                                        clientTokenObj,
+                                                        clientTokenObj.get(),
                                                         hostInputTransferTokenObj.get(),
                                                         surfaceControlObj.get(),
                                                         clientInputTransferTokenObj.get()));
@@ -68,9 +68,9 @@ std::shared_ptr<InputChannel> createInputChannel(
 void removeInputChannel(const sp<IBinder>& clientToken) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    jobject clientTokenObj(javaObjectForIBinder(env, clientToken));
+    ScopedLocalRef<jobject> clientTokenObj(env, javaObjectForIBinder(env, clientToken));
     env->CallStaticObjectMethod(gWindowManagerGlobal.clazz, gWindowManagerGlobal.removeInputChannel,
-                                clientTokenObj);
+                                clientTokenObj.get());
 }
 
 int register_android_view_WindowManagerGlobal(JNIEnv* env) {
