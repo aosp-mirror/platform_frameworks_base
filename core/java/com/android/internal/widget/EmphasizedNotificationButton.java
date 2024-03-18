@@ -171,7 +171,9 @@ public class EmphasizedNotificationButton extends Button {
             return;
         }
 
-        prepareIcon(icon);
+        if (icon != null) {
+            prepareIcon(icon);
+        }
 
         mIconToGlue = icon;
         mGluePending = true;
