@@ -1260,9 +1260,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setQsFullScreen(boolean fullScreen) {
-        FooterViewRefactor.assertInLegacyMode();
         mView.setQsFullScreen(fullScreen);
-        updateShowEmptyShadeView();
+        if (!FooterViewRefactor.isEnabled()) {
+            updateShowEmptyShadeView();
+        }
     }
 
     public void setScrollingEnabled(boolean enabled) {
