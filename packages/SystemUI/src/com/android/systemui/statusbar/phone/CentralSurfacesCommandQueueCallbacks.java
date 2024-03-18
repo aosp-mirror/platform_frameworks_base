@@ -332,7 +332,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             return;
         }
         if (!mCameraLauncherLazy.get().canCameraGestureBeLaunched(
-                mShadeViewController.getBarState())) {
+                mPanelExpansionInteractor.getBarState())) {
             if (CentralSurfaces.DEBUG_CAMERA_LIFT) {
                 Slog.d(CentralSurfaces.TAG, "Can't launch camera right now");
             }

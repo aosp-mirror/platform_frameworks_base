@@ -85,7 +85,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener,
             boolean bypassKeyguard = mKeyguardBypassController.getBypassEnabled()
                     && mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
             if (!mPanelExpansionInteractor.isFullyCollapsed()
-                    || mShadeViewController.isTracking()
+                    || mPanelExpansionInteractor.isTracking()
                     || bypassKeyguard) {
                 // We are currently tracking or is open and the shade doesn't need to
                 //be kept
