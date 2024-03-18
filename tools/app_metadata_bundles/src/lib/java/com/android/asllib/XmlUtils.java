@@ -16,6 +16,8 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.MalformedXmlException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -61,30 +63,34 @@ public class XmlUtils {
     public static final String FALSE_STR = "false";
 
     /** Gets the single top-level {@link Element} having the {@param tagName}. */
-    public static Element getSingleElement(Document doc, String tagName) {
+    public static Element getSingleElement(Document doc, String tagName)
+            throws MalformedXmlException {
         var elements = doc.getElementsByTagName(tagName);
-        return getSingleElement(elements);
+        return getSingleElement(elements, tagName);
     }
 
     /**
      * Gets the single {@link Element} within {@param parentEle} and having the {@param tagName}.
      */
-    public static Element getSingleChildElement(Element parentEle, String tagName) {
+    public static Element getSingleChildElement(Element parentEle, String tagName)
+            throws MalformedXmlException {
         var elements = parentEle.getElementsByTagName(tagName);
-        return getSingleElement(elements);
+        return getSingleElement(elements, tagName);
     }
 
     /** Gets the single {@link Element} from {@param elements} */
-    public static Element getSingleElement(NodeList elements) {
+    public static Element getSingleElement(NodeList elements, String tagName)
+            throws MalformedXmlException {
         if (elements.getLength() != 1) {
-            throw new IllegalArgumentException(
+            throw new MalformedXmlException(
                     String.format(
-                            "Expected 1 element in NodeList but got %s.", elements.getLength()));
+                            "Expected 1 element \"%s\" in NodeList but got %s.",
+                            tagName, elements.getLength()));
         }
         var elementAsNode = elements.item(0);
         if (!(elementAsNode instanceof Element)) {
-            throw new IllegalStateException(
-                    String.format("%s was not an element.", elementAsNode.getNodeName()));
+            throw new MalformedXmlException(
+                    String.format("%s was not a valid XML element.", tagName));
         }
         return ((Element) elementAsNode);
     }

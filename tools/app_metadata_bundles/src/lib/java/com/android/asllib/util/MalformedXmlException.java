@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.asllib;
+package com.android.asllib.util;
 
-import com.android.asllib.util.MalformedXmlException;
+public class MalformedXmlException extends Exception {
+    /** Constructs an {@code MalformedXmlException} with no detail message. */
+    public MalformedXmlException() {
+        super();
+    }
 
-import org.w3c.dom.Element;
-
-import java.util.List;
-
-public interface AslMarshallableFactory<T extends AslMarshallable> {
-
-    /** Creates an {@link AslMarshallableFactory} from human-readable DOM element */
-    T createFromHrElements(List<Element> elements) throws MalformedXmlException;
+    /**
+     * Constructs an {@code MalformedXmlException} with the specified detail message.
+     *
+     * @param s the detail message.
+     */
+    public MalformedXmlException(String s) {
+        super(s);
+    }
 }

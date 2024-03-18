@@ -16,6 +16,8 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.MalformedXmlException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -53,7 +55,7 @@ public class AndroidSafetyLabel implements AslMarshallable {
     /** Reads a {@link AndroidSafetyLabel} from an {@link InputStream}. */
     // TODO(b/329902686): Support parsing from on-device.
     public static AndroidSafetyLabel readFromStream(InputStream in, Format format)
-            throws IOException, ParserConfigurationException, SAXException {
+            throws IOException, ParserConfigurationException, SAXException, MalformedXmlException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         Document document = factory.newDocumentBuilder().parse(in);
@@ -65,9 +67,9 @@ public class AndroidSafetyLabel implements AslMarshallable {
 
                 return new AndroidSafetyLabelFactory()
                         .createFromHrElements(
-                                XmlUtils.asElementList(
-                                        document.getElementsByTagName(
-                                                XmlUtils.HR_TAG_APP_METADATA_BUNDLES)));
+                                List.of(
+                                        XmlUtils.getSingleElement(
+                                                document, XmlUtils.HR_TAG_APP_METADATA_BUNDLES)));
             case ON_DEVICE:
                 throw new IllegalArgumentException(
                         "Parsing from on-device format is not supported at this time.");
