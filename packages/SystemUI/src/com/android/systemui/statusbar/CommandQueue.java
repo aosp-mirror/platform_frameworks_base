@@ -529,9 +529,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode) {}
 
         /**
-         * @see IStatusBar#enterDesktop(int)
+         * @see IStatusBar#moveFocusedTaskToDesktop(int)
          */
-        default void enterDesktop(int displayId) {}
+        default void moveFocusedTaskToDesktop(int displayId) {}
     }
 
     @VisibleForTesting
@@ -1444,7 +1444,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void enterDesktop(int displayId) {
+    public void moveFocusedTaskToDesktop(int displayId) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = displayId;
         mHandler.obtainMessage(MSG_ENTER_DESKTOP, args).sendToTarget();
@@ -1960,7 +1960,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                     args = (SomeArgs) msg.obj;
                     int displayId = args.argi1;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).enterDesktop(displayId);
+                        mCallbacks.get(i).moveFocusedTaskToDesktop(displayId);
                     }
                     break;
                 }
