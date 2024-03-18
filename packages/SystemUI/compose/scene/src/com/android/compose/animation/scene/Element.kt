@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.util.fastCoerceIn
+import androidx.compose.ui.util.fastLastOrNull
 import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.transformation.PropertyTransformation
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
@@ -81,14 +82,12 @@ internal class Element(val key: ElementKey) {
 }
 
 data class Scale(val scaleX: Float, val scaleY: Float, val pivot: Offset = Offset.Unspecified) {
-
     companion object {
         val Default = Scale(1f, 1f, Offset.Unspecified)
     }
 }
 
 /** The implementation of [SceneScope.element]. */
-@OptIn(ExperimentalComposeUiApi::class)
 @Stable
 internal fun Modifier.element(
     layoutImpl: SceneTransitionLayoutImpl,
@@ -187,7 +186,7 @@ internal class ElementNode(
     override fun isMeasurementApproachComplete(lookaheadSize: IntSize): Boolean {
         // TODO(b/324191441): Investigate whether making this check more complex (checking if this
         // element is shared or transformed) would lead to better performance.
-        return layoutImpl.state.currentTransition == null
+        return layoutImpl.state.currentTransitions.isEmpty()
     }
 
     override fun Placeable.PlacementScope.isPlacementApproachComplete(
@@ -195,7 +194,7 @@ internal class ElementNode(
     ): Boolean {
         // TODO(b/324191441): Investigate whether making this check more complex (checking if this
         // element is shared or transformed) would lead to better performance.
-        return layoutImpl.state.currentTransition == null
+        return layoutImpl.state.currentTransitions.isEmpty()
     }
 
     @ExperimentalComposeUiApi
@@ -203,25 +202,38 @@ internal class ElementNode(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
-        val overscrollScene = layoutImpl.state.currentTransition?.currentOverscrollSpec?.scene
-        if (overscrollScene != null && overscrollScene != scene.key) {
-            // There is an overscroll in progress on another scene
-            // By measuring composable elements, Compose can cache relevant information.
-            // This reduces the need for re-measure when users return from an overscroll animation.
+        val transitions = layoutImpl.state.currentTransitions
+        val transition = elementTransition(element, transitions)
+
+        // If this element is not supposed to be laid out now, either because it is not part of any
+        // ongoing transition or the other scene of its transition is overscrolling, then lay out
+        // the element normally and don't place it.
+        val overscrollScene = transition?.currentOverscrollSpec?.scene
+        val isOtherSceneOverscrolling = overscrollScene != null && overscrollScene != scene.key
+        val isNotPartOfAnyOngoingTransitions = transitions.isNotEmpty() && transition == null
+        if (isNotPartOfAnyOngoingTransitions || isOtherSceneOverscrolling) {
             val placeable = measurable.measure(constraints)
-            return layout(placeable.width, placeable.height) {
-                // We don't want to draw it, no need to place the element.
-            }
+            return layout(placeable.width, placeable.height) {}
         }
 
-        val placeable = measure(layoutImpl, scene, element, sceneState, measurable, constraints)
+        val placeable =
+            measure(layoutImpl, scene, element, transition, sceneState, measurable, constraints)
         return layout(placeable.width, placeable.height) {
-            place(layoutImpl, scene, element, sceneState, placeable, placementScope = this)
+            place(
+                layoutImpl,
+                scene,
+                element,
+                transition,
+                sceneState,
+                placeable,
+                placementScope = this,
+            )
         }
     }
 
     override fun ContentDrawScope.draw() {
-        val drawScale = getDrawScale(layoutImpl, element, scene)
+        val transition = elementTransition(element, layoutImpl.state.currentTransitions)
+        val drawScale = getDrawScale(layoutImpl, scene, element, transition)
         if (drawScale == Scale.Default) {
             drawContent()
         } else {
@@ -256,45 +268,64 @@ internal class ElementNode(
     }
 }
 
-private fun shouldDrawElement(
+/**
+ * The transition that we should consider for [element]. This is the last transition where one of
+ * its scenes contains the element.
+ */
+private fun elementTransition(
+    element: Element,
+    transitions: List<TransitionState.Transition>,
+): TransitionState.Transition? {
+    return transitions.fastLastOrNull { transition ->
+        transition.fromScene in element.sceneStates || transition.toScene in element.sceneStates
+    }
+}
+
+private fun shouldPlaceElement(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
+    transition: TransitionState.Transition?,
 ): Boolean {
-    val transition = layoutImpl.state.currentTransition ?: return true
-
-    val inFromScene = transition.fromScene in element.sceneStates
-    val inToScene = transition.toScene in element.sceneStates
-
-    // If an element is not present in any scene, it should not be drawn.
-    if (!inFromScene && !inToScene) {
-        return false
-    }
-
-    // Always draw if the element is not shared or if the current scene is the one that is currently
-    // over scrolling with [OverscrollSpec].
-    if (!inFromScene || !inToScene || transition.currentOverscrollSpec?.scene == scene.key) {
+    // Always place the element if we are idle.
+    if (transition == null) {
         return true
     }
 
-    val sharedTransformation = sharedElementTransformation(transition, element.key)
+    // Don't place the element in this scene if this scene is not part of the current element
+    // transition.
+    if (scene.key != transition.fromScene && scene.key != transition.toScene) {
+        return false
+    }
+
+    // Place the element if it is not shared or if the current scene is the one that is currently
+    // overscrolling with [OverscrollSpec].
+    if (
+        transition.fromScene !in element.sceneStates ||
+            transition.toScene !in element.sceneStates ||
+            transition.currentOverscrollSpec?.scene == scene.key
+    ) {
+        return true
+    }
+
+    val sharedTransformation = sharedElementTransformation(element.key, transition)
     if (sharedTransformation?.enabled == false) {
         return true
     }
 
     return shouldDrawOrComposeSharedElement(
         layoutImpl,
-        transition,
         scene.key,
         element.key,
+        transition,
     )
 }
 
 internal fun shouldDrawOrComposeSharedElement(
     layoutImpl: SceneTransitionLayoutImpl,
-    transition: TransitionState.Transition,
     scene: SceneKey,
     element: ElementKey,
+    transition: TransitionState.Transition,
 ): Boolean {
     val scenePicker = element.scenePicker
     val fromScene = transition.fromScene
@@ -313,15 +344,15 @@ internal fun shouldDrawOrComposeSharedElement(
 }
 
 private fun isSharedElementEnabled(
-    transition: TransitionState.Transition,
     element: ElementKey,
+    transition: TransitionState.Transition,
 ): Boolean {
-    return sharedElementTransformation(transition, element)?.enabled ?: true
+    return sharedElementTransformation(element, transition)?.enabled ?: true
 }
 
 internal fun sharedElementTransformation(
-    transition: TransitionState.Transition,
     element: ElementKey,
+    transition: TransitionState.Transition,
 ): SharedElementTransformation? {
     val transformationSpec = transition.transformationSpec
     val sharedInFromScene = transformationSpec.transformations(element, transition.fromScene).shared
@@ -346,11 +377,13 @@ internal fun sharedElementTransformation(
  * placement and we don't want to read the transition progress in that phase.
  */
 private fun isElementOpaque(
-    layoutImpl: SceneTransitionLayoutImpl,
-    element: Element,
     scene: Scene,
+    element: Element,
+    transition: TransitionState.Transition?,
 ): Boolean {
-    val transition = layoutImpl.state.currentTransition ?: return true
+    if (transition == null) {
+        return true
+    }
 
     val fromScene = transition.fromScene
     val toScene = transition.toScene
@@ -362,7 +395,7 @@ private fun isElementOpaque(
     }
 
     val isSharedElement = fromState != null && toState != null
-    if (isSharedElement && isSharedElementEnabled(transition, element.key)) {
+    if (isSharedElement && isSharedElementEnabled(element.key, transition)) {
         return true
     }
 
@@ -379,13 +412,15 @@ private fun isElementOpaque(
  */
 private fun elementAlpha(
     layoutImpl: SceneTransitionLayoutImpl,
-    element: Element,
     scene: Scene,
+    element: Element,
+    transition: TransitionState.Transition?,
 ): Float {
     return computeValue(
             layoutImpl,
             scene,
             element,
+            transition,
             sceneValue = { 1f },
             transformation = { it.alpha },
             idleValue = 1f,
@@ -401,6 +436,7 @@ private fun ApproachMeasureScope.measure(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
+    transition: TransitionState.Transition?,
     sceneState: Element.SceneState,
     measurable: Measurable,
     constraints: Constraints,
@@ -424,6 +460,7 @@ private fun ApproachMeasureScope.measure(
             layoutImpl,
             scene,
             element,
+            transition,
             sceneValue = { it.targetSize },
             transformation = { it.size },
             idleValue = lookaheadSize,
@@ -443,13 +480,15 @@ private fun ApproachMeasureScope.measure(
 
 private fun getDrawScale(
     layoutImpl: SceneTransitionLayoutImpl,
+    scene: Scene,
     element: Element,
-    scene: Scene
+    transition: TransitionState.Transition?,
 ): Scale {
     return computeValue(
         layoutImpl,
         scene,
         element,
+        transition,
         sceneValue = { Scale.Default },
         transformation = { it.drawScale },
         idleValue = Scale.Default,
@@ -464,6 +503,7 @@ private fun ApproachMeasureScope.place(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
+    transition: TransitionState.Transition?,
     sceneState: Element.SceneState,
     placeable: Placeable,
     placementScope: Placeable.PlacementScope,
@@ -481,7 +521,7 @@ private fun ApproachMeasureScope.place(
         }
 
         // No need to place the element in this scene if we don't want to draw it anyways.
-        if (!shouldDrawElement(layoutImpl, scene, element)) {
+        if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
             return
         }
 
@@ -491,6 +531,7 @@ private fun ApproachMeasureScope.place(
                 layoutImpl,
                 scene,
                 element,
+                transition,
                 sceneValue = { it.targetOffset },
                 transformation = { it.offset },
                 idleValue = targetOffsetInScene,
@@ -500,14 +541,14 @@ private fun ApproachMeasureScope.place(
             )
 
         val offset = (targetOffset - currentOffset).round()
-        if (isElementOpaque(layoutImpl, element, scene)) {
+        if (isElementOpaque(scene, element, transition)) {
             // TODO(b/291071158): Call placeWithLayer() if offset != IntOffset.Zero and size is not
             // animated once b/305195729 is fixed. Test that drawing is not invalidated in that
             // case.
             placeable.place(offset)
         } else {
             placeable.placeWithLayer(offset) {
-                alpha = elementAlpha(layoutImpl, element, scene)
+                alpha = elementAlpha(layoutImpl, scene, element, transition)
                 compositingStrategy = CompositingStrategy.ModulateAlpha
             }
         }
@@ -538,6 +579,7 @@ private inline fun <T> computeValue(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
+    transition: TransitionState.Transition?,
     sceneValue: (Element.SceneState) -> T,
     transformation: (ElementTransformations) -> PropertyTransformation<T>?,
     idleValue: T,
@@ -545,13 +587,13 @@ private inline fun <T> computeValue(
     isSpecified: (T) -> Boolean,
     lerp: (T, T, Float) -> T,
 ): T {
-    val transition =
-        layoutImpl.state.currentTransition
+    if (transition == null) {
         // There is no ongoing transition. Even if this element SceneTransitionLayout is not
         // animated, the layout itself might be animated (e.g. by another parent
         // SceneTransitionLayout), in which case this element still need to participate in the
         // layout phase.
-        ?: return currentValue()
+        return currentValue()
+    }
 
     val fromScene = transition.fromScene
     val toScene = transition.toScene
@@ -604,7 +646,7 @@ private inline fun <T> computeValue(
     // TODO(b/290184746): Support non linear shared paths as well as a way to make sure that shared
     // elements follow the finger direction.
     val isSharedElement = fromState != null && toState != null
-    if (isSharedElement && isSharedElementEnabled(transition, element.key)) {
+    if (isSharedElement && isSharedElementEnabled(element.key, transition)) {
         val start = sceneValue(fromState!!)
         val end = sceneValue(toState!!)
 
