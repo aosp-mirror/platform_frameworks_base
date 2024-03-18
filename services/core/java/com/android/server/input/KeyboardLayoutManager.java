@@ -459,13 +459,16 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         for (ResolveInfo resolveInfo : pm.queryBroadcastReceiversAsUser(intent,
                 PackageManager.GET_META_DATA | PackageManager.MATCH_DIRECT_BOOT_AWARE
                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, UserHandle.USER_SYSTEM)) {
+            if (resolveInfo == null || resolveInfo.activityInfo == null) {
+                continue;
+            }
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
             final int priority = resolveInfo.priority;
             visitKeyboardLayoutsInPackage(pm, activityInfo, null, priority, visitor);
         }
     }
 
-    private void visitKeyboardLayout(String keyboardLayoutDescriptor,
+    private void visitKeyboardLayout(@NonNull String keyboardLayoutDescriptor,
             KeyboardLayoutVisitor visitor) {
         KeyboardLayoutDescriptor d = KeyboardLayoutDescriptor.parse(keyboardLayoutDescriptor);
         if (d != null) {
@@ -482,8 +485,8 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         }
     }
 
-    private void visitKeyboardLayoutsInPackage(PackageManager pm, ActivityInfo receiver,
-            String keyboardName, int requestedPriority, KeyboardLayoutVisitor visitor) {
+    private void visitKeyboardLayoutsInPackage(PackageManager pm, @NonNull ActivityInfo receiver,
+            @Nullable String keyboardName, int requestedPriority, KeyboardLayoutVisitor visitor) {
         Bundle metaData = receiver.metaData;
         if (metaData == null) {
             return;
@@ -1415,7 +1418,7 @@ class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             return packageName + "/" + receiverName + "/" + keyboardName;
         }
 
-        public static KeyboardLayoutDescriptor parse(String descriptor) {
+        public static KeyboardLayoutDescriptor parse(@NonNull String descriptor) {
             int pos = descriptor.indexOf('/');
             if (pos < 0 || pos + 1 == descriptor.length()) {
                 return null;
