@@ -110,6 +110,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected void addTileView(TileRecord tile) {
+        // Re-using tile views might lead to having out-of-date squishiness. This is fixed by
+        // making sure we set the correct squishiness value when added to the layout.
+        if (tile.tileView instanceof HeightOverrideable) {
+            ((HeightOverrideable) tile.tileView).setSquishinessFraction(mSquishinessFraction);
+        }
         addView(tile.tileView);
     }
 
@@ -347,6 +352,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 ((HeightOverrideable) record.tileView).setSquishinessFraction(mSquishinessFraction);
             }
         }
+    }
+
+    public float getSquishinessFraction() {
+        return mSquishinessFraction;
     }
 
     @Override
