@@ -45,7 +45,6 @@ import android.util.SparseArray;
 
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.PackageList;
@@ -1395,21 +1394,6 @@ public abstract class PackageManagerInternal {
     public abstract void notifyComponentUsed(@NonNull String packageName,
             @UserIdInt int userId, @Nullable String recentCallingPackage,
             @NonNull String debugInfo);
-
-    /** @deprecated For legacy shell command only. */
-    @Deprecated
-    public abstract void legacyDumpProfiles(@NonNull String packageName,
-            boolean dumpClassesAndMethods) throws LegacyDexoptDisabledException;
-
-    /** @deprecated For legacy shell command only. */
-    @Deprecated
-    public abstract void legacyForceDexOpt(@NonNull String packageName)
-            throws LegacyDexoptDisabledException;
-
-    /** @deprecated For legacy shell command only. */
-    @Deprecated
-    public abstract void legacyReconcileSecondaryDexFiles(String packageName)
-            throws LegacyDexoptDisabledException;
 
     /**
      * Gets {@link PackageManager.DistractionRestriction restrictions} of the given
