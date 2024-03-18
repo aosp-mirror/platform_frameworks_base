@@ -488,9 +488,6 @@ object Flags {
     // TODO(b/259428678): Tracking Bug
     @JvmField val KEYBOARD_BACKLIGHT_INDICATOR = releasedFlag("keyboard_backlight_indicator")
 
-    // TODO(b/277192623): Tracking Bug
-    @JvmField val KEYBOARD_EDUCATION = releasedFlag("keyboard_education")
-
     // TODO(b/277201412): Tracking Bug
     @JvmField
     val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION = unreleasedFlag("split_shade_subpixel_optimization")

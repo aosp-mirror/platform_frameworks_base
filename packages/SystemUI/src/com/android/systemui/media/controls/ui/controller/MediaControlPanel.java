@@ -1306,7 +1306,7 @@ public class MediaControlPanel {
                 TurbulenceNoiseAnimationConfig.DEFAULT_NOISE_SPEED_Z,
                 // Color will be correctly updated in ColorSchemeTransition.
                 /* color= */ mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
-                /* backgroundColor= */ Color.BLACK,
+                /* screenColor= */ Color.BLACK,
                 width,
                 height,
                 TurbulenceNoiseAnimationConfig.DEFAULT_MAX_DURATION_IN_MILLIS,

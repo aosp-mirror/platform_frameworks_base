@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
@@ -33,10 +34,12 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.toAnimatedValueFlow
 import java.util.Optional
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -55,6 +58,7 @@ constructor(
     shadeInteractor: ShadeInteractor,
     userSetupInteractor: UserSetupInteractor,
     zenModeInteractor: ZenModeInteractor,
+    @Background bgDispatcher: CoroutineDispatcher,
 ) {
     /**
      * We want the NSSL to be unimportant for accessibility when there are no notifications in it
@@ -72,6 +76,7 @@ constructor(
                 ) { hasNotifications, isShowingOnLockscreen ->
                     hasNotifications || !isShowingOnLockscreen
                 }
+                .flowOn(bgDispatcher)
                 .distinctUntilChanged()
         }
     }
@@ -95,6 +100,7 @@ constructor(
                         else -> true
                     }
                 }
+                .flowOn(bgDispatcher)
                 .distinctUntilChanged()
         }
     }
@@ -107,15 +113,13 @@ constructor(
                     activeNotificationsInteractor.areAnyNotificationsPresent,
                     userSetupInteractor.isUserSetUp,
                     notificationStackInteractor.isShowingOnLockscreen,
-                    shadeInteractor.qsExpansion,
                     shadeInteractor.isQsFullscreen,
                     remoteInputInteractor.isRemoteInputActive,
-                    shadeInteractor.shadeExpansion.map { it == 0f }
+                    shadeInteractor.shadeExpansion.map { it == 0f }.distinctUntilChanged(),
                 ) {
                     hasNotifications,
                     isUserSetUp,
                     isShowingOnLockscreen,
-                    qsExpansion,
                     qsFullScreen,
                     isRemoteInputActive,
                     isShadeClosed ->
@@ -131,7 +135,7 @@ constructor(
                         isShowingOnLockscreen -> VisibilityChange.HIDE_WITHOUT_ANIMATION
                         // Do not show the footer if quick settings are fully expanded (except
                         // for the foldable split shade view). See b/201427195 && b/222699879.
-                        qsExpansion == 1f && qsFullScreen -> VisibilityChange.HIDE_WITH_ANIMATION
+                        qsFullScreen -> VisibilityChange.HIDE_WITH_ANIMATION
                         // Hide the footer if remote input is active (i.e. user is replying to a
                         // notification). See b/75984847.
                         isRemoteInputActive -> VisibilityChange.HIDE_WITH_ANIMATION
@@ -140,6 +144,7 @@ constructor(
                         else -> VisibilityChange.SHOW_WITH_ANIMATION
                     }
                 }
+                .flowOn(bgDispatcher)
                 .distinctUntilChanged(
                     // Equivalent unless visibility changes
                     areEquivalent = { a: VisibilityChange, b: VisibilityChange ->

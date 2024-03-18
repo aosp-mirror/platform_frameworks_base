@@ -24,12 +24,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.util.Assert
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.launch
 
 /**
  * Runs the given [block] every time the [View] becomes attached (or immediately after calling this
@@ -66,7 +67,8 @@ fun View.repeatWhenAttached(
     // dispatcher to use. We don't want it to run on the Dispatchers.Default thread pool as
     // default behavior. Instead, we want it to run on the view's UI thread since the user will
     // presumably want to call view methods that require being called from said UI thread.
-    val lifecycleCoroutineContext = Dispatchers.Main + coroutineContext
+    val lifecycleCoroutineContext =
+        Dispatchers.Main + createCoroutineTracingContext() + coroutineContext
     var lifecycleOwner: ViewLifecycleOwner? = null
     val onAttachListener =
         object : View.OnAttachStateChangeListener {
@@ -97,14 +99,12 @@ fun View.repeatWhenAttached(
             )
     }
 
-    return object : DisposableHandle {
-        override fun dispose() {
-            Assert.isMainThread()
+    return DisposableHandle {
+        Assert.isMainThread()
 
-            lifecycleOwner?.onDestroy()
-            lifecycleOwner = null
-            view.removeOnAttachStateChangeListener(onAttachListener)
-        }
+        lifecycleOwner?.onDestroy()
+        lifecycleOwner = null
+        view.removeOnAttachStateChangeListener(onAttachListener)
     }
 }
 
@@ -115,7 +115,12 @@ private fun createLifecycleOwnerAndRun(
 ): ViewLifecycleOwner {
     return ViewLifecycleOwner(view).apply {
         onCreate()
-        lifecycleScope.launch(coroutineContext) { block(view) }
+        lifecycleScope.launch(
+            "ViewLifecycleOwner(${view::class.java.simpleName})",
+            coroutineContext
+        ) {
+            block(view)
+        }
     }
 }
 

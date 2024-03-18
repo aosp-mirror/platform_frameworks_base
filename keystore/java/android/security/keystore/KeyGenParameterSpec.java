@@ -880,9 +880,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
-     * Returns {@code true} if the screen must be unlocked for this key to be used for decryption or
-     * signing. Encryption and signature verification will still be available when the screen is
-     * locked.
+     * Returns {@code true} if the key is authorized to be used only while the device is unlocked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
      */
@@ -1723,11 +1721,49 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
-         * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt or sign using this
-         * key while the screen is locked will fail. A locked device requires a PIN, password,
-         * biometric, or other trusted factor to access. While the screen is locked, any associated
-         * public key can still be used (e.g for signature verification).
+         * Sets whether this key is authorized to be used only while the device is unlocked.
+         * <p>
+         * The device is considered to be locked for a user when the user's apps are currently
+         * inaccessible and some form of lock screen authentication is required to regain access to
+         * them. For the full definition, see {@link KeyguardManager#isDeviceLocked()}.
+         * <p>
+         * Public key operations aren't restricted by {@code setUnlockedDeviceRequired(true)} and
+         * may be performed even while the device is locked. In Android 11 (API level 30) and lower,
+         * encryption and verification operations with symmetric keys weren't restricted either.
+         * <p>
+         * Keys that use {@code setUnlockedDeviceRequired(true)} can be imported and generated even
+         * while the device is locked, as long as the device has been unlocked at least once since
+         * the last reboot. However, such keys cannot be used (except for the unrestricted
+         * operations mentioned above) until the device is unlocked. Apps that need to encrypt data
+         * while the device is locked such that it can only be decrypted while the device is
+         * unlocked can generate a key and encrypt the data in software, import the key into
+         * Keystore using {@code setUnlockedDeviceRequired(true)}, and zeroize the original key.
+         * <p>
+         * {@code setUnlockedDeviceRequired(true)} is related to but distinct from
+         * {@link #setUserAuthenticationRequired(boolean) setUserAuthenticationRequired(true)}.
+         * {@code setUnlockedDeviceRequired(true)} requires that the device be unlocked, whereas
+         * {@code setUserAuthenticationRequired(true)} requires that a specific type of strong
+         * authentication has happened within a specific time period. They may be used together or
+         * separately; there are cases in which one requirement can be satisfied but not the other.
+         * <p>
+         * <b>Warning:</b> Be careful using {@code setUnlockedDeviceRequired(true)} on Android 14
+         * (API level 34) and lower, since the following bugs existed in Android 12 through 14:
+         * <ul>
+         *   <li>When the user didn't have a secure lock screen, unlocked-device-required keys
+         *   couldn't be generated, imported, or used.</li>
+         *   <li>When the user's secure lock screen was removed, all of that user's
+         *   unlocked-device-required keys were automatically deleted.</li>
+         *   <li>Unlocking the device with a non-strong biometric, such as face on many devices,
+         *   didn't re-authorize the use of unlocked-device-required keys.</li>
+         *   <li>Unlocking the device with a biometric didn't re-authorize the use of
+         *   unlocked-device-required keys in profiles that share their parent user's lock.</li>
+         * </ul>
+         * These issues are fixed in Android 15, so apps can avoid them by using
+         * {@code setUnlockedDeviceRequired(true)} only on Android 15 and higher.
+         * Apps that use both {@code setUnlockedDeviceRequired(true)} and
+         * {@link #setUserAuthenticationRequired(boolean) setUserAuthenticationRequired(true)}
+         * are unaffected by the first two issues, since the first two issues describe expected
+         * behavior for {@code setUserAuthenticationRequired(true)}.
          */
         @NonNull
         public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {

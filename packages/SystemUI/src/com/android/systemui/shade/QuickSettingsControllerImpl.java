@@ -979,9 +979,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     void updateQsState() {
         boolean qsFullScreen = getExpanded() && !mSplitShadeEnabled;
         mShadeRepository.setLegacyQsFullscreen(qsFullScreen);
-        if (!FooterViewRefactor.isEnabled()) {
-            mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
-        }
+        mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
         if (!SceneContainerFlag.isEnabled()) {
             mNotificationStackScrollLayoutController.setScrollingEnabled(
                     mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));

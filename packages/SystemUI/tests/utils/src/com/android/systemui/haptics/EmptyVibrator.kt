@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.domain.interactor
+package com.android.systemui.haptics
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.plugins.statusbar.statusBarStateController
-import com.android.systemui.scene.domain.interactor.sceneInteractor
+import android.os.VibrationAttributes
+import android.os.VibrationEffect
+import android.os.Vibrator
 
-val Kosmos.panelExpansionInteractor by Fixture { panelExpansionInteractorImpl }
-val Kosmos.panelExpansionInteractorImpl by Fixture {
-    PanelExpansionInteractorImpl(
-        sceneInteractor,
-        shadeInteractor,
-        shadeAnimationInteractor,
-        statusBarStateController,
-    )
+/** A simple empty vibrator required for the [FakeVibratorHelper] */
+class EmptyVibrator : Vibrator() {
+    override fun cancel() {}
+
+    override fun cancel(usageFilter: Int) {}
+
+    override fun hasAmplitudeControl(): Boolean = true
+
+    override fun hasVibrator(): Boolean = true
+
+    override fun vibrate(
+        uid: Int,
+        opPkg: String,
+        vibe: VibrationEffect,
+        reason: String,
+        attributes: VibrationAttributes,
+    ) {}
 }

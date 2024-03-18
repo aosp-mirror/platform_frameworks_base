@@ -2170,8 +2170,49 @@ public class DisplayContentTests extends WindowTestsBase {
             assertEquals("There should be only one DisplayArea for FEATURE_WINDOWED_MAGNIFICATION",
                     1, windowedMagnificationAreas.size());
             assertEquals(windowedMagnificationAreas.get(0).mSurfaceControl, windowingLayer);
+            assertEquals(windowingLayer,
+                    mDisplayContent.mDisplayAreaPolicy.getWindowingArea().mSurfaceControl);
         } else {
             assertNotEquals(mDisplayContent.mSurfaceControl, windowingLayer);
+        }
+
+        // When migrating the surface of default trusted display, the children should belong to the
+        // surface of DisplayContent directly.
+        clearInvocations(mTransaction);
+        mDisplayContent.migrateToNewSurfaceControl(mTransaction);
+        for (int i = mDisplayContent.getChildCount() - 1; i >= 0; i--) {
+            final SurfaceControl childSc = mDisplayContent.getChildAt(i).mSurfaceControl;
+            verify(mTransaction).reparent(eq(childSc), eq(mDisplayContent.mSurfaceControl));
+            verify(mTransaction, never()).reparent(eq(childSc), eq(windowingLayer));
+        }
+
+        // If a display doesn't have WINDOWED_MAGNIFICATION (e.g. untrusted), it will have an
+        // additional windowing layer to put the window content.
+        clearInvocations(mTransaction);
+        final DisplayInfo info = new DisplayInfo(mDisplayInfo);
+        info.flags &= ~Display.FLAG_TRUSTED;
+        final DisplayContent dc2 = createNewDisplay(info);
+        final SurfaceControl dc2WinLayer = dc2.getWindowingLayer();
+        final DisplayArea<?> dc2WinArea = dc2.mDisplayAreaPolicy.getWindowingArea();
+        assertEquals(dc2WinLayer, dc2WinArea.mSurfaceControl);
+
+        // When migrating the surface of a display with additional windowing layer, the children
+        // layer of display should still belong to the display.
+        clearInvocations(mTransaction);
+        dc2.migrateToNewSurfaceControl(mTransaction);
+        verify(mTransaction).reparent(eq(dc2WinLayer), eq(dc2.mSurfaceControl));
+        for (int i = dc2.getChildCount() - 1; i >= 0; i--) {
+            verify(mTransaction).reparent(eq(dc2.getChildAt(i).mSurfaceControl),
+                    eq(dc2.mSurfaceControl));
+        }
+
+        // When migrating the surface of child area under windowing area, the new child surfaces
+        // should reparent to the windowing layer.
+        clearInvocations(mTransaction);
+        for (int i = dc2WinArea.getChildCount() - 1; i >= 0; i--) {
+            final WindowContainer<?> child = dc2WinArea.getChildAt(i);
+            child.migrateToNewSurfaceControl(mTransaction);
+            verify(mTransaction).reparent(eq(child.mSurfaceControl), eq(dc2WinLayer));
         }
     }
 

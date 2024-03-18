@@ -18,7 +18,6 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -65,8 +64,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean) {}
     override fun updateSystemUiStateFlags() {}
     override fun updateTouchableRegion() {}
-    override fun addOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {}
-    override fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener) {}
     override fun transitionToExpandedShade(delay: Long) {}
 
     @Deprecated("Not supported by scenes") override fun resetViewGroupFade() {}

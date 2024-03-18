@@ -281,6 +281,15 @@ private fun <T> valueOrNull(
                     // relayout/redraw for nothing.
                     fromValue
                 } else {
+                    // In the case of bouncing, if the value remains constant during the overscroll,
+                    // we should use the value of the scene we are bouncing around.
+                    if (!canOverflow && transition is TransitionState.HasOverscrollProperties) {
+                        val bouncingScene = transition.bouncingScene
+                        if (bouncingScene != null) {
+                            return sceneValue(bouncingScene)
+                        }
+                    }
+
                     val progress =
                         if (canOverflow) transition.progress
                         else transition.progress.fastCoerceIn(0f, 1f)

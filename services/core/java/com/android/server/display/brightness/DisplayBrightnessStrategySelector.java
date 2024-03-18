@@ -122,9 +122,11 @@ public class DisplayBrightnessStrategySelector {
      */
     @NonNull
     public DisplayBrightnessStrategy selectStrategy(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            int targetDisplayState) {
+            StrategySelectionRequest strategySelectionRequest) {
         DisplayBrightnessStrategy displayBrightnessStrategy = mInvalidBrightnessStrategy;
+        int targetDisplayState = strategySelectionRequest.getTargetDisplayState();
+        DisplayManagerInternal.DisplayPowerRequest displayPowerRequest = strategySelectionRequest
+                .getDisplayPowerRequest();
         if (targetDisplayState == Display.STATE_OFF) {
             displayBrightnessStrategy = mScreenOffBrightnessStrategy;
         } else if (shouldUseDozeBrightnessStrategy(displayPowerRequest)) {

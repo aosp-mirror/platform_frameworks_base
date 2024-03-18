@@ -214,6 +214,24 @@ class QSLongPressEffect(
         _actionType.value = null
     }
 
+    /**
+     * Reset the effect with a new effect duration.
+     *
+     * The effect will go back to an [IDLE] state where it can begin its logic with a new duration.
+     *
+     * @param[duration] New duration for the long-press effect
+     */
+    fun resetWithDuration(duration: Int) {
+        // The effect can't reset if it is running
+        if (effectAnimator.isRunning) return
+
+        effectAnimator.duration = duration.toLong()
+        _effectProgress.value = 0f
+        _actionType.value = null
+        waitJob?.cancel()
+        state = State.IDLE
+    }
+
     enum class State {
         IDLE, /* The effect is idle waiting for touch input */
         TIMEOUT_WAIT, /* The effect is waiting for a [PRESSED_TIMEOUT] period */

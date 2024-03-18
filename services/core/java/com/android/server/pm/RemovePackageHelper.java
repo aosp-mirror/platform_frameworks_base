@@ -23,7 +23,6 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
-import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
@@ -49,7 +48,6 @@ import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -511,32 +509,9 @@ final class RemovePackageHelper {
         }
 
         removeCodePathLI(codeFile);
-        removeDexFilesLI(allCodePaths, instructionSets);
-    }
 
-    @GuardedBy("mPm.mInstallLock")
-    private void removeDexFilesLI(@NonNull List<String> allCodePaths,
-                                  @Nullable  String[] instructionSets) {
-        if (!allCodePaths.isEmpty()) {
-            if (instructionSets == null) {
-                throw new IllegalStateException("instructionSet == null");
-            }
-            // TODO(b/265813358): ART Service currently doesn't support deleting optimized artifacts
-            // relative to an arbitrary APK path. Skip this and rely on its file GC instead.
-            if (!DexOptHelper.useArtService()) {
-                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-                for (String codePath : allCodePaths) {
-                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                        try {
-                            mPm.mInstaller.rmdex(codePath, dexCodeInstructionSet);
-                        } catch (LegacyDexoptDisabledException e) {
-                            throw new RuntimeException(e);
-                        } catch (Installer.InstallerException ignored) {
-                        }
-                    }
-                }
-            }
-        }
+        // TODO(b/265813358): ART Service currently doesn't support deleting optimized artifacts
+        // relative to an arbitrary APK path. Skip this and rely on its file GC instead.
     }
 
     void cleanUpForMoveInstall(String volumeUuid, String packageName, String fromCodePath) {

@@ -302,6 +302,54 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_freeformTaskOrder() {
+        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
+                DesktopModeStatus.class).startMocking();
+        when(DesktopModeStatus.isEnabled()).thenReturn(true);
+
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        ActivityManager.RecentTaskInfo t5 = makeTaskInfo(5);
+        setRawList(t1, t2, t3, t4, t5);
+
+        SplitBounds pair1Bounds =
+                new SplitBounds(new Rect(), new Rect(), 1, 2, SNAP_TO_50_50);
+        mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, pair1Bounds);
+
+        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(5)).thenReturn(true);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        // 2 split screen tasks grouped, 2 freeform tasks grouped, 3 total recents entries
+        assertEquals(3, recentTasks.size());
+        GroupedRecentTaskInfo splitGroup = recentTasks.get(0);
+        GroupedRecentTaskInfo freeformGroup = recentTasks.get(1);
+        GroupedRecentTaskInfo singleGroup = recentTasks.get(2);
+
+        // Check that groups have expected types
+        assertEquals(GroupedRecentTaskInfo.TYPE_SPLIT, splitGroup.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup.getType());
+
+        // Check freeform group entries
+        assertEquals(t3, freeformGroup.getTaskInfoList().get(0));
+        assertEquals(t5, freeformGroup.getTaskInfoList().get(1));
+
+        // Check split group entries
+        assertEquals(t1, splitGroup.getTaskInfoList().get(0));
+        assertEquals(t2, splitGroup.getTaskInfoList().get(1));
+
+        // Check single entry
+        assertEquals(t4, singleGroup.getTaskInfo1());
+
+        mockitoSession.finishMocking();
+    }
+
+    @Test
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Disabled_doNotGroupFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).startMocking();

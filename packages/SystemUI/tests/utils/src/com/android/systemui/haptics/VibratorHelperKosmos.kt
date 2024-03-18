@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.domain.interactor
+package com.android.systemui.haptics
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.plugins.statusbar.statusBarStateController
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 
-val Kosmos.panelExpansionInteractor by Fixture { panelExpansionInteractorImpl }
-val Kosmos.panelExpansionInteractorImpl by Fixture {
-    PanelExpansionInteractorImpl(
-        sceneInteractor,
-        shadeInteractor,
-        shadeAnimationInteractor,
-        statusBarStateController,
-    )
-}
+var Kosmos.vibratorHelper by Kosmos.Fixture { FakeVibratorHelper() }

@@ -91,7 +91,8 @@ constructor(
             )
         controller.init()
 
-        applicationScope.launch(bgHandler.asCoroutineDispatcher()) {
+        val bgDispatcher = bgHandler.asCoroutineDispatcher("@UnfoldBg Handler")
+        applicationScope.launch(bgDispatcher) {
             powerInteractor.screenPowerState.collect {
                 if (it == ScreenPowerState.SCREEN_ON) {
                     readyCallback = null
@@ -99,7 +100,7 @@ constructor(
             }
         }
 
-        applicationScope.launch(bgHandler.asCoroutineDispatcher()) {
+        applicationScope.launch(bgDispatcher) {
             deviceStateRepository.state
                 .map { it == DeviceStateRepository.DeviceState.FOLDED }
                 .distinctUntilChanged()

@@ -196,7 +196,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     /** Called when the shade has been emptied to attempt to close the shade */
     private void maybeClosePanelForShadeEmptied() {
         if (CLOSE_PANEL_WHEN_EMPTIED
-                && !mNotificationPanel.isTracking()
+                && !mPanelExpansionInteractor.isTracking()
                 && !mQsController.getExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                 && !isCollapsing()) {

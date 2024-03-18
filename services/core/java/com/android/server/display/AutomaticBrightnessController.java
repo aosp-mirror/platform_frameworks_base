@@ -47,6 +47,7 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
@@ -234,6 +235,8 @@ public class AutomaticBrightnessController {
     // The current display policy. This is useful, for example,  for knowing when we're dozing,
     // where the light sensor may not be available.
     private int mDisplayPolicy = DisplayPowerRequest.POLICY_OFF;
+
+    private int mDisplayState = Display.STATE_UNKNOWN;
 
     // True if we are collecting a brightness adjustment sample, along with some data
     // for the initial state of the sample.
@@ -458,11 +461,12 @@ public class AutomaticBrightnessController {
 
     public void configure(int state, @Nullable BrightnessConfiguration configuration,
             float brightness, boolean userChangedBrightness, float adjustment,
-            boolean userChangedAutoBrightnessAdjustment, int displayPolicy,
+            boolean userChangedAutoBrightnessAdjustment, int displayPolicy, int displayState,
             boolean shouldResetShortTermModel) {
         mState = state;
         boolean changed = setBrightnessConfiguration(configuration, shouldResetShortTermModel);
         changed |= setDisplayPolicy(displayPolicy);
+        mDisplayState = displayState;
         if (userChangedAutoBrightnessAdjustment) {
             changed |= setAutoBrightnessAdjustment(adjustment);
         }
@@ -1262,9 +1266,11 @@ public class AutomaticBrightnessController {
     }
 
     private boolean shouldApplyDozeScaleFactor() {
-        // Don't apply the doze scale factor if we have a designated brightness curve for doze
-        return mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE
-                && getMode() != AUTO_BRIGHTNESS_MODE_DOZE;
+        // Apply the doze scale factor if the display is in doze. We shouldn't rely on the display
+        // policy here - the screen might turn on while the policy is POLICY_DOZE and in this
+        // situation, we shouldn't apply the doze scale factor. We also don't apply the doze scale
+        // factor if we have a designated brightness curve for doze.
+        return Display.isDozeState(mDisplayState) && getMode() != AUTO_BRIGHTNESS_MODE_DOZE;
     }
 
     private class ShortTermModel {

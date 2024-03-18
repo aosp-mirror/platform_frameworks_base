@@ -173,3 +173,10 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+  name: "allow_screen_brightness_control_on_cope"
+  namespace: "enterprise"
+  description: "Allow COPE admin to control screen brightness and timeout."
+  bug: "323894620"
+}
