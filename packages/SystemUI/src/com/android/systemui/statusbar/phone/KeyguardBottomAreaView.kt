@@ -20,7 +20,6 @@ import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.annotation.StringRes
 import com.android.keyguard.LockIconViewController
@@ -146,16 +145,6 @@ constructor(
 
     override fun hasOverlappingRendering(): Boolean {
         return false
-    }
-
-    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
-        val bottom = insets.displayCutout?.safeInsetBottom ?: 0
-        if (isPaddingRelative) {
-            setPaddingRelative(paddingStart, paddingTop, paddingEnd, bottom)
-        } else {
-            setPadding(paddingLeft, paddingTop, paddingRight, bottom)
-        }
-        return insets
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
