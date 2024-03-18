@@ -4328,7 +4328,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     private boolean updateUidStateUL(int uid, int procState, long procStateSeq,
             @ProcessCapability int capability) {
-        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL");
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL: " + uid + "/"
+                + ActivityManager.procStateToString(procState) + "/" + procStateSeq + "/"
+                + ActivityManager.getCapabilitiesSummary(capability));
         try {
             final UidState oldUidState = mUidState.get(uid);
             if (oldUidState != null && procStateSeq < oldUidState.procStateSeq) {
