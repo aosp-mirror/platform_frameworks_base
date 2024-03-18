@@ -26,7 +26,9 @@
 #include <hwui/AnimatedImageDrawable.h>
 #include <hwui/ImageDecoder.h>
 #include <hwui/Canvas.h>
-#include <utils/Looper.h>
+#ifdef __ANDROID__
+#include <utils/Looper.h>  // requires epoll
+#endif
 
 using namespace android;
 
@@ -174,6 +176,7 @@ static void AnimatedImageDrawable_nSetRepeatCount(JNIEnv* env, jobject /*clazz*/
     drawable->setRepetitionCount(loopCount);
 }
 
+#ifdef __ANDROID__  // Requires native Looper, which is not available on host.
 class InvokeListener : public MessageHandler {
 public:
     InvokeListener(JNIEnv* env, jobject javaObject) {
@@ -213,6 +216,7 @@ private:
     sp<InvokeListener> mListener;
     sp<Looper> mLooper;
 };
+#endif
 
 static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobject /*clazz*/,
                                                              jlong nativePtr, jobject jdrawable) {
@@ -220,6 +224,7 @@ static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobjec
     if (!jdrawable) {
         drawable->setOnAnimationEndListener(nullptr);
     } else {
+#ifdef __ANDROID__  // Requires native Looper, which is not available on host.
         sp<Looper> looper = Looper::getForThread();
         if (!looper.get()) {
             doThrowISE(env,
@@ -230,6 +235,7 @@ static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobjec
 
         drawable->setOnAnimationEndListener(
                 std::make_unique<JniAnimationEndListener>(std::move(looper), env, jdrawable));
+#endif
     }
 }
 
