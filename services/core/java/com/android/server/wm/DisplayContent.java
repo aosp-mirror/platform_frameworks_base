@@ -87,7 +87,6 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
 import static android.window.DisplayAreaOrganizer.FEATURE_IME;
 import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
-import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
@@ -340,12 +339,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private SurfaceControl mA11yOverlayLayer;
 
     /**
-     * The direct child layer of the display to put all non-overlay windows. This is also used for
-     * screen rotation animation so that there is a parent layer to put the animation leash.
-     */
-    private SurfaceControl mWindowingLayer;
-
-    /**
      * Delegate for handling all logic around content recording; decides if this DisplayContent is
      * recording, and if so, applies necessary updates to SurfaceFlinger.
      */
@@ -365,7 +358,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final ImeContainer mImeWindowsContainer = new ImeContainer(mWmService);
 
     @VisibleForTesting
-    DisplayAreaPolicy mDisplayAreaPolicy;
+    final DisplayAreaPolicy mDisplayAreaPolicy;
 
     private WindowState mTmpWindow;
     private boolean mUpdateImeTarget;
@@ -1245,6 +1238,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWindowCornerRadius = mDisplayPolicy.getWindowCornerRadius();
         mPinnedTaskController = new PinnedTaskController(mWmService, this);
 
+        // Set up the policy and build the display area hierarchy.
+        // Build the hierarchy only after creating the surface, so it is reparented correctly
+        mDisplayAreaPolicy = mWmService.getDisplayAreaPolicyProvider().instantiate(
+                mWmService, this /* content */, this /* root */, mImeWindowsContainer);
         final Transaction pendingTransaction = getPendingTransaction();
         configureSurfaces(pendingTransaction);
         pendingTransaction.apply();
@@ -1315,14 +1312,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mLastDeltaRotation = Surface.ROTATION_0;
 
         configureSurfaces(t);
-
-        for (int i = 0; i < mChildren.size(); i++)  {
-            SurfaceControl sc = mChildren.get(i).getSurfaceControl();
-            if (sc != null) {
-                t.reparent(sc, getParentingSurfaceControl());
-            }
-        }
-
         scheduleAnimation();
     }
 
@@ -1338,31 +1327,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .setContainerLayer()
                 .setCallsite("DisplayContent");
         mSurfaceControl = b.setName(getName()).setContainerLayer().build();
-
-        if (mDisplayAreaPolicy == null) {
-            // Setup the policy and build the display area hierarchy.
-            // Build the hierarchy only after creating the surface so it is reparented correctly
-            mDisplayAreaPolicy = mWmService.getDisplayAreaPolicyProvider().instantiate(
-                    mWmService, this /* content */, this /* root */,
-                    mImeWindowsContainer);
-        }
-
-        final List<DisplayArea<? extends WindowContainer>> areas =
-                mDisplayAreaPolicy.getDisplayAreas(FEATURE_WINDOWED_MAGNIFICATION);
-        final DisplayArea<?> area = areas.size() == 1 ? areas.get(0) : null;
-
-        if (area != null && area.getParent() == this) {
-            // The windowed magnification area should contain all non-overlay windows, so just use
-            // it as the windowing layer.
-            mWindowingLayer = area.mSurfaceControl;
-            transaction.reparent(mWindowingLayer, mSurfaceControl);
-        } else {
-            // Need an additional layer for screen level animation, so move the layer containing
-            // the windows to the new root.
-            mWindowingLayer = mSurfaceControl;
-            mSurfaceControl = b.setName("RootWrapper").build();
-            transaction.reparent(mWindowingLayer, mSurfaceControl)
-                    .show(mWindowingLayer);
+        for (int i = getChildCount() - 1; i >= 0; i--)  {
+            final SurfaceControl sc = getChildAt(i).mSurfaceControl;
+            if (sc != null) {
+                transaction.reparent(sc, mSurfaceControl);
+            }
         }
 
         if (mOverlayLayer == null) {
@@ -1385,7 +1354,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         transaction
-                .setLayer(mSurfaceControl, 0)
                 .setLayerStack(mSurfaceControl, mDisplayId)
                 .show(mSurfaceControl)
                 .setLayer(mOverlayLayer, Integer.MAX_VALUE)
@@ -3461,7 +3429,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mOverlayLayer.release();
             mInputOverlayLayer.release();
             mA11yOverlayLayer.release();
-            mWindowingLayer.release();
             mInputMonitor.onDisplayRemoved();
             mWmService.mDisplayNotificationController.dispatchDisplayRemoved(this);
             mDisplayRotation.onDisplayRemoved();
@@ -5490,11 +5457,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return b;
         }
 
-        // WARNING: it says `mSurfaceControl` below, but this CHANGES meaning after construction!
-        // DisplayAreas are added in `configureSurface()` *before* `mSurfaceControl` gets replaced
-        // with a wrapper or magnification surface so they end up in the right place; however,
-        // anything added or reparented to "the display" *afterwards* needs to be reparented to
-        // `getWindowinglayer()` (unless it's an overlay DisplayArea).
         return b.setName(child.getName())
                 .setParent(mSurfaceControl);
     }
@@ -5838,22 +5800,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Returns the {@link SurfaceControl} where all the children should be parented on.
-     *
-     * <p> {@link DisplayContent} inserts a RootWrapper leash in the hierarchy above its original
-     * {@link #mSurfaceControl} and then overrides the {@link #mSurfaceControl} to point to the
-     * RootWrapper.
-     * <p> To prevent inconsistent state later where the DAs might get re-parented to the
-     * RootWrapper, this method should be used which returns the correct surface where the
-     * re-parenting should happen.
+     * The direct child layer of the display to put all non-overlay windows. This is also used for
+     * screen rotation animation so that there is a parent layer to put the animation leash.
      */
-    @Override
-    SurfaceControl getParentingSurfaceControl() {
-        return mWindowingLayer;
-    }
-
     SurfaceControl getWindowingLayer() {
-        return mWindowingLayer;
+        return mDisplayAreaPolicy.getWindowingArea().mSurfaceControl;
     }
 
     DisplayArea.Tokens getImeContainer() {
@@ -7257,7 +7208,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     public void replaceContent(SurfaceControl sc) {
         new Transaction().reparent(sc, getSurfaceControl())
-                .reparent(mWindowingLayer, null)
                 .reparent(mOverlayLayer, null)
                 .reparent(mInputOverlayLayer, null)
                 .reparent(mA11yOverlayLayer, null)

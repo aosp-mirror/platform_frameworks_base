@@ -84,6 +84,11 @@ public abstract class DisplayAreaPolicy {
     public abstract List<DisplayArea<? extends WindowContainer>> getDisplayAreas(int featureId);
 
     /**
+     * Returns the {@link DisplayArea} that is used to put all window content.
+     */
+    public abstract DisplayArea<? extends WindowContainer> getWindowingArea();
+
+    /**
      * @return the default/fallback {@link TaskDisplayArea} on the display.
      */
     public abstract TaskDisplayArea getDefaultTaskDisplayArea();
