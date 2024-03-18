@@ -769,7 +769,8 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         }
 
         final Runnable onCompleteCallback = () -> {
-            Log.d(TAG, "ThemeHomeDelay: ThemeOverlayController ready");
+            Log.d(TAG, "ThemeHomeDelay: ThemeOverlayController ready with user "
+                    + currentUser);
             mActivityManager.setThemeOverlayReady(currentUser);
         };
 
