@@ -13,8 +13,10 @@
 # limitations under the License.
 
 #
-# Sony DS4 motion sensor configuration file.
+# Sony Playstation(R) DualShock 4 Controller
 #
+
+## Motion sensor ##
 
 # reporting mode 0 - continuous
 sensor.accelerometer.reportingMode = 0
@@ -33,3 +35,21 @@ sensor.gyroscope.maxDelay = 100000
 sensor.gyroscope.minDelay = 5000
 # The power in mA used by this sensor while in use
 sensor.gyroscope.power = 0.8
+
+## Touchpad ##
+
+# After the DualShock 4 has been connected over Bluetooth for a minute or so,
+# its reports start bunching up in time, meaning that we receive 2–4 reports
+# within a millisecond followed by a >10ms wait until the next batch.
+#
+# This uneven timing causes the apparent speed of a finger (calculated using
+# time deltas between received reports) to vary dramatically even if it's
+# actually moving smoothly across the touchpad, triggering the touchpad stack's
+# drumroll detection logic, which causes the finger's single smooth movement to
+# be treated as many small movements of consecutive touches, which are then
+# inhibited by the click wiggle filter.
+#
+# Since this touchpad does not seem vulnerable to click wiggle, we can safely
+# disable drumroll detection due to speed changes (by setting the speed change
+# threshold very high, since there's no boolean control property).
+gestureProp.Drumroll_Max_Speed_Change_Factor = 1000000000
