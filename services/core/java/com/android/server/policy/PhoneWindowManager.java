@@ -4735,7 +4735,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down) {
                     // There may have other embedded activities on the same Task. Try to move the
                     // focus before processing the back event.
-                    mWindowManagerInternal.moveFocusToTopEmbeddedWindowIfNeeded();
+                    mWindowManagerInternal.moveFocusToAdjacentEmbeddedActivityIfNeeded();
                     mBackKeyHandled = false;
                 } else {
                     if (!hasLongPressOnBackBehavior()) {

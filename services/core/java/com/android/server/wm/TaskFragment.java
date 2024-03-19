@@ -216,9 +216,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     Dimmer mDimmer = Dimmer.DIMMER_REFACTOR
             ? new SmoothDimmer(this) : new LegacyDimmer(this);
 
-    /** {@code true} if the dimmer surface is boosted. {@code false} otherwise. */
-    boolean mDimmerSurfaceBoosted;
-
     /** Apply the dim layer on the embedded TaskFragment. */
     static final int EMBEDDED_DIM_AREA_TASK_FRAGMENT = 0;
 
