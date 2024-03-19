@@ -310,6 +310,7 @@ public class PreferencesHelper implements RankingConfig {
                     parser.getAttributeInt(null, ATT_VISIBILITY, DEFAULT_VISIBILITY),
                     parser.getAttributeBoolean(null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE),
                     bubblePref);
+            r.bubblePreference = bubblePref;
             r.priority = parser.getAttributeInt(null, ATT_PRIORITY, DEFAULT_PRIORITY);
             r.visibility = parser.getAttributeInt(null, ATT_VISIBILITY, DEFAULT_VISIBILITY);
             r.showBadge = parser.getAttributeBoolean(null, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
@@ -676,7 +677,7 @@ public class PreferencesHelper implements RankingConfig {
      * @param bubblePreference whether bubbles are allowed.
      */
     public void setBubblesAllowed(String pkg, int uid, int bubblePreference) {
-        boolean changed = false;
+        boolean changed;
         synchronized (mPackagePreferences) {
             PackagePreferences p = getOrCreatePackagePreferencesLocked(pkg, uid);
             changed = p.bubblePreference != bubblePreference;
