@@ -173,7 +173,7 @@ public final class DeviceState {
     public static final int PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT = 17;
 
     /** @hide */
-    @IntDef(prefix = {"PROPERTY_"}, flag = true, value = {
+    @IntDef(prefix = {"PROPERTY_"}, flag = false, value = {
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED,
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN,
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN,
@@ -197,7 +197,7 @@ public final class DeviceState {
     public @interface DeviceStateProperties {}
 
     /** @hide */
-    @IntDef(prefix = {"PROPERTY_"}, flag = true, value = {
+    @IntDef(prefix = {"PROPERTY_"}, flag = false, value = {
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED,
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN,
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN
@@ -207,7 +207,7 @@ public final class DeviceState {
     public @interface PhysicalDeviceStateProperties {}
 
     /** @hide */
-    @IntDef(prefix = {"PROPERTY_"}, flag = true, value = {
+    @IntDef(prefix = {"PROPERTY_"}, flag = false, value = {
             PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS,
             PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
             PROPERTY_POLICY_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
