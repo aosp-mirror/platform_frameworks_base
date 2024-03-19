@@ -39,21 +39,21 @@ import java.io.PrintWriter;
  * Class used to prevent the screen brightness dipping below a certain value, based on current
  * lux conditions and user preferred minimum.
  */
-public class BrightnessLowLuxModifier implements
-        BrightnessStateModifier {
+public class BrightnessLowLuxModifier extends BrightnessModifier {
 
     // To enable these logs, run:
     // 'adb shell setprop persist.log.tag.BrightnessLowLuxModifier DEBUG && adb reboot'
     private static final String TAG = "BrightnessLowLuxModifier";
     private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
+    private static final float MIN_NITS = 2.0f;
     private final SettingsObserver mSettingsObserver;
     private final ContentResolver mContentResolver;
     private final Handler mHandler;
     private final BrightnessClamperController.ClamperChangeListener mChangeListener;
-    protected float mSettingNitsLowerBound = PowerManager.BRIGHTNESS_MIN;
     private int mReason;
     private float mBrightnessLowerBound;
     private boolean mIsActive;
+    private float mAmbientLux;
 
     @VisibleForTesting
     BrightnessLowLuxModifier(Handler handler,
@@ -78,17 +78,17 @@ public class BrightnessLowLuxModifier implements
         int userId = UserHandle.USER_CURRENT;
         float settingNitsLowerBound = Settings.Secure.getFloatForUser(
                 mContentResolver, Settings.Secure.EVEN_DIMMER_MIN_NITS,
-                /* def= */ PowerManager.BRIGHTNESS_MIN, userId);
+                /* def= */ MIN_NITS, userId);
 
-        boolean isActive = Settings.Secure.getIntForUser(mContentResolver,
+        boolean isActive = Settings.Secure.getFloatForUser(mContentResolver,
                 Settings.Secure.EVEN_DIMMER_ACTIVATED,
-                /* def= */ 0, userId) == 1;
+                /* def= */ 0, userId) == 1.0f;
 
-        // TODO: luxBasedNitsLowerBound = mMinNitsToLuxSpline(currentLux);
-        float luxBasedNitsLowerBound = 0.0f;
+        // TODO: luxBasedNitsLowerBound = mMinLuxToNitsSpline(currentLux);
+        float luxBasedNitsLowerBound = 2.0f;
 
-        // TODO: final float nitsLowerBound = isActive ? Math.max(settingNitsLowerBound,
-                // luxBasedNitsLowerBound) : PowerManager.BRIGHTNESS_MIN;
+        final float nitsLowerBound = isActive ? Math.max(settingNitsLowerBound,
+                 luxBasedNitsLowerBound) : MIN_NITS;
 
         final int reason = settingNitsLowerBound > luxBasedNitsLowerBound
                 ? BrightnessReason.MODIFIER_MIN_USER_SET_LOWER_BOUND
@@ -104,8 +104,13 @@ public class BrightnessLowLuxModifier implements
             mReason = reason;
             if (DEBUG) {
                 Slog.i(TAG, "isActive: " + isActive
-                        + ", settingNitsLowerBound: " + settingNitsLowerBound
-                        + ", lowerBound: " + brightnessLowerBound);
+                        + ", brightnessLowerBound: " + brightnessLowerBound
+                        + ", mAmbientLux: " + mAmbientLux
+                        + ", mReason: " + (
+                        mReason == BrightnessReason.MODIFIER_MIN_USER_SET_LOWER_BOUND ? "minSetting"
+                                : "lux")
+                        + ", nitsLowerBound: " + nitsLowerBound
+                );
             }
             mBrightnessLowerBound = brightnessLowerBound;
             mChangeListener.onChanged();
@@ -132,6 +137,22 @@ public class BrightnessLowLuxModifier implements
     }
 
     @Override
+    boolean shouldApply(DisplayManagerInternal.DisplayPowerRequest request) {
+        return mIsActive;
+    }
+
+    @Override
+    float getBrightnessAdjusted(float currentBrightness,
+            DisplayManagerInternal.DisplayPowerRequest request) {
+        return Math.max(mBrightnessLowerBound, currentBrightness);
+    }
+
+    @Override
+    int getModifier() {
+        return mReason;
+    }
+
+    @Override
     public void apply(DisplayManagerInternal.DisplayPowerRequest request,
             DisplayBrightnessState.Builder stateBuilder) {
         stateBuilder.setMinBrightness(mBrightnessLowerBound);
@@ -150,10 +171,16 @@ public class BrightnessLowLuxModifier implements
     }
 
     @Override
+    public void onAmbientLuxChange(float ambientLux) {
+        mAmbientLux = ambientLux;
+        recalculateLowerBound();
+    }
+
+    @Override
     public void dump(PrintWriter pw) {
         pw.println("BrightnessLowLuxModifier:");
-        pw.println("  mBrightnessLowerBound=" + mBrightnessLowerBound);
         pw.println("  mIsActive=" + mIsActive);
+        pw.println("  mBrightnessLowerBound=" + mBrightnessLowerBound);
         pw.println("  mReason=" + mReason);
     }
 
