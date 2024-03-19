@@ -80,7 +80,7 @@ constructor(
             ) { model, isEnabled, ringerMode ->
                 model.toState(isEnabled, ringerMode)
             }
-            .stateIn(coroutineScope, SharingStarted.Eagerly, EmptyState)
+            .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
 
     override fun onValueChanged(state: SliderState, newValue: Float) {
         val audioViewModel = state as? State
@@ -162,17 +162,6 @@ constructor(
         override val a11yStep: Int,
         val audioStreamModel: AudioStreamModel,
     ) : SliderState
-
-    private data object EmptyState : SliderState {
-        override val value: Float = 0f
-        override val valueRange: ClosedFloatingPointRange<Float> = 0f..1f
-        override val icon: Icon? = null
-        override val valueText: String = ""
-        override val label: String = ""
-        override val disabledMessage: String? = null
-        override val a11yStep: Int = 0
-        override val isEnabled: Boolean = true
-    }
 
     @AssistedFactory
     interface Factory {
