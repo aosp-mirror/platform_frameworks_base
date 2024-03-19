@@ -27,7 +27,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
@@ -147,16 +146,6 @@ public class AudioPolicy {
         return mProjection;
     }
 
-    /** @hide */
-    public AttributionSource getAttributionSource() {
-        return getAttributionSource(mContext);
-    }
-
-    private static AttributionSource getAttributionSource(Context context) {
-        return context == null
-                ? AttributionSource.myAttributionSource() : context.getAttributionSource();
-    }
-
     /**
      * The parameters are guaranteed non-null through the Builder
      */
@@ -218,9 +207,6 @@ public class AudioPolicy {
         public Builder addMix(@NonNull AudioMix mix) throws IllegalArgumentException {
             if (mix == null) {
                 throw new IllegalArgumentException("Illegal null AudioMix argument");
-            }
-            if (android.permission.flags.Flags.deviceAwarePermissionApisEnabled()) {
-                mix.setVirtualDeviceId(getAttributionSource(mContext).getDeviceId());
             }
             mMixes.add(mix);
             return this;
@@ -372,9 +358,6 @@ public class AudioPolicy {
                 if (mix == null) {
                     throw new IllegalArgumentException("Illegal null AudioMix in attachMixes");
                 } else {
-                    if (android.permission.flags.Flags.deviceAwarePermissionApisEnabled()) {
-                        mix.setVirtualDeviceId(getAttributionSource(mContext).getDeviceId());
-                    }
                     zeMixes.add(mix);
                 }
             }
@@ -417,9 +400,6 @@ public class AudioPolicy {
                 if (mix == null) {
                     throw new IllegalArgumentException("Illegal null AudioMix in detachMixes");
                 } else {
-                    if (android.permission.flags.Flags.deviceAwarePermissionApisEnabled()) {
-                        mix.setVirtualDeviceId(getAttributionSource(mContext).getDeviceId());
-                    }
                     zeMixes.add(mix);
                 }
             }
