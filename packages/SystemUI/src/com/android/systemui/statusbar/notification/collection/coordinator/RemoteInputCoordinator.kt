@@ -127,6 +127,15 @@ class RemoteInputCoordinator @Inject constructor(
                             mSmartReplyController.stopSending(entry)
                             mNotifUpdater.onInternalNotificationUpdate(newSbn,
                                     "Extending lifetime of notification with smart reply")
+                        } else {
+                            // The app may have re-cancelled a notification after it had already
+                            // been lifetime extended.
+                            // Rebuild the notification with the replies it already had to ensure
+                            // those replies continue to be displayed.
+                            val newSbn = mRebuilder.rebuildWithExistingReplies(entry)
+                            mNotifUpdater.onInternalNotificationUpdate(newSbn,
+                                    "Extending lifetime of notification that has already been " +
+                                            "lifetime extended.")
                         }
                     } else {
                         // Notifications updated without FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY
