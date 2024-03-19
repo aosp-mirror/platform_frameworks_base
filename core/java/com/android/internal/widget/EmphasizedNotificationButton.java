@@ -278,11 +278,6 @@ public class EmphasizedNotificationButton extends Button {
         // be ready to glue. This can only happen if the button is initialized and displayed and
         // *then* someone calls glueIcon or glueLabel.
 
-        if (mIconToGlue == null) {
-            Log.w(TAG, "glueIconAndLabelIfNeeded: label glued without icon; doing nothing");
-            return;
-        }
-
         if (mLabelToGlue == null) {
             Log.w(TAG, "glueIconAndLabelIfNeeded: icon glued without label; doing nothing");
             return;
@@ -318,6 +313,14 @@ public class EmphasizedNotificationButton extends Button {
     private static final String POP_DIRECTIONAL_ISOLATE = "\u2069";
 
     private void glueIconAndLabel(int layoutDirection) {
+        if (mIconToGlue == null) {
+            if (DEBUG_NEW_ACTION_LAYOUT) {
+                Log.d(TAG, "glueIconAndLabel: null icon, setting text to label");
+            }
+            setText(mLabelToGlue);
+            return;
+        }
+
         final boolean rtlLayout = layoutDirection == LAYOUT_DIRECTION_RTL;
 
         if (DEBUG_NEW_ACTION_LAYOUT) {
