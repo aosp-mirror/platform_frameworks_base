@@ -54,7 +54,10 @@
 -keep,allowoptimization,allowaccessmodification class android.app.admin.flags.FeatureFlagsImpl { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.input.NativeInputManagerService$NativeImpl { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.ThreadPriorityBooster { *; }
--keep,allowaccessmodification class android.app.admin.flags.Flags { *; }
+
+# Keep all aconfig Flag class as they might be statically referenced by other packages
+# An merge or inlining could lead to missing dependencies that cause run time errors
+-keepclassmembernames class android.**.Flags, com.android.**.Flags { public *; }
 
 # Referenced via CarServiceHelperService in car-frameworks-service (avoid removing)
 -keep public class com.android.server.utils.Slogf { *; }
