@@ -22,9 +22,9 @@ import android.util.Log
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardClockSwitch
-import com.android.systemui.Flags
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -145,7 +145,7 @@ constructor(
                 // Ensure the desired translation doesn't encroach on the top inset
                 val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolated).toInt()
                 val translationY =
-                    if (Flags.migrateClocksToBlueprint()) {
+                    if (MigrateClocksToBlueprint.isEnabled) {
                         max(params.topInset - params.minViewY, burnInY)
                     } else {
                         max(params.topInset, params.minViewY + burnInY) - params.minViewY
@@ -168,7 +168,7 @@ constructor(
     private fun clockController(
         provider: Provider<ClockController>?,
     ): Provider<ClockController>? {
-        return if (Flags.migrateClocksToBlueprint()) {
+        return if (MigrateClocksToBlueprint.isEnabled) {
             Provider { keyguardClockViewModel.currentClock.value }
         } else {
             provider

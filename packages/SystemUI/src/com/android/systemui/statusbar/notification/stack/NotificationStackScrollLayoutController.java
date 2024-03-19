@@ -23,7 +23,6 @@ import static com.android.app.animation.Interpolators.STANDARD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.Flags.nsslFalsingFix;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
@@ -71,6 +70,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -2090,7 +2090,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             }
             boolean horizontalSwipeWantsIt = false;
             boolean scrollerWantsIt = false;
-            if (nsslFalsingFix() || migrateClocksToBlueprint()) {
+            if (nsslFalsingFix() || MigrateClocksToBlueprint.isEnabled()) {
                 // Reverse the order relative to the else statement. onScrollTouch will reset on an
                 // UP event, causing horizontalSwipeWantsIt to be set to true on vertical swipes.
                 if (mLongPressedView == null && !mView.isBeingDragged()
