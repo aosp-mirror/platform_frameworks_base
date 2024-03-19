@@ -377,7 +377,7 @@ constructor(
         // All transition view models are mututally exclusive, and safe to merge
         val alphaTransitions =
             merge(
-                alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                 aodToLockscreenTransitionViewModel.notificationAlpha,
                 aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
                 dozingToLockscreenTransitionViewModel.lockscreenAlpha,

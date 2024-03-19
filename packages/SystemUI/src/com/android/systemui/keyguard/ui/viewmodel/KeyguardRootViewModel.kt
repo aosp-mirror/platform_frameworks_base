@@ -178,7 +178,7 @@ constructor(
                 merge(
                         alphaOnShadeExpansion,
                         keyguardInteractor.dismissAlpha.filterNotNull(),
-                        alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                        alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
@@ -235,11 +235,7 @@ constructor(
         burnInJob?.cancel()
 
         burnInJob =
-            scope.launch {
-                aodBurnInViewModel.movement(params).collect {
-                    burnInModel.value = it
-                }
-            }
+            scope.launch { aodBurnInViewModel.movement(params).collect { burnInModel.value = it } }
     }
 
     val scale: Flow<BurnInScaleViewModel> =
