@@ -594,7 +594,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         /* inflationId = */ FLAG_GROUP_SUMMARY_HEADER,
                         remoteViewCache, entry, row, isNewView, remoteViewClickHandler, callback,
                         /* parentLayout = */ childrenContainer,
-                        /* existingView = */ childrenContainer.getNotificationHeader(),
+                        /* existingView = */ childrenContainer.getGroupHeader(),
                         /* existingWrapper = */ childrenContainer.getNotificationHeaderWrapper(),
                         runningInflations, applyCallback, logger);
             }
