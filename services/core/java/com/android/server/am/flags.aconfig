@@ -86,3 +86,11 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "use_permission_manager_for_broadcast_delivery_check"
+    description: "Use PermissionManager API for broadcast delivery permission checks."
+    bug: "315468967"
+    is_fixed_read_only: true
+}
