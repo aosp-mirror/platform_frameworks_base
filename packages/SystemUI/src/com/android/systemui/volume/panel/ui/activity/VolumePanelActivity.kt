@@ -42,7 +42,6 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
         volumePanelFlag.assertNewVolumePanel()
 
         setContent { VolumePanelRoot(viewModel = viewModel, onDismiss = ::finish) }

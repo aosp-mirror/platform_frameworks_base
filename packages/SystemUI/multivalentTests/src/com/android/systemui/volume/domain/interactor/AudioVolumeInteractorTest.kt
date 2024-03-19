@@ -200,6 +200,15 @@ class AudioVolumeInteractorTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun alarmStream_isNotMutable() {
+        with(kosmos) {
+            val isMutable = underTest.isMutable(AudioStream(AudioManager.STREAM_ALARM))
+
+            assertThat(isMutable).isFalse()
+        }
+    }
+
     private companion object {
         val audioStream = AudioStream(AudioManager.STREAM_SYSTEM)
     }

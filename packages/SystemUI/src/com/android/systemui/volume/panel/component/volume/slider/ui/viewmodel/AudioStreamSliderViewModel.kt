@@ -116,6 +116,7 @@ constructor(
             isEnabled = isEnabled,
             a11yStep = volumeRange.step,
             audioStreamModel = this,
+            isMutable = audioVolumeInteractor.isMutable(audioStream),
         )
     }
 
@@ -160,6 +161,7 @@ constructor(
         override val disabledMessage: String?,
         override val isEnabled: Boolean,
         override val a11yStep: Int,
+        override val isMutable: Boolean,
         val audioStreamModel: AudioStreamModel,
     ) : SliderState
 
