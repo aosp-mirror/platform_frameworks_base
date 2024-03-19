@@ -21,6 +21,9 @@ import static android.app.NotificationManager.INTERRUPTION_FILTER_ALARMS;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_ALL;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
+import static android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN;
+import static android.appwidget.AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD;
+import static android.appwidget.flags.Flags.generatedPreviews;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
@@ -56,6 +59,7 @@ import android.app.people.IPeopleManager;
 import android.app.people.PeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -80,12 +84,15 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
@@ -96,6 +103,8 @@ import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.people.PeopleTileViewHelper;
 import com.android.systemui.people.SharedPreferencesHelper;
+import com.android.systemui.res.R;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -160,13 +169,27 @@ public class PeopleSpaceWidgetManager implements Dumpable {
     @GuardedBy("mLock")
     public static Map<Integer, PeopleSpaceTile> mTiles = new HashMap<>();
 
+    @NonNull private final UserTracker mUserTracker;
+    @NonNull private final SparseBooleanArray mUpdatedPreviews = new SparseBooleanArray();
+    @NonNull private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onUserUnlocked() {
+                    if (DEBUG) {
+                        Log.d(TAG, "onUserUnlocked " + mUserTracker.getUserId());
+                    }
+                    updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
+                }
+            };
+
     @Inject
     public PeopleSpaceWidgetManager(Context context, LauncherApps launcherApps,
             CommonNotifCollection notifCollection,
             PackageManager packageManager, Optional<Bubbles> bubblesOptional,
             UserManager userManager, NotificationManager notificationManager,
             BroadcastDispatcher broadcastDispatcher, @Background Executor bgExecutor,
-            DumpManager dumpManager) {
+            DumpManager dumpManager, @NonNull UserTracker userTracker,
+            @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor) {
         if (DEBUG) Log.d(TAG, "constructor");
         mContext = context;
         mAppWidgetManager = AppWidgetManager.getInstance(context);
@@ -187,6 +210,8 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         mBroadcastDispatcher = broadcastDispatcher;
         mBgExecutor = bgExecutor;
         dumpManager.registerNormalDumpable(TAG, this);
+        mUserTracker = userTracker;
+        keyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
     }
 
     /** Initializes {@PeopleSpaceWidgetManager}. */
@@ -246,7 +271,7 @@ public class PeopleSpaceWidgetManager implements Dumpable {
             CommonNotifCollection notifCollection, PackageManager packageManager,
             Optional<Bubbles> bubblesOptional, UserManager userManager, BackupManager backupManager,
             INotificationManager iNotificationManager, NotificationManager notificationManager,
-            @Background Executor executor) {
+            @Background Executor executor, UserTracker userTracker) {
         mContext = context;
         mAppWidgetManager = appWidgetManager;
         mIPeopleManager = iPeopleManager;
@@ -262,6 +287,7 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         mManager = this;
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         mBgExecutor = executor;
+        mUserTracker = userTracker;
     }
 
     /**
@@ -1406,5 +1432,33 @@ public class PeopleSpaceWidgetManager implements Dumpable {
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_APP);
+    }
+
+    @VisibleForTesting
+    void updateGeneratedPreviewForUser(UserHandle user) {
+        if (!generatedPreviews() || mUpdatedPreviews.get(user.getIdentifier())
+                || !mUserManager.isUserUnlocked(user)) {
+            return;
+        }
+
+        // The widget provider may be disabled on SystemUI implementers, e.g. TvSystemUI.
+        ComponentName provider = new ComponentName(mContext, PeopleSpaceWidgetProvider.class);
+        List<AppWidgetProviderInfo> infos = mAppWidgetManager.getInstalledProvidersForPackage(
+                mContext.getPackageName(), user);
+        if (infos.stream().noneMatch(info -> info.provider.equals(provider))) {
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Updating People Space widget preview for user " + user.getIdentifier());
+        }
+        boolean success = mAppWidgetManager.setWidgetPreview(
+                provider, WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD,
+                new RemoteViews(mContext.getPackageName(),
+                        R.layout.people_space_placeholder_layout));
+        if (DEBUG && !success) {
+            Log.d(TAG, "Failed to update generated preview for user " + user.getIdentifier());
+        }
+        mUpdatedPreviews.put(user.getIdentifier(), success);
     }
 }

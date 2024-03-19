@@ -80,6 +80,8 @@ import android.app.people.IPeopleManager;
 import android.app.people.PeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -101,11 +103,12 @@ import android.text.TextUtils;
 import androidx.preference.PreferenceManager;
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.people.SharedPreferencesHelper;
+import com.android.systemui.res.R;
+import com.android.systemui.settings.FakeUserTracker;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.statusbar.SbnBuilder;
@@ -265,6 +268,8 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
 
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mClock);
 
+    private final FakeUserTracker mUserTracker = new FakeUserTracker();
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -272,7 +277,7 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
         mManager = new PeopleSpaceWidgetManager(mContext, mAppWidgetManager, mIPeopleManager,
                 mPeopleManager, mLauncherApps, mNotifCollection, mPackageManager,
                 Optional.of(mBubbles), mUserManager, mBackupManager, mINotificationManager,
-                mNotificationManager, mFakeExecutor);
+                mNotificationManager, mFakeExecutor, mUserTracker);
         mManager.attach(mListenerService);
 
         verify(mListenerService).addNotificationHandler(mListenerCaptor.capture());
@@ -309,6 +314,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setId(1)
                 .setShortcutInfo(mShortcutInfo)
                 .build();
+
+        AppWidgetProviderInfo providerInfo = new AppWidgetProviderInfo();
+        providerInfo.provider = new ComponentName("com.android.systemui.tests",
+                "com.android.systemui.people.widget.PeopleSpaceWidgetProvider");
+        when(mAppWidgetManager.getInstalledProvidersForPackage(anyString(), any()))
+                .thenReturn(List.of(providerInfo));
     }
 
     @Test
@@ -1560,6 +1571,43 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 String.valueOf(WIDGET_ID_WITH_SHORTCUT));
         assertThat(followUp.getStringSet(key11.toString(), new HashSet<>())).containsExactly(
                 String.valueOf(WIDGET_ID_WITH_KEY_IN_OPTIONS));
+    }
+
+    @Test
+    public void testUpdateGeneratedPreview_flagDisabled() {
+        mSetFlagsRule.disableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
+        mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
+        verify(mAppWidgetManager, times(0)).setWidgetPreview(any(), anyInt(), any());
+    }
+
+    @Test
+    public void testUpdateGeneratedPreview_userLocked() {
+        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
+        when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(false);
+
+        mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
+        verify(mAppWidgetManager, times(0)).setWidgetPreview(any(), anyInt(), any());
+    }
+
+    @Test
+    public void testUpdateGeneratedPreview_userUnlocked() {
+        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
+        when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(true);
+        when(mAppWidgetManager.setWidgetPreview(any(), anyInt(), any())).thenReturn(true);
+
+        mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
+        verify(mAppWidgetManager, times(1)).setWidgetPreview(any(), anyInt(), any());
+    }
+
+    @Test
+    public void testUpdateGeneratedPreview_doesNotSetTwice() {
+        mSetFlagsRule.enableFlags(android.appwidget.flags.Flags.FLAG_GENERATED_PREVIEWS);
+        when(mUserManager.isUserUnlocked(mUserTracker.getUserHandle())).thenReturn(true);
+        when(mAppWidgetManager.setWidgetPreview(any(), anyInt(), any())).thenReturn(true);
+
+        mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
+        mManager.updateGeneratedPreviewForUser(mUserTracker.getUserHandle());
+        verify(mAppWidgetManager, times(1)).setWidgetPreview(any(), anyInt(), any());
     }
 
     private void setFinalField(String fieldName, int value) {
