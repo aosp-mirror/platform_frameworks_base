@@ -1677,6 +1677,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     PermissionManagerServiceInternal mPermissionManagerInt;
     private TestUtilityService mTestUtilityService;
 
+    // Packages which have received a (LOCKED_)BOOT_COMPLETED broadcast since
+    // the private space profile has been started
+    @GuardedBy("this")
+    private final ArraySet<String> mPrivateSpaceBootCompletedPackages = new ArraySet<String>();
+
     /**
      * Whether to force background check on all apps (for battery saver) or not.
      */
@@ -2304,6 +2309,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void onUserStopped(@NonNull TargetUser user) {
             mService.mBatteryStatsService.onCleanupUser(user.getUserIdentifier());
+
+            if (android.os.Flags.allowPrivateProfile()
+                    && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
+                final UserManagerInternal umInternal =
+                        LocalServices.getService(UserManagerInternal.class);
+                UserInfo userInfo = umInternal.getUserInfo(user.getUserIdentifier());
+
+                if (userInfo != null && userInfo.isPrivateProfile()) {
+                    synchronized (mService) {
+                        mService.mPrivateSpaceBootCompletedPackages.clear();
+                    }
+                }
+            }
         }
 
         public ActivityManagerService getService() {
@@ -5033,13 +5051,32 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Send LOCKED_BOOT_COMPLETED and BOOT_COMPLETED to the package explicitly when unstopped
+     * Send LOCKED_BOOT_COMPLETED and BOOT_COMPLETED to the package explicitly when unstopped,
+     * or when the package first starts in private space
      */
     private void maybeSendBootCompletedLocked(ProcessRecord app) {
-        if (!android.content.pm.Flags.stayStopped()) return;
-        // Nothing to do if it wasn't previously stopped
-        if (!app.wasForceStopped() && !app.getWindowProcessController().wasForceStopped()) {
-            return;
+        boolean sendBroadcast = false;
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
+            final UserManagerInternal umInternal =
+                    LocalServices.getService(UserManagerInternal.class);
+            UserInfo userInfo = umInternal.getUserInfo(app.userId);
+
+            if (userInfo != null && userInfo.isPrivateProfile()) {
+                // Packages in private space get deferred boot completed whenever they start the
+                // first time since profile start
+                if (!mPrivateSpaceBootCompletedPackages.contains(app.info.packageName)) {
+                    mPrivateSpaceBootCompletedPackages.add(app.info.packageName);
+                    sendBroadcast = true;
+                } // else, stopped packages in private space may still hit the logic below
+            }
+        }
+        if (!sendBroadcast) {
+            if (!android.content.pm.Flags.stayStopped()) return;
+            // Nothing to do if it wasn't previously stopped
+            if (!app.wasForceStopped() && !app.getWindowProcessController().wasForceStopped()) {
+                return;
+            }
         }
 
         // Send LOCKED_BOOT_COMPLETED, if necessary
