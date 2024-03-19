@@ -126,3 +126,10 @@ flag {
   description: "When handwriting is initiated in an unfocused TextView, cursor is placed at the end of the closest paragraph."
   bug: "323376217"
 }
+
+flag {
+  name: "handwriting_unsupported_message"
+  namespace: "text"
+  description: "Feature flag for showing error message when user tries stylus handwriting on a text field which doesn't support it"
+  bug: "297962571"
+}
