@@ -2078,6 +2078,7 @@
   <java-symbol type="integer" name="config_notificationsBatteryMediumARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryNearlyFullLevel" />
   <java-symbol type="integer" name="config_notificationServiceArchiveSize" />
+  <java-symbol type="integer" name="config_notificationLongTextMaxLineCount" />
   <java-symbol type="dimen" name="config_rotaryEncoderAxisScrollTickInterval" />
   <java-symbol type="integer" name="config_recentVibrationsDumpSizeLimit" />
   <java-symbol type="integer" name="config_previousVibrationsDumpSizeLimit" />
