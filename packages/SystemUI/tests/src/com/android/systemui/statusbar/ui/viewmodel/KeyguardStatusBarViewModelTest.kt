@@ -35,6 +35,7 @@ import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
+import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
@@ -66,6 +67,8 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
             kosmos.keyguardTransitionInteractor,
             { kosmos.sceneInteractor },
             { kosmos.fromGoneTransitionInteractor },
+            { kosmos.sharedNotificationContainerInteractor },
+            testScope,
         )
     private val keyguardStatusBarInteractor =
         KeyguardStatusBarInteractor(

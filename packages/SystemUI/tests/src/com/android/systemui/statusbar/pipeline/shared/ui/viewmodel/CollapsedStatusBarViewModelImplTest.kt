@@ -23,6 +23,7 @@ import com.android.systemui.CoroutineTestScopeModule
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
 import com.android.systemui.collectLastValue
 import com.android.systemui.collectValues
 import com.android.systemui.communal.dagger.CommunalModule
@@ -60,6 +61,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             [
                 SysUITestModule::class,
                 CommunalModule::class,
+                BiometricsDomainLayerModule::class,
             ]
     )
     interface TestComponent : SysUITestComponent<CollapsedStatusBarViewModelImpl> {

@@ -178,7 +178,9 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 new FakeShadeRepository(),
                 keyguardTransitionInteractor,
                 () -> mKosmos.getSceneInteractor(),
-                () -> mKosmos.getFromGoneTransitionInteractor());
+                () -> mKosmos.getFromGoneTransitionInteractor(),
+                () -> mKosmos.getSharedNotificationContainerInteractor(),
+                mTestScope);
         mViewModel =
                 new KeyguardStatusBarViewModel(
                         mTestScope.getBackgroundScope(),
