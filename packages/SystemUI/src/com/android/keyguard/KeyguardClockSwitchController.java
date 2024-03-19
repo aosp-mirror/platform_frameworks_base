@@ -631,7 +631,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @Nullable
     public ClockController getClock() {
         if (migrateClocksToBlueprint()) {
-            return mKeyguardClockInteractor.getClock();
+            return mKeyguardClockInteractor.getCurrentClock().getValue();
         } else {
             return mClockEventController.getClock();
         }

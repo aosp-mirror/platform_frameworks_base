@@ -113,7 +113,10 @@ constructor(
 
     override val currentClock: StateFlow<ClockController?> =
         currentClockId
-            .map { clockRegistry.createCurrentClock() }
+            .map {
+                clockEventController.clock = clockRegistry.createCurrentClock()
+                clockEventController.clock
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),

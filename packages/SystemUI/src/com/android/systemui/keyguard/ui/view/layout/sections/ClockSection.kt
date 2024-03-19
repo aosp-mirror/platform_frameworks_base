@@ -86,7 +86,7 @@ constructor(
         if (!Flags.migrateClocksToBlueprint()) {
             return
         }
-        clockInteractor.clock?.let { clock ->
+        keyguardClockViewModel.currentClock.value?.let { clock ->
             constraintSet.applyDeltaFrom(buildConstraints(clock, constraintSet))
         }
     }
