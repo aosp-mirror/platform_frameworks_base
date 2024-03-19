@@ -38,14 +38,13 @@ constructor(
     private val keyguardClockRepository: KeyguardClockRepository,
 ) {
 
-    val selectedClockSize: Flow<SettingsClockSize> = keyguardClockRepository.selectedClockSize
+    val selectedClockSize: StateFlow<SettingsClockSize> = keyguardClockRepository.selectedClockSize
 
     val currentClockId: Flow<ClockId> = keyguardClockRepository.currentClockId
 
     val currentClock: StateFlow<ClockController?> = keyguardClockRepository.currentClock
 
-    val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
-        keyguardClockRepository.previewClockPair
+    val previewClock: Flow<ClockController> = keyguardClockRepository.previewClock
 
     var clock: ClockController? by keyguardClockRepository.clockEventController::clock
 

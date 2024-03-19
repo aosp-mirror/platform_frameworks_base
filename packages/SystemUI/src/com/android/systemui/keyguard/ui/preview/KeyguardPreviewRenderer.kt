@@ -408,10 +408,8 @@ constructor(
             if (migrateClocksToBlueprint()) {
                 KeyguardPreviewClockViewBinder.bind(
                     context,
-                    displayId,
                     keyguardRootView,
                     clockViewModel,
-                    clockController,
                     ::updateClockAppearance
                 )
             } else {
