@@ -993,6 +993,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                     intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
                                     intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                         }
+                    } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(which)) {
+                        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
+                            return;
+                        }
+                        restoreAccessibilityQsTargets(
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                     }
                 }
             }
@@ -2129,6 +2135,29 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
         onUserStateChangedLocked(userState);
+    }
+
+    /**
+     * User could configure accessibility shortcut during the SUW before restoring user data.
+     * Merges the current value and the new value to make sure we don't lost the setting the user's
+     * preferences of accessibility qs shortcut updated in SUW are not lost.
+     *
+     * Called only during settings restore; currently supports only the owner user
+     * TODO: http://b/22388012
+     */
+    private void restoreAccessibilityQsTargets(String newValue) {
+        synchronized (mLock) {
+            final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+            final Set<String> mergedTargets = userState.getA11yQsTargets();
+            readColonDelimitedStringToSet(newValue, str -> str, mergedTargets,
+                    /* doMerge = */ true);
+
+            userState.updateA11yQsTargetLocked(mergedTargets);
+            persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_QS_TARGETS,
+                    UserHandle.USER_SYSTEM, mergedTargets, str -> str);
+            scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+            onUserStateChangedLocked(userState);
+        }
     }
 
     private int getClientStateLocked(AccessibilityUserState userState) {

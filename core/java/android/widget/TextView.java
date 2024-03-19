@@ -13565,6 +13565,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** @hide */
     @Override
+    public boolean shouldTrackHandwritingArea() {
+        // The handwriting initiator tracks all editable TextViews regardless of whether handwriting
+        // is supported, so that it can show an error message for unsupported editable TextViews.
+        return super.shouldTrackHandwritingArea()
+                || (Flags.handwritingUnsupportedMessage() && onCheckIsTextEditor());
+    }
+
+    /** @hide */
+    @Override
     public boolean isStylusHandwritingAvailable() {
         if (mTextOperationUser == null) {
             return super.isStylusHandwritingAvailable();

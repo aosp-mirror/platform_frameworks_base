@@ -61,6 +61,7 @@ import com.android.server.display.config.IdleScreenRefreshRateTimeout;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholds;
 import com.android.server.display.config.IntegerArray;
+import com.android.server.display.config.LowBrightnessData;
 import com.android.server.display.config.LuxThrottling;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.NonNegativeFloatToFloatPoint;
@@ -555,6 +556,24 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <majorVersion>2</majorVersion>
  *         <minorVersion>0</minorVersion>
  *     </usiVersion>
+ *     <lowBrightness enabled="true">
+ *       <transitionPoint>0.1</transitionPoint>
+ *
+ *       <nits>0.2</nits>
+ *       <nits>2.0</nits>
+ *       <nits>500.0</nits>
+ *       <nits>1000.0</nits>
+ *
+ *       <backlight>0</backlight>
+ *       <backlight>0.0001</backlight>
+ *       <backlight>0.5</backlight>
+ *       <backlight>1.0</backlight>
+ *
+ *       <brightness>0</brightness>
+ *       <brightness>0.1</brightness>
+ *       <brightness>0.5</brightness>
+ *       <brightness>1.0</brightness>
+ *     </lowBrightness>
  *     <screenBrightnessCapForWearBedtimeMode>0.1</screenBrightnessCapForWearBedtimeMode>
  *     <idleScreenRefreshRateTimeout>
  *          <luxThresholds>
@@ -568,6 +587,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *              </point>
  *          </luxThresholds>
  *     </idleScreenRefreshRateTimeout>
+ *
+ *
  *    </displayConfiguration>
  *  }
  *  </pre>
@@ -732,6 +753,7 @@ public class DisplayDeviceConfig {
     private Spline mBacklightToBrightnessSpline;
     private Spline mBacklightToNitsSpline;
     private Spline mNitsToBacklightSpline;
+
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
@@ -871,6 +893,9 @@ public class DisplayDeviceConfig {
 
     @Nullable
     private HdrBrightnessData mHdrBrightnessData;
+
+    @Nullable
+    public LowBrightnessData mLowBrightnessData;
 
     /**
      * Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
@@ -1814,6 +1839,15 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     *
+     * @return true if low brightness mode is enabled
+     */
+    @VisibleForTesting
+    public boolean getLbmEnabled() {
+        return mLowBrightnessData != null;
+    }
+
+    /**
      * @return Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
      */
     public float getBrightnessCapForWearBedtimeMode() {
@@ -1952,6 +1986,8 @@ public class DisplayDeviceConfig {
                 + "mUsiVersion= " + mHostUsiVersion + "\n"
                 + "mHdrBrightnessData= " + mHdrBrightnessData + "\n"
                 + "mBrightnessCapForWearBedtimeMode= " + mBrightnessCapForWearBedtimeMode
+                + "\n"
+                + (mLowBrightnessData != null ? mLowBrightnessData.toString() : "")
                 + "}";
     }
 
@@ -2002,6 +2038,9 @@ public class DisplayDeviceConfig {
                 loadDensityMapping(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
+                if (mFlags.isEvenDimmerEnabled()) {
+                    mLowBrightnessData = LowBrightnessData.loadConfig(config);
+                }
                 loadBrightnessMap(config);
                 loadThermalThrottlingConfig(config);
                 loadPowerThrottlingConfigData(config);
@@ -2793,6 +2832,18 @@ public class DisplayDeviceConfig {
     // These splines are used to convert from the system brightness value to the HAL backlight
     // value
     private void createBacklightConversionSplines() {
+        if (mLowBrightnessData != null) {
+            mBrightnessToBacklightSpline = mLowBrightnessData.mBrightnessToBacklight;
+            mBacklightToBrightnessSpline = mLowBrightnessData.mBacklightToBrightness;
+            mBacklightToNitsSpline = mLowBrightnessData.mBacklightToNits;
+            mNitsToBacklightSpline = mLowBrightnessData.mNitsToBacklight;
+
+            mNits = mLowBrightnessData.mNits;
+            mBrightness = mLowBrightnessData.mBrightness;
+            mBacklight = mLowBrightnessData.mBacklight;
+            return;
+        }
+
         mBrightness = new float[mBacklight.length];
         for (int i = 0; i < mBrightness.length; i++) {
             mBrightness[i] = MathUtils.map(mBacklight[0],

@@ -44,6 +44,7 @@ interface ShadeViewController {
     fun disableHeader(state1: Int, state2: Int, animated: Boolean)
 
     /** If the latency tracker is enabled, begins tracking expand latency. */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun startExpandLatencyTracking()
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
@@ -57,13 +58,14 @@ interface ShadeViewController {
     fun setAlphaChangeAnimationEndAction(r: Runnable)
 
     /** Sets Qs ScrimEnabled and updates QS state. */
+    @Deprecated("Does nothing when scene container is enabled.")
     fun setQsScrimEnabled(qsScrimEnabled: Boolean)
 
     /** Sets the top spacing for the ambient indicator. */
     fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean)
 
     /** Updates notification panel-specific flags on [SysUiState]. */
-    fun updateSystemUiStateFlags()
+    @Deprecated("Does nothing when scene container is enabled.") fun updateSystemUiStateFlags()
 
     /** Ensures that the touchable region is updated. */
     fun updateTouchableRegion()
@@ -104,16 +106,6 @@ interface ShadeViewController {
      */
     @Deprecated("No longer supported. Do not add new calls to this.")
     fun finishInputFocusTransfer(velocity: Float)
-
-    /**
-     * Performs haptic feedback from a view with a haptic feedback constant.
-     *
-     * The implementation of this method should use the [android.view.View.performHapticFeedback]
-     * method with the provided constant.
-     *
-     * @param[constant] One of [android.view.HapticFeedbackConstants]
-     */
-    fun performHapticFeedback(constant: Int)
 
     /** Returns the ShadeHeadsUpTracker. */
     val shadeHeadsUpTracker: ShadeHeadsUpTracker

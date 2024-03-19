@@ -24,6 +24,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
+import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -61,11 +63,16 @@ constructor(
         right: Float,
         bottom: Float,
     ) {
-        val notificationContainerBounds =
-            NotificationContainerBounds(top = top, bottom = bottom, left = left, right = right)
-        keyguardInteractor.setNotificationContainerBounds(notificationContainerBounds)
-        interactor.setStackBounds(notificationContainerBounds)
+        keyguardInteractor.setNotificationContainerBounds(
+            NotificationContainerBounds(top = top, bottom = bottom)
+        )
+        interactor.setStackBounds(
+            StackBounds(top = top, bottom = bottom, left = left, right = right)
+        )
     }
+
+    /** Corner rounding of the stack */
+    val stackRounding: Flow<StackRounding> = interactor.stackRounding
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of

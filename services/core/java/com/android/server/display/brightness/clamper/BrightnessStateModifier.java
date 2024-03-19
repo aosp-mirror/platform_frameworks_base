@@ -42,4 +42,10 @@ public interface BrightnessStateModifier {
      * Called when stopped. Listeners can be unregistered here.
      */
     void stop();
+
+    /**
+     * Allows modifiers to react to ambient lux changes.
+     * @param ambientLux current debounced lux.
+     */
+    void onAmbientLuxChange(float ambientLux);
 }

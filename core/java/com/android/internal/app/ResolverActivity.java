@@ -217,6 +217,12 @@ public class ResolverActivity extends Activity implements
     public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
 
     /**
+     * Boolean extra to indicate if Resolver Sheet needs to be started in single user mode.
+     */
+    protected static final String EXTRA_RESTRICT_TO_SINGLE_USER =
+            "com.android.internal.app.ResolverActivity.EXTRA_RESTRICT_TO_SINGLE_USER";
+
+    /**
      * Integer extra to indicate which profile should be automatically selected.
      * <p>Can only be used if there is a work profile.
      * <p>Possible values can be either {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}.
@@ -750,8 +756,10 @@ public class ResolverActivity extends Activity implements
     }
 
     protected UserHandle getPersonalProfileUserHandle() {
-        if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()){
-            return mPrivateProfileUserHandle;
+        // When launched in single user mode, only personal tab is populated, so we use
+        // tabOwnerUserHandleForLaunch as personal tab's user handle.
+        if (privateSpaceEnabled() && isLaunchedInSingleUserMode()) {
+            return getTabOwnerUserHandleForLaunch();
         }
         return mPersonalProfileUserHandle;
     }
@@ -822,11 +830,11 @@ public class ResolverActivity extends Activity implements
         // If we are in work or private profile's process, return WorkProfile/PrivateProfile user
         // as owner, otherwise we always return PersonalProfile user as owner
         if (UserHandle.of(UserHandle.myUserId()).equals(getWorkProfileUserHandle())) {
-            return getWorkProfileUserHandle();
+            return mWorkProfileUserHandle;
         } else if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()) {
-            return getPrivateProfileUserHandle();
+            return mPrivateProfileUserHandle;
         }
-        return getPersonalProfileUserHandle();
+        return mPersonalProfileUserHandle;
     }
 
     private boolean hasWorkProfile() {
@@ -847,8 +855,18 @@ public class ResolverActivity extends Activity implements
                 && (UserHandle.myUserId() == getPrivateProfileUserHandle().getIdentifier());
     }
 
+    protected final boolean isLaunchedInSingleUserMode() {
+        // When launched from Private Profile, return true
+        if (isLaunchedAsPrivateProfile()) {
+            return true;
+        }
+        return getIntent()
+                .getBooleanExtra(EXTRA_RESTRICT_TO_SINGLE_USER, /* defaultValue = */ false);
+    }
+
     protected boolean shouldShowTabs() {
-        if (privateSpaceEnabled() && isLaunchedAsPrivateProfile()) {
+        // No Tabs are shown when launched in single user mode.
+        if (privateSpaceEnabled() && isLaunchedInSingleUserMode()) {
             return false;
         }
         return hasWorkProfile() && ENABLE_TABBED_VIEW;

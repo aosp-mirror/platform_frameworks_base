@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 
+import androidx.lifecycle.ViewModel;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -56,7 +57,8 @@ public class ComplicationViewModelTransformerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mFactory.create(Mockito.any(), Mockito.any())).thenReturn(mComponent);
         when(mComponent.getViewModelProvider()).thenReturn(mViewModelProvider);
-        when(mViewModelProvider.get(Mockito.any(), Mockito.any())).thenReturn(mViewModel);
+        when(mViewModelProvider.get(Mockito.any(), Mockito.<Class<ViewModel>>any()))
+                .thenReturn(mViewModel);
     }
 
     /**

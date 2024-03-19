@@ -167,7 +167,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onInit() {
-        mView.initialize(mQSLogger);
+        mView.initialize(mQSLogger, mUsingMediaPlayer);
         mQSLogger.logAllTilesChangeListening(mView.isListening(), mView.getDumpableTag(), "");
         mHost.addCallback(mQSHostCallback);
     }

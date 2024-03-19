@@ -31,6 +31,8 @@ import android.view.RemotableViewMethod;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.android.internal.R;
+
 /**
  * A TextView that can float around an image on the end.
  *
@@ -49,6 +51,7 @@ public class ImageFloatingTextView extends TextView {
     private int mMaxLinesForHeight = -1;
     private int mLayoutMaxLines = -1;
     private int mImageEndMargin;
+    private final int mMaxLineUpperLimit;
 
     private int mStaticLayoutCreationCountInOnMeasure = 0;
 
@@ -71,6 +74,8 @@ public class ImageFloatingTextView extends TextView {
         super(context, attrs, defStyleAttr, defStyleRes);
         setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL_FAST);
         setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY);
+        mMaxLineUpperLimit =
+                getResources().getInteger(R.integer.config_notificationLongTextMaxLineCount);
     }
 
     @Override
@@ -102,6 +107,11 @@ public class ImageFloatingTextView extends TextView {
         } else {
             maxLines = getMaxLines() >= 0 ? getMaxLines() : Integer.MAX_VALUE;
         }
+
+        if (mMaxLineUpperLimit > 0) {
+            maxLines = Math.min(maxLines, mMaxLineUpperLimit);
+        }
+
         builder.setMaxLines(maxLines);
         mLayoutMaxLines = maxLines;
         if (shouldEllipsize) {

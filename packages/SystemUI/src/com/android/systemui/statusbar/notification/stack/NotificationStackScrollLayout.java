@@ -812,6 +812,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             mDebugTextUsedYPositions.clear();
         }
+
+        mDebugPaint.setColor(Color.DKGRAY);
+        canvas.drawPath(mRoundedClipPath, mDebugPaint);
+
         int y = 0;
         drawDebugInfo(canvas, y, Color.RED, /* label= */ "y = " + y);
 
@@ -843,13 +847,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         drawDebugInfo(canvas, y, Color.LTGRAY,
                 /* label= */ "mAmbientState.getStackY() + mAmbientState.getStackHeight() = " + y);
 
-        y = (int) mAmbientState.getStackY() + mContentHeight;
-        drawDebugInfo(canvas, y, Color.MAGENTA,
-                /* label= */ "mAmbientState.getStackY() + mContentHeight = " + y);
-
         y = (int) (mAmbientState.getStackY() + mIntrinsicContentHeight);
         drawDebugInfo(canvas, y, Color.YELLOW,
                 /* label= */ "mAmbientState.getStackY() + mIntrinsicContentHeight = " + y);
+
+        y = mContentHeight;
+        drawDebugInfo(canvas, y, Color.MAGENTA,
+                /* label= */ "mContentHeight = " + y);
 
         drawDebugInfo(canvas, mRoundedRectClippingBottom, Color.DKGRAY,
                 /* label= */ "mRoundedRectClippingBottom) = " + y);
@@ -4940,6 +4944,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             println(pw, "intrinsicPadding", mIntrinsicPadding);
             println(pw, "topPadding", mTopPadding);
             println(pw, "bottomPadding", mBottomPadding);
+            dumpRoundedRectClipping(pw);
+            println(pw, "requestedClipBounds", mRequestedClipBounds);
+            println(pw, "isClipped", mIsClipped);
             println(pw, "translationX", getTranslationX());
             println(pw, "translationY", getTranslationY());
             println(pw, "translationZ", getTranslationZ());
@@ -4992,6 +4999,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                         expandableView.dump(pw, args);
                     }
                 });
+    }
+
+    private void dumpRoundedRectClipping(IndentingPrintWriter pw) {
+        pw.append("roundedRectClipping{l=").print(mRoundedRectClippingLeft);
+        pw.append(" t=").print(mRoundedRectClippingTop);
+        pw.append(" r=").print(mRoundedRectClippingRight);
+        pw.append(" b=").print(mRoundedRectClippingBottom);
+        pw.append("} topRadius=").print(mBgCornerRadii[0]);
+        pw.append(" bottomRadius=").println(mBgCornerRadii[4]);
     }
 
     private void dumpFooterViewVisibility(IndentingPrintWriter pw) {

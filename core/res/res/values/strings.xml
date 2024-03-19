@@ -231,8 +231,10 @@
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
     <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
-    <!-- Displayed to tell the user that emergency calls might not be available. -->
-    <string name="EmergencyCallWarningSummary">Can\u2019t make emergency calls over Wi\u2011Fi</string>
+    <!-- Displayed to tell the user that emergency calls might not be available; this is shown to
+         the user when only WiFi calling is available and the carrier does not support emergency
+         calls over WiFi calling. -->
+    <string name="EmergencyCallWarningSummary">Emergency calls require a mobile network</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -3246,6 +3248,12 @@
 
     <!-- Title for EditText context menu [CHAR LIMIT=20] -->
     <string name="editTextMenuTitle">Text actions</string>
+
+    <!-- Error shown when a user uses a stylus to try handwriting on a text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported">Handwriting is not supported in this field</string>
+
+    <!-- Error shown when a user uses a stylus to try handwriting on a password text field which doesn't support stylus handwriting. [CHAR LIMIT=TOAST] -->
+    <string name="error_handwriting_unsupported_password">Handwriting is not supported in password fields</string>
 
     <!-- Content description of the back button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="input_method_nav_back_button_desc">Back</string>

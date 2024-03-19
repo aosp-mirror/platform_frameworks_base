@@ -188,7 +188,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     public void vibrateOnNavigationKeyDown_usesPerformHapticFeedback() {
         mSbcqCallbacks.vibrateOnNavigationKeyDown();
 
-        verify(mShadeViewController).performHapticFeedback(
+        verify(mShadeController).performHapticFeedback(
                 HapticFeedbackConstants.GESTURE_START
         );
     }

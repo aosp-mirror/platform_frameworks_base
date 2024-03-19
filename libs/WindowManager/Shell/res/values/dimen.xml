@@ -535,5 +535,7 @@
     <!-- The vertical margin that needs to be preserved between the scaled window bounds and the
     original window bounds (once the surface is scaled enough to do so) -->
     <dimen name="cross_task_back_vertical_margin">8dp</dimen>
+    <!-- The offset from the left edge of the entering page for the cross-activity animation -->
+    <dimen name="cross_activity_back_entering_start_offset">96dp</dimen>
 
 </resources>

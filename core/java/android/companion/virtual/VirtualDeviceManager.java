@@ -972,6 +972,7 @@ public final class VirtualDeviceManager {
          *
          * @param config camera configuration.
          * @return newly created camera.
+         * @throws UnsupportedOperationException if virtual camera isn't supported on this device.
          * @see VirtualDeviceParams#POLICY_TYPE_CAMERA
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)

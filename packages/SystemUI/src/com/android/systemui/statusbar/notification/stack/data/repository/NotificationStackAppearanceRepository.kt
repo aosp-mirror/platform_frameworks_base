@@ -17,8 +17,8 @@
 
 package com.android.systemui.statusbar.notification.stack.data.repository
 
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SysUISingleton
 class NotificationStackAppearanceRepository @Inject constructor() {
     /** The bounds of the notification stack in the current scene. */
-    val stackBounds = MutableStateFlow(NotificationContainerBounds())
+    val stackBounds = MutableStateFlow(StackBounds())
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of

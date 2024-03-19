@@ -36,7 +36,7 @@ class QuickQSPanelTest : SysuiTestCase() {
 
         testableLooper.runWithLooper {
             quickQSPanel = QuickQSPanel(mContext, null)
-            quickQSPanel.initialize(qsLogger)
+            quickQSPanel.initialize(qsLogger, true)
 
             quickQSPanel.onFinishInflate()
             // Provides a parent with non-zero size for QSPanel

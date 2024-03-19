@@ -3962,6 +3962,20 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_existingPackage_bubblePrefsRestored() throws Exception {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_ALL);
+        assertEquals(BUBBLE_PREFERENCE_ALL, mHelper.getBubblePreference(PKG_O, UID_O));
+
+        mXmlHelper.setBubblesAllowed(PKG_O, UID_O, BUBBLE_PREFERENCE_NONE);
+        assertEquals(BUBBLE_PREFERENCE_NONE, mXmlHelper.getBubblePreference(PKG_O, UID_O));
+
+        ByteArrayOutputStream stream = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
+        loadStreamXml(stream, true, UserHandle.USER_ALL);
+
+        assertEquals(BUBBLE_PREFERENCE_ALL, mXmlHelper.getBubblePreference(PKG_O, UID_O));
+    }
+
+    @Test
     public void testUpdateNotificationChannel_fixedPermission() {
         List<UserInfo> users = ImmutableList.of(new UserInfo(UserHandle.USER_SYSTEM, "user0", 0));
         when(mPermissionHelper.isPermissionFixed(PKG_O, 0)).thenReturn(true);

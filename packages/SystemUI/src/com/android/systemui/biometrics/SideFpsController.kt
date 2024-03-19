@@ -126,6 +126,7 @@ constructor(
             field?.let { oldView ->
                 val lottie = oldView.requireViewById(R.id.sidefps_animation) as LottieAnimationView
                 lottie.pauseAnimation()
+                lottie.removeAllLottieOnCompositionLoadedListener()
                 windowManager.removeView(oldView)
                 orientationListener.disable()
             }
@@ -288,7 +289,7 @@ constructor(
     }
 
     private fun onOrientationChanged(@BiometricRequestConstants.RequestReason reason: Int) {
-        if (overlayView != null) {
+        if (overlayView?.isAttachedToWindow == true) {
             createOverlayForDisplay(reason)
         }
     }
@@ -322,7 +323,7 @@ constructor(
         )
         lottie.addLottieOnCompositionLoadedListener {
             // Check that view is not stale, and that overlayView has not been hidden/removed
-            if (overlayView != null && overlayView == view) {
+            if (overlayView?.isAttachedToWindow == true && overlayView == view) {
                 updateOverlayParams(display, it.bounds)
             }
         }

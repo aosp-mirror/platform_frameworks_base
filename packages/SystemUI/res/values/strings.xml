@@ -235,6 +235,8 @@
     <string name="screenshot_edit_label">Edit</string>
     <!-- Content description indicating that tapping the element will allow editing the screenshot [CHAR LIMIT=NONE] -->
     <string name="screenshot_edit_description">Edit screenshot</string>
+    <!-- Label for UI element which allows sharing the screenshot [CHAR LIMIT=30] -->
+    <string name="screenshot_share_label">Share</string>
     <!-- Content description indicating that tapping the element will allow sharing the screenshot [CHAR LIMIT=NONE] -->
     <string name="screenshot_share_description">Share screenshot</string>
     <!-- Label for UI element which allows the user to capture additional off-screen content in a screenshot. [CHAR LIMIT=30] -->
@@ -1437,8 +1439,11 @@
     <!-- Indication on the keyguard that appears when a trust agents unlocks the device. [CHAR LIMIT=40] -->
     <string name="keyguard_indication_trust_unlocked">Kept unlocked by TrustAgent</string>
 
-    <!-- Message asking the user to authenticate with primary authentication methods (PIN/pattern/password) or biometrics after the device is locked by adaptive auth. [CHAR LIMIT=60] -->
-    <string name="kg_prompt_after_adaptive_auth_lock">Theft protection\nDevice locked, too many unlock attempts</string>
+    <!-- Message asking the user to authenticate with primary authentication methods (PIN/pattern/password) or biometrics after the device is locked by adaptive auth. [CHAR LIMIT=70] -->
+    <string name="kg_prompt_after_adaptive_auth_lock">Device was locked, too many authentication attempts</string>
+
+    <!-- Indication on the keyguard that appears after the device is locked by adaptive auth. [CHAR LIMIT=60] -->
+    <string name="keyguard_indication_after_adaptive_auth_lock">Device locked\nFailed authentication</string>
 
     <!-- Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description. [CHAR LIMIT=20] -->
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
@@ -1991,8 +1996,6 @@
     <string name="group_system_cycle_back">Cycle backward through recent apps</string>
     <!-- User visible title for the keyboard shortcut that accesses list of all apps and search. [CHAR LIMIT=70] -->
     <string name="group_system_access_all_apps_search">Open apps list</string>
-    <!-- User visible title for the keyboard shortcut that hides and (re)showes taskbar. [CHAR LIMIT=70] -->
-    <string name="group_system_hide_reshow_taskbar">Show taskbar</string>
     <!-- User visible title for the keyboard shortcut that accesses [system] settings. [CHAR LIMIT=70] -->
     <string name="group_system_access_system_settings">Open settings</string>
     <!-- User visible title for the keyboard shortcut that accesses Assistant app. [CHAR LIMIT=70] -->

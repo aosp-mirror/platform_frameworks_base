@@ -500,7 +500,8 @@ public class VibratorManagerServiceTest {
         InOrder batteryVerifier = inOrder(mBatteryStatsMock);
         batteryVerifier.verify(mBatteryStatsMock)
                 .noteVibratorOn(UID, oneShotDuration + mVibrationConfig.getRampDownDurationMs());
-        batteryVerifier.verify(mBatteryStatsMock).noteVibratorOff(UID);
+        batteryVerifier
+                .verify(mBatteryStatsMock, timeout(TEST_TIMEOUT_MILLIS)).noteVibratorOff(UID);
     }
 
     @Test

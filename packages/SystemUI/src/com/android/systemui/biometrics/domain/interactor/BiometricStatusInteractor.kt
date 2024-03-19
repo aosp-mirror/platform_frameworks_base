@@ -23,6 +23,7 @@ import com.android.systemui.biometrics.shared.model.AuthenticationReason.Setting
 import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /** Encapsulates business logic for interacting with biometric authentication state. */
@@ -52,7 +53,7 @@ constructor(
             } else {
                 AuthenticationReason.NotRunning
             }
-        }
+        }.distinctUntilChanged()
 
     override val fingerprintAcquiredStatus: Flow<FingerprintAuthenticationStatus> =
         biometricStatusRepository.fingerprintAcquiredStatus

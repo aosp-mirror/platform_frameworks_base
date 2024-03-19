@@ -29,9 +29,10 @@ import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.volume.localMediaController
 import com.android.systemui.volume.localMediaRepository
-import com.android.systemui.volume.mediaController
 import com.android.systemui.volume.mediaControllerRepository
+import com.android.systemui.volume.mediaDeviceSessionInteractor
 import com.android.systemui.volume.mediaOutputActionsInteractor
 import com.android.systemui.volume.mediaOutputInteractor
 import com.android.systemui.volume.panel.volumePanelViewModel
@@ -63,6 +64,7 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                     testScope.backgroundScope,
                     volumePanelViewModel,
                     mediaOutputActionsInteractor,
+                    mediaDeviceSessionInteractor,
                     mediaOutputInteractor,
                 )
 
@@ -74,11 +76,11 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                 )
             }
 
-            whenever(mediaController.packageName).thenReturn("test.pkg")
-            whenever(mediaController.sessionToken).thenReturn(MediaSession.Token(0, mock {}))
-            whenever(mediaController.playbackState).then { playbackStateBuilder.build() }
+            whenever(localMediaController.packageName).thenReturn("test.pkg")
+            whenever(localMediaController.sessionToken).thenReturn(MediaSession.Token(0, mock {}))
+            whenever(localMediaController.playbackState).then { playbackStateBuilder.build() }
 
-            mediaControllerRepository.setActiveLocalMediaController(mediaController)
+            mediaControllerRepository.setActiveSessions(listOf(localMediaController))
         }
     }
 

@@ -11012,6 +11012,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
+     * Returns the {@link #createTime} if the top window is the `base` window. Note that do not
+     * use the window creation time because the window could be re-created when the activity
+     * relaunched if configuration changed.
+     * <p>
+     * Otherwise, return the creation time of the top window.
+     */
+    long getLastWindowCreateTime() {
+        final WindowState window = getWindow(win -> true);
+        return window != null && window.mAttrs.type != TYPE_BASE_APPLICATION
+                ? window.getCreateTime()
+                : createTime;
+    }
+
+    /**
      * Adjust the source rect hint in {@link #pictureInPictureArgs} by window bounds since
      * it is relative to its root view (see also b/235599028).
      * It is caller's responsibility to make sure this is called exactly once when we update

@@ -45,6 +45,8 @@ public:
             mClientToken(clientToken),
             mInputTransferToken(inputTransferToken) {}
 
+    // The InputConsumer does not keep the InputReceiver alive so the receiver is cleared once the
+    // owner releases it.
     ~InputReceiver() {
         remove();
     }

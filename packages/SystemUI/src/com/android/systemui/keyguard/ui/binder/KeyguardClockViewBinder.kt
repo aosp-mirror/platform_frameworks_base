@@ -55,7 +55,7 @@ object KeyguardClockViewBinder {
             }
         }
         keyguardRootView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     if (!migrateClocksToBlueprint()) return@launch
                     viewModel.currentClock.collect { currentClock ->

@@ -65,7 +65,7 @@ class BrightnessLowLuxModifierTest {
         Settings.Secure.putIntForUser(context.contentResolver,
                 Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, userId)
         Settings.Secure.putFloatForUser(context.contentResolver,
-                Settings.Secure.EVEN_DIMMER_MIN_NITS, 0.7f, userId)
+                Settings.Secure.EVEN_DIMMER_MIN_NITS, 30.0f, userId)
         modifier.recalculateLowerBound()
         testHandler.flush()
         assertThat(modifier.isActive).isTrue()
@@ -81,11 +81,22 @@ class BrightnessLowLuxModifierTest {
                 Settings.Secure.EVEN_DIMMER_ACTIVATED, 1, userId)
         Settings.Secure.putFloatForUser(context.contentResolver,
                 Settings.Secure.EVEN_DIMMER_MIN_NITS, 0.0f, userId)
-        modifier.recalculateLowerBound()
+        modifier.onAmbientLuxChange(3000.0f)
         testHandler.flush()
         assertThat(modifier.isActive).isTrue()
 
         // Test restriction from lux setting
         assertThat(modifier.brightnessReason).isEqualTo(BrightnessReason.MODIFIER_MIN_LUX)
+    }
+
+    @Test
+    fun testSettingOffDisablesModifier() {
+        Settings.Secure.putIntForUser(context.contentResolver,
+            Settings.Secure.EVEN_DIMMER_ACTIVATED, 0, userId)
+        assertThat(modifier.brightnessLowerBound).isEqualTo(PowerManager.BRIGHTNESS_MIN)
+        modifier.onAmbientLuxChange(3000.0f)
+        testHandler.flush()
+        assertThat(modifier.isActive).isFalse()
+        assertThat(modifier.brightnessLowerBound).isEqualTo(PowerManager.BRIGHTNESS_MIN)
     }
 }

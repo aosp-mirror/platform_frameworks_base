@@ -15,14 +15,10 @@
  */
 package com.android.settingslib.volume.data.repository
 
-import android.media.MediaRouter2Manager
-import android.media.RoutingSessionInfo
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
-import com.android.settingslib.volume.data.model.RoutingSession
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -30,35 +26,23 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.withContext
 
 /** Repository providing data about connected media devices. */
 interface LocalMediaRepository {
 
-    /** Available devices list */
-    val mediaDevices: StateFlow<Collection<MediaDevice>>
-
     /** Currently connected media device */
     val currentConnectedDevice: StateFlow<MediaDevice?>
-
-    val remoteRoutingSessions: StateFlow<Collection<RoutingSession>>
-
-    suspend fun adjustSessionVolume(sessionId: String?, volume: Int)
 }
 
 class LocalMediaRepositoryImpl(
     audioManagerEventsReceiver: AudioManagerEventsReceiver,
     private val localMediaManager: LocalMediaManager,
-    private val mediaRouter2Manager: MediaRouter2Manager,
     coroutineScope: CoroutineScope,
-    private val backgroundContext: CoroutineContext,
 ) : LocalMediaRepository {
 
     private val devicesChanges =
@@ -94,18 +78,6 @@ class LocalMediaRepositoryImpl(
             }
             .shareIn(coroutineScope, SharingStarted.WhileSubscribed(), replay = 0)
 
-    override val mediaDevices: StateFlow<Collection<MediaDevice>> =
-        mediaDevicesUpdates
-            .mapNotNull {
-                if (it is DevicesUpdate.DeviceListUpdate) {
-                    it.newDevices ?: emptyList()
-                } else {
-                    null
-                }
-            }
-            .flowOn(backgroundContext)
-            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyList())
-
     override val currentConnectedDevice: StateFlow<MediaDevice?> =
         merge(devicesChanges, mediaDevicesUpdates)
             .map { localMediaManager.currentConnectedDevice }
@@ -115,30 +87,6 @@ class LocalMediaRepositoryImpl(
                 SharingStarted.WhileSubscribed(),
                 localMediaManager.currentConnectedDevice
             )
-
-    override val remoteRoutingSessions: StateFlow<Collection<RoutingSession>> =
-        merge(devicesChanges, mediaDevicesUpdates)
-            .onStart { emit(Unit) }
-            .map { localMediaManager.remoteRoutingSessions.map(::toRoutingSession) }
-            .flowOn(backgroundContext)
-            .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), emptyList())
-
-    override suspend fun adjustSessionVolume(sessionId: String?, volume: Int) {
-        withContext(backgroundContext) {
-            if (sessionId == null) {
-                localMediaManager.adjustSessionVolume(volume)
-            } else {
-                localMediaManager.adjustSessionVolume(sessionId, volume)
-            }
-        }
-    }
-
-    private fun toRoutingSession(info: RoutingSessionInfo): RoutingSession =
-        RoutingSession(
-            info,
-            isMediaOutputDisabled = mediaRouter2Manager.getTransferableRoutes(info).isEmpty(),
-            isVolumeSeekBarEnabled = localMediaManager.shouldEnableVolumeSeekBar(info)
-        )
 
     private sealed interface DevicesUpdate {
 
