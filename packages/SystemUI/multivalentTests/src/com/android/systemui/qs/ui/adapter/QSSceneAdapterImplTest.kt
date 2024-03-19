@@ -27,9 +27,17 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSComponent
 import com.android.systemui.qs.dagger.QSSceneComponent
+import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -41,8 +49,6 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -57,8 +63,9 @@ import org.mockito.Mockito.verify
 @OptIn(ExperimentalCoroutinesApi::class)
 class QSSceneAdapterImplTest : SysuiTestCase() {
 
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val kosmos = Kosmos().apply { testCase = this@QSSceneAdapterImplTest }
+    private val testDispatcher = kosmos.testDispatcher
+    private val testScope = kosmos.testScope
 
     private val qsImplProvider =
         object : Provider<QSImpl> {
@@ -107,10 +114,15 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             }
         }
 
+    private val shadeInteractor = kosmos.shadeInteractor
+    private val dumpManager = mock<DumpManager>()
+
     private val underTest =
         QSSceneAdapterImpl(
             qsSceneComponentFactory,
             qsImplProvider,
+            shadeInteractor,
+            dumpManager,
             testDispatcher,
             testScope.backgroundScope,
             configurationInteractor,
@@ -158,12 +170,6 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
                     )
                 verify(this).setListening(false)
                 verify(this).setExpanded(false)
-                verify(this)
-                    .setTransitionToFullShadeProgress(
-                        /* isTransitioningToFullShade= */ false,
-                        /* qsTransitionFraction= */ 1f,
-                        /* qsSquishinessFraction = */ 1f,
-                    )
             }
         }
 
@@ -187,13 +193,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
                         /* squishinessFraction= */ 1f,
                     )
                 verify(this).setListening(true)
-                verify(this).setExpanded(true)
-                verify(this)
-                    .setTransitionToFullShadeProgress(
-                        /* isTransitioningToFullShade= */ false,
-                        /* qsTransitionFraction= */ 1f,
-                        /* qsSquishinessFraction = */ 1f,
-                    )
+                verify(this).setExpanded(false)
             }
         }
 
@@ -218,12 +218,6 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
                     )
                 verify(this).setListening(true)
                 verify(this).setExpanded(true)
-                verify(this)
-                    .setTransitionToFullShadeProgress(
-                        /* isTransitioningToFullShade= */ false,
-                        /* qsTransitionFraction= */ 1f,
-                        /* qsSquishinessFraction = */ 1f,
-                    )
             }
         }
 
@@ -249,12 +243,6 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
                     )
                 verify(this).setListening(true)
                 verify(this).setExpanded(true)
-                verify(this)
-                    .setTransitionToFullShadeProgress(
-                        /* isTransitioningToFullShade= */ false,
-                        /* qsTransitionFraction= */ 1f,
-                        /* qsSquishinessFraction = */ 1f,
-                    )
             }
         }
 
@@ -268,7 +256,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             runCurrent()
             clearInvocations(qsImpl!!)
 
-            underTest.setState(QSSceneAdapter.State.Unsquishing(squishiness))
+            underTest.setState(QSSceneAdapter.State.UnsquishingQQS(squishiness))
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
                 verify(this)
@@ -279,13 +267,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
                         /* squishinessFraction= */ squishiness,
                     )
                 verify(this).setListening(true)
-                verify(this).setExpanded(true)
-                verify(this)
-                    .setTransitionToFullShadeProgress(
-                        /* isTransitioningToFullShade= */ false,
-                        /* qsTransitionFraction= */ 1f,
-                        /* qsSquishinessFraction = */ squishiness,
-                    )
+                verify(this).setExpanded(false)
             }
         }
 
@@ -496,5 +478,22 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             runCurrent()
 
             verify(qsImpl!!).applyBottomNavBarToCustomizerPadding(navBarHeight)
+        }
+
+    @Test
+    fun dispatchSplitShade() =
+        testScope.runTest {
+            val shadeRepository = kosmos.fakeShadeRepository
+            shadeRepository.setShadeMode(ShadeMode.Single)
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            verify(qsImpl!!).setInSplitShade(false)
+
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            runCurrent()
+            verify(qsImpl!!).setInSplitShade(true)
         }
 }

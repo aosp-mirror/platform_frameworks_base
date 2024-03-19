@@ -49,9 +49,16 @@ class QSSceneAdapterTest : SysuiTestCase() {
     }
 
     @Test
-    fun unsquishing_expansionSameAsQQS() {
+    fun unsquishingQQS_expansionSameAsQQS() {
         val squishiness = 0.6f
-        assertThat(QSSceneAdapter.State.Unsquishing(squishiness).expansion)
+        assertThat(QSSceneAdapter.State.UnsquishingQQS(squishiness).expansion)
             .isEqualTo(QSSceneAdapter.State.QQS.expansion)
+    }
+
+    @Test
+    fun unsquishingQS_expansionSameAsQS() {
+        val squishiness = 0.6f
+        assertThat(QSSceneAdapter.State.UnsquishingQS(squishiness).expansion)
+            .isEqualTo(QSSceneAdapter.State.QS.expansion)
     }
 }

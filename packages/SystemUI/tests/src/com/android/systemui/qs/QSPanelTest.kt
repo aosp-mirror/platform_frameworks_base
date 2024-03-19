@@ -21,6 +21,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
 import android.view.ContextThemeWrapper
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
@@ -71,7 +72,7 @@ class QSPanelTest : SysuiTestCase() {
             qsPanel = QSPanel(themedContext, null)
             qsPanel.mUsingMediaPlayer = true
 
-            qsPanel.initialize(qsLogger)
+            qsPanel.initialize(qsLogger, true)
             // QSPanel inflates a footer inside of it, mocking it here
             footer = LinearLayout(themedContext).apply { id = R.id.qs_footer }
             qsPanel.addView(footer, MATCH_PARENT, 100)
@@ -216,6 +217,62 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.addTile(record)
 
         verify(tile).addCallback(record.callback)
+    }
+
+    @Test
+    fun initializedWithNoMedia_tileLayoutParentIsAlwaysQsPanel() {
+        lateinit var panel: QSPanel
+        lateinit var tileLayout: View
+        testableLooper.runWithLooper {
+            panel = QSPanel(themedContext, null)
+            panel.mUsingMediaPlayer = true
+
+            panel.initialize(qsLogger, /* usingMediaPlayer= */ false)
+            tileLayout = panel.orCreateTileLayout as View
+            // QSPanel inflates a footer inside of it, mocking it here
+            footer = LinearLayout(themedContext).apply { id = R.id.qs_footer }
+            panel.addView(footer, MATCH_PARENT, 100)
+            panel.onFinishInflate()
+            // Provides a parent with non-zero size for QSPanel
+            ViewUtils.attachView(panel)
+        }
+        val mockMediaHost = mock(ViewGroup::class.java)
+
+        panel.setUsingHorizontalLayout(false, mockMediaHost, true)
+
+        assertThat(tileLayout.parent).isSameInstanceAs(panel)
+
+        panel.setUsingHorizontalLayout(true, mockMediaHost, true)
+        assertThat(tileLayout.parent).isSameInstanceAs(panel)
+
+        ViewUtils.detachView(panel)
+    }
+
+    @Test
+    fun initializeWithNoMedia_mediaNeverAttached() {
+        lateinit var panel: QSPanel
+        testableLooper.runWithLooper {
+            panel = QSPanel(themedContext, null)
+            panel.mUsingMediaPlayer = true
+
+            panel.initialize(qsLogger, /* usingMediaPlayer= */ false)
+            panel.orCreateTileLayout as View
+            // QSPanel inflates a footer inside of it, mocking it here
+            footer = LinearLayout(themedContext).apply { id = R.id.qs_footer }
+            panel.addView(footer, MATCH_PARENT, 100)
+            panel.onFinishInflate()
+            // Provides a parent with non-zero size for QSPanel
+            ViewUtils.attachView(panel)
+        }
+        val mockMediaHost = FrameLayout(themedContext)
+
+        panel.setUsingHorizontalLayout(false, mockMediaHost, true)
+        assertThat(mockMediaHost.parent).isNull()
+
+        panel.setUsingHorizontalLayout(true, mockMediaHost, true)
+        assertThat(mockMediaHost.parent).isNull()
+
+        ViewUtils.detachView(panel)
     }
 
     private infix fun View.isLeftOf(other: View): Boolean {
