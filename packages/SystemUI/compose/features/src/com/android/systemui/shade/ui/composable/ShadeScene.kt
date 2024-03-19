@@ -222,15 +222,17 @@ private fun SceneScope.SingleShade(
                                         horizontal = Shade.Dimensions.HorizontalPadding
                                     )
                             )
-                            QuickSettings(
-                                viewModel.qsSceneAdapter,
-                                {
-                                    (viewModel.qsSceneAdapter.qqsHeight * tileSquishiness)
-                                        .roundToInt()
-                                },
-                                isSplitShade = false,
-                                squishiness = tileSquishiness,
-                            )
+                            Box(Modifier.element(QuickSettings.Elements.QuickQuickSettings)) {
+                                QuickSettings(
+                                    viewModel.qsSceneAdapter,
+                                    {
+                                        (viewModel.qsSceneAdapter.qqsHeight * tileSquishiness)
+                                            .roundToInt()
+                                    },
+                                    isSplitShade = false,
+                                    squishiness = tileSquishiness,
+                                )
+                            }
 
                             MediaIfVisible(
                                 viewModel = viewModel,
@@ -280,6 +282,8 @@ private fun SceneScope.SplitShade(
     val lifecycleOwner = LocalLifecycleOwner.current
     val footerActionsViewModel =
         remember(lifecycleOwner, viewModel) { viewModel.getFooterActionsViewModel(lifecycleOwner) }
+    val tileSquishiness by
+        animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
 
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val density = LocalDensity.current
@@ -325,12 +329,17 @@ private fun SceneScope.SplitShade(
                                 .padding(bottom = navBarBottomHeight)
                         }
                 ) {
-                    QuickSettings(
-                        qsSceneAdapter = viewModel.qsSceneAdapter,
-                        heightProvider = { viewModel.qsSceneAdapter.qsHeight },
-                        isSplitShade = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Box(
+                        modifier = Modifier.element(QuickSettings.Elements.SplitShadeQuickSettings)
+                    ) {
+                        QuickSettings(
+                            qsSceneAdapter = viewModel.qsSceneAdapter,
+                            heightProvider = { viewModel.qsSceneAdapter.qsHeight },
+                            isSplitShade = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            squishiness = tileSquishiness,
+                        )
+                    }
 
                     MediaIfVisible(
                         viewModel = viewModel,

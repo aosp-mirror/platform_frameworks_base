@@ -61,6 +61,7 @@ import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -113,6 +114,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private InputManager mInputManager;
     @Mock
     private ShellCommandHandler mShellCommandHandler;
+    @Mock
+    private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
     private BackAnimationController mController;
     private TestableContentResolver mContentResolver;
@@ -133,7 +136,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mShellInit = spy(new ShellInit(mShellExecutor));
         mShellBackAnimationRegistry =
                 new ShellBackAnimationRegistry(
-                        new CrossActivityBackAnimation(mContext, mAnimationBackground),
+                        new CrossActivityBackAnimation(
+                                mContext, mAnimationBackground, mRootTaskDisplayAreaOrganizer),
                         new CrossTaskBackAnimation(mContext, mAnimationBackground),
                         /* dialogCloseAnimation= */ null,
                         new CustomizeActivityAnimation(mContext, mAnimationBackground),
@@ -528,8 +532,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void testBackToActivity() throws RemoteException {
-        final CrossActivityBackAnimation animation = new CrossActivityBackAnimation(mContext,
-                mAnimationBackground);
+        final CrossActivityBackAnimation animation = new CrossActivityBackAnimation(
+                mContext, mAnimationBackground, mRootTaskDisplayAreaOrganizer);
         verifySystemBackBehavior(BackNavigationInfo.TYPE_CROSS_ACTIVITY, animation.getRunner());
     }
 

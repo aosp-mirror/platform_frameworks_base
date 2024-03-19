@@ -271,6 +271,11 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     }
 
     @Override
+    public void performHapticFeedback(int constant) {
+        getNpvc().performHapticFeedback(constant);
+    }
+
+    @Override
     public void instantCollapseShade() {
         getNpvc().instantCollapse();
         runPostCollapseActions();

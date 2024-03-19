@@ -1905,6 +1905,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             accessibilityManager.performSystemAction(
                     AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
         }
+        dismissKeyboardShortcutsMenu();
     }
 
     private void toggleNotificationPanel() {
@@ -3478,13 +3479,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
-            case KeyEvent.KEYCODE_T:
-                if (firstDown && event.isMetaPressed()) {
-                    toggleTaskbar();
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.TOGGLE_TASKBAR);
-                    return true;
-                }
-                break;
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_ESCAPE:
                 if (firstDown && event.isMetaPressed()) {
@@ -4735,7 +4729,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down) {
                     // There may have other embedded activities on the same Task. Try to move the
                     // focus before processing the back event.
-                    mWindowManagerInternal.moveFocusToTopEmbeddedWindowIfNeeded();
+                    mWindowManagerInternal.moveFocusToAdjacentEmbeddedActivityIfNeeded();
                     mBackKeyHandled = false;
                 } else {
                     if (!hasLongPressOnBackBehavior()) {

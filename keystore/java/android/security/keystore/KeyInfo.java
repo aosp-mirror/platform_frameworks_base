@@ -279,7 +279,7 @@ public class KeyInfo implements KeySpec {
     }
 
     /**
-     * Returns {@code true} if the key is authorized to be used only when the device is unlocked.
+     * Returns {@code true} if the key is authorized to be used only while the device is unlocked.
      *
      * <p>This authorization applies only to secret key and private key operations. Public key
      * operations are not restricted.

@@ -870,7 +870,7 @@ public class BubblePositioner {
         if (onLeft) {
             left = getInsets().left + padding;
         } else {
-            left = getAvailableRect().width() - width - padding;
+            left = getAvailableRect().right - width - padding;
         }
         int top = getExpandedViewBottomForBubbleBar() - height;
         out.offsetTo(left, top);

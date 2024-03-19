@@ -165,7 +165,7 @@ class BackNavigationController {
             }
 
             // Move focus to the top embedded window if possible
-            if (mWindowManagerService.moveFocusToTopEmbeddedWindow(window)) {
+            if (mWindowManagerService.moveFocusToAdjacentEmbeddedWindow(window)) {
                 window = wmService.getFocusedWindowLocked();
                 if (window == null) {
                     Slog.e(TAG, "New focused window is null, returning null.");

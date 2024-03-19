@@ -757,8 +757,8 @@ public class KeyguardIndicationController {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_ADAPTIVE_AUTH,
                     new KeyguardIndication.Builder()
-                            .setMessage(mContext
-                                    .getString(R.string.kg_prompt_after_adaptive_auth_lock))
+                            .setMessage(mContext.getString(
+                                    R.string.keyguard_indication_after_adaptive_auth_lock))
                             .setTextColor(mInitialTextColorState)
                             .build(),
                     true);

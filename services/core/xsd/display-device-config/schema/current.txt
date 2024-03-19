@@ -113,6 +113,7 @@ package com.android.server.display.config {
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
     method public final com.android.server.display.config.IdleScreenRefreshRateTimeout getIdleScreenRefreshRateTimeout();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
+    method public final com.android.server.display.config.LowBrightnessMode getLowBrightness();
     method public com.android.server.display.config.LuxThrottling getLuxThrottling();
     method @Nullable public final String getName();
     method public com.android.server.display.config.PowerThrottlingConfig getPowerThrottlingConfig();
@@ -149,6 +150,7 @@ package com.android.server.display.config {
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
     method public final void setIdleScreenRefreshRateTimeout(com.android.server.display.config.IdleScreenRefreshRateTimeout);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
+    method public final void setLowBrightness(com.android.server.display.config.LowBrightnessMode);
     method public void setLuxThrottling(com.android.server.display.config.LuxThrottling);
     method public final void setName(@Nullable String);
     method public void setPowerThrottlingConfig(com.android.server.display.config.PowerThrottlingConfig);
@@ -246,6 +248,17 @@ package com.android.server.display.config {
   public class IntegerArray {
     ctor public IntegerArray();
     method public java.util.List<java.math.BigInteger> getItem();
+  }
+
+  public class LowBrightnessMode {
+    ctor public LowBrightnessMode();
+    method public java.util.List<java.lang.Float> getBacklight();
+    method public java.util.List<java.lang.Float> getBrightness();
+    method public boolean getEnabled();
+    method public java.util.List<java.lang.Float> getNits();
+    method public java.math.BigDecimal getTransitionPoint();
+    method public void setEnabled(boolean);
+    method public void setTransitionPoint(java.math.BigDecimal);
   }
 
   public class LuxThrottling {

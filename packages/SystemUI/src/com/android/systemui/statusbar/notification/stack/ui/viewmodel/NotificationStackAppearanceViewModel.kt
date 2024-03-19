@@ -18,7 +18,6 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.compose.animation.scene.ObservableTransitionState
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -27,6 +26,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.Scenes.Shade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
+import com.android.systemui.statusbar.notification.stack.shared.model.StackClipping
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -83,8 +83,13 @@ constructor(
             .dumpWhileCollecting("expandFraction")
 
     /** The bounds of the notification stack in the current scene. */
-    val stackBounds: Flow<NotificationContainerBounds> =
-        stackAppearanceInteractor.stackBounds.dumpValue("stackBounds")
+    val stackClipping: Flow<StackClipping> =
+        combine(
+                stackAppearanceInteractor.stackBounds,
+                stackAppearanceInteractor.stackRounding,
+                ::StackClipping
+            )
+            .dumpWhileCollecting("stackClipping")
 
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val contentTop: StateFlow<Float> = stackAppearanceInteractor.contentTop.dumpValue("contentTop")

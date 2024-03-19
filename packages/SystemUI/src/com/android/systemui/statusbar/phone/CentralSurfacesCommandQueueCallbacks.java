@@ -537,7 +537,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @VisibleForTesting
     void vibrateOnNavigationKeyDown() {
-        mShadeViewController.performHapticFeedback(
+        mShadeController.performHapticFeedback(
                 HapticFeedbackConstants.GESTURE_START
         );
     }

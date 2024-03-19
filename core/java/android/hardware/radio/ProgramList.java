@@ -357,7 +357,7 @@ public final class ProgramList implements AutoCloseable {
         /**
          * Constructor of program list filter.
          *
-         * Arrays passed to this constructor become owned by this object, do not modify them later.
+         * <p>Arrays passed to this constructor will be owned by this object, do not modify them.
          *
          * @param identifierTypes see getIdentifierTypes()
          * @param identifiers see getIdentifiers()
@@ -438,12 +438,11 @@ public final class ProgramList implements AutoCloseable {
         /**
          * Returns the list of identifier types that satisfy the filter.
          *
-         * If the program list entry contains at least one identifier of the type
-         * listed, it satisfies this condition.
+         * <p>If the program list entry contains at least one identifier of the type
+         * listed, it satisfies this condition. Empty list means no filtering on
+         * identifier type.
          *
-         * Empty list means no filtering on identifier type.
-         *
-         * @return the list of accepted identifier types, must not be modified
+         * @return the set of accepted identifier types, must not be modified
          */
         public @NonNull Set<Integer> getIdentifierTypes() {
             return mIdentifierTypes;
@@ -452,12 +451,10 @@ public final class ProgramList implements AutoCloseable {
         /**
          * Returns the list of identifiers that satisfy the filter.
          *
-         * If the program list entry contains at least one listed identifier,
-         * it satisfies this condition.
+         * <p>If the program list entry contains at least one listed identifier,
+         * it satisfies this condition. Empty list means no filtering on identifier.
          *
-         * Empty list means no filtering on identifier.
-         *
-         * @return the list of accepted identifiers, must not be modified
+         * @return the set of accepted identifiers, must not be modified
          */
         public @NonNull Set<ProgramSelector.Identifier> getIdentifiers() {
             return mIdentifiers;
@@ -476,7 +473,7 @@ public final class ProgramList implements AutoCloseable {
         /**
          * Checks, if updates on entry modifications should be disabled.
          *
-         * If true, 'modified' vector of ProgramListChunk must contain list
+         * <p>If true, 'modified' vector of ProgramListChunk must contain list
          * additions only. Once the program is added to the list, it's not
          * updated anymore.
          */

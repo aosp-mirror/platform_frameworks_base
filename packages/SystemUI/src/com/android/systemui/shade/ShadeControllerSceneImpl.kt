@@ -33,6 +33,7 @@ import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import dagger.Lazy
@@ -62,6 +63,7 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val notificationStackScrollLayout: NotificationStackScrollLayout,
     @ShadeTouchLog private val touchLog: LogBuffer,
+    private val vibratorHelper: VibratorHelper,
     commandQueue: CommandQueue,
     statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     notificationShadeWindowController: NotificationShadeWindowController,
@@ -248,5 +250,9 @@ constructor(
     override fun onStatusBarTouch(event: MotionEvent) {
         // The only call to this doesn't happen with migrateClocksToBlueprint() enabled
         throw UnsupportedOperationException()
+    }
+
+    override fun performHapticFeedback(constant: Int) {
+        vibratorHelper.performHapticFeedback(notificationStackScrollLayout, constant)
     }
 }

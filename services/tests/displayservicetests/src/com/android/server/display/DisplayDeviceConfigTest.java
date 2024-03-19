@@ -44,6 +44,7 @@ import android.content.res.TypedArray;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 import android.os.Temperature;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.provider.Settings;
 import android.util.SparseArray;
 import android.util.Spline;
@@ -57,6 +58,7 @@ import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.feature.DisplayManagerFlags;
+import com.android.server.display.feature.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -380,7 +382,7 @@ public final class DisplayDeviceConfigTest {
     public void testInvalidLuxThrottling() throws Exception {
         setupDisplayDeviceConfigFromDisplayConfigFile(
                 getContent(getInvalidLuxThrottling(), getValidProxSensor(),
-                        /* includeIdleMode= */ true));
+                        /* includeIdleMode= */ true, /* enableEvenDimmer */ false));
 
         Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
                 mDisplayDeviceConfig.getLuxThrottlingData();
@@ -588,7 +590,7 @@ public final class DisplayDeviceConfigTest {
     public void testProximitySensorWithEmptyValuesFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile(
                 getContent(getValidLuxThrottling(), getProxSensorWithEmptyValues(),
-                        /* includeIdleMode= */ true));
+                        /* includeIdleMode= */ true, /* enableEvenDimmer */ false));
         assertNull(mDisplayDeviceConfig.getProximitySensor());
     }
 
@@ -596,7 +598,7 @@ public final class DisplayDeviceConfigTest {
     public void testProximitySensorWithRefreshRatesFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile(
                 getContent(getValidLuxThrottling(), getValidProxSensorWithRefreshRateAndVsyncRate(),
-                        /* includeIdleMode= */ true));
+                        /* includeIdleMode= */ true, /* enableEvenDimmer */ false));
         assertEquals("test_proximity_sensor",
                 mDisplayDeviceConfig.getProximitySensor().type);
         assertEquals("Test Proximity Sensor",
@@ -784,7 +786,7 @@ public final class DisplayDeviceConfigTest {
     @Test
     public void testBrightnessRamps_IdleFallsBackToConfigInteractive() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
-                getValidProxSensor(), /* includeIdleMode= */ false));
+                getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ false));
 
         assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis(), 3000);
         assertEquals(mDisplayDeviceConfig.getBrightnessRampIncreaseMaxMillis(), 2000);
@@ -801,14 +803,14 @@ public final class DisplayDeviceConfigTest {
     @Test
     public void testBrightnessCapForWearBedtimeMode() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
-                getValidProxSensor(), /* includeIdleMode= */ false));
+                getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ false));
         assertEquals(0.1f, mDisplayDeviceConfig.getBrightnessCapForWearBedtimeMode(), ZERO_DELTA);
     }
 
     @Test
     public void testAutoBrightnessBrighteningLevels() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
-                getValidProxSensor(), /* includeIdleMode= */ false));
+                getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ false));
 
         assertArrayEquals(new float[]{0.0f, 80},
                 mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(
@@ -871,7 +873,7 @@ public final class DisplayDeviceConfigTest {
         when(mFlags.areAutoBrightnessModesEnabled()).thenReturn(false);
         setupDisplayDeviceConfigFromConfigResourceFile();
         setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
-                getValidProxSensor(), /* includeIdleMode= */ false));
+                getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ false));
 
         assertArrayEquals(new float[]{brightnessIntToFloat(50), brightnessIntToFloat(100),
                         brightnessIntToFloat(150)},
@@ -902,6 +904,18 @@ public final class DisplayDeviceConfigTest {
         setupDisplayDeviceConfigFromDisplayConfigFile();
 
         assertFalse(mDisplayDeviceConfig.isAutoBrightnessAvailable());
+    }
+
+    @RequiresFlagsEnabled(Flags.FLAG_EVEN_DIMMER)
+    @Test
+    public void testEvenDimmer() throws IOException {
+        when(mFlags.isEvenDimmerEnabled()).thenReturn(true);
+        setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
+                getValidProxSensor(), /* includeIdleMode= */ false, /* enableEvenDimmer */ true));
+
+        assertTrue(mDisplayDeviceConfig.getLbmEnabled());
+        assertEquals(0.0001f, mDisplayDeviceConfig.getBacklightFromBrightness(0.1f), ZERO_DELTA);
+        assertEquals(0.2f, mDisplayDeviceConfig.getNitsFromBacklight(0.0f), ZERO_DELTA);
     }
 
     private String getValidLuxThrottling() {
@@ -1229,11 +1243,11 @@ public final class DisplayDeviceConfigTest {
 
     private String getContent() {
         return getContent(getValidLuxThrottling(), getValidProxSensor(),
-                /* includeIdleMode= */ true);
+                /* includeIdleMode= */ true, false);
     }
 
     private String getContent(String brightnessCapConfig, String proxSensor,
-            boolean includeIdleMode) {
+            boolean includeIdleMode, boolean enableEvenDimmer) {
         return "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<displayConfiguration>\n"
                 +   "<name>Example Display</name>\n"
@@ -1603,6 +1617,7 @@ public final class DisplayDeviceConfigTest {
                 +       "<majorVersion>2</majorVersion>\n"
                 +       "<minorVersion>0</minorVersion>\n"
                 +   "</usiVersion>\n"
+                + evenDimmerConfig(enableEvenDimmer)
                 +   "<screenBrightnessCapForWearBedtimeMode>"
                 +       "0.1"
                 +   "</screenBrightnessCapForWearBedtimeMode>"
@@ -1619,6 +1634,24 @@ public final class DisplayDeviceConfigTest {
                 +       "</luxThresholds>"
                 +   "</idleScreenRefreshRateTimeout>"
                 + "</displayConfiguration>\n";
+    }
+
+    private String evenDimmerConfig(boolean enabled) {
+        return (enabled ? "<lowBrightness enabled=\"true\">" : "<lowBrightness enabled=\"false\">")
+                + "  <transitionPoint>0.1</transitionPoint>\n"
+                + "  <nits>0.2</nits>\n"
+                + "  <nits>2.0</nits>\n"
+                + "  <nits>500.0</nits>\n"
+                + "  <nits>1000.0</nits>\n"
+                + "  <backlight>0</backlight>\n"
+                + "  <backlight>0.0001</backlight>\n"
+                + "  <backlight>0.5</backlight>\n"
+                + "  <backlight>1.0</backlight>\n"
+                + "  <brightness>0</brightness>\n"
+                + "  <brightness>0.1</brightness>\n"
+                + "  <brightness>0.5</brightness>\n"
+                + "  <brightness>1.0</brightness>\n"
+                + "</lowBrightness>";
     }
 
     private void mockDeviceConfigs() {

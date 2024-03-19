@@ -86,7 +86,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -146,7 +145,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
-    private final FeatureFlags mFeatureFlags;
     private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
@@ -209,8 +207,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onStatusBarTouchEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
-                // TODO move this logic to message queue
-                if (event.getActionMasked() == ACTION_DOWN) {
+                if (mSceneContainerFlags.isEnabled()) {
+                    //TODO(b/329863123) implement latency tracking for shade scene
+                    Log.i(TAG_OPS, "Scene container enabled. Latency tracking not started.");
+                } else if (event.getActionMasked() == ACTION_DOWN) {
                     mShadeViewControllerLazy.get().startExpandLatencyTracking();
                 }
                 mHandler.post(() -> {
@@ -600,7 +600,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager,
             AssistUtils assistUtils,
-            FeatureFlags featureFlags,
             SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
@@ -613,7 +612,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         mContext = context;
-        mFeatureFlags = featureFlags;
         mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;

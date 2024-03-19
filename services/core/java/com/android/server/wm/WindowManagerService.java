@@ -8700,14 +8700,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean moveFocusToTopEmbeddedWindowIfNeeded() {
+        public boolean moveFocusToAdjacentEmbeddedActivityIfNeeded() {
             synchronized (mGlobalLock) {
                 final WindowState focusedWindow = getFocusedWindow();
                 if (focusedWindow == null) {
                     return false;
                 }
 
-                if (moveFocusToTopEmbeddedWindow(focusedWindow)) {
+                if (moveFocusToAdjacentEmbeddedWindow(focusedWindow)) {
                     // Sync the input transactions to ensure the input focus updates as well.
                     syncInputTransactions(false);
                     return true;
@@ -9219,9 +9219,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Move focus to the top embedded window if possible.
+     * Move focus to the adjacent embedded activity if the adjacent activity is more recently
+     * created or has a window more recently added.
      */
-    boolean moveFocusToTopEmbeddedWindow(@NonNull WindowState focusedWindow) {
+    boolean moveFocusToAdjacentEmbeddedWindow(@NonNull WindowState focusedWindow) {
         final TaskFragment taskFragment = focusedWindow.getTaskFragment();
         if (taskFragment == null) {
             // Skip if not an Activity window.
@@ -9233,31 +9234,25 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
 
-        if (taskFragment.mDimmerSurfaceBoosted) {
-            // Skip if the TaskFragment currently has dimmer surface boosted.
+        if (!focusedWindow.mActivityRecord.isEmbedded()) {
+            // Skip if the focused activity is not embedded
             return false;
         }
 
-        final ActivityRecord topActivity =
-                taskFragment.getTask().topRunningActivity(true /* focusableOnly */);
-        if (topActivity == null || topActivity == focusedWindow.mActivityRecord) {
-            // Skip if the focused activity is already the top-most activity on the Task.
+        final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+        final ActivityRecord adjacentTopActivity =
+                adjacentTaskFragment != null ? adjacentTaskFragment.topRunningActivity() : null;
+        if (adjacentTopActivity == null) {
             return false;
         }
 
-        if (!topActivity.isEmbedded()) {
-            // Skip if the top activity is not embedded
+        if (adjacentTopActivity.getLastWindowCreateTime()
+                < focusedWindow.mActivityRecord.getLastWindowCreateTime()) {
+            // Skip if the current focus activity has more recently active window.
             return false;
         }
 
-        final TaskFragment topTaskFragment = topActivity.getTaskFragment();
-        if (topTaskFragment.isIsolatedNav()
-                && taskFragment.getAdjacentTaskFragment() == topTaskFragment) {
-            // Skip if the top TaskFragment is adjacent to current focus and is set to isolated nav.
-            return false;
-        }
-
-        moveFocusToActivity(topActivity);
+        moveFocusToActivity(adjacentTopActivity);
         return !focusedWindow.isFocused();
     }
 

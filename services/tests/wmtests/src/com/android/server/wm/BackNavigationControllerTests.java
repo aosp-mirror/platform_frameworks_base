@@ -633,18 +633,23 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     @Test
     public void testAdjacentFocusInActivityEmbedding() {
         mSetFlagsRule.enableFlags(Flags.FLAG_EMBEDDED_ACTIVITY_BACK_NAV_FLAG);
-        Task task = createTask(mDefaultDisplay);
-        TaskFragment primary = createTaskFragmentWithActivity(task);
-        TaskFragment secondary = createTaskFragmentWithActivity(task);
-        primary.setAdjacentTaskFragment(secondary);
-        secondary.setAdjacentTaskFragment(primary);
+        final Task task = createTask(mDefaultDisplay);
+        final TaskFragment primaryTf = createTaskFragmentWithActivity(task);
+        final TaskFragment secondaryTf = createTaskFragmentWithActivity(task);
+        final ActivityRecord primaryActivity = primaryTf.getTopMostActivity();
+        final ActivityRecord secondaryActivity = secondaryTf.getTopMostActivity();
+        primaryTf.setAdjacentTaskFragment(secondaryTf);
+        secondaryTf.setAdjacentTaskFragment(primaryTf);
 
-        WindowState windowState = mock(WindowState.class);
+        final WindowState windowState = mock(WindowState.class);
+        windowState.mActivityRecord = primaryActivity;
         doReturn(windowState).when(mWm).getFocusedWindowLocked();
-        doReturn(primary).when(windowState).getTaskFragment();
+        doReturn(primaryTf).when(windowState).getTaskFragment();
+        doReturn(1L).when(primaryActivity).getLastWindowCreateTime();
+        doReturn(2L).when(secondaryActivity).getLastWindowCreateTime();
 
         startBackNavigation();
-        verify(mWm).moveFocusToActivity(any());
+        verify(mWm).moveFocusToActivity(eq(secondaryActivity));
     }
 
     /**

@@ -52,6 +52,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
@@ -96,6 +97,8 @@ public class AutomaticBrightnessControllerTest {
     @Mock HysteresisLevels mScreenBrightnessThresholdsIdle;
     @Mock Handler mNoOpHandler;
     @Mock BrightnessRangeController mBrightnessRangeController;
+    @Mock
+    BrightnessClamperController mBrightnessClamperController;
     @Mock BrightnessThrottler mBrightnessThrottler;
 
     @Before
@@ -161,7 +164,8 @@ public class AutomaticBrightnessControllerTest {
                 mAmbientBrightnessThresholdsIdle, mScreenBrightnessThresholdsIdle,
                 mContext, mBrightnessRangeController, mBrightnessThrottler,
                 useHorizon ? AMBIENT_LIGHT_HORIZON_SHORT : 1,
-                useHorizon ? AMBIENT_LIGHT_HORIZON_LONG : 10000, userLux, userNits
+                useHorizon ? AMBIENT_LIGHT_HORIZON_LONG : 10000, userLux, userNits,
+                mBrightnessClamperController
         );
 
         when(mBrightnessRangeController.getCurrentBrightnessMax()).thenReturn(

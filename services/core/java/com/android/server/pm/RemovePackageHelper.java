@@ -261,11 +261,6 @@ final class RemovePackageHelper {
         // Step 1: always destroy app profiles.
         mAppDataHelper.destroyAppProfilesLIF(packageName);
 
-        // Everything else is preserved if the DELETE_KEEP_DATA flag is on
-        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
-            return;
-        }
-
         final AndroidPackage pkg;
         final SharedUserSetting sus;
         synchronized (mPm.mLock) {
@@ -282,9 +277,20 @@ final class RemovePackageHelper {
             resolvedPkg = PackageImpl.buildFakeForDeletion(packageName, ps.getVolumeUuid());
         }
 
+        int appDataDeletionFlags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL;
+        // Personal data is preserved if the DELETE_KEEP_DATA flag is on
+        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
+            if ((flags & PackageManager.DELETE_ARCHIVE) != 0) {
+                mAppDataHelper.clearAppDataLIF(resolvedPkg, userId,
+                        appDataDeletionFlags | Installer.FLAG_CLEAR_CACHE_ONLY);
+                mAppDataHelper.clearAppDataLIF(resolvedPkg, userId,
+                        appDataDeletionFlags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            }
+            return;
+        }
+
         // Step 2: destroy app data.
-        mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId,
-                FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+        mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId, appDataDeletionFlags);
         if (userId != UserHandle.USER_ALL) {
             ps.setCeDataInode(-1, userId);
             ps.setDeDataInode(-1, userId);

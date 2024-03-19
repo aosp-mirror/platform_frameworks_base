@@ -54,6 +54,7 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
 import com.android.server.display.brightness.BrightnessEvent;
+import com.android.server.display.brightness.clamper.BrightnessClamperController;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -252,6 +253,7 @@ public class AutomaticBrightnessController {
 
     // Controls Brightness range (including High Brightness Mode).
     private final BrightnessRangeController mBrightnessRangeController;
+    private final BrightnessClamperController mBrightnessClamperController;
 
     // Throttles (caps) maximum allowed brightness
     private final BrightnessThrottler mBrightnessThrottler;
@@ -287,7 +289,8 @@ public class AutomaticBrightnessController {
             HysteresisLevels screenBrightnessThresholdsIdle, Context context,
             BrightnessRangeController brightnessModeController,
             BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
-            int ambientLightHorizonLong, float userLux, float userNits) {
+            int ambientLightHorizonLong, float userLux, float userNits,
+            BrightnessClamperController brightnessClamperController) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor,
                 brightnessMappingStrategyMap, lightSensorWarmUpTime, brightnessMin, brightnessMax,
                 dozeScaleFactor, lightSensorRate, initialLightSensorRate,
@@ -297,7 +300,7 @@ public class AutomaticBrightnessController {
                 screenBrightnessThresholds, ambientBrightnessThresholdsIdle,
                 screenBrightnessThresholdsIdle, context, brightnessModeController,
                 brightnessThrottler, ambientLightHorizonShort, ambientLightHorizonLong, userLux,
-                userNits
+                userNits, brightnessClamperController
         );
     }
 
@@ -313,9 +316,10 @@ public class AutomaticBrightnessController {
             HysteresisLevels screenBrightnessThresholds,
             HysteresisLevels ambientBrightnessThresholdsIdle,
             HysteresisLevels screenBrightnessThresholdsIdle, Context context,
-            BrightnessRangeController brightnessModeController,
+            BrightnessRangeController brightnessRangeController,
             BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
-            int ambientLightHorizonLong, float userLux, float userNits) {
+            int ambientLightHorizonLong, float userLux, float userNits,
+            BrightnessClamperController brightnessClamperController) {
         mInjector = injector;
         mClock = injector.createClock();
         mContext = context;
@@ -358,7 +362,8 @@ public class AutomaticBrightnessController {
         mPendingForegroundAppPackageName = null;
         mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
-        mBrightnessRangeController = brightnessModeController;
+        mBrightnessRangeController = brightnessRangeController;
+        mBrightnessClamperController = brightnessClamperController;
         mBrightnessThrottler = brightnessThrottler;
         mBrightnessMappingStrategyMap = brightnessMappingStrategyMap;
 
@@ -791,7 +796,7 @@ public class AutomaticBrightnessController {
                     mAmbientBrightnessThresholds.getDarkeningThreshold(lux);
         }
         mBrightnessRangeController.onAmbientLuxChange(mAmbientLux);
-
+        mBrightnessClamperController.onAmbientLuxChange(mAmbientLux);
 
         // If the short term model was invalidated and the change is drastic enough, reset it.
         mShortTermModel.maybeReset(mAmbientLux);

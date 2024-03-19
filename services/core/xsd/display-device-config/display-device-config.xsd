@@ -162,6 +162,10 @@
                 <xs:element type="usiVersion" name="usiVersion">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="lowBrightnessMode" name="lowBrightness">
+                    <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <!-- Maximum screen brightness setting when screen brightness capped in
                 Wear Bedtime mode. This must be a non-negative decimal within the range defined by
                 the first and the last brightness value in screenBrightnessMap. -->
@@ -172,6 +176,7 @@
                 <xs:element type="idleScreenRefreshRateTimeout" name="idleScreenRefreshRateTimeout" minOccurs="0">
                     <xs:annotation name="final"/>
                 </xs:element>
+
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -215,6 +220,21 @@
             <xs:enumeration value="adaptive"/>
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:complexType name="lowBrightnessMode">
+        <xs:sequence>
+            <xs:element name="transitionPoint" type="nonNegativeDecimal" minOccurs="1"
+                maxOccurs="1">
+            </xs:element>
+            <xs:element name="nits" type="xs:float" maxOccurs="unbounded">
+            </xs:element>
+            <xs:element name="backlight" type="xs:float" maxOccurs="unbounded">
+            </xs:element>
+            <xs:element name="brightness" type="xs:float" maxOccurs="unbounded">
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+    </xs:complexType>
 
     <xs:complexType name="highBrightnessMode">
         <xs:all>

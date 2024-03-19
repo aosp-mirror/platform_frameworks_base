@@ -1945,6 +1945,21 @@ public class TaskTests extends WindowTestsBase {
         assertEquals(2, finishCount[0]);
     }
 
+    @Test
+    public void testPauseActivityWhenHasEmptyLeafTaskFragment() {
+        // Creating a task that has a RESUMED activity and an empty TaskFragment.
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = task.getTopMostActivity();
+        new TaskFragmentBuilder(mAtm).setParentTask(task).build();
+        activity.setState(ActivityRecord.State.RESUMED, "test");
+
+        // Ensure the activity is paused if cannot be resumed.
+        doReturn(false).when(task).canBeResumed(any());
+        mSupervisor.mUserLeaving = true;
+        task.pauseActivityIfNeeded(null /* resuming */, "test");
+        verify(task).startPausing(eq(true) /* userLeaving */, anyBoolean(), any(), any());
+    }
+
     private Task getTestTask() {
         return new TaskBuilder(mSupervisor).setCreateActivity(true).build();
     }

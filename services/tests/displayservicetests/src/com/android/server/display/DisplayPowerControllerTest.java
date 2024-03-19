@@ -1184,7 +1184,8 @@ public final class DisplayPowerControllerTest {
                 /* ambientLightHorizonShort= */ anyInt(),
                 /* ambientLightHorizonLong= */ anyInt(),
                 eq(lux),
-                eq(nits)
+                eq(nits),
+                any(BrightnessClamperController.class)
         );
     }
 
@@ -2121,7 +2122,8 @@ public final class DisplayPowerControllerTest {
                 HysteresisLevels screenBrightnessThresholdsIdle, Context context,
                 BrightnessRangeController brightnessRangeController,
                 BrightnessThrottler brightnessThrottler, int ambientLightHorizonShort,
-                int ambientLightHorizonLong, float userLux, float userNits) {
+                int ambientLightHorizonLong, float userLux, float userNits,
+                BrightnessClamperController brightnessClamperController) {
             return mAutomaticBrightnessController;
         }
 

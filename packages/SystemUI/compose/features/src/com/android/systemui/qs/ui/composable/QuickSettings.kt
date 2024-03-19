@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +37,8 @@ import com.android.compose.modifiers.thenIf
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collapsing
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Expanding
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Unsquishing
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.UnsquishingQQS
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.UnsquishingQS
 import com.android.systemui.scene.shared.model.Scenes
 
 object QuickSettings {
@@ -49,6 +51,8 @@ object QuickSettings {
     object Elements {
         val Content =
             ElementKey("QuickSettingsContent", scenePicker = MovableElementScenePicker(SCENES))
+        val QuickQuickSettings = ElementKey("QuickQuickSettings")
+        val SplitShadeQuickSettings = ElementKey("SplitShadeQuickSettings")
         val FooterActions = ElementKey("QuickSettingsFooterActions")
     }
 
@@ -78,12 +82,16 @@ private fun SceneScope.stateForQuickSettingsContent(
         is TransitionState.Transition ->
             with(transitionState) {
                 when {
-                    isSplitShade -> QSSceneAdapter.State.QS
-                    fromScene == Scenes.Shade && toScene == Scenes.QuickSettings ->
+                    isSplitShade -> UnsquishingQS(squishiness)
+                    fromScene == Scenes.Shade && toScene == Scenes.QuickSettings -> {
                         Expanding(progress)
-                    fromScene == Scenes.QuickSettings && toScene == Scenes.Shade ->
+                    }
+                    fromScene == Scenes.QuickSettings && toScene == Scenes.Shade -> {
                         Collapsing(progress)
-                    fromScene == Scenes.Shade || toScene == Scenes.Shade -> Unsquishing(squishiness)
+                    }
+                    fromScene == Scenes.Shade || toScene == Scenes.Shade -> {
+                        UnsquishingQQS(squishiness)
+                    }
                     fromScene == Scenes.QuickSettings || toScene == Scenes.QuickSettings -> {
                         QSSceneAdapter.State.QS
                     }
@@ -119,6 +127,18 @@ fun SceneScope.QuickSettings(
     squishiness: Float = QuickSettings.SharedValues.SquishinessValues.Default,
 ) {
     val contentState = stateForQuickSettingsContent(isSplitShade, squishiness)
+    val transitionState = layoutState.transitionState
+    val isClosing =
+        transitionState is TransitionState.Transition &&
+            transitionState.progress >= 0.9f && // almost done closing
+            !(layoutState.isTransitioning(to = Scenes.Shade) ||
+                layoutState.isTransitioning(to = Scenes.QuickSettings))
+
+    if (isClosing) {
+        DisposableEffect(Unit) {
+            onDispose { qsSceneAdapter.setState(QSSceneAdapter.State.CLOSED) }
+        }
+    }
 
     MovableElement(
         key = QuickSettings.Elements.Content,

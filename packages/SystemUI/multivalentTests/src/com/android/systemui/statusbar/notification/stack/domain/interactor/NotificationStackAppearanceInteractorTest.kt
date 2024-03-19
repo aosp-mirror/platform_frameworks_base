@@ -19,10 +19,10 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -43,19 +43,17 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
             val stackBounds by collectLastValue(underTest.stackBounds)
 
             val bounds1 =
-                NotificationContainerBounds(
+                StackBounds(
                     top = 100f,
                     bottom = 200f,
-                    isAnimated = true,
                 )
             underTest.setStackBounds(bounds1)
             assertThat(stackBounds).isEqualTo(bounds1)
 
             val bounds2 =
-                NotificationContainerBounds(
+                StackBounds(
                     top = 200f,
                     bottom = 300f,
-                    isAnimated = false,
                 )
             underTest.setStackBounds(bounds2)
             assertThat(stackBounds).isEqualTo(bounds2)
@@ -65,7 +63,7 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
     fun setStackBounds_withImproperBounds_throwsException() =
         testScope.runTest {
             underTest.setStackBounds(
-                NotificationContainerBounds(
+                StackBounds(
                     top = 100f,
                     bottom = 99f,
                 )

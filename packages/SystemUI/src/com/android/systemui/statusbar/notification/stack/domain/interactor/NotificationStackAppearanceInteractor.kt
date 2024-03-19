@@ -17,9 +17,10 @@
 
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationStackAppearanceRepository
+import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +34,10 @@ constructor(
     private val repository: NotificationStackAppearanceRepository,
 ) {
     /** The bounds of the notification stack in the current scene. */
-    val stackBounds: StateFlow<NotificationContainerBounds> = repository.stackBounds.asStateFlow()
+    val stackBounds: StateFlow<StackBounds> = repository.stackBounds.asStateFlow()
+
+    /** The rounding of the notification stack. */
+    val stackRounding: StateFlow<StackRounding> = repository.stackRounding.asStateFlow()
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of
@@ -59,7 +63,7 @@ constructor(
     val syntheticScroll: Flow<Float> = repository.syntheticScroll.asStateFlow()
 
     /** Sets the position of the notification stack in the current scene. */
-    fun setStackBounds(bounds: NotificationContainerBounds) {
+    fun setStackBounds(bounds: StackBounds) {
         check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
         repository.stackBounds.value = bounds
     }

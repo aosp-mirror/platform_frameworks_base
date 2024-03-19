@@ -3257,7 +3257,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardStatusViewController.setStatusAccessibilityImportance(mode);
     }
 
-    @Override
     public void performHapticFeedback(int constant) {
         mVibratorHelper.performHapticFeedback(mView, constant);
     }
