@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.codec.Flags.FLAG_IN_PROCESS_SW_AUDIO_CODEC;
+import static android.media.codec.Flags.FLAG_REGION_OF_INTEREST;
 
 import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
 import static com.android.media.codec.flags.Flags.FLAG_LARGE_AUDIO_FRAME;
@@ -26,6 +27,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.Rect;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,6 +37,7 @@ import java.nio.ByteOrder;
 import java.util.AbstractSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -1768,6 +1772,67 @@ public final class MediaFormat {
      */
     @FlaggedApi(FLAG_IN_PROCESS_SW_AUDIO_CODEC)
     public static final String KEY_SECURITY_MODEL = "security-model";
+
+    /**
+     * QpOffsetRect constitutes the metadata required for encoding a region of interest in an
+     * image or a video frame. The region of interest is represented by a rectangle. The four
+     * integer coordinates of the rectangle are stored in fields left, top, right, bottom.
+     * Note that the right and bottom coordinates are exclusive.
+     * This is paired with a suggestive qp offset information that is to be used during encoding
+     * of the blocks belonging to the to the box.
+     */
+    @FlaggedApi(FLAG_REGION_OF_INTEREST)
+    public static final class QpOffsetRect {
+        private Rect mContour;
+        private int mQpOffset;
+
+        /**
+         * Create a new region of interest with the specified coordinates and qpOffset. Note: no
+         * range checking is performed, so the caller must ensure that left >= 0, left <= right,
+         * top >= 0 and top <= bottom. Note that the right and bottom coordinates are exclusive.
+         *
+         * @param contour  Rectangle specifying the region of interest
+         * @param qpOffset qpOffset to be used for the blocks in the specified rectangle
+         */
+        public QpOffsetRect(@NonNull Rect contour, int qpOffset) {
+            mContour = contour;
+            mQpOffset = qpOffset;
+        }
+
+        /**
+         * Update the region of interest information with the specified coordinates and qpOffset
+         *
+         * @param contour  Rectangle specifying the region of interest
+         * @param qpOffset qpOffset to be used for the blocks in the specified rectangle
+         */
+        public void set(@NonNull Rect contour, int qpOffset) {
+            mContour = contour;
+            mQpOffset = qpOffset;
+        }
+
+        /**
+         * @return Return a string representation of qpOffsetRect in a compact form.
+         * Helper function to insert key {@link #PARAMETER_KEY_QP_OFFSET_RECTS} in MediaFormat
+         */
+        @NonNull
+        public String flattenToString() {
+            return TextUtils.formatSimple("%d,%d-%d,%d=%d;", mContour.top, mContour.left,
+                        mContour.bottom, mContour.right, mQpOffset);
+        }
+
+        /**
+         * @return Return a string representation of qpOffsetRect in a compact form.
+         * Helper function to insert key {@link #PARAMETER_KEY_QP_OFFSET_RECTS} in MediaFormat
+         */
+        @NonNull
+        public static String flattenToString(@NonNull List<QpOffsetRect> qpOffsetRects) {
+            StringBuilder builder = new StringBuilder();
+            for (QpOffsetRect qpOffsetRect : qpOffsetRects) {
+                builder.append(qpOffsetRect.flattenToString());
+            }
+            return builder.toString();
+        }
+    }
 
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;

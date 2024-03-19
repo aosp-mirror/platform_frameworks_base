@@ -163,10 +163,8 @@ public class RescueParty {
      * Check if we're currently attempting to reboot for a factory reset. This method must
      * return true if RescueParty tries to reboot early during a boot loop, since the device
      * will not be fully booted at this time.
-     *
-     * TODO(gavincorkery): Rename method since its scope has expanded.
      */
-    public static boolean isAttemptingFactoryReset() {
+    public static boolean isRecoveryTriggeredReboot() {
         return isFactoryResetPropertySet() || isRebootPropertySet();
     }
 
