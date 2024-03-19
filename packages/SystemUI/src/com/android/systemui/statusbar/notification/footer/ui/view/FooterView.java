@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.row.FooterViewButton;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.util.DrawableDumpKt;
@@ -428,6 +429,12 @@ public class FooterView extends StackScrollerDecorView {
          */
         public boolean hideContent;
 
+        /**
+         * When true, skip animating Y on the next #animateTo.
+         * Once true, remains true until reset in #animateTo.
+         */
+        public boolean resetY = false;
+
         @Override
         public void copyFrom(ViewState viewState) {
             super.copyFrom(viewState);
@@ -443,6 +450,18 @@ public class FooterView extends StackScrollerDecorView {
                 FooterView footerView = (FooterView) view;
                 footerView.setContentVisibleAnimated(!hideContent);
             }
+        }
+
+        @Override
+        public void animateTo(View child, AnimationProperties properties) {
+            if (child instanceof FooterView) {
+                // Must set animateY=false before super.animateTo, which checks for animateY
+                if (resetY) {
+                    properties.getAnimationFilter().animateY = false;
+                    resetY = false;
+                }
+            }
+            super.animateTo(child, properties);
         }
     }
 }

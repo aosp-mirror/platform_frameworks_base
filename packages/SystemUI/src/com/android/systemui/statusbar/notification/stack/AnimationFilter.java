@@ -30,7 +30,7 @@ public class AnimationFilter {
     public static final int NO_DELAY = -1;
     boolean animateAlpha;
     boolean animateX;
-    boolean animateY;
+    public boolean animateY;
     ArraySet<View> animateYViews = new ArraySet<>();
     boolean animateZ;
     boolean animateHeight;
