@@ -53,9 +53,7 @@ public class StackScrollAlgorithm {
     public static final float START_FRACTION = 0.5f;
 
     private static final String TAG = "StackScrollAlgorithm";
-    private static final Boolean DEBUG = false;
     private static final SourceType STACK_SCROLL_ALGO = SourceType.from("StackScrollAlgorithm");
-
     private final ViewGroup mHostView;
     private float mPaddingBetweenElements;
     private float mGapHeight;
@@ -247,13 +245,11 @@ public class StackScrollAlgorithm {
                 >= ambientState.getMaxHeadsUpTranslation();
     }
 
-    public static void log(String s) {
-        if (DEBUG) {
-            android.util.Log.i(TAG, s);
-        }
+    public static void debugLog(String s) {
+        android.util.Log.i(TAG, s);
     }
 
-    public static void logView(View view, String s) {
+    public static void debugLogView(View view, String s) {
         String viewString = "";
         if (view instanceof ExpandableNotificationRow row) {
             if (row.getEntry() == null) {
@@ -274,7 +270,7 @@ public class StackScrollAlgorithm {
         } else {
             viewString = view.toString();
         }
-        log(viewString + " " + s);
+        debugLog(viewString + " " + s);
     }
 
     private void resetChildViewStates() {
