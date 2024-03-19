@@ -98,6 +98,7 @@ public class SettingsHelper {
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
         sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
+        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_QS_TARGETS);
         sBroadcastOnRestoreSystemUI = new ArraySet<String>(2);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_TILES);
         sBroadcastOnRestoreSystemUI.add(Settings.Secure.QS_AUTO_ADDED_TILES);
@@ -228,6 +229,10 @@ public class SettingsHelper {
                 return;
             } else if (Settings.System.ACCELEROMETER_ROTATION.equals(name)
                     && shouldSkipAutoRotateRestore()) {
+                return;
+            } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(name)) {
+                // Don't write it to setting. Let the broadcast receiver in
+                // AccessibilityManagerService handle restore/merging logic.
                 return;
             }
 

@@ -112,6 +112,10 @@ class AccessibilityUserState {
      * TileService's or the a11y framework tile component names (e.g.
      * {@link AccessibilityShortcutController#COLOR_INVERSION_TILE_COMPONENT_NAME}) instead of the
      * A11y Feature's component names.
+     * <p/>
+     * In addition, {@link #mA11yTilesInQsPanel} stores what's on the QS Panel, whereas
+     * {@link #mAccessibilityQsTargets} stores the targets that configured qs as their shortcut and
+     * also grant full device control permission.
      */
     private final ArraySet<ComponentName> mA11yTilesInQsPanel = new ArraySet<>();
 

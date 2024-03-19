@@ -50,9 +50,11 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -67,6 +69,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.UserHandle;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -74,6 +77,7 @@ import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -123,6 +127,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1464,6 +1469,52 @@ public class AccessibilityManagerServiceTest {
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString());
     }
 
+    @Test
+    @RequiresFlagsEnabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void restoreAccessibilityQsTargets_a11yQsTargetsRestored() {
+        String daltonizerTile =
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();
+        String colorInversionTile =
+                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString();
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        userState.updateA11yQsTargetLocked(Set.of(daltonizerTile));
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+
+        Intent intent = new Intent(Intent.ACTION_SETTING_RESTORED)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                .putExtra(Intent.EXTRA_SETTING_NAME, Settings.Secure.ACCESSIBILITY_QS_TARGETS)
+                .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, colorInversionTile);
+        sendBroadcastToAccessibilityManagerService(intent);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mA11yms.mUserStates.get(UserHandle.USER_SYSTEM).getA11yQsTargets())
+                .containsExactlyElementsIn(Set.of(daltonizerTile, colorInversionTile));
+    }
+
+    @Test
+    @RequiresFlagsDisabled(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
+    public void restoreAccessibilityQsTargets_a11yQsTargetsNotRestored() {
+        String daltonizerTile =
+                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();
+        String colorInversionTile =
+                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString();
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                UserHandle.USER_SYSTEM, mTestableContext, mA11yms);
+        userState.updateA11yQsTargetLocked(Set.of(daltonizerTile));
+        mA11yms.mUserStates.put(UserHandle.USER_SYSTEM, userState);
+
+        Intent intent = new Intent(Intent.ACTION_SETTING_RESTORED)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                .putExtra(Intent.EXTRA_SETTING_NAME, Settings.Secure.ACCESSIBILITY_QS_TARGETS)
+                .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, colorInversionTile);
+        sendBroadcastToAccessibilityManagerService(intent);
+        mTestableLooper.processAllMessages();
+
+        assertThat(userState.getA11yQsTargets())
+                .containsExactlyElementsIn(Set.of(daltonizerTile));
+    }
+
     private static AccessibilityServiceInfo mockAccessibilityServiceInfo(
             ComponentName componentName) {
         return mockAccessibilityServiceInfo(
@@ -1542,6 +1593,14 @@ public class AccessibilityManagerServiceTest {
         mA11yms.getCurrentUserState().updateTileServiceMapForAccessibilityServiceLocked();
     }
 
+    private void sendBroadcastToAccessibilityManagerService(Intent intent) {
+        if (!mTestableContext.getBroadcastReceivers().containsKey(intent.getAction())) {
+            return;
+        }
+        mTestableContext.getBroadcastReceivers().get(intent.getAction()).forEach(
+                broadcastReceiver -> broadcastReceiver.onReceive(mTestableContext, intent));
+    }
+
     public static class FakeInputFilter extends AccessibilityInputFilter {
         FakeInputFilter(Context context,
                 AccessibilityManagerService service) {
@@ -1552,6 +1611,7 @@ public class AccessibilityManagerServiceTest {
     private static class A11yTestableContext extends TestableContext {
 
         private final Context mMockContext;
+        private final Map<String, List<BroadcastReceiver>> mBroadcastReceivers = new ArrayMap<>();
 
         A11yTestableContext(Context base) {
             super(base);
@@ -1563,8 +1623,29 @@ public class AccessibilityManagerServiceTest {
             mMockContext.startActivityAsUser(intent, options, user);
         }
 
+        @Override
+        public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+                IntentFilter filter, String broadcastPermission, Handler scheduler) {
+            Iterator<String> actions = filter.actionsIterator();
+            if (actions != null) {
+                while (actions.hasNext()) {
+                    String action = actions.next();
+                    List<BroadcastReceiver> actionReceivers =
+                            mBroadcastReceivers.getOrDefault(action, new ArrayList<>());
+                    actionReceivers.add(receiver);
+                    mBroadcastReceivers.put(action, actionReceivers);
+                }
+            }
+            return super.registerReceiverAsUser(
+                    receiver, user, filter, broadcastPermission, scheduler);
+        }
+
         Context getMockContext() {
             return mMockContext;
+        }
+
+        Map<String, List<BroadcastReceiver>> getBroadcastReceivers() {
+            return mBroadcastReceivers;
         }
     }
 }
