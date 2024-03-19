@@ -49,10 +49,13 @@ import static android.util.MathUtils.constrain;
 import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
-import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__GESTURE_SHORTCUT_TYPE__TRIPLE_TAP;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__HARDWARE_SHORTCUT_TYPE__VOLUME_KEY;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__QS_SHORTCUT_TYPE__QUICK_SETTINGS;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_BUTTON;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_GESTURE;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__UNKNOWN_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__GEO;
@@ -799,7 +802,7 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.KEYSTORE2_CRASH_STATS:
                         return pullKeystoreAtoms(atomTag, data);
                     case FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS:
-                        return pullAccessibilityShortcutStatsLocked(atomTag, data);
+                        return pullAccessibilityShortcutStatsLocked(data);
                     case FrameworkStatsLog.ACCESSIBILITY_FLOATING_MENU_STATS:
                         return pullAccessibilityFloatingMenuStatsLocked(atomTag, data);
                     case FrameworkStatsLog.MEDIA_CAPABILITIES:
@@ -4774,7 +4777,10 @@ public class StatsPullAtomService extends SystemService {
         }
     }
 
-    int pullAccessibilityShortcutStatsLocked(int atomTag, List<StatsEvent> pulledData) {
+    /**
+     * Pulls ACCESSIBILITY_SHORTCUT_STATS atom
+     */
+    int pullAccessibilityShortcutStatsLocked(List<StatsEvent> pulledData) {
         UserManager userManager = mContext.getSystemService(UserManager.class);
         if (userManager == null) {
             return StatsManager.PULL_SKIP;
@@ -4782,10 +4788,6 @@ public class StatsPullAtomService extends SystemService {
         final long token = Binder.clearCallingIdentity();
         try {
             final ContentResolver resolver = mContext.getContentResolver();
-            final int hardware_shortcut_type =
-                    FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__VOLUME_KEY;
-            final int triple_tap_shortcut =
-                    FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__TRIPLE_TAP;
             for (UserInfo userInfo : userManager.getUsers()) {
                 final int userId = userInfo.getUserHandle().getIdentifier();
 
@@ -4803,15 +4805,22 @@ public class StatsPullAtomService extends SystemService {
                     final int hardware_shortcut_service_num = countAccessibilityServices(
                             hardware_shortcut_list);
 
+                    final String qs_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                            Settings.Secure.ACCESSIBILITY_QS_TARGETS, userId);
+                    final boolean qs_shortcut_enabled = !TextUtils.isEmpty(qs_shortcut_list);
+
                     // only allow magnification to use it for now
                     final int triple_tap_service_num = Settings.Secure.getIntForUser(resolver,
                             Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, 0, userId);
-
-                    pulledData.add(
-                            FrameworkStatsLog.buildStatsEvent(atomTag,
-                                    software_shortcut_type, software_shortcut_service_num,
-                                    hardware_shortcut_type, hardware_shortcut_service_num,
-                                    triple_tap_shortcut, triple_tap_service_num));
+                    pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                            FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_STATS,
+                            software_shortcut_type, software_shortcut_service_num,
+                            ACCESSIBILITY_SHORTCUT_STATS__HARDWARE_SHORTCUT_TYPE__VOLUME_KEY,
+                            hardware_shortcut_service_num,
+                            ACCESSIBILITY_SHORTCUT_STATS__GESTURE_SHORTCUT_TYPE__TRIPLE_TAP,
+                            triple_tap_service_num,
+                            ACCESSIBILITY_SHORTCUT_STATS__QS_SHORTCUT_TYPE__QUICK_SETTINGS,
+                            qs_shortcut_enabled));
                 }
             }
         } catch (RuntimeException e) {
@@ -5150,16 +5159,19 @@ public class StatsPullAtomService extends SystemService {
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, userId);
         final String hardware_shortcut_list = Settings.Secure.getStringForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, userId);
+        final String qs_shortcut_list = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ACCESSIBILITY_QS_TARGETS, userId);
         final boolean hardware_shortcut_dialog_shown = Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0, userId) == 1;
         final boolean software_shortcut_enabled = !TextUtils.isEmpty(software_shortcut_list);
         final boolean hardware_shortcut_enabled =
                 hardware_shortcut_dialog_shown && !TextUtils.isEmpty(hardware_shortcut_list);
+        final boolean qs_shortcut_enabled = !TextUtils.isEmpty(qs_shortcut_list);
         final boolean triple_tap_shortcut_enabled = Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED, 0, userId) == 1;
 
         return software_shortcut_enabled || hardware_shortcut_enabled
-                || triple_tap_shortcut_enabled;
+                || triple_tap_shortcut_enabled || qs_shortcut_enabled;
     }
 
     private boolean isAccessibilityFloatingMenuUser(Context context, @UserIdInt int userId) {
@@ -5176,13 +5188,13 @@ public class StatsPullAtomService extends SystemService {
     private int convertToAccessibilityShortcutType(int shortcutType) {
         switch (shortcutType) {
             case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_BUTTON;
             case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_FLOATING_MENU;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_FLOATING_MENU;
             case Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_GESTURE;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__A11Y_GESTURE;
             default:
-                return ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__UNKNOWN_TYPE;
+                return ACCESSIBILITY_SHORTCUT_STATS__SOFTWARE_SHORTCUT_TYPE__UNKNOWN_TYPE;
         }
     }
 
