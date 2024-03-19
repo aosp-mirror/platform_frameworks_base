@@ -53,7 +53,7 @@ class WindowExtensionsImpl implements WindowExtensions {
      * The min version of the WM Extensions that must be supported in the current platform version.
      */
     @VisibleForTesting
-    static final int EXTENSIONS_VERSION_CURRENT_PLATFORM = 5;
+    static final int EXTENSIONS_VERSION_CURRENT_PLATFORM = 6;
 
     private final Object mLock = new Object();
     private volatile DeviceStateManagerFoldingFeatureProducer mFoldingFeatureProducer;
