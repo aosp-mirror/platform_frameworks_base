@@ -25,7 +25,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.FeatureFlags
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
@@ -44,7 +43,6 @@ class KeyguardMediaController @Inject constructor(
     @param:Named(KEYGUARD) private val mediaHost: MediaHost,
     private val bypassController: KeyguardBypassController,
     private val statusBarStateController: SysuiStatusBarStateController,
-    private val notifLockscreenUserManager: NotificationLockscreenUserManager,
     private val featureFlags: FeatureFlags,
     private val context: Context,
     configurationController: ConfigurationController
@@ -166,8 +164,7 @@ class KeyguardMediaController @Inject constructor(
         // mediaHost.visible required for proper animations handling
         visible = mediaHost.visible &&
                 !bypassController.bypassEnabled &&
-                keyguardOrUserSwitcher &&
-                notifLockscreenUserManager.shouldShowLockscreenNotifications()
+                keyguardOrUserSwitcher
         if (visible) {
             showMediaPlayer()
         } else {
