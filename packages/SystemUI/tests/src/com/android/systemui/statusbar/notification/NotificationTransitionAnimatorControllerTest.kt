@@ -5,9 +5,10 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
-import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.jank.interactionJankMonitor
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -39,7 +40,6 @@ import org.mockito.junit.MockitoJUnit
 class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
     @Mock lateinit var notificationListContainer: NotificationListContainer
     @Mock lateinit var headsUpManager: HeadsUpManager
-    @Mock lateinit var jankMonitor: InteractionJankMonitor
     @Mock lateinit var onFinishAnimationCallback: Runnable
 
     private lateinit var notificationTestHelper: NotificationTestHelper
@@ -67,7 +67,7 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
                 notificationListContainer,
                 headsUpManager,
                 notification,
-                jankMonitor,
+                Kosmos().interactionJankMonitor,
                 onFinishAnimationCallback
             )
     }
