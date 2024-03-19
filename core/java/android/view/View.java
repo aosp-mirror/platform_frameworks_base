@@ -39,6 +39,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
@@ -33772,7 +33773,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     && heightDp <= FRAME_RATE_SMALL_SIZE_THRESHOLD)) {
                 return FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_SMALL;
             } else {
-                return FRAME_RATE_CATEGORY_HIGH | FRAME_RATE_CATEGORY_REASON_LARGE;
+                int category = toolkitFrameRateDefaultNormalReadOnly()
+                        ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                return category | FRAME_RATE_CATEGORY_REASON_LARGE;
             }
         }
 
@@ -33820,8 +33823,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     frameRateCategory = FRAME_RATE_CATEGORY_HIGH
                             | FRAME_RATE_CATEGORY_REASON_REQUESTED;
                 } else {
-                    // invalid frame rate, default to HIGH
-                    frameRateCategory = FRAME_RATE_CATEGORY_HIGH
+                    // invalid frame rate, use default
+                    int category = toolkitFrameRateDefaultNormalReadOnly()
+                            ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+                    frameRateCategory = category
                             | FRAME_RATE_CATEGORY_REASON_INVALID;
                 }
             } else {
