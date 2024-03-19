@@ -133,7 +133,7 @@ public final class SessionConfiguration implements Parcelable {
      * {@link CameraDeviceSetup.isSessionConfigurationSupported} and {@link
      * CameraDeviceSetup.getSessionCharacteristics} to query a camera device's feature
      * combination support and session specific characteristics. For the SessionConfiguration
-     * object to be used to create a capture session, {@link #setCallback} must be called to
+     * object to be used to create a capture session, {@link #setStateCallback} must be called to
      * specify the state callback function, and any incomplete OutputConfigurations must be
      * completed via {@link OutputConfiguration#addSurface} or
      * {@link OutputConfiguration#setSurfacesForMultiResolutionOutput} as appropriate.</p>
@@ -419,7 +419,7 @@ public final class SessionConfiguration implements Parcelable {
      * @param cb A state callback interface implementation.
      */
     @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
-    public void setCallback(
+    public void setStateCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CameraCaptureSession.StateCallback cb) {
         mStateCallback = cb;
