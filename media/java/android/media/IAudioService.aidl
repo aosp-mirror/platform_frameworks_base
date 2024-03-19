@@ -18,7 +18,6 @@ package android.media;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
-import android.content.AttributionSource;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioFormat;
@@ -362,8 +361,7 @@ interface IAudioService {
     String registerAudioPolicy(in AudioPolicyConfig policyConfig,
             in IAudioPolicyCallback pcb, boolean hasFocusListener, boolean isFocusPolicy,
             boolean isTestFocusPolicy,
-            boolean isVolumeController, in IMediaProjection projection,
-            in AttributionSource attributionSource);
+            boolean isVolumeController, in IMediaProjection projection);
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 
