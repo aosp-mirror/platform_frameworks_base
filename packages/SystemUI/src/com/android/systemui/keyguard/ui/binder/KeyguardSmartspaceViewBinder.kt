@@ -41,7 +41,7 @@ object KeyguardSmartspaceViewBinder {
         blueprintInteractor: KeyguardBlueprintInteractor,
     ) {
         keyguardRootView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     if (!migrateClocksToBlueprint()) return@launch
                     clockViewModel.hasCustomWeatherDataDisplay.collect { hasCustomWeatherDataDisplay
