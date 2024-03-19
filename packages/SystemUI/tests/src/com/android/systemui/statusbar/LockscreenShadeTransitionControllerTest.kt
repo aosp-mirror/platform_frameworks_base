@@ -21,7 +21,7 @@ import com.android.systemui.plugins.qs.QS
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeLockscreenInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel

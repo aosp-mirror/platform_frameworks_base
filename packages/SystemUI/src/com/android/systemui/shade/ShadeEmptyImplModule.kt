@@ -27,6 +27,7 @@ import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorEmpt
 import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorEmptyImpl
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import dagger.Binds
 import dagger.Module
 
