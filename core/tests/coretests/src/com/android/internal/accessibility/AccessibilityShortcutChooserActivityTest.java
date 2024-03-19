@@ -25,7 +25,6 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -54,7 +53,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -176,21 +174,6 @@ public class AccessibilityShortcutChooserActivityTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
-    public void selectTestService_oldPermissionDialog_deny_dialogIsHidden() {
-        launchActivity();
-        openShortcutsList();
-
-        mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
-        onView(withText(DENY_LABEL)).perform(scrollTo(), click());
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-
-        onView(withId(R.id.accessibility_permissionDialog_title)).inRoot(isDialog()).check(
-                doesNotExist());
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void selectTestService_permissionDialog_allow_rowChecked() {
         launchActivity();
         openShortcutsList();
@@ -202,7 +185,6 @@ public class AccessibilityShortcutChooserActivityTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void selectTestService_permissionDialog_deny_rowNotChecked() {
         launchActivity();
         openShortcutsList();
@@ -214,7 +196,6 @@ public class AccessibilityShortcutChooserActivityTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void selectTestService_permissionDialog_uninstall_callsUninstaller_rowRemoved() {
         launchActivity();
         openShortcutsList();
@@ -228,7 +209,6 @@ public class AccessibilityShortcutChooserActivityTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void selectTestService_permissionDialog_notShownWhenNotRequired() throws Exception {
         when(mAccessibilityManagerService.isAccessibilityServiceWarningRequired(any()))
                 .thenReturn(false);
@@ -243,7 +223,6 @@ public class AccessibilityShortcutChooserActivityTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void selectTestService_notPermittedByAdmin_blockedEvenIfNoWarningRequired()
             throws Exception {
         when(mAccessibilityManagerService.isAccessibilityServiceWarningRequired(any()))
@@ -380,11 +359,9 @@ public class AccessibilityShortcutChooserActivityTest {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            if (Flags.cleanupAccessibilityWarningDialog()) {
-                // Setting the Theme is necessary here for the dialog to use the proper style
-                // resources as designated in its layout XML.
-                setTheme(R.style.Theme_DeviceDefault_DayNight);
-            }
+            // Setting the Theme is necessary here for the dialog to use the proper style
+            // resources as designated in its layout XML.
+            setTheme(R.style.Theme_DeviceDefault_DayNight);
         }
 
         @Override

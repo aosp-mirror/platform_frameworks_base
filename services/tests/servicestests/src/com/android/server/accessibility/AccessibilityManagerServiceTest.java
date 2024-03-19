@@ -21,7 +21,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
-import static android.view.accessibility.Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG;
 import static android.view.accessibility.Flags.FLAG_SKIP_ACCESSIBILITY_WARNING_DIALOG_FOR_TRUSTED_SERVICES;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
@@ -880,7 +879,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void testIsAccessibilityServiceWarningRequired_requiredByDefault() {
         mockManageAccessibilityGranted(mTestableContext);
         final AccessibilityServiceInfo info = mockAccessibilityServiceInfo(COMPONENT_NAME);
@@ -889,7 +887,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void testIsAccessibilityServiceWarningRequired_notRequiredIfAlreadyEnabled() {
         mockManageAccessibilityGranted(mTestableContext);
         final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(COMPONENT_NAME);
@@ -904,7 +901,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
     public void testIsAccessibilityServiceWarningRequired_notRequiredIfExistingShortcut() {
         mockManageAccessibilityGranted(mTestableContext);
         final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(
@@ -925,9 +921,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled({
-            FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG,
-            FLAG_SKIP_ACCESSIBILITY_WARNING_DIALOG_FOR_TRUSTED_SERVICES})
+    @RequiresFlagsEnabled(FLAG_SKIP_ACCESSIBILITY_WARNING_DIALOG_FOR_TRUSTED_SERVICES)
     public void testIsAccessibilityServiceWarningRequired_notRequiredIfAllowlisted() {
         mockManageAccessibilityGranted(mTestableContext);
         final AccessibilityServiceInfo info_a = mockAccessibilityServiceInfo(
