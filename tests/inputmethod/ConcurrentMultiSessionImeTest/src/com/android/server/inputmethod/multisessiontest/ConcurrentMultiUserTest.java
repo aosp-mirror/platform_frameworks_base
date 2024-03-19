@@ -23,19 +23,13 @@ import android.content.pm.PackageManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.bedstead.harrier.BedsteadJUnit4;
-import com.android.bedstead.harrier.DeviceState;
-
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
-@RunWith(BedsteadJUnit4.class)
+@RunWith(JUnit4.class)
 public final class ConcurrentMultiUserTest {
-
-    @Rule
-    public static final DeviceState sDeviceState = new DeviceState();
 
     @Before
     public void doBeforeEachTest() {
