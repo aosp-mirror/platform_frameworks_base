@@ -150,7 +150,6 @@ filegroup {
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
         ":audio_policy_configuration_V7_0",
-        ":perfetto_trace_javastream_protos",
     ],
 }
 
@@ -427,6 +426,7 @@ java_defaults {
         "audiopolicy-aidl-java",
         "sounddose-aidl-java",
         "modules-utils-expresslog",
+        "perfetto_trace_javastream_protos_jarjar",
     ],
 }
 
@@ -664,6 +664,16 @@ filegroup {
         "**/package.html",
     ],
     visibility: ["//frameworks/base/api"],
+}
+
+java_library {
+    name: "perfetto_trace_javastream_protos_jarjar",
+    srcs: [
+        ":perfetto_trace_javastream_protos",
+    ],
+    jarjar_rules: ":framework-jarjar-rules",
+    sdk_version: "core_platform",
+    installable: false,
 }
 
 build = [

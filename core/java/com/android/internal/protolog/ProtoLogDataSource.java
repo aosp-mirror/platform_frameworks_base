@@ -16,13 +16,14 @@
 
 package com.android.internal.protolog;
 
-import static perfetto.protos.PerfettoTrace.DataSourceConfig.PROTOLOG_CONFIG;
-import static perfetto.protos.PerfettoTrace.ProtoLogConfig.GROUP_OVERRIDES;
-import static perfetto.protos.PerfettoTrace.ProtoLogConfig.TRACING_MODE;
-import static perfetto.protos.PerfettoTrace.ProtoLogGroup.COLLECT_STACKTRACE;
-import static perfetto.protos.PerfettoTrace.ProtoLogGroup.LOG_FROM;
-import static perfetto.protos.PerfettoTrace.ProtoLogGroup.GROUP_NAME;
+import static android.internal.perfetto.protos.PerfettoTrace.DataSourceConfig.PROTOLOG_CONFIG;
+import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogConfig.GROUP_OVERRIDES;
+import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogConfig.TRACING_MODE;
+import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogGroup.COLLECT_STACKTRACE;
+import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogGroup.GROUP_NAME;
+import static android.internal.perfetto.protos.PerfettoTrace.ProtoLogGroup.LOG_FROM;
 
+import android.internal.perfetto.protos.PerfettoTrace;
 import android.tracing.perfetto.CreateIncrementalStateArgs;
 import android.tracing.perfetto.CreateTlsStateArgs;
 import android.tracing.perfetto.DataSource;
@@ -38,8 +39,6 @@ import com.android.internal.protolog.common.LogLevel;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import perfetto.protos.PerfettoTrace;
 
 public class ProtoLogDataSource extends DataSource<ProtoLogDataSource.Instance,
         ProtoLogDataSource.TlsState,
