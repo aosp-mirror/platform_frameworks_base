@@ -402,7 +402,7 @@ public class TaskFragmentContainerTest {
 
         assertTrue(container.hasActivity(mActivity.getActivityToken()));
 
-        taskContainer.onActivityDestroyed(mActivity.getActivityToken());
+        taskContainer.onActivityDestroyed(mTransaction, mActivity.getActivityToken());
 
         // It should not contain the destroyed Activity.
         assertFalse(container.hasActivity(mActivity.getActivityToken()));
