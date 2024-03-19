@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
+import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
@@ -59,6 +60,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.sysui.ShellInit;
@@ -1023,13 +1025,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
                 if (mPipTransaction != null && sendUserLeaveHint) {
                     SurfaceControl pipLeash = null;
+                    TransitionInfo.Change pipChange = null;
                     if (mPipTask != null) {
-                        pipLeash = mInfo.getChange(mPipTask).getLeash();
+                        pipChange = mInfo.getChange(mPipTask);
+                        pipLeash = pipChange.getLeash();
                     } else if (mPipTaskId != -1) {
                         // find a task with taskId from #setFinishTaskTransaction()
                         for (TransitionInfo.Change change : mInfo.getChanges()) {
                             if (change.getTaskInfo() != null
                                     && change.getTaskInfo().taskId == mPipTaskId) {
+                                pipChange = change;
                                 pipLeash = change.getLeash();
                                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                         "RecentsController.finishInner:"
@@ -1048,6 +1053,28 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                 "RecentsController.finishInner: PiP transaction %s merged",
                                 mPipTransaction);
+                        if (PipUtils.isPip2ExperimentEnabled()) {
+                            // If this path is triggered, we are in auto-enter PiP flow in gesture
+                            // navigation mode, which means "Recents" transition should be followed
+                            // by a TRANSIT_PIP. Hence, we take the WCT was about to be sent
+                            // to Core to be applied during finishTransition(), we modify it to
+                            // factor in PiP changes, and we send it as a direct startWCT for
+                            // a new TRANSIT_PIP type transition. Recents still sends
+                            // finishTransition() to update visibilities, but with finishWCT=null.
+                            TransitionRequestInfo requestInfo = new TransitionRequestInfo(
+                                    TRANSIT_PIP, null /* triggerTask */, pipChange.getTaskInfo(),
+                                    null /* remote */, null /* displayChange */, 0 /* flags */);
+                            // Use mTransition IBinder token temporarily just to get PipTransition
+                            // to return from its handleRequest(). The actual TRANSIT_PIP will have
+                            // anew token once it arrives into PipTransition#startAnimation().
+                            Pair<Transitions.TransitionHandler, WindowContainerTransaction>
+                                    requestRes = mTransitions.dispatchRequest(mTransition,
+                                            requestInfo, null /* skip */);
+                            wct.merge(requestRes.second, true);
+                            mTransitions.startTransition(TRANSIT_PIP, wct, null /* handler */);
+                            // We need to clear the WCT to send finishWCT=null for Recents.
+                            wct.clear();
+                        }
                     }
                     mPipTaskId = -1;
                     mPipTask = null;

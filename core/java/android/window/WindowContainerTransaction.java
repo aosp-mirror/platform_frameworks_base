@@ -88,6 +88,19 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Clear the transaction object.
+     * This is equivalent to a new empty {@link WindowContainerTransaction} in content.
+     *
+     * @hide
+     */
+    public void clear() {
+        mChanges.clear();
+        mHierarchyOps.clear();
+        mErrorCallbackToken = null;
+        mTaskFragmentOrganizer = null;
+    }
+
+    /**
      * Resize a container.
      */
     @NonNull
