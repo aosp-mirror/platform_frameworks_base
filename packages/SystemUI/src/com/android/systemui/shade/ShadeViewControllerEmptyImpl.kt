@@ -84,8 +84,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() :
     override fun startInputFocusTransfer() {}
     override fun cancelInputFocusTransfer() {}
     override fun finishInputFocusTransfer(velocity: Float) {}
-    override fun performHapticFeedback(constant: Int) {}
-
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
     @Deprecated("Use SceneInteractor.currentScene instead.")

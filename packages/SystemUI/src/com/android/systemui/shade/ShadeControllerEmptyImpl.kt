@@ -63,4 +63,5 @@ open class ShadeControllerEmptyImpl @Inject constructor() : ShadeController {
     override fun onStatusBarTouch(event: MotionEvent?) {}
     override fun onLaunchAnimationCancelled(isLaunchForActivity: Boolean) {}
     override fun onLaunchAnimationEnd(launchIsFullScreen: Boolean) {}
+    override fun performHapticFeedback(constant: Int) {}
 }
