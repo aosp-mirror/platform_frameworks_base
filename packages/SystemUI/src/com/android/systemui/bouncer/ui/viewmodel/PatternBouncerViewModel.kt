@@ -40,6 +40,7 @@ class PatternBouncerViewModel(
     viewModelScope: CoroutineScope,
     interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
+    private val onIntentionalUserInput: () -> Unit,
 ) :
     AuthMethodBouncerViewModel(
         viewModelScope = viewModelScope,
@@ -84,7 +85,7 @@ class PatternBouncerViewModel(
 
     /** Notifies that the user has started a drag gesture across the dot grid. */
     fun onDragStart() {
-        interactor.clearMessage()
+        onIntentionalUserInput()
     }
 
     /**
