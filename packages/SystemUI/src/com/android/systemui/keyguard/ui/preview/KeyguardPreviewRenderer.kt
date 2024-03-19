@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.android.systemui.util.kotlin.DisposableHandles
 import com.android.systemui.util.settings.SecureSettings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -173,7 +174,7 @@ constructor(
     private lateinit var smallClockHostView: FrameLayout
     private var smartSpaceView: View? = null
 
-    private val disposables = mutableSetOf<DisposableHandle>()
+    private val disposables = DisposableHandles()
     private var isDestroyed = false
 
     private val shortcutsBindings = mutableSetOf<KeyguardQuickAffordanceViewBinder.Binding>()
@@ -183,7 +184,7 @@ constructor(
 
     init {
         coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job())
-        disposables.add(DisposableHandle { coroutineScope.cancel() })
+        disposables += DisposableHandle { coroutineScope.cancel() }
 
         if (keyguardBottomAreaRefactor()) {
             quickAffordancesCombinedViewModel.enablePreviewMode(
@@ -214,7 +215,7 @@ constructor(
                     if (hostToken == null) null else InputTransferToken(hostToken),
                     "KeyguardPreviewRenderer"
                 )
-            disposables.add(DisposableHandle { host.release() })
+            disposables += DisposableHandle { host.release() }
         }
     }
 
@@ -284,7 +285,7 @@ constructor(
     fun destroy() {
         isDestroyed = true
         lockscreenSmartspaceController.disconnect()
-        disposables.forEach { it.dispose() }
+        disposables.dispose()
         if (keyguardBottomAreaRefactor()) {
             shortcutsBindings.forEach { it.destroy() }
         }
@@ -372,7 +373,7 @@ constructor(
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
         val keyguardRootView = KeyguardRootView(previewContext, null)
         if (!keyguardBottomAreaRefactor()) {
-            disposables.add(
+            disposables +=
                 KeyguardRootViewBinder.bind(
                     keyguardRootView,
                     keyguardRootViewModel,
@@ -387,7 +388,6 @@ constructor(
                     null, // device entry haptics not required for preview mode
                     null, // falsing manager not required for preview mode
                 )
-            )
         }
         rootView.addView(
             keyguardRootView,
@@ -555,14 +555,12 @@ constructor(
                     }
                 }
             clockRegistry.registerClockChangeListener(clockChangeListener)
-            disposables.add(
-                DisposableHandle {
-                    clockRegistry.unregisterClockChangeListener(clockChangeListener)
-                }
-            )
+            disposables += DisposableHandle {
+                clockRegistry.unregisterClockChangeListener(clockChangeListener)
+            }
 
             clockController.registerListeners(parentView)
-            disposables.add(DisposableHandle { clockController.unregisterListeners() })
+            disposables += DisposableHandle { clockController.unregisterListeners() }
         }
 
         val receiver =
@@ -581,7 +579,7 @@ constructor(
                 addAction(Intent.ACTION_TIME_CHANGED)
             },
         )
-        disposables.add(DisposableHandle { broadcastDispatcher.unregisterReceiver(receiver) })
+        disposables += DisposableHandle { broadcastDispatcher.unregisterReceiver(receiver) }
 
         if (!migrateClocksToBlueprint()) {
             val layoutChangeListener =
@@ -602,9 +600,9 @@ constructor(
                     }
                 }
             parentView.addOnLayoutChangeListener(layoutChangeListener)
-            disposables.add(
-                DisposableHandle { parentView.removeOnLayoutChangeListener(layoutChangeListener) }
-            )
+            disposables += DisposableHandle {
+                parentView.removeOnLayoutChangeListener(layoutChangeListener)
+            }
         }
 
         onClockChanged()
