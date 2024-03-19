@@ -26,22 +26,23 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.system.OsConstants;
+import android.util.Log;
 
 import androidx.annotation.IntDef;
 
-import com.android.internal.R;
+import com.android.internal.infra.AndroidFuture;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -76,6 +77,8 @@ public final class OnDeviceIntelligenceManager {
      */
     public static final String AUGMENT_REQUEST_CONTENT_BUNDLE_KEY =
             "AugmentRequestContentBundleKey";
+
+    private static final String TAG = "OnDeviceIntelligence";
     private final Context mContext;
     private final IOnDeviceIntelligenceManager mService;
 
@@ -121,9 +124,9 @@ public final class OnDeviceIntelligenceManager {
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public String getRemoteServicePackageName() {
         String result;
-        try{
-           result = mService.getRemoteServicePackageName();
-        } catch (RemoteException e){
+        try {
+            result = mService.getRemoteServicePackageName();
+        } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
         return result;
@@ -288,17 +291,14 @@ public final class OnDeviceIntelligenceManager {
                 }
             };
 
-            ICancellationSignal transport = null;
-            if (cancellationSignal != null) {
-                transport = CancellationSignal.createTransport();
-                cancellationSignal.setRemote(transport);
-            }
-
-            mService.requestFeatureDownload(feature, transport, downloadCallback);
+            mService.requestFeatureDownload(feature,
+                    configureRemoteCancellationFuture(cancellationSignal, callbackExecutor),
+                    downloadCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
+
 
     /**
      * The methods computes the token related information for a given request payload using the
@@ -337,13 +337,9 @@ public final class OnDeviceIntelligenceManager {
                 }
             };
 
-            ICancellationSignal transport = null;
-            if (cancellationSignal != null) {
-                transport = CancellationSignal.createTransport();
-                cancellationSignal.setRemote(transport);
-            }
-
-            mService.requestTokenInfo(feature, request, transport, callback);
+            mService.requestTokenInfo(feature, request,
+                    configureRemoteCancellationFuture(cancellationSignal, callbackExecutor),
+                    callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -407,19 +403,9 @@ public final class OnDeviceIntelligenceManager {
             };
 
 
-            IProcessingSignal transport = null;
-            if (processingSignal != null) {
-                transport = ProcessingSignal.createTransport();
-                processingSignal.setRemote(transport);
-            }
-
-            ICancellationSignal cancellationTransport = null;
-            if (cancellationSignal != null) {
-                cancellationTransport = CancellationSignal.createTransport();
-                cancellationSignal.setRemote(cancellationTransport);
-            }
-
-            mService.processRequest(feature, request, requestType, cancellationTransport, transport,
+            mService.processRequest(feature, request, requestType,
+                    configureRemoteCancellationFuture(cancellationSignal, callbackExecutor),
+                    configureRemoteProcessingSignalFuture(processingSignal, callbackExecutor),
                     callback);
 
         } catch (RemoteException e) {
@@ -449,7 +435,8 @@ public final class OnDeviceIntelligenceManager {
      * @param callbackExecutor          executor to run the callback on.
      */
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
-    public void processRequestStreaming(@NonNull Feature feature, @NonNull @InferenceParams Bundle request,
+    public void processRequestStreaming(@NonNull Feature feature,
+            @NonNull @InferenceParams Bundle request,
             @RequestType int requestType,
             @Nullable CancellationSignal cancellationSignal,
             @Nullable ProcessingSignal processingSignal,
@@ -500,20 +487,11 @@ public final class OnDeviceIntelligenceManager {
                 }
             };
 
-            IProcessingSignal transport = null;
-            if (processingSignal != null) {
-                transport = ProcessingSignal.createTransport();
-                processingSignal.setRemote(transport);
-            }
-
-            ICancellationSignal cancellationTransport = null;
-            if (cancellationSignal != null) {
-                cancellationTransport = CancellationSignal.createTransport();
-                cancellationSignal.setRemote(cancellationTransport);
-            }
-
             mService.processRequestStreaming(
-                    feature, request, requestType, cancellationTransport, transport, callback);
+                    feature, request, requestType,
+                    configureRemoteCancellationFuture(cancellationSignal, callbackExecutor),
+                    configureRemoteProcessingSignalFuture(processingSignal, callbackExecutor),
+                    callback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -574,4 +552,45 @@ public final class OnDeviceIntelligenceManager {
     @Target({ElementType.PARAMETER, ElementType.FIELD})
     public @interface InferenceParams {
     }
+
+
+    @Nullable
+    private static AndroidFuture<IBinder> configureRemoteCancellationFuture(
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull Executor callbackExecutor) {
+        if (cancellationSignal == null) {
+            return null;
+        }
+        AndroidFuture<IBinder> cancellationFuture = new AndroidFuture<>();
+        cancellationFuture.whenCompleteAsync(
+                (cancellationTransport, error) -> {
+                    if (error != null || cancellationTransport == null) {
+                        Log.e(TAG, "Unable to receive the remote cancellation signal.", error);
+                    } else {
+                        cancellationSignal.setRemote(
+                                ICancellationSignal.Stub.asInterface(cancellationTransport));
+                    }
+                }, callbackExecutor);
+        return cancellationFuture;
+    }
+
+    @Nullable
+    private static AndroidFuture<IBinder> configureRemoteProcessingSignalFuture(
+            ProcessingSignal processingSignal, Executor executor) {
+        if (processingSignal == null) {
+            return null;
+        }
+        AndroidFuture<IBinder> processingSignalFuture = new AndroidFuture<>();
+        processingSignalFuture.whenCompleteAsync(
+                (transport, error) -> {
+                    if (error != null || transport == null) {
+                        Log.e(TAG, "Unable to receive the remote processing signal.", error);
+                    } else {
+                        processingSignal.setRemote(IProcessingSignal.Stub.asInterface(transport));
+                    }
+                }, executor);
+        return processingSignalFuture;
+    }
+
+
 }
