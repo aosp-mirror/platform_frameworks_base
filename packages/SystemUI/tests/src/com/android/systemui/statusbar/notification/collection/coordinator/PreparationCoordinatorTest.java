@@ -248,7 +248,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertFalse(mParamsCaptor.getValue().isLowPriority());
+        assertFalse(mParamsCaptor.getValue().isMinimized());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
 
         // WHEN notification moves to a min priority section
@@ -257,7 +257,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN we rebind it
         verify(mNotifInflater).rebindViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertTrue(mParamsCaptor.getValue().isLowPriority());
+        assertTrue(mParamsCaptor.getValue().isMinimized());
 
         // THEN we do not filter it because it's not the first inflation.
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
@@ -270,7 +270,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
         mCollectionListener.onEntryInit(mEntry);
         mBeforeFilterListener.onBeforeFinalizeFilter(List.of(mEntry));
         verify(mNotifInflater).inflateViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertTrue(mParamsCaptor.getValue().isLowPriority());
+        assertTrue(mParamsCaptor.getValue().isMinimized());
         mNotifInflater.invokeInflateCallbackForEntry(mEntry);
 
         // WHEN notification is moved under a parent
@@ -279,7 +279,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN we rebind it as not-minimized
         verify(mNotifInflater).rebindViews(eq(mEntry), mParamsCaptor.capture(), any());
-        assertFalse(mParamsCaptor.getValue().isLowPriority());
+        assertFalse(mParamsCaptor.getValue().isMinimized());
 
         // THEN we do not filter it because it's not the first inflation.
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));

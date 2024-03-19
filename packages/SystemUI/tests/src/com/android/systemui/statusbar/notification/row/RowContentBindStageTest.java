@@ -197,7 +197,7 @@ public class RowContentBindStageTest extends SysuiTestCase {
         params.clearDirtyContentViews();
 
         // WHEN low priority is set and stage executed.
-        params.setUseLowPriority(true);
+        params.setUseMinimized(true);
         mRowContentBindStage.executeStage(mEntry, mRow, (en) -> { });
 
         // THEN binder is called with use low priority and contracted/expanded are called to bind.
