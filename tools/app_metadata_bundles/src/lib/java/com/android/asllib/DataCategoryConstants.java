@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Constants for determining valid {@link String} data types for usage within {@link SafetyLabel},
+ * Constants for determining valid {@link String} data types for usage within {@link SafetyLabels},
  * {@link DataCategory}, and {@link DataType}
  */
 public class DataCategoryConstants {

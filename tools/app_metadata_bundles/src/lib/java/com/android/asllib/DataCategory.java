@@ -35,4 +35,9 @@ public class DataCategory {
     public Map<String, DataType> getDataTypes() {
         return mDataTypes;
     }
+
+    /** Creates a {@link DataCategory} given map of {@param dataTypes}. */
+    public static DataCategory create(Map<String, DataType> dataTypes) {
+        return new DataCategory(dataTypes);
+    }
 }
