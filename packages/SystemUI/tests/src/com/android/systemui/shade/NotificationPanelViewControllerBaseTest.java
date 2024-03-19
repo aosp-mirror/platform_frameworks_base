@@ -444,7 +444,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(
                 mUiEventLogger,
-                mKosmos.getInteractionJankMonitor(),
+                () -> mKosmos.getInteractionJankMonitor(),
                 mJavaAdapter,
                 () -> mShadeInteractor,
                 () -> mKosmos.getDeviceUnlockedInteractor(),
@@ -598,7 +598,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         new StatusBarStateControllerImpl(
                                 new UiEventLoggerFake(),
-                                mKosmos.getInteractionJankMonitor(),
+                                () -> mKosmos.getInteractionJankMonitor(),
                                 mJavaAdapter,
                                 () -> mShadeInteractor,
                                 () -> mKosmos.getDeviceUnlockedInteractor(),
@@ -802,7 +802,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mKosmos.getInteractionJankMonitor(),
+                () -> mKosmos.getInteractionJankMonitor(),
                 mShadeLog,
                 mDumpManager,
                 mDeviceEntryFaceAuthInteractor,
