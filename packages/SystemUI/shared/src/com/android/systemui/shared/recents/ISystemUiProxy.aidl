@@ -155,5 +155,10 @@ interface ISystemUiProxy {
      */
     oneway void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) = 54;
 
-    // Next id = 55
+    /**
+     * Set the override value for home button long press duration in ms and slop multiplier.
+     */
+    oneway void setOverrideHomeButtonLongPress(long duration, float slopMultiplier) = 55;
+
+    // Next id = 56
 }
