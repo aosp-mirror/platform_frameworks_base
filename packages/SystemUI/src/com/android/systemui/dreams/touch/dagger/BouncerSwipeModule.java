@@ -21,10 +21,10 @@ import android.content.res.Resources;
 import android.util.TypedValue;
 import android.view.VelocityTracker;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
@@ -45,6 +45,9 @@ public class BouncerSwipeModule {
      * swiping up to the bouncer can occur.
      */
     public static final String SWIPE_TO_BOUNCER_START_REGION = "swipe_to_bouncer_start_region";
+
+    public static final String MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE =
+            "min_bouncer_zone_screen_percentage";
 
     /**
      * The {@link android.view.animation.AnimationUtils} for animating the bouncer closing.
@@ -105,6 +108,18 @@ public class BouncerSwipeModule {
     public static float providesSwipeToBouncerStartRegion(@Main Resources resources) {
         TypedValue typedValue = new TypedValue();
         resources.getValue(R.dimen.dream_overlay_bouncer_start_region_screen_percentage,
+                typedValue, true);
+        return typedValue.getFloat();
+    }
+
+    /**
+     * Provides the minimum region to start wipe gestures from.
+     */
+    @Provides
+    @Named(MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE)
+    public static float providesMinBouncerZoneScreenPercentage(@Main Resources resources) {
+        TypedValue typedValue = new TypedValue();
+        resources.getValue(R.dimen.dream_overlay_bouncer_min_region_screen_percentage,
                 typedValue, true);
         return typedValue.getFloat();
     }

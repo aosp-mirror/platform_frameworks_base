@@ -87,7 +87,7 @@ public class CommunalTouchHandler implements DreamTouchHandler {
     }
 
     @Override
-    public void getTouchInitiationRegion(Rect bounds, Region region) {
+    public void getTouchInitiationRegion(Rect bounds, Region region, Rect exclusionRect) {
         final Rect outBounds = new Rect(bounds);
         outBounds.inset(outBounds.width() - mInitiationWidth, 0, 0, 0);
         region.op(outBounds, Region.Op.UNION);

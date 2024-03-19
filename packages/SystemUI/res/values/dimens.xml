@@ -1863,6 +1863,10 @@
         .2
     </item>
 
+    <item name="dream_overlay_bouncer_min_region_screen_percentage" format="float" type="dimen">
+        .05
+    </item>
+
     <!-- The padding applied to the dream overlay container -->
     <dimen name="dream_overlay_container_padding_start">0dp</dimen>
     <dimen name="dream_overlay_container_padding_end">0dp</dimen>
