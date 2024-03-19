@@ -57,6 +57,7 @@ public final class InputTransferToken implements Parcelable {
     private static native void nativeWriteToParcel(long nativeObject, Parcel out);
     private static native long nativeReadFromParcel(Parcel in);
     private static native IBinder nativeGetBinderToken(long nativeObject);
+    private static native long nativeGetBinderTokenRef(long nativeObject);
     private static native long nativeGetNativeInputTransferTokenFinalizer();
     private static native boolean nativeEquals(long nativeObject1, long nativeObject2);
 
@@ -130,7 +131,7 @@ public final class InputTransferToken implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(getToken());
+        return Objects.hash(nativeGetBinderTokenRef(mNativeObject));
     }
 
     /**
