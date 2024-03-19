@@ -4208,7 +4208,7 @@ public abstract class Context {
             MEDIA_COMMUNICATION_SERVICE,
             BATTERY_SERVICE,
             JOB_SCHEDULER_SERVICE,
-            //@hide: PERSISTENT_DATA_BLOCK_SERVICE,
+            PERSISTENT_DATA_BLOCK_SERVICE,
             //@hide: OEM_LOCK_SERVICE,
             MEDIA_PROJECTION_SERVICE,
             MIDI_SERVICE,
@@ -5930,9 +5930,8 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.service.persistentdata.PersistentDataBlockManager
-     * @hide
      */
-    @SystemApi
+    @FlaggedApi(android.security.Flags.FLAG_FRP_ENFORCEMENT)
     public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
 
     /**
