@@ -37,8 +37,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.os.Binder;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -360,7 +360,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         synchronized (mLock) {
             if (mRemoteOnDeviceIntelligenceService == null) {
                 String serviceName = getServiceNames()[0];
-                validateService(serviceName, false);
+                Binder.withCleanCallingIdentity(() -> validateServiceElevated(serviceName, false));
                 mRemoteOnDeviceIntelligenceService = new RemoteOnDeviceIntelligenceService(mContext,
                         ComponentName.unflattenFromString(serviceName),
                         UserHandle.SYSTEM.getIdentifier());
@@ -410,7 +410,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         synchronized (mLock) {
             if (mRemoteInferenceService == null) {
                 String serviceName = getServiceNames()[1];
-                validateService(serviceName, true);
+                Binder.withCleanCallingIdentity(() -> validateServiceElevated(serviceName, true));
                 mRemoteInferenceService = new RemoteOnDeviceSandboxedInferenceService(mContext,
                         ComponentName.unflattenFromString(serviceName),
                         UserHandle.SYSTEM.getIdentifier());
@@ -457,11 +457,10 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         };
     }
 
-    @GuardedBy("mLock")
-    private void validateService(String serviceName, boolean checkIsolated)
+    private static void validateServiceElevated(String serviceName, boolean checkIsolated)
             throws RemoteException {
         if (TextUtils.isEmpty(serviceName)) {
-            throw new RuntimeException("");
+            throw new IllegalArgumentException("Received null/empty service name : " + serviceName);
         }
         ComponentName serviceComponent = ComponentName.unflattenFromString(
                 serviceName);
@@ -501,8 +500,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         }
     }
 
-    @GuardedBy("mLock")
-    private boolean isIsolatedService(@NonNull ServiceInfo serviceInfo) {
+    private static boolean isIsolatedService(@NonNull ServiceInfo serviceInfo) {
         return (serviceInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
                 && (serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) == 0;
     }
