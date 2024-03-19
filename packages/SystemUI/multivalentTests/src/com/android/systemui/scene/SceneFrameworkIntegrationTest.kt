@@ -64,6 +64,7 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
+import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
@@ -285,6 +286,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 deviceProvisioningInteractor = kosmos.deviceProvisioningInteractor,
                 centralSurfaces = mock(),
                 headsUpInteractor = kosmos.headsUpNotificationInteractor,
+                occlusionInteractor = kosmos.sceneContainerOcclusionInteractor,
             )
         startable.start()
 
