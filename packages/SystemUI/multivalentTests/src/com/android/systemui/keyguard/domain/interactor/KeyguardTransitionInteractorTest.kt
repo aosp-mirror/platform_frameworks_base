@@ -270,12 +270,61 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun transitionValue_canceled_toAnotherState() =
+        testScope.runTest {
+            val transitionValuesGone by collectValues(underTest.transitionValue(state = GONE))
+            val transitionValuesAod by collectValues(underTest.transitionValue(state = AOD))
+            val transitionValuesLs by collectValues(underTest.transitionValue(state = LOCKSCREEN))
+
+            listOf(
+                    TransitionStep(GONE, AOD, 0f, STARTED),
+                    TransitionStep(GONE, AOD, 0.5f, RUNNING),
+                    TransitionStep(GONE, AOD, 0.5f, CANCELED),
+                    TransitionStep(AOD, LOCKSCREEN, 0.5f, STARTED),
+                    TransitionStep(AOD, LOCKSCREEN, 0.7f, RUNNING),
+                    TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED),
+                )
+                .forEach {
+                    repository.sendTransitionStep(it)
+                    runCurrent()
+                }
+
+            assertThat(transitionValuesGone).isEqualTo(listOf(1f, 0.5f, 0f))
+            assertThat(transitionValuesAod).isEqualTo(listOf(0f, 0.5f, 0.5f, 0.3f, 0f))
+            assertThat(transitionValuesLs).isEqualTo(listOf(0.5f, 0.7f, 1f))
+        }
+
+    @Test
+    fun transitionValue_canceled_backToOriginalState() =
+        testScope.runTest {
+            val transitionValuesGone by collectValues(underTest.transitionValue(state = GONE))
+            val transitionValuesAod by collectValues(underTest.transitionValue(state = AOD))
+
+            listOf(
+                    TransitionStep(GONE, AOD, 0f, STARTED),
+                    TransitionStep(GONE, AOD, 0.5f, RUNNING),
+                    TransitionStep(GONE, AOD, 1f, CANCELED),
+                    TransitionStep(AOD, GONE, 0.5f, STARTED),
+                    TransitionStep(AOD, GONE, 0.7f, RUNNING),
+                    TransitionStep(AOD, GONE, 1f, FINISHED),
+                )
+                .forEach {
+                    repository.sendTransitionStep(it)
+                    runCurrent()
+                }
+
+            assertThat(transitionValuesGone).isEqualTo(listOf(1f, 0.5f, 0.5f, 0.7f, 1f))
+            assertThat(transitionValuesAod).isEqualTo(listOf(0f, 0.5f, 0.5f, 0.3f, 0f))
+        }
+
+    @Test
     fun isInTransitionToAnyState() =
         testScope.runTest {
             val inTransition by collectValues(underTest.isInTransitionToAnyState)
 
             assertEquals(
                 listOf(
+                    false,
                     true, // The repo is seeded with a transition from OFF to LOCKSCREEN.
                     false,
                 ),
@@ -288,6 +337,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                     true,
@@ -301,6 +351,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                     true,
@@ -314,6 +365,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                     true,
@@ -330,6 +382,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                 ),
@@ -345,6 +398,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                     true,
@@ -359,6 +413,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                     true,
@@ -379,6 +434,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                     true,
@@ -398,6 +454,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             assertEquals(
                 listOf(
+                    false,
                     true,
                     false,
                     true,
