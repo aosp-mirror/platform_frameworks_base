@@ -69,8 +69,7 @@ class ObserverTest {
         assertThat(counter.get()).isEqualTo(1)
 
         // trigger GC, the observer callback should not be invoked
-        @Suppress("unused")
-        observer = null
+        null.also { observer = it }
         System.gc()
         System.runFinalization()
 
@@ -100,10 +99,12 @@ class ObserverTest {
     @Test
     fun notifyChange_addObserverWithinCallback() {
         // ConcurrentModificationException is raised if it is not implemented correctly
+        val observer = Observer { observable.addObserver(observer1, executor) }
         observable.addObserver(
-            { observable.addObserver(observer1, executor) },
+            observer,
             MoreExecutors.directExecutor()
         )
         observable.notifyChange(ChangeReason.UPDATE)
+        observable.removeObserver(observer)
     }
 }
