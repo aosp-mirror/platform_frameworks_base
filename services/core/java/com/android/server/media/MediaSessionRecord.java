@@ -687,27 +687,20 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
 
     private static String toVolumeControlTypeString(
             @VolumeProvider.ControlType int volumeControlType) {
-        switch (volumeControlType) {
-            case VOLUME_CONTROL_FIXED:
-                return "FIXED";
-            case VOLUME_CONTROL_RELATIVE:
-                return "RELATIVE";
-            case VOLUME_CONTROL_ABSOLUTE:
-                return "ABSOLUTE";
-            default:
-                return TextUtils.formatSimple("unknown(%d)", volumeControlType);
-        }
+        return switch (volumeControlType) {
+            case VOLUME_CONTROL_FIXED -> "FIXED";
+            case VOLUME_CONTROL_RELATIVE -> "RELATIVE";
+            case VOLUME_CONTROL_ABSOLUTE -> "ABSOLUTE";
+            default -> TextUtils.formatSimple("unknown(%d)", volumeControlType);
+        };
     }
 
     private static String toVolumeTypeString(@PlaybackInfo.PlaybackType int volumeType) {
-        switch (volumeType) {
-            case PLAYBACK_TYPE_LOCAL:
-                return "LOCAL";
-            case PLAYBACK_TYPE_REMOTE:
-                return "REMOTE";
-            default:
-                return TextUtils.formatSimple("unknown(%d)", volumeType);
-        }
+        return switch (volumeType) {
+            case PLAYBACK_TYPE_LOCAL -> "LOCAL";
+            case PLAYBACK_TYPE_REMOTE -> "REMOTE";
+            default -> TextUtils.formatSimple("unknown(%d)", volumeType);
+        };
     }
 
     @Override
