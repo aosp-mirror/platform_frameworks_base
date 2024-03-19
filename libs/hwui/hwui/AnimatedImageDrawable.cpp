@@ -15,17 +15,15 @@
  */
 
 #include "AnimatedImageDrawable.h"
-#ifdef __ANDROID__ // Layoutlib does not support AnimatedImageThread
-#include "AnimatedImageThread.h"
-#endif
-
-#include <gui/TraceUtils.h>
-#include "pipeline/skia/SkiaUtils.h"
 
 #include <SkPicture.h>
 #include <SkRefCnt.h>
+#include <gui/TraceUtils.h>
 
 #include <optional>
+
+#include "AnimatedImageThread.h"
+#include "pipeline/skia/SkiaUtils.h"
 
 namespace android {
 
@@ -185,10 +183,8 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     } else if (starting) {
         // The image has animated, and now is being reset. Queue up the first
         // frame, but keep showing the current frame until the first is ready.
-#ifdef __ANDROID__ // Layoutlib does not support AnimatedImageThread
         auto& thread = uirenderer::AnimatedImageThread::getInstance();
         mNextSnapshot = thread.reset(sk_ref_sp(this));
-#endif
     }
 
     bool finalFrame = false;
@@ -214,10 +210,8 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     }
 
     if (mRunning && !mNextSnapshot.valid()) {
-#ifdef __ANDROID__ // Layoutlib does not support AnimatedImageThread
         auto& thread = uirenderer::AnimatedImageThread::getInstance();
         mNextSnapshot = thread.decodeNextFrame(sk_ref_sp(this));
-#endif
     }
 
     if (!drawDirectly) {
