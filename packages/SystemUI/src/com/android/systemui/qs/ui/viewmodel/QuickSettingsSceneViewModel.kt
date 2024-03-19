@@ -48,6 +48,8 @@ constructor(
         qsSceneAdapter.isCustomizing.map { customizing ->
             if (customizing) {
                 mapOf<UserAction, UserActionResult>(Back to UserActionResult(Scenes.QuickSettings))
+                // TODO(b/330200163) Add an Up from Bottom to be able to collapse the shade
+                // while customizing
             } else {
                 mapOf(
                     Back to UserActionResult(Scenes.Shade),

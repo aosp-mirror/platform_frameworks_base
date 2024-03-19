@@ -66,11 +66,13 @@ constructor(
                 deviceEntryInteractor.isUnlocked,
                 deviceEntryInteractor.canSwipeToEnter,
                 shadeInteractor.shadeMode,
-            ) { isUnlocked, canSwipeToDismiss, shadeMode ->
+                qsSceneAdapter.isCustomizing
+            ) { isUnlocked, canSwipeToDismiss, shadeMode, isCustomizing ->
                 destinationScenes(
                     isUnlocked = isUnlocked,
                     canSwipeToDismiss = canSwipeToDismiss,
                     shadeMode = shadeMode,
+                    isCustomizing = isCustomizing
                 )
             }
             .stateIn(
@@ -81,6 +83,7 @@ constructor(
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
                         shadeMode = shadeInteractor.shadeMode.value,
+                        isCustomizing = qsSceneAdapter.isCustomizing.value,
                     ),
             )
 
@@ -120,6 +123,7 @@ constructor(
         isUnlocked: Boolean,
         canSwipeToDismiss: Boolean?,
         shadeMode: ShadeMode,
+        isCustomizing: Boolean,
     ): Map<UserAction, UserActionResult> {
         val up =
             when {
@@ -131,7 +135,9 @@ constructor(
         val down = Scenes.QuickSettings.takeIf { shadeMode is ShadeMode.Single }
 
         return buildMap {
-            this[Swipe(SwipeDirection.Up)] = UserActionResult(up)
+            if (!isCustomizing) {
+                this[Swipe(SwipeDirection.Up)] = UserActionResult(up)
+            } // TODO(b/330200163) Add an else to be able to collapse the shade while customizing
             down?.let { this[Swipe(SwipeDirection.Down)] = UserActionResult(down) }
         }
     }
