@@ -45,14 +45,15 @@ sensor.gyroscope.power = 0.8
 # This uneven timing causes the apparent speed of a finger (calculated using
 # time deltas between received reports) to vary dramatically even if it's
 # actually moving smoothly across the touchpad, triggering the touchpad stack's
-# drumroll detection logic, which causes the finger's single smooth movement to
-# be treated as many small movements of consecutive touches, which are then
-# inhibited by the click wiggle filter.
+# drumroll detection logic. For moving fingers, the drumroll detection logic
+# splits the finger's single movement into many small movements of consecutive
+# touches, which are then inhibited by the click wiggle filter. For tapping
+# fingers, it prevents tapping to click because it thinks the finger's moving
+# too fast.
 #
-# Since this touchpad does not seem vulnerable to click wiggle, we can safely
-# disable drumroll detection due to speed changes (by setting the speed change
-# threshold very high, since there's no boolean control property).
-gestureProp.Drumroll_Max_Speed_Change_Factor = 1000000000
+# Since this touchpad doesn't seem to have to drumroll issues, we can safely
+# disable drumroll detection.
+gestureProp.Drumroll_Suppression_Enable = 0
 
 # Because of the way this touchpad is positioned, touches around the edges are
 # no more likely to be palms than ones in the middle, so remove the edge zones
