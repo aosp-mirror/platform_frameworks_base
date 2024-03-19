@@ -22,6 +22,7 @@ import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags.notificationMinimalismPrototype
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -260,8 +262,11 @@ constructor(
         }
     }
 
-    private suspend fun trackUnseenFilterSettingChanges() {
-        secureSettings
+    private fun unseenFeatureEnabled(): Flow<Boolean> {
+        if (notificationMinimalismPrototype()) {
+            return flowOf(true)
+        }
+        return secureSettings
             // emit whenever the setting has changed
             .observerFlow(
                 UserHandle.USER_ALL,
@@ -283,17 +288,20 @@ constructor(
             // only track the most recent emission, if events are happening faster than they can be
             // consumed
             .conflate()
-            .collectLatest { setting ->
-                // update local field and invalidate if necessary
-                if (setting != unseenFilterEnabled) {
-                    unseenFilterEnabled = setting
-                    unseenNotifFilter.invalidateList("unseen setting changed")
-                }
-                // if the setting is enabled, then start tracking and filtering unseen notifications
-                if (setting) {
-                    trackSeenNotifications()
-                }
+    }
+
+    private suspend fun trackUnseenFilterSettingChanges() {
+        unseenFeatureEnabled().collectLatest { setting ->
+            // update local field and invalidate if necessary
+            if (setting != unseenFilterEnabled) {
+                unseenFilterEnabled = setting
+                unseenNotifFilter.invalidateList("unseen setting changed")
             }
+            // if the setting is enabled, then start tracking and filtering unseen notifications
+            if (setting) {
+                trackSeenNotifications()
+            }
+        }
     }
 
     private val collectionListener =
