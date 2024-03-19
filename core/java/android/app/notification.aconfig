@@ -82,3 +82,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "sort_section_by_time"
+  namespace: "systemui"
+  description: "Changes notification sort order to be by time within a section"
+  bug: "330193582"
+}
