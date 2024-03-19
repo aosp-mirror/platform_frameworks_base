@@ -28,7 +28,6 @@ import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.util.Log
-import java.lang.ClassCastException
 
 /**
  * Proxy to launch in user 0
@@ -61,22 +60,28 @@ class ControlsRequestReceiver : BroadcastReceiver() {
         }
 
         val targetComponent = try {
-            intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
-        } catch (e: ClassCastException) {
+            intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME, ComponentName::class.java)
+        } catch (e: Exception) {
             Log.e(TAG, "Malformed intent extra ComponentName", e)
+            return
+        } ?: run {
+            Log.e(TAG, "Null target component")
             return
         }
 
         val control = try {
-            intent.getParcelableExtra<Control>(ControlsProviderService.EXTRA_CONTROL)
-        } catch (e: ClassCastException) {
+            intent.getParcelableExtra(ControlsProviderService.EXTRA_CONTROL, Control::class.java)
+        } catch (e: Exception) {
             Log.e(TAG, "Malformed intent extra Control", e)
+            return
+        } ?: run {
+            Log.e(TAG, "Null control")
             return
         }
 
-        val packageName = targetComponent?.packageName
+        val packageName = targetComponent.packageName
 
-        if (packageName == null || !isPackageInForeground(context, packageName)) {
+        if (!isPackageInForeground(context, packageName)) {
             return
         }
 

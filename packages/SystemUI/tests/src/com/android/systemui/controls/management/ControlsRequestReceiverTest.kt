@@ -24,6 +24,9 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
@@ -176,6 +179,64 @@ class ControlsRequestReceiverTest : SysuiTestCase() {
         assertNull(wrapper.intent)
     }
 
+    @Test
+    fun testClassNotFoundExceptionComponent_noCrash() {
+        val bundle = Bundle().apply {
+            putParcelable(Intent.EXTRA_COMPONENT_NAME, PrivateParcelable())
+            putParcelable(ControlsProviderService.EXTRA_CONTROL, control)
+        }
+        val parcel = Parcel.obtain()
+        bundle.writeToParcel(parcel, 0)
+
+        parcel.setDataPosition(0)
+
+        val badIntent = Intent(ControlsProviderService.ACTION_ADD_CONTROL).apply {
+            parcel.readBundle()?.let { putExtras(it) }
+        }
+        receiver.onReceive(wrapper, badIntent)
+
+        assertNull(wrapper.intent)
+    }
+
+    @Test
+    fun testClassNotFoundExceptionControl_noCrash() {
+        val bundle = Bundle().apply {
+            putParcelable(Intent.EXTRA_COMPONENT_NAME, componentName)
+            putParcelable(ControlsProviderService.EXTRA_CONTROL, PrivateParcelable())
+        }
+        val parcel = Parcel.obtain()
+        bundle.writeToParcel(parcel, 0)
+
+        parcel.setDataPosition(0)
+
+        val badIntent = Intent(ControlsProviderService.ACTION_ADD_CONTROL).apply {
+            parcel.readBundle()?.let { putExtras(it) }
+        }
+        receiver.onReceive(wrapper, badIntent)
+
+        assertNull(wrapper.intent)
+    }
+
+    @Test
+    fun testMissingComponentName_noCrash() {
+        val badIntent = Intent(ControlsProviderService.ACTION_ADD_CONTROL).apply {
+            putExtra(ControlsProviderService.EXTRA_CONTROL, control)
+        }
+        receiver.onReceive(wrapper, badIntent)
+
+        assertNull(wrapper.intent)
+    }
+
+    @Test
+    fun testMissingControl_noCrash() {
+        val badIntent = Intent(ControlsProviderService.ACTION_ADD_CONTROL).apply {
+            putExtra(Intent.EXTRA_COMPONENT_NAME, componentName)
+        }
+        receiver.onReceive(wrapper, badIntent)
+
+        assertNull(wrapper.intent)
+    }
+
     class MyWrapper(context: Context) : ContextWrapper(context) {
         var intent: Intent? = null
 
@@ -187,6 +248,22 @@ class ControlsRequestReceiverTest : SysuiTestCase() {
 
         override fun startActivity(intent: Intent) {
             this.intent = intent
+        }
+    }
+
+    class PrivateParcelable : Parcelable {
+        override fun describeContents() = 0
+
+        override fun writeToParcel(dest: Parcel, flags: Int) {}
+
+        companion object CREATOR : Parcelable.Creator<PrivateParcelable?> {
+            override fun createFromParcel(source: Parcel?): PrivateParcelable {
+                return PrivateParcelable()
+            }
+
+            override fun newArray(size: Int): Array<PrivateParcelable?> {
+                return arrayOfNulls(size)
+            }
         }
     }
 }
