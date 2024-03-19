@@ -50,7 +50,7 @@ java_sdk_library {
     ],
     defaults: ["framework-module-defaults"],
     sdk_version: "module_current",
-    min_sdk_version: "34", // should be 35 (making it 34 for compiling for `-next`)
+    min_sdk_version: "VanillaIceCream",
     installable: true,
     optimize: {
         enabled: false,
