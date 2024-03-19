@@ -1037,16 +1037,16 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * {@link #setUserAuthenticationValidityDurationSeconds} and
          * {@link #setUserAuthenticationRequired}). Once the device has been removed from the
          * user's body, the key will be considered unauthorized and the user will need to
-         * re-authenticate to use it. For keys without an authentication validity period this
-         * parameter has no effect.
+         * re-authenticate to use it. If the device does not have an on-body sensor or the key does
+         * not have an authentication validity period, this parameter has no effect.
+         * <p>
+         * Since Android 12 (API level 31), this parameter has no effect even on devices that have
+         * an on-body sensor. A future version of Android may restore enforcement of this parameter.
+         * Meanwhile, it is recommended to not use it.
          *
-         * <p>Similarly, on devices that do not have an on-body sensor, this parameter will have no
-         * effect; the device will always be considered to be "on-body" and the key will therefore
-         * remain authorized until the validity period ends.
-         *
-         * @param remainsValid if {@code true}, and if the device supports on-body detection, key
-         * will be invalidated when the device is removed from the user's body or when the
-         * authentication validity expires, whichever occurs first.
+         * @param remainsValid if {@code true}, and if the device supports enforcement of this
+         * parameter, the key will be invalidated when the device is removed from the user's body or
+         * when the authentication validity expires, whichever occurs first.
          */
         @NonNull
         public Builder setUserAuthenticationValidWhileOnBody(boolean remainsValid) {
