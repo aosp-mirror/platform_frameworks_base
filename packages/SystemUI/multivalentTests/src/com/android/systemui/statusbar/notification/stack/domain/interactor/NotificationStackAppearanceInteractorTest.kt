@@ -20,9 +20,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -30,10 +33,9 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
 class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
 
-    private val kosmos = Kosmos()
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val underTest = kosmos.notificationStackAppearanceInteractor
 
@@ -57,6 +59,18 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
                 )
             underTest.setStackBounds(bounds2)
             assertThat(stackBounds).isEqualTo(bounds2)
+        }
+
+    @Test
+    fun stackRounding() =
+        testScope.runTest {
+            val stackRounding by collectLastValue(underTest.stackRounding)
+
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
+            assertThat(stackRounding).isEqualTo(StackRounding(roundTop = true, roundBottom = false))
+
+            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
+            assertThat(stackRounding).isEqualTo(StackRounding(roundTop = true, roundBottom = true))
         }
 
     @Test(expected = IllegalStateException::class)

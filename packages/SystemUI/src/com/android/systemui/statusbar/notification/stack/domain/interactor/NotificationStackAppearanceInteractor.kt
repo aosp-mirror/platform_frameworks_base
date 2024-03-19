@@ -18,6 +18,8 @@
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationStackAppearanceRepository
 import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
@@ -25,6 +27,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 
 /** An interactor which controls the appearance of the NSSL */
 @SysUISingleton
@@ -32,12 +37,30 @@ class NotificationStackAppearanceInteractor
 @Inject
 constructor(
     private val repository: NotificationStackAppearanceRepository,
+    shadeInteractor: ShadeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
     val stackBounds: StateFlow<StackBounds> = repository.stackBounds.asStateFlow()
 
+    /**
+     * Whether the stack is expanding from GONE-with-HUN to SHADE
+     *
+     * TODO(b/296118689): implement this to match legacy QSController logic
+     */
+    private val isExpandingFromHeadsUp: Flow<Boolean> = flowOf(false)
+
     /** The rounding of the notification stack. */
-    val stackRounding: StateFlow<StackRounding> = repository.stackRounding.asStateFlow()
+    val stackRounding: Flow<StackRounding> =
+        combine(
+                shadeInteractor.shadeMode,
+                isExpandingFromHeadsUp,
+            ) { shadeMode, isExpandingFromHeadsUp ->
+                StackRounding(
+                    roundTop = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
+                    roundBottom = shadeMode != ShadeMode.Single,
+                )
+            }
+            .distinctUntilChanged()
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of

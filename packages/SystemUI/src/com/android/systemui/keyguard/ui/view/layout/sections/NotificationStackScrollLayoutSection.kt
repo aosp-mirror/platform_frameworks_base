@@ -31,15 +31,10 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.statusbar.notification.stack.AmbientState
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackAppearanceViewBinder
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 
 abstract class NotificationStackScrollLayoutSection
@@ -49,11 +44,8 @@ constructor(
     private val notificationPanelView: NotificationPanelView,
     private val sharedNotificationContainer: SharedNotificationContainer,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
-    private val notificationStackAppearanceViewModel: NotificationStackAppearanceViewModel,
-    private val ambientState: AmbientState,
-    private val controller: NotificationStackScrollLayoutController,
-    private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    private val mainDispatcher: CoroutineDispatcher,
+    private val sharedNotificationContainerBinder: SharedNotificationContainerBinder,
+    private val notificationStackViewBinder: NotificationStackViewBinder,
 ) : KeyguardSection() {
     private val placeHolderId = R.id.nssl_placeholder
     private val disposableHandles: MutableList<DisposableHandle> = mutableListOf()
@@ -104,27 +96,14 @@ constructor(
 
         disposeHandles()
         disposableHandles.add(
-            SharedNotificationContainerBinder.bind(
+            sharedNotificationContainerBinder.bind(
                 sharedNotificationContainer,
                 sharedNotificationContainerViewModel,
-                sceneContainerFlags,
-                controller,
-                notificationStackSizeCalculator,
-                mainImmediateDispatcher = mainDispatcher,
             )
         )
 
         if (sceneContainerFlags.isEnabled()) {
-            disposableHandles.add(
-                NotificationStackAppearanceViewBinder.bind(
-                    context,
-                    sharedNotificationContainer,
-                    notificationStackAppearanceViewModel,
-                    ambientState,
-                    controller,
-                    mainImmediateDispatcher = mainDispatcher,
-                )
-            )
+            disposableHandles.add(notificationStackViewBinder.bindWhileAttached())
         }
     }
 

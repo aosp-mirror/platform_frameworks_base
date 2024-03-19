@@ -20,6 +20,7 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
@@ -30,6 +31,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,16 +40,19 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** Binds the shared notification container to its view-model. */
-object SharedNotificationContainerBinder {
+@SysUISingleton
+class SharedNotificationContainerBinder
+@Inject
+constructor(
+    private val sceneContainerFlags: SceneContainerFlags,
+    private val controller: NotificationStackScrollLayoutController,
+    private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
+    @Main private val mainImmediateDispatcher: CoroutineDispatcher,
+) {
 
-    @JvmStatic
     fun bind(
         view: SharedNotificationContainer,
         viewModel: SharedNotificationContainerViewModel,
-        sceneContainerFlags: SceneContainerFlags,
-        controller: NotificationStackScrollLayoutController,
-        notificationStackSizeCalculator: NotificationStackSizeCalculator,
-        @Main mainImmediateDispatcher: CoroutineDispatcher,
     ): DisposableHandle {
         val disposableHandle =
             view.repeatWhenAttached {
