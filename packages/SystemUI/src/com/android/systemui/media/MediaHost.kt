@@ -159,8 +159,14 @@ class MediaHost constructor(
         }
     }
 
-    private fun updateViewVisibility() {
-        state.visible = if (showsOnlyActiveMedia) {
+    /**
+     * Updates this host's state based on the current media data's status, and invokes listeners if
+     * the visibility has changed
+     */
+    fun updateViewVisibility() {
+        state.visible = if (mediaHierarchyManager.isLockedAndHidden()) {
+            false
+        } else if (showsOnlyActiveMedia) {
             mediaDataManager.hasActiveMedia()
         } else {
             mediaDataManager.hasAnyMedia()
