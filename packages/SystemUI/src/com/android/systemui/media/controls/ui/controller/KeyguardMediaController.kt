@@ -18,18 +18,12 @@ package com.android.systemui.media.controls.ui.controller
 
 import android.content.Context
 import android.content.res.Configuration
-import android.database.ContentObserver
-import android.net.Uri
-import android.os.Handler
-import android.os.UserHandle
-import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
@@ -43,7 +37,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.println
-import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.withIncreasedIndent
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -61,8 +54,6 @@ constructor(
     private val bypassController: KeyguardBypassController,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val context: Context,
-    private val secureSettings: SecureSettings,
-    @Main private val handler: Handler,
     configurationController: ConfigurationController,
     private val splitShadeStateController: SplitShadeStateController,
     private val logger: KeyguardMediaControllerLogger,
@@ -89,26 +80,6 @@ constructor(
                     updateResources()
                 }
             }
-        )
-
-        val settingsObserver: ContentObserver =
-            object : ContentObserver(handler) {
-                override fun onChange(selfChange: Boolean, uri: Uri?) {
-                    if (uri == lockScreenMediaPlayerUri) {
-                        allowMediaPlayerOnLockScreen =
-                            secureSettings.getBoolForUser(
-                                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-                                true,
-                                UserHandle.USER_CURRENT
-                            )
-                        refreshMediaPosition(reason = "allowMediaPlayerOnLockScreen changed")
-                    }
-                }
-            }
-        secureSettings.registerContentObserverForUser(
-            Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-            settingsObserver,
-            UserHandle.USER_ALL
         )
 
         // First let's set the desired state that we want for this host
@@ -155,16 +126,6 @@ constructor(
     var singlePaneContainer: MediaContainerView? = null
         private set
     private var splitShadeContainer: ViewGroup? = null
-
-    /** Track the media player setting status on lock screen. */
-    private var allowMediaPlayerOnLockScreen: Boolean =
-        secureSettings.getBoolForUser(
-            Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
-            true,
-            UserHandle.USER_CURRENT
-        )
-    private val lockScreenMediaPlayerUri =
-        secureSettings.getUriFor(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
 
     /**
      * Attaches media container in single pane mode, situated at the top of the notifications list
@@ -229,14 +190,12 @@ constructor(
         // mediaHost.visible required for proper animations handling
         val isMediaHostVisible = mediaHost.visible
         val isBypassNotEnabled = !bypassController.bypassEnabled
-        val currentAllowMediaPlayerOnLockScreen = allowMediaPlayerOnLockScreen
         val useSplitShade = useSplitShade
         val shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade()
         visible =
             isMediaHostVisible &&
                 isBypassNotEnabled &&
                 keyguardOrUserSwitcher &&
-                currentAllowMediaPlayerOnLockScreen &&
                 shouldBeVisibleForSplitShade
         logger.logRefreshMediaPosition(
             reason = reason,
@@ -246,7 +205,6 @@ constructor(
             keyguardOrUserSwitcher = keyguardOrUserSwitcher,
             mediaHostVisible = isMediaHostVisible,
             bypassNotEnabled = isBypassNotEnabled,
-            currentAllowMediaPlayerOnLockScreen = currentAllowMediaPlayerOnLockScreen,
             shouldBeVisibleForSplitShade = shouldBeVisibleForSplitShade,
         )
         val currActiveContainer = activeContainer
@@ -321,7 +279,6 @@ constructor(
                 println("Self", this@KeyguardMediaController)
                 println("visible", visible)
                 println("useSplitShade", useSplitShade)
-                println("allowMediaPlayerOnLockScreen", allowMediaPlayerOnLockScreen)
                 println("bypassController.bypassEnabled", bypassController.bypassEnabled)
                 println("isDozeWakeUpAnimationWaiting", isDozeWakeUpAnimationWaiting)
                 println("singlePaneContainer", singlePaneContainer)

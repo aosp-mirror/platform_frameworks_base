@@ -36,7 +36,6 @@ constructor(@KeyguardMediaControllerLog private val logBuffer: LogBuffer) {
         keyguardOrUserSwitcher: Boolean,
         mediaHostVisible: Boolean,
         bypassNotEnabled: Boolean,
-        currentAllowMediaPlayerOnLockScreen: Boolean,
         shouldBeVisibleForSplitShade: Boolean,
     ) {
         logBuffer.log(
@@ -50,8 +49,7 @@ constructor(@KeyguardMediaControllerLog private val logBuffer: LogBuffer) {
                 bool3 = keyguardOrUserSwitcher
                 bool4 = mediaHostVisible
                 int2 = if (bypassNotEnabled) 1 else 0
-                str2 = currentAllowMediaPlayerOnLockScreen.toString()
-                str3 = shouldBeVisibleForSplitShade.toString()
+                str2 = shouldBeVisibleForSplitShade.toString()
             },
             {
                 "refreshMediaPosition(reason=$str1, " +
@@ -60,8 +58,7 @@ constructor(@KeyguardMediaControllerLog private val logBuffer: LogBuffer) {
                     "keyguardOrUserSwitcher=$bool3, " +
                     "mediaHostVisible=$bool4, " +
                     "bypassNotEnabled=${int2 == 1}, " +
-                    "currentAllowMediaPlayerOnLockScreen=$str2, " +
-                    "shouldBeVisibleForSplitShade=$str3)"
+                    "shouldBeVisibleForSplitShade=$str2)"
             }
         )
     }
