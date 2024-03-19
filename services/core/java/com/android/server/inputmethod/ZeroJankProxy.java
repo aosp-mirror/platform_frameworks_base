@@ -46,7 +46,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
-import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.inputmethod.CursorAnchorInfo;
@@ -77,6 +76,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.function.BooleanSupplier;
 
 /**
  * A proxy that processes all {@link IInputMethodManager} calls asynchronously.
@@ -86,10 +86,12 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
 
     private final IInputMethodManager mInner;
     private final Executor mExecutor;
+    private final BooleanSupplier mIsInputShown;
 
-    ZeroJankProxy(Executor executor, IInputMethodManager inner) {
+    ZeroJankProxy(Executor executor, IInputMethodManager inner, BooleanSupplier isInputShown) {
         mInner = inner;
         mExecutor = executor;
+        mIsInputShown = isInputShown;
     }
 
     private void offload(ThrowingRunnable r) {
@@ -163,8 +165,19 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             int lastClickTooType, ResultReceiver resultReceiver,
             @SoftInputShowHideReason int reason)
             throws RemoteException {
-        offload(() -> mInner.showSoftInput(client, windowToken, statsToken, flags, lastClickTooType,
-                resultReceiver, reason));
+        offload(
+                () -> {
+                    if (!mInner.showSoftInput(
+                            client,
+                            windowToken,
+                            statsToken,
+                            flags,
+                            lastClickTooType,
+                            resultReceiver,
+                            reason)) {
+                        sendResultReceiverFailure(resultReceiver);
+                    }
+                });
         return true;
     }
 
@@ -173,9 +186,22 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
             @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason)
             throws RemoteException {
-        offload(() -> mInner.hideSoftInput(client, windowToken, statsToken, flags, resultReceiver,
-                reason));
+        offload(
+                () -> {
+                    if (!mInner.hideSoftInput(
+                            client, windowToken, statsToken, flags, resultReceiver, reason)) {
+                        sendResultReceiverFailure(resultReceiver);
+                    }
+                });
         return true;
+    }
+
+    private void sendResultReceiverFailure(ResultReceiver resultReceiver) {
+        resultReceiver.send(
+                mIsInputShown.getAsBoolean()
+                        ? InputMethodManager.RESULT_UNCHANGED_SHOWN
+                        : InputMethodManager.RESULT_UNCHANGED_HIDDEN,
+                null);
     }
 
     @Override
