@@ -85,10 +85,12 @@ constructor(
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
     private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    private val dreamingToGoneTransitionViewModel: DreamingToGoneTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
+    private val goneToDreamingTransitionViewModel: GoneToDreamingTransitionViewModel,
     private val lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
     private val lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
@@ -136,14 +138,20 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val lockscreenToGoneTransitionRunning: Flow<Boolean> =
+        keyguardTransitionInteractor
+            .isInTransitionWhere { from, to -> from == LOCKSCREEN && to == GONE }
+            .onStart { emit(false) }
+
     private val alphaOnShadeExpansion: Flow<Float> =
         combineTransform(
+                lockscreenToGoneTransitionRunning,
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) { isOnLockscreen, qsExpansion, shadeExpansion ->
+            ) { lockscreenToGoneTransitionRunning, isOnLockscreen, qsExpansion, shadeExpansion ->
                 // Fade out quickly as the shade expands
-                if (isOnLockscreen) {
+                if (isOnLockscreen && !lockscreenToGoneTransitionRunning) {
                     val alpha =
                         1f -
                             MathUtils.constrainedMap(
@@ -204,10 +212,12 @@ constructor(
                         dozingToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+                        dreamingToGoneTransitionViewModel.lockscreenAlpha,
                         dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
                         goneToAodTransitionViewModel.enterFromTopAnimationAlpha,
                         goneToDozingTransitionViewModel.lockscreenAlpha,
+                        goneToDreamingTransitionViewModel.lockscreenAlpha,
                         lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
                         lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
