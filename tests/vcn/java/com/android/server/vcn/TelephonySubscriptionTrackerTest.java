@@ -38,6 +38,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -58,6 +59,7 @@ import android.os.HandlerExecutor;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.os.test.TestLooper;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -71,7 +73,10 @@ import android.util.ArraySet;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.telephony.flags.Flags;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -127,6 +132,9 @@ public class TelephonySubscriptionTrackerTest {
         subIdToCarrierConfigMap.put(TEST_SUBSCRIPTION_ID_1, TEST_CARRIER_CONFIG_WRAPPER);
         TEST_SUBID_TO_CARRIER_CONFIG_MAP = Collections.unmodifiableMap(subIdToCarrierConfigMap);
     }
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
 
     @NonNull private final Context mContext;
     @NonNull private final TestLooper mTestLooper;
@@ -185,6 +193,7 @@ public class TelephonySubscriptionTrackerTest {
 
     @Before
     public void setUp() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_FIX_CRASH_ON_GETTING_CONFIG_WHEN_PHONE_IS_GONE);
         doReturn(2).when(mTelephonyManager).getActiveModemCount();
 
         mCallback = mock(TelephonySubscriptionTrackerCallback.class);
@@ -593,5 +602,15 @@ public class TelephonySubscriptionTrackerTest {
         assertEquals(
                 new ArraySet<>(Arrays.asList(TEST_SUBSCRIPTION_ID_1, TEST_SUBSCRIPTION_ID_2)),
                 snapshot.getAllSubIdsInGroup(TEST_PARCEL_UUID));
+    }
+
+    @Test
+    public void testCarrierConfigChangeWhenPhoneIsGoneShouldNotCrash() throws Exception {
+        doThrow(new IllegalStateException("Carrier config loader is not available."))
+                .when(mCarrierConfigManager)
+                .getConfigForSubId(eq(TEST_SUBSCRIPTION_ID_1), any());
+
+        sendCarrierConfigChange(true /* hasValidSubscription */);
+        mTestLooper.dispatchAll();
     }
 }
