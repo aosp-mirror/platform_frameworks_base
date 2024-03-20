@@ -68,7 +68,9 @@ class LockscreenToGoneTransitionViewModelTest : SysuiTestCase() {
             repository.sendTransitionStep(step(0f))
             assertThat(alpha).isEqualTo(0.5f)
 
-            // Before the halfway point, it will have reached zero
+            repository.sendTransitionStep(step(0.25f))
+            assertThat(alpha).isEqualTo(0.25f)
+
             repository.sendTransitionStep(step(.5f))
             assertThat(alpha).isEqualTo(0f)
         }

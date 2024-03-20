@@ -720,59 +720,6 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun alphaDoesNotUpdateWhileGoneTransitionIsRunning() =
-        testScope.runTest {
-            val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
-
-            showLockscreen()
-            // GONE transition gets to 90% complete
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    transitionState = TransitionState.STARTED,
-                    value = 0f,
-                )
-            )
-            runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    transitionState = TransitionState.RUNNING,
-                    value = 0.9f,
-                )
-            )
-            runCurrent()
-
-            // At this point, alpha should be zero
-            assertThat(alpha).isEqualTo(0f)
-
-            // An attempt to override by the shade should be ignored
-            shadeRepository.setQsExpansion(0.5f)
-            assertThat(alpha).isEqualTo(0f)
-        }
-
-    @Test
-    fun alphaWhenGoneIsSetToOne() =
-        testScope.runTest {
-            val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
-
-            showLockscreen()
-
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope
-            )
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-
-            assertThat(alpha).isEqualTo(1f)
-        }
-
-    @Test
     fun shadeCollapseFadeIn() =
         testScope.runTest {
             val fadeIn by collectValues(underTest.shadeCollapseFadeIn)
