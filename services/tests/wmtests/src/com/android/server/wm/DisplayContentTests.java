@@ -1068,16 +1068,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
     }
 
-    @SetupWindows(addWindows = W_INPUT_METHOD)
-    @Test
-    public void testInputMethodSet_listenOnDisplayAreaConfigurationChanged() {
-        spyOn(mAtm);
-        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
-
-        verify(mAtm).onImeWindowSetOnDisplayArea(
-                mImeWindow.mSession.mPid, mDisplayContent.getImeContainer());
-    }
-
     @Test
     public void testAllowsTopmostFullscreenOrientation() {
         final DisplayContent dc = createNewDisplay();

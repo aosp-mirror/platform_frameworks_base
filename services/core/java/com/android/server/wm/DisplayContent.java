@@ -4171,11 +4171,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     void setInputMethodWindowLocked(WindowState win) {
         mInputMethodWindow = win;
-        // Update display configuration for IME process.
-        if (mInputMethodWindow != null) {
-            final int imePid = mInputMethodWindow.mSession.mPid;
-            mAtmService.onImeWindowSetOnDisplayArea(imePid, mImeWindowsContainer);
-        }
         mInsetsStateController.getImeSourceProvider().setWindowContainer(win,
                 mDisplayPolicy.getImeSourceFrameProvider(), null);
         computeImeTarget(true /* updateImeTarget */);
