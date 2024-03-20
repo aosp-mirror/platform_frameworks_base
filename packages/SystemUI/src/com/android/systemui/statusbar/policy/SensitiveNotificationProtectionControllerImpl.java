@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.permission.flags.Flags.sensitiveNotificationAppProtection;
 import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
@@ -23,6 +24,7 @@ import static com.android.server.notification.Flags.screenshareNotificationHidin
 import android.annotation.MainThread;
 import android.app.IActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ExecutorContentObserver;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
@@ -32,6 +34,9 @@ import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
@@ -52,6 +57,7 @@ public class SensitiveNotificationProtectionControllerImpl
         implements SensitiveNotificationProtectionController {
     private static final String LOG_TAG = "SNPC";
     private final SensitiveNotificationProtectionControllerLogger mLogger;
+    private final PackageManager mPackageManager;
     private final ArraySet<String> mExemptPackages = new ArraySet<>();
     private final ListenerSet<Runnable> mListeners = new ListenerSet<>();
     private volatile MediaProjectionInfo mProjection;
@@ -64,17 +70,7 @@ public class SensitiveNotificationProtectionControllerImpl
                 public void onStart(MediaProjectionInfo info) {
                     Trace.beginSection("SNPC.onProjectionStart");
                     try {
-                        if (mDisableScreenShareProtections) {
-                            Log.w(LOG_TAG,
-                                    "Screen share protections disabled, ignoring projectionstart");
-                            mLogger.logProjectionStart(false, info.getPackageName());
-                            return;
-                        }
-
-                        // Only enable sensitive content protection if sharing full screen
-                        // Launch cookie only set (non-null) if sharing single app/task
-                        updateProjectionStateAndNotifyListeners(
-                                (info.getLaunchCookie() == null) ? info : null);
+                        updateProjectionStateAndNotifyListeners(info);
                         mLogger.logProjectionStart(isSensitiveStateActive(), info.getPackageName());
                     } finally {
                         Trace.endSection();
@@ -99,10 +95,12 @@ public class SensitiveNotificationProtectionControllerImpl
             GlobalSettings settings,
             MediaProjectionManager mediaProjectionManager,
             IActivityManager activityManager,
+            PackageManager packageManager,
             @Main Handler mainHandler,
             @Background Executor bgExecutor,
             SensitiveNotificationProtectionControllerLogger logger) {
         mLogger = logger;
+        mPackageManager = packageManager;
 
         if (!screenshareNotificationHiding()) {
             return;
@@ -168,7 +166,7 @@ public class SensitiveNotificationProtectionControllerImpl
         mExemptPackages.addAll(exemptPackages);
 
         if (mProjection != null) {
-            mListeners.forEach(Runnable::run);
+            updateProjectionStateAndNotifyListeners(mProjection);
         }
     }
 
@@ -177,18 +175,48 @@ public class SensitiveNotificationProtectionControllerImpl
      * listeners
      */
     @MainThread
-    private void updateProjectionStateAndNotifyListeners(MediaProjectionInfo info) {
+    private void updateProjectionStateAndNotifyListeners(@Nullable MediaProjectionInfo info) {
         Assert.isMainThread();
         // capture previous state
         boolean wasSensitive = isSensitiveStateActive();
 
         // update internal state
-        mProjection = info;
+        mProjection = getNonExemptProjectionInfo(info);
 
         // if either previous or new state is sensitive, notify listeners.
         if (wasSensitive || isSensitiveStateActive()) {
             mListeners.forEach(Runnable::run);
         }
+    }
+
+    private MediaProjectionInfo getNonExemptProjectionInfo(@Nullable MediaProjectionInfo info) {
+        if (mDisableScreenShareProtections) {
+            Log.w(LOG_TAG, "Screen share protections disabled");
+            return null;
+        } else if (info != null && mExemptPackages.contains(info.getPackageName())) {
+            Log.w(LOG_TAG, "Screen share protections exempt for package " + info.getPackageName());
+            return null;
+        } else if (info != null && canRecordSensitiveContent(info.getPackageName())) {
+            Log.w(LOG_TAG, "Screen share protections exempt for package " + info.getPackageName()
+                    + " via permission");
+            return null;
+        } else if (info != null && info.getLaunchCookie() != null) {
+            // Only enable sensitive content protection if sharing full screen
+            // Launch cookie only set (non-null) if sharing single app/task
+            Log.w(LOG_TAG, "Screen share protections exempt for single app screenshare");
+            return null;
+        }
+        return info;
+    }
+
+    private boolean canRecordSensitiveContent(@NonNull String packageName) {
+        // RECORD_SENSITIVE_CONTENT is flagged api on sensitiveNotificationAppProtection
+        if (sensitiveNotificationAppProtection()) {
+            return mPackageManager.checkPermission(
+                            android.Manifest.permission.RECORD_SENSITIVE_CONTENT, packageName)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+        return false;
     }
 
     @Override
@@ -201,15 +229,9 @@ public class SensitiveNotificationProtectionControllerImpl
         mListeners.remove(onSensitiveStateChanged);
     }
 
-    // TODO(b/323396693): opportunity for optimization
     @Override
     public boolean isSensitiveStateActive() {
-        MediaProjectionInfo projection = mProjection;
-        if (projection == null) {
-            return false;
-        }
-
-        return !mExemptPackages.contains(projection.getPackageName());
+        return mProjection != null;
     }
 
     @Override
