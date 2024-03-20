@@ -42,6 +42,10 @@ import com.android.systemui.qs.tiles.impl.uimodenight.domain.UiModeNightTileMapp
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.interactor.UiModeNightTileDataInteractor
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.interactor.UiModeNightTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.uimodenight.domain.model.UiModeNightTileModel
+import com.android.systemui.qs.tiles.impl.work.domain.interactor.WorkModeTileDataInteractor
+import com.android.systemui.qs.tiles.impl.work.domain.interactor.WorkModeTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.work.domain.model.WorkModeTileModel
+import com.android.systemui.qs.tiles.impl.work.ui.WorkModeTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
@@ -69,6 +73,7 @@ interface PolicyModule {
         const val LOCATION_TILE_SPEC = "location"
         const val ALARM_TILE_SPEC = "alarm"
         const val UIMODENIGHT_TILE_SPEC = "dark"
+        const val WORK_MODE_TILE_SPEC = "work"
 
         /** Inject flashlight config */
         @Provides
@@ -193,6 +198,38 @@ interface PolicyModule {
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(UIMODENIGHT_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        /** Inject work mode tile config */
+        @Provides
+        @IntoMap
+        @StringKey(WORK_MODE_TILE_SPEC)
+        fun provideWorkModeTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(WORK_MODE_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = com.android.internal.R.drawable.stat_sys_managed_profile_status,
+                        labelRes = R.string.quick_settings_work_mode_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject work mode into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(WORK_MODE_TILE_SPEC)
+        fun provideWorkModeTileViewModel(
+            factory: QSTileViewModelFactory.Static<WorkModeTileModel>,
+            mapper: WorkModeTileMapper,
+            stateInteractor: WorkModeTileDataInteractor,
+            userActionInteractor: WorkModeTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(WORK_MODE_TILE_SPEC),
                 userActionInteractor,
                 stateInteractor,
                 mapper,
