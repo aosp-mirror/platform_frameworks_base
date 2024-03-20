@@ -43,6 +43,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -392,6 +393,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
+    @Ignore("Can be enabled only after b/330536267 is ready")
     public void testChoreographerDivisorRefreshRate() {
         for (int divisor : new int[]{2, 3}) {
             CountDownLatch continueLatch = new CountDownLatch(1);
@@ -420,6 +422,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
+    @Ignore("Can be enabled only after b/330536267 is ready")
     public void testChoreographerAttachedAfterSetFrameRate() {
         Log.i(TAG, "starting testChoreographerAttachedAfterSetFrameRate");
 
