@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.component.volume.ui.composable
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
@@ -27,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -38,6 +40,7 @@ import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformSlider
 import com.android.compose.PlatformSliderColors
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderState
 
@@ -86,18 +89,11 @@ fun VolumeSlider(
                 Text(text = state.valueText, color = LocalContentColor.current)
             } else {
                 state.icon?.let {
-                    IconButton(
-                        onClick = onIconTapped,
-                        colors =
-                            IconButtonColors(
-                                contentColor = LocalContentColor.current,
-                                containerColor = Color.Transparent,
-                                disabledContentColor = LocalContentColor.current,
-                                disabledContainerColor = Color.Transparent,
-                            )
-                    ) {
-                        Icon(modifier = Modifier.size(24.dp), icon = it)
-                    }
+                    SliderIcon(
+                        icon = it,
+                        onIconTapped = onIconTapped,
+                        isTappable = state.isMutable,
+                    )
                 }
             }
         },
@@ -126,4 +122,33 @@ fun VolumeSlider(
             }
         }
     )
+}
+
+@Composable
+private fun SliderIcon(
+    icon: Icon,
+    onIconTapped: () -> Unit,
+    isTappable: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (isTappable) {
+        IconButton(
+            modifier = modifier,
+            onClick = onIconTapped,
+            colors =
+                IconButtonColors(
+                    contentColor = LocalContentColor.current,
+                    containerColor = Color.Transparent,
+                    disabledContentColor = LocalContentColor.current,
+                    disabledContainerColor = Color.Transparent,
+                ),
+            content = { Icon(modifier = Modifier.size(24.dp), icon = icon) },
+        )
+    } else {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center,
+            content = { Icon(modifier = Modifier.size(24.dp), icon = icon) },
+        )
+    }
 }
