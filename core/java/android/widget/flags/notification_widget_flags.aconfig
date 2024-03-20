@@ -27,3 +27,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "toast_no_weakref"
+  namespace: "systemui"
+  description: "Do not use WeakReference for custom view Toast"
+  bug: "321732224"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
