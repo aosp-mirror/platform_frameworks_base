@@ -194,6 +194,41 @@ class CommunalViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun isEmptyState_isTrue_noWidgetButActiveLiveContent() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+
+            widgetRepository.setCommunalWidgets(emptyList())
+            // UMO playing
+            mediaRepository.mediaActive()
+            smartspaceRepository.setCommunalSmartspaceTargets(emptyList())
+
+            val isEmptyState by collectLastValue(underTest.isEmptyState)
+            assertThat(isEmptyState).isTrue()
+        }
+
+    @Test
+    fun isEmptyState_isFalse_withWidgets() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
+
+            widgetRepository.setCommunalWidgets(
+                listOf(
+                    CommunalWidgetContentModel(
+                        appWidgetId = 1,
+                        priority = 1,
+                        providerInfo = providerInfo,
+                    )
+                ),
+            )
+            mediaRepository.mediaInactive()
+            smartspaceRepository.setCommunalSmartspaceTargets(emptyList())
+
+            val isEmptyState by collectLastValue(underTest.isEmptyState)
+            assertThat(isEmptyState).isFalse()
+        }
+
+    @Test
     fun dismissCta_hidesCtaTileAndShowsPopup_thenHidesPopupAfterTimeout() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)

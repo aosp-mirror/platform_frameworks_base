@@ -264,8 +264,11 @@ constructor(
     }
 
     /** Show the widget editor Activity. */
-    fun showWidgetEditor(preselectedKey: String? = null) {
-        editWidgetsActivityStarter.startActivity(preselectedKey)
+    fun showWidgetEditor(
+        preselectedKey: String? = null,
+        shouldOpenWidgetPickerOnStart: Boolean = false,
+    ) {
+        editWidgetsActivityStarter.startActivity(preselectedKey, shouldOpenWidgetPickerOnStart)
     }
 
     /**

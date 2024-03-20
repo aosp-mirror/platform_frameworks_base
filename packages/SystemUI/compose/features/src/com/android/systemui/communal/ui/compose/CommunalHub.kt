@@ -111,6 +111,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
 import androidx.window.layout.WindowMetricsCalculator
+import com.android.compose.modifiers.height
+import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -155,6 +157,7 @@ fun CommunalHub(
         derivedStateOf { selectedKey.value != null || reorderingWidgets }
     }
     var isButtonToEditWidgetsShowing by remember { mutableStateOf(false) }
+    val isEmptyState by viewModel.isEmptyState.collectAsState(initial = false)
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     val contentOffset = beforeContentPadding(contentPadding).toOffset()
@@ -177,7 +180,7 @@ fun CommunalHub(
                         viewModel.setSelectedKey(key)
                     }
                 }
-                .thenIf(!viewModel.isEditMode) {
+                .thenIf(!viewModel.isEditMode && !isEmptyState) {
                     Modifier.pointerInput(
                             gridState,
                             contentOffset,
@@ -218,26 +221,33 @@ fun CommunalHub(
                         .motionEventSpy { onMotionEvent(viewModel) }
                 },
     ) {
-        CommunalHubLazyGrid(
-            communalContent = communalContent,
-            viewModel = viewModel,
-            contentPadding = contentPadding,
-            contentOffset = contentOffset,
-            setGridCoordinates = { gridCoordinates = it },
-            updateDragPositionForRemove = { offset ->
-                isDraggingToRemove =
-                    isPointerWithinCoordinates(
-                        offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                        containerToCheck = removeButtonCoordinates
-                    )
-                isDraggingToRemove
-            },
-            onOpenWidgetPicker = onOpenWidgetPicker,
-            gridState = gridState,
-            contentListState = contentListState,
-            selectedKey = selectedKey,
-            widgetConfigurator = widgetConfigurator,
-        )
+        if (!viewModel.isEditMode && isEmptyState) {
+            EmptyStateCta(
+                contentPadding = contentPadding,
+                viewModel = viewModel,
+            )
+        } else {
+            CommunalHubLazyGrid(
+                communalContent = communalContent,
+                viewModel = viewModel,
+                contentPadding = contentPadding,
+                contentOffset = contentOffset,
+                setGridCoordinates = { gridCoordinates = it },
+                updateDragPositionForRemove = { offset ->
+                    isDraggingToRemove =
+                        isPointerWithinCoordinates(
+                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
+                            containerToCheck = removeButtonCoordinates
+                        )
+                    isDraggingToRemove
+                },
+                onOpenWidgetPicker = onOpenWidgetPicker,
+                gridState = gridState,
+                contentListState = contentListState,
+                selectedKey = selectedKey,
+                widgetConfigurator = widgetConfigurator,
+            )
+        }
 
         // TODO(b/326060686): Remove this once keyguard indication area can persist over hub
         if (viewModel is CommunalViewModel) {
@@ -457,6 +467,67 @@ private fun BoxScope.CommunalHubLazyGrid(
     }
 }
 
+/**
+ * The empty state displays a fullscreen call-to-action (CTA) tile when no widgets are available.
+ */
+@Composable
+private fun EmptyStateCta(
+    contentPadding: PaddingValues,
+    viewModel: BaseCommunalViewModel,
+) {
+    val colors = LocalAndroidColorScheme.current
+    Card(
+        modifier = Modifier.height(Dimensions.GridHeight).padding(contentPadding),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(3.dp, colors.primaryFixedDim),
+        shape = RoundedCornerShape(size = 80.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 110.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.title_for_empty_state_cta),
+                style = MaterialTheme.typography.displaySmall,
+                textAlign = TextAlign.Center,
+                color = colors.secondaryFixed,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Button(
+                    modifier = Modifier.height(56.dp),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = colors.primaryFixed,
+                            contentColor = colors.onPrimaryFixed,
+                        ),
+                    onClick = {
+                        viewModel.onOpenWidgetEditor(
+                            shouldOpenWidgetPickerOnStart = true,
+                        )
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription =
+                            stringResource(R.string.label_for_button_in_empty_state_cta),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                    Text(
+                        text = stringResource(R.string.label_for_button_in_empty_state_cta),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun LockStateIcon(
     isUnlocked: Boolean,
@@ -511,7 +582,7 @@ private fun Toolbar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val spacerModifier = Modifier.width(Dimensions.ToolbarButtonSpaceBetween)
+        val spacerModifier = Modifier.width(ButtonDefaults.IconSpacing)
         Button(
             onClick = onOpenWidgetPicker,
             colors = filledButtonColors(),
@@ -1042,7 +1113,6 @@ object Dimensions {
     val ToolbarPaddingHorizontal = 16.dp
     val ToolbarButtonPaddingHorizontal = 24.dp
     val ToolbarButtonPaddingVertical = 16.dp
-    val ToolbarButtonSpaceBetween = 8.dp
     val ButtonPadding =
         PaddingValues(
             vertical = ToolbarButtonPaddingVertical,

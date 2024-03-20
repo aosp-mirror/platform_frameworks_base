@@ -87,6 +87,9 @@ abstract class BaseCommunalViewModel(
     /** Whether the popup message triggered by dismissing the CTA tile is showing. */
     open val isPopupOnDismissCtaShowing: Flow<Boolean> = flowOf(false)
 
+    /** Whether the communal hub is empty with no widget available. */
+    open val isEmptyState: Flow<Boolean> = flowOf(false)
+
     /** Hide the popup message triggered by dismissing the CTA tile. */
     open fun onHidePopupAfterDismissCta() {}
 
@@ -103,7 +106,10 @@ abstract class BaseCommunalViewModel(
     open fun onReorderWidgets(widgetIdToPriorityMap: Map<Int, Int>) {}
 
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
-    open fun onOpenWidgetEditor(preselectedKey: String? = null) {}
+    open fun onOpenWidgetEditor(
+        preselectedKey: String? = null,
+        shouldOpenWidgetPickerOnStart: Boolean = false,
+    ) {}
 
     /** Called as the UI requests to dismiss the CTA tile. */
     open fun onDismissCtaTile() {}

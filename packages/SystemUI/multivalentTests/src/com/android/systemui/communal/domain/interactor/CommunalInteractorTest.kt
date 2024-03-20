@@ -817,6 +817,13 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun showWidgetEditor_openWidgetPickerOnStart_startsActivity() =
+        testScope.runTest {
+            underTest.showWidgetEditor(shouldOpenWidgetPickerOnStart = true)
+            verify(editWidgetsActivityStarter).startActivity(shouldOpenWidgetPickerOnStart = true)
+        }
+
+    @Test
     fun navigateToCommunalWidgetSettings_startsActivity() =
         testScope.runTest {
             underTest.navigateToCommunalWidgetSettings()
