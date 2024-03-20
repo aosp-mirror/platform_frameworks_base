@@ -114,7 +114,7 @@
                 <xs:element type="sensorDetails" name="screenOffBrightnessSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
-                <xs:element type="sensorDetails" name="proxSensor">
+                <xs:element type="sensorDetails" name="proxSensor" maxOccurs="2">
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="sensorDetails" name="tempSensor">
@@ -478,6 +478,7 @@
     </xs:simpleType>
 
     <xs:complexType name="sensorDetails">
+        <xs:attribute name="featureFlag" type="xs:string" use="optional"/>
         <xs:sequence>
             <xs:element type="xs:string" name="type" minOccurs="0" maxOccurs="1">
                 <xs:annotation name="nullable"/>

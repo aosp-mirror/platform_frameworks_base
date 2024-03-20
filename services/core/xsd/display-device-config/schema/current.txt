@@ -117,7 +117,7 @@ package com.android.server.display.config {
     method public com.android.server.display.config.LuxThrottling getLuxThrottling();
     method @Nullable public final String getName();
     method public com.android.server.display.config.PowerThrottlingConfig getPowerThrottlingConfig();
-    method public final com.android.server.display.config.SensorDetails getProxSensor();
+    method public final java.util.List<com.android.server.display.config.SensorDetails> getProxSensor();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method public com.android.server.display.config.RefreshRateConfigs getRefreshRate();
     method public final java.math.BigDecimal getScreenBrightnessCapForWearBedtimeMode();
@@ -154,7 +154,6 @@ package com.android.server.display.config {
     method public void setLuxThrottling(com.android.server.display.config.LuxThrottling);
     method public final void setName(@Nullable String);
     method public void setPowerThrottlingConfig(com.android.server.display.config.PowerThrottlingConfig);
-    method public final void setProxSensor(com.android.server.display.config.SensorDetails);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public void setRefreshRate(com.android.server.display.config.RefreshRateConfigs);
     method public final void setScreenBrightnessCapForWearBedtimeMode(java.math.BigDecimal);
@@ -405,10 +404,12 @@ package com.android.server.display.config {
 
   public class SensorDetails {
     ctor public SensorDetails();
+    method public String getFeatureFlag();
     method @Nullable public final String getName();
     method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate();
     method @Nullable public final com.android.server.display.config.NonNegativeFloatToFloatMap getSupportedModes();
     method @Nullable public final String getType();
+    method public void setFeatureFlag(String);
     method public final void setName(@Nullable String);
     method public final void setRefreshRate(@Nullable com.android.server.display.config.RefreshRateRange);
     method public final void setSupportedModes(@Nullable com.android.server.display.config.NonNegativeFloatToFloatMap);
