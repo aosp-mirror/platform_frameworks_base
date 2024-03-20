@@ -1297,15 +1297,19 @@ public class ContentCaptureManagerService extends
 
         @Override
         public void onLoginDetected(@NonNull ParceledListSlice<ContentCaptureEvent> events) {
-            RemoteContentProtectionService service = createRemoteContentProtectionService();
-            if (service == null) {
-                return;
-            }
-            try {
-                service.onLoginDetected(events);
-            } catch (Exception ex) {
-                Slog.e(TAG, "Failed to call remote service", ex);
-            }
+            Binder.withCleanCallingIdentity(
+                    () -> {
+                        RemoteContentProtectionService service =
+                                createRemoteContentProtectionService();
+                        if (service == null) {
+                            return;
+                        }
+                        try {
+                            service.onLoginDetected(events);
+                        } catch (Exception ex) {
+                            Slog.e(TAG, "Failed to call remote service", ex);
+                        }
+                    });
         }
     }
 
