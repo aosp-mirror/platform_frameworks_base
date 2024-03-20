@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.ravenwood.RavenwoodRule;
@@ -445,6 +446,42 @@ public class BundleTest {
         assertThat(bundle.size()).isEqualTo(0);
     }
 
+    @Test
+    @DisabledOnRavenwood(blockedBy = Parcel.class)
+    public void parcelledBundleWithBinder_shouldReturnHasBindersTrue() throws Exception {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("test", new CustomParcelable(13, "Tiramisu"));
+        bundle.putBinder("test_binder",
+                new IBinderWorkSourceNestedService.Stub() {
+
+                    public int[] nestedCallWithWorkSourceToSet(int uidToBlame) {
+                        return new int[0];
+                    }
+
+                    public int[] nestedCall() {
+                        return new int[0];
+                    }
+                });
+        Bundle bundle2 = new Bundle(getParcelledBundle(bundle));
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_PRESENT);
+
+        bundle2.putParcelable("test2", new CustomParcelable(13, "Tiramisu"));
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_UNKNOWN);
+    }
+
+    @Test
+    @DisabledOnRavenwood(blockedBy = Parcel.class)
+    public void parcelledBundleWithoutBinder_shouldReturnHasBindersFalse() throws Exception {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("test", new CustomParcelable(13, "Tiramisu"));
+        Bundle bundle2 = new Bundle(getParcelledBundle(bundle));
+        //Should fail to load with framework classloader.
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_NOT_PRESENT);
+
+        bundle2.putParcelable("test2", new CustomParcelable(13, "Tiramisu"));
+        assertEquals(bundle2.hasBinders(), Bundle.STATUS_BINDERS_UNKNOWN);
+    }
+
     private Bundle getMalformedBundle() {
         Parcel p = Parcel.obtain();
         p.writeInt(BaseBundle.BUNDLE_MAGIC);
@@ -520,6 +557,7 @@ public class BundleTest {
             public CustomParcelable createFromParcel(Parcel in) {
                 return new CustomParcelable(in);
             }
+
             @Override
             public CustomParcelable[] newArray(int size) {
                 return new CustomParcelable[size];
