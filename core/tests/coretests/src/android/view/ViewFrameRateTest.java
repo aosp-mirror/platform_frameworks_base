@@ -16,9 +16,13 @@
 
 package android.view;
 
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_DEFAULT_NORMAL_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 
 import static junit.framework.Assert.assertEquals;
@@ -145,8 +149,9 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a normal category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_NORMAL,
-                    mViewRoot.getPreferredFrameRateCategory());
+            int expected = toolkitFrameRateBySizeReadOnly()
+                    ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
 
@@ -169,8 +174,9 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a normal category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_NORMAL,
-                    mViewRoot.getPreferredFrameRateCategory());
+            int expected = toolkitFrameRateBySizeReadOnly()
+                    ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
 
@@ -193,8 +199,9 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a normal category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_NORMAL,
-                    mViewRoot.getPreferredFrameRateCategory());
+            int expected = toolkitFrameRateBySizeReadOnly()
+                    ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
 
@@ -218,7 +225,7 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
             int expected = toolkitFrameRateDefaultNormalReadOnly()
-                    ? Surface.FRAME_RATE_CATEGORY_NORMAL : Surface.FRAME_RATE_CATEGORY_HIGH;
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
             assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
@@ -243,7 +250,7 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
             int expected = toolkitFrameRateDefaultNormalReadOnly()
-                    ? Surface.FRAME_RATE_CATEGORY_NORMAL : Surface.FRAME_RATE_CATEGORY_HIGH;
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
             assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
@@ -255,7 +262,7 @@ public class ViewFrameRateTest {
         waitForFrameRateCategoryToSettle();
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_NORMAL,
+            assertEquals(FRAME_RATE_CATEGORY_NORMAL,
                     mViewRoot.getPreferredFrameRateCategory());
         });
     }
