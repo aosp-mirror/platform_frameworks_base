@@ -289,7 +289,10 @@ constructor(
                 .collect { pair ->
                     val (isKeyguardGoingAway, lastStartedStep) = pair
                     if (isKeyguardGoingAway && lastStartedStep.to == KeyguardState.LOCKSCREEN) {
-                        startTransitionTo(KeyguardState.GONE)
+                        startTransitionTo(
+                            KeyguardState.GONE,
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
+                        )
                     }
                 }
         }
@@ -303,20 +306,6 @@ constructor(
                     startTransitionTo(KeyguardState.GONE)
                 }
             }
-
-            return
-        }
-
-        scope.launch {
-            keyguardInteractor.isKeyguardGoingAway
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    KeyguardWmStateRefactor.assertInLegacyMode()
-                    val (isKeyguardGoingAway, lastStartedStep) = pair
-                    if (isKeyguardGoingAway && lastStartedStep.to == KeyguardState.LOCKSCREEN) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
-                }
         }
     }
 
@@ -413,7 +402,7 @@ constructor(
         val TO_OCCLUDED_DURATION = 450.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
-        val TO_GONE_DURATION = DEFAULT_DURATION
+        val TO_GONE_DURATION = 633.milliseconds
         val TO_GLANCEABLE_HUB_DURATION = 1.seconds
     }
 }
