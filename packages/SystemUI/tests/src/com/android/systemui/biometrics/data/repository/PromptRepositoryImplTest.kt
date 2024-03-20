@@ -18,6 +18,7 @@ package com.android.systemui.biometrics.data.repository
 
 import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
+import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
@@ -26,8 +27,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
@@ -58,6 +61,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
 
     private val testScope = TestScope()
     private val faceSettings = FakeFaceSettingsRepository()
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
 
     @Mock private lateinit var authController: AuthController
 
@@ -135,7 +139,7 @@ class PromptRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun showBpWithoutIconForCredential_withCustomBp() =
+    fun showBpWithoutIconForCredential_withVerticalListContentView() =
         testScope.runTest {
             mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
             mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
@@ -157,6 +161,33 @@ class PromptRepositoryImplTest : SysuiTestCase() {
 
                 assertThat(repository.showBpWithoutIconForCredential.value)
                     .isEqualTo(!hasCredentialViewShown)
+            }
+        }
+
+    @Test
+    fun showBpWithoutIconForCredential_withContentViewWithMoreOptionsButton() =
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            val promptInfo =
+                PromptInfo().apply {
+                    authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                    contentView =
+                        PromptContentViewWithMoreOptionsButton.Builder()
+                            .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
+                            .build()
+                }
+            for (case in
+                listOf(
+                    PromptKind.Biometric(),
+                    PromptKind.Pin,
+                    PromptKind.Password,
+                    PromptKind.Pattern
+                )) {
+                repository.setPrompt(promptInfo, USER_ID, CHALLENGE, case, OP_PACKAGE_NAME)
+                repository.setShouldShowBpWithoutIconForCredential(promptInfo)
+
+                assertThat(repository.showBpWithoutIconForCredential.value).isFalse()
             }
         }
 

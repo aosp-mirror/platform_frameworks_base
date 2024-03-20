@@ -1,6 +1,8 @@
 package com.android.systemui.biometrics.domain.interactor
 
+import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
+import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.Utils
@@ -10,6 +12,8 @@ import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.biometrics.promptInfo
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -43,6 +47,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
     private val testScope = TestScope(testDispatcher)
     private val biometricPromptRepository = FakePromptRepository()
     private val credentialInteractor = FakeCredentialInteractor()
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
 
     private lateinit var interactor: PromptCredentialInteractor
 
@@ -90,6 +95,82 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             assertThat(prompt).isNull()
         }
 
+    @Test
+    fun testShowTitleOnlyValue_description() =
+        testScope.runTest {
+            val title = "what a prompt"
+            val subtitle = "s"
+            val description = "something to see"
+
+            val showTitleOnly by collectLastValue(interactor.showTitleOnly)
+
+            interactor.useCredentialsForAuthentication(
+                PromptInfo().also {
+                    it.title = title
+                    it.description = description
+                    it.subtitle = subtitle
+                },
+                kind = Utils.CREDENTIAL_PIN,
+                userId = USER_ID,
+                challenge = OPERATION_ID,
+                opPackageName = OP_PACKAGE_NAME
+            )
+            assertThat(showTitleOnly).isFalse()
+        }
+
+    @Test
+    fun testShowTitleOnlyValue_verticalListContentView() =
+        testScope.runTest {
+            val title = "what a prompt"
+            val subtitle = "s"
+            val description = "something to see"
+            val contentView = PromptVerticalListContentView.Builder().build()
+
+            val showTitleOnly by collectLastValue(interactor.showTitleOnly)
+
+            interactor.useCredentialsForAuthentication(
+                PromptInfo().also {
+                    it.title = title
+                    it.description = description
+                    it.subtitle = subtitle
+                    it.contentView = contentView
+                },
+                kind = Utils.CREDENTIAL_PIN,
+                userId = USER_ID,
+                challenge = OPERATION_ID,
+                opPackageName = OP_PACKAGE_NAME
+            )
+            assertThat(showTitleOnly).isTrue()
+        }
+
+    @Test
+    fun testShowTitleOnlyValue_ContentViewWithButton() =
+        testScope.runTest {
+            val title = "what a prompt"
+            val subtitle = "s"
+            val description = "something to see"
+            val contentView =
+                PromptContentViewWithMoreOptionsButton.Builder()
+                    .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
+                    .build()
+
+            val showTitleOnly by collectLastValue(interactor.showTitleOnly)
+
+            interactor.useCredentialsForAuthentication(
+                PromptInfo().also {
+                    it.title = title
+                    it.description = description
+                    it.subtitle = subtitle
+                    it.contentView = contentView
+                },
+                kind = Utils.CREDENTIAL_PIN,
+                userId = USER_ID,
+                challenge = OPERATION_ID,
+                opPackageName = OP_PACKAGE_NAME
+            )
+            assertThat(showTitleOnly).isFalse()
+        }
+
     @Test fun usePinCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PIN)
 
     @Test fun usePasswordCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PASSWORD)
@@ -106,12 +187,14 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             val title = "what a prompt"
             val subtitle = "s"
             val description = "something to see"
+            val contentView = PromptVerticalListContentView.Builder().build()
 
             interactor.useCredentialsForAuthentication(
                 PromptInfo().also {
                     it.title = title
                     it.description = description
                     it.subtitle = subtitle
+                    it.contentView = contentView
                 },
                 kind = kind,
                 userId = USER_ID,
@@ -122,6 +205,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             assertThat(prompt?.title).isEqualTo(title)
             assertThat(prompt?.subtitle).isEqualTo(subtitle)
             assertThat(prompt?.description).isEqualTo(description)
+            assertThat(prompt?.contentView).isEqualTo(contentView)
             assertThat(prompt?.userInfo).isEqualTo(BiometricUserInfo(USER_ID))
             assertThat(prompt?.operationInfo).isEqualTo(BiometricOperationInfo(OPERATION_ID))
             assertThat(prompt)

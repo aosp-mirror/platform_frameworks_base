@@ -518,7 +518,8 @@ public class AuthContainerView extends LinearLayout
                 mConfig.mOpPackageName);
         final CredentialViewModel vm = mCredentialViewModelProvider.get();
         vm.setAnimateContents(animateContents);
-        ((CredentialView) mCredentialView).init(vm, this, mPanelController, animatePanel);
+        ((CredentialView) mCredentialView).init(vm, this, mPanelController, animatePanel,
+                mBiometricCallback);
 
         mLayout.addView(mCredentialView);
     }

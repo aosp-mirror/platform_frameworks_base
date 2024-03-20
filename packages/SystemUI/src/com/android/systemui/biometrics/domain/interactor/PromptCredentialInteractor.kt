@@ -30,11 +30,11 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.lastOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
@@ -61,11 +61,12 @@ constructor(
     val isShowing: Flow<Boolean> = biometricPromptRepository.isShowing
 
     /**
-     * If biometric prompt without icon needs to show for displaying content prior to credential
-     * view.
+     * If vertical list content view is shown, credential view should hide subtitle and content view
      */
-    val showBpWithoutIconForCredential: StateFlow<Boolean> =
-        biometricPromptRepository.showBpWithoutIconForCredential
+    val showTitleOnly: Flow<Boolean> =
+        biometricPromptRepository.promptInfo.map { promptInfo ->
+            promptInfo?.contentView != null && !promptInfo.isContentViewMoreOptionsButtonUsed
+        }
 
     /** Metadata about the current credential prompt, including app-supplied preferences. */
     val prompt: Flow<BiometricPromptRequest.Credential?> =

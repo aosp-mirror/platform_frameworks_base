@@ -1,20 +1,23 @@
 package com.android.systemui.biometrics.ui.binder
 
+import android.hardware.biometrics.Flags
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
-import com.android.systemui.res.R
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialPatternView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
@@ -40,12 +43,15 @@ object CredentialViewBinder {
         viewModel: CredentialViewModel,
         panelViewController: AuthPanelController,
         animatePanel: Boolean,
+        legacyCallback: Spaghetti.Callback,
         maxErrorDuration: Long = 3_000L,
         requestFocusForInput: Boolean = true,
     ) {
         val titleView: TextView = view.requireViewById(R.id.title)
         val subtitleView: TextView = view.requireViewById(R.id.subtitle)
         val descriptionView: TextView = view.requireViewById(R.id.description)
+        val customizedViewContainer: LinearLayout =
+            view.requireViewById(R.id.customized_view_container)
         val iconView: ImageView? = view.findViewById(R.id.icon)
         val errorView: TextView = view.requireViewById(R.id.error)
         val cancelButton: Button? = view.findViewById(R.id.cancel_button)
@@ -76,6 +82,13 @@ object CredentialViewBinder {
 
                         subtitleView.textOrHide = header.subtitle
                         descriptionView.textOrHide = header.description
+                        if (Flags.customBiometricPrompt() && constraintBp()) {
+                            BiometricCustomizedViewBinder.bind(
+                                customizedViewContainer,
+                                header.contentView,
+                                legacyCallback
+                            )
+                        }
 
                         iconView?.setImageDrawable(header.icon)
 
