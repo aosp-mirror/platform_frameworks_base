@@ -65,6 +65,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -1718,8 +1719,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
             displayPolicy.adjustWindowParamsLw(win, win.mAttrs);
             attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), callingUid, callingPid);
-            attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), callingUid,
-                    callingPid);
+            attrs.inputFeatures = sanitizeInputFeatures(attrs.inputFeatures, win.getName(),
+                    callingUid, callingPid, win.isTrustedOverlay());
             win.setRequestedVisibleTypes(requestedVisibleTypes);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
@@ -2289,8 +2290,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs);
                 attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), uid, pid);
-                attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), uid,
-                        pid);
+                attrs.inputFeatures = sanitizeInputFeatures(attrs.inputFeatures, win.getName(), uid,
+                        pid, win.isTrustedOverlay());
                 int disableFlags =
                         (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility) & DISABLE_MASK;
                 if (disableFlags != 0 && !hasStatusBarPermission(pid, uid)) {
@@ -9105,18 +9106,26 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * You need MONITOR_INPUT permission to be able to set INPUT_FEATURE_SPY.
+     * Ensure the caller has the right permissions to be able to set the requested input features.
      */
-    private int sanitizeSpyWindow(int inputFeatures, String windowName, int callingUid,
-            int callingPid) {
-        if ((inputFeatures & INPUT_FEATURE_SPY) == 0) {
-            return inputFeatures;
+    private int sanitizeInputFeatures(int inputFeatures, String windowName, int callingUid,
+            int callingPid, boolean isTrustedOverlay) {
+        // You need MONITOR_INPUT permission to be able to set INPUT_FEATURE_SPY.
+        if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
+            final int permissionResult = mContext.checkPermission(
+                    permission.MONITOR_INPUT, callingPid, callingUid);
+            if (permissionResult != PackageManager.PERMISSION_GRANTED) {
+                throw new IllegalArgumentException(
+                        "Cannot use INPUT_FEATURE_SPY from '" + windowName
+                                + "' because it doesn't the have MONITOR_INPUT permission");
+            }
         }
-        final int permissionResult = mContext.checkPermission(
-                permission.MONITOR_INPUT, callingPid, callingUid);
-        if (permissionResult != PackageManager.PERMISSION_GRANTED) {
-            throw new IllegalArgumentException("Cannot use INPUT_FEATURE_SPY from '" + windowName
-                    + "' because it doesn't the have MONITOR_INPUT permission");
+
+        // You can only use INPUT_FEATURE_SENSITIVE_FOR_TRACING on a trusted overlay.
+        if ((inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING) != 0 && !isTrustedOverlay) {
+            Slog.w(TAG, "Removing INPUT_FEATURE_SENSITIVE_FOR_TRACING from '" + windowName
+                    + "' because it isn't a trusted overlay");
+            return inputFeatures & ~INPUT_FEATURE_SENSITIVE_FOR_TRACING;
         }
         return inputFeatures;
     }
@@ -9194,8 +9203,10 @@ public class WindowManagerService extends IWindowManager.Stub
         h.setWindowToken(clientToken);
         h.name = name;
 
+        final boolean isTrustedOverlay = (privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0;
         flags = sanitizeFlagSlippery(flags, name, callingUid, callingPid);
-        inputFeatures = sanitizeSpyWindow(inputFeatures, name, callingUid, callingPid);
+        inputFeatures = sanitizeInputFeatures(inputFeatures, name, callingUid, callingPid,
+                isTrustedOverlay);
 
         final int sanitizedLpFlags =
                 (flags & (FLAG_NOT_TOUCHABLE | FLAG_SLIPPERY | LayoutParams.FLAG_NOT_FOCUSABLE))
@@ -9232,7 +9243,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final SurfaceControl.Transaction t = mTransactionFactory.get();
         //  Check private trusted overlay flag to set trustedOverlay field of input window handle.
-        h.setTrustedOverlay(t, surface, (privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0);
+        h.setTrustedOverlay(t, surface, isTrustedOverlay);
         t.setInputWindowInfo(surface, h);
         t.apply();
         t.close();
