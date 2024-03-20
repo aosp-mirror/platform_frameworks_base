@@ -12715,7 +12715,10 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean shouldEnableDvrr() {
-        return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
+        // uncomment this when we are ready for enabling dVRR
+        // return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
+        return false;
+
     }
 
     private void checkIdleness() {
