@@ -59,6 +59,7 @@ constructor(
     keyguardDismissUtil: KeyguardDismissUtil,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
+    private val issueRecordingState: IssueRecordingState,
 ) :
     RecordingService(
         controller,
@@ -90,6 +91,7 @@ constructor(
                     DEFAULT_MAX_TRACE_SIZE,
                     DEFAULT_MAX_TRACE_DURATION_IN_MINUTES
                 )
+                issueRecordingState.isRecording = true
                 if (!intent.getBooleanExtra(EXTRA_SCREEN_RECORD, false)) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
                     // will circumvent the RecordingService's screen recording start code.
@@ -103,6 +105,7 @@ constructor(
                 // this line should be removed.
                 getSystemService(LauncherApps::class.java)?.saveViewCaptureData()
                 TraceUtils.traceStop(contentResolver)
+                issueRecordingState.isRecording = false
             }
             ACTION_SHARE -> {
                 shareRecording(intent)
