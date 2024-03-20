@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.app.admin.DevicePolicyManager.IS_DEVICE_OWNER_USER_AWARE;
 import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_BATTERY;
 import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_CPU;
 import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_GPU;
@@ -28,12 +29,14 @@ import static android.os.HardwarePropertiesManager.TEMPERATURE_THROTTLING_BELOW_
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.compat.CompatChanges;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.CpuUsageInfo;
 import android.os.IHardwarePropertiesManager;
 import android.os.UserHandle;
+import android.permission.flags.Flags;
 
 import com.android.internal.util.DumpUtils;
 import com.android.server.vr.VrManagerInternal;
@@ -168,7 +171,15 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
         mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        final DevicePolicyManager dpm;
+        if (Flags.systemServerRoleControllerEnabled()
+                && CompatChanges.isChangeEnabled(IS_DEVICE_OWNER_USER_AWARE)) {
+            final UserHandle handle = new UserHandle(userId);
+            dpm = mContext.createContextAsUser(handle, 0)
+                    .getSystemService(DevicePolicyManager.class);
+        } else {
+            dpm = mContext.getSystemService(DevicePolicyManager.class);
+        }
         if (!dpm.isDeviceOwnerApp(callingPackage)
                 && mContext.checkCallingOrSelfPermission(Manifest.permission.DEVICE_POWER)
                         != PackageManager.PERMISSION_GRANTED
