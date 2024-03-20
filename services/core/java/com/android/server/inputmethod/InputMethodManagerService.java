@@ -5674,14 +5674,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 switchKeyboardLayoutLocked(direction);
             }
         }
-
-        /**
-         * Returns true if any InputConnection is currently active.
-         */
-        @Override
-        public boolean isAnyInputConnectionActive() {
-            return mCurInputConnection != null;
-        }
     }
 
     @BinderThread
