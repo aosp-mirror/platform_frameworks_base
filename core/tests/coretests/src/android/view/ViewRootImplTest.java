@@ -1054,18 +1054,32 @@ public class ViewRootImplTest {
     /**
      * Test the IsFrameRatePowerSavingsBalanced values are properly set
      */
-    @UiThreadTest
     @Test
     @Ignore("Can be enabled only after b/330596920 is ready")
     @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void votePreferredFrameRate_isFrameRatePowerSavingsBalanced() {
-        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext,
-                sContext.getDisplayNoVerify());
-        assertEquals(viewRootImpl.isFrameRatePowerSavingsBalanced(), true);
-        viewRootImpl.setFrameRatePowerSavingsBalanced(false);
-        assertEquals(viewRootImpl.isFrameRatePowerSavingsBalanced(), false);
-        viewRootImpl.setFrameRatePowerSavingsBalanced(true);
-        assertEquals(viewRootImpl.isFrameRatePowerSavingsBalanced(), true);
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRoot = view.getViewRootImpl();
+        final WindowManager.LayoutParams attrs = viewRoot.mWindowAttributes;
+        assertEquals(attrs.isFrameRatePowerSavingsBalanced(), true);
+        assertEquals(viewRoot.isFrameRatePowerSavingsBalanced(),
+                attrs.isFrameRatePowerSavingsBalanced());
+
+        sInstrumentation.runOnMainSync(() -> {
+            attrs.setFrameRatePowerSavingsBalanced(false);
+            viewRoot.setLayoutParams(attrs, false);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        sInstrumentation.runOnMainSync(() -> {
+            final WindowManager.LayoutParams newAttrs = viewRoot.mWindowAttributes;
+            assertEquals(newAttrs.isFrameRatePowerSavingsBalanced(), false);
+            assertEquals(viewRoot.isFrameRatePowerSavingsBalanced(),
+                    newAttrs.isFrameRatePowerSavingsBalanced());
+        });
     }
 
     /**
