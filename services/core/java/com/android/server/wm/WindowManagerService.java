@@ -304,6 +304,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
+import android.window.ActivityWindowInfo;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
 import android.window.IGlobalDragListener;
@@ -794,6 +795,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE);
         private final Uri mImmersiveModeConfirmationsUri =
                 Settings.Secure.getUriFor(Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS);
+        private final Uri mDisableSecureWindowsUri =
+                Settings.Secure.getUriFor(Settings.Secure.DISABLE_SECURE_WINDOWS);
         private final Uri mPolicyControlUri =
                 Settings.Global.getUriFor(Settings.Global.POLICY_CONTROL);
         private final Uri mForceDesktopModeOnExternalDisplaysUri = Settings.Global.getUriFor(
@@ -821,6 +824,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mAnimationDurationScaleUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mImmersiveModeConfirmationsUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mDisableSecureWindowsUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mPolicyControlUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mForceDesktopModeOnExternalDisplaysUri, false, this,
@@ -876,6 +881,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            if (mDisableSecureWindowsUri.equals(uri)) {
+                updateDisableSecureWindows();
+                return;
+            }
+
             @UpdateAnimationScaleMode
             final int mode;
             if (mWindowAnimationScaleUri.equals(uri)) {
@@ -895,6 +905,7 @@ public class WindowManagerService extends IWindowManager.Stub
         void loadSettings() {
             updateSystemUiSettings(false /* handleChange */);
             updateMaximumObscuringOpacityForTouch();
+            updateDisableSecureWindows();
         }
 
         void updateMaximumObscuringOpacityForTouch() {
@@ -975,6 +986,28 @@ public class WindowManagerService extends IWindowManager.Stub
                     mDisplayWindowSettings.applySettingsToDisplayLocked(display);
                     display.reconfigureDisplayLocked();
                 });
+            }
+        }
+
+        void updateDisableSecureWindows() {
+            if (!SystemProperties.getBoolean(SYSTEM_DEBUGGABLE, false)) {
+                return;
+            }
+
+            final boolean disableSecureWindows;
+            try {
+                disableSecureWindows = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.DISABLE_SECURE_WINDOWS, 0) != 0;
+            } catch (Settings.SettingNotFoundException e) {
+                return;
+            }
+            if (mDisableSecureWindows == disableSecureWindows) {
+                return;
+            }
+
+            synchronized (mGlobalLock) {
+                mDisableSecureWindows = disableSecureWindows;
+                mRoot.refreshSecureSurfaceState();
             }
         }
     }
@@ -1114,6 +1147,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private final ScreenRecordingCallbackController mScreenRecordingCallbackController;
+
+    private volatile boolean mDisableSecureWindows = false;
 
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, WindowManagerPolicy policy,
@@ -2213,7 +2248,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
             InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
-            Bundle outSyncIdBundle) {
+            Bundle outBundle) {
         if (outActiveControls != null) {
             outActiveControls.set(null);
         }
@@ -2544,6 +2579,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (outFrames != null && outMergedConfiguration != null) {
                 win.fillClientWindowFramesAndConfiguration(outFrames, outMergedConfiguration,
                         false /* useLatestConfig */, shouldRelayout);
+                if (Flags.activityWindowInfoFlag() && outBundle != null
+                        && win.mActivityRecord != null) {
+                    final ActivityWindowInfo activityWindowInfo = win.mActivityRecord
+                            .getActivityWindowInfo();
+                    outBundle.putParcelable(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                            activityWindowInfo);
+                }
 
                 // Set resize-handled here because the values are sent back to the client.
                 win.onResizeHandled();
@@ -2573,7 +2615,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.isVisible() /* visible */, false /* removed */);
             }
 
-            if (outSyncIdBundle != null) {
+            if (outBundle != null) {
                 final int maybeSyncSeqId;
                 if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
                         && win.mSyncSeqId > lastSyncSeqId) {
@@ -2582,7 +2624,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 } else {
                     maybeSyncSeqId = -1;
                 }
-                outSyncIdBundle.putInt("seqid", maybeSyncSeqId);
+                outBundle.putInt(IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID, maybeSyncSeqId);
             }
 
             if (configChanged) {
@@ -6897,6 +6939,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(mLastFinishedFreezeSource);
                 }
                 pw.println();
+        pw.print("  mDisableSecureWindows="); pw.println(mDisableSecureWindows);
 
         mInputManagerCallback.dump(pw, "  ");
         mSnapshotController.dump(pw, " ");
@@ -10067,5 +10110,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             mDragDropController.setGlobalDragListener(listener);
         }
+    }
+
+    boolean getDisableSecureWindows() {
+        return mDisableSecureWindows;
     }
 }

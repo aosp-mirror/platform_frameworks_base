@@ -3147,7 +3147,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 public void onDozeAmountChanged(float linear, float eased) {
                     if (!lightRevealMigration()
                             && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
-                        mLightRevealScrim.setRevealAmount(1f - linear);
+                        if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                            // If wakeAndUnlocking, this is handled in AuthRippleInteractor
+                            if (!mBiometricUnlockController.isWakeAndUnlock()) {
+                                mLightRevealScrim.setRevealAmount(1f - linear);
+                            }
+                        } else {
+                            mLightRevealScrim.setRevealAmount(1f - linear);
+                        }
                     }
                 }
 

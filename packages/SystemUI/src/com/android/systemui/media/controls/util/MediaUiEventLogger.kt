@@ -161,7 +161,7 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         logger.log(event)
     }
 
-    fun logRecommendationAdded(packageName: String, instanceId: InstanceId) {
+    fun logRecommendationAdded(packageName: String, instanceId: InstanceId?) {
         logger.logWithInstanceId(
             MediaUiEvent.MEDIA_RECOMMENDATION_ADDED,
             0,
@@ -170,7 +170,7 @@ class MediaUiEventLogger @Inject constructor(private val logger: UiEventLogger) 
         )
     }
 
-    fun logRecommendationRemoved(packageName: String, instanceId: InstanceId) {
+    fun logRecommendationRemoved(packageName: String, instanceId: InstanceId?) {
         logger.logWithInstanceId(
             MediaUiEvent.MEDIA_RECOMMENDATION_REMOVED,
             0,

@@ -1163,7 +1163,7 @@ constructor(
         // Only log media resume card when Smartspace data is available
         if (
             !mediaControlKey.isSsMediaRec &&
-                !mediaManager.smartspaceMediaData.isActive &&
+                !mediaManager.isRecommendationActive() &&
                 MediaPlayerData.smartspaceMediaData == null
         ) {
             return

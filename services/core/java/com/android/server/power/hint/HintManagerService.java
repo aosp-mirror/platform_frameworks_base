@@ -17,6 +17,7 @@
 package com.android.server.power.hint;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -26,9 +27,12 @@ import android.app.UidObserver;
 import android.content.Context;
 import android.hardware.power.WorkDuration;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IHintManager;
 import android.os.IHintSession;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -36,6 +40,8 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
+import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.StatsEvent;
 
@@ -46,20 +52,31 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.utils.Slogf;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /** An hint service implementation that runs in System Server process. */
 public final class HintManagerService extends SystemService {
     private static final String TAG = "HintManagerService";
     private static final boolean DEBUG = false;
+
+    private static final int EVENT_CLEAN_UP_UID = 3;
+    @VisibleForTesting  static final int CLEAN_UP_UID_DELAY_MILLIS = 1000;
+
+
     @VisibleForTesting final long mHintSessionPreferredRate;
 
     // Multi-level map storing all active AppHintSessions.
@@ -73,9 +90,15 @@ public final class HintManagerService extends SystemService {
     /** Lock to protect HAL handles and listen list. */
     private final Object mLock = new Object();
 
+    @GuardedBy("mNonIsolatedTidsLock")
+    private final Map<Integer, Set<Long>> mNonIsolatedTids;
+
+    private final Object mNonIsolatedTidsLock = new Object();
+
     @VisibleForTesting final MyUidObserver mUidObserver;
 
     private final NativeWrapper mNativeWrapper;
+    private final CleanUpHandler mCleanUpHandler;
 
     private final ActivityManagerInternal mAmInternal;
 
@@ -94,6 +117,13 @@ public final class HintManagerService extends SystemService {
     HintManagerService(Context context, Injector injector) {
         super(context);
         mContext = context;
+        if (powerhintThreadCleanup()) {
+            mCleanUpHandler = new CleanUpHandler(createCleanUpThread().getLooper());
+            mNonIsolatedTids = new HashMap<>();
+        } else {
+            mCleanUpHandler = null;
+            mNonIsolatedTids = null;
+        }
         mActiveSessions = new ArrayMap<>();
         mNativeWrapper = injector.createNativeWrapper();
         mNativeWrapper.halInit();
@@ -101,6 +131,13 @@ public final class HintManagerService extends SystemService {
         mUidObserver = new MyUidObserver();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
+    }
+
+    private ServiceThread createCleanUpThread() {
+        final ServiceThread handlerThread = new ServiceThread(TAG,
+                Process.THREAD_PRIORITY_LOWEST, true /*allowIo*/);
+        handlerThread.start();
+        return handlerThread;
     }
 
     @VisibleForTesting
@@ -306,7 +343,18 @@ public final class HintManagerService extends SystemService {
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             FgThread.getHandler().post(() -> {
                 synchronized (mCacheLock) {
-                    mProcStatesCache.put(uid, procState);
+                    if (powerhintThreadCleanup()) {
+                        final boolean before = isUidForeground(uid);
+                        mProcStatesCache.put(uid, procState);
+                        final boolean after = isUidForeground(uid);
+                        if (before != after) {
+                            final Message msg = mCleanUpHandler.obtainMessage(EVENT_CLEAN_UP_UID,
+                                    uid);
+                            mCleanUpHandler.sendMessageDelayed(msg, CLEAN_UP_UID_DELAY_MILLIS);
+                        }
+                    } else {
+                        mProcStatesCache.put(uid, procState);
+                    }
                 }
                 boolean shouldAllowUpdate = isUidForeground(uid);
                 synchronized (mLock) {
@@ -314,13 +362,193 @@ public final class HintManagerService extends SystemService {
                     if (tokenMap == null) {
                         return;
                     }
-                    for (ArraySet<AppHintSession> sessionSet : tokenMap.values()) {
-                        for (AppHintSession s : sessionSet) {
-                            s.onProcStateChanged(shouldAllowUpdate);
+                    for (int i = tokenMap.size() - 1; i >= 0; i--) {
+                        final ArraySet<AppHintSession> sessionSet = tokenMap.valueAt(i);
+                        for (int j = sessionSet.size() - 1; j >= 0; j--) {
+                            sessionSet.valueAt(j).onProcStateChanged(shouldAllowUpdate);
                         }
                     }
                 }
             });
+        }
+    }
+
+    final class CleanUpHandler extends Handler {
+        // status of processed tid used for caching
+        private static final int TID_NOT_CHECKED = 0;
+        private static final int TID_PASSED_CHECK = 1;
+        private static final int TID_EXITED = 2;
+
+        CleanUpHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == EVENT_CLEAN_UP_UID) {
+                if (hasEqualMessages(msg.what, msg.obj)) {
+                    removeEqualMessages(msg.what, msg.obj);
+                    final Message newMsg = obtainMessage(msg.what, msg.obj);
+                    sendMessageDelayed(newMsg, CLEAN_UP_UID_DELAY_MILLIS);
+                    return;
+                }
+                final int uid = (int) msg.obj;
+                boolean isForeground = mUidObserver.isUidForeground(uid);
+                // store all sessions in a list and release the global lock
+                // we don't need to worry about stale data or racing as the session is synchronized
+                // itself and will perform its own closed status check in setThreads call
+                final List<AppHintSession> sessions;
+                synchronized (mLock) {
+                    final ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
+                            mActiveSessions.get(uid);
+                    if (tokenMap == null || tokenMap.isEmpty()) {
+                        return;
+                    }
+                    sessions = new ArrayList<>(tokenMap.size());
+                    for (int i = tokenMap.size() - 1; i >= 0; i--) {
+                        final ArraySet<AppHintSession> set = tokenMap.valueAt(i);
+                        for (int j = set.size() - 1; j >= 0; j--) {
+                            sessions.add(set.valueAt(j));
+                        }
+                    }
+                }
+                final long[] durationList = new long[sessions.size()];
+                final int[] invalidTidCntList = new int[sessions.size()];
+                final SparseIntArray checkedTids = new SparseIntArray();
+                int[] totalTidCnt = new int[1];
+                for (int i = sessions.size() - 1; i >= 0; i--) {
+                    final AppHintSession session = sessions.get(i);
+                    final long start = System.nanoTime();
+                    try {
+                        final int invalidCnt = cleanUpSession(session, checkedTids, totalTidCnt);
+                        final long elapsed = System.nanoTime() - start;
+                        invalidTidCntList[i] = invalidCnt;
+                        durationList[i] = elapsed;
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Failed to clean up session " + session.mHalSessionPtr
+                                + " for UID " + session.mUid);
+                    }
+                }
+                logCleanUpMetrics(uid, invalidTidCntList, durationList, sessions.size(),
+                        totalTidCnt[0], isForeground);
+            }
+        }
+
+        private void logCleanUpMetrics(int uid, int[] count, long[] durationNsList, int sessionCnt,
+                int totalTidCnt, boolean isForeground) {
+            int maxInvalidTidCnt = Integer.MIN_VALUE;
+            int totalInvalidTidCnt = 0;
+            for (int i = 0; i < count.length; i++) {
+                totalInvalidTidCnt += count[i];
+                maxInvalidTidCnt = Math.max(maxInvalidTidCnt, count[i]);
+            }
+            if (DEBUG || totalInvalidTidCnt > 0) {
+                Arrays.sort(durationNsList);
+                long totalDurationNs = 0;
+                for (int i = 0; i < durationNsList.length; i++) {
+                    totalDurationNs += durationNsList[i];
+                }
+                int totalDurationUs = (int) TimeUnit.NANOSECONDS.toMicros(totalDurationNs);
+                int maxDurationUs = (int) TimeUnit.NANOSECONDS.toMicros(
+                        durationNsList[durationNsList.length - 1]);
+                int minDurationUs = (int) TimeUnit.NANOSECONDS.toMicros(durationNsList[0]);
+                int avgDurationUs = (int) TimeUnit.NANOSECONDS.toMicros(
+                        totalDurationNs / durationNsList.length);
+                int th90DurationUs = (int) TimeUnit.NANOSECONDS.toMicros(
+                        durationNsList[(int) (durationNsList.length * 0.9)]);
+                Slog.d(TAG,
+                        "Invalid tid found for UID" + uid + " in " + totalDurationUs + "us:\n\t"
+                                + "count("
+                                + " session: " + sessionCnt
+                                + " totalTid: " + totalTidCnt
+                                + " maxInvalidTid: " + maxInvalidTidCnt
+                                + " totalInvalidTid: " + totalInvalidTidCnt + ")\n\t"
+                                + "time per session("
+                                + " min: " + minDurationUs + "us"
+                                + " max: " + maxDurationUs + "us"
+                                + " avg: " + avgDurationUs + "us"
+                                + " 90%: " + th90DurationUs + "us" + ")\n\t"
+                                + "isForeground: " + isForeground);
+            }
+        }
+
+        // This will check if each TID currently linked to the session still exists. If it's
+        // previously registered as not an isolated process, then it will run tkill(pid, tid, 0) to
+        // verify that it's still running under the same pid. Otherwise, it will run
+        // kill(tid, 0) to only check if it exists. The result will be cached in checkedTids
+        // map with tid as the key and checked status as value.
+        public int cleanUpSession(AppHintSession session, SparseIntArray checkedTids, int[] total) {
+            if (session.isClosed()) {
+                return 0;
+            }
+            final int pid = session.mPid;
+            final int[] tids = session.getTidsInternal();
+            if (total != null && total.length == 1) {
+                total[0] += tids.length;
+            }
+            final IntArray filtered = new IntArray(tids.length);
+            for (int i = 0; i < tids.length; i++) {
+                int tid = tids[i];
+                if (checkedTids.get(tid, 0) != TID_NOT_CHECKED) {
+                    if (checkedTids.get(tid) == TID_PASSED_CHECK) {
+                        filtered.add(tid);
+                    }
+                    continue;
+                }
+                // if it was registered as a non-isolated then we perform more restricted check
+                final boolean isNotIsolated;
+                synchronized (mNonIsolatedTidsLock) {
+                    isNotIsolated = mNonIsolatedTids.containsKey(tid);
+                }
+                try {
+                    if (isNotIsolated) {
+                        Process.checkTid(pid, tid);
+                    } else {
+                        Process.checkPid(tid);
+                    }
+                    checkedTids.put(tid, TID_PASSED_CHECK);
+                    filtered.add(tid);
+                } catch (NoSuchElementException e) {
+                    checkedTids.put(tid, TID_EXITED);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Unexpected exception when checking TID " + tid + " under PID "
+                            + pid + "(isolated: " + !isNotIsolated + ")", e);
+                    // if anything unexpected happens then we keep it, but don't store it as checked
+                    filtered.add(tid);
+                }
+            }
+            final int diff = tids.length - filtered.size();
+            if (diff > 0) {
+                synchronized (session) {
+                    // in case thread list is updated during the cleanup then we skip updating
+                    // the session but just return the number for reporting purpose
+                    final int[] newTids = session.getTidsInternal();
+                    if (newTids.length != tids.length) {
+                        Slog.d(TAG, "Skipped cleaning up the session as new tids are added");
+                        return diff;
+                    }
+                    Arrays.sort(newTids);
+                    Arrays.sort(tids);
+                    if (!Arrays.equals(newTids, tids)) {
+                        Slog.d(TAG, "Skipped cleaning up the session as new tids are updated");
+                        return diff;
+                    }
+                    Slog.d(TAG, "Cleaned up " + diff + " invalid tids for session "
+                            + session.mHalSessionPtr + " with UID " + session.mUid + "\n\t"
+                            + "before: " + Arrays.toString(tids) + "\n\t"
+                            + "after: " + filtered);
+                    final int[] filteredTids = filtered.toArray();
+                    if (filteredTids.length == 0) {
+                        session.mShouldForcePause = true;
+                        if (session.mUpdateAllowed) {
+                            session.pause();
+                        }
+                    } else {
+                        session.setThreadsInternal(filteredTids, false);
+                    }
+                }
+            }
+            return diff;
         }
     }
 
@@ -330,46 +558,52 @@ public final class HintManagerService extends SystemService {
     }
 
     // returns the first invalid tid or null if not found
-    private Integer checkTidValid(int uid, int tgid, int [] tids) {
+    private Integer checkTidValid(int uid, int tgid, int [] tids, IntArray nonIsolated) {
         // Make sure all tids belongs to the same UID (including isolated UID),
         // tids can belong to different application processes.
         List<Integer> isolatedPids = null;
-        for (int threadId : tids) {
+        for (int i = 0; i < tids.length; i++) {
+            int tid = tids[i];
             final String[] procStatusKeys = new String[] {
                     "Uid:",
                     "Tgid:"
             };
             long[] output = new long[procStatusKeys.length];
-            Process.readProcLines("/proc/" + threadId + "/status", procStatusKeys, output);
+            Process.readProcLines("/proc/" + tid + "/status", procStatusKeys, output);
             int uidOfThreadId = (int) output[0];
             int pidOfThreadId = (int) output[1];
 
-            // use PID check for isolated processes, use UID check for non-isolated processes.
-            if (pidOfThreadId == tgid || uidOfThreadId == uid) {
+            // use PID check for non-isolated processes
+            if (nonIsolated != null && pidOfThreadId == tgid) {
+                nonIsolated.add(tid);
+                continue;
+            }
+            // use UID check for isolated processes.
+            if (uidOfThreadId == uid) {
                 continue;
             }
             // Only call into AM if the tid is either isolated or invalid
             if (isolatedPids == null) {
                 // To avoid deadlock, do not call into AMS if the call is from system.
                 if (uid == Process.SYSTEM_UID) {
-                    return threadId;
+                    return tid;
                 }
                 isolatedPids = mAmInternal.getIsolatedProcesses(uid);
                 if (isolatedPids == null) {
-                    return threadId;
+                    return tid;
                 }
             }
             if (isolatedPids.contains(pidOfThreadId)) {
                 continue;
             }
-            return threadId;
+            return tid;
         }
         return null;
     }
 
     private String formatTidCheckErrMsg(int callingUid, int[] tids, Integer invalidTid) {
         return "Tid" + invalidTid + " from list " + Arrays.toString(tids)
-                + " doesn't belong to the calling application" + callingUid;
+                + " doesn't belong to the calling application " + callingUid;
     }
 
     @VisibleForTesting
@@ -387,7 +621,10 @@ public final class HintManagerService extends SystemService {
             final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
             final long identity = Binder.clearCallingIdentity();
             try {
-                final Integer invalidTid = checkTidValid(callingUid, callingTgid, tids);
+                final IntArray nonIsolated = powerhintThreadCleanup() ? new IntArray(tids.length)
+                        : null;
+                final Integer invalidTid = checkTidValid(callingUid, callingTgid, tids,
+                        nonIsolated);
                 if (invalidTid != null) {
                     final String errMsg = formatTidCheckErrMsg(callingUid, tids, invalidTid);
                     Slogf.w(TAG, errMsg);
@@ -396,6 +633,14 @@ public final class HintManagerService extends SystemService {
 
                 long halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid, callingUid,
                         tids, durationNanos);
+                if (powerhintThreadCleanup()) {
+                    synchronized (mNonIsolatedTidsLock) {
+                        for (int i = nonIsolated.size() - 1; i >= 0; i--) {
+                            mNonIsolatedTids.putIfAbsent(nonIsolated.get(i), new ArraySet<>());
+                            mNonIsolatedTids.get(nonIsolated.get(i)).add(halSessionPtr);
+                        }
+                    }
+                }
                 if (halSessionPtr == 0) {
                     return null;
                 }
@@ -482,6 +727,7 @@ public final class HintManagerService extends SystemService {
         protected boolean mUpdateAllowed;
         protected int[] mNewThreadIds;
         protected boolean mPowerEfficient;
+        protected boolean mShouldForcePause;
 
         private enum SessionModes {
             POWER_EFFICIENCY,
@@ -498,6 +744,7 @@ public final class HintManagerService extends SystemService {
             mTargetDurationNanos = durationNanos;
             mUpdateAllowed = true;
             mPowerEfficient = false;
+            mShouldForcePause = false;
             final boolean allowed = mUidObserver.isUidForeground(mUid);
             updateHintAllowed(allowed);
             try {
@@ -511,7 +758,7 @@ public final class HintManagerService extends SystemService {
         @VisibleForTesting
         boolean updateHintAllowed(boolean allowed) {
             synchronized (this) {
-                if (allowed && !mUpdateAllowed) resume();
+                if (allowed && !mUpdateAllowed && !mShouldForcePause) resume();
                 if (!allowed && mUpdateAllowed) pause();
                 mUpdateAllowed = allowed;
                 return mUpdateAllowed;
@@ -521,7 +768,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public void updateTargetWorkDuration(long targetDurationNanos) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed) {
+                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
                     return;
                 }
                 Preconditions.checkArgument(targetDurationNanos > 0, "Expected"
@@ -534,7 +781,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public void reportActualWorkDuration(long[] actualDurationNanos, long[] timeStampNanos) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed) {
+                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
                     return;
                 }
                 Preconditions.checkArgument(actualDurationNanos.length != 0, "the count"
@@ -581,12 +828,25 @@ public final class HintManagerService extends SystemService {
                 if (sessionSet.isEmpty()) tokenMap.remove(mToken);
                 if (tokenMap.isEmpty()) mActiveSessions.remove(mUid);
             }
+            if (powerhintThreadCleanup()) {
+                synchronized (mNonIsolatedTidsLock) {
+                    final int[] tids = getTidsInternal();
+                    for (int tid : tids) {
+                        if (mNonIsolatedTids.containsKey(tid)) {
+                            mNonIsolatedTids.get(tid).remove(mHalSessionPtr);
+                            if (mNonIsolatedTids.get(tid).isEmpty()) {
+                                mNonIsolatedTids.remove(tid);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         @Override
         public void sendHint(@PerformanceHintManager.Session.Hint int hint) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed) {
+                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
                     return;
                 }
                 Preconditions.checkArgument(hint >= 0, "the hint ID value should be"
@@ -596,33 +856,60 @@ public final class HintManagerService extends SystemService {
         }
 
         public void setThreads(@NonNull int[] tids) {
+            setThreadsInternal(tids, true);
+        }
+
+        private void setThreadsInternal(int[] tids, boolean checkTid) {
+            if (tids.length == 0) {
+                throw new IllegalArgumentException("Thread id list can't be empty.");
+            }
+
             synchronized (this) {
                 if (mHalSessionPtr == 0) {
                     return;
                 }
-                if (tids.length == 0) {
-                    throw new IllegalArgumentException("Thread id list can't be empty.");
-                }
-                final int callingUid = Binder.getCallingUid();
-                final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    final Integer invalidTid = checkTidValid(callingUid, callingTgid, tids);
-                    if (invalidTid != null) {
-                        final String errMsg = formatTidCheckErrMsg(callingUid, tids, invalidTid);
-                        Slogf.w(TAG, errMsg);
-                        throw new SecurityException(errMsg);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
                 if (!mUpdateAllowed) {
                     Slogf.v(TAG, "update hint not allowed, storing tids.");
                     mNewThreadIds = tids;
+                    mShouldForcePause = false;
                     return;
+                }
+                if (checkTid) {
+                    final int callingUid = Binder.getCallingUid();
+                    final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
+                    final IntArray nonIsolated = powerhintThreadCleanup() ? new IntArray() : null;
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        final Integer invalidTid = checkTidValid(callingUid, callingTgid, tids,
+                                nonIsolated);
+                        if (invalidTid != null) {
+                            final String errMsg = formatTidCheckErrMsg(callingUid, tids,
+                                    invalidTid);
+                            Slogf.w(TAG, errMsg);
+                            throw new SecurityException(errMsg);
+                        }
+                        if (powerhintThreadCleanup()) {
+                            synchronized (mNonIsolatedTidsLock) {
+                                for (int i = nonIsolated.size() - 1; i >= 0; i--) {
+                                    mNonIsolatedTids.putIfAbsent(nonIsolated.get(i),
+                                            new ArraySet<>());
+                                    mNonIsolatedTids.get(nonIsolated.get(i)).add(mHalSessionPtr);
+                                }
+                            }
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
                 mNativeWrapper.halSetThreads(mHalSessionPtr, tids);
                 mThreadIds = tids;
+                mNewThreadIds = null;
+                // if the update is allowed but the session is force paused by tid clean up, then
+                // it's waiting for this tid update to resume
+                if (mShouldForcePause) {
+                    resume();
+                    mShouldForcePause = false;
+                }
             }
         }
 
@@ -632,10 +919,24 @@ public final class HintManagerService extends SystemService {
             }
         }
 
+        @VisibleForTesting
+        int[] getTidsInternal() {
+            synchronized (this) {
+                return mNewThreadIds != null ? Arrays.copyOf(mNewThreadIds, mNewThreadIds.length)
+                        : Arrays.copyOf(mThreadIds, mThreadIds.length);
+            }
+        }
+
+        boolean isClosed() {
+            synchronized (this) {
+                return mHalSessionPtr == 0;
+            }
+        }
+
         @Override
         public void setMode(int mode, boolean enabled) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed) {
+                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
                     return;
                 }
                 Preconditions.checkArgument(mode >= 0, "the mode Id value should be"
@@ -650,13 +951,13 @@ public final class HintManagerService extends SystemService {
         @Override
         public void reportActualWorkDuration2(WorkDuration[] workDurations) {
             synchronized (this) {
-                if (mHalSessionPtr == 0 || !mUpdateAllowed) {
+                if (mHalSessionPtr == 0 || !mUpdateAllowed || mShouldForcePause) {
                     return;
                 }
                 Preconditions.checkArgument(workDurations.length != 0, "the count"
                         + " of work durations shouldn't be 0.");
-                for (WorkDuration workDuration : workDurations) {
-                    validateWorkDuration(workDuration);
+                for (int i = 0; i < workDurations.length; i++) {
+                    validateWorkDuration(workDurations[i]);
                 }
                 mNativeWrapper.halReportActualWorkDuration(mHalSessionPtr, workDurations);
             }
@@ -743,6 +1044,7 @@ public final class HintManagerService extends SystemService {
                 pw.println(prefix + "SessionTIDs: " + Arrays.toString(mThreadIds));
                 pw.println(prefix + "SessionTargetDurationNanos: " + mTargetDurationNanos);
                 pw.println(prefix + "SessionAllowed: " + mUpdateAllowed);
+                pw.println(prefix + "SessionForcePaused: " + mShouldForcePause);
                 pw.println(prefix + "PowerEfficient: " + (mPowerEfficient ? "true" : "false"));
             }
         }

@@ -42,7 +42,6 @@ import android.app.Person;
 import android.app.RemoteInput;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
-import android.content.pm.ShortcutInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -133,7 +132,6 @@ public final class NotificationEntry extends ListEntry {
     public Uri remoteInputUri;
     public ContentInfo remoteInputAttachment;
     private Notification.BubbleMetadata mBubbleMetadata;
-    private ShortcutInfo mShortcutInfo;
 
     /**
      * If {@link RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
@@ -168,10 +166,8 @@ public final class NotificationEntry extends ListEntry {
     private ListenerSet<OnSensitivityChangedListener> mOnSensitivityChangedListeners =
             new ListenerSet<>();
 
-    private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
     private int mBucket = BUCKET_ALERTING;
-    @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
     private boolean mIsHeadsUpEntry;
 

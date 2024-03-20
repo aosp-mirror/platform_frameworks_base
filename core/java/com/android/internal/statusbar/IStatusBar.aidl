@@ -388,9 +388,9 @@ oneway interface IStatusBar
      */
     void showMediaOutputSwitcher(String packageName);
 
-    /** Enters desktop mode.
+    /** Enters desktop mode from the current focused app.
     *
     * @param displayId the id of the current display.
     */
-    void enterDesktop(int displayId);
+    void moveFocusedTaskToDesktop(int displayId);
 }

@@ -741,7 +741,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         when(mockViewWrapper.getIcon()).thenReturn(mockIcon);
 
         NotificationViewWrapper mockLowPriorityViewWrapper = mock(NotificationViewWrapper.class);
-        when(mockContainer.getLowPriorityViewWrapper()).thenReturn(mockLowPriorityViewWrapper);
+        when(mockContainer.getMinimizedGroupHeaderWrapper()).thenReturn(mockLowPriorityViewWrapper);
         CachingIconView mockLowPriorityIcon = mock(CachingIconView.class);
         when(mockLowPriorityViewWrapper.getIcon()).thenReturn(mockLowPriorityIcon);
 

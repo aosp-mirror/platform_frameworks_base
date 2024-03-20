@@ -49,7 +49,6 @@ import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -63,6 +62,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -130,6 +130,7 @@ import javax.inject.Provider;
 @RunWith(AndroidTestingRunner.class)
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
+    protected KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationsController mNotificationsController;
@@ -167,7 +168,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private SceneContainerFlags mSceneContainerFlags;
     @Mock private Provider<WindowRootView> mWindowRootView;
     @Mock private NotificationStackAppearanceInteractor mNotificationStackAppearanceInteractor;
-    @Mock private InteractionJankMonitor mJankMonitor;
     private final StackStateLogger mStackLogger = new StackStateLogger(logcatLogBuffer(),
             logcatLogBuffer());
     private final NotificationStackScrollLogger mLogger = new NotificationStackScrollLogger(
@@ -1030,7 +1030,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mSceneContainerFlags,
                 mWindowRootView,
                 mNotificationStackAppearanceInteractor,
-                mJankMonitor,
+                mKosmos.getInteractionJankMonitor(),
                 mStackLogger,
                 mLogger,
                 mNotificationStackSizeCalculator,

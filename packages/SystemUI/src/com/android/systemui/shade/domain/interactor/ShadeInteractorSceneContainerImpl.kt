@@ -49,7 +49,9 @@ constructor(
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     shadeRepository: ShadeRepository,
 ) : BaseShadeInteractor {
-    override val shadeExpansion: Flow<Float> = sceneBasedExpansion(sceneInteractor, Scenes.Shade)
+    override val shadeExpansion: StateFlow<Float> =
+        sceneBasedExpansion(sceneInteractor, Scenes.Shade)
+            .stateIn(scope, SharingStarted.Eagerly, 0f)
 
     private val sceneBasedQsExpansion = sceneBasedExpansion(sceneInteractor, Scenes.QuickSettings)
 

@@ -20,48 +20,49 @@ import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.session.MediaSession
+import android.os.Process
 import com.android.internal.logging.InstanceId
 import com.android.systemui.res.R
 
 /** State of a media view. */
 data class MediaData(
-    val userId: Int,
+    val userId: Int = -1,
     val initialized: Boolean = false,
     /** App name that will be displayed on the player. */
-    val app: String?,
+    val app: String? = null,
     /** App icon shown on player. */
-    val appIcon: Icon?,
+    val appIcon: Icon? = null,
     /** Artist name. */
-    val artist: CharSequence?,
+    val artist: CharSequence? = null,
     /** Song name. */
-    val song: CharSequence?,
+    val song: CharSequence? = null,
     /** Album artwork. */
-    val artwork: Icon?,
+    val artwork: Icon? = null,
     /** List of generic action buttons for the media player, based on notification actions */
-    val actions: List<MediaAction>,
+    val actions: List<MediaAction> = emptyList(),
     /** Same as above, but shown on smaller versions of the player, like in QQS or keyguard. */
-    val actionsToShowInCompact: List<Int>,
+    val actionsToShowInCompact: List<Int> = emptyList(),
     /**
      * Semantic actions buttons, based on the PlaybackState of the media session. If present, these
      * actions will be preferred in the UI over [actions]
      */
     val semanticActions: MediaButton? = null,
     /** Package name of the app that's posting the media. */
-    val packageName: String,
+    val packageName: String = "INVALID",
     /** Unique media session identifier. */
-    val token: MediaSession.Token?,
+    val token: MediaSession.Token? = null,
     /** Action to perform when the player is tapped. This is unrelated to {@link #actions}. */
-    val clickIntent: PendingIntent?,
+    val clickIntent: PendingIntent? = null,
     /** Where the media is playing: phone, headphones, ear buds, remote session. */
-    val device: MediaDeviceData?,
+    val device: MediaDeviceData? = null,
     /**
      * When active, a player will be displayed on keyguard and quick-quick settings. This is
      * unrelated to the stream being playing or not, a player will not be active if timed out, or in
      * resumption mode.
      */
-    var active: Boolean,
+    var active: Boolean = true,
     /** Action that should be performed to restart a non active session. */
-    var resumeAction: Runnable?,
+    var resumeAction: Runnable? = null,
     /** Playback location: one of PLAYBACK_LOCAL, PLAYBACK_CAST_LOCAL, or PLAYBACK_CAST_REMOTE */
     var playbackLocation: Int = PLAYBACK_LOCAL,
     /**
@@ -88,10 +89,10 @@ data class MediaData(
     var createdTimestampMillis: Long = 0L,
 
     /** Instance ID for logging purposes */
-    val instanceId: InstanceId,
+    val instanceId: InstanceId = InstanceId.fakeInstanceId(-1),
 
     /** The UID of the app, used for logging */
-    val appUid: Int,
+    val appUid: Int = Process.INVALID_UID,
 
     /** Whether explicit indicator exists */
     val isExplicit: Boolean = false,

@@ -36,6 +36,7 @@ sealed interface SliderState {
      */
     val a11yStep: Int
     val disabledMessage: String?
+    val isMutable: Boolean
 
     data object Empty : SliderState {
         override val value: Float = 0f
@@ -46,5 +47,6 @@ sealed interface SliderState {
         override val disabledMessage: String? = null
         override val a11yStep: Int = 0
         override val isEnabled: Boolean = true
+        override val isMutable: Boolean = false
     }
 }

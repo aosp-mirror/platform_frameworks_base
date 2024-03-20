@@ -66,7 +66,7 @@ private val SMARTSPACE_INSTANCE_ID = InstanceId.fakeInstanceId(456)!!
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
-class MediaDataFilterTest : SysuiTestCase() {
+class LegacyMediaDataFilterImplTest : SysuiTestCase() {
 
     @Mock private lateinit var listener: MediaDataManager.Listener
     @Mock private lateinit var userTracker: UserTracker
@@ -80,7 +80,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Mock private lateinit var mediaFlags: MediaFlags
     @Mock private lateinit var cardAction: SmartspaceAction
 
-    private lateinit var mediaDataFilter: MediaDataFilter
+    private lateinit var mediaDataFilter: LegacyMediaDataFilterImpl
     private lateinit var dataMain: MediaData
     private lateinit var dataGuest: MediaData
     private lateinit var dataPrivateProfile: MediaData
@@ -92,7 +92,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         MediaPlayerData.clear()
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         mediaDataFilter =
-            MediaDataFilter(
+            LegacyMediaDataFilterImpl(
                 context,
                 userTracker,
                 broadcastSender,
@@ -370,7 +370,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataMain)
         mediaDataFilter.onSwipeToDismiss()
 
-        verify(mediaDataManager).setTimedOut(eq(KEY), eq(true), eq(true))
+        verify(mediaDataManager).setInactive(eq(KEY), eq(true), eq(true))
     }
 
     @Test

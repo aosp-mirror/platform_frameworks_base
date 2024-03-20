@@ -13118,6 +13118,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return superResult;
         }
 
+        // At this point, the event is not a long press, otherwise it would be handled above.
+        if (Flags.handwritingEndOfLineTap() && action == MotionEvent.ACTION_UP
+                && shouldStartHandwritingForEndOfLineTap(event)) {
+            InputMethodManager imm = getInputMethodManager();
+            if (imm != null) {
+                imm.startStylusHandwriting(this);
+                return true;
+            }
+        }
+
         final boolean touchIsFinished = (action == MotionEvent.ACTION_UP)
                 && (mEditor == null || !mEditor.mIgnoreActionUpEvent) && isFocused();
 
@@ -13164,6 +13174,46 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /**
+     * If handwriting is supported, the TextView is already focused and not empty, and the cursor is
+     * at the end of a line, a stylus tap after the end of the line will trigger handwriting.
+     */
+    private boolean shouldStartHandwritingForEndOfLineTap(MotionEvent actionUpEvent) {
+        if (!onCheckIsTextEditor()
+                || !isEnabled()
+                || !isAutoHandwritingEnabled()
+                || TextUtils.isEmpty(mText)
+                || didTouchFocusSelect()
+                || mLayout == null
+                || !actionUpEvent.isStylusPointer()) {
+            return false;
+        }
+        int cursorOffset = getSelectionStart();
+        if (cursorOffset < 0 || getSelectionEnd() != cursorOffset) {
+            return false;
+        }
+        int cursorLine = mLayout.getLineForOffset(cursorOffset);
+        int cursorLineEnd = mLayout.getLineEnd(cursorLine);
+        if (cursorLine != mLayout.getLineCount() - 1) {
+            cursorLineEnd--;
+        }
+        if (cursorLineEnd != cursorOffset) {
+            return false;
+        }
+        // Check that the stylus down point is within the same line as the cursor.
+        if (getLineAtCoordinate(actionUpEvent.getY()) != cursorLine) {
+            return false;
+        }
+        // Check that the stylus down point is after the end of the line.
+        float localX = convertToLocalHorizontalCoordinate(actionUpEvent.getX());
+        if (mLayout.getParagraphDirection(cursorLine) == Layout.DIR_RIGHT_TO_LEFT
+                ? localX >= mLayout.getLineLeft(cursorLine)
+                : localX <= mLayout.getLineRight(cursorLine)) {
+            return false;
+        }
+        return isStylusHandwritingAvailable();
     }
 
     /**

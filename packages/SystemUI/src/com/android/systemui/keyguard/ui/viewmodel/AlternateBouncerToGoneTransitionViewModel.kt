@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.util.MathUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -47,13 +48,16 @@ constructor(
             to = KeyguardState.GONE,
         )
 
-    val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+    fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
             duration = 200.milliseconds,
-            onStep = { 1 - it },
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { MathUtils.lerp(startAlpha, 0f, it) },
             onFinish = { 0f },
-            onCancel = { 1f },
+            onCancel = { startAlpha },
         )
+    }
 
     /** Scrim alpha values */
     val scrimAlpha: Flow<ScrimAlpha> =

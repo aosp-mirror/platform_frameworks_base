@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import static com.android.systemui.media.controls.domain.pipeline.MediaDataManagerKt.isMediaNotification;
+import static com.android.systemui.media.controls.domain.pipeline.MediaDataManager.isMediaNotification;
 
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;

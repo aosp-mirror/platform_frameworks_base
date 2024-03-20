@@ -1414,8 +1414,13 @@ public final class CachedAppOptimizer {
     }
 
     @GuardedBy({"mAm", "mProcLock"})
+    void forceFreezeAppAsyncLSP(ProcessRecord app) {
+        freezeAppAsyncInternalLSP(app, 0 /* delayMillis */, true /* force */);
+    }
+
+    @GuardedBy({"mAm", "mProcLock"})
     private void freezeAppAsyncLSP(ProcessRecord app, @UptimeMillisLong long delayMillis) {
-        freezeAppAsyncInternalLSP(app, delayMillis, false, false);
+        freezeAppAsyncInternalLSP(app, delayMillis, false /* force */);
     }
 
     @GuardedBy({"mAm", "mProcLock"})
@@ -1427,17 +1432,18 @@ public final class CachedAppOptimizer {
     // and remove this method.
     @GuardedBy({"mAm", "mProcLock"})
     void freezeAppAsyncImmediateLSP(ProcessRecord app) {
-        freezeAppAsyncInternalLSP(app, 0, false, true);
+        freezeAppAsyncInternalLSP(app, 0 /* delayMillis */, false /* force */);
     }
 
-    // TODO: Update this method to be private and have the existing clients call different methods.
-    // This "internal" method should not be directly triggered by clients outside this class.
     @GuardedBy({"mAm", "mProcLock"})
-    void freezeAppAsyncInternalLSP(ProcessRecord app, @UptimeMillisLong long delayMillis,
-            boolean force, boolean immediate) {
+    private void freezeAppAsyncInternalLSP(ProcessRecord app, @UptimeMillisLong long delayMillis,
+            boolean force) {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
-            if (immediate) {
+            if (delayMillis == 0) {
+                // Caller is requesting to freeze the process without delay, so remove
+                // any already posted messages which would have been handled with a delay and
+                // post a new message without a delay.
                 mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
                 mFreezeHandler.sendMessage(mFreezeHandler.obtainMessage(
                         SET_FROZEN_PROCESS_MSG, DO_FREEZE, 0, app));

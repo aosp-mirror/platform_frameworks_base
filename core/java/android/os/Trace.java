@@ -125,15 +125,15 @@ public final class Trace {
     @UnsupportedAppUsage
     @CriticalNative
     @android.ravenwood.annotation.RavenwoodReplace
-    private static native long nativeGetEnabledTags();
+    private static native boolean nativeIsTagEnabled(long tag);
     @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetAppTracingAllowed(boolean allowed);
     @android.ravenwood.annotation.RavenwoodReplace
     private static native void nativeSetTracingEnabled(boolean allowed);
 
-    private static long nativeGetEnabledTags$ravenwood() {
+    private static boolean nativeIsTagEnabled$ravenwood(long traceTag) {
         // Tracing currently completely disabled under Ravenwood
-        return 0;
+        return false;
     }
 
     private static void nativeSetAppTracingAllowed$ravenwood(boolean allowed) {
@@ -181,8 +181,7 @@ public final class Trace {
     @UnsupportedAppUsage
     @SystemApi(client = MODULE_LIBRARIES)
     public static boolean isTagEnabled(long traceTag) {
-        long tags = nativeGetEnabledTags();
-        return (tags & traceTag) != 0;
+        return nativeIsTagEnabled(traceTag);
     }
 
     /**

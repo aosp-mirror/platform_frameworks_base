@@ -66,6 +66,10 @@ class AudioVolumeInteractor(
         }
     }
 
+    fun isMutable(audioStream: AudioStream): Boolean =
+        // Alarm stream doesn't support muting
+        audioStream.value != AudioManager.STREAM_ALARM
+
     private suspend fun processVolume(
         audioStreamModel: AudioStreamModel,
         ringerMode: RingerMode,

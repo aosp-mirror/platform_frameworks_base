@@ -5019,8 +5019,7 @@
   <java-symbol type="bool" name="config_assistLongPressHomeEnabledDefault" />
   <java-symbol type="bool" name="config_assistTouchGestureEnabledDefault" />
 
-  <java-symbol type="bool" name="config_searchPressHoldNavHandleEnabledDefault" />
-  <java-symbol type="bool" name="config_searchLongPressHomeEnabledDefault" />
+  <java-symbol type="bool" name="config_searchAllEntrypointsEnabledDefault" />
 
   <java-symbol type="integer" name="config_hotwordDetectedResultMaxBundleSize" />
 
@@ -5337,6 +5336,11 @@
   <java-symbol type="dimen" name="config_am_pssToRssThresholdModifier" />
 
   <java-symbol type="raw" name="default_ringtone_vibration_effect" />
+
+  <!-- For activity embedding divider -->
+  <java-symbol type="drawable" name="activity_embedding_divider_handle" />
+  <java-symbol type="dimen" name="activity_embedding_divider_touch_target_width" />
+  <java-symbol type="dimen" name="activity_embedding_divider_touch_target_height" />
 
   <!-- Whether we order unlocking and waking -->
   <java-symbol type="bool" name="config_orderUnlockAndWake" />

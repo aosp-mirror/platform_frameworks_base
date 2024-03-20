@@ -344,22 +344,36 @@ class ContextImpl extends Context {
      */
     private boolean mOwnsToken = false;
 
-    private final Object mDirsLock = new Object();
-    @GuardedBy("mDirsLock")
+    private final Object mDatabasesDirLock = new Object();
+    @GuardedBy("mDatabasesDirLock")
     private File mDatabasesDir;
-    @GuardedBy("mDirsLock")
+
+    private final Object mPreferencesDirLock = new Object();
     @UnsupportedAppUsage
+    @GuardedBy("mPreferencesDirLock")
     private File mPreferencesDir;
-    @GuardedBy("mDirsLock")
+
+    private final Object mFilesDirLock = new Object();
+    @GuardedBy("mFilesDirLock")
     private File mFilesDir;
-    @GuardedBy("mDirsLock")
+
+    private final Object mCratesDirLock = new Object();
+    @GuardedBy("mCratesDirLock")
     private File mCratesDir;
-    @GuardedBy("mDirsLock")
+
+    private final Object mNoBackupFilesDirLock = new Object();
+    @GuardedBy("mNoBackupFilesDirLock")
     private File mNoBackupFilesDir;
-    @GuardedBy("mDirsLock")
+
+    private final Object mCacheDirLock = new Object();
+    @GuardedBy("mCacheDirLock")
     private File mCacheDir;
-    @GuardedBy("mDirsLock")
+
+    private final Object mCodeCacheDirLock = new Object();
+    @GuardedBy("mCodeCacheDirLock")
     private File mCodeCacheDir;
+
+    private final Object mMiscDirsLock = new Object();
 
     // The system service cache for the system services that are cached per-ContextImpl.
     @UnsupportedAppUsage
@@ -742,7 +756,7 @@ class ContextImpl extends Context {
 
     @UnsupportedAppUsage
     private File getPreferencesDir() {
-        synchronized (mDirsLock) {
+        synchronized (mPreferencesDirLock) {
             if (mPreferencesDir == null) {
                 mPreferencesDir = new File(getDataDir(), "shared_prefs");
             }
@@ -831,7 +845,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getFilesDir() {
-        synchronized (mDirsLock) {
+        synchronized (mFilesDirLock) {
             if (mFilesDir == null) {
                 mFilesDir = new File(getDataDir(), "files");
             }
@@ -846,7 +860,7 @@ class ContextImpl extends Context {
         final Path absoluteNormalizedCratePath = cratesRootPath.resolve(crateId)
                 .toAbsolutePath().normalize();
 
-        synchronized (mDirsLock) {
+        synchronized (mCratesDirLock) {
             if (mCratesDir == null) {
                 mCratesDir = cratesRootPath.toFile();
             }
@@ -859,7 +873,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getNoBackupFilesDir() {
-        synchronized (mDirsLock) {
+        synchronized (mNoBackupFilesDirLock) {
             if (mNoBackupFilesDir == null) {
                 mNoBackupFilesDir = new File(getDataDir(), "no_backup");
             }
@@ -876,7 +890,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalFilesDirs(String type) {
-        synchronized (mDirsLock) {
+        synchronized (mMiscDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppFilesDirs(getPackageName());
             if (type != null) {
                 dirs = Environment.buildPaths(dirs, type);
@@ -894,7 +908,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getObbDirs() {
-        synchronized (mDirsLock) {
+        synchronized (mMiscDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
             return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
@@ -902,7 +916,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getCacheDir() {
-        synchronized (mDirsLock) {
+        synchronized (mCacheDirLock) {
             if (mCacheDir == null) {
                 mCacheDir = new File(getDataDir(), "cache");
             }
@@ -912,7 +926,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getCodeCacheDir() {
-        synchronized (mDirsLock) {
+        synchronized (mCodeCacheDirLock) {
             if (mCodeCacheDir == null) {
                 mCodeCacheDir = getCodeCacheDirBeforeBind(getDataDir());
             }
@@ -938,7 +952,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalCacheDirs() {
-        synchronized (mDirsLock) {
+        synchronized (mMiscDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppCacheDirs(getPackageName());
             // We don't try to create cache directories in-process, because they need special
             // setup for accurate quota tracking. This ensures the cache dirs are always
@@ -949,7 +963,7 @@ class ContextImpl extends Context {
 
     @Override
     public File[] getExternalMediaDirs() {
-        synchronized (mDirsLock) {
+        synchronized (mMiscDirsLock) {
             File[] dirs = Environment.buildExternalStorageAppMediaDirs(getPackageName());
             return ensureExternalDirsExistOrFilter(dirs, true /* tryCreateInProcess */);
         }
@@ -1051,7 +1065,7 @@ class ContextImpl extends Context {
     }
 
     private File getDatabasesDir() {
-        synchronized (mDirsLock) {
+        synchronized (mDatabasesDirLock) {
             if (mDatabasesDir == null) {
                 if ("android".equals(getPackageName())) {
                     mDatabasesDir = new File("/data/system");

@@ -90,6 +90,8 @@ constructor(
     ) : SliderState {
         override val disabledMessage: String?
             get() = null
+        override val isMutable: Boolean
+            get() = false
     }
 
     @AssistedFactory

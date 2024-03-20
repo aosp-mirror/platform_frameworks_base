@@ -114,7 +114,7 @@ private fun <T> anyObject(): T {
 @SmallTest
 @RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
-class MediaDataManagerTest : SysuiTestCase() {
+class LegacyMediaDataManagerImplTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     @Mock lateinit var mediaControllerFactory: MediaControllerFactory
@@ -133,7 +133,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var mediaSessionBasedFilter: MediaSessionBasedFilter
     @Mock lateinit var mediaDeviceManager: MediaDeviceManager
     @Mock lateinit var mediaDataCombineLatest: MediaDataCombineLatest
-    @Mock lateinit var mediaDataFilter: MediaDataFilter
+    @Mock lateinit var mediaDataFilter: LegacyMediaDataFilterImpl
     @Mock lateinit var listener: MediaDataManager.Listener
     @Mock lateinit var pendingIntent: PendingIntent
     @Mock lateinit var activityStarter: ActivityStarter
@@ -146,7 +146,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock private lateinit var mediaSmartspaceBaseAction: SmartspaceAction
     @Mock private lateinit var mediaFlags: MediaFlags
     @Mock private lateinit var logger: MediaUiEventLogger
-    lateinit var mediaDataManager: MediaDataManager
+    lateinit var mediaDataManager: LegacyMediaDataManagerImpl
     lateinit var mediaNotification: StatusBarNotification
     lateinit var remoteCastNotification: StatusBarNotification
     @Captor lateinit var mediaDataCaptor: ArgumentCaptor<MediaData>
@@ -189,7 +189,7 @@ class MediaDataManagerTest : SysuiTestCase() {
             1
         )
         mediaDataManager =
-            MediaDataManager(
+            LegacyMediaDataManagerImpl(
                 context = context,
                 backgroundExecutor = backgroundExecutor,
                 uiExecutor = uiExecutor,
@@ -304,13 +304,13 @@ class MediaDataManagerTest : SysuiTestCase() {
         val data = mediaDataCaptor.value
         assertThat(data.active).isTrue()
 
-        mediaDataManager.setTimedOut(KEY, timedOut = true)
+        mediaDataManager.setInactive(KEY, timedOut = true)
         assertThat(data.active).isFalse()
         verify(logger).logMediaTimeout(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
     @Test
-    fun testSetTimedOut_resume_dismissesMedia() {
+    fun testsetInactive_resume_dismissesMedia() {
         // WHEN resume controls are present, and time out
         val desc =
             MediaDescription.Builder().run {
@@ -339,7 +339,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(false)
             )
 
-        mediaDataManager.setTimedOut(PACKAGE_NAME, timedOut = true)
+        mediaDataManager.setInactive(PACKAGE_NAME, timedOut = true)
         verify(logger)
             .logMediaTimeout(anyInt(), eq(PACKAGE_NAME), eq(mediaDataCaptor.value.instanceId))
 
@@ -1485,7 +1485,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         // WHEN the notification times out
         clock.advanceTime(100)
         val currentTime = clock.elapsedRealtime()
-        mediaDataManager.setTimedOut(KEY, true, true)
+        mediaDataManager.setInactive(KEY, true, true)
 
         // THEN the last active time is changed
         verify(listener)
@@ -1602,7 +1602,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(false)
             )
         assertThat(mediaDataCaptor.value.actionsToShowInCompact.size)
-            .isEqualTo(MediaDataManager.MAX_COMPACT_ACTIONS)
+            .isEqualTo(LegacyMediaDataManagerImpl.MAX_COMPACT_ACTIONS)
     }
 
     @Test
@@ -1615,7 +1615,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 modifyNotification(context).also {
                     it.setSmallIcon(android.R.drawable.ic_media_pause)
                     it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
-                    for (i in 0..MediaDataManager.MAX_NOTIFICATION_ACTIONS) {
+                    for (i in 0..LegacyMediaDataManagerImpl.MAX_NOTIFICATION_ACTIONS) {
                         it.addAction(action)
                     }
                 }
@@ -1638,7 +1638,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 eq(false)
             )
         assertThat(mediaDataCaptor.value.actions.size)
-            .isEqualTo(MediaDataManager.MAX_NOTIFICATION_ACTIONS)
+            .isEqualTo(LegacyMediaDataManagerImpl.MAX_NOTIFICATION_ACTIONS)
     }
 
     @Test
@@ -2040,7 +2040,7 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         // When a media control based on notification is added, times out, and then removed
         addNotificationAndLoad()
-        mediaDataManager.setTimedOut(KEY, timedOut = true)
+        mediaDataManager.setInactive(KEY, timedOut = true)
         assertThat(mediaDataCaptor.value.active).isFalse()
         mediaDataManager.onNotificationRemoved(KEY)
 
@@ -2070,7 +2070,7 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         // When a media control based on notification is added and times out
         addNotificationAndLoad()
-        mediaDataManager.setTimedOut(KEY, timedOut = true)
+        mediaDataManager.setInactive(KEY, timedOut = true)
         assertThat(mediaDataCaptor.value.active).isFalse()
 
         // and then the session is destroyed
@@ -2142,7 +2142,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         assertThat(data.active).isTrue()
-        mediaDataManager.setTimedOut(KEY, timedOut = true)
+        mediaDataManager.setInactive(KEY, timedOut = true)
         mediaDataManager.onNotificationRemoved(KEY)
 
         // It remains as a regular player
@@ -2162,7 +2162,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         assertThat(data.active).isTrue()
-        mediaDataManager.setTimedOut(KEY, timedOut = true)
+        mediaDataManager.setInactive(KEY, timedOut = true)
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is converted to a resume player
@@ -2249,7 +2249,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         assertThat(data.active).isTrue()
-        mediaDataManager.setTimedOut(KEY, timedOut = true)
+        mediaDataManager.setInactive(KEY, timedOut = true)
         sessionCallbackCaptor.value.invoke(KEY)
 
         // It is fully removed.

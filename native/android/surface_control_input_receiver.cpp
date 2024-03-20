@@ -192,7 +192,9 @@ const AInputTransferToken* AInputReceiver_getInputTransferToken(AInputReceiver* 
 
 void AInputReceiver_release(AInputReceiver* aInputReceiver) {
     InputReceiver* inputReceiver = AInputReceiver_to_InputReceiver(aInputReceiver);
-    inputReceiver->remove();
+    if (inputReceiver != nullptr) {
+        inputReceiver->remove();
+    }
     delete inputReceiver;
 }
 

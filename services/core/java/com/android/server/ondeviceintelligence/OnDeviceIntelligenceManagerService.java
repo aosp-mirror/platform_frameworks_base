@@ -163,7 +163,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             }
 
             @Override
-            public void getVersion(RemoteCallback remoteCallback) throws RemoteException {
+            public void getVersion(RemoteCallback remoteCallback) {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal getVersion");
                 Objects.requireNonNull(remoteCallback);
                 mContext.enforceCallingOrSelfPermission(
@@ -244,7 +244,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
             @Override
             public void requestFeatureDownload(Feature feature,
-                    ICancellationSignal cancellationSignal,
+                    AndroidFuture cancellationSignalFuture,
                     IDownloadCallback downloadCallback) throws RemoteException {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal requestFeatureDownload");
                 Objects.requireNonNull(feature);
@@ -261,16 +261,17 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 ensureRemoteIntelligenceServiceInitialized();
                 mRemoteOnDeviceIntelligenceService.run(
                         service -> service.requestFeatureDownload(Binder.getCallingUid(), feature,
-                                cancellationSignal,
+                                cancellationSignalFuture,
                                 downloadCallback));
             }
 
 
             @Override
             public void requestTokenInfo(Feature feature,
-                    Bundle request, ICancellationSignal cancellationSignal,
+                    Bundle request,
+                    AndroidFuture cancellationSignalFuture,
                     ITokenInfoCallback tokenInfoCallback) throws RemoteException {
-                Slog.i(TAG, "OnDeviceIntelligenceManagerInternal prepareFeatureProcessing");
+                Slog.i(TAG, "OnDeviceIntelligenceManagerInternal requestTokenInfo");
                 Objects.requireNonNull(feature);
                 Objects.requireNonNull(request);
                 Objects.requireNonNull(tokenInfoCallback);
@@ -285,10 +286,11 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                             PersistableBundle.EMPTY);
                 }
                 ensureRemoteInferenceServiceInitialized();
+
                 mRemoteInferenceService.run(
                         service -> service.requestTokenInfo(Binder.getCallingUid(), feature,
                                 request,
-                                cancellationSignal,
+                                cancellationSignalFuture,
                                 tokenInfoCallback));
             }
 
@@ -296,8 +298,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             public void processRequest(Feature feature,
                     Bundle request,
                     int requestType,
-                    ICancellationSignal cancellationSignal,
-                    IProcessingSignal processingSignal,
+                    AndroidFuture cancellationSignalFuture,
+                    AndroidFuture processingSignalFuture,
                     IResponseCallback responseCallback)
                     throws RemoteException {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal processRequest");
@@ -316,7 +318,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 mRemoteInferenceService.run(
                         service -> service.processRequest(Binder.getCallingUid(), feature, request,
                                 requestType,
-                                cancellationSignal, processingSignal,
+                                cancellationSignalFuture, processingSignalFuture,
                                 responseCallback));
             }
 
@@ -324,8 +326,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             public void processRequestStreaming(Feature feature,
                     Bundle request,
                     int requestType,
-                    ICancellationSignal cancellationSignal,
-                    IProcessingSignal processingSignal,
+                    AndroidFuture cancellationSignalFuture,
+                    AndroidFuture processingSignalFuture,
                     IStreamingResponseCallback streamingCallback) throws RemoteException {
                 Slog.i(TAG, "OnDeviceIntelligenceManagerInternal processRequestStreaming");
                 Objects.requireNonNull(feature);
@@ -343,7 +345,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 mRemoteInferenceService.run(
                         service -> service.processRequestStreaming(Binder.getCallingUid(), feature,
                                 request, requestType,
-                                cancellationSignal, processingSignal,
+                                cancellationSignalFuture, processingSignalFuture,
                                 streamingCallback));
             }
 
@@ -356,7 +358,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         };
     }
 
-    private void ensureRemoteIntelligenceServiceInitialized() throws RemoteException {
+    private void ensureRemoteIntelligenceServiceInitialized() {
         synchronized (mLock) {
             if (mRemoteOnDeviceIntelligenceService == null) {
                 String serviceName = getServiceNames()[0];
@@ -388,25 +390,15 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             public void updateProcessingState(
                     Bundle processingState,
                     IProcessingUpdateStatusCallback callback) {
-                try {
-                    ensureRemoteInferenceServiceInitialized();
-                    mRemoteInferenceService.run(
-                            service -> service.updateProcessingState(
-                                    processingState, callback));
-                } catch (RemoteException unused) {
-                    try {
-                        callback.onFailure(
-                                OnDeviceIntelligenceException.PROCESSING_UPDATE_STATUS_CONNECTION_FAILED,
-                                "Received failure invoking the remote processing service.");
-                    } catch (RemoteException ex) {
-                        Slog.w(TAG, "Failed to send failure status.", ex);
-                    }
-                }
+                ensureRemoteInferenceServiceInitialized();
+                mRemoteInferenceService.run(
+                        service -> service.updateProcessingState(
+                                processingState, callback));
             }
         };
     }
 
-    private void ensureRemoteInferenceServiceInitialized() throws RemoteException {
+    private void ensureRemoteInferenceServiceInitialized() {
         synchronized (mLock) {
             if (mRemoteInferenceService == null) {
                 String serviceName = getServiceNames()[1];
@@ -457,34 +449,38 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
         };
     }
 
-    private static void validateServiceElevated(String serviceName, boolean checkIsolated)
-            throws RemoteException {
-        if (TextUtils.isEmpty(serviceName)) {
-            throw new IllegalArgumentException("Received null/empty service name : " + serviceName);
-        }
-        ComponentName serviceComponent = ComponentName.unflattenFromString(
-                serviceName);
-        ServiceInfo serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
-                serviceComponent,
-                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
-        if (serviceInfo != null) {
-            if (!checkIsolated) {
-                checkServiceRequiresPermission(serviceInfo,
-                        Manifest.permission.BIND_ON_DEVICE_INTELLIGENCE_SERVICE);
-                return;
+    private void validateServiceElevated(String serviceName, boolean checkIsolated) {
+        try {
+            if (TextUtils.isEmpty(serviceName)) {
+                throw new IllegalStateException(
+                        "Remote service is not configured to complete the request");
             }
+            ComponentName serviceComponent = ComponentName.unflattenFromString(
+                    serviceName);
+            ServiceInfo serviceInfo = AppGlobals.getPackageManager().getServiceInfo(
+                    serviceComponent,
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
+            if (serviceInfo != null) {
+                if (!checkIsolated) {
+                    checkServiceRequiresPermission(serviceInfo,
+                            Manifest.permission.BIND_ON_DEVICE_INTELLIGENCE_SERVICE);
+                    return;
+                }
 
-            checkServiceRequiresPermission(serviceInfo,
-                    Manifest.permission.BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE);
-            if (!isIsolatedService(serviceInfo)) {
-                throw new SecurityException(
-                        "Call required an isolated service, but the configured service: "
-                                + serviceName + ", is not isolated");
+                checkServiceRequiresPermission(serviceInfo,
+                        Manifest.permission.BIND_ON_DEVICE_SANDBOXED_INFERENCE_SERVICE);
+                if (!isIsolatedService(serviceInfo)) {
+                    throw new SecurityException(
+                            "Call required an isolated service, but the configured service: "
+                                    + serviceName + ", is not isolated");
+                }
+            } else {
+                throw new IllegalStateException(
+                        "Remote service is not configured to complete the request.");
             }
-        } else {
-            throw new RuntimeException(
-                    "Could not find service info for serviceName: " + serviceName);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Could not fetch service info for remote services", e);
         }
     }
 
@@ -542,7 +538,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
         synchronized (mLock) {
             mTemporaryServiceNames = componentNames;
-
+            mRemoteOnDeviceIntelligenceService = null;
+            mRemoteInferenceService = null;
             if (mTemporaryHandler == null) {
                 mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
                     @Override

@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -179,10 +180,11 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         for (TransitionInfo.Change change: info.getChanges()) {
             final SurfaceControl sc = change.getLeash();
             final Rect endBounds = change.getEndAbsBounds();
+            final Point endPosition = change.getEndRelOffset();
             startTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
-                    .setPosition(sc, endBounds.left, endBounds.top);
+                    .setPosition(sc, endPosition.x, endPosition.y);
             finishTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
-                    .setPosition(sc, endBounds.left, endBounds.top);
+                    .setPosition(sc, endPosition.x, endPosition.y);
         }
 
         startTransaction.apply();

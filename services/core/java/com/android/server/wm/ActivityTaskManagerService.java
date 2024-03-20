@@ -5682,29 +5682,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         throw e;
     }
 
-    /**
-     * Sets the corresponding {@link DisplayArea} information for the process global
-     * configuration. To be called when we need to show IME on a different {@link DisplayArea}
-     * or display.
-     *
-     * @param pid The process id associated with the IME window.
-     * @param imeContainer The DisplayArea that contains the IME window.
-     */
-    void onImeWindowSetOnDisplayArea(final int pid, @NonNull final DisplayArea imeContainer) {
-        if (pid == MY_PID || pid < 0) {
-            ProtoLog.w(WM_DEBUG_CONFIGURATION,
-                    "Trying to update display configuration for system/invalid process.");
-            return;
-        }
-        final WindowProcessController process = mProcessMap.getProcess(pid);
-        if (process == null) {
-            ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
-                    + "configuration for invalid process, pid=%d", pid);
-            return;
-        }
-        process.registerDisplayAreaConfigurationListener(imeContainer);
-    }
-
     @Override
     public void setRunningRemoteTransitionDelegate(IApplicationThread delegate) {
         final TransitionController controller = getTransitionController();

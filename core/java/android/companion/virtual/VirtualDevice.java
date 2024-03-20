@@ -17,7 +17,6 @@
 package android.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
-import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 
@@ -176,8 +175,7 @@ public final class VirtualDevice implements Parcelable {
     @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public boolean hasCustomAudioInputSupport() {
         try {
-            return mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM;
-            // TODO(b/291735254): also check for a custom audio injection mix for this device id.
+            return mVirtualDevice.hasCustomAudioInputSupport();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

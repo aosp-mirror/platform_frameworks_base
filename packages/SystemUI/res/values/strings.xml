@@ -2013,6 +2013,10 @@
     <string name="system_multitasking_lhs">Enter split screen with current app to LHS</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
+    <!-- User visible title for the keyboard shortcut that switches to app on right or below while using split screen [CHAR LIMIT=70] -->
+    <string name="system_multitasking_splitscreen_focus_rhs">Switch to app on right or below while using split screen</string>
+    <!-- User visible title for the keyboard shortcut that switches to app on left or above while using split screen [CHAR LIMIT=70] -->
+    <string name="system_multitasking_splitscreen_focus_lhs">Switch to app on left or above while using split screen</string>
     <!-- User visible title for the keyboard shortcut that replaces an app from one to another during split screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_replace">During split screen: replace an app from one to another</string>
 

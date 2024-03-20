@@ -27,14 +27,3 @@ flag {
   description: "Provides additional callbacks with information about user actions in ChooserResult"
   bug: "263474465"
 }
-
-flag {
-  name: "legacy_chooser_pinning_removal"
-  namespace: "intentresolver"
-  description: "Removing pinning functionality from the legacy chooser (used by partial screenshare)"
-  bug: "301068735"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-

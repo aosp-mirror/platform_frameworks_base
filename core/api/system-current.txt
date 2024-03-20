@@ -598,7 +598,6 @@ package android.app {
     field public static final int FOREGROUND_SERVICE_API_TYPE_MICROPHONE = 6; // 0x6
     field public static final int FOREGROUND_SERVICE_API_TYPE_PHONE_CALL = 7; // 0x7
     field public static final int FOREGROUND_SERVICE_API_TYPE_USB = 8; // 0x8
-    field @FlaggedApi("android.media.audio.foreground_audio_control") public static final int PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL = 64; // 0x40
     field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
     field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 4; // 0x4
@@ -3797,7 +3796,6 @@ package android.content {
     field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String ON_DEVICE_INTELLIGENCE_SERVICE = "on_device_intelligence";
     field public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
     field public static final String PERMISSION_SERVICE = "permission";
-    field public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
     field public static final String REBOOT_READINESS_SERVICE = "reboot_readiness";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String SAFETY_CENTER_SERVICE = "safety_center";
@@ -4356,7 +4354,7 @@ package android.content.pm {
     field @Deprecated public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1; // 0x1
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
-    field public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
+    field @Deprecated public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
     field @FlaggedApi("android.content.pm.fix_duplicated_flags") public static final long MATCH_CLONE_PROFILE_LONG = 17179869184L; // 0x400000000L
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000

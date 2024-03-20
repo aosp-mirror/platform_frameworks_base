@@ -169,7 +169,7 @@ constructor(
         provider: Provider<ClockController>?,
     ): Provider<ClockController>? {
         return if (Flags.migrateClocksToBlueprint()) {
-            Provider { keyguardClockViewModel.clock }
+            Provider { keyguardClockViewModel.currentClock.value }
         } else {
             provider
         }

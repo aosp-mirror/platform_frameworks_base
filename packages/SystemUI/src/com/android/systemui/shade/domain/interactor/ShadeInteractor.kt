@@ -66,7 +66,7 @@ interface BaseShadeInteractor {
     val isAnyExpanded: StateFlow<Boolean>
 
     /** The amount [0-1] that the shade has been opened. */
-    val shadeExpansion: Flow<Float>
+    val shadeExpansion: StateFlow<Float>
 
     /**
      * The amount [0-1] QS has been opened. Normal shade with notifications (QQS) visible will
