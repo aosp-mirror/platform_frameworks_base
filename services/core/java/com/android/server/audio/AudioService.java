@@ -6854,15 +6854,6 @@ public class AudioService extends IAudioService.Stub
                         ringerMode = RINGER_MODE_SILENT;
                     }
                 }
-            } else if (mIsSingleVolume && (direction == AudioManager.ADJUST_TOGGLE_MUTE
-                    || direction == AudioManager.ADJUST_MUTE)) {
-                if (mHasVibrator) {
-                    ringerMode = RINGER_MODE_VIBRATE;
-                } else {
-                    ringerMode = RINGER_MODE_SILENT;
-                }
-                // Setting the ringer mode will toggle mute
-                result &= ~FLAG_ADJUST_VOLUME;
             }
             break;
         case RINGER_MODE_VIBRATE:
@@ -6871,11 +6862,8 @@ public class AudioService extends IAudioService.Stub
                         "but no vibrator is present");
                 break;
             }
-            if ((direction == AudioManager.ADJUST_LOWER)) {
-                // This is the case we were muted with the volume turned up
-                if (mIsSingleVolume && oldIndex >= 2 * step && isMuted) {
-                    ringerMode = RINGER_MODE_NORMAL;
-                } else if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+            if (direction == AudioManager.ADJUST_LOWER) {
+                if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                     if (mVolumePolicy.volumeDownToEnterSilent) {
                         final long diff = SystemClock.uptimeMillis()
                                 - mLoweredFromNormalToVibrateTime;
@@ -6895,10 +6883,7 @@ public class AudioService extends IAudioService.Stub
             result &= ~FLAG_ADJUST_VOLUME;
             break;
         case RINGER_MODE_SILENT:
-            if (mIsSingleVolume && direction == AudioManager.ADJUST_LOWER && oldIndex >= 2 * step && isMuted) {
-                // This is the case we were muted with the volume turned up
-                ringerMode = RINGER_MODE_NORMAL;
-            } else if (direction == AudioManager.ADJUST_RAISE
+            if (direction == AudioManager.ADJUST_RAISE
                     || direction == AudioManager.ADJUST_TOGGLE_MUTE
                     || direction == AudioManager.ADJUST_UNMUTE) {
                 if (!mVolumePolicy.volumeUpToExitSilent) {
