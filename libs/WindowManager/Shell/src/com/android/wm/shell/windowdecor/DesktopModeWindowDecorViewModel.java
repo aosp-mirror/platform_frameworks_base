@@ -32,16 +32,8 @@ import static android.view.WindowInsets.Type.statusBars;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.compatui.AppCompatUtils.isSingleTopActivityTranslucent;
-import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
-import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
-import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
-import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION;
-import static com.android.wm.shell.windowdecor.MoveToDesktopAnimator.DRAG_FREEFORM_SCALE;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -849,26 +841,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
             case MotionEvent.ACTION_UP: {
                 if (mTransitionDragActive) {
-                    final DesktopModeVisualIndicator.IndicatorType indicatorType =
-                            mDesktopTasksController.updateVisualIndicator(relevantDecor.mTaskInfo,
-                                    relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY());
+                    mDesktopTasksController.updateVisualIndicator(relevantDecor.mTaskInfo,
+                            relevantDecor.mTaskSurface, ev.getRawX(), ev.getRawY());
                     mTransitionDragActive = false;
-                    if (indicatorType == TO_DESKTOP_INDICATOR
-                            || indicatorType == TO_SPLIT_LEFT_INDICATOR
-                            || indicatorType == TO_SPLIT_RIGHT_INDICATOR) {
-                        if (DesktopModeStatus.isEnabled()) {
-                            animateToDesktop(relevantDecor, ev);
-                        }
-                        mMoveToDesktopAnimator = null;
-                        return;
-                    } else if (mMoveToDesktopAnimator != null) {
+                    if (mMoveToDesktopAnimator != null) {
                         // Though this isn't a hover event, we need to update handle's hover state
                         // as it likely will change.
                         relevantDecor.updateHoverAndPressStatus(ev);
                         mDesktopTasksController.onDragPositioningEndThroughStatusBar(
                                 new PointF(ev.getRawX(), ev.getRawY()),
                                 relevantDecor.mTaskInfo,
-                                calculateFreeformBounds(ev.getDisplayId(), DRAG_FREEFORM_SCALE));
+                                calculateFreeformBounds(ev.getDisplayId(),
+                                        DesktopTasksController.DESKTOP_MODE_INITIAL_BOUNDS_SCALE));
                         mMoveToDesktopAnimator = null;
                         return;
                     } else {
@@ -935,54 +919,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 (int) (screenHeight * adjustmentPercentage),
                 (int) (screenWidth * (adjustmentPercentage + scale)),
                 (int) (screenHeight * (adjustmentPercentage + scale)));
-    }
-
-    /**
-     * Blocks relayout until transition is finished and transitions to Desktop
-     */
-    private void animateToDesktop(DesktopModeWindowDecoration relevantDecor,
-            MotionEvent ev) {
-        centerAndMoveToDesktopWithAnimation(relevantDecor, ev);
-    }
-
-    /**
-     * Animates a window to the center, grows to freeform size, and transitions to Desktop Mode.
-     * @param relevantDecor the window decor of the task to be animated
-     * @param ev the motion event that triggers the animation
-     * TODO(b/315527000): This animation needs to be adjusted to allow snap left/right cases.
-     *  Currently fullscreen -> split snap still animates to center screen before readjusting.
-     */
-    private void centerAndMoveToDesktopWithAnimation(DesktopModeWindowDecoration relevantDecor,
-            MotionEvent ev) {
-        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
-        animator.setDuration(FREEFORM_ANIMATION_DURATION);
-        final SurfaceControl sc = relevantDecor.mTaskSurface;
-        final Rect endBounds = calculateFreeformBounds(ev.getDisplayId(), DRAG_FREEFORM_SCALE);
-        final Transaction t = mTransactionFactory.get();
-        final float diffX = endBounds.centerX() - ev.getRawX();
-        final float diffY = endBounds.top - ev.getRawY();
-        final float startingX = ev.getRawX() - DRAG_FREEFORM_SCALE
-                * mDragToDesktopAnimationStartBounds.width() / 2;
-
-        animator.addUpdateListener(animation -> {
-            final float animatorValue = (float) animation.getAnimatedValue();
-            final float x = startingX + diffX * animatorValue;
-            final float y = ev.getRawY() + diffY * animatorValue;
-            t.setPosition(sc, x, y);
-            t.apply();
-        });
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mDesktopTasksController.onDragPositioningEndThroughStatusBar(
-                        new PointF(ev.getRawX(), ev.getRawY()),
-                        relevantDecor.mTaskInfo,
-                        calculateFreeformBounds(ev.getDisplayId(),
-                                DesktopTasksController
-                                        .DESKTOP_MODE_INITIAL_BOUNDS_SCALE));
-            }
-        });
-        animator.start();
     }
 
     @Nullable
