@@ -8933,7 +8933,8 @@ public final class ViewRootImpl implements ViewParent,
                     mTempInsets, mTempControls, mRelayoutBundle);
             mRelayoutRequested = true;
 
-            final int maybeSyncSeqId = mRelayoutBundle.getInt("seqid");
+            final int maybeSyncSeqId = mRelayoutBundle.getInt(
+                    IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID);
             if (maybeSyncSeqId > 0) {
                 mSyncSeqId = maybeSyncSeqId;
             }
