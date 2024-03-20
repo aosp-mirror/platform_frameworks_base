@@ -3508,7 +3508,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
                     if (statusbar != null) {
-                        statusbar.enterDesktop(getTargetDisplayIdForKeyEvent(event));
+                        statusbar.moveFocusedTaskToDesktop(getTargetDisplayIdForKeyEvent(event));
                         logKeyboardSystemsEvent(event, KeyboardLogEvent.DESKTOP_MODE);
                         return true;
                     }

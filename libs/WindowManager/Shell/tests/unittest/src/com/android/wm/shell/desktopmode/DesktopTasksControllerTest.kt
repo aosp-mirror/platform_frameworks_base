@@ -833,7 +833,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         verify(launchAdjacentController).launchAdjacentEnabled = true
     }
     @Test
-    fun enterDesktop_fullscreenTaskIsMovedToDesktop() {
+    fun moveFocusedTaskToDesktop_fullscreenTaskIsMovedToDesktop() {
         val task1 = setUpFullscreenTask()
         val task2 = setUpFullscreenTask()
         val task3 = setUpFullscreenTask()
@@ -842,7 +842,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         task2.isFocused = false
         task3.isFocused = false
 
-        controller.enterDesktop(DEFAULT_DISPLAY)
+        controller.moveFocusedTaskToDesktop(DEFAULT_DISPLAY)
 
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task1.token.asBinder()]?.windowingMode)
@@ -850,7 +850,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun enterDesktop_splitScreenTaskIsMovedToDesktop() {
+    fun moveFocusedTaskToDesktop_splitScreenTaskIsMovedToDesktop() {
         val task1 = setUpSplitScreenTask()
         val task2 = setUpFullscreenTask()
         val task3 = setUpFullscreenTask()
@@ -863,7 +863,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         task4.parentTaskId = task1.taskId
 
-        controller.enterDesktop(DEFAULT_DISPLAY)
+        controller.moveFocusedTaskToDesktop(DEFAULT_DISPLAY)
 
         val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task4.token.asBinder()]?.windowingMode)

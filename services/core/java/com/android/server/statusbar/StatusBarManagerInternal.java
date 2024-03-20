@@ -267,7 +267,7 @@ public interface StatusBarManagerInternal {
     void removeQsTile(ComponentName tile);
 
     /**
-     * Called when requested to enter desktop from an app.
+     * Called when requested to enter desktop from a focused app.
      */
-    void enterDesktop(int displayId);
+    void moveFocusedTaskToDesktop(int displayId);
 }
