@@ -185,7 +185,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
             setOf(QSTileState.UserAction.CLICK),
             label,
             null,
-            QSTileState.SideViewIcon.None,
+            QSTileState.SideViewIcon.Chevron,
             QSTileState.EnabledState.ENABLED,
             Switch::class.qualifiedName
         )
