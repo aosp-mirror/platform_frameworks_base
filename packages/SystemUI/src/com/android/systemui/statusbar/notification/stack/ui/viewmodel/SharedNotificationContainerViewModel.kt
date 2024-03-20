@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -241,7 +242,22 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = false,
             )
-            .dumpWhileCollecting("isOnGlanceableHubWithoutShade")
+            .dumpValue("isOnGlanceableHubWithoutShade")
+
+    /** Are we on the dream without the shade/qs? */
+    private val isDreamingWithoutShade: Flow<Boolean> =
+        combine(
+                keyguardTransitionInteractor.isFinishedInState(DREAMING),
+                isAnyExpanded,
+            ) { isDreaming, isAnyExpanded ->
+                isDreaming && !isAnyExpanded
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+            .dumpValue("isDreamingWithoutShade")
 
     /**
      * Fade in if the user swipes the shade back up, not if collapsed by going to AOD. This is
@@ -459,6 +475,7 @@ constructor(
         combineTransform(
                 isOnGlanceableHubWithoutShade,
                 isOnLockscreen,
+                isDreamingWithoutShade,
                 merge(
                         lockscreenToGlanceableHubTransitionViewModel.notificationAlpha,
                         glanceableHubToLockscreenTransitionViewModel.notificationAlpha,
@@ -466,9 +483,9 @@ constructor(
                     // Manually emit on start because [notificationAlpha] only starts emitting
                     // when transitions start.
                     .onStart { emit(1f) }
-            ) { isOnGlanceableHubWithoutShade, isOnLockscreen, alpha,
+            ) { isOnGlanceableHubWithoutShade, isOnLockscreen, isDreamingWithoutShade, alpha,
                 ->
-                if (isOnGlanceableHubWithoutShade && !isOnLockscreen) {
+                if ((isOnGlanceableHubWithoutShade || isDreamingWithoutShade) && !isOnLockscreen) {
                     // Notifications should not be visible on the glanceable hub.
                     // TODO(b/321075734): implement a way to actually set the notifications to
                     // gone while on the hub instead of just adjusting alpha
@@ -483,6 +500,7 @@ constructor(
                     emit(1f)
                 }
             }
+            .distinctUntilChanged()
             .dumpWhileCollecting("glanceableHubAlpha")
 
     /**
