@@ -18,6 +18,7 @@ package com.android.server.location.gnss;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.location.flags.Flags;
 import android.net.ConnectivityManager;
@@ -32,6 +33,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.PreciseCallState;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -566,6 +568,10 @@ class GnssNetworkConnectivityHandler {
         }
     }
 
+    @RequiresPermission(allOf = {
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.READ_PHONE_STATE
+    })
     private void handleRequestSuplConnection(int agpsType, byte[] suplIpAddr) {
         mAGpsDataConnectionIpAddr = null;
         mAGpsType = agpsType;
@@ -599,6 +605,19 @@ class GnssNetworkConnectivityHandler {
         NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
         networkRequestBuilder.addCapability(getNetworkCapability(mAGpsType));
         networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+
+        if (com.android.internal.telephony.flags.Flags.satelliteInternet()) {
+            // Add transport type NetworkCapabilities.TRANSPORT_SATELLITE on satellite network.
+            TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
+            if (telephonyManager != null) {
+                ServiceState state = telephonyManager.getServiceState();
+                if (state != null && state.isUsingNonTerrestrialNetwork()) {
+                    networkRequestBuilder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
+                    networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_SATELLITE);
+                }
+            }
+        }
+
         // During an emergency call, and when we have cached the Active Sub Id, we set the
         // Network Specifier so that the network request goes to the correct Sub Id
         if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
