@@ -312,8 +312,8 @@ public class AuthService extends SystemService {
             if (promptInfo.containsPrivateApiConfigurations()) {
                 checkInternalPermission();
             }
-            if (promptInfo.containsSetLogoApiConfigurations()) {
-                checkManageBiometricPermission();
+            if (promptInfo.containsAdvancedApiConfigurations()) {
+                checkBiometricAdvancedPermission();
             }
 
             final long identity = Binder.clearCallingIdentity();
@@ -1029,7 +1029,7 @@ public class AuthService extends SystemService {
                 "Must have USE_BIOMETRIC_INTERNAL permission");
     }
 
-    private void checkManageBiometricPermission() {
+    private void checkBiometricAdvancedPermission() {
         getContext().enforceCallingOrSelfPermission(SET_BIOMETRIC_DIALOG_ADVANCED,
                 "Must have SET_BIOMETRIC_DIALOG_ADVANCED permission");
     }
