@@ -163,10 +163,10 @@ constructor(
         addFilter(PulseLockscreenVisibilityPrivateSuppressor())
         addFilter(PulseLowImportanceSuppressor())
         addFilter(BubbleNotAllowedSuppressor())
-        addFilter(BubbleAppSuspendedSuppressor())
         addFilter(BubbleNoMetadataSuppressor())
         addFilter(HunGroupAlertBehaviorSuppressor())
         addFilter(HunJustLaunchedFsiSuppressor())
+        addFilter(AlertAppSuspendedSuppressor())
         addFilter(AlertKeyguardVisibilitySuppressor(keyguardNotificationVisibilityProvider))
 
         if (NotificationAvalancheSuppression.isEnabled) {

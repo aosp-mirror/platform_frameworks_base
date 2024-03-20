@@ -207,11 +207,6 @@ class BubbleNotAllowedSuppressor() :
     override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
 }
 
-class BubbleAppSuspendedSuppressor :
-    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "app is suspended") {
-    override fun shouldSuppress(entry: NotificationEntry) = entry.ranking.isSuspended
-}
-
 class BubbleNoMetadataSuppressor() :
     VisualInterruptionFilter(types = setOf(BUBBLE), reason = "has no or invalid bubble metadata") {
 
@@ -219,6 +214,11 @@ class BubbleNoMetadataSuppressor() :
         metadata != null && (metadata.intent != null || metadata.shortcutId != null)
 
     override fun shouldSuppress(entry: NotificationEntry) = !isValidMetadata(entry.bubbleMetadata)
+}
+
+class AlertAppSuspendedSuppressor :
+    VisualInterruptionFilter(types = setOf(PEEK, PULSE, BUBBLE), reason = "app is suspended") {
+    override fun shouldSuppress(entry: NotificationEntry) = entry.ranking.isSuspended
 }
 
 class AlertKeyguardVisibilitySuppressor(
