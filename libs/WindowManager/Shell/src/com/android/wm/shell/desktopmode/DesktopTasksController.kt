@@ -1166,7 +1166,7 @@ class DesktopTasksController(
             pendingIntentLaunchFlags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
             setPendingIntentBackgroundActivityStartMode(
-                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
             )
             isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
         }
