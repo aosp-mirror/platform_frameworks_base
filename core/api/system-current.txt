@@ -598,7 +598,6 @@ package android.app {
     field public static final int FOREGROUND_SERVICE_API_TYPE_MICROPHONE = 6; // 0x6
     field public static final int FOREGROUND_SERVICE_API_TYPE_PHONE_CALL = 7; // 0x7
     field public static final int FOREGROUND_SERVICE_API_TYPE_USB = 8; // 0x8
-    field @FlaggedApi("android.media.audio.foreground_audio_control") public static final int PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL = 64; // 0x40
     field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
     field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 4; // 0x4
