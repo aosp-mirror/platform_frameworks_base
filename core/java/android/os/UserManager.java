@@ -3183,6 +3183,8 @@ public class UserManager {
      * @return whether the context user can add a private profile.
      * @hide
      */
+    @TestApi
+    @FlaggedApi(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE)
     @RequiresPermission(anyOf = {
             Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS},
