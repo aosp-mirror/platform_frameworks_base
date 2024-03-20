@@ -23,10 +23,8 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.notifications.ui.composable.NotificationStack
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackViewBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
@@ -37,12 +35,10 @@ class NotificationSection
 @Inject
 constructor(
     private val viewModel: NotificationsPlaceholderViewModel,
-    sceneContainerFlags: SceneContainerFlags,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     stackScrollLayout: NotificationStackScrollLayout,
     sharedNotificationContainerBinder: SharedNotificationContainerBinder,
-    notificationStackViewBinder: NotificationStackViewBinder,
 ) {
 
     init {
@@ -65,10 +61,6 @@ constructor(
             sharedNotificationContainer,
             sharedNotificationContainerViewModel,
         )
-
-        if (sceneContainerFlags.isEnabled()) {
-            notificationStackViewBinder.bindWhileAttached()
-        }
     }
 
     @Composable
