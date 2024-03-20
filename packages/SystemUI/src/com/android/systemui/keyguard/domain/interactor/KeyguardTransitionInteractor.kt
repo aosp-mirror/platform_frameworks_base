@@ -86,7 +86,6 @@ constructor(
         return transitionValueCache.getOrPut(state) {
             MutableSharedFlow<Float>(
                 extraBufferCapacity = 2,
-                replay = 1,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
         }

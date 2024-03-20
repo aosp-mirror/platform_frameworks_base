@@ -50,7 +50,7 @@ constructor(
      * The amount [0-1] that the shade has been opened. Uses stateIn to avoid redundant calculations
      * in downstream flows.
      */
-    override val shadeExpansion: StateFlow<Float> =
+    override val shadeExpansion: Flow<Float> =
         combine(
                 repository.lockscreenShadeExpansion,
                 keyguardRepository.statusBarState,
