@@ -21,7 +21,6 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
 import static com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE;
@@ -71,6 +70,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -1778,7 +1778,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                     // Dragging down on the lockscreen statusbar should prohibit other interactions
                     // immediately, otherwise we'll wait on the touchslop. This is to allow
                     // dragging down to expanded quick settings directly on the lockscreen.
-                    if (!migrateClocksToBlueprint()) {
+                    if (!MigrateClocksToBlueprint.isEnabled()) {
                         mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
                     }
                 }
@@ -1823,7 +1823,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(
                         mInitialTouchX, mInitialTouchY, h)) {
-                    if (!migrateClocksToBlueprint()) {
+                    if (!MigrateClocksToBlueprint.isEnabled()) {
                         mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
                     }
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);

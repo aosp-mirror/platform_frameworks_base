@@ -25,7 +25,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.centralizedStatusBarHeightFix
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.NotificationPanelView
@@ -54,13 +54,13 @@ constructor(
         sharedNotificationContainerBinder,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
         constraintSet.apply {
             val bottomMargin =
                 context.resources.getDimensionPixelSize(R.dimen.keyguard_status_view_bottom_margin)
-            if (migrateClocksToBlueprint()) {
+            if (MigrateClocksToBlueprint.isEnabled) {
                 val useLargeScreenHeader =
                     context.resources.getBoolean(R.bool.config_use_large_screen_shade_header)
                 val marginTopLargeScreen =

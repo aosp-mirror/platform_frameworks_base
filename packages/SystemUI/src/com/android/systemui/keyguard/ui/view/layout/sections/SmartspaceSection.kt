@@ -23,8 +23,8 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardSmartspaceInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
@@ -56,7 +56,7 @@ constructor(
     private var pastVisibility: Int = -1
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) return
+        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         smartspaceView = smartspaceController.buildAndConnectView(constraintLayout)
         weatherView = smartspaceController.buildAndConnectWeatherView(constraintLayout)
@@ -83,7 +83,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) return
+        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         KeyguardSmartspaceViewBinder.bind(
             constraintLayout,
@@ -94,7 +94,7 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!migrateClocksToBlueprint()) return
+        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         val horizontalPaddingStart =
             context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
@@ -191,7 +191,7 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) return
+        if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
         listOf(smartspaceView, dateView, weatherView).forEach {
             it?.let {

@@ -25,8 +25,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
@@ -70,7 +70,7 @@ constructor(
     }
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
         // This moves the existing NSSL view to a different parent, as the controller is a
@@ -86,7 +86,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
 

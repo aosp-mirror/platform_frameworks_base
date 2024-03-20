@@ -20,8 +20,8 @@ import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.notifications.ui.composable.NotificationStack
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -42,8 +42,8 @@ constructor(
 ) {
 
     init {
-        if (!migrateClocksToBlueprint()) {
-            throw IllegalStateException("this requires migrateClocksToBlueprint()")
+        if (!MigrateClocksToBlueprint.isEnabled) {
+            throw IllegalStateException("this requires MigrateClocksToBlueprint.isEnabled")
         }
         // This scene container section moves the NSSL to the SharedNotificationContainer.
         // This also requires that SharedNotificationContainer gets moved to the

@@ -21,7 +21,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.Flags.smartspaceRelocateToBottom;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
@@ -45,6 +44,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
@@ -202,7 +202,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockChangedListener = new ClockRegistry.ClockChangeListener() {
             @Override
             public void onCurrentClockChanged() {
-                if (!migrateClocksToBlueprint()) {
+                if (!MigrateClocksToBlueprint.isEnabled()) {
                     setClock(mClockRegistry.createCurrentClock());
                 }
             }
@@ -245,7 +245,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     protected void onInit() {
         mKeyguardSliceViewController.init();
 
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled()) {
             mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
             mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
         }
@@ -340,7 +340,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 addDateWeatherView();
             }
         }
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled()) {
             setDateWeatherVisibility();
             setWeatherVisibility();
         }
@@ -348,7 +348,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     int getNotificationIconAreaHeight() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return 0;
         } else if (NotificationIconContainerRefactor.isEnabled()) {
             return mAodIconContainer != null ? mAodIconContainer.getHeight() : 0;
@@ -391,7 +391,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addDateWeatherView() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return;
         }
         mDateWeatherView = (ViewGroup) mSmartspaceController.buildAndConnectDateView(mView);
@@ -407,7 +407,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addWeatherView() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return;
         }
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -420,7 +420,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addSmartspaceView() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return;
         }
 
@@ -528,7 +528,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     void updatePosition(int x, float scale, AnimationProperties props, boolean animate) {
         x = getCurrentLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? -x : x;
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled()) {
             PropertyAnimator.setProperty(mSmallClockFrame, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
             PropertyAnimator.setProperty(mLargeClockFrame, AnimatableProperty.SCALE_X,
@@ -554,7 +554,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             return 0;
         }
 
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return 0;
         }
 
@@ -589,14 +589,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     boolean isClockTopAligned() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return mKeyguardClockInteractor.getClockSize().getValue() == LARGE;
         }
         return mLargeClockFrame.getVisibility() != View.VISIBLE;
     }
 
     private void updateAodIcons() {
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled()) {
             NotificationIconContainer nic = (NotificationIconContainer)
                     mView.findViewById(
                             com.android.systemui.res.R.id.left_aligned_notification_icon_container);
@@ -616,7 +616,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void setClock(ClockController clock) {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return;
         }
         if (clock != null && mLogBuffer != null) {
@@ -630,7 +630,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     @Nullable
     public ClockController getClock() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return mKeyguardClockInteractor.getCurrentClock().getValue();
         } else {
             return mClockEventController.getClock();
@@ -642,7 +642,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateDoubleLineClock() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             return;
         }
         mCanShowDoubleLineClock = mSecureSettings.getIntForUser(
