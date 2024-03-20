@@ -203,6 +203,11 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
         return mVcnContext;
     }
 
+    @NonNull
+    public Network getNetwork() {
+        return mNetwork;
+    }
+
     // Override methods for AutoCloseable. Subclasses MUST call super when overriding this method
     @Override
     public void close() {
