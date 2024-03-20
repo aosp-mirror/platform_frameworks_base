@@ -305,10 +305,14 @@ fun CtaButtonRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         if (leftButton != null) {
-            leftButton()
+            Box(modifier = Modifier.wrapContentSize().weight(1f, fill = false)) {
+                leftButton()
+            }
         }
         if (rightButton != null) {
-            rightButton()
+            Box(modifier = Modifier.wrapContentSize().weight(1f, fill = false)) {
+                rightButton()
+            }
         }
     }
 }
