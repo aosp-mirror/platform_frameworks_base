@@ -33,7 +33,6 @@ import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
@@ -42,6 +41,7 @@ import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -50,6 +50,7 @@ import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionI
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
@@ -309,17 +310,20 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
             underTest.addCallback(listener)
 
             val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            val deviceUnlockStatus by
+                collectLastValue(kosmos.deviceUnlockedInteractor.deviceUnlockStatus)
+
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             runCurrent()
+            assertThat(deviceUnlockStatus!!.isUnlocked).isFalse()
+
             kosmos.sceneInteractor.changeScene(
                 toScene = Scenes.Lockscreen,
                 loggingReason = "reason"
             )
             runCurrent()
-            assertThat(kosmos.deviceUnlockedInteractor.isDeviceUnlocked.value).isFalse()
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
             // Call start to begin hydrating based on the scene framework:
@@ -371,14 +375,20 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
             underTest.addCallback(listener)
 
             val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            val deviceUnlockStatus by
+                collectLastValue(kosmos.deviceUnlockedInteractor.deviceUnlockStatus)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
+
+            assertThat(deviceUnlockStatus!!.isUnlocked).isTrue()
+
             kosmos.sceneInteractor.changeScene(toScene = Scenes.Gone, loggingReason = "reason")
             runCurrent()
-            assertThat(kosmos.deviceUnlockedInteractor.isDeviceUnlocked.value).isTrue()
             assertThat(currentScene).isEqualTo(Scenes.Gone)
 
             // Call start to begin hydrating based on the scene framework:

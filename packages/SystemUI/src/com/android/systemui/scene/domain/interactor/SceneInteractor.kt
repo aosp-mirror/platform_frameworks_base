@@ -162,7 +162,9 @@ constructor(
         loggingReason: String,
         transitionKey: TransitionKey? = null,
     ) {
-        check(toScene != Scenes.Gone || deviceUnlockedInteractor.isDeviceUnlocked.value) {
+        check(
+            toScene != Scenes.Gone || deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
+        ) {
             "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
                 " change was: $loggingReason"
         }

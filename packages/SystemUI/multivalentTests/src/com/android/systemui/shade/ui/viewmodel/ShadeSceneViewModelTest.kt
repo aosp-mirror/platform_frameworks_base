@@ -29,6 +29,8 @@ import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepositor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.footerActionsController
@@ -140,7 +142,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(Scenes.Lockscreen)
@@ -153,7 +154,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(Scenes.Gone)
@@ -178,7 +181,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val destinationScenes by collectLastValue(underTest.destinationScenes)
             kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.None
             )
@@ -196,7 +198,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
 
             assertThat(isClickable).isFalse()
@@ -209,7 +213,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             runCurrent()
 
             assertThat(isClickable).isTrue()
@@ -222,7 +225,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pin
             )
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
             runCurrent()
 
             underTest.onContentClicked()

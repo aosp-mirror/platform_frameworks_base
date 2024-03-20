@@ -23,7 +23,8 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.sceneContainerConfig
@@ -79,7 +80,9 @@ class SceneInteractorTest : SysuiTestCase() {
             val currentScene by collectLastValue(underTest.currentScene)
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
 
-            kosmos.fakeDeviceEntryRepository.setUnlocked(true)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             runCurrent()
 
             underTest.changeScene(Scenes.Gone, "reason")
@@ -88,11 +91,7 @@ class SceneInteractorTest : SysuiTestCase() {
 
     @Test(expected = IllegalStateException::class)
     fun changeScene_toGoneWhenStillLocked_throws() =
-        testScope.runTest {
-            kosmos.fakeDeviceEntryRepository.setUnlocked(false)
-
-            underTest.changeScene(Scenes.Gone, "reason")
-        }
+        testScope.runTest { underTest.changeScene(Scenes.Gone, "reason") }
 
     @Test
     fun sceneChanged_inDataSource() =

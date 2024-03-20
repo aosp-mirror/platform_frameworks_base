@@ -24,9 +24,12 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
@@ -49,7 +52,6 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
     private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
     private val sceneInteractor = kosmos.sceneInteractor
     private val shadeAnimationInteractor = kosmos.shadeAnimationInteractor
@@ -71,7 +73,6 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
     fun legacyPanelExpansion_whenIdle_whenLocked() =
         testScope.runTest {
             underTest = kosmos.panelExpansionInteractorImpl
-            setUnlocked(false)
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
             changeScene(Scenes.Lockscreen) { assertThat(panelExpansion).isEqualTo(1f) }
@@ -95,7 +96,15 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
     fun legacyPanelExpansion_whenIdle_whenUnlocked() =
         testScope.runTest {
             underTest = kosmos.panelExpansionInteractorImpl
-            setUnlocked(true)
+            val unlockStatus by collectLastValue(deviceUnlockedInteractor.deviceUnlockStatus)
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+
+            assertThat(unlockStatus)
+                .isEqualTo(DeviceUnlockStatus(true, DeviceUnlockSource.Fingerprint))
+
             val panelExpansion by collectLastValue(underTest.legacyPanelExpansion)
 
             changeScene(Scenes.Gone) { assertThat(panelExpansion).isEqualTo(0f) }
@@ -146,14 +155,6 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
 
             assertThat(underTest.shouldHideStatusBarIconsWhenExpanded()).isFalse()
         }
-
-    private fun TestScope.setUnlocked(isUnlocked: Boolean) {
-        val isDeviceUnlocked by collectLastValue(deviceUnlockedInteractor.isDeviceUnlocked)
-        deviceEntryRepository.setUnlocked(isUnlocked)
-        runCurrent()
-
-        assertThat(isDeviceUnlocked).isEqualTo(isUnlocked)
-    }
 
     private fun TestScope.changeScene(
         toScene: SceneKey,
