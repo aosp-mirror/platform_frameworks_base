@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 /**
  * @hide
  */
-final class ConversationHeaderData {
+public final class ConversationHeaderData {
     private final CharSequence mConversationText;
 
     private final ConversationAvatarData mConversationAvatarData;
@@ -38,7 +38,7 @@ final class ConversationHeaderData {
     }
 
     @Nullable
-    ConversationAvatarData getConversationAvatar() {
+    public ConversationAvatarData getConversationAvatar() {
         return mConversationAvatarData;
     }
 }
