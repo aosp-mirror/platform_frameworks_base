@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,46 +16,33 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Breaks down PRIMARY BOUNCER->LOCKSCREEN transition into discrete steps for corresponding views to
+ * Breaks down AOD->PRIMARY BOUNCER transition into discrete steps for corresponding views to
  * consume.
  */
 @ExperimentalCoroutinesApi
 @SysUISingleton
-class PrimaryBouncerToLockscreenTransitionViewModel
+class AodToPrimaryBouncerTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
-            duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.PRIMARY_BOUNCER,
-            to = KeyguardState.LOCKSCREEN,
+            duration = FromAodTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
+            from = KeyguardState.AOD,
+            to = KeyguardState.PRIMARY_BOUNCER,
         )
 
-    val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            duration = 250.milliseconds,
-            interpolator = EMPHASIZED_ACCELERATE,
-            onStep = { it }
-        )
-
-    val lockscreenAlpha: Flow<Float> = shortcutsAlpha
-
-    val deviceEntryBackgroundViewAlpha: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(1f)
     override val deviceEntryParentViewAlpha: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(1f)
+        transitionAnimation.immediatelyTransitionTo(0f)
 }
