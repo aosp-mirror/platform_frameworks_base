@@ -35,7 +35,6 @@ package android.content {
     method @Deprecated @Nullable public String getFeatureId();
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
     method public abstract java.io.File getSharedPreferencesPath(String);
-    field public static final String FINGERPRINT_SERVICE = "fingerprint";
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -142,54 +141,6 @@ package android.hardware {
 
   public final class SensorDirectChannel implements java.nio.channels.Channel {
     method @Deprecated public boolean isValid();
-  }
-
-}
-
-package android.hardware.fingerprint {
-
-  @Deprecated public class FingerprintManager {
-    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.USE_BIOMETRIC, android.Manifest.permission.USE_FINGERPRINT}) public void authenticate(@Nullable android.hardware.fingerprint.FingerprintManager.CryptoObject, @Nullable android.os.CancellationSignal, int, @NonNull android.hardware.fingerprint.FingerprintManager.AuthenticationCallback, @Nullable android.os.Handler);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.USE_FINGERPRINT) public boolean hasEnrolledFingerprints();
-    method @Deprecated @RequiresPermission(android.Manifest.permission.USE_FINGERPRINT) public boolean isHardwareDetected();
-    field public static final int FINGERPRINT_ACQUIRED_GOOD = 0; // 0x0
-    field public static final int FINGERPRINT_ACQUIRED_IMAGER_DIRTY = 3; // 0x3
-    field public static final int FINGERPRINT_ACQUIRED_INSUFFICIENT = 2; // 0x2
-    field public static final int FINGERPRINT_ACQUIRED_PARTIAL = 1; // 0x1
-    field public static final int FINGERPRINT_ACQUIRED_TOO_FAST = 5; // 0x5
-    field public static final int FINGERPRINT_ACQUIRED_TOO_SLOW = 4; // 0x4
-    field public static final int FINGERPRINT_ERROR_CANCELED = 5; // 0x5
-    field public static final int FINGERPRINT_ERROR_HW_NOT_PRESENT = 12; // 0xc
-    field public static final int FINGERPRINT_ERROR_HW_UNAVAILABLE = 1; // 0x1
-    field public static final int FINGERPRINT_ERROR_LOCKOUT = 7; // 0x7
-    field public static final int FINGERPRINT_ERROR_LOCKOUT_PERMANENT = 9; // 0x9
-    field public static final int FINGERPRINT_ERROR_NO_FINGERPRINTS = 11; // 0xb
-    field public static final int FINGERPRINT_ERROR_NO_SPACE = 4; // 0x4
-    field public static final int FINGERPRINT_ERROR_TIMEOUT = 3; // 0x3
-    field public static final int FINGERPRINT_ERROR_UNABLE_TO_PROCESS = 2; // 0x2
-    field public static final int FINGERPRINT_ERROR_USER_CANCELED = 10; // 0xa
-    field public static final int FINGERPRINT_ERROR_VENDOR = 8; // 0x8
-  }
-
-  @Deprecated public abstract static class FingerprintManager.AuthenticationCallback {
-    ctor public FingerprintManager.AuthenticationCallback();
-    method public void onAuthenticationError(int, CharSequence);
-    method public void onAuthenticationFailed();
-    method public void onAuthenticationHelp(int, CharSequence);
-    method public void onAuthenticationSucceeded(android.hardware.fingerprint.FingerprintManager.AuthenticationResult);
-  }
-
-  @Deprecated public static class FingerprintManager.AuthenticationResult {
-    method public android.hardware.fingerprint.FingerprintManager.CryptoObject getCryptoObject();
-  }
-
-  @Deprecated public static final class FingerprintManager.CryptoObject {
-    ctor public FingerprintManager.CryptoObject(@NonNull java.security.Signature);
-    ctor public FingerprintManager.CryptoObject(@NonNull javax.crypto.Cipher);
-    ctor public FingerprintManager.CryptoObject(@NonNull javax.crypto.Mac);
-    method public javax.crypto.Cipher getCipher();
-    method public javax.crypto.Mac getMac();
-    method public java.security.Signature getSignature();
   }
 
 }
