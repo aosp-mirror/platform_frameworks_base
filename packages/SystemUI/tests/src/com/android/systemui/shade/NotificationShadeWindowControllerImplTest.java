@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -436,6 +437,10 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) != 0).isTrue();
+        assertThat(
+                (mLayoutParameters.getValue().inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING)
+                        != 0)
+                .isTrue();
     }
 
     @Test
@@ -444,6 +449,10 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
+        assertThat(
+                (mLayoutParameters.getValue().inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING)
+                        == 0)
+                .isTrue();
     }
 
     @Test
