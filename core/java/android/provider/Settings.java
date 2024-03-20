@@ -12398,6 +12398,10 @@ public final class Settings {
         /**
          * Whether or not secure windows should be disabled. This only works on debuggable builds.
          *
+         * <p>When this setting is set to a non-zero value, all windows are treated as non-secure.
+         * Content in windows with {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} will
+         * appear in screenshots and recordings.
+         *
          * @hide
          */
         public static final String DISABLE_SECURE_WINDOWS = "disable_secure_windows";
