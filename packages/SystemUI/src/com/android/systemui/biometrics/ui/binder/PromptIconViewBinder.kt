@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieOnCompositionLoadedListener
 import com.android.settingslib.widget.LottieColorUtils
 import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.ui.viewmodel.PromptIconViewModel
@@ -77,6 +78,8 @@ object PromptIconViewBinder {
                     }
 
                 launch {
+                    var lottieOnCompositionLoadedListener: LottieOnCompositionLoadedListener? = null
+
                     combine(viewModel.activeAuthType, viewModel.iconSize, ::Pair).collect {
                         (activeAuthType, iconSize) ->
                         // Every time after bp shows, [isIconViewLoaded] is set to false in
@@ -94,10 +97,18 @@ object PromptIconViewBinder {
                                  * TODO(b/288175072): May be able to remove this once constraint
                                  *   layout is implemented
                                  */
-                                iconView.removeAllLottieOnCompositionLoadedListener()
-                                iconView.addLottieOnCompositionLoadedListener {
-                                    promptViewModel.setIsIconViewLoaded(true)
+                                if (lottieOnCompositionLoadedListener != null) {
+                                    iconView.removeLottieOnCompositionLoadedListener(
+                                        lottieOnCompositionLoadedListener!!
+                                    )
                                 }
+                                lottieOnCompositionLoadedListener =
+                                    LottieOnCompositionLoadedListener {
+                                        promptViewModel.setIsIconViewLoaded(true)
+                                    }
+                                iconView.addLottieOnCompositionLoadedListener(
+                                    lottieOnCompositionLoadedListener!!
+                                )
                             }
                             AuthType.Face -> {
                                 /**
