@@ -12370,7 +12370,8 @@ public class AudioService extends IAudioService.Stub
     }
 
     private boolean callerHasPermission(String permission) {
-        return mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED;
+        return mContext.checkCallingOrSelfPermission(permission)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /** @return true if projection is a valid MediaProjection that can project audio. */
