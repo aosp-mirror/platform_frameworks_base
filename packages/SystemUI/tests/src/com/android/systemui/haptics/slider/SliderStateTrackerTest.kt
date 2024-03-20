@@ -38,11 +38,11 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class SeekableSliderTrackerTest : SysuiTestCase() {
+class SliderStateTrackerTest : SysuiTestCase() {
 
     @Mock private lateinit var sliderStateListener: SliderStateListener
     private val sliderEventProducer = FakeSliderEventProducer()
-    private lateinit var mSeekableSliderTracker: SeekableSliderTracker
+    private lateinit var mSliderStateTracker: SliderStateTracker
 
     @Before
     fun setup() {
@@ -55,7 +55,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // THEN the tracker job is active
-        assertThat(mSeekableSliderTracker.isTracking).isTrue()
+        assertThat(mSliderStateTracker.isTracking).isTrue()
     }
 
     @Test
@@ -65,14 +65,14 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
             initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
             // GIVEN a state in the state machine
-            mSeekableSliderTracker.setState(it)
+            mSliderStateTracker.setState(it)
 
             // WHEN the tracker stops tracking the state and listening to events
-            mSeekableSliderTracker.stopTracking()
+            mSliderStateTracker.stopTracking()
 
             // THEN The state is idle and the tracker is not active
-            assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
-            assertThat(mSeekableSliderTracker.isTracking).isFalse()
+            assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
+            assertThat(mSliderStateTracker.isTracking).isFalse()
         }
     }
 
@@ -83,7 +83,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // THEN The state is idle and the listener is not called to play haptics
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyZeroInteractions(sliderStateListener)
     }
 
@@ -96,9 +96,9 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STARTED_TRACKING_TOUCH, progress))
 
         // THEN the tracker moves to the wait state and the timer job begins
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.WAIT)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.WAIT)
         verifyZeroInteractions(sliderStateListener)
-        assertThat(mSeekableSliderTracker.isWaiting).isTrue()
+        assertThat(mSliderStateTracker.isWaiting).isTrue()
     }
 
     // Tests on the WAIT state
@@ -117,9 +117,9 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         advanceTimeBy(config.waitTimeMillis + 10L)
 
         // THEN the tracker moves to the DRAG_HANDLE_ACQUIRED_BY_TOUCH state
-        assertThat(mSeekableSliderTracker.currentState)
+        assertThat(mSliderStateTracker.currentState)
             .isEqualTo(SliderState.DRAG_HANDLE_ACQUIRED_BY_TOUCH)
-        assertThat(mSeekableSliderTracker.isWaiting).isFalse()
+        assertThat(mSliderStateTracker.isWaiting).isFalse()
         verify(sliderStateListener).onHandleAcquiredByTouch()
         verifyNoMoreInteractions(sliderStateListener)
     }
@@ -142,9 +142,9 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker moves to the DRAG_HANDLE_ACQUIRED_BY_TOUCH state without the timer job
         // being complete
-        assertThat(mSeekableSliderTracker.currentState)
+        assertThat(mSliderStateTracker.currentState)
             .isEqualTo(SliderState.DRAG_HANDLE_ACQUIRED_BY_TOUCH)
-        assertThat(mSeekableSliderTracker.isWaiting).isFalse()
+        assertThat(mSliderStateTracker.isWaiting).isFalse()
         verify(sliderStateListener).onHandleAcquiredByTouch()
         verifyNoMoreInteractions(sliderStateListener)
     }
@@ -166,9 +166,9 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         )
 
         // THEN the tracker moves to the jump-track location selected state
-        assertThat(mSeekableSliderTracker.currentState)
+        assertThat(mSliderStateTracker.currentState)
             .isEqualTo(SliderState.JUMP_TRACK_LOCATION_SELECTED)
-        assertThat(mSeekableSliderTracker.isWaiting).isFalse()
+        assertThat(mSliderStateTracker.isWaiting).isFalse()
         verify(sliderStateListener).onProgressJump(anyFloat())
         verifyNoMoreInteractions(sliderStateListener)
     }
@@ -190,8 +190,8 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         )
 
         // THEN the tracker moves to the jump-track location selected state
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.JUMP_BOOKEND_SELECTED)
-        assertThat(mSeekableSliderTracker.isWaiting).isFalse()
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.JUMP_BOOKEND_SELECTED)
+        assertThat(mSliderStateTracker.isWaiting).isFalse()
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -212,8 +212,8 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         )
 
         // THEN the tracker moves to the JUMP_TRACK_LOCATION_SELECTED state
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.JUMP_BOOKEND_SELECTED)
-        assertThat(mSeekableSliderTracker.isWaiting).isFalse()
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.JUMP_BOOKEND_SELECTED)
+        assertThat(mSliderStateTracker.isWaiting).isFalse()
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -225,15 +225,15 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         // GIVEN a start of tracking touch event that moves the tracker to WAIT at the middle of the
         // slider
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STARTED_TRACKING_TOUCH, 0.5f))
-        assertThat(mSeekableSliderTracker.isWaiting).isTrue()
+        assertThat(mSliderStateTracker.isWaiting).isTrue()
 
         // GIVEN that the tracker stops tracking the state and listening to events
-        mSeekableSliderTracker.stopTracking()
+        mSliderStateTracker.stopTracking()
 
         // THEN the tracker moves to the IDLE state without the timer job being complete
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
-        assertThat(mSeekableSliderTracker.isWaiting).isFalse()
-        assertThat(mSeekableSliderTracker.isTracking).isFalse()
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.isWaiting).isFalse()
+        assertThat(mSliderStateTracker.isTracking).isFalse()
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -244,13 +244,13 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a JUMP_TRACK_LOCATION_SELECTED state
-        mSeekableSliderTracker.setState(SliderState.JUMP_TRACK_LOCATION_SELECTED)
+        mSliderStateTracker.setState(SliderState.JUMP_TRACK_LOCATION_SELECTED)
 
         // GIVEN a progress event due to dragging the handle
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_USER, 0.5f))
 
         // THEN the tracker moves to the DRAG_HANDLE_DRAGGING state
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
         verify(sliderStateListener).onProgress(anyFloat())
         verifyNoMoreInteractions(sliderStateListener)
     }
@@ -260,14 +260,14 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a JUMP_TRACK_LOCATION_SELECTED state
-        mSeekableSliderTracker.setState(SliderState.JUMP_TRACK_LOCATION_SELECTED)
+        mSliderStateTracker.setState(SliderState.JUMP_TRACK_LOCATION_SELECTED)
 
         // GIVEN that the slider stopped tracking touch
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STOPPED_TRACKING_TOUCH, 0.5f))
 
         // THEN the tracker executes on onHandleReleasedFromTouch before moving to the IDLE state
         verify(sliderStateListener).onHandleReleasedFromTouch()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -276,13 +276,13 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a JUMP_BOOKEND_SELECTED state
-        mSeekableSliderTracker.setState(SliderState.JUMP_BOOKEND_SELECTED)
+        mSliderStateTracker.setState(SliderState.JUMP_BOOKEND_SELECTED)
 
         // GIVEN that the slider stopped tracking touch
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_USER, 0.5f))
 
         // THEN the tracker moves to the DRAG_HANDLE_DRAGGING state
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
         verify(sliderStateListener).onProgress(anyFloat())
         verifyNoMoreInteractions(sliderStateListener)
     }
@@ -292,14 +292,14 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a JUMP_BOOKEND_SELECTED state
-        mSeekableSliderTracker.setState(SliderState.JUMP_BOOKEND_SELECTED)
+        mSliderStateTracker.setState(SliderState.JUMP_BOOKEND_SELECTED)
 
         // GIVEN that the slider stopped tracking touch
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STOPPED_TRACKING_TOUCH, 0.5f))
 
         // THEN the tracker executes on onHandleReleasedFromTouch before moving to the IDLE state
         verify(sliderStateListener).onHandleReleasedFromTouch()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -310,7 +310,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a DRAG_HANDLE_ACQUIRED_BY_TOUCH state
-        mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_ACQUIRED_BY_TOUCH)
+        mSliderStateTracker.setState(SliderState.DRAG_HANDLE_ACQUIRED_BY_TOUCH)
 
         // GIVEN a progress change by the user
         val progress = 0.5f
@@ -320,7 +320,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker moves to the DRAG_HANDLE_DRAGGING state
         verify(sliderStateListener).onProgress(progress)
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -329,14 +329,14 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a DRAG_HANDLE_ACQUIRED_BY_TOUCH state
-        mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_ACQUIRED_BY_TOUCH)
+        mSliderStateTracker.setState(SliderState.DRAG_HANDLE_ACQUIRED_BY_TOUCH)
 
         // GIVEN that the handle stops tracking touch
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STOPPED_TRACKING_TOUCH, 0.5f))
 
         // THEN the tracker executes on onHandleReleasedFromTouch before moving to the IDLE state
         verify(sliderStateListener).onHandleReleasedFromTouch()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -348,7 +348,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
             initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
             // GIVEN a DRAG_HANDLE_DRAGGING state
-            mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
+            mSliderStateTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
 
             // GIVEN a progress change by the user outside of bookend bounds
             val progress = 0.5f
@@ -357,8 +357,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
             )
 
             // THEN the tracker does not change state and executes the onProgress call
-            assertThat(mSeekableSliderTracker.currentState)
-                .isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
+            assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
             verify(sliderStateListener).onProgress(progress)
             verifyNoMoreInteractions(sliderStateListener)
         }
@@ -370,7 +369,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
             initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
 
             // GIVEN a DRAG_HANDLE_DRAGGING state
-            mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
+            mSliderStateTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
 
             // GIVEN a progress change by the user reaching the lower bookend
             val progress = config.lowerBookendThreshold - 0.01f
@@ -380,7 +379,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
             // THEN the tracker moves to the DRAG_HANDLE_REACHED_BOOKEND state and executes the
             // corresponding callback
-            assertThat(mSeekableSliderTracker.currentState)
+            assertThat(mSliderStateTracker.currentState)
                 .isEqualTo(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
             verify(sliderStateListener).onLowerBookend()
             verifyNoMoreInteractions(sliderStateListener)
@@ -393,7 +392,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
             initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
 
             // GIVEN a DRAG_HANDLE_DRAGGING state
-            mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
+            mSliderStateTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
 
             // GIVEN a progress change by the user reaching the upper bookend
             val progress = config.upperBookendThreshold + 0.01f
@@ -403,7 +402,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
             // THEN the tracker moves to the DRAG_HANDLE_REACHED_BOOKEND state and executes the
             // corresponding callback
-            assertThat(mSeekableSliderTracker.currentState)
+            assertThat(mSliderStateTracker.currentState)
                 .isEqualTo(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
             verify(sliderStateListener).onUpperBookend()
             verifyNoMoreInteractions(sliderStateListener)
@@ -414,14 +413,14 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a DRAG_HANDLE_DRAGGING state
-        mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
+        mSliderStateTracker.setState(SliderState.DRAG_HANDLE_DRAGGING)
 
         // GIVEN that the slider stops tracking touch
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STOPPED_TRACKING_TOUCH, 0.5f))
 
         // THEN the tracker executes on onHandleReleasedFromTouch before moving to the IDLE state
         verify(sliderStateListener).onHandleReleasedFromTouch()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyNoMoreInteractions(sliderStateListener)
     }
 
@@ -434,7 +433,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
             initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
 
             // GIVEN a DRAG_HANDLE_REACHED_BOOKEND state
-            mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
+            mSliderStateTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
 
             // GIVEN a progress event that falls outside of the lower bookend range
             val progress = config.lowerBookendThreshold + 0.01f
@@ -444,8 +443,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
             // THEN the tracker moves to the DRAG_HANDLE_DRAGGING state and executes accordingly
             verify(sliderStateListener).onProgress(progress)
-            assertThat(mSeekableSliderTracker.currentState)
-                .isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
+            assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
             verifyNoMoreInteractions(sliderStateListener)
         }
 
@@ -455,7 +453,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
 
         // GIVEN a DRAG_HANDLE_REACHED_BOOKEND state
-        mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
+        mSliderStateTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
 
         // GIVEN a progress event that falls inside of the lower bookend range
         val progress = config.lowerBookendThreshold - 0.01f
@@ -465,7 +463,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker stays in the current state and executes accordingly
         verify(sliderStateListener).onLowerBookend()
-        assertThat(mSeekableSliderTracker.currentState)
+        assertThat(mSliderStateTracker.currentState)
             .isEqualTo(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
         verifyNoMoreInteractions(sliderStateListener)
     }
@@ -477,7 +475,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
             initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
 
             // GIVEN a DRAG_HANDLE_REACHED_BOOKEND state
-            mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
+            mSliderStateTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
 
             // GIVEN a progress event that falls outside of the upper bookend range
             val progress = config.upperBookendThreshold - 0.01f
@@ -487,8 +485,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
             // THEN the tracker moves to the DRAG_HANDLE_DRAGGING state and executes accordingly
             verify(sliderStateListener).onProgress(progress)
-            assertThat(mSeekableSliderTracker.currentState)
-                .isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
+            assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.DRAG_HANDLE_DRAGGING)
             verifyNoMoreInteractions(sliderStateListener)
         }
 
@@ -498,7 +495,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
 
         // GIVEN a DRAG_HANDLE_REACHED_BOOKEND state
-        mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
+        mSliderStateTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
 
         // GIVEN a progress event that falls inside of the upper bookend range
         val progress = config.upperBookendThreshold + 0.01f
@@ -508,7 +505,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker stays in the current state and executes accordingly
         verify(sliderStateListener).onUpperBookend()
-        assertThat(mSeekableSliderTracker.currentState)
+        assertThat(mSliderStateTracker.currentState)
             .isEqualTo(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
         verifyNoMoreInteractions(sliderStateListener)
     }
@@ -518,37 +515,36 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a DRAG_HANDLE_REACHED_BOOKEND state
-        mSeekableSliderTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
+        mSliderStateTracker.setState(SliderState.DRAG_HANDLE_REACHED_BOOKEND)
 
         // GIVEN that the handle stops tracking touch
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STOPPED_TRACKING_TOUCH, 0.5f))
 
         // THEN the tracker executes on onHandleReleasedFromTouch before moving to the IDLE state
         verify(sliderStateListener).onHandleReleasedFromTouch()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyNoMoreInteractions(sliderStateListener)
     }
 
     @Test
-    fun onProgressChangeByProgram_atTheMiddle_onIdle_movesToArrowHandleMovedOnce() = runTest {
+    fun onStartedTrackingProgram_atTheMiddle_onIdle_movesToArrowHandleMovedOnce() = runTest {
         // GIVEN an initialized tracker in the IDLE state
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
 
         // GIVEN a progress due to an external source that lands at the middle of the slider
         val progress = 0.5f
         sliderEventProducer.sendEvent(
-            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+            SliderEvent(SliderEventType.STARTED_TRACKING_PROGRAM, progress)
         )
 
         // THEN the state moves to ARROW_HANDLE_MOVED_ONCE and the listener is called to play
         // haptics
-        assertThat(mSeekableSliderTracker.currentState)
-            .isEqualTo(SliderState.ARROW_HANDLE_MOVED_ONCE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.ARROW_HANDLE_MOVED_ONCE)
         verify(sliderStateListener).onSelectAndArrow(progress)
     }
 
     @Test
-    fun onProgressChangeByProgram_atUpperBookend_onIdle_movesToIdle() = runTest {
+    fun onStartedTrackingProgram_atUpperBookend_onIdle_movesToIdle() = runTest {
         // GIVEN an initialized tracker in the IDLE state
         val config = SeekableSliderTrackerConfig()
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
@@ -556,16 +552,16 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         // GIVEN a progress due to an external source that lands at the upper bookend
         val progress = config.upperBookendThreshold + 0.01f
         sliderEventProducer.sendEvent(
-            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+            SliderEvent(SliderEventType.STARTED_TRACKING_PROGRAM, progress)
         )
 
         // THEN the tracker executes upper bookend haptics before moving back to IDLE
         verify(sliderStateListener).onUpperBookend()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
     }
 
     @Test
-    fun onProgressChangeByProgram_atLowerBookend_onIdle_movesToIdle() = runTest {
+    fun onStartedTrackingProgram_atLowerBookend_onIdle_movesToIdle() = runTest {
         // GIVEN an initialized tracker in the IDLE state
         val config = SeekableSliderTrackerConfig()
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
@@ -573,26 +569,28 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         // WHEN a progress is recorded due to an external source that lands at the lower bookend
         val progress = config.lowerBookendThreshold - 0.01f
         sliderEventProducer.sendEvent(
-            SliderEvent(SliderEventType.PROGRESS_CHANGE_BY_PROGRAM, progress)
+            SliderEvent(SliderEventType.STARTED_TRACKING_PROGRAM, progress)
         )
 
         // THEN the tracker executes lower bookend haptics before moving to IDLE
         verify(sliderStateListener).onLowerBookend()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
     }
 
     @Test
     fun onArrowUp_onArrowMovedOnce_movesToIdle() = runTest {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVED_ONCE state
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
 
         // WHEN the external stimulus is released
         val progress = 0.5f
-        sliderEventProducer.sendEvent(SliderEvent(SliderEventType.ARROW_UP, progress))
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.STOPPED_TRACKING_PROGRAM, progress)
+        )
 
         // THEN the tracker moves back to IDLE and there are no haptics
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyZeroInteractions(sliderStateListener)
     }
 
@@ -600,7 +598,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
     fun onStartTrackingTouch_onArrowMovedOnce_movesToWait() = runTest {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVED_ONCE state
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
 
         // WHEN the slider starts tracking touch
         val progress = 0.5f
@@ -608,8 +606,8 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker moves back to WAIT and starts the waiting job. Also, there are no
         // haptics
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.WAIT)
-        assertThat(mSeekableSliderTracker.isWaiting).isTrue()
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.WAIT)
+        assertThat(mSliderStateTracker.isWaiting).isTrue()
         verifyZeroInteractions(sliderStateListener)
     }
 
@@ -617,7 +615,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
     fun onProgressChangeByProgram_onArrowMovedOnce_movesToArrowMovesContinuously() = runTest {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVED_ONCE state
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVED_ONCE)
 
         // WHEN the slider gets an external progress change
         val progress = 0.5f
@@ -627,7 +625,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker moves to ARROW_HANDLE_MOVES_CONTINUOUSLY and calls the appropriate
         // haptics
-        assertThat(mSeekableSliderTracker.currentState)
+        assertThat(mSliderStateTracker.currentState)
             .isEqualTo(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
         verify(sliderStateListener).onProgress(progress)
     }
@@ -636,14 +634,16 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
     fun onArrowUp_onArrowMovesContinuously_movesToIdle() = runTest {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
 
         // WHEN the external stimulus is released
         val progress = 0.5f
-        sliderEventProducer.sendEvent(SliderEvent(SliderEventType.ARROW_UP, progress))
+        sliderEventProducer.sendEvent(
+            SliderEvent(SliderEventType.STOPPED_TRACKING_PROGRAM, progress)
+        )
 
         // THEN the tracker moves to IDLE and no haptics are played
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
         verifyZeroInteractions(sliderStateListener)
     }
 
@@ -651,15 +651,15 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
     fun onStartTrackingTouch_onArrowMovesContinuously_movesToWait() = runTest {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
 
         // WHEN the slider starts tracking touch
         val progress = 0.5f
         sliderEventProducer.sendEvent(SliderEvent(SliderEventType.STARTED_TRACKING_TOUCH, progress))
 
         // THEN the tracker moves to WAIT and the wait job starts.
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.WAIT)
-        assertThat(mSeekableSliderTracker.isWaiting).isTrue()
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.WAIT)
+        assertThat(mSliderStateTracker.isWaiting).isTrue()
         verifyZeroInteractions(sliderStateListener)
     }
 
@@ -667,7 +667,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
     fun onProgressChangeByProgram_onArrowMovesContinuously_preservesState() = runTest {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
 
         // WHEN the slider changes progress programmatically at the middle
         val progress = 0.5f
@@ -676,7 +676,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         )
 
         // THEN the tracker stays in the same state and haptics are delivered appropriately
-        assertThat(mSeekableSliderTracker.currentState)
+        assertThat(mSliderStateTracker.currentState)
             .isEqualTo(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
         verify(sliderStateListener).onProgress(progress)
     }
@@ -686,7 +686,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
         val config = SeekableSliderTrackerConfig()
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
 
         // WHEN the slider reaches the lower bookend programmatically
         val progress = config.lowerBookendThreshold - 0.01f
@@ -696,7 +696,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker executes lower bookend haptics before moving to IDLE
         verify(sliderStateListener).onLowerBookend()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
     }
 
     @Test
@@ -704,7 +704,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         // GIVEN an initialized tracker in the ARROW_HANDLE_MOVES_CONTINUOUSLY state
         val config = SeekableSliderTrackerConfig()
         initTracker(CoroutineScope(UnconfinedTestDispatcher(testScheduler)), config)
-        mSeekableSliderTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
+        mSliderStateTracker.setState(SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY)
 
         // WHEN the slider reaches the lower bookend programmatically
         val progress = config.upperBookendThreshold + 0.01f
@@ -714,7 +714,7 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
 
         // THEN the tracker executes upper bookend haptics before moving to IDLE
         verify(sliderStateListener).onUpperBookend()
-        assertThat(mSeekableSliderTracker.currentState).isEqualTo(SliderState.IDLE)
+        assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -722,8 +722,8 @@ class SeekableSliderTrackerTest : SysuiTestCase() {
         scope: CoroutineScope,
         config: SeekableSliderTrackerConfig = SeekableSliderTrackerConfig(),
     ) {
-        mSeekableSliderTracker =
-            SeekableSliderTracker(sliderStateListener, sliderEventProducer, scope, config)
-        mSeekableSliderTracker.startTracking()
+        mSliderStateTracker =
+            SliderStateTracker(sliderStateListener, sliderEventProducer, scope, config)
+        mSliderStateTracker.startTracking()
     }
 }
