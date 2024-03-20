@@ -479,15 +479,7 @@ public class MockingOomAdjusterTests {
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
 
-        final int expectedAdj;
-        if (sService.mConstants.ENABLE_NEW_OOMADJ) {
-            // A cached empty process can be at best a level higher than the min cached adj.
-            expectedAdj = sFirstCachedAdj;
-        } else {
-            // This is wrong but legacy behavior is going to be removed and not worth fixing.
-            expectedAdj = CACHED_APP_MIN_ADJ;
-        }
-
+        final int expectedAdj = sFirstCachedAdj;
         assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, expectedAdj,
                 SCHED_GROUP_BACKGROUND);
     }

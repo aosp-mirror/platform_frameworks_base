@@ -20817,4 +20817,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         mOomAdjuster.mCachedAppOptimizer.binderError(debugPid, app, code, flags, err);
     }
+
+    @GuardedBy("this")
+    void enqueuePendingTopAppIfNecessaryLocked() {
+        mPendingStartActivityUids.enqueuePendingTopAppIfNecessaryLocked(this);
+    }
+
+    @GuardedBy("this")
+    void clearPendingTopAppLocked() {
+        mPendingStartActivityUids.clear();
+    }
 }

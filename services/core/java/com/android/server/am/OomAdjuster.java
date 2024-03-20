@@ -409,6 +409,12 @@ public class OomAdjuster {
 
     private final OomAdjusterDebugLogger mLogger;
 
+    /**
+     * The process state of the current TOP app.
+     */
+    @GuardedBy("mService")
+    protected int mProcessStateCurTop = PROCESS_STATE_TOP;
+
     /** Overrideable by a test */
     @VisibleForTesting
     protected boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
@@ -518,59 +524,6 @@ public class OomAdjuster {
     }
 
     /**
-     * Perform oom adj update on the given process. It does NOT do the re-computation
-     * if there is a cycle, caller should check {@link #mProcessesInCycle} and do it on its own.
-     */
-    @GuardedBy({"mService", "mProcLock"})
-    private boolean performUpdateOomAdjLSP(ProcessRecord app, int cachedAdj,
-            ProcessRecord topApp, long now, @OomAdjReason int oomAdjReason) {
-        if (app.getThread() == null) {
-            return false;
-        }
-
-        app.mState.resetCachedInfo();
-        app.mState.setCurBoundByNonBgRestrictedApp(false);
-        UidRecord uidRec = app.getUidRecord();
-        if (uidRec != null) {
-            if (DEBUG_UID_OBSERVERS) {
-                Slog.i(TAG_UID_OBSERVERS, "Starting update of " + uidRec);
-            }
-            uidRec.reset();
-        }
-
-        // Check if this process is in the pending list too, remove from pending list if so.
-        mPendingProcessSet.remove(app);
-
-        mProcessesInCycle.clear();
-        computeOomAdjLSP(app, cachedAdj, topApp, false, now, false, true, oomAdjReason, true);
-        if (!mProcessesInCycle.isEmpty()) {
-            // We can't use the score here if there is a cycle, abort.
-            for (int i = mProcessesInCycle.size() - 1; i >= 0; i--) {
-                // Reset the adj seq
-                mProcessesInCycle.valueAt(i).mState.setCompletedAdjSeq(mAdjSeq - 1);
-            }
-            return true;
-        }
-
-        if (uidRec != null) {
-            // After uidRec.reset() above, for UidRecord with multiple processes (ProcessRecord),
-            // we need to apply all ProcessRecord into UidRecord.
-            uidRec.forEachProcess(this::updateAppUidRecIfNecessaryLSP);
-            if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT
-                    && (uidRec.getSetProcState() != uidRec.getCurProcState()
-                    || uidRec.getSetCapability() != uidRec.getCurCapability()
-                    || uidRec.isSetAllowListed() != uidRec.isCurAllowListed())) {
-                final ActiveUids uids = mTmpUidRecords;
-                uids.clear();
-                uids.put(uidRec.getUid(), uidRec);
-                updateUidsLSP(uids, SystemClock.elapsedRealtime());
-            }
-        }
-
-        return applyOomAdjLSP(app, false, now, SystemClock.elapsedRealtime(), oomAdjReason);
-    }
-
-    /**
      * Update OomAdj for all processes in LRU list
      */
     @GuardedBy("mService")
@@ -599,6 +552,7 @@ public class OomAdjuster {
     @GuardedBy({"mService", "mProcLock"})
     protected void performUpdateOomAdjLSP(@OomAdjReason int oomAdjReason) {
         final ProcessRecord topApp = mService.getTopApp();
+        mProcessStateCurTop = mService.mAtmInternal.getTopProcessState();
         // Clear any pending ones because we are doing a full update now.
         mPendingProcessSet.clear();
         mService.mAppProfiler.mHasPreviousProcess = mService.mAppProfiler.mHasHomeProcess = false;
@@ -649,54 +603,14 @@ public class OomAdjuster {
         mLastReason = oomAdjReason;
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
         mService.mOomAdjProfiler.oomAdjStarted();
-        mAdjSeq++;
 
         final ProcessStateRecord state = app.mState;
-        final boolean wasCached = state.isCached();
-        final int oldAdj = state.getCurRawAdj();
-        final int cachedAdj = oldAdj >= CACHED_APP_MIN_ADJ
-                ? oldAdj : UNKNOWN_ADJ;
-
-        // Firstly, try to see if the importance of itself gets changed
-        final boolean wasBackground = ActivityManager.isProcStateBackground(
-                state.getSetProcState());
-        final int oldCap = state.getSetCapability();
-        state.setContainsCycle(false);
-        state.setProcStateChanged(false);
-        state.resetCachedInfo();
-        state.setCurBoundByNonBgRestrictedApp(false);
-        // Check if this process is in the pending list too, remove from pending list if so.
-        mPendingProcessSet.remove(app);
-        app.mOptRecord.setLastOomAdjChangeReason(oomAdjReason);
-        boolean success = performUpdateOomAdjLSP(app, cachedAdj, topApp,
-                SystemClock.uptimeMillis(), oomAdjReason);
-        // The 'app' here itself might or might not be in the cycle, for example,
-        // the case A <=> B vs. A -> B <=> C; anyway, if we spot a cycle here, re-compute them.
-        if (!success || (wasCached == state.isCached() && oldAdj != INVALID_ADJ
-                && mProcessesInCycle.isEmpty() /* Force re-compute if there is a cycle */
-                && oldCap == state.getCurCapability()
-                && wasBackground == ActivityManager.isProcStateBackground(
-                        state.getSetProcState()))) {
-            mProcessesInCycle.clear();
-            // Okay, it's unchanged, it won't impact any service it binds to, we're done here.
-            if (DEBUG_OOM_ADJ) {
-                Slog.i(TAG_OOM_ADJ, "No oomadj changes for " + app);
-            }
-            mService.mOomAdjProfiler.oomAdjEnded();
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-            return success;
-        }
 
         // Next to find out all its reachable processes
         ArrayList<ProcessRecord> processes = mTmpProcessList;
         ActiveUids uids = mTmpUidRecords;
         mPendingProcessSet.add(app);
-
-        // Add all processes with cycles into the list to scan
-        for (int i = mProcessesInCycle.size() - 1; i >= 0; i--) {
-            mPendingProcessSet.add(mProcessesInCycle.valueAt(i));
-        }
-        mProcessesInCycle.clear();
+        mProcessStateCurTop = enqueuePendingTopAppIfNecessaryLSP();
 
         boolean containsCycle = collectReachableProcessesLocked(mPendingProcessSet,
                 processes, uids);
@@ -704,14 +618,8 @@ public class OomAdjuster {
         // Clear the pending set as they should've been included in 'processes'.
         mPendingProcessSet.clear();
 
-        if (!containsCycle) {
-            // Remove this app from the return list because we've done the computation on it.
-            processes.remove(app);
-        }
-
         int size = processes.size();
         if (size > 0) {
-            mAdjSeq--;
             // Update these reachable processes
             updateOomAdjInnerLSP(oomAdjReason, topApp, processes, uids, containsCycle, false);
         } else if (state.getCurRawAdj() == UNKNOWN_ADJ) {
@@ -723,9 +631,23 @@ public class OomAdjuster {
                     SystemClock.elapsedRealtime(), oomAdjReason);
         }
         mTmpProcessList.clear();
+        mService.clearPendingTopAppLocked();
         mService.mOomAdjProfiler.oomAdjEnded();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         return true;
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    protected int enqueuePendingTopAppIfNecessaryLSP() {
+        final int prevTopProcessState = mService.mAtmInternal.getTopProcessState();
+        mService.enqueuePendingTopAppIfNecessaryLocked();
+        final int topProcessState = mService.mAtmInternal.getTopProcessState();
+        if (prevTopProcessState != topProcessState) {
+            // Unlikely but possible: WM just updated the top process state, it may have
+            // enqueued the new top app to the pending top UID list. Enqueue that one here too.
+            mService.enqueuePendingTopAppIfNecessaryLocked();
+        }
+        return topProcessState;
     }
 
     /**
@@ -930,6 +852,7 @@ public class OomAdjuster {
         mLastReason = oomAdjReason;
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
         mService.mOomAdjProfiler.oomAdjStarted();
+        mProcessStateCurTop = enqueuePendingTopAppIfNecessaryLSP();
 
         final ArrayList<ProcessRecord> processes = mTmpProcessList;
         final ActiveUids uids = mTmpUidRecords;
@@ -939,6 +862,7 @@ public class OomAdjuster {
             updateOomAdjInnerLSP(oomAdjReason, topApp, processes, uids, true, false);
         }
         processes.clear();
+        mService.clearPendingTopAppLocked();
 
         mService.mOomAdjProfiler.oomAdjEnded();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -1342,6 +1266,7 @@ public class OomAdjuster {
                     // Avoid trimming processes that are still initializing. If they aren't
                     // hosting any components yet because they may be unfairly killed.
                     // We however apply the oom scores set at #setAttachingProcessStatesLSP.
+                    updateAppUidRecLSP(app);
                     continue;
                 }
 
@@ -1887,7 +1812,7 @@ public class OomAdjuster {
 
         state.setSystemNoUi(false);
 
-        final int PROCESS_STATE_CUR_TOP = mService.mAtmInternal.getTopProcessState();
+        final int PROCESS_STATE_CUR_TOP = mProcessStateCurTop;
 
         // Determine the importance of the process, starting with most
         // important to least, and assign an appropriate OOM adjustment.
@@ -3291,13 +3216,15 @@ public class OomAdjuster {
                     // If the partial values are no better, skip until the next
                     // attempt
                     if (client.getCurRawProcState() >= procState
-                            && client.getCurRawAdj() >= adj) {
+                            && client.getCurRawAdj() >= adj
+                            && (client.getCurCapability() & app.mState.getCurCapability())
+                            == client.getCurCapability()) {
                         return true;
                     }
                     // Else use the client's partial procstate and adj to adjust the
                     // effect of the binding
                 } else {
-                    return true;
+                    return false;
                 }
             }
         }
