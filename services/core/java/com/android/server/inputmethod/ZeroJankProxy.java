@@ -441,14 +441,17 @@ public class ZeroJankProxy extends IInputMethodManager.Stub {
 
     private void sendOnStartInputResult(
             IInputMethodClient client, InputBindResult res, int startInputSeq) {
-        InputMethodManagerService service = (InputMethodManagerService) mInner;
-        final ClientState cs = service.getClientState(client);
-        if (cs != null && cs.mClient != null) {
-            cs.mClient.onStartInputResult(res, startInputSeq);
-        } else {
-            // client is unbound.
-            Slog.i(TAG, "Client that requested startInputOrWindowGainedFocus is no longer"
-                    + " bound. InputBindResult: " + res + " for startInputSeq: " + startInputSeq);
+        synchronized (ImfLock.class) {
+            InputMethodManagerService service = (InputMethodManagerService) mInner;
+            final ClientState cs = service.getClientState(client);
+            if (cs != null && cs.mClient != null) {
+                cs.mClient.onStartInputResult(res, startInputSeq);
+            } else {
+                // client is unbound.
+                Slog.i(TAG, "Client that requested startInputOrWindowGainedFocus is no longer"
+                        + " bound. InputBindResult: " + res + " for startInputSeq: "
+                        + startInputSeq);
+            }
         }
     }
 }
