@@ -126,3 +126,12 @@ flag {
     description: "Sends accessibility events in TouchExplorer#onAccessibilityEvent based on internal state to keep it consistent. This reduces test flakiness."
     bug: "295575684"
 }
+flag {
+    name: "send_hover_events_based_on_event_stream"
+    namespace: "accessibility"
+    description: "Send hover enter and exit based on the state of the hover event stream rather than the internal state of the touch explorer state machine. Because of the nondeterministic nature of gesture detection when done in talkback, relying on the internal state can cause crashes."
+    bug: "314251047"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
