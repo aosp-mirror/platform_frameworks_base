@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.composable.blueprint
 
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneKey
@@ -39,7 +40,7 @@ object ClockTransition {
             transitioningToSmallClock()
         }
         from(ClockScenes.splitShadeLargeClockScene, to = ClockScenes.largeClockScene) {
-            spec = tween(1000)
+            spec = tween(1000, easing = LinearEasing)
         }
     }
 
