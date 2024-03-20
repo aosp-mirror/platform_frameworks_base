@@ -267,9 +267,11 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public boolean showMediaOutputSwitcher(String packageName) {
-        if (!validatePackageName(Binder.getCallingUid(), packageName)) {
+        int uid = Binder.getCallingUid();
+        if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling identity");
         }
+        UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
         final long token = Binder.clearCallingIdentity();
         try {
             if (mContext.getSystemService(ActivityManager.class).getPackageImportance(packageName)
@@ -280,7 +282,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             synchronized (mLock) {
                 StatusBarManagerInternal statusBar =
                         LocalServices.getService(StatusBarManagerInternal.class);
-                statusBar.showMediaOutputSwitcher(packageName);
+                statusBar.showMediaOutputSwitcher(packageName, userHandle);
             }
         } finally {
             Binder.restoreCallingIdentity(token);

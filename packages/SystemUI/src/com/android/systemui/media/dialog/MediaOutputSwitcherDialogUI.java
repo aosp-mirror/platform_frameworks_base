@@ -18,6 +18,7 @@ package com.android.systemui.media.dialog;
 
 import android.annotation.MainThread;
 import android.content.Context;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -52,8 +53,9 @@ public class MediaOutputSwitcherDialogUI implements CoreStartable, CommandQueue.
 
     @Override
     @MainThread
-    public void showMediaOutputSwitcher(String packageName) {
+    public void showMediaOutputSwitcher(String packageName, UserHandle userHandle) {
         if (!TextUtils.isEmpty(packageName)) {
+            // TODO: b/279555229 - Pass the userHandle into the output dialog manager.
             mMediaOutputDialogManager.createAndShow(packageName, false, null);
         } else {
             Log.e(TAG, "Unable to launch media output dialog. Package name is empty.");
