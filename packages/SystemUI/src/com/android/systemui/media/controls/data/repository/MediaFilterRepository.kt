@@ -19,7 +19,9 @@ package com.android.systemui.media.controls.data.repository
 import com.android.internal.logging.InstanceId
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +47,16 @@ class MediaFilterRepository @Inject constructor() {
     private val _allUserEntries: MutableStateFlow<Map<String, MediaData>> =
         MutableStateFlow(LinkedHashMap())
     val allUserEntries: StateFlow<Map<String, MediaData>> = _allUserEntries.asStateFlow()
+
+    private val _mediaDataLoadedStates: MutableStateFlow<List<MediaDataLoadingModel>> =
+        MutableStateFlow(mutableListOf())
+    val mediaDataLoadedStates: StateFlow<List<MediaDataLoadingModel>> =
+        _mediaDataLoadedStates.asStateFlow()
+
+    private val _recommendationsLoadingState: MutableStateFlow<SmartspaceMediaLoadingModel> =
+        MutableStateFlow(SmartspaceMediaLoadingModel.Unknown)
+    val recommendationsLoadingState: StateFlow<SmartspaceMediaLoadingModel> =
+        _recommendationsLoadingState.asStateFlow()
 
     fun addMediaEntry(key: String, data: MediaData) {
         val entries = LinkedHashMap<String, MediaData>(_allUserEntries.value)
@@ -109,5 +121,26 @@ class MediaFilterRepository @Inject constructor() {
     /** Updates media control key that recommendations card reactivated. */
     fun setReactivatedId(instanceId: InstanceId?) {
         _reactivatedId.value = instanceId
+    }
+
+    fun addMediaDataLoadingState(mediaDataLoadingModel: MediaDataLoadingModel) {
+        // Filter out previous loading state that has same [InstanceId].
+        val loadedStates =
+            _mediaDataLoadedStates.value.filter { loadedModel ->
+                loadedModel !is MediaDataLoadingModel.Loaded ||
+                    !loadedModel.equalInstanceIds(mediaDataLoadingModel)
+            }
+
+        _mediaDataLoadedStates.value =
+            loadedStates +
+                if (mediaDataLoadingModel is MediaDataLoadingModel.Loaded) {
+                    listOf(mediaDataLoadingModel)
+                } else {
+                    emptyList()
+                }
+    }
+
+    fun setRecommedationsLoadingState(smartspaceMediaLoadingModel: SmartspaceMediaLoadingModel) {
+        _recommendationsLoadingState.value = smartspaceMediaLoadingModel
     }
 }
