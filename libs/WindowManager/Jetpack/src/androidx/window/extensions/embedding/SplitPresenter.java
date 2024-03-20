@@ -368,6 +368,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         updateTaskFragmentWindowingModeIfRegistered(wct, secondaryContainer, windowingMode);
         updateAnimationParams(wct, primaryContainer.getTaskFragmentToken(), splitAttributes);
         updateAnimationParams(wct, secondaryContainer.getTaskFragmentToken(), splitAttributes);
+        taskContainer.updateDivider(wct);
     }
 
     private void setAdjacentTaskFragments(@NonNull WindowContainerTransaction wct,
@@ -686,8 +687,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                     splitContainer.getPrimaryContainer().getTaskFragmentToken();
             final IBinder secondaryToken =
                     splitContainer.getSecondaryContainer().getTaskFragmentToken();
-            expandTaskFragment(wct, primaryToken);
-            expandTaskFragment(wct, secondaryToken);
+            expandTaskFragment(wct, splitContainer.getPrimaryContainer());
+            expandTaskFragment(wct, splitContainer.getSecondaryContainer());
             // Set the companion TaskFragment when the two containers stacked.
             setCompanionTaskFragment(wct, primaryToken, secondaryToken,
                     splitContainer.getSplitRule(), true /* isStacked */);

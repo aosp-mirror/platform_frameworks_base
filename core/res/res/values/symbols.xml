@@ -5337,6 +5337,11 @@
 
   <java-symbol type="raw" name="default_ringtone_vibration_effect" />
 
+  <!-- For activity embedding divider -->
+  <java-symbol type="drawable" name="activity_embedding_divider_handle" />
+  <java-symbol type="dimen" name="activity_embedding_divider_touch_target_width" />
+  <java-symbol type="dimen" name="activity_embedding_divider_touch_target_height" />
+
   <!-- Whether we order unlocking and waking -->
   <java-symbol type="bool" name="config_orderUnlockAndWake" />
 

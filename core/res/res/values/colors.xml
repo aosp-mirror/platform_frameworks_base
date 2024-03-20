@@ -593,6 +593,10 @@
     <color name="accessibility_magnification_thumbnail_container_background_color">#99000000</color>
     <color name="accessibility_magnification_thumbnail_container_stroke_color">#FFFFFF</color>
 
+    <!-- Activity Embedding divider -->
+    <color name="activity_embedding_divider_color">#8e918f</color>
+    <color name="activity_embedding_divider_color_pressed">#e3e3e3</color>
+
     <!-- Lily Language Picker language item view colors -->
     <color name="language_picker_item_text_color">#202124</color>
     <color name="language_picker_item_text_color_secondary">#5F6368</color>

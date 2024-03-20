@@ -1028,6 +1028,16 @@
     <dimen name="popup_enter_animation_from_y_delta">20dp</dimen>
     <dimen name="popup_exit_animation_to_y_delta">-10dp</dimen>
 
+    <!-- Dimensions for the activity embedding divider. -->
+    <dimen name="activity_embedding_divider_handle_width">4dp</dimen>
+    <dimen name="activity_embedding_divider_handle_height">48dp</dimen>
+    <dimen name="activity_embedding_divider_handle_radius">2dp</dimen>
+    <dimen name="activity_embedding_divider_handle_width_pressed">12dp</dimen>
+    <dimen name="activity_embedding_divider_handle_height_pressed">53dp</dimen>
+    <dimen name="activity_embedding_divider_handle_radius_pressed">6dp</dimen>
+    <dimen name="activity_embedding_divider_touch_target_width">24dp</dimen>
+    <dimen name="activity_embedding_divider_touch_target_height">64dp</dimen>
+
     <!-- Default handwriting bounds offsets for editors. -->
     <dimen name="handwriting_bounds_offset_left">10dp</dimen>
     <dimen name="handwriting_bounds_offset_top">40dp</dimen>
