@@ -22,6 +22,14 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/device_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/pair_new_device_button" />
+
     <Button
         android:id="@+id/pair_new_device_button"
         style="@style/BluetoothTileDialog.Device"
@@ -33,7 +41,7 @@
         android:contentDescription="@string/accessibility_hearing_device_pair_new_device"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/device_list"
         android:drawableStart="@drawable/ic_add"
         android:drawablePadding="20dp"
         android:drawableTint="?android:attr/textColorPrimary"
