@@ -1137,6 +1137,41 @@ void android_os_Process_sendSignalQuiet(JNIEnv* env, jobject clazz, jint pid, ji
     }
 }
 
+void android_os_Process_sendSignalThrows(JNIEnv* env, jobject clazz, jint pid, jint sig) {
+    if (pid <= 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", "Invalid argument: pid(%d)",
+                             pid);
+        return;
+    }
+    int ret = kill(pid, sig);
+    if (ret < 0) {
+        if (errno == ESRCH) {
+            jniThrowExceptionFmt(env, "java/util/NoSuchElementException",
+                                 "Process with pid %d not found", pid);
+        } else {
+            signalExceptionForError(env, errno, pid);
+        }
+    }
+}
+
+void android_os_Process_sendTgSignalThrows(JNIEnv* env, jobject clazz, jint tgid, jint tid,
+                                           jint sig) {
+    if (tgid <= 0 || tid <= 0) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Invalid argument: tgid(%d), tid(%d)", tid, tgid);
+        return;
+    }
+    int ret = tgkill(tgid, tid, sig);
+    if (ret < 0) {
+        if (errno == ESRCH) {
+            jniThrowExceptionFmt(env, "java/util/NoSuchElementException",
+                                 "Process with tid %d and tgid %d not found", tid, tgid);
+        } else {
+            signalExceptionForError(env, errno, tid);
+        }
+    }
+}
+
 static jlong android_os_Process_getElapsedCpuTime(JNIEnv* env, jobject clazz)
 {
     struct timespec ts;
@@ -1357,6 +1392,8 @@ static const JNINativeMethod methods[] = {
         {"setGid", "(I)I", (void*)android_os_Process_setGid},
         {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
         {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
+        {"sendSignalThrows", "(II)V", (void*)android_os_Process_sendSignalThrows},
+        {"sendTgSignalThrows", "(III)V", (void*)android_os_Process_sendTgSignalThrows},
         {"setProcessFrozen", "(IIZ)V", (void*)android_os_Process_setProcessFrozen},
         {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
         {"getTotalMemory", "()J", (void*)android_os_Process_getTotalMemory},
