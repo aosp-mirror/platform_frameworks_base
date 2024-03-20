@@ -12080,18 +12080,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int i=0; i<items.size(); i++) {
             MemItem mi = items.get(i);
             if (!isCompact) {
-                pw.printf("%s%s: %s%s\n", prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
+                String printFormat = "%s%s: %s%s\n";
+                if ((dumpPss && dumpSwapPss) || dumpPrivateDirty) {
+                    StringBuilder format = new StringBuilder();
+                    format.append("%s%s: %-60s%s");
+                    if (dumpSwapPss) {
+                        format.append(String.format("(%s in swap%s", stringifyKBSize(mi.swapPss),
+                                dumpPrivateDirty ? ", " : ")"));
+                    }
+                    if (dumpPrivateDirty) {
+                        format.append(String.format("%s%s private dirty)", dumpSwapPss ? "" : "(",
+                                stringifyKBSize(mi.mPrivateDirty)));
+                    }
+                    printFormat = format.append("\n").toString();
+                }
+                pw.printf(printFormat, prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
                             mi.label,
                             mi.userId != UserHandle.USER_SYSTEM ? " (user " + mi.userId + ")" : "");
-                if (dumpPss && dumpSwapPss) {
-                    pw.printf("(%s in swap%s", stringifyKBSize(mi.swapPss),
-                            dumpPrivateDirty ? ", " : ")");
-                }
-                if (dumpPrivateDirty) {
-                    pw.printf("%s%s private dirty)", dumpSwapPss ? "" : "(",
-                            stringifyKBSize(mi.mPrivateDirty));
-                }
-                pw.printf("\n");
             } else if (mi.isProc) {
                 pw.print("proc,"); pw.print(tag); pw.print(","); pw.print(mi.shortLabel);
                 pw.print(","); pw.print(mi.id); pw.print(",");
