@@ -161,9 +161,8 @@ import java.util.zip.ZipOutputStream;
 public class LauncherAppsService extends SystemService {
     private static final String WM_TRACE_DIR = "/data/misc/wmtrace/";
     private static final String VC_FILE_SUFFIX = ".vc";
-    // TODO(b/310027945): Update the intent name.
     private static final String PS_SETTINGS_INTENT =
-            "com.android.settings.action.PRIVATE_SPACE_SETUP_FLOW";
+            "com.android.settings.action.OPEN_PRIVATE_SPACE_SETTINGS";
 
     private static final Set<PosixFilePermission> WM_TRACE_FILE_PERMISSIONS = Set.of(
             PosixFilePermission.OWNER_WRITE,
@@ -1788,15 +1787,26 @@ public class LauncherAppsService extends SystemService {
                 Slog.e(TAG, "Caller cannot access hidden profiles");
                 return null;
             }
+            final int callingUser = getCallingUserId();
+            final int callingUid = getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
                 Intent psSettingsIntent = new Intent(PS_SETTINGS_INTENT);
                 psSettingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                final PendingIntent pi = PendingIntent.getActivity(mContext,
+                List<ResolveInfo> ri = mPackageManagerInternal.queryIntentActivities(
+                        psSettingsIntent,
+                        psSettingsIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        PackageManager.MATCH_SYSTEM_ONLY, callingUid, callingUser);
+                if (ri.isEmpty()) {
+                    return null;
+                }
+                final PendingIntent pi = PendingIntent.getActivityAsUser(mContext,
                         /* requestCode */ 0,
                         psSettingsIntent,
-                        PendingIntent.FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT);
+                        PendingIntent.FLAG_IMMUTABLE | FLAG_UPDATE_CURRENT,
+                        null,
+                        UserHandle.of(callingUser));
                 return pi == null ? null : pi.getIntentSender();
             } finally {
                 Binder.restoreCallingIdentity(identity);
