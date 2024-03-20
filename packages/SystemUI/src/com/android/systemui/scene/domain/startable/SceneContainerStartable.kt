@@ -234,7 +234,7 @@ constructor(
             bouncerInteractor.onImeHiddenByUser.collectLatest {
                 if (sceneInteractor.currentScene.value == Scenes.Bouncer) {
                     sceneInteractor.changeScene(
-                        toScene = Scenes.Lockscreen,
+                        toScene = Scenes.Lockscreen, // TODO(b/336581871): add sceneState?
                         loggingReason = "IME hidden",
                     )
                 }
@@ -252,6 +252,7 @@ constructor(
                     when {
                         isAnySimLocked -> {
                             switchToScene(
+                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Bouncer,
                                 loggingReason = "Need to authenticate locked SIM card."
                             )
@@ -259,6 +260,7 @@ constructor(
                         unlockStatus.isUnlocked &&
                             deviceEntryInteractor.canSwipeToEnter.value == false -> {
                             switchToScene(
+                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Gone,
                                 loggingReason =
                                     "All SIM cards unlocked and device already unlocked and " +
@@ -267,6 +269,7 @@ constructor(
                         }
                         else -> {
                             switchToScene(
+                                // TODO(b/336581871): add sceneState?
                                 targetSceneKey = Scenes.Lockscreen,
                                 loggingReason =
                                     "All SIM cards unlocked and device still locked" +
@@ -325,7 +328,8 @@ constructor(
                                 Scenes.Gone to "device was unlocked in Bouncer scene"
                             } else {
                                 val prevScene = previousScene.value
-                                (prevScene ?: Scenes.Gone) to
+                                (prevScene
+                                    ?: Scenes.Gone) to
                                     "device was unlocked in Bouncer scene, from sceneKey=$prevScene"
                             }
                         isOnLockscreen ->
@@ -364,6 +368,7 @@ constructor(
             powerInteractor.isAsleep.collect { isAsleep ->
                 if (isAsleep) {
                     switchToScene(
+                        // TODO(b/336581871): add sceneState?
                         targetSceneKey = Scenes.Lockscreen,
                         loggingReason = "device is starting to sleep",
                     )
