@@ -21,15 +21,22 @@ import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.shade.ShadeHeaderController
 import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shadeController
 import com.android.systemui.statusbar.policy.splitShadeStateController
+import com.android.systemui.util.mockito.mock
 
 val Kosmos.shadeStartable by Fixture {
     ShadeStartable(
         applicationScope = applicationCoroutineScope,
         applicationContext = applicationContext,
+        touchLog = mock<LogBuffer>(),
         configurationRepository = configurationRepository,
         shadeRepository = shadeRepository,
         controller = splitShadeStateController,
+        shadeHeaderController = mock<ShadeHeaderController>(),
+        shadeController = shadeController
     )
 }

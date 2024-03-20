@@ -56,7 +56,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -80,8 +80,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final ScreenPinningRequest mScreenPinningRequest;
     private final com.android.systemui.shade.ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
-    private final ShadeViewController mShadeViewController;
     private final PanelExpansionInteractor mPanelExpansionInteractor;
+    private final ShadeHeaderController mShadeHeaderController;
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -119,8 +119,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             ScreenPinningRequest screenPinningRequest,
             ShadeController shadeController,
             CommandQueue commandQueue,
-            ShadeViewController shadeViewController,
             PanelExpansionInteractor panelExpansionInteractor,
+            ShadeHeaderController shadeHeaderController,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
             MetricsLogger metricsLogger,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -146,8 +146,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mScreenPinningRequest = screenPinningRequest;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
-        mShadeViewController = shadeViewController;
         mPanelExpansionInteractor = panelExpansionInteractor;
+        mShadeHeaderController = shadeHeaderController;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
         mMetricsLogger = metricsLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -279,7 +279,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             }
         }
 
-        mShadeViewController.disableHeader(state1, state2, animate);
+        mShadeHeaderController.disable(state1, state2, animate);
     }
 
     /**

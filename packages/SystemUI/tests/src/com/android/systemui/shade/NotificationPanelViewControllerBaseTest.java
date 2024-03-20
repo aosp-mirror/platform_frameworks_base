@@ -711,7 +711,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFragmentService,
                 mStatusBarService,
                 mContentResolver,
-                mShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
                 mShadeExpansionStateManager,
