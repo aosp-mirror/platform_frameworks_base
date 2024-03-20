@@ -30,9 +30,12 @@ import static com.android.server.credentials.metrics.ApiName.GET_CREDENTIAL;
 import static com.android.server.credentials.metrics.ApiName.GET_CREDENTIAL_VIA_REGISTRY;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
+import android.content.Context;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
+import android.credentials.selection.IntentCreationResult;
 import android.credentials.selection.UserSelectionDialogResult;
 import android.util.Slog;
 
@@ -267,6 +270,21 @@ public class RequestSessionMetric {
                     generateMetricKey(exception, DELTA_EXCEPTION_CUT));
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
+    /** Log results of the device Credential Manager UI configuration. */
+    public void collectUiConfigurationResults(Context context, IntentCreationResult result,
+            @UserIdInt int userId) {
+        try {
+            mChosenProviderFinalPhaseMetric.setOemUiUid(MetricUtilities.getPackageUid(
+                    context, result.getOemUiPackageName(), userId));
+            mChosenProviderFinalPhaseMetric.setFallbackUiUid(MetricUtilities.getPackageUid(
+                    context, result.getFallbackUiPackageName(), userId));
+            mChosenProviderFinalPhaseMetric.setOemUiUsageStatus(
+                    OemUiUsageStatus.createFrom(result.getOemUiUsageStatus()));
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during ui configuration result collection: " + e);
         }
     }
 

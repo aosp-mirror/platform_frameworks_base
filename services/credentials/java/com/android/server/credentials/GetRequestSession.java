@@ -111,7 +111,8 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
                                         Manifest.permission
                                                 .CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
                                 /*isShowAllOptionsRequested=*/ false),
-                        providerDataList);
+                        providerDataList,
+                        mRequestSessionMetric);
                 mClientCallback.onPendingIntent(mPendingIntent);
             } catch (RemoteException e) {
                 mRequestSessionMetric.collectUiReturnedFinalPhase(/*uiReturned=*/ false);
