@@ -54,6 +54,7 @@ import com.android.server.display.config.DisplayBrightnessMappingConfig;
 import com.android.server.display.config.DisplayBrightnessPoint;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
+import com.android.server.display.config.EvenDimmerBrightnessData;
 import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.HighBrightnessMode;
@@ -61,7 +62,6 @@ import com.android.server.display.config.IdleScreenRefreshRateTimeout;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholds;
 import com.android.server.display.config.IntegerArray;
-import com.android.server.display.config.LowBrightnessData;
 import com.android.server.display.config.LuxThrottling;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.NonNegativeFloatToFloatPoint;
@@ -556,7 +556,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <majorVersion>2</majorVersion>
  *         <minorVersion>0</minorVersion>
  *     </usiVersion>
- *     <lowBrightness enabled="true">
+ *     <evenDimmer enabled="true">
  *       <transitionPoint>0.1</transitionPoint>
  *
  *       <nits>0.2</nits>
@@ -573,7 +573,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *       <brightness>0.1</brightness>
  *       <brightness>0.5</brightness>
  *       <brightness>1.0</brightness>
- *     </lowBrightness>
+ *     </evenDimmer>
  *     <screenBrightnessCapForWearBedtimeMode>0.1</screenBrightnessCapForWearBedtimeMode>
  *     <idleScreenRefreshRateTimeout>
  *          <luxThresholds>
@@ -894,9 +894,9 @@ public class DisplayDeviceConfig {
     @Nullable
     private HdrBrightnessData mHdrBrightnessData;
 
-    // Null if low brightness mode is disabled - in config or by flag.
+    // Null if even dimmer is disabled - in config or by flag.
     @Nullable
-    public LowBrightnessData mLowBrightnessData;
+    public EvenDimmerBrightnessData mEvenDimmerBrightnessData;
 
     /**
      * Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
@@ -1064,8 +1064,8 @@ public class DisplayDeviceConfig {
      * @return The brightness mapping nits array.
      */
     public float[] getNits() {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mNits;
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mNits;
         }
         return mNits;
     }
@@ -1077,8 +1077,8 @@ public class DisplayDeviceConfig {
      */
     @VisibleForTesting
     public float[] getBacklight() {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mBacklight;
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mBacklight;
         }
         return mBacklight;
     }
@@ -1091,8 +1091,8 @@ public class DisplayDeviceConfig {
      * @return backlight value on the HAL scale of 0-1
      */
     public float getBacklightFromBrightness(float brightness) {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mBrightnessToBacklight.interpolate(brightness);
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mBrightnessToBacklight.interpolate(brightness);
         }
         return mBrightnessToBacklightSpline.interpolate(brightness);
     }
@@ -1104,21 +1104,10 @@ public class DisplayDeviceConfig {
      * @return brightness value from 0-1 framework scale
      */
     public float getBrightnessFromBacklight(float backlight) {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mBacklightToBrightness.interpolate(backlight);
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mBacklightToBrightness.interpolate(backlight);
         }
         return mBacklightToBrightnessSpline.interpolate(backlight);
-    }
-
-    /**
-     *
-     * @return low brightness mode transition point
-     */
-    public float getLowBrightnessTransitionPoint() {
-        if (mLowBrightnessData == null) {
-            return PowerManager.BRIGHTNESS_MIN;
-        }
-        return mLowBrightnessData.mTransitionPoint;
     }
 
     /**
@@ -1126,8 +1115,8 @@ public class DisplayDeviceConfig {
      * @return HAL backlight mapping to framework brightness
      */
     private Spline getBacklightToBrightnessSpline() {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mBacklightToBrightness;
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mBacklightToBrightness;
         }
         return mBacklightToBrightnessSpline;
     }
@@ -1139,12 +1128,12 @@ public class DisplayDeviceConfig {
      * exits.
      */
     public float getNitsFromBacklight(float backlight) {
-        if (mLowBrightnessData != null) {
-            if (mLowBrightnessData.mBacklightToNits == null) {
+        if (mEvenDimmerBrightnessData != null) {
+            if (mEvenDimmerBrightnessData.mBacklightToNits == null) {
                 return INVALID_NITS;
             }
             backlight = Math.max(backlight, mBacklightMinimum);
-            return mLowBrightnessData.mBacklightToNits.interpolate(backlight);
+            return mEvenDimmerBrightnessData.mBacklightToNits.interpolate(backlight);
         }
 
         if (mBacklightToNitsSpline == null) {
@@ -1160,15 +1149,15 @@ public class DisplayDeviceConfig {
      * @return corresponding HAL backlight value
      */
     public float getBacklightFromNits(float nits) {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mNitsToBacklight.interpolate(nits);
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mNitsToBacklight.interpolate(nits);
         }
         return mNitsToBacklightSpline.interpolate(nits);
     }
 
     private Spline getNitsToBacklightSpline() {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mNitsToBacklight;
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mNitsToBacklight;
         }
         return mNitsToBacklightSpline;
     }
@@ -1179,10 +1168,21 @@ public class DisplayDeviceConfig {
      * @return minimum allowed nits, given the lux.
      */
     public float getMinNitsFromLux(float lux) {
-        if (mLowBrightnessData == null) {
+        if (mEvenDimmerBrightnessData == null) {
             return INVALID_NITS;
         }
-        return mLowBrightnessData.mMinLuxToNits.interpolate(lux);
+        return mEvenDimmerBrightnessData.mMinLuxToNits.interpolate(lux);
+    }
+
+    /**
+     *
+     * @return even dimmer mode transition point
+     */
+    public float getEvenDimmerTransitionPoint() {
+        if (mEvenDimmerBrightnessData == null) {
+            return PowerManager.BRIGHTNESS_MIN;
+        }
+        return mEvenDimmerBrightnessData.mTransitionPoint;
     }
 
     /**
@@ -1239,8 +1239,8 @@ public class DisplayDeviceConfig {
      * @return brightness array
      */
     public float[] getBrightness() {
-        if (mLowBrightnessData != null) {
-            return mLowBrightnessData.mBrightness;
+        if (mEvenDimmerBrightnessData != null) {
+            return mEvenDimmerBrightnessData.mBrightness;
         }
         return mBrightness;
     }
@@ -1928,11 +1928,11 @@ public class DisplayDeviceConfig {
 
     /**
      *
-     * @return true if low brightness mode is enabled
+     * @return true if even dimmer mode is enabled
      */
     @VisibleForTesting
-    public boolean getLbmEnabled() {
-        return mLowBrightnessData != null;
+    public boolean isEvenDimmerAvailable() {
+        return mEvenDimmerBrightnessData != null;
     }
 
     /**
@@ -2075,8 +2075,8 @@ public class DisplayDeviceConfig {
                 + "mHdrBrightnessData= " + mHdrBrightnessData + "\n"
                 + "mBrightnessCapForWearBedtimeMode= " + mBrightnessCapForWearBedtimeMode
                 + "\n"
-                + "mLowBrightnessData:" + (mLowBrightnessData != null
-                ? mLowBrightnessData.toString() : "null")
+                + "mEvenDimmerBrightnessData:" + (mEvenDimmerBrightnessData != null
+                ? mEvenDimmerBrightnessData.toString() : "null")
                 + "}";
     }
 
@@ -2128,7 +2128,7 @@ public class DisplayDeviceConfig {
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
                 if (mFlags.isEvenDimmerEnabled()) {
-                    mLowBrightnessData = LowBrightnessData.loadConfig(config);
+                    mEvenDimmerBrightnessData = EvenDimmerBrightnessData.loadConfig(config);
                 }
                 loadBrightnessMap(config);
                 loadThermalThrottlingConfig(config);
@@ -2923,7 +2923,7 @@ public class DisplayDeviceConfig {
     private void createBacklightConversionSplines() {
 
 
-        // Create original brightness splines - not using low brightness mode arrays - this is
+        // Create original brightness splines - not using even dimmer mode arrays - this is
         // so that we can continue to log the original brightness splines.
 
         mBrightness = new float[mBacklight.length];

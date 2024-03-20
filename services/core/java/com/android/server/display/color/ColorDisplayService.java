@@ -1632,6 +1632,15 @@ public final class ColorDisplayService extends SystemService {
             return mAppSaturationController
                     .addColorTransformController(packageName, userId, controller);
         }
+
+        /**
+         * Applies tint changes for even dimmer feature.
+         */
+        public void applyEvenDimmerColorChanges(boolean enabled, int strength) {
+            mReduceBrightColorsTintController.setActivated(enabled);
+            mReduceBrightColorsTintController.setMatrix(strength);
+            mHandler.sendEmptyMessage(MSG_APPLY_REDUCE_BRIGHT_COLORS);
+        }
     }
 
     /**
