@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -78,19 +77,19 @@ constructor(
     /**
      * Shows the dialog.
      *
-     * @param context The context in which the dialog is displayed.
      * @param view The view from which the dialog is shown.
      */
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun showDialog(context: Context, view: View?) {
+    fun showDialog(view: View?) {
         cancelJob()
 
         job =
             coroutineScope.launch(mainDispatcher) {
                 var updateDeviceItemJob: Job?
                 var updateDialogUiJob: Job? = null
-                val dialogDelegate = createBluetoothTileDialog(context)
+                val dialogDelegate = createBluetoothTileDialog()
                 val dialog = dialogDelegate.createDialog()
+                val context = dialog.context
 
                 view?.let {
                     dialogTransitionAnimator.showFromView(
@@ -206,7 +205,7 @@ constructor(
             }
     }
 
-    private suspend fun createBluetoothTileDialog(context: Context): BluetoothTileDialogDelegate {
+    private suspend fun createBluetoothTileDialog(): BluetoothTileDialogDelegate {
         val cachedContentHeight =
             withContext(backgroundDispatcher) {
                 sharedPreferences.getInt(
@@ -216,7 +215,6 @@ constructor(
             }
 
         return bluetoothDialogDelegateFactory.create(
-            context,
             UiProperties.build(
                 bluetoothStateInteractor.isBluetoothEnabled,
                 isAutoOnToggleFeatureAvailable()
