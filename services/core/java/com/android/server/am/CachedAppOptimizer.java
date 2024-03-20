@@ -1461,8 +1461,7 @@ public final class CachedAppOptimizer {
             return;
         }
 
-        if (mAm.mConstants.USE_MODERN_TRIM
-                && app.mState.getSetAdj() >= ProcessList.CACHED_APP_MIN_ADJ) {
+        if (app.mState.getSetAdj() >= ProcessList.CACHED_APP_MIN_ADJ) {
             final IApplicationThread thread = app.getThread();
             if (thread != null) {
                 try {

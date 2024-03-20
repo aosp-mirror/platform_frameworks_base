@@ -163,7 +163,6 @@ final class ActivityManagerConstants extends ContentObserver {
 
     static final String KEY_USE_TIERED_CACHED_ADJ = "use_tiered_cached_adj";
     static final String KEY_TIERED_CACHED_ADJ_DECAY_TIME = "tiered_cached_adj_decay_time";
-    static final String KEY_USE_MODERN_TRIM = "use_modern_trim";
 
     /**
      * Whether or not to enable the new oom adjuster implementation.
@@ -238,8 +237,6 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final boolean DEFAULT_USE_TIERED_CACHED_ADJ = false;
     private static final long DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME = 60 * 1000;
-
-    private static final boolean DEFAULT_USE_MODERN_TRIM = true;
 
     /**
      * The default value to {@link #KEY_ENABLE_NEW_OOMADJ}.
@@ -1136,9 +1133,6 @@ final class ActivityManagerConstants extends ContentObserver {
     /** @see #KEY_TIERED_CACHED_ADJ_DECAY_TIME */
     public long TIERED_CACHED_ADJ_DECAY_TIME = DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME;
 
-    /** @see #KEY_USE_MODERN_TRIM */
-    public boolean USE_MODERN_TRIM = DEFAULT_USE_MODERN_TRIM;
-
     /** @see #KEY_ENABLE_NEW_OOMADJ */
     public boolean ENABLE_NEW_OOMADJ = DEFAULT_ENABLE_NEW_OOM_ADJ;
 
@@ -1342,9 +1336,6 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_USE_TIERED_CACHED_ADJ:
                             case KEY_TIERED_CACHED_ADJ_DECAY_TIME:
                                 updateUseTieredCachedAdj();
-                                break;
-                            case KEY_USE_MODERN_TRIM:
-                                updateUseModernTrim();
                                 break;
                             case KEY_DISABLE_APP_PROFILER_PSS_PROFILING:
                                 updateDisableAppProfilerPssProfiling();
@@ -2231,13 +2222,6 @@ final class ActivityManagerConstants extends ContentObserver {
             DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
             KEY_TIERED_CACHED_ADJ_DECAY_TIME,
             DEFAULT_TIERED_CACHED_ADJ_DECAY_TIME);
-    }
-
-    private void updateUseModernTrim() {
-        USE_MODERN_TRIM = DeviceConfig.getBoolean(
-            DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-            KEY_USE_MODERN_TRIM,
-            DEFAULT_USE_MODERN_TRIM);
     }
 
     private void updateEnableNewOomAdj() {
