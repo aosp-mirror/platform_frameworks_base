@@ -20,6 +20,7 @@ import static android.provider.DeviceConfig.Properties;
 
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
@@ -27,6 +28,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.crashrecovery.flags.Flags;
 import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
@@ -53,6 +55,8 @@ import com.android.server.am.SettingsToPropertiesMapper;
 import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
 
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -88,6 +92,40 @@ public class RescueParty {
     static final int LEVEL_WARM_REBOOT = 4;
     @VisibleForTesting
     static final int LEVEL_FACTORY_RESET = 5;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_NONE = 0;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET = 1;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET = 2;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_WARM_REBOOT = 3;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS = 4;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES = 5;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS = 6;
+    @VisibleForTesting
+    static final int RESCUE_LEVEL_FACTORY_RESET = 7;
+
+    @IntDef(prefix = { "RESCUE_LEVEL_" }, value = {
+        RESCUE_LEVEL_NONE,
+        RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET,
+        RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET,
+        RESCUE_LEVEL_WARM_REBOOT,
+        RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS,
+        RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES,
+        RESCUE_LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS,
+        RESCUE_LEVEL_FACTORY_RESET
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface RescueLevels {}
+
+    @VisibleForTesting
+    static final String RESCUE_NON_REBOOT_LEVEL_LIMIT = "persist.sys.rescue_non_reboot_level_limit";
+    @VisibleForTesting
+    static final int DEFAULT_RESCUE_NON_REBOOT_LEVEL_LIMIT = RESCUE_LEVEL_WARM_REBOOT - 1;
     @VisibleForTesting
     static final String TAG = "RescueParty";
     @VisibleForTesting
@@ -347,11 +385,20 @@ public class RescueParty {
     }
 
     private static int getMaxRescueLevel(boolean mayPerformReboot) {
-        if (!mayPerformReboot
-                || SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)) {
-            return LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS;
+        if (Flags.recoverabilityDetection()) {
+            if (!mayPerformReboot
+                    || SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)) {
+                return SystemProperties.getInt(RESCUE_NON_REBOOT_LEVEL_LIMIT,
+                        DEFAULT_RESCUE_NON_REBOOT_LEVEL_LIMIT);
+            }
+            return RESCUE_LEVEL_FACTORY_RESET;
+        } else {
+            if (!mayPerformReboot
+                    || SystemProperties.getBoolean(PROP_DISABLE_FACTORY_RESET_FLAG, false)) {
+                return LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS;
+            }
+            return LEVEL_FACTORY_RESET;
         }
-        return LEVEL_FACTORY_RESET;
     }
 
     /**
@@ -379,6 +426,46 @@ public class RescueParty {
         }
     }
 
+    /**
+     * Get the rescue level to perform if this is the n-th attempt at mitigating failure.
+     * When failedPackage is null then 1st and 2nd mitigation counts are redundant (scoped and
+     * all device config reset). Behaves as if one mitigation attempt was already done.
+     *
+     * @param mitigationCount the mitigation attempt number (1 = first attempt etc.).
+     * @param mayPerformReboot whether or not a reboot and factory reset may be performed
+     * for the given failure.
+     * @param failedPackage in case of bootloop this is null.
+     * @return the rescue level for the n-th mitigation attempt.
+     */
+    private static @RescueLevels int getRescueLevel(int mitigationCount, boolean mayPerformReboot,
+            @Nullable VersionedPackage failedPackage) {
+        // Skipping RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET since it's not defined without a failed
+        // package.
+        if (failedPackage == null && mitigationCount > 0) {
+            mitigationCount += 1;
+        }
+        if (mitigationCount == 1) {
+            return RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET;
+        } else if (mitigationCount == 2) {
+            return RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET;
+        } else if (mitigationCount == 3) {
+            return Math.min(getMaxRescueLevel(mayPerformReboot), RESCUE_LEVEL_WARM_REBOOT);
+        } else if (mitigationCount == 4) {
+            return Math.min(getMaxRescueLevel(mayPerformReboot),
+                                RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS);
+        } else if (mitigationCount == 5) {
+            return Math.min(getMaxRescueLevel(mayPerformReboot),
+                                RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES);
+        } else if (mitigationCount == 6) {
+            return Math.min(getMaxRescueLevel(mayPerformReboot),
+                                RESCUE_LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS);
+        } else if (mitigationCount >= 7) {
+            return Math.min(getMaxRescueLevel(mayPerformReboot), RESCUE_LEVEL_FACTORY_RESET);
+        } else {
+            return RESCUE_LEVEL_NONE;
+        }
+    }
+
     private static void executeRescueLevel(Context context, @Nullable String failedPackage,
             int level) {
         Slog.w(TAG, "Attempting rescue level " + levelToString(level));
@@ -397,6 +484,15 @@ public class RescueParty {
 
     private static void executeRescueLevelInternal(Context context, int level, @Nullable
             String failedPackage) throws Exception {
+        if (Flags.recoverabilityDetection()) {
+            executeRescueLevelInternalNew(context, level, failedPackage);
+        } else {
+            executeRescueLevelInternalOld(context, level, failedPackage);
+        }
+    }
+
+    private static void executeRescueLevelInternalOld(Context context, int level, @Nullable
+            String failedPackage) throws Exception {
 
         if (level <= LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS) {
             // Disabling flag resets on master branch for trunk stable launch.
@@ -410,8 +506,6 @@ public class RescueParty {
         // Try our best to reset all settings possible, and once finished
         // rethrow any exception that we encountered
         Exception res = null;
-        Runnable runnable;
-        Thread thread;
         switch (level) {
             case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
                 try {
@@ -453,21 +547,7 @@ public class RescueParty {
                 }
                 break;
             case LEVEL_WARM_REBOOT:
-                // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
-                // when device shutting down.
-                setRebootProperty(true);
-                runnable = () -> {
-                    try {
-                        PowerManager pm = context.getSystemService(PowerManager.class);
-                        if (pm != null) {
-                            pm.reboot(TAG);
-                        }
-                    } catch (Throwable t) {
-                        logRescueException(level, failedPackage, t);
-                    }
-                };
-                thread = new Thread(runnable);
-                thread.start();
+                executeWarmReboot(context, level, failedPackage);
                 break;
             case LEVEL_FACTORY_RESET:
                 // Before the completion of Reboot, if any crash happens then PackageWatchdog
@@ -475,23 +555,9 @@ public class RescueParty {
                 // Adding a check to prevent factory reset to execute before above reboot completes.
                 // Note: this reboot property is not persistent resets after reboot is completed.
                 if (isRebootPropertySet()) {
-                    break;
+                    return;
                 }
-                setFactoryResetProperty(true);
-                long now = System.currentTimeMillis();
-                setLastFactoryResetTimeMs(now);
-                runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
-                        } catch (Throwable t) {
-                            logRescueException(level, failedPackage, t);
-                        }
-                    }
-                };
-                thread = new Thread(runnable);
-                thread.start();
+                executeFactoryReset(context, level, failedPackage);
                 break;
         }
 
@@ -499,6 +565,83 @@ public class RescueParty {
             throw res;
         }
     }
+
+    private static void executeRescueLevelInternalNew(Context context, @RescueLevels int level,
+            @Nullable String failedPackage) throws Exception {
+        CrashRecoveryStatsLog.write(CrashRecoveryStatsLog.RESCUE_PARTY_RESET_REPORTED,
+                level, levelToString(level));
+        switch (level) {
+            case RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET:
+                // Temporary disable deviceConfig reset
+                // resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
+                break;
+            case RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET:
+                // Temporary disable deviceConfig reset
+                // resetDeviceConfig(context, /*isScoped=*/false, failedPackage);
+                break;
+            case RESCUE_LEVEL_WARM_REBOOT:
+                executeWarmReboot(context, level, failedPackage);
+                break;
+            case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
+                resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_DEFAULTS, level);
+                break;
+            case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
+                resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_CHANGES, level);
+                break;
+            case RESCUE_LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
+                resetAllSettingsIfNecessary(context, Settings.RESET_MODE_TRUSTED_DEFAULTS, level);
+                break;
+            case RESCUE_LEVEL_FACTORY_RESET:
+                // Before the completion of Reboot, if any crash happens then PackageWatchdog
+                // escalates to next level i.e. factory reset, as they happen in separate threads.
+                // Adding a check to prevent factory reset to execute before above reboot completes.
+                // Note: this reboot property is not persistent resets after reboot is completed.
+                if (isRebootPropertySet()) {
+                    return;
+                }
+                executeFactoryReset(context, level, failedPackage);
+                break;
+        }
+    }
+
+    private static void executeWarmReboot(Context context, int level,
+            @Nullable String failedPackage) {
+        // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
+        // when device shutting down.
+        setRebootProperty(true);
+        Runnable runnable = () -> {
+            try {
+                PowerManager pm = context.getSystemService(PowerManager.class);
+                if (pm != null) {
+                    pm.reboot(TAG);
+                }
+            } catch (Throwable t) {
+                logRescueException(level, failedPackage, t);
+            }
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
+    }
+
+    private static void executeFactoryReset(Context context, int level,
+            @Nullable String failedPackage) {
+        setFactoryResetProperty(true);
+        long now = System.currentTimeMillis();
+        setLastFactoryResetTimeMs(now);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
+                } catch (Throwable t) {
+                    logRescueException(level, failedPackage, t);
+                }
+            }
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
+    }
+
 
     private static String getCompleteMessage(Throwable t) {
         final StringBuilder builder = new StringBuilder();
@@ -521,17 +664,38 @@ public class RescueParty {
     }
 
     private static int mapRescueLevelToUserImpact(int rescueLevel) {
-        switch(rescueLevel) {
-            case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
-            case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
-                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_10;
-            case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
-            case LEVEL_WARM_REBOOT:
-                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_50;
-            case LEVEL_FACTORY_RESET:
-                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_100;
-            default:
-                return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
+        if (Flags.recoverabilityDetection()) {
+            switch (rescueLevel) {
+                case RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_10;
+                case RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_20;
+                case RESCUE_LEVEL_WARM_REBOOT:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_50;
+                case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_71;
+                case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_75;
+                case RESCUE_LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_80;
+                case RESCUE_LEVEL_FACTORY_RESET:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_100;
+                default:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
+            }
+        } else {
+            switch (rescueLevel) {
+                case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
+                case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_10;
+                case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
+                case LEVEL_WARM_REBOOT:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_50;
+                case LEVEL_FACTORY_RESET:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_100;
+                default:
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
+            }
         }
     }
 
@@ -548,7 +712,7 @@ public class RescueParty {
         final ContentResolver resolver = context.getContentResolver();
         try {
             Settings.Global.resetToDefaultsAsUser(resolver, null, mode,
-                UserHandle.SYSTEM.getIdentifier());
+                    UserHandle.SYSTEM.getIdentifier());
         } catch (Exception e) {
             res = new RuntimeException("Failed to reset global settings", e);
         }
@@ -667,8 +831,13 @@ public class RescueParty {
                 @FailureReasons int failureReason, int mitigationCount) {
             if (!isDisabled() && (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING)) {
-                return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount,
+                if (Flags.recoverabilityDetection()) {
+                    return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount,
+                            mayPerformReboot(failedPackage), failedPackage));
+                } else {
+                    return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount,
                         mayPerformReboot(failedPackage)));
+                }
             } else {
                 return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
             }
@@ -682,8 +851,10 @@ public class RescueParty {
             }
             if (failureReason == PackageWatchdog.FAILURE_REASON_APP_CRASH
                     || failureReason == PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING) {
-                final int level = getRescueLevel(mitigationCount,
-                        mayPerformReboot(failedPackage));
+                final int level = Flags.recoverabilityDetection() ? getRescueLevel(mitigationCount,
+                        mayPerformReboot(failedPackage), failedPackage)
+                        : getRescueLevel(mitigationCount,
+                                mayPerformReboot(failedPackage));
                 executeRescueLevel(mContext,
                         failedPackage == null ? null : failedPackage.getPackageName(), level);
                 return true;
@@ -716,7 +887,12 @@ public class RescueParty {
             if (isDisabled()) {
                 return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
             }
-            return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount, true));
+            if (Flags.recoverabilityDetection()) {
+                return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount,
+                        true, /*failedPackage=*/ null));
+            } else {
+                return mapRescueLevelToUserImpact(getRescueLevel(mitigationCount, true));
+            }
         }
 
         @Override
@@ -725,8 +901,10 @@ public class RescueParty {
                 return false;
             }
             boolean mayPerformReboot = !shouldThrottleReboot();
-            executeRescueLevel(mContext, /*failedPackage=*/ null,
-                    getRescueLevel(mitigationCount, mayPerformReboot));
+            final int level = Flags.recoverabilityDetection() ? getRescueLevel(mitigationCount,
+                        mayPerformReboot, /*failedPackage=*/ null)
+                        : getRescueLevel(mitigationCount, mayPerformReboot);
+            executeRescueLevel(mContext, /*failedPackage=*/ null, level);
             return true;
         }
 
@@ -843,14 +1021,44 @@ public class RescueParty {
     }
 
     private static String levelToString(int level) {
-        switch (level) {
-            case LEVEL_NONE: return "NONE";
-            case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS: return "RESET_SETTINGS_UNTRUSTED_DEFAULTS";
-            case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES: return "RESET_SETTINGS_UNTRUSTED_CHANGES";
-            case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS: return "RESET_SETTINGS_TRUSTED_DEFAULTS";
-            case LEVEL_WARM_REBOOT: return "WARM_REBOOT";
-            case LEVEL_FACTORY_RESET: return "FACTORY_RESET";
-            default: return Integer.toString(level);
+        if (Flags.recoverabilityDetection()) {
+            switch (level) {
+                case RESCUE_LEVEL_NONE:
+                    return "NONE";
+                case RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET:
+                    return "SCOPED_DEVICE_CONFIG_RESET";
+                case RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET:
+                    return "ALL_DEVICE_CONFIG_RESET";
+                case RESCUE_LEVEL_WARM_REBOOT:
+                    return "WARM_REBOOT";
+                case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
+                    return "RESET_SETTINGS_UNTRUSTED_DEFAULTS";
+                case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
+                    return "RESET_SETTINGS_UNTRUSTED_CHANGES";
+                case RESCUE_LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
+                    return "RESET_SETTINGS_TRUSTED_DEFAULTS";
+                case RESCUE_LEVEL_FACTORY_RESET:
+                    return "FACTORY_RESET";
+                default:
+                    return Integer.toString(level);
+            }
+        } else {
+            switch (level) {
+                case LEVEL_NONE:
+                    return "NONE";
+                case LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
+                    return "RESET_SETTINGS_UNTRUSTED_DEFAULTS";
+                case LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
+                    return "RESET_SETTINGS_UNTRUSTED_CHANGES";
+                case LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
+                    return "RESET_SETTINGS_TRUSTED_DEFAULTS";
+                case LEVEL_WARM_REBOOT:
+                    return "WARM_REBOOT";
+                case LEVEL_FACTORY_RESET:
+                    return "FACTORY_RESET";
+                default:
+                    return Integer.toString(level);
+            }
         }
     }
 }
