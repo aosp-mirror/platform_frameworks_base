@@ -1728,7 +1728,7 @@ class ActivityStarter {
         // Get top task at beginning because the order may be changed when reusing existing task.
         final Task prevTopRootTask = mPreferredTaskDisplayArea.getFocusedRootTask();
         final Task prevTopTask = prevTopRootTask != null ? prevTopRootTask.getTopLeafTask() : null;
-        final Task reusedTask = getReusableTask();
+        final Task reusedTask = resolveReusableTask();
 
         // If requested, freeze the task list
         if (mOptions != null && mOptions.freezeRecentTasksReordering()
@@ -2727,7 +2727,7 @@ class ActivityStarter {
      * Decide whether the new activity should be inserted into an existing task. Returns null
      * if not or an ActivityRecord with the task into which the new activity should be added.
      */
-    private Task getReusableTask() {
+    private Task resolveReusableTask() {
         // If a target task is specified, try to reuse that one
         if (mOptions != null && mOptions.getLaunchTaskId() != INVALID_TASK_ID) {
             Task launchTask = mRootWindowContainer.anyTaskForId(mOptions.getLaunchTaskId());
@@ -2755,7 +2755,14 @@ class ActivityStarter {
                 // There can be one and only one instance of single instance activity in the
                 // history, and it is always in its own unique task, so we do a special search.
                 intentActivity = mRootWindowContainer.findActivity(mIntent, mStartActivity.info,
-                       mStartActivity.isActivityTypeHome());
+                       false /* compareIntentFilters */);
+                // Removes the existing singleInstance Activity if we're starting it as home
+                // activity, while the existing one is not.
+                if (intentActivity != null && mStartActivity.isActivityTypeHome()
+                        && !intentActivity.isActivityTypeHome()) {
+                    intentActivity.destroyIfPossible("Removes redundant singleInstance");
+                    intentActivity = null;
+                }
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
