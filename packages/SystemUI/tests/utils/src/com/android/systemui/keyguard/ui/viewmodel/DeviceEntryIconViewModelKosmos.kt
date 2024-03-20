@@ -25,6 +25,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInterac
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
@@ -50,5 +51,6 @@ val Kosmos.deviceEntryIconViewModel by Fixture {
         keyguardViewController = { statusBarKeyguardViewManager },
         deviceEntryInteractor = deviceEntryInteractor,
         deviceEntrySourceInteractor = deviceEntrySourceInteractor,
+        scope = testScope.backgroundScope,
     )
 }
