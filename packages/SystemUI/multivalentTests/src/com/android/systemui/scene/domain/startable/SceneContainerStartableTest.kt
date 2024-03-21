@@ -187,27 +187,20 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun hydrateVisibility_basedOnDeviceProvisioningAndFactoryResetProtection() =
+    fun hydrateVisibility_basedOnDeviceProvisioning() =
         testScope.runTest {
             val isVisible by collectLastValue(sceneInteractor.isVisible)
             prepareState(
                 isDeviceUnlocked = true,
                 initialSceneKey = Scenes.Lockscreen,
                 isDeviceProvisioned = false,
-                isFrpActive = true,
             )
 
             underTest.start()
             assertThat(isVisible).isFalse()
 
-            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(false)
-            assertThat(isVisible).isFalse()
-
             kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(true)
             assertThat(isVisible).isTrue()
-
-            kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(true)
-            assertThat(isVisible).isFalse()
         }
 
     @Test
@@ -1030,7 +1023,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         isLockscreenEnabled: Boolean = true,
         startsAwake: Boolean = true,
         isDeviceProvisioned: Boolean = true,
-        isFrpActive: Boolean = false,
     ): MutableStateFlow<ObservableTransitionState> {
         if (authenticationMethod?.isSecure == true) {
             assert(isLockscreenEnabled) {
@@ -1068,7 +1060,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
         kosmos.fakeDeviceProvisioningRepository.setDeviceProvisioned(isDeviceProvisioned)
-        kosmos.fakeDeviceProvisioningRepository.setFactoryResetProtectionActive(isFrpActive)
 
         runCurrent()
 

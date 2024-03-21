@@ -86,7 +86,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
                 globalSettings,
                 userTracker,
                 dumpManager,
-                buildInfo,
                 Handler(testableLooper.looper),
                 mainExecutor
         )
@@ -96,12 +95,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
     fun testNotProvisionedByDefault() {
         init()
         assertThat(controller.isDeviceProvisioned).isFalse()
-    }
-
-    @Test
-    fun testFrpNotActiveByDefault() {
-        init()
-        assertThat(controller.isFrpActive).isFalse()
     }
 
     @Test
@@ -116,14 +109,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         init()
 
         assertThat(controller.isDeviceProvisioned).isTrue()
-    }
-
-    @Test
-    fun testFrpActiveWhenCreated() {
-        globalSettings.putInt(Settings.Global.SECURE_FRP_MODE, 1)
-        init()
-
-        assertThat(controller.isFrpActive).isTrue()
     }
 
     @Test
@@ -142,16 +127,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         testableLooper.processAllMessages() // background observer
 
         assertThat(controller.isDeviceProvisioned).isTrue()
-    }
-
-    @Test
-    fun testFrpActiveChange() {
-        init()
-
-        globalSettings.putInt(Settings.Global.SECURE_FRP_MODE, 1)
-        testableLooper.processAllMessages() // background observer
-
-        assertThat(controller.isFrpActive).isTrue()
     }
 
     @Test
@@ -197,7 +172,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         mainExecutor.runAllReady()
 
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
         verify(listener, never()).onUserSetupChanged()
         verify(listener, never()).onUserSwitched()
     }
@@ -215,7 +189,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         verify(listener).onUserSwitched()
         verify(listener, never()).onUserSetupChanged()
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
     }
 
     @Test
@@ -230,7 +203,6 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         verify(listener, never()).onUserSwitched()
         verify(listener).onUserSetupChanged()
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
     }
 
     @Test
@@ -244,23 +216,7 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
 
         verify(listener, never()).onUserSwitched()
         verify(listener, never()).onUserSetupChanged()
-        verify(listener, never()).onFrpActiveChanged()
         verify(listener).onDeviceProvisionedChanged()
-    }
-
-    @Test
-    fun testListenerCalledOnFrpActiveChanged() {
-        init()
-        controller.addCallback(listener)
-
-        globalSettings.putInt(Settings.Global.SECURE_FRP_MODE, 1)
-        testableLooper.processAllMessages()
-        mainExecutor.runAllReady()
-
-        verify(listener, never()).onUserSwitched()
-        verify(listener, never()).onUserSetupChanged()
-        verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener).onFrpActiveChanged()
     }
 
     @Test
@@ -272,13 +228,11 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         switchUser(10)
         secureSettings.putIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 1, START_USER)
         globalSettings.putInt(Settings.Global.DEVICE_PROVISIONED, 1)
-        globalSettings.putInt(Settings.Global.SECURE_FRP_MODE, 1)
 
         testableLooper.processAllMessages()
         mainExecutor.runAllReady()
 
         verify(listener, never()).onDeviceProvisionedChanged()
-        verify(listener, never()).onFrpActiveChanged()
         verify(listener, never()).onUserSetupChanged()
         verify(listener, never()).onUserSwitched()
     }

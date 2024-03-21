@@ -78,31 +78,4 @@ class DeviceProvisioningRepositoryImplTest : SysuiTestCase() {
             .onDeviceProvisionedChanged()
         assertThat(deviceProvisioned).isFalse()
     }
-
-    @Test
-    fun isFrpActive_reflectsCurrentControllerState() = runTest {
-        whenever(deviceProvisionedController.isFrpActive).thenReturn(true)
-        val frpActive by collectLastValue(underTest.isFactoryResetProtectionActive)
-        assertThat(frpActive).isTrue()
-    }
-
-    @Test
-    fun isFrpActive_updatesWhenControllerStateChanges_toTrue() = runTest {
-        val frpActive by collectLastValue(underTest.isFactoryResetProtectionActive)
-        runCurrent()
-        whenever(deviceProvisionedController.isFrpActive).thenReturn(true)
-        withArgCaptor { verify(deviceProvisionedController).addCallback(capture()) }
-            .onFrpActiveChanged()
-        assertThat(frpActive).isTrue()
-    }
-
-    @Test
-    fun isFrpActive_updatesWhenControllerStateChanges_toFalse() = runTest {
-        val frpActive by collectLastValue(underTest.isFactoryResetProtectionActive)
-        runCurrent()
-        whenever(deviceProvisionedController.isFrpActive).thenReturn(false)
-        withArgCaptor { verify(deviceProvisionedController).addCallback(capture()) }
-            .onFrpActiveChanged()
-        assertThat(frpActive).isFalse()
-    }
 }

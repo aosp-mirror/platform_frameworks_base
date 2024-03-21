@@ -109,7 +109,6 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         testComponent.apply {
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setKeyguardOccluded(false)
-            deviceProvisioningRepository.setFactoryResetProtectionActive(false)
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.AWAKE,
                 lastWakeReason = WakeSleepReason.OTHER,
@@ -118,20 +117,6 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
         }
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
     }
-
-    @Test
-    fun animationsEnabled_isFalse_whenFrpIsActive() =
-        testComponent.runTest {
-            deviceProvisioningRepository.setFactoryResetProtectionActive(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
-            )
-            val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
-            runCurrent()
-            assertThat(animationsEnabled).isFalse()
-        }
 
     @Test
     fun animationsEnabled_isFalse_whenDeviceAsleepAndNotPulsing() =

@@ -603,20 +603,6 @@ class ShadeInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isShadeTouchable_isFalse_whenFrpIsActive() =
-        testScope.runTest {
-            deviceProvisioningRepository.setFactoryResetProtectionActive(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
-            )
-            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
-            runCurrent()
-            assertThat(isShadeTouchable).isFalse()
-        }
-
-    @Test
     fun isShadeTouchable_isFalse_whenDeviceAsleepAndNotPulsing() =
         testScope.runTest {
             powerRepository.updateWakefulness(
