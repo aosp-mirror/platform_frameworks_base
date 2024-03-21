@@ -105,14 +105,14 @@ class MenuViewLayer extends FrameLayout implements
      *
      * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
      */
-    static final String TEX_METRIC_DISMISS = "accessibility.value_fab_shortcut_action_dismiss";
+    static final String TEX_METRIC_DISMISS = "accessibility.value_fab_shortcut_dismiss";
 
     /**
      * Counter indicating the FAB was dragged to the Edit action button.
      *
      * <p>Defined in frameworks/proto_logging/stats/express/catalog/accessibility.cfg.
      */
-    static final String TEX_METRIC_EDIT = "accessibility.value_fab_shortcut_action_edit";
+    static final String TEX_METRIC_EDIT = "accessibility.value_fab_shortcut_edit";
 
     private final WindowManager mWindowManager;
     private final MenuView mMenuView;
@@ -492,11 +492,11 @@ class MenuViewLayer extends FrameLayout implements
             } else {
                 hideMenuAndShowMessage();
             }
-            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_DISMISS);
+            mMenuView.incrementTexMetric(TEX_METRIC_DISMISS);
         } else if (id == R.id.action_edit
                 && Flags.floatingMenuDragToEdit()) {
             gotoEditScreen();
-            mMenuView.incrementTexMetricForAllTargets(TEX_METRIC_EDIT);
+            mMenuView.incrementTexMetric(TEX_METRIC_EDIT);
         }
         mDismissView.hide();
         mDragToInteractView.hide();

@@ -165,7 +165,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
         mMenuView = spy(
                 new MenuView(mSpyContext, mMenuViewModel, menuViewAppearance, mSecureSettings));
         // Ensure tests don't actually update metrics.
-        doNothing().when(mMenuView).incrementTexMetric(any(), anyInt());
+        doNothing().when(mMenuView).incrementTexMetric(any());
 
         mMenuViewLayer = spy(new MenuViewLayer(mSpyContext, mStubWindowManager,
                 mStubAccessibilityManager, mMenuViewModel, menuViewAppearance, mMenuView,
@@ -414,33 +414,25 @@ public class MenuViewLayerTest extends SysuiTestCase {
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
     public void onDismissAction_incrementsTexMetricDismiss() {
-        int uid1 = 1234, uid2 = 5678;
         mMenuViewModel.onTargetFeaturesChanged(
-                List.of(new TestAccessibilityTarget(mSpyContext, uid1),
-                        new TestAccessibilityTarget(mSpyContext, uid2)));
+                List.of(new TestAccessibilityTarget(mSpyContext, 1234),
+                        new TestAccessibilityTarget(mSpyContext, 5678)));
 
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_remove_menu);
 
-        ArgumentCaptor<Integer> uidCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(mMenuView, times(2)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_DISMISS),
-                uidCaptor.capture());
-        assertThat(uidCaptor.getAllValues()).containsExactly(uid1, uid2);
+        verify(mMenuView, times(1)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_DISMISS));
     }
 
     @Test
     @EnableFlags(Flags.FLAG_FLOATING_MENU_DRAG_TO_EDIT)
     public void onEditAction_incrementsTexMetricEdit() {
-        int uid1 = 1234, uid2 = 5678;
         mMenuViewModel.onTargetFeaturesChanged(
-                List.of(new TestAccessibilityTarget(mSpyContext, uid1),
-                        new TestAccessibilityTarget(mSpyContext, uid2)));
+                List.of(new TestAccessibilityTarget(mSpyContext, 1234),
+                        new TestAccessibilityTarget(mSpyContext, 5678)));
 
         mMenuViewLayer.dispatchAccessibilityAction(R.id.action_edit);
 
-        ArgumentCaptor<Integer> uidCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(mMenuView, times(2)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_EDIT),
-                uidCaptor.capture());
-        assertThat(uidCaptor.getAllValues()).containsExactly(uid1, uid2);
+        verify(mMenuView, times(1)).incrementTexMetric(eq(MenuViewLayer.TEX_METRIC_EDIT));
     }
 
     /** Simplified AccessibilityTarget for testing MenuViewLayer. */
