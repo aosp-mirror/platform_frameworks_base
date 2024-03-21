@@ -33,18 +33,19 @@ import android.os.Binder;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import com.android.server.companion.CompanionApplicationController;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
-import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
+import com.android.server.companion.presence.CompanionAppBinder;
+import com.android.server.companion.presence.DevicePresenceProcessor;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 /**
- * A class response for Association removal.
+ * This class responsible for disassociation.
  */
 @SuppressLint("LongLogTag")
 public class DisassociationProcessor {
 
     private static final String TAG = "CDM_DisassociationProcessor";
+
     @NonNull
     private final Context mContext;
     @NonNull
@@ -52,11 +53,11 @@ public class DisassociationProcessor {
     @NonNull
     private final PackageManagerInternal mPackageManagerInternal;
     @NonNull
-    private final CompanionDevicePresenceMonitor mDevicePresenceMonitor;
+    private final DevicePresenceProcessor mDevicePresenceMonitor;
     @NonNull
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     @NonNull
-    private final CompanionApplicationController mCompanionAppController;
+    private final CompanionAppBinder mCompanionAppController;
     @NonNull
     private final CompanionTransportManager mTransportManager;
     private final OnPackageVisibilityChangeListener mOnPackageVisibilityChangeListener;
@@ -66,8 +67,8 @@ public class DisassociationProcessor {
             @NonNull ActivityManager activityManager,
             @NonNull AssociationStore associationStore,
             @NonNull PackageManagerInternal packageManager,
-            @NonNull CompanionDevicePresenceMonitor devicePresenceMonitor,
-            @NonNull CompanionApplicationController applicationController,
+            @NonNull DevicePresenceProcessor devicePresenceMonitor,
+            @NonNull CompanionAppBinder applicationController,
             @NonNull SystemDataTransferRequestStore systemDataTransferRequestStore,
             @NonNull CompanionTransportManager companionTransportManager) {
         mContext = context;
@@ -89,11 +90,7 @@ public class DisassociationProcessor {
     public void disassociate(int id) {
         Slog.i(TAG, "Disassociating id=[" + id + "]...");
 
-        final AssociationInfo association = mAssociationStore.getAssociationById(id);
-        if (association == null) {
-            Slog.e(TAG, "Can't disassociate id=[" + id + "]. It doesn't exist.");
-            return;
-        }
+        final AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(id);
 
         final int userId = association.getUserId();
         final String packageName = association.getPackageName();
@@ -118,12 +115,12 @@ public class DisassociationProcessor {
             return;
         }
 
-        // Association cleanup.
-        mAssociationStore.removeAssociation(association.getId());
-        mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, id);
-
         // Detach transport if exists
-        mTransportManager.detachSystemDataTransport(packageName, userId, id);
+        mTransportManager.detachSystemDataTransport(id);
+
+        // Association cleanup.
+        mSystemDataTransferRequestStore.removeRequestsByAssociationId(userId, id);
+        mAssociationStore.removeAssociation(association.getId());
 
         // If role is not in use by other associations, revoke the role.
         // Do not need to remove the system role since it was pre-granted by the system.
@@ -147,6 +144,24 @@ public class DisassociationProcessor {
         }
     }
 
+    /**
+     * @deprecated Use {@link #disassociate(int)} instead.
+     */
+    @Deprecated
+    public void disassociate(int userId, String packageName, String macAddress) {
+        AssociationInfo association = mAssociationStore.getFirstAssociationByAddress(userId,
+                packageName, macAddress);
+
+        if (association == null) {
+            throw new IllegalArgumentException(
+                    "Association for mac address=[" + macAddress + "] doesn't exist");
+        }
+
+        mAssociationStore.getAssociationWithCallerChecks(association.getId());
+
+        disassociate(association.getId());
+    }
+
     @SuppressLint("MissingPermission")
     private int getPackageProcessImportance(@UserIdInt int userId, @NonNull String packageName) {
         return Binder.withCleanCallingIdentity(() -> {
@@ -163,7 +178,7 @@ public class DisassociationProcessor {
                     () -> mActivityManager.addOnUidImportanceListener(
                             mOnPackageVisibilityChangeListener,
                             ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE));
-        }  catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             Slog.e(TAG, "Failed to start listening to uid importance changes.");
         }
     }
