@@ -221,8 +221,42 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             assertThat(message).isNull()
         }
 
+    @Test
+    fun noMessage_fpErrorsWhileDozing() =
+        testScope.runTest {
+            val message by collectLastValue(underTest.message)
+
+            givenOnOccludingApp(true)
+            givenFingerprintAllowed(true)
+            keyguardRepository.setIsDozing(true)
+            runCurrent()
+
+            // ERROR message
+            fingerprintAuthRepository.setAuthenticationStatus(
+                ErrorFingerprintAuthenticationStatus(
+                    FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                    "testError",
+                )
+            )
+            assertThat(message).isNull()
+
+            // HELP message
+            fingerprintAuthRepository.setAuthenticationStatus(
+                HelpFingerprintAuthenticationStatus(
+                    FingerprintManager.FINGERPRINT_ACQUIRED_PARTIAL,
+                    "testHelp",
+                )
+            )
+            assertThat(message).isNull()
+
+            // FAIL message
+            fingerprintAuthRepository.setAuthenticationStatus(FailFingerprintAuthenticationStatus)
+            assertThat(message).isNull()
+        }
+
     private fun givenOnOccludingApp(isOnOccludingApp: Boolean) {
         powerRepository.setInteractive(true)
+        keyguardRepository.setIsDozing(false)
         keyguardRepository.setKeyguardOccluded(isOnOccludingApp)
         keyguardRepository.setKeyguardShowing(isOnOccludingApp)
         keyguardRepository.setDreaming(false)
