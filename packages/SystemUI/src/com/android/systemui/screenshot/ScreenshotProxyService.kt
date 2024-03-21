@@ -30,7 +30,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 /** Provides state from the main SystemUI process on behalf of the Screenshot process. */
-internal class ScreenshotProxyService
+class ScreenshotProxyService
 @Inject
 constructor(
     private val mExpansionMgr: ShadeExpansionStateManager,
