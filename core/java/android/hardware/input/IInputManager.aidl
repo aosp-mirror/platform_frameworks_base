@@ -94,33 +94,8 @@ interface IInputManager {
     // Keyboard layouts configuration.
     KeyboardLayout[] getKeyboardLayouts();
 
-    KeyboardLayout[] getKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
-
     KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor);
 
-    String getCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier);
-
-    @EnforcePermission("SET_KEYBOARD_LAYOUT")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
-    void setCurrentKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor);
-
-    String[] getEnabledKeyboardLayoutsForInputDevice(in InputDeviceIdentifier identifier);
-
-    @EnforcePermission("SET_KEYBOARD_LAYOUT")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
-    void addKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor);
-
-    @EnforcePermission("SET_KEYBOARD_LAYOUT")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
-            + "android.Manifest.permission.SET_KEYBOARD_LAYOUT)")
-    void removeKeyboardLayoutForInputDevice(in InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor);
-
-    // New Keyboard layout config APIs
     KeyboardLayoutSelectionResult getKeyboardLayoutForInputDevice(
             in InputDeviceIdentifier identifier, int userId, in InputMethodInfo imeInfo,
             in InputMethodSubtype imeSubtype);

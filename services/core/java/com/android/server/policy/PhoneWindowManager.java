@@ -174,7 +174,6 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.MutableBoolean;
@@ -4121,14 +4120,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void handleSwitchKeyboardLayout(@NonNull KeyEvent event, int direction,
             IBinder focusedToken) {
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
-            IBinder targetWindowToken =
-                    mWindowManagerInternal.getTargetWindowTokenFromInputToken(focusedToken);
-            InputMethodManagerInternal.get().onSwitchKeyboardLayoutShortcut(direction,
-                    event.getDisplayId(), targetWindowToken);
-        } else {
-            mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
-        }
+        IBinder targetWindowToken =
+                mWindowManagerInternal.getTargetWindowTokenFromInputToken(focusedToken);
+        InputMethodManagerInternal.get().onSwitchKeyboardLayoutShortcut(direction,
+                event.getDisplayId(), targetWindowToken);
     }
 
     private boolean interceptFallback(IBinder focusedToken, KeyEvent fallbackEvent,
