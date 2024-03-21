@@ -174,43 +174,59 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.Title">
+    <style name="TextAppearance.AuthCredential.OldTitle">
         <item name="android:fontFamily">google-sans</item>
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">24sp</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.Subtitle">
+    <style name="TextAppearance.AuthCredential.OldSubtitle">
         <item name="android:fontFamily">google-sans</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">16sp</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.Description">
+    <style name="TextAppearance.AuthCredential.OldDescription">
         <item name="android:fontFamily">google-sans</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.ContentViewTitle">
-        <item name="android:fontFamily">google-sans</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingHorizontal">24dp</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:gravity">start</item>
+    <style name="TextAppearance.AuthCredential.LogoDescription" parent="TextAppearance.Material3.LabelLarge" >
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:gravity">@integer/biometric_dialog_text_gravity</item>
+        <item name="android:marqueeRepeatLimit">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.ContentViewListItem">
-        <item name="android:fontFamily">google-sans</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingHorizontal">
-            @dimen/biometric_prompt_content_list_item_padding_horizontal
-        </item>
-        <item name="android:textSize">@dimen/biometric_prompt_content_list_item_text_size</item>
-        <item name="android:gravity">start</item>
+    <style name="TextAppearance.AuthCredential.Title" parent="TextAppearance.Material3.HeadlineSmall" >
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.Subtitle" parent="TextAppearance.Material3.BodyMedium" >
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.Description" parent="TextAppearance.Material3.BodyMedium" >
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.ContentViewDescription" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.ContentViewListItem" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+        <item name="android:paddingTop">@dimen/biometric_prompt_content_list_item_padding_top</item>
+    </style>
+
+    <style name="TextAppearance.AuthCredential.Indicator" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Error">
@@ -313,8 +329,11 @@
     </style>
 
     <style name="AuthCredentialContentLayoutStyle">
-        <item name="android:background">@color/biometric_prompt_content_background_color</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/biometric_prompt_content_view_background</item>
         <item name="android:paddingHorizontal">@dimen/biometric_prompt_content_padding_horizontal</item>
+        <item name="android:paddingVertical">@dimen/biometric_prompt_content_padding_vertical</item>
     </style>
 
     <style name="DeviceManagementDialogTitle">

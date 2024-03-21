@@ -169,11 +169,7 @@ object BiometricViewBinder {
             descriptionView.text = viewModel.description.first()
 
             if (Flags.customBiometricPrompt() && constraintBp()) {
-                BiometricCustomizedViewBinder.bind(
-                    customizedViewContainer,
-                    view.requireViewById(R.id.space_above_content),
-                    viewModel
-                )
+                BiometricCustomizedViewBinder.bind(customizedViewContainer, viewModel)
             }
 
             // set button listeners
