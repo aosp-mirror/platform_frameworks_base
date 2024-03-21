@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.model.sceneContainerPlugin
 import com.android.systemui.plugins.statusbar.statusBarStateController
@@ -96,6 +97,7 @@ class KosmosJavaAdapter(
     val fromGoneTransitionInteractor by lazy { kosmos.fromGoneTransitionInteractor }
     val globalActionsInteractor by lazy { kosmos.globalActionsInteractor }
     val sceneDataSource by lazy { kosmos.sceneDataSource }
+    val keyguardClockInteractor by lazy { kosmos.keyguardClockInteractor }
 
     init {
         kosmos.applicationContext = testCase.context
