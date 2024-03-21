@@ -190,9 +190,9 @@ class GlassView(context: Context, attributeSet: AttributeSet) : FrameLayout(cont
         sensorManager?.unregisterListener(sensorListener)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         updateGlassRenderNode()
-        canvas?.drawRenderNode(renderNode)
+        canvas.drawRenderNode(renderNode)
     }
 
     fun resetGyroOffsets() {

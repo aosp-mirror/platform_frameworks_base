@@ -652,7 +652,7 @@
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"Atera pantaila osoaren argazki bat"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Atzitu sistemaren edo aplikazioetarako lasterbideen zerrenda"</string>
     <string name="group_system_go_back" msgid="8838454003680364227">"Atzera: itzuli aurreko egoerara (atzera egiteko botoia)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Atzitu hasierako pantaila"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Atzitu orri nagusia"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ikusi irekitako aplikazioen ikuspegi orokorra"</string>
     <string name="group_system_cycle_forward" msgid="9202444850838205990">"Joan azkenaldian erabilitako aplikazio batetik bestera (aurrera)"</string>
     <string name="group_system_cycle_back" msgid="5163464503638229131">"Joan azkenaldian erabilitako aplikazio batetik bestera (atzera)"</string>
@@ -1002,7 +1002,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Kopiatu da konpilazio-zenbakia arbelean."</string>
     <string name="basic_status" msgid="2315371112182658176">"Elkarrizketa irekia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Elkarrizketa-widgetak"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat hasierako pantailan gehitzeko"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Sakatu elkarrizketa bat orri nagusian gehitzeko"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Azken elkarrizketak agertuko dira hemen"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Lehentasunezko elkarrizketak"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Azken elkarrizketak"</string>

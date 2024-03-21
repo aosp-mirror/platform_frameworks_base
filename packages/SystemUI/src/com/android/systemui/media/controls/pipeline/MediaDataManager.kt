@@ -23,6 +23,7 @@ import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
 import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.app.UriGrantsManager
+import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
@@ -1650,20 +1651,18 @@ class MediaDataManager(
      *   SmartspaceTarget's data is invalid.
      */
     private fun toSmartspaceMediaData(target: SmartspaceTarget): SmartspaceMediaData {
-        var dismissIntent: Intent? = null
-        if (target.baseAction != null && target.baseAction.extras != null) {
-            dismissIntent =
-                target.baseAction.extras.getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY)
-                    as Intent?
-        }
+        val baseAction: SmartspaceAction? = target.baseAction
+        val dismissIntent =
+            baseAction?.extras?.getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY) as Intent?
 
         val isActive =
             when {
                 !mediaFlags.isPersistentSsCardEnabled() -> true
-                target.baseAction == null -> true
-                else ->
-                    target.baseAction.extras.getString(EXTRA_KEY_TRIGGER_SOURCE) !=
-                        EXTRA_VALUE_TRIGGER_PERIODIC
+                baseAction == null -> true
+                else -> {
+                    val triggerSource = baseAction.extras?.getString(EXTRA_KEY_TRIGGER_SOURCE)
+                    triggerSource != EXTRA_VALUE_TRIGGER_PERIODIC
+                }
             }
 
         packageName(target)?.let {
