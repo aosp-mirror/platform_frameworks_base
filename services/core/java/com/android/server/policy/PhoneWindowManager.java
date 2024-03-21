@@ -1914,6 +1914,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             accessibilityManager.performSystemAction(
                     AccessibilityService.GLOBAL_ACTION_ACCESSIBILITY_ALL_APPS);
         }
+        dismissKeyboardShortcutsMenu();
     }
 
     private void toggleNotificationPanel() {
@@ -3483,13 +3484,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.TAKE_SCREENSHOT);
-                    return true;
-                }
-                break;
-            case KeyEvent.KEYCODE_T:
-                if (firstDown && event.isMetaPressed()) {
-                    toggleTaskbar();
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.TOGGLE_TASKBAR);
                     return true;
                 }
                 break;
