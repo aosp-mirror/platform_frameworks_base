@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.notification.row.wrapper
 
 import android.graphics.drawable.AnimatedImageDrawable
 import android.testing.AndroidTestingRunner
-import android.testing.TestableLooper
-import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.MessagingGroup
@@ -39,7 +37,6 @@ import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-@RunWithLooper
 class NotificationMessagingTemplateViewWrapperTest : SysuiTestCase() {
 
     private lateinit var mRow: ExpandableNotificationRow
@@ -47,8 +44,7 @@ class NotificationMessagingTemplateViewWrapperTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        allowTestableLooperAsMainThread()
-        helper = NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
+        helper = NotificationTestHelper(mContext, mDependency)
         mRow = helper.createRow()
     }
 

@@ -39,7 +39,6 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-@RunWithLooper
 public class NotificationViewWrapperTest extends SysuiTestCase {
 
     private View mView;
@@ -48,13 +47,9 @@ public class NotificationViewWrapperTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
-        allowTestableLooperAsMainThread();
         mView = mock(View.class);
         when(mView.getContext()).thenReturn(mContext);
-        NotificationTestHelper helper = new NotificationTestHelper(
-                mContext,
-                mDependency,
-                TestableLooper.get(this));
+        NotificationTestHelper helper = new NotificationTestHelper(mContext, mDependency);
         mRow = helper.createRow();
         mNotificationViewWrapper = new TestableNotificationViewWrapper(mContext, mView, mRow);
     }
