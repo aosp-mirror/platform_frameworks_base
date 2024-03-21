@@ -23,13 +23,16 @@ import android.annotation.ColorRes;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
+import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
@@ -37,6 +40,7 @@ import android.widget.ImageView;
 import android.window.TaskConstants;
 
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.SurfaceUtils;
 
 import java.util.function.Supplier;
 
@@ -45,19 +49,36 @@ import java.util.function.Supplier;
  */
 public class ResizeVeil {
     private static final int RESIZE_ALPHA_DURATION = 100;
+
+    private static final int VEIL_CONTAINER_LAYER = TaskConstants.TASK_CHILD_LAYER_RESIZE_VEIL;
+    /** The background is a child of the veil container layer and goes at the bottom. */
+    private static final int VEIL_BACKGROUND_LAYER = 0;
+    /** The icon is a child of the veil container layer and goes in front of the background. */
+    private static final int VEIL_ICON_LAYER = 1;
+
     private final Context mContext;
     private final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
     private final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
+    private final SurfaceSession mSurfaceSession = new SurfaceSession();
     private final Drawable mAppIcon;
     private ImageView mIconView;
+    private int mIconSize;
     private SurfaceControl mParentSurface;
+
+    /** A container surface to host the veil background and icon child surfaces. */
     private SurfaceControl mVeilSurface;
+    /** A color surface for the veil background. */
+    private SurfaceControl mBackgroundSurface;
+    /** A surface that hosts a windowless window with the app icon. */
+    private SurfaceControl mIconSurface;
+
     private final RunningTaskInfo mTaskInfo;
     private SurfaceControlViewHost mViewHost;
     private final Display mDisplay;
     private ValueAnimator mVeilAnimator;
 
     public ResizeVeil(Context context, Drawable appIcon, RunningTaskInfo taskInfo,
+            SurfaceControl taskSurface,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier, Display display,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier) {
         mContext = context;
@@ -65,6 +86,7 @@ public class ResizeVeil {
         mSurfaceControlBuilderSupplier = surfaceControlBuilderSupplier;
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
         mTaskInfo = taskInfo;
+        mParentSurface = taskSurface;
         mDisplay = display;
         setupResizeVeil();
     }
@@ -73,34 +95,44 @@ public class ResizeVeil {
      * Create the veil in its default invisible state.
      */
     private void setupResizeVeil() {
-        SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
-        final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
-        mVeilSurface = builder
-                .setName("Resize veil of Task= " + mTaskInfo.taskId)
+        mVeilSurface = mSurfaceControlBuilderSupplier.get()
                 .setContainerLayer()
+                .setName("Resize veil of Task=" + mTaskInfo.taskId)
+                .setHidden(true)
+                .setParent(mParentSurface)
+                .setCallsite("ResizeVeil#setupResizeVeil")
                 .build();
-        View v = LayoutInflater.from(mContext)
-                .inflate(R.layout.desktop_mode_resize_veil, null);
+        mBackgroundSurface = SurfaceUtils.makeColorLayer(mVeilSurface,
+                "Resize veil background of Task=" + mTaskInfo.taskId, mSurfaceSession);
+        mIconSurface = mSurfaceControlBuilderSupplier.get()
+                .setName("Resize veil icon of Task= " + mTaskInfo.taskId)
+                .setContainerLayer()
+                .setParent(mVeilSurface)
+                .setHidden(true)
+                .setCallsite("ResizeVeil#setupResizeVeil")
+                .build();
 
-        t.setPosition(mVeilSurface, 0, 0)
-            .setLayer(mVeilSurface, TaskConstants.TASK_CHILD_LAYER_RESIZE_VEIL)
-            .apply();
-        Rect taskBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
+        mIconSize = mContext.getResources()
+                .getDimensionPixelSize(R.dimen.desktop_mode_resize_veil_icon_size);
+        final View root = LayoutInflater.from(mContext)
+                .inflate(R.layout.desktop_mode_resize_veil, null /* root */);
+        mIconView = root.findViewById(R.id.veil_application_icon);
+        mIconView.setImageDrawable(mAppIcon);
+
         final WindowManager.LayoutParams lp =
-                new WindowManager.LayoutParams(taskBounds.width(),
-                        taskBounds.height(),
+                new WindowManager.LayoutParams(
+                        mIconSize,
+                        mIconSize,
                         WindowManager.LayoutParams.TYPE_APPLICATION,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                         PixelFormat.TRANSPARENT);
-        lp.setTitle("Resize veil of Task=" + mTaskInfo.taskId);
+        lp.setTitle("Resize veil icon window of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
-        WindowlessWindowManager windowManager = new WindowlessWindowManager(mTaskInfo.configuration,
-                mVeilSurface, null /* hostInputToken */);
-        mViewHost = new SurfaceControlViewHost(mContext, mDisplay, windowManager, "ResizeVeil");
-        mViewHost.setView(v, lp);
 
-        mIconView = mViewHost.getView().findViewById(R.id.veil_application_icon);
-        mIconView.setImageDrawable(mAppIcon);
+        final WindowlessWindowManager wwm = new WindowlessWindowManager(mTaskInfo.configuration,
+                mIconSurface, null /* hostInputToken */);
+        mViewHost = new SurfaceControlViewHost(mContext, mDisplay, wwm, "ResizeVeil");
+        mViewHost.setView(root, lp);
     }
 
     /**
@@ -120,46 +152,74 @@ public class ResizeVeil {
             mParentSurface = parentSurface;
         }
 
-        int backgroundColorId = getBackgroundColorId();
-        mViewHost.getView().setBackgroundColor(mContext.getColor(backgroundColorId));
+        t.show(mVeilSurface);
+        t.setLayer(mVeilSurface, VEIL_CONTAINER_LAYER);
+        t.setLayer(mIconSurface, VEIL_ICON_LAYER);
+        t.setLayer(mBackgroundSurface, VEIL_BACKGROUND_LAYER);
+        t.setColor(mBackgroundSurface,
+                Color.valueOf(mContext.getColor(getBackgroundColorId())).getComponents());
 
         relayout(taskBounds, t);
         if (fadeIn) {
             cancelAnimation();
+            final SurfaceControl.Transaction veilAnimT = mSurfaceControlTransactionSupplier.get();
             mVeilAnimator = new ValueAnimator();
             mVeilAnimator.setFloatValues(0f, 1f);
             mVeilAnimator.setDuration(RESIZE_ALPHA_DURATION);
             mVeilAnimator.addUpdateListener(animation -> {
-                t.setAlpha(mVeilSurface, mVeilAnimator.getAnimatedFraction());
-                t.apply();
+                veilAnimT.setAlpha(mBackgroundSurface, mVeilAnimator.getAnimatedFraction());
+                veilAnimT.apply();
             });
             mVeilAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
+                public void onAnimationStart(Animator animation) {
+                    veilAnimT.show(mBackgroundSurface)
+                            .setAlpha(mBackgroundSurface, 0)
+                            .apply();
+                }
+
+                @Override
                 public void onAnimationEnd(Animator animation) {
-                    t.setAlpha(mVeilSurface, 1);
-                    t.apply();
+                    veilAnimT.setAlpha(mBackgroundSurface, 1).apply();
                 }
             });
 
+            final SurfaceControl.Transaction iconAnimT = mSurfaceControlTransactionSupplier.get();
             final ValueAnimator iconAnimator = new ValueAnimator();
             iconAnimator.setFloatValues(0f, 1f);
             iconAnimator.setDuration(RESIZE_ALPHA_DURATION);
             iconAnimator.addUpdateListener(animation -> {
-                mIconView.setAlpha(animation.getAnimatedFraction());
+                iconAnimT.setAlpha(mIconSurface, animation.getAnimatedFraction());
+                iconAnimT.apply();
             });
+            iconAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    iconAnimT.show(mIconSurface)
+                            .setAlpha(mIconSurface, 0)
+                            .apply();
+                }
 
-            t.show(mVeilSurface)
-                    .addTransactionCommittedListener(
-                            mContext.getMainExecutor(), () -> {
-                                mVeilAnimator.start();
-                                iconAnimator.start();
-                            })
-                    .setAlpha(mVeilSurface, 0);
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    iconAnimT.setAlpha(mIconSurface, 1).apply();
+                }
+            });
+            // Let the animators show it with the correct alpha value once the animation starts.
+            t.hide(mIconSurface);
+            t.hide(mBackgroundSurface);
+            t.apply();
+
+            mVeilAnimator.start();
+            iconAnimator.start();
         } else {
-            // Show the veil immediately at full opacity.
-            t.show(mVeilSurface).setAlpha(mVeilSurface, 1);
+            // Show the veil immediately.
+            t.show(mIconSurface);
+            t.show(mBackgroundSurface);
+            t.setAlpha(mIconSurface, 1);
+            t.setAlpha(mBackgroundSurface, 1);
+            t.apply();
         }
-        mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);
     }
 
     /**
@@ -175,8 +235,9 @@ public class ResizeVeil {
      * @param newBounds bounds to update veil to.
      */
     private void relayout(Rect newBounds, SurfaceControl.Transaction t) {
-        mViewHost.relayout(newBounds.width(), newBounds.height());
         t.setWindowCrop(mVeilSurface, newBounds.width(), newBounds.height());
+        final PointF iconPosition = calculateAppIconPosition(newBounds);
+        t.setPosition(mIconSurface, iconPosition.x, iconPosition.y);
         t.setPosition(mParentSurface, newBounds.left, newBounds.top);
         t.setWindowCrop(mParentSurface, newBounds.width(), newBounds.height());
     }
@@ -204,7 +265,7 @@ public class ResizeVeil {
             mVeilAnimator.end();
         }
         relayout(newBounds, t);
-        mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);
+        t.apply();
     }
 
     /**
@@ -217,14 +278,16 @@ public class ResizeVeil {
         mVeilAnimator.setDuration(RESIZE_ALPHA_DURATION);
         mVeilAnimator.addUpdateListener(animation -> {
             SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
-            t.setAlpha(mVeilSurface, 1 - mVeilAnimator.getAnimatedFraction());
+            t.setAlpha(mBackgroundSurface, 1 - mVeilAnimator.getAnimatedFraction());
+            t.setAlpha(mIconSurface, 1 - mVeilAnimator.getAnimatedFraction());
             t.apply();
         });
         mVeilAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
-                t.hide(mVeilSurface);
+                t.hide(mBackgroundSurface);
+                t.hide(mIconSurface);
                 t.apply();
             }
         });
@@ -240,6 +303,11 @@ public class ResizeVeil {
         } else {
             return R.color.desktop_mode_resize_veil_light;
         }
+    }
+
+    private PointF calculateAppIconPosition(Rect parentBounds) {
+        return new PointF((float) parentBounds.width() / 2 - (float) mIconSize / 2,
+                (float) parentBounds.height() / 2 - (float) mIconSize / 2);
     }
 
     private void cancelAnimation() {
@@ -260,11 +328,19 @@ public class ResizeVeil {
             mViewHost.release();
             mViewHost = null;
         }
+        final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        if (mBackgroundSurface != null) {
+            t.remove(mBackgroundSurface);
+            mBackgroundSurface = null;
+        }
+        if (mIconSurface != null) {
+            t.remove(mIconSurface);
+            mIconSurface = null;
+        }
         if (mVeilSurface != null) {
-            final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
             t.remove(mVeilSurface);
             mVeilSurface = null;
-            t.apply();
         }
+        t.apply();
     }
 }
