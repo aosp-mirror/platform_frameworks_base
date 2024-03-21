@@ -1,10 +1,8 @@
 # Ravenwood
 
-Ravenwood is a lightweight unit testing environment for Android platform code that runs on the host.
+Ravenwood is an officially-supported lightweight unit testing environment for Android platform code that runs on the host.
 
 Ravenwood’s focus on Android platform use-cases, improved maintainability, and device consistency distinguishes it from Robolectric, which remains a popular choice for app testing.
-
-> **Note:** Active development of Ravenwood has been paused as of March 2024.  Existing Ravenwood tests will continue running, but support has moved to a self-service model.
 
 ## Background
 
