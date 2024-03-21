@@ -2,6 +2,7 @@ package: "android.appwidget.flags"
 
 flag {
   name: "generated_previews"
+  is_exported: true
   namespace: "app_widgets"
   description: "Enable support for generated previews in AppWidgetManager"
   bug: "306546610"
@@ -26,6 +27,7 @@ flag {
 
 flag {
   name: "draw_data_parcel"
+  is_exported: true
   namespace: "app_widgets"
   description: "Enable support for transporting draw instructions as data parcel"
   bug: "286130467"

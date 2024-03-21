@@ -18,6 +18,7 @@ flag {
 
 flag {
   name: "get_op_id_crypto_object"
+  is_exported: true
   namespace: "biometrics_framework"
   description: "Feature flag for adding a get operation id api to CryptoObject."
   bug: "307601768"
@@ -25,8 +26,8 @@ flag {
 
 flag {
   name: "custom_biometric_prompt"
+  is_exported: true
   namespace: "biometrics_framework"
   description: "Feature flag for adding a custom content view API to BiometricPrompt.Builder."
   bug: "302735104"
 }
-

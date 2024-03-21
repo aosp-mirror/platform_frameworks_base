@@ -2,6 +2,7 @@ package: "android.app.ondeviceintelligence.flags"
 
 flag {
     name: "enable_on_device_intelligence"
+    is_exported: true
     namespace: "ondeviceintelligence"
     description: "Make methods on OnDeviceIntelligenceManager available for local inference."
     bug: "304755128"

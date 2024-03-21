@@ -2,6 +2,7 @@ package: "com.android.server.power.optimization"
 
 flag {
     name: "power_monitor_api"
+    is_exported: true
     namespace: "backstage_power"
     description: "Feature flag for ODPM API"
     bug: "295027807"

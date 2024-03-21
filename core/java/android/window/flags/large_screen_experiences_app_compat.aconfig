@@ -18,6 +18,7 @@ flag {
 
 flag {
   name: "density_390_api"
+  is_exported: true
   namespace: "large_screen_experiences_app_compat"
   description: "Whether the API DisplayMetrics.DENSITY_390 is available"
   bug: "297550533"
@@ -26,6 +27,7 @@ flag {
 
 flag {
   name: "app_compat_properties_api"
+  is_exported: true
   namespace: "large_screen_experiences_app_compat"
   description: "Whether app compat property APIs are public. Which includes: /n"
                  "WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE,/n"

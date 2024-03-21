@@ -10,6 +10,7 @@ flag {
 
 flag {
     name: "editorinfo_handwriting_enabled"
+    is_exported: true
     namespace: "input_method"
     description: "Feature flag for adding EditorInfo#mStylusHandwritingEnabled"
     bug: "293898187"
@@ -18,6 +19,7 @@ flag {
 
 flag {
     name: "imm_userhandle_hostsidetests"
+    is_exported: true
     namespace: "input_method"
     description: "Feature flag for replacing UserIdInt with UserHandle in some helper IMM functions"
     bug: "301713309"
@@ -26,6 +28,7 @@ flag {
 
 flag {
     name: "concurrent_input_methods"
+    is_exported: true
     namespace: "input_method"
     description: "Feature flag for concurrent multi-session IME"
     bug: "284527000"
@@ -34,6 +37,7 @@ flag {
 
 flag {
     name: "home_screen_handwriting_delegator"
+    is_exported: true
     namespace: "input_method"
     description: "Feature flag for supporting stylus handwriting delegation from RemoteViews on the home screen"
     bug: "279959705"
@@ -49,6 +53,7 @@ flag {
 
 flag {
     name: "use_zero_jank_proxy"
+    is_exported: true
     namespace: "input_method"
     description: "Feature flag for using a proxy that uses async calls to achieve zero jank for IMMS calls."
     bug: "293640003"
@@ -57,6 +62,7 @@ flag {
 
 flag {
     name: "ime_switcher_revamp"
+    is_exported: true
     namespace: "input_method"
     description: "Feature flag for revamping the Input Method Switcher menu"
     bug: "311791923"
@@ -73,6 +79,7 @@ flag {
 
 flag {
     name: "connectionless_handwriting"
+    is_exported: true
     namespace: "input_method"
     description: "Feature flag for connectionless stylus handwriting APIs"
     bug: "300979854"

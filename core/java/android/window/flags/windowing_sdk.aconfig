@@ -43,6 +43,7 @@ flag {
 flag {
     namespace: "windowing_sdk"
     name: "untrusted_embedding_any_app_permission"
+    is_exported: true
     description: "Feature flag to enable the permission to embed any app in untrusted mode."
     bug: "293647332"
     is_fixed_read_only: true
@@ -59,6 +60,7 @@ flag {
 flag {
     namespace: "windowing_sdk"
     name: "untrusted_embedding_state_sharing"
+    is_exported: true
     description: "Feature flag to enable state sharing in untrusted embedding when apps opt in."
     bug: "293647332"
     is_fixed_read_only: true
@@ -74,6 +76,7 @@ flag {
 flag {
     namespace: "windowing_sdk"
     name: "cover_display_opt_in"
+    is_exported: true
     description: "Properties to allow apps and activities to opt-in to cover display rendering"
     bug: "312530526"
     is_fixed_read_only: true
