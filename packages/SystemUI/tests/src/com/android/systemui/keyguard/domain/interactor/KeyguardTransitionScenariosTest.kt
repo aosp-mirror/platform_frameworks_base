@@ -34,7 +34,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -358,7 +358,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN biometrics succeeds with wake and unlock from dream mode
             keyguardRepository.setBiometricUnlockState(
-                BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
+                BiometricUnlockMode.WAKE_AND_UNLOCK_FROM_DREAM
             )
             runCurrent()
 
@@ -535,7 +535,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN biometrics succeeds with wake and unlock mode
             powerInteractor.setAwakeForTest()
-            keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+            keyguardRepository.setBiometricUnlockState(BiometricUnlockMode.WAKE_AND_UNLOCK)
             advanceTimeBy(60L)
 
             assertThat(transitionRepository)

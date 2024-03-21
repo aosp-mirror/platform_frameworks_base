@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
@@ -165,7 +165,7 @@ constructor(
             ) { isDozing, biometricUnlockState ->
                 // AOD is visible if we're dozing, unless we are wake and unlocking (where we go
                 // directly from AOD to unlocked while dozing).
-                isDozing && !BiometricUnlockModel.isWakeAndUnlock(biometricUnlockState)
+                isDozing && !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
 

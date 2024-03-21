@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
-import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.biometrics.AuthController
@@ -31,6 +30,7 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DismissAction
@@ -169,19 +169,19 @@ interface KeyguardRepository {
     /** Observable for the [StatusBarState] */
     val statusBarState: StateFlow<StatusBarState>
 
-    /** Observable for biometric unlock modes */
+    /** Observable for biometric unlock state which includes the mode and unlock source */
     val biometricUnlockState: Flow<BiometricUnlockModel>
 
-    fun setBiometricUnlockState(value: BiometricUnlockModel)
+    fun setBiometricUnlockState(
+        unlockMode: BiometricUnlockMode,
+        unlockSource: BiometricUnlockSource?,
+    )
 
     /** Approximate location on the screen of the fingerprint sensor. */
     val fingerprintSensorLocation: Flow<Point?>
 
     /** Approximate location on the screen of the face unlock sensor/front facing camera. */
     val faceSensorLocation: Flow<Point?>
-
-    /** Source of the most recent biometric unlock, such as fingerprint or face. */
-    val biometricUnlockSource: Flow<BiometricUnlockSource?>
 
     /** Whether quick settings or quick-quick settings is visible. */
     val isQuickSettingsVisible: Flow<Boolean>
@@ -597,11 +597,15 @@ constructor(
                 statusBarStateIntToObject(statusBarStateController.state)
             )
 
-    private val _biometricUnlockState = MutableStateFlow(BiometricUnlockModel.NONE)
+    private val _biometricUnlockState: MutableStateFlow<BiometricUnlockModel> =
+        MutableStateFlow(BiometricUnlockModel(BiometricUnlockMode.NONE, null))
     override val biometricUnlockState = _biometricUnlockState.asStateFlow()
 
-    override fun setBiometricUnlockState(value: BiometricUnlockModel) {
-        _biometricUnlockState.value = value
+    override fun setBiometricUnlockState(
+        unlockMode: BiometricUnlockMode,
+        unlockSource: BiometricUnlockSource?,
+    ) {
+        _biometricUnlockState.value = BiometricUnlockModel(unlockMode, unlockSource)
     }
 
     override val fingerprintSensorLocation: Flow<Point?> = conflatedCallbackFlow {
@@ -627,27 +631,6 @@ constructor(
     }
 
     override val faceSensorLocation: Flow<Point?> = facePropertyRepository.sensorLocation
-
-    override val biometricUnlockSource: Flow<BiometricUnlockSource?> = conflatedCallbackFlow {
-        val callback =
-            object : KeyguardUpdateMonitorCallback() {
-                override fun onBiometricAuthenticated(
-                    userId: Int,
-                    biometricSourceType: BiometricSourceType?,
-                    isStrongBiometric: Boolean
-                ) {
-                    trySendWithFailureLogging(
-                        BiometricUnlockSource.fromBiometricSourceType(biometricSourceType),
-                        TAG,
-                        "onBiometricAuthenticated"
-                    )
-                }
-            }
-
-        keyguardUpdateMonitor.registerCallback(callback)
-        trySendWithFailureLogging(null, TAG, "initial value")
-        awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
-    }
 
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()

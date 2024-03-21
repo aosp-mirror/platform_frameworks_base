@@ -412,10 +412,10 @@ constructor(
         ) {
             // Reuse the biometric wake-and-unlock transition if we dismiss keyguard from a
             // pulse.
-            // TODO: Factor this transition out of BiometricUnlockController.
+            // TODO (b/338578036): Factor this transition out of BiometricUnlockController.
             biometricUnlockControllerLazy
                 .get()
-                .startWakeAndUnlock(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING)
+                .startWakeAndUnlock(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING, null)
         }
         if (keyguardStateController.isShowing) {
             statusBarKeyguardViewManagerLazy

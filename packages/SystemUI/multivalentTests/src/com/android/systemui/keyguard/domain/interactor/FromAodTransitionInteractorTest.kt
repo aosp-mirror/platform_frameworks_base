@@ -42,8 +42,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
-import com.android.systemui.keyguard.data.repository.keyguardRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
@@ -97,7 +96,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
                 to = KeyguardState.AOD,
                 testScope
             )
-            kosmos.keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.NONE)
+            kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
             reset(transitionRepository)
         }
     }
@@ -276,7 +275,9 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testWakeAndUnlock_transitionsToGone_onlyAfterDismissCallPostWakeup() =
         testScope.runTest {
-            kosmos.keyguardRepository.setBiometricUnlockState(BiometricUnlockModel.WAKE_AND_UNLOCK)
+            kosmos.fakeKeyguardRepository.setBiometricUnlockState(
+                BiometricUnlockMode.WAKE_AND_UNLOCK
+            )
             powerInteractor.setAwakeForTest()
             runCurrent()
 

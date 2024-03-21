@@ -24,7 +24,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -72,7 +72,8 @@ constructor(
             keyguardInteractor.isKeyguardDismissible,
             keyguardInteractor.biometricUnlockState,
         ) { isKeyguardShowing, isKeyguardDismissible, biometricUnlockState ->
-            (isWakeAndUnlock(biometricUnlockState) || (!isKeyguardShowing && isKeyguardDismissible))
+            (isWakeAndUnlock(biometricUnlockState.mode) ||
+                (!isKeyguardShowing && isKeyguardDismissible))
         }
 
     /**
@@ -110,11 +111,11 @@ constructor(
                                 // receiving a call to #dismissAod() shortly when the authentication
                                 // completes.
                                 !maybeStartTransitionToOccludedOrInsecureCamera() &&
-                                    !isWakeAndUnlock(biometricUnlockState) &&
+                                    !isWakeAndUnlock(biometricUnlockState.mode) &&
                                     !primaryBouncerShowing
                             } else {
                                 !isKeyguardOccludedLegacy &&
-                                    !isWakeAndUnlock(biometricUnlockState) &&
+                                    !isWakeAndUnlock(biometricUnlockState.mode) &&
                                     !primaryBouncerShowing
                             }
 
