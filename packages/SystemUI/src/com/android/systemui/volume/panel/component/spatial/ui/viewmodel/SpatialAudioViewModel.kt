@@ -50,7 +50,11 @@ constructor(
 
     val spatialAudioButton: StateFlow<ButtonViewModel?> =
         interactor.isEnabled
-            .map { it.toViewModel(true).toButtonViewModel() }
+            .map {
+                it.toViewModel(true)
+                    .toButtonViewModel()
+                    .copy(label = context.getString(R.string.volume_panel_spatial_audio_title))
+            }
             .stateIn(scope, SharingStarted.Eagerly, null)
 
     val isAvailable: StateFlow<Boolean> =
