@@ -1651,6 +1651,17 @@ public final class DisplayDeviceConfigTest {
                 + "  <brightness>0.1</brightness>\n"
                 + "  <brightness>0.5</brightness>\n"
                 + "  <brightness>1.0</brightness>\n"
+                + " <luxToMinimumNitsMap>\n"
+                + "     <point>\n"
+                + "         <value>10</value> <nits>0.3</nits>\n"
+                + "     </point>\n"
+                + "     <point>\n"
+                + "         <value>50</value> <nits>0.7</nits>\n"
+                + "     </point>\n"
+                + "     <point>\n"
+                + "         <value>100</value> <nits>1.0</nits>\n"
+                + "     </point>\n"
+                + " </luxToMinimumNitsMap>\n"
                 + "</lowBrightness>";
     }
 

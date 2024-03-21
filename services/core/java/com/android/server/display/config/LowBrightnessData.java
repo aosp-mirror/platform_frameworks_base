@@ -66,11 +66,13 @@ public class LowBrightnessData {
      * Spline, mapping between backlight and brightness
      */
     public final Spline mBacklightToBrightness;
+    public final Spline mMinLuxToNits;
 
     @VisibleForTesting
     public LowBrightnessData(float transitionPoint, float[] nits,
             float[] backlight, float[] brightness, Spline backlightToNits,
-            Spline nitsToBacklight, Spline brightnessToBacklight, Spline backlightToBrightness) {
+            Spline nitsToBacklight, Spline brightnessToBacklight, Spline backlightToBrightness,
+            Spline minLuxToNits) {
         mTransitionPoint = transitionPoint;
         mNits = nits;
         mBacklight = backlight;
@@ -79,6 +81,7 @@ public class LowBrightnessData {
         mNitsToBacklight = nitsToBacklight;
         mBrightnessToBacklight = brightnessToBacklight;
         mBacklightToBrightness = backlightToBrightness;
+        mMinLuxToNits = minLuxToNits;
     }
 
     @Override
@@ -92,6 +95,7 @@ public class LowBrightnessData {
                 + ", mNitsToBacklight: " + mNitsToBacklight
                 + ", mBrightnessToBacklight: " + mBrightnessToBacklight
                 + ", mBacklightToBrightness: " + mBacklightToBrightness
+                + ", mMinLuxToNits: " + mMinLuxToNits
                 + "} ";
     }
 
@@ -132,11 +136,40 @@ public class LowBrightnessData {
             brightness[i] = brightnessList.get(i);
         }
 
+        final NitsMap map = lbm.getLuxToMinimumNitsMap();
+        if (map == null) {
+            Slog.e(TAG, "Invalid min lux to nits mapping");
+            return null;
+        }
+        final List<Point> points = map.getPoint();
+        final int size = points.size();
+
+        float[] minLux = new float[size];
+        float[] minNits = new float[size];
+
+        int i = 0;
+        for (Point point : points) {
+            minLux[i] = point.getValue().floatValue();
+            minNits[i] = point.getNits().floatValue();
+            if (i > 0) {
+                if (minLux[i] < minLux[i - 1]) {
+                    Slog.e(TAG, "minLuxToNitsSpline must be non-decreasing, ignoring rest "
+                            + " of configuration. Value: " + minLux[i] + " < " + minLux[i - 1]);
+                }
+                if (minNits[i] < minNits[i - 1]) {
+                    Slog.e(TAG, "minLuxToNitsSpline must be non-decreasing, ignoring rest "
+                            + " of configuration. Nits: " + minNits[i] + " < " + minNits[i - 1]);
+                }
+            }
+            ++i;
+        }
+
         return new LowBrightnessData(transitionPoints, nits, backlight, brightness,
                 Spline.createSpline(backlight, nits),
                 Spline.createSpline(nits, backlight),
                 Spline.createSpline(brightness, backlight),
-                Spline.createSpline(backlight, brightness)
-                );
+                Spline.createSpline(backlight, brightness),
+                Spline.createSpline(minLux, minNits)
+        );
     }
 }

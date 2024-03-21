@@ -48,4 +48,10 @@ public interface BrightnessStateModifier {
      * @param ambientLux current debounced lux.
      */
     void onAmbientLuxChange(float ambientLux);
+
+    /**
+     * Sets the autobrightness state for clampers that need to be aware of the state.
+     * @param state autobrightness state
+     */
+    void setAutoBrightnessState(int state);
 }
