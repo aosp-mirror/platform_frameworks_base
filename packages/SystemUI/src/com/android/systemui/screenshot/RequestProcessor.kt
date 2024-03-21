@@ -18,14 +18,9 @@ package com.android.systemui.screenshot
 
 import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import com.android.systemui.dagger.SysUISingleton
-import javax.inject.Inject
 
 /** Implementation of [ScreenshotRequestProcessor] */
-@SysUISingleton
-class RequestProcessor
-@Inject
-constructor(
+class RequestProcessor(
     private val capture: ImageCapture,
     private val policy: ScreenshotPolicy,
 ) : ScreenshotRequestProcessor {
