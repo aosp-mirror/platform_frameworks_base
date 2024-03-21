@@ -15,6 +15,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FILL_IN_COMPONENT
 import android.graphics.Rect
+import android.os.Bundle
 import android.os.IBinder
 import android.os.SystemClock
 import android.view.SurfaceControl
@@ -124,7 +125,7 @@ class DragToDesktopTransitionHandler(
                 options.toBundle()
         )
         val wct = WindowContainerTransaction()
-        wct.sendPendingIntent(pendingIntent, launchHomeIntent, options.toBundle())
+        wct.sendPendingIntent(pendingIntent, launchHomeIntent, Bundle())
         val startTransitionToken = transitions
                 .startTransition(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP, wct, this)
 
