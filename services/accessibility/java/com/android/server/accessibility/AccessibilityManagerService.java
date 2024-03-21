@@ -2703,13 +2703,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         Map<ComponentName, AccessibilityServiceConnection> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
         boolean isUnlockingOrUnlocked = mUmi.isUserUnlockingOrUnlocked(userState.mUserId);
-        Set<ComponentName> installedComponentNames = new HashSet<>();
 
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
             AccessibilityServiceInfo installedService = userState.mInstalledServices.get(i);
             ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
-            installedComponentNames.add(componentName);
 
             AccessibilityServiceConnection service = componentNameToServiceMap.get(componentName);
 
@@ -2769,28 +2767,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             audioManager.setAccessibilityServiceUids(mTempIntArray);
         }
         mActivityTaskManagerService.setAccessibilityServiceUids(mTempIntArray);
-        final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
-        boolean anyServiceRemoved = false;
-        while (it.hasNext()) {
-            final ComponentName comp = it.next();
-            if (!installedComponentNames.contains(comp)) {
-                it.remove();
-                userState.mTouchExplorationGrantedServices.remove(comp);
-                anyServiceRemoved = true;
-            }
-        }
-        if (anyServiceRemoved) {
-            // Update the enabled services setting.
-            persistComponentNamesToSettingLocked(
-                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                    userState.mEnabledServices,
-                    userState.mUserId);
-            // Update the touch exploration granted services setting.
-            persistComponentNamesToSettingLocked(
-                    Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                    userState.mTouchExplorationGrantedServices,
-                    userState.mUserId);
-        }
         updateAccessibilityEnabledSettingLocked(userState);
     }
 
