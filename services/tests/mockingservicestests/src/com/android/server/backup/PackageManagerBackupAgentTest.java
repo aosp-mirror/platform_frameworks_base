@@ -16,14 +16,19 @@
 
 package com.android.server.backup;
 
-import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
-
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
+import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.Presubmit;
@@ -38,6 +43,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -51,22 +58,30 @@ import java.util.Optional;
 public class PackageManagerBackupAgentTest {
 
     private static final String EXISTING_PACKAGE_NAME = "com.android.wallpaperbackup";
+    private static final int EXISTING_PACKAGE_VERSION = 1;
+
     private static final int USER_ID = 0;
 
     @Rule public TemporaryFolder folder = new TemporaryFolder();
 
-    private PackageManager mPackageManager;
+    @Mock private PackageManager mPackageManager;
+
     private PackageManagerBackupAgent mPackageManagerBackupAgent;
     private ImmutableList<PackageInfo> mPackages;
     private File mBackupData, mOldState, mNewState;
 
     @Before
     public void setUp() throws Exception {
-        mPackageManager = getApplicationContext().getPackageManager();
+        MockitoAnnotations.initMocks(this);
 
         PackageInfo existingPackageInfo =
-                mPackageManager.getPackageInfoAsUser(
-                        EXISTING_PACKAGE_NAME, PackageManager.GET_SIGNING_CERTIFICATES, USER_ID);
+                createPackage(EXISTING_PACKAGE_NAME, EXISTING_PACKAGE_VERSION);
+        Signature sig = new Signature(new byte[256]);
+        existingPackageInfo.signingInfo =
+                new SigningInfo(new SigningDetails(new Signature[] {sig}, 1, null, null));
+        when(mPackageManager.getPackageInfoAsUser(eq(EXISTING_PACKAGE_NAME), anyInt(), anyInt()))
+                .thenReturn(existingPackageInfo);
+
         mPackages = ImmutableList.of(existingPackageInfo);
         mPackageManagerBackupAgent =
                 new PackageManagerBackupAgent(mPackageManager, mPackages, USER_ID);
