@@ -46,7 +46,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApexStagedEvent;
-import android.content.pm.Flags;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageManager;
@@ -663,9 +662,7 @@ public final class DexOptHelper {
             }
         }, new IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED));
 
-        if (Flags.useArtServiceV2()) {
-            StagedApexObserver.registerForStagedApexUpdates(artManager);
-        }
+        StagedApexObserver.registerForStagedApexUpdates(artManager);
     }
 
     /**
@@ -750,9 +747,7 @@ public final class DexOptHelper {
                             & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)
                             != 0;
             /*@DexoptFlags*/ int extraFlags =
-                    ignoreDexoptProfile && Flags.useArtServiceV2()
-                            ? ArtFlags.FLAG_IGNORE_PROFILE
-                            : 0;
+                    ignoreDexoptProfile ? ArtFlags.FLAG_IGNORE_PROFILE : 0;
             DexoptParams params = dexoptOptions.convertToDexoptParams(extraFlags);
             DexoptResult dexOptResult = getArtManagerLocal().dexoptPackage(
                     snapshot, packageName, params);
