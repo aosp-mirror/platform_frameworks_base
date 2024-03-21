@@ -37,8 +37,6 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.selectedUserInteractor
 import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertTrue
-import junit.framework.Assert.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
@@ -141,73 +139,6 @@ class FromPrimaryBouncerTransitionInteractorTest : SysuiTestCase() {
                 ),
                 values
             )
-        }
-
-    @Test
-    fun testSurfaceBehindModel() =
-        testScope.runTest {
-            val values by collectValues(underTest.surfaceBehindModel)
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.LOCKSCREEN,
-                )
-            )
-            runCurrent()
-
-            assertEquals(
-                listOf(
-                    null, // PRIMARY_BOUNCER -> LOCKSCREEN does not have specific view params.
-                ),
-                values
-            )
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GONE,
-                )
-            )
-            runCurrent()
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GONE,
-                    value = 0.01f,
-                )
-            )
-            runCurrent()
-
-            transitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
-                    from = KeyguardState.PRIMARY_BOUNCER,
-                    to = KeyguardState.GONE,
-                    value = 0.99f,
-                )
-            )
-            runCurrent()
-
-            assertEquals(3, values.size)
-            val model1percent = values[1]
-            val model99percent = values[2]
-
-            try {
-                // We should initially have an alpha of 0f when unlocking, so the surface is not
-                // visible
-                // while lockscreen UI animates out.
-                assertEquals(0f, model1percent!!.alpha)
-
-                // By the end it should probably be visible.
-                assertTrue(model99percent!!.alpha > 0f)
-            } catch (e: NullPointerException) {
-                fail("surfaceBehindModel was unexpectedly null.")
-            }
         }
 
     @Test

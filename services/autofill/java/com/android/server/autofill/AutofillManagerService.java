@@ -718,7 +718,9 @@ public final class AutofillManagerService
                         + ", mPccUseFallbackDetection=" + mPccUseFallbackDetection
                         + ", mPccProviderHints=" + mPccProviderHints
                         + ", mAutofillCredmanIntegrationEnabled="
-                        + mAutofillCredmanIntegrationEnabled);
+                        + mAutofillCredmanIntegrationEnabled
+                        + ", mIsFillFieldsFromCurrentSessionOnly="
+                        + mIsFillFieldsFromCurrentSessionOnly);
             }
         }
     }

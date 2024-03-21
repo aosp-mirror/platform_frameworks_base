@@ -19,7 +19,6 @@ package com.android.settingslib.volume.data.repository
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.OnCommunicationDeviceChangedListener
-import androidx.concurrent.futures.DirectExecutor
 import com.android.internal.util.ConcurrentUtils
 import com.android.settingslib.volume.shared.AudioManagerEventsReceiver
 import com.android.settingslib.volume.shared.model.AudioManagerEvent
@@ -34,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
@@ -108,8 +108,8 @@ class AudioRepositoryImpl(
             callbackFlow {
                     val listener = OnCommunicationDeviceChangedListener { trySend(Unit) }
                     audioManager.addOnCommunicationDeviceChangedListener(
-                        DirectExecutor.INSTANCE,
-                        listener
+                        ConcurrentUtils.DIRECT_EXECUTOR,
+                        listener,
                     )
 
                     awaitClose { audioManager.removeOnCommunicationDeviceChangedListener(listener) }
@@ -134,6 +134,7 @@ class AudioRepositoryImpl(
             }
             .map { getCurrentAudioStream(audioStream) }
             .onStart { emit(getCurrentAudioStream(audioStream)) }
+            .conflate()
             .flowOn(backgroundCoroutineContext)
     }
 
@@ -144,7 +145,7 @@ class AudioRepositoryImpl(
             maxVolume = audioManager.getStreamMaxVolume(audioStream.value),
             volume = audioManager.getStreamVolume(audioStream.value),
             isAffectedByRingerMode = audioManager.isStreamAffectedByRingerMode(audioStream.value),
-            isMuted = audioManager.isStreamMute(audioStream.value),
+            isMuted = audioManager.isStreamMute(audioStream.value)
         )
     }
 

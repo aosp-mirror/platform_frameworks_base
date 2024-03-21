@@ -54,8 +54,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -85,10 +85,12 @@ constructor(
     private val dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     private val dozingToOccludedTransitionViewModel: DozingToOccludedTransitionViewModel,
     private val dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    private val dreamingToGoneTransitionViewModel: DreamingToGoneTransitionViewModel,
     private val glanceableHubToLockscreenTransitionViewModel:
         GlanceableHubToLockscreenTransitionViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
+    private val goneToDreamingTransitionViewModel: GoneToDreamingTransitionViewModel,
     private val lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
     private val lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
     private val lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
@@ -125,13 +127,42 @@ constructor(
             .onStart { emit(false) }
             .distinctUntilChanged()
 
-    private val alphaOnShadeExpansion: Flow<Float> =
+    private val isOnLockscreen: Flow<Boolean> =
         combine(
+                keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
+                keyguardTransitionInteractor
+                    .isInTransitionWhere { from, to -> from == LOCKSCREEN || to == LOCKSCREEN }
+                    .onStart { emit(false) }
+            ) { onLockscreen, transitioningToOrFromLockscreen ->
+                onLockscreen || transitioningToOrFromLockscreen
+            }
+            .distinctUntilChanged()
+
+    private val lockscreenToGoneTransitionRunning: Flow<Boolean> =
+        keyguardTransitionInteractor
+            .isInTransitionWhere { from, to -> from == LOCKSCREEN && to == GONE }
+            .onStart { emit(false) }
+
+    private val alphaOnShadeExpansion: Flow<Float> =
+        combineTransform(
+                lockscreenToGoneTransitionRunning,
+                isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
-            ) { qsExpansion, shadeExpansion ->
+            ) { lockscreenToGoneTransitionRunning, isOnLockscreen, qsExpansion, shadeExpansion ->
                 // Fade out quickly as the shade expands
-                1f - MathUtils.constrainedMap(0f, 1f, 0f, 0.2f, max(qsExpansion, shadeExpansion))
+                if (isOnLockscreen && !lockscreenToGoneTransitionRunning) {
+                    val alpha =
+                        1f -
+                            MathUtils.constrainedMap(
+                                /* rangeMin = */ 0f,
+                                /* rangeMax = */ 1f,
+                                /* valueMin = */ 0f,
+                                /* valueMax = */ 0.2f,
+                                /* value = */ max(qsExpansion, shadeExpansion)
+                            )
+                    emit(alpha)
+                }
             }
             .distinctUntilChanged()
 
@@ -159,10 +190,6 @@ constructor(
     /** Last point that the root view was tapped */
     val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition
 
-    /** the shared notification container bounds *on the lockscreen* */
-    val notificationBounds: StateFlow<NotificationContainerBounds> =
-        keyguardInteractor.notificationContainerBounds
-
     /**
      * The keyguard root view can be clipped as the shade is pulled down, typically only for
      * non-split shade cases.
@@ -178,17 +205,19 @@ constructor(
                 merge(
                         alphaOnShadeExpansion,
                         keyguardInteractor.dismissAlpha.filterNotNull(),
-                        alternateBouncerToGoneTransitionViewModel.lockscreenAlpha,
+                        alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         dozingToLockscreenTransitionViewModel.lockscreenAlpha,
                         dozingToOccludedTransitionViewModel.lockscreenAlpha(viewState),
+                        dreamingToGoneTransitionViewModel.lockscreenAlpha,
                         dreamingToLockscreenTransitionViewModel.lockscreenAlpha,
                         glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
                         goneToAodTransitionViewModel.enterFromTopAnimationAlpha,
                         goneToDozingTransitionViewModel.lockscreenAlpha,
+                        goneToDreamingTransitionViewModel.lockscreenAlpha,
                         lockscreenToAodTransitionViewModel.lockscreenAlpha(viewState),
                         lockscreenToDozingTransitionViewModel.lockscreenAlpha,
                         lockscreenToDreamingTransitionViewModel.lockscreenAlpha,
@@ -235,11 +264,7 @@ constructor(
         burnInJob?.cancel()
 
         burnInJob =
-            scope.launch {
-                aodBurnInViewModel.movement(params).collect {
-                    burnInModel.value = it
-                }
-            }
+            scope.launch { aodBurnInViewModel.movement(params).collect { burnInModel.value = it } }
     }
 
     val scale: Flow<BurnInScaleViewModel> =

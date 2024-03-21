@@ -98,6 +98,7 @@ internal class SceneTransitionLayoutImpl(
     private val horizontalDraggableHandler: DraggableHandlerImpl
     private val verticalDraggableHandler: DraggableHandlerImpl
 
+    internal val elementStateScope = ElementStateScopeImpl(this)
     private var _userActionDistanceScope: UserActionDistanceScope? = null
     internal val userActionDistanceScope: UserActionDistanceScope
         get() =

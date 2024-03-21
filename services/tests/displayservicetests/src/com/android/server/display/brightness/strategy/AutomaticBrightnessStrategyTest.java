@@ -112,8 +112,9 @@ public class AutomaticBrightnessStrategyTest {
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
                         mBrightnessConfiguration,
                         lastUserSetBrightness,
-                        userSetBrightnessChanged, 0.5f,
-                        false, policy, true);
+                        userSetBrightnessChanged, /* adjustment */ 0.5f,
+                        /* userChangedAutoBrightnessAdjustment= */ false, policy,
+                        targetDisplayState, /* shouldResetShortTermModel */ true);
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessEnabled());
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff());
     }
@@ -135,8 +136,9 @@ public class AutomaticBrightnessStrategyTest {
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
                         mBrightnessConfiguration,
                         lastUserSetBrightness,
-                        userSetBrightnessChanged, 0.5f,
-                        false, policy, true);
+                        userSetBrightnessChanged, /* adjustment */ 0.5f,
+                        /* userChangedAutoBrightnessAdjustment= */ false, policy,
+                        targetDisplayState, /* shouldResetShortTermModel */ true);
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessEnabled());
         assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff());
     }
@@ -158,8 +160,9 @@ public class AutomaticBrightnessStrategyTest {
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE,
                         mBrightnessConfiguration,
                         lastUserSetBrightness,
-                        userSetBrightnessChanged, 0.5f,
-                        false, policy, true);
+                        userSetBrightnessChanged, /* adjustment */ 0.5f,
+                        /* userChangedAutoBrightnessAdjustment= */ false, policy,
+                        targetDisplayState, /* shouldResetShortTermModel */ true);
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessEnabled());
         assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff());
     }
@@ -181,8 +184,9 @@ public class AutomaticBrightnessStrategyTest {
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED,
                         mBrightnessConfiguration,
                         lastUserSetBrightness,
-                        userSetBrightnessChanged, 0.5f,
-                        false, policy, true);
+                        userSetBrightnessChanged, /* adjustment */ 0.5f,
+                        /* userChangedAutoBrightnessAdjustment= */ false, policy,
+                        targetDisplayState, /* shouldResetShortTermModel */ true);
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessEnabled());
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff());
     }
@@ -206,8 +210,9 @@ public class AutomaticBrightnessStrategyTest {
                 .configure(AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED,
                         mBrightnessConfiguration,
                         lastUserSetBrightness,
-                        userSetBrightnessChanged, 0.4f,
-                        true, policy, true);
+                        userSetBrightnessChanged, /* adjustment */ 0.4f,
+                        /* userChangedAutoBrightnessAdjustment= */ true, policy,
+                        targetDisplayState, /* shouldResetShortTermModel */ true);
         assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessEnabled());
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff());
     }
@@ -233,7 +238,8 @@ public class AutomaticBrightnessStrategyTest {
                         mBrightnessConfiguration,
                         lastUserSetBrightness,
                         userSetBrightnessChanged, pendingBrightnessAdjustment,
-                        true, policy, true);
+                        /* userChangedAutoBrightnessAdjustment= */ true, policy, targetDisplayState,
+                        /* shouldResetShortTermModel */ true);
         assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessEnabled());
         assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessDisabledDueToDisplayOff());
     }
@@ -245,6 +251,7 @@ public class AutomaticBrightnessStrategyTest {
         boolean userSetBrightnessChanged = true;
         float lastUserSetScreenBrightness = 0.2f;
         int policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT;
+        int targetDisplayState = Display.STATE_ON;
         BrightnessConfiguration brightnessConfiguration = new BrightnessConfiguration.Builder(
                 new float[]{0f, 1f}, new float[]{0, PowerManager.BRIGHTNESS_ON}).build();
         int autoBrightnessState = AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
@@ -252,13 +259,13 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setShouldResetShortTermModel(true);
         setTemporaryAutoBrightnessAdjustment(temporaryAutoBrightnessAdjustments);
         mAutomaticBrightnessStrategy.accommodateUserBrightnessChanges(userSetBrightnessChanged,
-                lastUserSetScreenBrightness, policy, brightnessConfiguration,
+                lastUserSetScreenBrightness, policy, targetDisplayState, brightnessConfiguration,
                 autoBrightnessState);
         verify(mAutomaticBrightnessController).configure(autoBrightnessState,
                 brightnessConfiguration,
                 lastUserSetScreenBrightness,
                 userSetBrightnessChanged, temporaryAutoBrightnessAdjustments,
-                /* userChangedAutoBrightnessAdjustment= */ false, policy,
+                /* userChangedAutoBrightnessAdjustment= */ false, policy, targetDisplayState,
                 /* shouldResetShortTermModel= */ true);
         assertTrue(mAutomaticBrightnessStrategy.isTemporaryAutoBrightnessAdjustmentApplied());
         assertFalse(mAutomaticBrightnessStrategy.shouldResetShortTermModel());
@@ -268,7 +275,7 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutomaticBrightnessController(null);
         mAutomaticBrightnessStrategy.setShouldResetShortTermModel(true);
         mAutomaticBrightnessStrategy.accommodateUserBrightnessChanges(userSetBrightnessChanged,
-                lastUserSetScreenBrightness, policy, brightnessConfiguration,
+                lastUserSetScreenBrightness, policy, targetDisplayState, brightnessConfiguration,
                 autoBrightnessState);
         assertFalse(mAutomaticBrightnessStrategy.isTemporaryAutoBrightnessAdjustmentApplied());
         assertTrue(mAutomaticBrightnessStrategy.shouldResetShortTermModel());

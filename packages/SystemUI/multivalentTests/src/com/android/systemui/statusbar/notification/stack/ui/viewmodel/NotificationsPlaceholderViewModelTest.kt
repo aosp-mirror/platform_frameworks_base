@@ -22,6 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
+import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -36,9 +37,9 @@ class NotificationsPlaceholderViewModelTest : SysuiTestCase() {
     fun onBoundsChanged_setsNotificationContainerBounds() {
         underTest.onBoundsChanged(left = 5f, top = 5f, right = 5f, bottom = 5f)
         assertThat(kosmos.keyguardInteractor.notificationContainerBounds.value)
-            .isEqualTo(NotificationContainerBounds(left = 5f, top = 5f, right = 5f, bottom = 5f))
+            .isEqualTo(NotificationContainerBounds(top = 5f, bottom = 5f))
         assertThat(kosmos.notificationStackAppearanceInteractor.stackBounds.value)
-            .isEqualTo(NotificationContainerBounds(left = 5f, top = 5f, right = 5f, bottom = 5f))
+            .isEqualTo(StackBounds(left = 5f, top = 5f, right = 5f, bottom = 5f))
     }
     @Test
     fun onContentTopChanged_setsContentTop() {

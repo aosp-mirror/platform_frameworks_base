@@ -49,7 +49,7 @@ public interface DesktopMode {
 
 
     /** Called when requested to go to desktop mode from the current focused app. */
-    void enterDesktop(int displayId);
+    void moveFocusedTaskToDesktop(int displayId);
 
     /** Called when requested to go to fullscreen from the current focused desktop app. */
     void moveFocusedTaskToFullscreen(int displayId);

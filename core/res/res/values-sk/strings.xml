@@ -1169,7 +1169,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"Vybrať všetko"</string>
     <string name="cut" msgid="2561199725874745819">"Vystrihnúť"</string>
-    <string name="copy" msgid="5472512047143665218">"Kopírovať"</string>
+    <string name="copy" msgid="5472512047143665218">"Skopírovať"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Nepodarilo sa skopírovať do schránky"</string>
     <string name="paste" msgid="461843306215520225">"Prilepiť"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Prilepiť ako obyčajný text"</string>
@@ -2395,6 +2395,5 @@
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Správy môžete odosielať a prijímať bez mobilnej siete či siete Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
-    <!-- no translation found for unarchival_session_app_label (6811856981546348205) -->
-    <skip />
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nespracovaná…"</string>
 </resources>

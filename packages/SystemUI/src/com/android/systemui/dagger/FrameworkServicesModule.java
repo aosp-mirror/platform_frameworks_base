@@ -119,6 +119,8 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.shared.system.PackageManagerWrapper;
+import com.android.systemui.user.utils.UserScopedService;
+import com.android.systemui.user.utils.UserScopedServiceImpl;
 
 import dagger.Module;
 import dagger.Provides;
@@ -621,6 +623,12 @@ public class FrameworkServicesModule {
     @Singleton
     static UserManager provideUserManager(Context context) {
         return context.getSystemService(UserManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static UserScopedService<UserManager> provideScopedUserManager(@Application Context context) {
+        return new UserScopedServiceImpl<>(context, UserManager.class);
     }
 
     @Provides

@@ -131,9 +131,30 @@ interface SceneTransitionLayoutScope {
  */
 @DslMarker annotation class ElementDsl
 
+/** A scope that can be used to query the target state of an element or scene. */
+interface ElementStateScope {
+    /**
+     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
+     * when idle, or `null` if the element is not composed and measured in that scene (yet).
+     */
+    fun ElementKey.targetSize(scene: SceneKey): IntSize?
+
+    /**
+     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
+     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
+     */
+    fun ElementKey.targetOffset(scene: SceneKey): Offset?
+
+    /**
+     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
+     * the scene was never composed.
+     */
+    fun SceneKey.targetSize(): IntSize?
+}
+
 @Stable
 @ElementDsl
-interface BaseSceneScope {
+interface BaseSceneScope : ElementStateScope {
     /** The state of the [SceneTransitionLayout] in which this scene is contained. */
     val layoutState: SceneTransitionLayoutState
 
@@ -415,25 +436,7 @@ interface UserActionDistance {
     ): Float
 }
 
-interface UserActionDistanceScope : Density {
-    /**
-     * Return the *target* size of [this] element in the given [scene], i.e. the size of the element
-     * when idle, or `null` if the element is not composed and measured in that scene (yet).
-     */
-    fun ElementKey.targetSize(scene: SceneKey): IntSize?
-
-    /**
-     * Return the *target* offset of [this] element in the given [scene], i.e. the size of the
-     * element when idle, or `null` if the element is not composed and placed in that scene (yet).
-     */
-    fun ElementKey.targetOffset(scene: SceneKey): Offset?
-
-    /**
-     * Return the *target* size of [this] scene, i.e. the size of the scene when idle, or `null` if
-     * the scene was never composed.
-     */
-    fun SceneKey.targetSize(): IntSize?
-}
+interface UserActionDistanceScope : Density, ElementStateScope
 
 /** The user action has a fixed [absoluteDistance]. */
 class FixedDistance(private val distance: Dp) : UserActionDistance {

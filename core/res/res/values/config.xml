@@ -1483,6 +1483,11 @@
     <!-- Number of notifications to keep in the notification service historical archive -->
     <integer name="config_notificationServiceArchiveSize">100</integer>
 
+    <!-- Upper limit imposed for long text content for BigTextStyle, MessagingStyle and
+    ConversationStyle notifications for performance reasons, and that line count is also
+    capped by vertical space available. It is only enabled when the value is positive int.-->
+    <integer name="config_notificationLongTextMaxLineCount">10</integer>
+
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
 
@@ -6414,10 +6419,8 @@
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
     <bool name="config_assistTouchGestureEnabledDefault">true</bool>
 
-    <!-- Default value for Settings.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED -->
-    <bool name="config_searchPressHoldNavHandleEnabledDefault">true</bool>
-    <!-- Default value for Settings.ASSIST_LONG_PRESS_HOME_ENABLED for search overlay -->
-    <bool name="config_searchLongPressHomeEnabledDefault">true</bool>
+    <!-- Default value for Settings.SEARCH_ALL_ENTRYPOINTS_ENABLED -->
+    <bool name="config_searchAllEntrypointsEnabledDefault">true</bool>
 
     <!-- The maximum byte size of the information contained in the bundle of
     HotwordDetectedResult. -->
@@ -6977,4 +6980,8 @@
 
     <!-- The key containing the branching boolean for legacy Search. -->
     <string name="config_defaultContextualSearchLegacyEnabled" translatable="false" />
+
+    <!-- Whether WM DisplayContent supports high performance transitions
+         (lower-end devices may want to disable) -->
+    <bool name="config_deviceSupportsHighPerfTransitions">true</bool>
 </resources>

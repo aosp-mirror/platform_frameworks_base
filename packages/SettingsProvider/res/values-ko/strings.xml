@@ -20,6 +20,4 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"설정 저장소"</string>
-    <string name="wifi_softap_config_change" msgid="5688373762357941645">"핫스팟 설정 변경됨"</string>
-    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"세부정보를 보려면 탭하세요."</string>
 </resources>

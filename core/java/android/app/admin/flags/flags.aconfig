@@ -1,3 +1,6 @@
+# proto-file: build/make/tools/aconfig/aconfig_protos/protos/aconfig.proto
+# proto-message: flag_declarations
+
 package: "android.app.admin.flags"
 
 flag {
@@ -172,4 +175,18 @@ flag {
   metadata {
       purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+  name: "allow_screen_brightness_control_on_cope"
+  namespace: "enterprise"
+  description: "Allow COPE admin to control screen brightness and timeout."
+  bug: "323894620"
+}
+
+flag {
+  name: "is_recursive_required_app_merging_enabled"
+  namespace: "enterprise"
+  description: "Guards a new flow for recursive required enterprise app list merging"
+  bug: "319084618"
 }

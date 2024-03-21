@@ -20,6 +20,4 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4567566098528588863">"সেটিংস স্টোরেজ"</string>
-    <string name="wifi_softap_config_change" msgid="5688373762357941645">"হটস্পট সেটিংসে পরিবর্তন করা হয়েছে"</string>
-    <string name="wifi_softap_config_change_summary" msgid="8946397286141531087">"বিশদে জানতে ট্যাপ করুন"</string>
 </resources>

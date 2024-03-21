@@ -33,6 +33,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.policy.SplitShadeStateController
@@ -42,6 +44,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -72,6 +75,7 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
     @Mock private lateinit var splitShadeStateController: SplitShadeStateController
     @Mock private lateinit var notifsKeyguardInteractor: NotificationsKeyguardInteractor
     @Mock private lateinit var areNotificationsFullyHidden: Flow<Boolean>
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
 
     @Before
     fun setup() {
@@ -96,13 +100,14 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
         keyguardClockInteractor = KeyguardClockInteractor(keyguardClockRepository)
         whenever(notifsKeyguardInteractor.areNotificationsFullyHidden)
             .thenReturn(areNotificationsFullyHidden)
+        whenever(shadeInteractor.shadeMode).thenReturn(MutableStateFlow(ShadeMode.Single))
         underTest =
             KeyguardClockViewModel(
                 keyguardInteractor,
                 keyguardClockInteractor,
                 scope.backgroundScope,
-                splitShadeStateController,
-                notifsKeyguardInteractor
+                notifsKeyguardInteractor,
+                shadeInteractor,
             )
     }
 

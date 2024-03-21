@@ -340,8 +340,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     static final String TAG = NetworkPolicyLogger.TAG;
     private static final boolean LOGD = NetworkPolicyLogger.LOGD;
     private static final boolean LOGV = NetworkPolicyLogger.LOGV;
-    // TODO: b/304347838 - Remove once the feature is in staging.
-    private static final boolean ALWAYS_RESTRICT_BACKGROUND_NETWORK = false;
 
     /**
      * No opportunistic quota could be calculated from user data plan or data settings.
@@ -1070,8 +1068,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
 
                     // The flag is boot-stable.
-                    mBackgroundNetworkRestricted = ALWAYS_RESTRICT_BACKGROUND_NETWORK
-                            && Flags.networkBlockedForTopSleepingAndAbove();
+                    mBackgroundNetworkRestricted = Flags.networkBlockedForTopSleepingAndAbove();
                     if (mBackgroundNetworkRestricted) {
                         // Firewall rules and UidBlockedState will get updated in
                         // updateRulesForGlobalChangeAL below.
@@ -4331,7 +4328,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock")
     private boolean updateUidStateUL(int uid, int procState, long procStateSeq,
             @ProcessCapability int capability) {
-        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL");
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL: " + uid + "/"
+                + ActivityManager.procStateToString(procState) + "/" + procStateSeq + "/"
+                + ActivityManager.getCapabilitiesSummary(capability));
         try {
             final UidState oldUidState = mUidState.get(uid);
             if (oldUidState != null && procStateSeq < oldUidState.procStateSeq) {

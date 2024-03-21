@@ -23,7 +23,6 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
-import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.RANDOM_DIR_PREFIX;
@@ -49,7 +48,6 @@ import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils;
 import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -263,11 +261,6 @@ final class RemovePackageHelper {
         // Step 1: always destroy app profiles.
         mAppDataHelper.destroyAppProfilesLIF(packageName);
 
-        // Everything else is preserved if the DELETE_KEEP_DATA flag is on
-        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
-            return;
-        }
-
         final AndroidPackage pkg;
         final SharedUserSetting sus;
         synchronized (mPm.mLock) {
@@ -284,9 +277,20 @@ final class RemovePackageHelper {
             resolvedPkg = PackageImpl.buildFakeForDeletion(packageName, ps.getVolumeUuid());
         }
 
+        int appDataDeletionFlags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL;
+        // Personal data is preserved if the DELETE_KEEP_DATA flag is on
+        if ((flags & PackageManager.DELETE_KEEP_DATA) != 0) {
+            if ((flags & PackageManager.DELETE_ARCHIVE) != 0) {
+                mAppDataHelper.clearAppDataLIF(resolvedPkg, userId,
+                        appDataDeletionFlags | Installer.FLAG_CLEAR_CACHE_ONLY);
+                mAppDataHelper.clearAppDataLIF(resolvedPkg, userId,
+                        appDataDeletionFlags | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            }
+            return;
+        }
+
         // Step 2: destroy app data.
-        mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId,
-                FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+        mAppDataHelper.destroyAppDataLIF(resolvedPkg, userId, appDataDeletionFlags);
         if (userId != UserHandle.USER_ALL) {
             ps.setCeDataInode(-1, userId);
             ps.setDeDataInode(-1, userId);
@@ -511,32 +515,9 @@ final class RemovePackageHelper {
         }
 
         removeCodePathLI(codeFile);
-        removeDexFilesLI(allCodePaths, instructionSets);
-    }
 
-    @GuardedBy("mPm.mInstallLock")
-    private void removeDexFilesLI(@NonNull List<String> allCodePaths,
-                                  @Nullable  String[] instructionSets) {
-        if (!allCodePaths.isEmpty()) {
-            if (instructionSets == null) {
-                throw new IllegalStateException("instructionSet == null");
-            }
-            // TODO(b/265813358): ART Service currently doesn't support deleting optimized artifacts
-            // relative to an arbitrary APK path. Skip this and rely on its file GC instead.
-            if (!DexOptHelper.useArtService()) {
-                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-                for (String codePath : allCodePaths) {
-                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                        try {
-                            mPm.mInstaller.rmdex(codePath, dexCodeInstructionSet);
-                        } catch (LegacyDexoptDisabledException e) {
-                            throw new RuntimeException(e);
-                        } catch (Installer.InstallerException ignored) {
-                        }
-                    }
-                }
-            }
-        }
+        // TODO(b/265813358): ART Service currently doesn't support deleting optimized artifacts
+        // relative to an arbitrary APK path. Skip this and rely on its file GC instead.
     }
 
     void cleanUpForMoveInstall(String volumeUuid, String packageName, String fromCodePath) {

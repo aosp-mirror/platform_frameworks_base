@@ -16,6 +16,8 @@
 
 package android.hardware.camera2;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
@@ -26,20 +28,15 @@ import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
+import android.hardware.camera2.params.MultiResolutionStreamInfo;
 import android.media.Image;
 import android.media.ImageReader;
-import android.hardware.camera2.params.MultiResolutionStreamInfo;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
+import android.util.Size;
 import android.view.Surface;
 
 import com.android.internal.camera.flags.Flags;
 
-import java.nio.NioUtils;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -348,6 +345,52 @@ public class MultiResolutionImageReader implements AutoCloseable {
      */
     public @NonNull ImageReader[] getReaders() {
         return mReaders;
+    }
+
+    /**
+     * Get the internal ImageReader surface based on configured size and physical camera Id.
+     *
+     * <p>The {@code configuredSize} and {@code physicalCameraId} parameters must match one of the
+     * MultiResolutionStreamInfo used to create this {@link MultiResolutionImageReader}.</p>
+     *
+     * <p>The Surface returned from this function isn't meant to be used directly as part of a
+     * {@link CaptureRequest}. It should instead be used for creating an OutputConfiguration
+     * before session creation. See {@link OutputConfiguration#setSurfacesForMultiResolutionOutput}
+     * for details. For {@link CaptureRequest}, use {@link #getSurface()} instead.</p>
+     *
+     * <p>Please note that holding on to the Surface objects returned by this method is not enough
+     * to keep their parent MultiResolutionImageReaders from being reclaimed. In that sense, a
+     * Surface acts like a {@link java.lang.ref.WeakReference weak reference} to the
+     * MultiResolutionImageReader that provides it.</p>
+     *
+     * @param configuredSize The configured size corresponding to one of the internal ImageReader.
+     * @param physicalCameraId The physical camera Id the internal ImageReader targets for. If
+     *                         the ImageReader is not targeting a physical camera of a logical
+     *                         multi-camera, this parameter is set to "".
+     *
+     * @return The {@link Surface} of the internal ImageReader corresponding to the provided
+     *         configured size and physical camera Id.
+     *
+     * @throws IllegalArgumentException If {@code configuredSize} is {@code null}, or the ({@code
+     *                                  configuredSize} and {@code physicalCameraId}) combo is not
+     *                                  part of this {@code MultiResolutionImageReader}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public @NonNull Surface getSurface(@NonNull Size configuredSize,
+            @NonNull String physicalCameraId) {
+        checkNotNull(configuredSize, "configuredSize must not be null");
+        checkNotNull(physicalCameraId, "physicalCameraId must not be null");
+
+        for (int i = 0; i < mStreamInfo.length; i++) {
+            if (mStreamInfo[i].getWidth() == configuredSize.getWidth()
+                    && mStreamInfo[i].getHeight() == configuredSize.getHeight()
+                    && physicalCameraId.equals(mStreamInfo[i].getPhysicalCameraId())) {
+                return mReaders[i].getSurface();
+            }
+        }
+        throw new IllegalArgumentException("configuredSize and physicalCameraId don't match with "
+                + "this MultiResolutionImageReader");
     }
 
     /**

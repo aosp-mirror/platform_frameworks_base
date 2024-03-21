@@ -38,6 +38,9 @@ object ClockTransition {
         from(ClockScenes.largeClockScene, to = ClockScenes.smallClockScene) {
             transitioningToSmallClock()
         }
+        from(ClockScenes.splitShadeLargeClockScene, to = ClockScenes.largeClockScene) {
+            spec = tween(1000)
+        }
     }
 
     private fun TransitionBuilder.transitioningToLargeClock() {
@@ -70,6 +73,8 @@ object ClockTransition {
 object ClockScenes {
     val smallClockScene = SceneKey("small-clock-scene")
     val largeClockScene = SceneKey("large-clock-scene")
+    val splitShadeSmallClockScene = SceneKey("split-shade-small-clock-scene")
+    val splitShadeLargeClockScene = SceneKey("split-shade-large-clock-scene")
 }
 
 object ClockElementKeys {

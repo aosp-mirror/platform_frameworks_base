@@ -59,6 +59,7 @@ import android.app.people.IPeopleManager;
 import android.app.people.PeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1439,12 +1440,20 @@ public class PeopleSpaceWidgetManager implements Dumpable {
                 || !mUserManager.isUserUnlocked(user)) {
             return;
         }
+
+        // The widget provider may be disabled on SystemUI implementers, e.g. TvSystemUI.
+        ComponentName provider = new ComponentName(mContext, PeopleSpaceWidgetProvider.class);
+        List<AppWidgetProviderInfo> infos = mAppWidgetManager.getInstalledProvidersForPackage(
+                mContext.getPackageName(), user);
+        if (infos.stream().noneMatch(info -> info.provider.equals(provider))) {
+            return;
+        }
+
         if (DEBUG) {
             Log.d(TAG, "Updating People Space widget preview for user " + user.getIdentifier());
         }
         boolean success = mAppWidgetManager.setWidgetPreview(
-                new ComponentName(mContext, PeopleSpaceWidgetProvider.class),
-                WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD,
+                provider, WIDGET_CATEGORY_HOME_SCREEN | WIDGET_CATEGORY_KEYGUARD,
                 new RemoteViews(mContext.getPackageName(),
                         R.layout.people_space_placeholder_layout));
         if (DEBUG && !success) {

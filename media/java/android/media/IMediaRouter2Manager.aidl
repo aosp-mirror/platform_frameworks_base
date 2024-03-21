@@ -35,4 +35,5 @@ oneway interface IMediaRouter2Manager {
             in @nullable RouteListingPreference routeListingPreference);
     void notifyRoutesUpdated(in List<MediaRoute2Info> routes);
     void notifyRequestFailed(int requestId, int reason);
+    void invalidateInstance();
 }

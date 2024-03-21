@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.ui
 
 import android.app.AlertDialog
 import android.content.Context
+import com.android.systemui.bouncer.ui.viewmodel.BouncerMessageViewModelModule
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModelModule
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -30,6 +31,7 @@ import dagger.Provides
     includes =
         [
             BouncerViewModelModule::class,
+            BouncerMessageViewModelModule::class,
         ],
 )
 interface BouncerViewModule {

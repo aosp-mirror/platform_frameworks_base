@@ -23,7 +23,6 @@ import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConst
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
-import static com.android.systemui.util.kotlin.JavaAdapterKt.combineFlows;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -107,8 +106,6 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -118,6 +115,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import kotlin.Unit;
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.Job;
@@ -523,16 +521,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (KeyguardWmStateRefactor.isEnabled()) {
             // Show the keyguard views whenever we've told WM that the lockscreen is visible.
             mJavaAdapter.alwaysCollectFlow(
-                    combineFlows(
-                            mWmLockscreenVisibilityInteractor.get().getLockscreenVisibility(),
-                            mSurfaceBehindInteractor.get().isAnimatingSurface(),
-                            (lockscreenVis, animatingSurface) ->
-                                    // TODO(b/322546110): Waiting until we're not animating the
-                                    // surface is a workaround to avoid jank. We should actually
-                                    // fix the source of the jank, and then hide the keyguard
-                                    // view without waiting for the animation to end.
-                                    lockscreenVis || animatingSurface
-                    ),
+                    mStatusBarKeyguardViewManagerInteractor.getKeyguardViewVisibility(),
                     this::consumeShowStatusBarKeyguardView);
 
             mJavaAdapter.alwaysCollectFlow(

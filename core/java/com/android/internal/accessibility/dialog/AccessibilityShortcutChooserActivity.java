@@ -20,7 +20,6 @@ import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHOR
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
-import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.createEnableDialogContentView;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getInstalledTargets;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
 import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
@@ -115,39 +114,22 @@ public class AccessibilityShortcutChooserActivity extends Activity {
     private void onTargetChecked(AdapterView<?> parent, View view, int position, long id) {
         final AccessibilityTarget target = mTargets.get(position);
 
-        if (Flags.cleanupAccessibilityWarningDialog()) {
-            if (target instanceof AccessibilityServiceTarget serviceTarget) {
-                if (sendRestrictedDialogIntentIfNeeded(target)) {
-                    return;
-                }
-                final AccessibilityManager am = getSystemService(AccessibilityManager.class);
-                if (am.isAccessibilityServiceWarningRequired(
-                        serviceTarget.getAccessibilityServiceInfo())) {
-                    showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
-                            position, mTargetAdapter);
-                    return;
-                }
+        if (target instanceof AccessibilityServiceTarget serviceTarget) {
+            if (sendRestrictedDialogIntentIfNeeded(target)) {
+                return;
             }
-            if (target instanceof AccessibilityActivityTarget activityTarget) {
-                if (!activityTarget.isShortcutEnabled()
-                        && sendRestrictedDialogIntentIfNeeded(activityTarget)) {
-                    return;
-                }
+            final AccessibilityManager am = getSystemService(AccessibilityManager.class);
+            if (am.isAccessibilityServiceWarningRequired(
+                    serviceTarget.getAccessibilityServiceInfo())) {
+                showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
+                        position, mTargetAdapter);
+                return;
             }
-        } else {
-            if (!target.isShortcutEnabled()) {
-                if (target instanceof AccessibilityServiceTarget
-                        || target instanceof AccessibilityActivityTarget) {
-                    if (sendRestrictedDialogIntentIfNeeded(target)) {
-                        return;
-                    }
-                }
-
-                if (target instanceof AccessibilityServiceTarget) {
-                    showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
-                            position, mTargetAdapter);
-                    return;
-                }
+        }
+        if (target instanceof AccessibilityActivityTarget activityTarget) {
+            if (!activityTarget.isShortcutEnabled()
+                    && sendRestrictedDialogIntentIfNeeded(activityTarget)) {
+                return;
             }
         }
 
@@ -178,37 +160,25 @@ public class AccessibilityShortcutChooserActivity extends Activity {
             return;
         }
 
-        if (Flags.cleanupAccessibilityWarningDialog()) {
-            mPermissionDialog = AccessibilityServiceWarning
-                    .createAccessibilityServiceWarningDialog(context,
-                            serviceTarget.getAccessibilityServiceInfo(),
-                            v -> {
-                                serviceTarget.onCheckedChanged(true);
-                                targetAdapter.notifyDataSetChanged();
-                                mPermissionDialog.dismiss();
-                            }, v -> {
-                                serviceTarget.onCheckedChanged(false);
-                                mPermissionDialog.dismiss();
-                            },
-                            v -> {
-                                mTargets.remove(position);
-                                context.getPackageManager().getPackageInstaller().uninstall(
-                                        serviceTarget.getComponentName().getPackageName(), null);
-                                targetAdapter.notifyDataSetChanged();
-                                mPermissionDialog.dismiss();
-                            });
-            mPermissionDialog.setOnDismissListener(dialog -> mPermissionDialog = null);
-        } else {
-            mPermissionDialog = new AlertDialog.Builder(context)
-                    .setView(createEnableDialogContentView(context, serviceTarget,
-                            v -> {
-                                mPermissionDialog.dismiss();
-                                targetAdapter.notifyDataSetChanged();
-                            },
-                            v -> mPermissionDialog.dismiss()))
-                    .setOnDismissListener(dialog -> mPermissionDialog = null)
-                    .create();
-        }
+        mPermissionDialog = AccessibilityServiceWarning
+                .createAccessibilityServiceWarningDialog(context,
+                        serviceTarget.getAccessibilityServiceInfo(),
+                        v -> {
+                            serviceTarget.onCheckedChanged(true);
+                            targetAdapter.notifyDataSetChanged();
+                            mPermissionDialog.dismiss();
+                        }, v -> {
+                            serviceTarget.onCheckedChanged(false);
+                            mPermissionDialog.dismiss();
+                        },
+                        v -> {
+                            mTargets.remove(position);
+                            context.getPackageManager().getPackageInstaller().uninstall(
+                                    serviceTarget.getComponentName().getPackageName(), null);
+                            targetAdapter.notifyDataSetChanged();
+                            mPermissionDialog.dismiss();
+                        });
+        mPermissionDialog.setOnDismissListener(dialog -> mPermissionDialog = null);
         mPermissionDialog.show();
     }
 

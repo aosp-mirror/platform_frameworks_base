@@ -46,7 +46,6 @@ import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
-import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.asIndenting
@@ -120,7 +119,6 @@ constructor(
             printSection("SceneContainerFlags") {
                 println("isEnabled", flags.isEnabled())
                 printSection("requirementDescription") { println(flags.requirementDescription()) }
-                println("flexiNotifsEnabled", flags.flexiNotifsEnabled())
             }
         }
 

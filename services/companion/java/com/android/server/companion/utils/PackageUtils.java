@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.companion.CompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,6 +42,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.os.Binder;
 import android.os.Process;
+import android.permission.flags.Flags;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
@@ -227,9 +229,19 @@ public final class PackageUtils {
      */
     public static boolean isRestrictedSettingsAllowed(
             Context context, String packageName, int uid) {
-        final int mode = context.getSystemService(AppOpsManager.class).noteOpNoThrow(
-                AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS, uid,
-                packageName, /* attributionTag= */ null, /* message= */ null);
-        return mode == AppOpsManager.MODE_ALLOWED;
+        if (Flags.enhancedConfirmationModeApisEnabled()) {
+            EnhancedConfirmationManager ecm = context.getSystemService(
+                    EnhancedConfirmationManager.class);
+            try {
+                return !ecm.isRestricted(packageName, AppOpsManager.OPSTR_ACCESS_NOTIFICATIONS);
+            } catch (PackageManager.NameNotFoundException e) {
+                return true;
+            }
+        } else {
+            final int mode = context.getSystemService(AppOpsManager.class).noteOpNoThrow(
+                    AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS, uid,
+                    packageName, /* attributionTag= */ null, /* message= */ null);
+            return mode == AppOpsManager.MODE_ALLOWED;
+        }
     }
 }

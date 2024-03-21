@@ -19,6 +19,7 @@ package com.android.systemui.media.dagger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
+import com.android.systemui.media.controls.domain.MediaDomainModule;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager;
@@ -38,7 +39,11 @@ import java.util.Optional;
 import javax.inject.Named;
 
 /** Dagger module for the media package. */
-@Module(subcomponents = {
+@Module(
+        includes = {
+            MediaDomainModule.class
+        },
+        subcomponents = {
         MediaComplicationComponent.class,
 })
 public interface MediaModule {

@@ -90,7 +90,6 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
     @Override
     public boolean isSessionConfigurationSupported(@NonNull SessionConfiguration config)
             throws CameraAccessException {
-        // TODO(b/298033056): restructure the OutputConfiguration API for better usability
         synchronized (mInterfaceLock) {
             if (mCameraManager.isCameraServiceDisabled()) {
                 throw new IllegalArgumentException("No cameras available on device");

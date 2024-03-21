@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
-import android.content.Intent;
 import android.testing.TestableLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -116,21 +115,6 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
                 .build();
         return HeadsUpManagerTestUtil.createEntry(id, notif);
     }
-
-    private PendingIntent createFullScreenIntent() {
-        return PendingIntent.getActivity(
-                getContext(), 0, new Intent(getContext(), this.getClass()),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
-    }
-
-    private NotificationEntry createFullScreenIntentEntry(int id) {
-        final Notification notif = new Notification.Builder(mContext, "")
-                .setSmallIcon(R.drawable.ic_person)
-                .setFullScreenIntent(createFullScreenIntent(), /* highPriority */ true)
-                .build();
-        return HeadsUpManagerTestUtil.createEntry(id, notif);
-    }
-
 
     private void useAccessibilityTimeout(boolean use) {
         if (use) {
@@ -239,7 +223,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUpBecomePinned_hasFSI_notUnpinned_true() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createFullScreenIntentEntry(/* id = */ 0);
+        final NotificationEntry notifEntry =
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
 
         // Add notifEntry to ANM mAlertEntries map and make it NOT unpinned
         hum.showNotification(notifEntry);
@@ -254,7 +239,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUpBecomePinned_wasUnpinned_false() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createFullScreenIntentEntry(/* id = */ 0);
+        final NotificationEntry notifEntry =
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
 
         // Add notifEntry to ANM mAlertEntries map and make it unpinned
         hum.showNotification(notifEntry);
@@ -443,7 +429,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Test
     public void testIsSticky_hasFullScreenIntent_true() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
-        final NotificationEntry notifEntry = createFullScreenIntentEntry(/* id = */ 0);
+        final NotificationEntry notifEntry =
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext);
 
         hum.showNotification(notifEntry);
 
@@ -510,16 +497,16 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     public void testAlertEntryCompareTo_ongoingCallLessThanActiveRemoteInput() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
 
-        final BaseHeadsUpManager.HeadsUpEntry ongoingCall = hum.new HeadsUpEntry();
-        ongoingCall.setEntry(new NotificationEntryBuilder()
-                .setSbn(HeadsUpManagerTestUtil.createSbn(/* id = */ 0,
-                        new Notification.Builder(mContext, "")
-                                .setCategory(Notification.CATEGORY_CALL)
-                                .setOngoing(true)))
-                .build());
+        final BaseHeadsUpManager.HeadsUpEntry ongoingCall = hum.new HeadsUpEntry(
+                new NotificationEntryBuilder()
+                        .setSbn(HeadsUpManagerTestUtil.createSbn(/* id = */ 0,
+                                new Notification.Builder(mContext, "")
+                                        .setCategory(Notification.CATEGORY_CALL)
+                                        .setOngoing(true)))
+                        .build());
 
-        final BaseHeadsUpManager.HeadsUpEntry activeRemoteInput = hum.new HeadsUpEntry();
-        activeRemoteInput.setEntry(HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext));
+        final BaseHeadsUpManager.HeadsUpEntry activeRemoteInput = hum.new HeadsUpEntry(
+                HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext));
         activeRemoteInput.mRemoteInputActive = true;
 
         assertThat(ongoingCall.compareTo(activeRemoteInput)).isLessThan(0);
@@ -530,18 +517,18 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
     public void testAlertEntryCompareTo_incomingCallLessThanActiveRemoteInput() {
         final BaseHeadsUpManager hum = createHeadsUpManager();
 
-        final BaseHeadsUpManager.HeadsUpEntry incomingCall = hum.new HeadsUpEntry();
         final Person person = new Person.Builder().setName("person").build();
         final PendingIntent intent = mock(PendingIntent.class);
-        incomingCall.setEntry(new NotificationEntryBuilder()
-                .setSbn(HeadsUpManagerTestUtil.createSbn(/* id = */ 0,
-                        new Notification.Builder(mContext, "")
-                                .setStyle(Notification.CallStyle
-                                        .forIncomingCall(person, intent, intent))))
-                .build());
+        final BaseHeadsUpManager.HeadsUpEntry incomingCall = hum.new HeadsUpEntry(
+                new NotificationEntryBuilder()
+                        .setSbn(HeadsUpManagerTestUtil.createSbn(/* id = */ 0,
+                                new Notification.Builder(mContext, "")
+                                        .setStyle(Notification.CallStyle
+                                                .forIncomingCall(person, intent, intent))))
+                        .build());
 
-        final BaseHeadsUpManager.HeadsUpEntry activeRemoteInput = hum.new HeadsUpEntry();
-        activeRemoteInput.setEntry(HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext));
+        final BaseHeadsUpManager.HeadsUpEntry activeRemoteInput = hum.new HeadsUpEntry(
+                HeadsUpManagerTestUtil.createEntry(/* id = */ 1, mContext));
         activeRemoteInput.mRemoteInputActive = true;
 
         assertThat(incomingCall.compareTo(activeRemoteInput)).isLessThan(0);
@@ -553,8 +540,8 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         final BaseHeadsUpManager hum = createHeadsUpManager();
 
         // Needs full screen intent in order to be pinned
-        final BaseHeadsUpManager.HeadsUpEntry entryToPin = hum.new HeadsUpEntry();
-        entryToPin.setEntry(createFullScreenIntentEntry(/* id = */ 0));
+        final BaseHeadsUpManager.HeadsUpEntry entryToPin = hum.new HeadsUpEntry(
+                HeadsUpManagerTestUtil.createFullScreenIntentEntry(/* id = */ 0, mContext));
 
         // Note: the standard way to show a notification would be calling showNotification rather
         // than onAlertEntryAdded. However, in practice showNotification in effect adds

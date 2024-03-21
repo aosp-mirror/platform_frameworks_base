@@ -305,6 +305,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         page.setMinRows(mMinRows);
         page.setMaxColumns(mMaxColumns);
         page.setSelected(false);
+
+        // All pages should have the same squishiness, so grabbing the value from the first page
+        // and giving it to new pages.
+        float squishiness = mPages.isEmpty() ? 1f : mPages.get(0).getSquishinessFraction();
+        page.setSquishinessFraction(squishiness);
+
         return page;
     }
 
@@ -426,6 +432,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         for (int i = 0; i < NP; i++) {
             mPages.get(i).removeAllViews();
         }
+        if (mPageIndicator != null) {
+            mPageIndicator.setNumPages(numPages);
+        }
         if (NP == numPages) {
             return;
         }
@@ -437,7 +446,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             mLogger.d("Removing page");
             mPages.remove(mPages.size() - 1);
         }
-        mPageIndicator.setNumPages(mPages.size());
         setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
         if (mPageToRestore != NO_PAGE) {

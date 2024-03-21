@@ -979,11 +979,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     void updateQsState() {
         boolean qsFullScreen = getExpanded() && !mSplitShadeEnabled;
         mShadeRepository.setLegacyQsFullscreen(qsFullScreen);
-        if (!FooterViewRefactor.isEnabled()) {
-            mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
+        mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
+        if (!SceneContainerFlag.isEnabled()) {
+            mNotificationStackScrollLayoutController.setScrollingEnabled(
+                    mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));
         }
-        mNotificationStackScrollLayoutController.setScrollingEnabled(
-                mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));
 
         if (mQsStateUpdateListener != null) {
             mQsStateUpdateListener.onQsStateUpdated(getExpanded(), mStackScrollerOverscrolling);
@@ -1280,18 +1280,20 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
         mScrimController.setScrimCornerRadius(radius);
 
-        // Convert global clipping coordinates to local ones,
-        // relative to NotificationStackScrollLayout
-        int nsslLeft = calculateNsslLeft(left);
-        int nsslRight = calculateNsslRight(right);
-        int nsslTop = getNotificationsClippingTopBounds(top);
-        int nsslBottom = bottom - mNotificationStackScrollLayoutController.getTop();
-        int bottomRadius = mSplitShadeEnabled ? radius : 0;
-        // TODO (b/265193930): remove dependency on NPVC
-        int topRadius = mSplitShadeEnabled
-                && mPanelViewControllerLazy.get().isExpandingFromHeadsUp() ? 0 : radius;
-        mNotificationStackScrollLayoutController.setRoundedClippingBounds(
-                nsslLeft, nsslTop, nsslRight, nsslBottom, topRadius, bottomRadius);
+        if (!SceneContainerFlag.isEnabled()) {
+            // Convert global clipping coordinates to local ones,
+            // relative to NotificationStackScrollLayout
+            int nsslLeft = calculateNsslLeft(left);
+            int nsslRight = calculateNsslRight(right);
+            int nsslTop = getNotificationsClippingTopBounds(top);
+            int nsslBottom = bottom - mNotificationStackScrollLayoutController.getTop();
+            int bottomRadius = mSplitShadeEnabled ? radius : 0;
+            // TODO (b/265193930): remove dependency on NPVC
+            int topRadius = mSplitShadeEnabled
+                    && mPanelViewControllerLazy.get().isExpandingFromHeadsUp() ? 0 : radius;
+            mNotificationStackScrollLayoutController.setRoundedClippingBounds(
+                    nsslLeft, nsslTop, nsslRight, nsslBottom, topRadius, bottomRadius);
+        }
     }
 
     /**

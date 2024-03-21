@@ -346,7 +346,7 @@ public class SystemServicesTestRule implements TestRule {
         doReturn(true).when(amInternal).hasStartedUserState(anyInt());
         doReturn(false).when(amInternal).shouldConfirmCredentials(anyInt());
         doReturn(false).when(amInternal).isActivityStartsLoggingEnabled();
-        doReturn(true).when(amInternal).isThemeOverlayReady(anyInt());
+        doReturn(false).when(amInternal).shouldDelayHomeLaunch(anyInt());
         LocalServices.addService(ActivityManagerInternal.class, amInternal);
 
         final ActivityManagerService amService =

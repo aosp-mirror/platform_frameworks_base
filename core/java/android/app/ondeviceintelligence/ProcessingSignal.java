@@ -123,10 +123,10 @@ public final class ProcessingSignal {
      * Sets the processing signal callback to be called when signals are received.
      *
      * This method is intended to be used by the recipient of a processing signal
-     * such as the remote implementation for {@link OnDeviceIntelligenceManager} to handle
-     * cancellation requests while performing a long-running operation.  This method is not
-     * intended
-     * to be used by applications themselves.
+     * such as the remote implementation in
+     * {@link android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService} to handle
+     * processing signals while performing a long-running operation.  This method is not
+     * intended to be used by the caller themselves.
      *
      * If {@link ProcessingSignal#sendSignal} has already been called, then the provided callback
      * is invoked immediately and all previously queued actions are passed to remote signal.
@@ -200,7 +200,7 @@ public final class ProcessingSignal {
     }
 
     /**
-     * Given a locally created transport, returns its associated cancellation signal.
+     * Given a locally created transport, returns its associated processing signal.
      *
      * @param transport The locally created transport, or null if none.
      * @return The associated processing signal, or null if none.

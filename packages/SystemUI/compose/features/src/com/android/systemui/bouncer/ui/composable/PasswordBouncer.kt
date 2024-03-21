@@ -74,10 +74,7 @@ internal fun PasswordBouncer(
     val isImeSwitcherButtonVisible by viewModel.isImeSwitcherButtonVisible.collectAsState()
     val selectedUserId by viewModel.selectedUserId.collectAsState()
 
-    DisposableEffect(Unit) {
-        viewModel.onShown()
-        onDispose { viewModel.onHidden() }
-    }
+    DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
     LaunchedEffect(animateFailure) {
         if (animateFailure) {

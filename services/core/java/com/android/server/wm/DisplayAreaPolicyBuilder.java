@@ -25,6 +25,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWING_LAYER;
 import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
@@ -254,6 +256,10 @@ class DisplayAreaPolicyBuilder {
             throw new IllegalStateException("There must be a default TaskDisplayArea with id of "
                     + "FEATURE_DEFAULT_TASK_CONTAINER.");
         }
+
+        if (!mRootHierarchyBuilder.hasValidWindowingLayer()) {
+            throw new IllegalStateException("WindowingLayer must exist at the top level index");
+        }
     }
 
     /** Checks if the given hierarchy contains the default {@link TaskDisplayArea}. */
@@ -265,6 +271,11 @@ class DisplayAreaPolicyBuilder {
             }
         }
         return false;
+    }
+
+    /** Returns {@code true} if the feature id can be used to put all window content. */
+    static boolean canBeWindowingLayer(int featureId) {
+        return featureId == FEATURE_WINDOWED_MAGNIFICATION || featureId == FEATURE_WINDOWING_LAYER;
     }
 
     /**
@@ -329,6 +340,12 @@ class DisplayAreaPolicyBuilder {
     }
 
     Result build(WindowManagerService wmService) {
+        if (mRootHierarchyBuilder != null && !mRootHierarchyBuilder.hasValidWindowingLayer()) {
+            // Need an additional top layer for screen level animation.
+            mRootHierarchyBuilder.mFeatures.add(0 /* top level index */, new Feature.Builder(
+                    wmService.mPolicy, "WindowingLayer", FEATURE_WINDOWING_LAYER)
+                    .setExcludeRoundedCornerOverlay(false).all().build());
+        }
         validate();
 
         // Attach DA group roots to screen hierarchy before adding windows to group hierarchies.
@@ -624,6 +641,11 @@ class DisplayAreaPolicyBuilder {
             }
         }
 
+        boolean hasValidWindowingLayer() {
+            // The windowing layer feature can only be the first one as the top hierarchy.
+            return !mFeatures.isEmpty() && canBeWindowingLayer(mFeatures.get(0).mId);
+        }
+
         private static int typeOfLayer(WindowManagerPolicy policy, int layer) {
             if (layer == APPLICATION_LAYER) {
                 return LEAF_TYPE_TASK_CONTAINERS;
@@ -863,6 +885,23 @@ class DisplayAreaPolicyBuilder {
                     displayAreas.addAll(root.mFeatureToDisplayAreas.get(feature));
                 }
             }
+        }
+
+        @Override
+        public DisplayArea<? extends WindowContainer> getWindowingArea() {
+            if (mRoot.mFeatures.isEmpty()) {
+                throw new IllegalStateException("There must be at least one feature.");
+            }
+            final Feature feature = mRoot.mFeatures.get(0);
+            if (canBeWindowingLayer(feature.mId)) {
+                final List<DisplayArea<WindowContainer>> areas =
+                        mRoot.mFeatureToDisplayAreas.get(feature);
+                if (areas.size() == 1) {
+                    return areas.get(0);
+                }
+            }
+            throw new IllegalStateException("There must be exactly one DisplayArea at top for the "
+                    + "FEATURE_WINDOWED_MAGNIFICATION or FEATURE_WINDOWING_LAYER");
         }
 
         @Override

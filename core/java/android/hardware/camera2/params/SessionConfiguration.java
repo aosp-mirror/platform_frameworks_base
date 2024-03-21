@@ -20,6 +20,7 @@ package android.hardware.camera2.params;
 import static com.android.internal.util.Preconditions.*;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +29,7 @@ import android.graphics.ColorSpace;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraDevice.CameraDeviceSetup;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.InputConfiguration;
@@ -122,6 +124,34 @@ public final class SessionConfiguration implements Parcelable {
         mOutputConfigurations = Collections.unmodifiableList(new ArrayList<>(outputs));
         mStateCallback = cb;
         mExecutor = executor;
+    }
+
+    /**
+     * Create a new {@link SessionConfiguration} with sessionType and output configurations.
+     *
+     * <p>The SessionConfiguration objects created by this constructor can be used by
+     * {@link CameraDeviceSetup.isSessionConfigurationSupported} and {@link
+     * CameraDeviceSetup.getSessionCharacteristics} to query a camera device's feature
+     * combination support and session specific characteristics. For the SessionConfiguration
+     * object to be used to create a capture session, {@link #setStateCallback} must be called to
+     * specify the state callback function, and any incomplete OutputConfigurations must be
+     * completed via {@link OutputConfiguration#addSurface} or
+     * {@link OutputConfiguration#setSurfacesForMultiResolutionOutput} as appropriate.</p>
+     *
+     * @param sessionType The session type.
+     * @param outputs A list of output configurations for the capture session.
+     *
+     * @see #SESSION_REGULAR
+     * @see #SESSION_HIGH_SPEED
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
+     * @see CameraDeviceSetup#isSessionConfigurationSupported
+     * @see CameraDeviceSetup#getSessionCharacteristics
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public SessionConfiguration(@SessionMode int sessionType,
+            @NonNull List<OutputConfiguration> outputs) {
+        mSessionType = sessionType;
+        mOutputConfigurations = Collections.unmodifiableList(new ArrayList<>(outputs));
     }
 
     /**
@@ -375,5 +405,24 @@ public final class SessionConfiguration implements Parcelable {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Set the state callback and executor.
+     *
+     * <p>This function must be called for the SessionConfiguration object created via {@link
+     * #SessionConfiguration(int, List) SessionConfiguration(int, List&lt;OutputConfiguration&gt;)}
+     * before it's used to create a capture session.</p>
+     *
+     * @param executor The executor which should be used to invoke the callback. In general it is
+     *                 recommended that camera operations are not done on the main (UI) thread.
+     * @param cb A state callback interface implementation.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public void setStateCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CameraCaptureSession.StateCallback cb) {
+        mStateCallback = cb;
+        mExecutor = executor;
     }
 }

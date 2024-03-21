@@ -112,10 +112,13 @@ public final class TaskFragmentOperation implements Parcelable {
     /**
      * Creates a decor surface in the parent Task of the TaskFragment. The created decor surface
      * will be provided in {@link TaskFragmentTransaction#TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED}
-     * event callback. The decor surface can be used to draw the divider between TaskFragments or
-     * other decorations.
+     * event callback. If a decor surface already exists in the parent Task, the current
+     * TaskFragment will become the new owner of the decor surface and the decor surface will be
+     * moved above the TaskFragment.
+     *
+     * The decor surface can be used to draw the divider between TaskFragments or other decorations.
      */
-    public static final int OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE = 14;
+    public static final int OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE = 14;
 
     /**
      * Removes the decor surface in the parent Task of the TaskFragment.
@@ -162,7 +165,7 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_SET_ISOLATED_NAVIGATION,
             OP_TYPE_REORDER_TO_BOTTOM_OF_TASK,
             OP_TYPE_REORDER_TO_TOP_OF_TASK,
-            OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE,
+            OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE,
             OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE,
             OP_TYPE_SET_DIM_ON_TASK,
             OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH,

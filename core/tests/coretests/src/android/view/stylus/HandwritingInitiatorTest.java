@@ -55,6 +55,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -72,6 +73,7 @@ import org.mockito.ArgumentCaptor;
  */
 @Presubmit
 @SmallTest
+@UiThreadTest
 @RunWith(AndroidJUnit4.class)
 public class HandwritingInitiatorTest {
     private static final long TIMEOUT = ViewConfiguration.getLongPressTimeout();

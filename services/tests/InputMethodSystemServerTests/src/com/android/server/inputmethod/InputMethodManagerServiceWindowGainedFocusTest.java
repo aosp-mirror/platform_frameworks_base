@@ -198,7 +198,9 @@ public class InputMethodManagerServiceWindowGainedFocusTest
 
     @Test
     public void startInputOrWindowGainedFocus_userNotRunning() throws RemoteException {
-        when(mMockUserManagerInternal.isUserRunning(anyInt())).thenReturn(false);
+        // Run blockingly on ServiceThread to avoid that interfering with our stubbing.
+        mServiceThread.getThreadHandler().runWithScissors(
+                () -> when(mMockUserManagerInternal.isUserRunning(anyInt())).thenReturn(false), 0);
 
         assertThat(
                         startInputOrWindowGainedFocus(

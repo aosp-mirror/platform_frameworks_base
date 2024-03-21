@@ -72,10 +72,7 @@ internal fun PatternBouncer(
     centerDotsVertically: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    DisposableEffect(Unit) {
-        viewModel.onShown()
-        onDispose { viewModel.onHidden() }
-    }
+    DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
     val colCount = viewModel.columnCount
     val rowCount = viewModel.rowCount

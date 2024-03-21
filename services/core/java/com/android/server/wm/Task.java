@@ -1274,7 +1274,8 @@ class Task extends TaskFragment {
         if (!isLeafTaskFragment()) {
             final ActivityRecord top = topRunningActivity();
             final ActivityRecord resumedActivity = getResumedActivity();
-            if (resumedActivity != null && top.getTaskFragment() != this) {
+            if (resumedActivity != null
+                    && (top.getTaskFragment() != this || !canBeResumed(resuming))) {
                 // Pausing the resumed activity because it is occluded by other task fragment.
                 if (startPausing(false /* uiSleeping*/, resuming, reason)) {
                     someActivityPaused[0]++;
@@ -3753,11 +3754,9 @@ class Task extends TaskFragment {
                 // Boost the adjacent TaskFragment for dimmer if needed.
                 final TaskFragment taskFragment = wc.asTaskFragment();
                 if (taskFragment != null && taskFragment.isEmbedded()) {
-                    taskFragment.mDimmerSurfaceBoosted = false;
                     final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
                     if (adjacentTf != null && adjacentTf.shouldBoostDimmer()) {
                         adjacentTf.assignLayer(t, layer++);
-                        adjacentTf.mDimmerSurfaceBoosted = true;
                     }
                 }
 
@@ -6823,8 +6822,8 @@ class Task extends TaskFragment {
      * A decor surface is requested by a {@link TaskFragmentOrganizer} and is placed below children
      * windows in the Task except for own Activities and TaskFragments in fully trusted mode. The
      * decor surface is created and shared with the client app with
-     * {@link android.window.TaskFragmentOperation#OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE} and
-     * be removed with
+     * {@link android.window.TaskFragmentOperation#OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE}
+     * and be removed with
      * {@link android.window.TaskFragmentOperation#OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE}.
      *
      * When boosted with

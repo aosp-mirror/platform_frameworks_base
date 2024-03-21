@@ -48,6 +48,7 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             isInputEnabled = MutableStateFlow(true),
             simBouncerInteractor = kosmos.simBouncerInteractor,
             authenticationMethod = AuthenticationMethodModel.Pin,
+            onIntentionalUserInput = {},
         )
     }
 

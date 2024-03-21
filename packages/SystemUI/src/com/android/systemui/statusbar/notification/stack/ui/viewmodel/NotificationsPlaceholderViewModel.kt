@@ -21,11 +21,11 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
-import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
+import com.android.systemui.statusbar.notification.stack.shared.model.StackBounds
+import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -43,15 +43,11 @@ constructor(
     featureFlags: FeatureFlagsClassic,
     private val keyguardInteractor: KeyguardInteractor,
 ) {
-    /** DEBUG: whether the placeholder "Notifications" text should be shown. */
-    val isPlaceholderTextVisible: Boolean =
-        !flags.flexiNotifsEnabled() && SceneContainerFlag.isEnabled
-
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */
     val isVisualDebuggingEnabled: Boolean = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES)
 
     /** DEBUG: whether the debug logging should be output. */
-    val isDebugLoggingEnabled: Boolean = flags.flexiNotifsEnabled()
+    val isDebugLoggingEnabled: Boolean = flags.isEnabled()
 
     /**
      * Notifies that the bounds of the notification placeholder have changed.
@@ -67,11 +63,16 @@ constructor(
         right: Float,
         bottom: Float,
     ) {
-        val notificationContainerBounds =
-            NotificationContainerBounds(top = top, bottom = bottom, left = left, right = right)
-        keyguardInteractor.setNotificationContainerBounds(notificationContainerBounds)
-        interactor.setStackBounds(notificationContainerBounds)
+        keyguardInteractor.setNotificationContainerBounds(
+            NotificationContainerBounds(top = top, bottom = bottom)
+        )
+        interactor.setStackBounds(
+            StackBounds(top = top, bottom = bottom, left = left, right = right)
+        )
     }
+
+    /** Corner rounding of the stack */
+    val stackRounding: Flow<StackRounding> = interactor.stackRounding
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of

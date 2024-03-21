@@ -98,10 +98,6 @@ private constructor(
         forEachSchemePolicy { with(it) { onStateMutated() } }
     }
 
-    fun MutateStateScope.onInitialized() {
-        forEachSchemePolicy { with(it) { onInitialized() } }
-    }
-
     fun MutateStateScope.onUserAdded(userId: Int) {
         newState.mutateExternalState().mutateUserIds() += userId
         newState.mutateUserStatesNoWrite()[userId] = MutableUserState()
@@ -442,8 +438,6 @@ abstract class SchemePolicy {
     abstract val objectScheme: String
 
     open fun GetStateScope.onStateMutated() {}
-
-    open fun MutateStateScope.onInitialized() {}
 
     open fun MutateStateScope.onUserAdded(userId: Int) {}
 

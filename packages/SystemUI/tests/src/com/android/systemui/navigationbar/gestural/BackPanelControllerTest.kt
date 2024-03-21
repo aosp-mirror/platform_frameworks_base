@@ -28,9 +28,10 @@ import android.view.MotionEvent.ACTION_UP
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
-import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.jank.interactionJankMonitor
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -41,10 +42,8 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -62,16 +61,13 @@ class BackPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var latencyTracker: LatencyTracker
-    @Mock private lateinit var interactionJankMonitor: InteractionJankMonitor
+    private val interactionJankMonitor = Kosmos().interactionJankMonitor
     @Mock private lateinit var layoutParams: WindowManager.LayoutParams
     @Mock private lateinit var backCallback: NavigationEdgeBackPlugin.BackCallback
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        `when`(interactionJankMonitor.begin(any(), anyInt())).thenReturn(true)
-        `when`(interactionJankMonitor.end(anyInt())).thenReturn(true)
-        `when`(interactionJankMonitor.cancel(anyInt())).thenReturn(true)
         mBackPanelController =
             BackPanelController(
                 context,

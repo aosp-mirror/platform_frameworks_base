@@ -52,6 +52,14 @@ flag {
 
 flag {
     namespace: "backstage_power"
+    name: "defer_outgoing_broadcasts"
+    description: "Defer outgoing broadcasts from processes in freezable state"
+    bug: "327496592"
+    is_fixed_read_only: true
+}
+
+flag {
+    namespace: "backstage_power"
     name: "avoid_repeated_bcast_re_enqueues"
     description: "Avoid re-enqueueing a broadcast repeatedly"
     bug: "319225224"
@@ -59,4 +67,30 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "log_excessive_binder_proxies"
+    description: "Log the excessive incoming binder proxies into statsd"
+    bug: "298263955"
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "avoid_resolving_type"
+    description: "Avoid resolving data type for sticky broadcasts"
+    bug: "323817802"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "backstage_power"
+    name: "use_permission_manager_for_broadcast_delivery_check"
+    description: "Use PermissionManager API for broadcast delivery permission checks."
+    bug: "315468967"
+    is_fixed_read_only: true
 }

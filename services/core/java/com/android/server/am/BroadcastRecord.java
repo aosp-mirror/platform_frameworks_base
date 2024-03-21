@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.app.AppProtoEnums.BROADCAST_TYPE_ALARM;
 import static android.app.AppProtoEnums.BROADCAST_TYPE_BACKGROUND;
 import static android.app.AppProtoEnums.BROADCAST_TYPE_DEFERRABLE_UNTIL_ACTIVE;
@@ -31,12 +30,6 @@ import static android.app.AppProtoEnums.BROADCAST_TYPE_PUSH_MESSAGE_OVER_QUOTA;
 import static android.app.AppProtoEnums.BROADCAST_TYPE_RESULT_TO;
 import static android.app.AppProtoEnums.BROADCAST_TYPE_STICKY;
 
-import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_ALL;
-import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY;
-import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_CHANGE_ID;
-import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_NONE;
-import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY;
-
 import android.annotation.CheckResult;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
@@ -45,12 +38,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
 import android.app.ActivityManager.ProcessState;
-import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.BroadcastOptions.DeliveryGroupPolicy;
-import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -63,7 +54,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.PrintWriterPrinter;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -75,13 +65,11 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
 /**
@@ -125,9 +113,6 @@ final class BroadcastRecord extends Binder {
     final int[] blockedUntilBeyondCount; // blocked until count of each receiver
     @Nullable ProcessRecord resultToApp; // who receives final result if non-null
     @Nullable IIntentReceiver resultTo; // who receives final result if non-null
-    boolean deferred;
-    int splitCount;         // refcount for result callback, when split
-    int splitToken;         // identifier for cross-BroadcastRecord refcount
     @UptimeMillisLong       long enqueueTime;        // when broadcast enqueued
     @ElapsedRealtimeLong    long enqueueRealTime;    // when broadcast enqueued
     @CurrentTimeMillisLong  long enqueueClockTime;   // when broadcast enqueued
@@ -275,15 +260,6 @@ final class BroadcastRecord extends Binder {
     ActivityInfo curReceiver;   // the manifest receiver that is currently running.
     BroadcastFilter curFilter;  // the registered receiver currently running.
     Bundle curFilteredExtras;   // the bundle that has been filtered by the package visibility rules
-
-    int curAppLastProcessState; // The last process state of the current receiver before receiving
-
-    boolean mIsReceiverAppRunning; // Was the receiver's app already running.
-
-    boolean mWasReceiverAppStopped; // Was the receiver app stopped prior to starting
-
-    // Private refcount-management bookkeeping; start > 0
-    static AtomicInteger sNextToken = new AtomicInteger(1);
 
     @NeverCompile
     void dump(PrintWriter pw, String prefix, SimpleDateFormat sdf) {
@@ -582,129 +558,6 @@ final class BroadcastRecord extends Binder {
     }
 
     /**
-     * Split off a new BroadcastRecord that clones this one, but contains only the
-     * recipient records for the current (just-finished) receiver's app, starting
-     * after the just-finished receiver [i.e. at r.nextReceiver].  Returns null
-     * if there are no matching subsequent receivers in this BroadcastRecord.
-     */
-    BroadcastRecord splitRecipientsLocked(int slowAppUid, int startingAt) {
-        // Do we actually have any matching receivers down the line...?
-        ArrayList splitReceivers = null;
-        for (int i = startingAt; i < receivers.size(); ) {
-            Object o = receivers.get(i);
-            if (getReceiverUid(o) == slowAppUid) {
-                if (splitReceivers == null) {
-                    splitReceivers = new ArrayList<>();
-                }
-                splitReceivers.add(o);
-                receivers.remove(i);
-            } else {
-                i++;
-            }
-        }
-
-        // No later receivers in the same app, so we have no more to do
-        if (splitReceivers == null) {
-            return null;
-        }
-
-        // build a new BroadcastRecord around that single-target list
-        BroadcastRecord split = new BroadcastRecord(queue, intent, callerApp, callerPackage,
-                callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
-                requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
-                splitReceivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
-                ordered, sticky, initialSticky, userId,
-                mBackgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
-                callerProcState);
-        split.enqueueTime = this.enqueueTime;
-        split.enqueueRealTime = this.enqueueRealTime;
-        split.enqueueClockTime = this.enqueueClockTime;
-        split.splitToken = this.splitToken;
-        return split;
-    }
-
-    /**
-     * Split a BroadcastRecord to a map of deferred receiver UID to deferred BroadcastRecord.
-     *
-     * The receivers that are deferred are removed from original BroadcastRecord's receivers list.
-     * The receivers that are not deferred are kept in original BroadcastRecord's receivers list.
-     *
-     * Only used to split LOCKED_BOOT_COMPLETED or BOOT_COMPLETED BroadcastRecord.
-     * LOCKED_BOOT_COMPLETED or BOOT_COMPLETED broadcast can be deferred until the first time
-     * the receiver's UID has a process started.
-     *
-     * @param ams The ActivityManagerService object.
-     * @param deferType Defer what UID?
-     * @return the deferred UID to BroadcastRecord map, the BroadcastRecord has the list of
-     *         receivers in that UID.
-     */
-    @NonNull SparseArray<BroadcastRecord> splitDeferredBootCompletedBroadcastLocked(
-            ActivityManagerInternal activityManagerInternal,
-            @BroadcastConstants.DeferBootCompletedBroadcastType int deferType) {
-        final SparseArray<BroadcastRecord> ret = new SparseArray<>();
-        if (deferType == DEFER_BOOT_COMPLETED_BROADCAST_NONE) {
-            return ret;
-        }
-
-        if (receivers == null) {
-            return ret;
-        }
-
-        final String action = intent.getAction();
-        if (!Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(action)
-                && !Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-            return ret;
-        }
-
-        final SparseArray<List<Object>> uid2receiverList = new SparseArray<>();
-        for (int i = receivers.size() - 1; i >= 0; i--) {
-            final Object receiver = receivers.get(i);
-            final int uid = getReceiverUid(receiver);
-            if (deferType != DEFER_BOOT_COMPLETED_BROADCAST_ALL) {
-                if ((deferType & DEFER_BOOT_COMPLETED_BROADCAST_BACKGROUND_RESTRICTED_ONLY) != 0) {
-                    if (activityManagerInternal.getRestrictionLevel(uid)
-                            < RESTRICTION_LEVEL_BACKGROUND_RESTRICTED) {
-                        // skip if the UID is not background restricted.
-                        continue;
-                    }
-                }
-                if ((deferType & DEFER_BOOT_COMPLETED_BROADCAST_TARGET_T_ONLY) != 0) {
-                    if (!CompatChanges.isChangeEnabled(DEFER_BOOT_COMPLETED_BROADCAST_CHANGE_ID,
-                            uid)) {
-                        // skip if the UID is not targetSdkVersion T+.
-                        continue;
-                    }
-                }
-            }
-            // Remove receiver from original BroadcastRecord's receivers list.
-            receivers.remove(i);
-            final List<Object> receiverList = uid2receiverList.get(uid);
-            if (receiverList != null) {
-                receiverList.add(0, receiver);
-            } else {
-                ArrayList<Object> splitReceivers = new ArrayList<>();
-                splitReceivers.add(0, receiver);
-                uid2receiverList.put(uid, splitReceivers);
-            }
-        }
-        final int uidSize = uid2receiverList.size();
-        for (int i = 0; i < uidSize; i++) {
-            final BroadcastRecord br = new BroadcastRecord(queue, intent, callerApp, callerPackage,
-                    callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
-                    requiredPermissions, excludedPermissions, excludedPackages, appOp, options,
-                    uid2receiverList.valueAt(i), null /* _resultToApp */, null /* _resultTo */,
-                    resultCode, resultData, resultExtras, ordered, sticky, initialSticky, userId,
-                    mBackgroundStartPrivileges, timeoutExempt,
-                    filterExtrasForReceiver, callerProcState);
-            br.enqueueTime = this.enqueueTime;
-            br.enqueueRealTime = this.enqueueRealTime;
-            br.enqueueClockTime = this.enqueueClockTime;
-            ret.put(uid2receiverList.keyAt(i), br);
-        }
-        return ret;
-    }
-
-    /**
      * Update the delivery state of the given {@link #receivers} index.
      * Automatically updates any time measurements related to state changes.
      *
@@ -876,7 +729,7 @@ final class BroadcastRecord extends Binder {
     }
 
     /**
-     * Determine if the result of {@link #calculateBlockedUntilTerminalCount}
+     * Determine if the result of {@link #calculateBlockedUntilBeyondCount(List, boolean)}
      * has prioritized tranches of receivers.
      */
     @VisibleForTesting

@@ -70,6 +70,11 @@ static jobject nativeGetBinderToken(JNIEnv* env, jclass clazz, jlong nativeObj) 
     return javaObjectForIBinder(env, inputTransferToken->mToken);
 }
 
+static jlong nativeGetBinderTokenRef(JNIEnv*, jclass, jlong nativeObj) {
+    sp<InputTransferToken> inputTransferToken = reinterpret_cast<InputTransferToken*>(nativeObj);
+    return reinterpret_cast<jlong>(inputTransferToken->mToken.get());
+}
+
 InputTransferToken* android_window_InputTransferToken_getNativeInputTransferToken(
         JNIEnv* env, jobject inputTransferTokenObj) {
     if (inputTransferTokenObj != nullptr &&
@@ -83,14 +88,10 @@ InputTransferToken* android_window_InputTransferToken_getNativeInputTransferToke
 }
 
 jobject android_window_InputTransferToken_getJavaInputTransferToken(
-        JNIEnv* env, const InputTransferToken* inputTransferToken) {
-    if (inputTransferToken == nullptr || env == nullptr) {
-        return nullptr;
-    }
-
-    inputTransferToken->incStrong((void*)nativeCreate);
+        JNIEnv* env, const InputTransferToken& inputTransferToken) {
+    inputTransferToken.incStrong((void*)nativeCreate);
     return env->NewObject(gInputTransferTokenClassInfo.clazz, gInputTransferTokenClassInfo.ctor,
-                          reinterpret_cast<jlong>(inputTransferToken));
+                          reinterpret_cast<jlong>(&inputTransferToken));
 }
 
 static void release(InputTransferToken* inputTransferToken) {
@@ -118,6 +119,7 @@ static const JNINativeMethod sInputTransferTokenMethods[] = {
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V", (void*)nativeWriteToParcel},
     {"nativeReadFromParcel", "(Landroid/os/Parcel;)J", (void*)nativeReadFromParcel},
     {"nativeGetBinderToken", "(J)Landroid/os/IBinder;", (void*)nativeGetBinderToken},
+    {"nativeGetBinderTokenRef", "(J)J", (void*)nativeGetBinderTokenRef},
     {"nativeGetNativeInputTransferTokenFinalizer", "()J", (void*)nativeGetNativeInputTransferTokenFinalizer},
         {"nativeEquals", "(JJ)Z", (void*) nativeEquals},
         // clang-format on

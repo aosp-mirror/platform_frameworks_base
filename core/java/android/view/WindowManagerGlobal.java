@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import android.animation.ValueAnimator;
@@ -839,20 +840,40 @@ public final class WindowManagerGlobal {
         mTrustedPresentationListener.removeListener(listener);
     }
 
-    InputTransferToken registerBatchedSurfaceControlInputReceiver(int displayId,
+    private static InputChannel createInputChannel(@NonNull IBinder clientToken,
             @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
-            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
-        IBinder clientToken = new Binder();
-        InputTransferToken inputTransferToken = new InputTransferToken();
+            @Nullable InputTransferToken inputTransferToken) {
         InputChannel inputChannel = new InputChannel();
         try {
-            WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
-                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, inputTransferToken,
-                    surfaceControl.getName(), inputChannel);
+            // TODO (b/329860681): Use INVALID_DISPLAY for now because the displayId will be
+            // selected in  SurfaceFlinger. This should be cleaned up so grantInputChannel doesn't
+            // take in a displayId at all
+            WindowManagerGlobal.getWindowSession().grantInputChannel(INVALID_DISPLAY,
+                    surfaceControl, clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null,
+                    inputTransferToken, surfaceControl.getName(), inputChannel);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create input channel", e);
             e.rethrowAsRuntimeException();
         }
+        return inputChannel;
+    }
+
+    private static void removeInputChannel(IBinder clientToken) {
+        try {
+            WindowManagerGlobal.getWindowSession().remove(clientToken);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to remove input channel", e);
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    InputTransferToken registerBatchedSurfaceControlInputReceiver(
+            @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
+            @NonNull Choreographer choreographer, @NonNull SurfaceControlInputReceiver receiver) {
+        IBinder clientToken = new Binder();
+        InputTransferToken inputTransferToken = new InputTransferToken();
+        InputChannel inputChannel = createInputChannel(clientToken, hostToken,
+                surfaceControl, inputTransferToken);
 
         synchronized (mSurfaceControlInputReceivers) {
             mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
@@ -869,20 +890,13 @@ public final class WindowManagerGlobal {
         return inputTransferToken;
     }
 
-    InputTransferToken registerUnbatchedSurfaceControlInputReceiver(int displayId,
+    InputTransferToken registerUnbatchedSurfaceControlInputReceiver(
             @NonNull InputTransferToken hostToken, @NonNull SurfaceControl surfaceControl,
             @NonNull Looper looper, @NonNull SurfaceControlInputReceiver receiver) {
         IBinder clientToken = new Binder();
         InputTransferToken inputTransferToken = new InputTransferToken();
-        InputChannel inputChannel = new InputChannel();
-        try {
-            WindowManagerGlobal.getWindowSession().grantInputChannel(displayId, surfaceControl,
-                    clientToken, hostToken, 0, 0, TYPE_APPLICATION, 0, null, inputTransferToken,
-                    surfaceControl.getName(), inputChannel);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to create input channel", e);
-            e.rethrowAsRuntimeException();
-        }
+        InputChannel inputChannel = createInputChannel(clientToken, hostToken,
+                surfaceControl, inputTransferToken);
 
         synchronized (mSurfaceControlInputReceivers) {
             mSurfaceControlInputReceivers.put(surfaceControl.getLayerId(),
@@ -909,13 +923,7 @@ public final class WindowManagerGlobal {
             Log.w(TAG, "No registered input event receiver with sc: " + surfaceControl);
             return;
         }
-        try {
-            WindowManagerGlobal.getWindowSession().remove(
-                    surfaceControlInputReceiverInfo.mClientToken);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to remove input channel", e);
-            e.rethrowAsRuntimeException();
-        }
+        removeInputChannel(surfaceControlInputReceiverInfo.mClientToken);
 
         surfaceControlInputReceiverInfo.mInputEventReceiver.dispose();
     }

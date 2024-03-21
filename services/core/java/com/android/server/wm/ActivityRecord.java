@@ -118,6 +118,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -125,10 +126,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED;
 import static android.view.WindowManager.PROPERTY_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING_STATE_SHARING;
+import static android.view.WindowManager.ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_OLD_UNSET;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.hasWindowExtensionsEnabled;
 import static android.window.TransitionInfo.FLAGS_IS_OCCLUDED_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -282,6 +285,7 @@ import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.ActivityId;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -328,7 +332,6 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.service.contentcapture.ActivityEvent;
@@ -1003,10 +1006,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // Whether the Activity allows state sharing in untrusted embedding
     private final boolean mAllowUntrustedEmbeddingStateSharing;
-
-    // TODO(b/329378309): Remove this once the overview handles the configuration correctly.
-    private static final boolean OVERRIDE_OVERVIEW_CONFIGURATION =
-            SystemProperties.getBoolean("persist.wm.debug.override_overview_configuration", true);
 
     // Records whether client has overridden the WindowAnimation_(Open/Close)(Enter/Exit)Animation.
     private CustomAppTransition mCustomOpenTransition;
@@ -2271,16 +2270,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
-        boolean appActivityEmbeddingEnabled = false;
-        try {
-            appActivityEmbeddingEnabled = WindowManager.hasWindowExtensionsEnabled()
-                    && mAtmService.mContext.getPackageManager()
-                            .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
-                            .getBoolean();
-        } catch (PackageManager.NameNotFoundException e) {
-            // No such property name.
-        }
-        mAppActivityEmbeddingSplitsEnabled = appActivityEmbeddingEnabled;
+        mAppActivityEmbeddingSplitsEnabled = isAppActivityEmbeddingSplitsEnabled();
         mAllowUntrustedEmbeddingStateSharing = getAllowUntrustedEmbeddingStateSharingProperty();
 
         mOptInOnBackInvoked = WindowOnBackInvokedDispatcher
@@ -2297,6 +2287,28 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                             return appContext;
                         });
         mCallerState = new ActivityCallerState(mAtmService);
+    }
+
+    private boolean isAppActivityEmbeddingSplitsEnabled() {
+        if (!hasWindowExtensionsEnabled()) {
+            // WM Extensions disabled.
+            return false;
+        }
+        if (ACTIVITY_EMBEDDING_GUARD_WITH_ANDROID_15 && !CompatChanges.isChangeEnabled(
+                ENABLE_ACTIVITY_EMBEDDING_FOR_ANDROID_15,
+                info.packageName,
+                UserHandle.getUserHandleForUid(getUid()))) {
+            // Activity Embedding is guarded with Android 15+, but this app is not qualified.
+            return false;
+        }
+        try {
+            return mAtmService.mContext.getPackageManager()
+                    .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
+                    .getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // No such property name.
+            return false;
+        }
     }
 
     /**
@@ -8613,12 +8625,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
             rotation = mDisplayContent.getRotation();
         }
-        final int activityType = inOutConfig.windowConfiguration.getActivityType();
-        if (OVERRIDE_OVERVIEW_CONFIGURATION
-                && (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS)) {
-            // Do not early return and provide the override. This should be removed shortly as we
-            // don't override 1P components.
-        } else if (!mWmService.mFlags.mInsetsDecoupledConfiguration
+        if (!mWmService.mFlags.mInsetsDecoupledConfiguration
                 || info.isChangeEnabled(INSETS_DECOUPLED_CONFIGURATION_ENFORCED)
                 || getCompatDisplayInsets() != null
                 || isFloating(parentWindowingMode) || fullBounds == null
@@ -11002,6 +11009,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return null;
         }
         return new Point(windowLayout.minWidth, windowLayout.minHeight);
+    }
+
+    /**
+     * Returns the {@link #createTime} if the top window is the `base` window. Note that do not
+     * use the window creation time because the window could be re-created when the activity
+     * relaunched if configuration changed.
+     * <p>
+     * Otherwise, return the creation time of the top window.
+     */
+    long getLastWindowCreateTime() {
+        final WindowState window = getWindow(win -> true);
+        return window != null && window.mAttrs.type != TYPE_BASE_APPLICATION
+                ? window.getCreateTime()
+                : createTime;
     }
 
     /**

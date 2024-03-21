@@ -60,6 +60,7 @@ public class DreamBackend {
         public CharSequence description;
         public Drawable previewImage;
         public boolean supportsComplications = false;
+        public int dreamCategory;
 
         @Override
         public String toString() {
@@ -207,6 +208,7 @@ public class DreamBackend {
                 dreamInfo.settingsComponentName = dreamMetadata.settingsActivity;
                 dreamInfo.previewImage = dreamMetadata.previewImage;
                 dreamInfo.supportsComplications = dreamMetadata.showComplications;
+                dreamInfo.dreamCategory = dreamMetadata.dreamCategory;
             }
             dreamInfos.add(dreamInfo);
         }

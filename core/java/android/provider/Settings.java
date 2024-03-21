@@ -11090,21 +11090,12 @@ public final class Settings {
                 "assist_long_press_home_enabled";
 
         /**
-         * Whether press and hold on nav handle can trigger search.
+         * Whether all entrypoints can trigger search. Replaces individual settings.
          *
          * @hide
          */
-        public static final String SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED =
-                "search_press_hold_nav_handle_enabled";
-
-        /**
-         * Whether long-pressing on the home button can trigger search.
-         *
-         * @hide
-         */
-        public static final String SEARCH_LONG_PRESS_HOME_ENABLED =
-                "search_long_press_home_enabled";
-
+        public static final String SEARCH_ALL_ENTRYPOINTS_ENABLED =
+                "search_all_entrypoints_enabled";
 
         /**
          * Whether or not the accessibility data streaming is enbled for the
@@ -12394,6 +12385,13 @@ public final class Settings {
          * @hide
          */
         public static final String HIDE_PRIVATESPACE_ENTRY_POINT = "hide_privatespace_entry_point";
+
+        /**
+         * Whether or not secure windows should be disabled. This only works on debuggable builds.
+         *
+         * @hide
+         */
+        public static final String DISABLE_SECURE_WINDOWS = "disable_secure_windows";
 
         /** @hide */
         public static final int PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK = 0;

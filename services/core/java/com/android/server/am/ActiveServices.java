@@ -4658,6 +4658,8 @@ public final class ActiveServices {
                         INVALID_UID /* sdkSandboxClientAppUid */,
                         null /* sdkSandboxClientAppPackage */,
                         false /* inSharedIsolatedProcess */);
+                r.foregroundId = fgsDelegateOptions.mClientNotificationId;
+                r.foregroundNoti = fgsDelegateOptions.mClientNotification;
                 res.setService(r);
                 smap.mServicesByInstanceName.put(cn, r);
                 smap.mServicesByIntent.put(filter, r);
@@ -8171,7 +8173,7 @@ public final class ActiveServices {
      * @param targetProcess  the process of the service to start.
      * @return {@link ReasonCode}
      */
-    private @ReasonCode int shouldAllowFgsWhileInUsePermissionLocked(String callingPackage,
+    @ReasonCode int shouldAllowFgsWhileInUsePermissionLocked(String callingPackage,
             int callingPid, int callingUid, @Nullable ProcessRecord targetProcess,
             BackgroundStartPrivileges backgroundStartPrivileges) {
         int ret = REASON_DENIED;
@@ -9046,6 +9048,10 @@ public final class ActiveServices {
             });
         }
         signalForegroundServiceObserversLocked(r);
+        if (r.foregroundId != 0 && r.foregroundNoti != null) {
+            r.foregroundNoti.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+            r.postNotification(true);
+        }
         return true;
     }
 

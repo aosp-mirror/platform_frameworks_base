@@ -336,6 +336,9 @@ public class WallpaperDataParser {
                         parser.getAttributeInt(null, "cropRight" + pair.second, 0),
                         parser.getAttributeInt(null, "cropBottom" + pair.second, 0));
                 if (!cropHint.isEmpty()) wallpaper.mCropHints.put(pair.first, cropHint);
+                if (!cropHint.isEmpty() && cropHint.equals(legacyCropHint)) {
+                    wallpaper.mOrientationWhenSet = pair.first;
+                }
             }
             if (wallpaper.mCropHints.size() == 0 && totalCropHint.isEmpty()) {
                 // migration case: the crops per screen orientation are not specified.

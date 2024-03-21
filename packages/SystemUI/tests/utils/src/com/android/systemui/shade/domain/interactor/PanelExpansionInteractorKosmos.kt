@@ -18,6 +18,7 @@ package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 
 val Kosmos.panelExpansionInteractor by Fixture { panelExpansionInteractorImpl }
@@ -26,5 +27,6 @@ val Kosmos.panelExpansionInteractorImpl by Fixture {
         sceneInteractor,
         shadeInteractor,
         shadeAnimationInteractor,
+        statusBarStateController,
     )
 }

@@ -80,6 +80,8 @@ import android.app.people.IPeopleManager;
 import android.app.people.PeopleManager;
 import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -312,6 +314,12 @@ public class PeopleSpaceWidgetManagerTest extends SysuiTestCase {
                 .setId(1)
                 .setShortcutInfo(mShortcutInfo)
                 .build();
+
+        AppWidgetProviderInfo providerInfo = new AppWidgetProviderInfo();
+        providerInfo.provider = new ComponentName("com.android.systemui.tests",
+                "com.android.systemui.people.widget.PeopleSpaceWidgetProvider");
+        when(mAppWidgetManager.getInstalledProvidersForPackage(anyString(), any()))
+                .thenReturn(List.of(providerInfo));
     }
 
     @Test

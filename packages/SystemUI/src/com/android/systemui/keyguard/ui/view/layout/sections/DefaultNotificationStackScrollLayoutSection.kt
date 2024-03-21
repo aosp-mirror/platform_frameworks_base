@@ -26,20 +26,16 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.centralizedStatusBarHeightFix
 import com.android.systemui.Flags.migrateClocksToBlueprint
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.NotificationPanelView
-import com.android.systemui.statusbar.notification.stack.AmbientState
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationStackViewBinder
+import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import dagger.Lazy
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
 
 /** Single column format for notifications (default for phones) */
 class DefaultNotificationStackScrollLayoutSection
@@ -50,12 +46,9 @@ constructor(
     notificationPanelView: NotificationPanelView,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
-    notificationStackAppearanceViewModel: NotificationStackAppearanceViewModel,
-    ambientState: AmbientState,
-    controller: NotificationStackScrollLayoutController,
-    notificationStackSizeCalculator: NotificationStackSizeCalculator,
+    sharedNotificationContainerBinder: SharedNotificationContainerBinder,
+    notificationStackViewBinder: NotificationStackViewBinder,
     private val largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
-    @Main mainDispatcher: CoroutineDispatcher,
 ) :
     NotificationStackScrollLayoutSection(
         context,
@@ -63,11 +56,8 @@ constructor(
         notificationPanelView,
         sharedNotificationContainer,
         sharedNotificationContainerViewModel,
-        notificationStackAppearanceViewModel,
-        ambientState,
-        controller,
-        notificationStackSizeCalculator,
-        mainDispatcher,
+        sharedNotificationContainerBinder,
+        notificationStackViewBinder,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!migrateClocksToBlueprint()) {

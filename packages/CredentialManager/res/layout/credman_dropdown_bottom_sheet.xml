@@ -33,10 +33,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:paddingLeft="@dimen/autofill_view_left_padding"
+            android:paddingStart="@dimen/autofill_view_left_padding"
             android:src="@drawable/more_horiz_24px"
             android:tint="?androidprv:attr/materialColorOnSurface"
-            android:layout_alignParentStart="true"
             android:contentDescription="@string/more_options_content_description"
             android:background="@null"/>
 
@@ -44,8 +43,8 @@
         android:id="@+id/text_container"
         android:layout_width="@dimen/autofill_dropdown_textview_max_width"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/autofill_view_left_padding"
-        android:paddingRight="@dimen/autofill_view_right_padding"
+        android:paddingStart="@dimen/autofill_view_left_padding"
+        android:paddingEnd="@dimen/autofill_view_right_padding"
         android:paddingTop="@dimen/more_options_item_vertical_padding"
         android:paddingBottom="@dimen/more_options_item_vertical_padding"
         android:orientation="vertical">
@@ -54,9 +53,7 @@
             android:id="@android:id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
             android:textColor="?androidprv:attr/materialColorOnSurface"
-            android:layout_toEndOf="@android:id/icon1"
             style="@style/autofill.TextTitle"/>
     </LinearLayout>
 

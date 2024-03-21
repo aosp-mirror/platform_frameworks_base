@@ -213,9 +213,10 @@ constructor(
         cs: ConstraintSet,
         viewModel: KeyguardClockViewModel
     ) {
-        if (!DEBUG || viewModel.clock == null) return
+        val currentClock = viewModel.currentClock.value
+        if (!DEBUG || currentClock == null) return
         val smallClockViewId = R.id.lockscreen_clock_view
-        val largeClockViewId = viewModel.clock!!.largeClock.layout.views[0].id
+        val largeClockViewId = currentClock.largeClock.layout.views[0].id
         Log.i(
             TAG,
             "applyCsToSmallClock: vis=${cs.getVisibility(smallClockViewId)} " +

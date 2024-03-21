@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneFloatAsState
@@ -222,15 +223,17 @@ private fun SceneScope.SingleShade(
                                         horizontal = Shade.Dimensions.HorizontalPadding
                                     )
                             )
-                            QuickSettings(
-                                viewModel.qsSceneAdapter,
-                                {
-                                    (viewModel.qsSceneAdapter.qqsHeight * tileSquishiness)
-                                        .roundToInt()
-                                },
-                                isSplitShade = false,
-                                squishiness = tileSquishiness,
-                            )
+                            Box(Modifier.element(QuickSettings.Elements.QuickQuickSettings)) {
+                                QuickSettings(
+                                    viewModel.qsSceneAdapter,
+                                    {
+                                        (viewModel.qsSceneAdapter.qqsHeight * tileSquishiness)
+                                            .roundToInt()
+                                    },
+                                    isSplitShade = false,
+                                    squishiness = tileSquishiness,
+                                )
+                            }
 
                             MediaIfVisible(
                                 viewModel = viewModel,
@@ -280,6 +283,8 @@ private fun SceneScope.SplitShade(
     val lifecycleOwner = LocalLifecycleOwner.current
     val footerActionsViewModel =
         remember(lifecycleOwner, viewModel) { viewModel.getFooterActionsViewModel(lifecycleOwner) }
+    val tileSquishiness by
+        animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
 
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val density = LocalDensity.current
@@ -290,6 +295,7 @@ private fun SceneScope.SplitShade(
     }
 
     val quickSettingsScrollState = rememberScrollState()
+    val isScrollable = layoutState.transitionState is TransitionState.Idle
     LaunchedEffect(isCustomizing, quickSettingsScrollState) {
         if (isCustomizing) {
             quickSettingsScrollState.scrollTo(0)
@@ -318,31 +324,41 @@ private fun SceneScope.SplitShade(
                 Column(
                     verticalArrangement = Arrangement.Top,
                     modifier =
-                        Modifier.weight(1f).fillMaxHeight().thenIf(!isCustomizing) {
-                            Modifier.verticalNestedScrollToScene()
-                                .verticalScroll(quickSettingsScrollState)
-                                .clipScrollableContainer(Orientation.Horizontal)
-                                .padding(bottom = navBarBottomHeight)
-                        }
+                        Modifier.weight(1f).fillMaxSize().thenIf(!isCustomizing) {
+                            Modifier.padding(bottom = navBarBottomHeight)
+                        },
                 ) {
-                    QuickSettings(
-                        qsSceneAdapter = viewModel.qsSceneAdapter,
-                        heightProvider = { viewModel.qsSceneAdapter.qsHeight },
-                        isSplitShade = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Column(
+                        modifier =
+                            Modifier.fillMaxSize().weight(1f).thenIf(!isCustomizing) {
+                                Modifier.verticalNestedScrollToScene()
+                                    .verticalScroll(
+                                        quickSettingsScrollState,
+                                        enabled = isScrollable
+                                    )
+                                    .clipScrollableContainer(Orientation.Horizontal)
+                            }
+                    ) {
+                        Box(
+                            modifier =
+                                Modifier.element(QuickSettings.Elements.SplitShadeQuickSettings)
+                        ) {
+                            QuickSettings(
+                                qsSceneAdapter = viewModel.qsSceneAdapter,
+                                heightProvider = { viewModel.qsSceneAdapter.qsHeight },
+                                isSplitShade = true,
+                                modifier = Modifier.fillMaxWidth(),
+                                squishiness = tileSquishiness,
+                            )
+                        }
 
-                    MediaIfVisible(
-                        viewModel = viewModel,
-                        mediaCarouselController = mediaCarouselController,
-                        mediaHost = mediaHost,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    Spacer(
-                        modifier = Modifier.weight(1f),
-                    )
-
+                        MediaIfVisible(
+                            viewModel = viewModel,
+                            mediaCarouselController = mediaCarouselController,
+                            mediaHost = mediaHost,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                     FooterActionsWithAnimatedVisibility(
                         viewModel = footerActionsViewModel,
                         isCustomizing = isCustomizing,
@@ -354,7 +370,8 @@ private fun SceneScope.SplitShade(
                 NotificationScrollingStack(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier =
+                        Modifier.weight(1f).fillMaxHeight().padding(bottom = navBarBottomHeight),
                 )
             }
         }

@@ -24,6 +24,7 @@ import android.app.ondeviceintelligence.Feature;
 import android.os.ICancellationSignal;
 import android.os.PersistableBundle;
 import android.os.Bundle;
+import com.android.internal.infra.AndroidFuture;
 import android.service.ondeviceintelligence.IRemoteStorageService;
 import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
 
@@ -34,13 +35,16 @@ import android.service.ondeviceintelligence.IProcessingUpdateStatusCallback;
  */
 oneway interface IOnDeviceSandboxedInferenceService {
     void registerRemoteStorageService(in IRemoteStorageService storageService);
-    void requestTokenInfo(int callerUid, in Feature feature, in Bundle request, in ICancellationSignal cancellationSignal,
+    void requestTokenInfo(int callerUid, in Feature feature, in Bundle request,
+                            in AndroidFuture<ICancellationSignal> cancellationSignal,
                             in ITokenInfoCallback tokenInfoCallback);
     void processRequest(int callerUid, in Feature feature, in Bundle request, in int requestType,
-                        in ICancellationSignal cancellationSignal, in IProcessingSignal processingSignal,
+                        in AndroidFuture<ICancellationSignal> cancellationSignal,
+                        in AndroidFuture<IProcessingSignal> processingSignal,
                         in IResponseCallback callback);
     void processRequestStreaming(int callerUid, in Feature feature, in Bundle request, in int requestType,
-                                in ICancellationSignal cancellationSignal, in IProcessingSignal processingSignal,
+                                in AndroidFuture<ICancellationSignal> cancellationSignal,
+                                in AndroidFuture<IProcessingSignal> processingSignal,
                                 in IStreamingResponseCallback callback);
     void updateProcessingState(in Bundle processingState,
                                      in IProcessingUpdateStatusCallback callback);

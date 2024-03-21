@@ -32,8 +32,8 @@ import com.android.systemui.media.spatializerRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.volume.localMediaController
 import com.android.systemui.volume.localMediaRepository
-import com.android.systemui.volume.mediaController
 import com.android.systemui.volume.mediaControllerRepository
 import com.android.systemui.volume.panel.component.spatial.spatialAudioComponentInteractor
 import com.google.common.truth.Truth.assertThat
@@ -66,11 +66,11 @@ class SpatialAudioAvailabilityCriteriaTest : SysuiTestCase() {
                 }
             )
 
-            whenever(mediaController.packageName).thenReturn("test.pkg")
-            whenever(mediaController.sessionToken).thenReturn(MediaSession.Token(0, mock {}))
-            whenever(mediaController.playbackState).thenReturn(PlaybackState.Builder().build())
+            whenever(localMediaController.packageName).thenReturn("test.pkg")
+            whenever(localMediaController.sessionToken).thenReturn(MediaSession.Token(0, mock {}))
+            whenever(localMediaController.playbackState).thenReturn(PlaybackState.Builder().build())
 
-            mediaControllerRepository.setActiveLocalMediaController(mediaController)
+            mediaControllerRepository.setActiveSessions(listOf(localMediaController))
 
             underTest = SpatialAudioAvailabilityCriteria(spatialAudioComponentInteractor)
         }

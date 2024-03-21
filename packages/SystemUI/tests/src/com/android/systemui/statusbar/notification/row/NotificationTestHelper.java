@@ -23,6 +23,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
 import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
+import static com.android.systemui.util.Assert.runWithCurrentThreadAsMainThread;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -42,6 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.graphics.drawable.Icon;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
@@ -90,6 +92,8 @@ import com.android.systemui.statusbar.policy.InflatedSmartReplyViewHolder;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyStateInflater;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.wmshell.BubblesManager;
@@ -123,7 +127,7 @@ public class NotificationTestHelper {
     private static final String APP_NAME = "appName";
 
     private final Context mContext;
-    private final TestableLooper mTestLooper;
+    private final Runnable mBindPipelineAdvancement;
     private int mId;
     private final ExpandableNotificationRowLogger mMockLogger;
     private final GroupMembershipManager mGroupMembershipManager;
@@ -151,18 +155,23 @@ public class NotificationTestHelper {
 
     public NotificationTestHelper(
             Context context,
+            TestableDependency dependency) {
+        this(context, dependency, null);
+    }
+
+    public NotificationTestHelper(
+            Context context,
             TestableDependency dependency,
-            TestableLooper testLooper) {
+            @Nullable TestableLooper testLooper) {
         this(context, dependency, testLooper, new FakeFeatureFlags());
     }
 
     public NotificationTestHelper(
             Context context,
             TestableDependency dependency,
-            TestableLooper testLooper,
+            @Nullable TestableLooper testLooper,
             @NonNull FakeFeatureFlags featureFlags) {
         mContext = context;
-        mTestLooper = testLooper;
         mFeatureFlags = Objects.requireNonNull(featureFlags);
         dependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
         dependency.injectMockDependency(NotificationMediaManager.class);
@@ -198,10 +207,27 @@ public class NotificationTestHelper {
 
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
+        // NOTE: This helper supports using either a TestableLooper or its own private FakeExecutor.
+        final Runnable processorAdvancement;
+        final NotificationEntryProcessorFactory processorFactory;
+        if (testLooper == null) {
+            FakeExecutor fakeExecutor = new FakeExecutor(new FakeSystemClock());
+            processorAdvancement = () -> {
+                runWithCurrentThreadAsMainThread(fakeExecutor::runAllReady);
+            };
+            processorFactory = new NotificationEntryProcessorFactoryExecutorImpl(fakeExecutor);
+        } else {
+            Looper looper = testLooper.getLooper();
+            processorAdvancement = () -> {
+                runWithCurrentThreadAsMainThread(testLooper::processAllMessages);
+            };
+            processorFactory = new NotificationEntryProcessorFactoryLooperImpl(looper);
+        }
+        mBindPipelineAdvancement = processorAdvancement;
         mBindPipeline = new NotifBindPipeline(
                 collection,
                 new NotifBindPipelineLogger(logcatLogBuffer()),
-                mTestLooper.getLooper());
+                processorFactory);
         mBindPipeline.setStage(mBindStage);
 
         ArgumentCaptor<NotifCollectionListener> collectionListenerCaptor =
@@ -643,7 +669,7 @@ public class NotificationTestHelper {
     private void inflateAndWait(NotificationEntry entry) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         mBindStage.requestRebind(entry, en -> countDownLatch.countDown());
-        mTestLooper.processAllMessages();
+        mBindPipelineAdvancement.run();
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 

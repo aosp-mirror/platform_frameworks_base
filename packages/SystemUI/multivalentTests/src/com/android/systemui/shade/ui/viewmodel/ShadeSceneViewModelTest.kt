@@ -95,7 +95,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             scope = testScope.backgroundScope,
         )
 
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter({ mock() })
+    private val qsSceneAdapter = FakeQSSceneAdapter({ mock() })
 
     private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
 
@@ -122,7 +122,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
-                qsSceneAdapter = qsFlexiglassAdapter,
+                qsSceneAdapter = qsSceneAdapter,
                 notifications = kosmos.notificationsPlaceholderViewModel,
                 mediaDataManager = mediaDataManager,
                 shadeInteractor = kosmos.shadeInteractor,
@@ -277,6 +277,20 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Down))?.toScene)
                 .isEqualTo(Scenes.QuickSettings)
         }
+
+    @Test
+    fun upTransitionSceneKey_customizing_noTransition() =
+            testScope.runTest {
+                val destinationScenes by collectLastValue(underTest.destinationScenes)
+
+                qsSceneAdapter.setCustomizing(true)
+                assertThat(
+                        destinationScenes!!
+                                .keys
+                                .filterIsInstance<Swipe>()
+                                .filter { it.direction == SwipeDirection.Up }
+                ).isEmpty()
+            }
 
     @Test
     fun shadeMode() =

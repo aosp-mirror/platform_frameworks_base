@@ -243,7 +243,7 @@ public final class NavBarHelper implements
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
-                Settings.Secure.getUriFor(Secure.SEARCH_LONG_PRESS_HOME_ENABLED),
+                Settings.Secure.getUriFor(Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
@@ -443,10 +443,10 @@ public final class NavBarHelper implements
         boolean overrideLongPressHome = mAssistManagerLazy.get()
                 .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
         boolean longPressDefault = mContext.getResources().getBoolean(overrideLongPressHome
-                ? com.android.internal.R.bool.config_searchLongPressHomeEnabledDefault
+                ? com.android.internal.R.bool.config_searchAllEntrypointsEnabledDefault
                 : com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
-                overrideLongPressHome ? Secure.SEARCH_LONG_PRESS_HOME_ENABLED
+                overrideLongPressHome ? Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED
                         : Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED, longPressDefault ? 1 : 0,
                 mUserTracker.getUserId()) != 0;
 

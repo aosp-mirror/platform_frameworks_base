@@ -364,6 +364,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
     private boolean mRedrawForSyncReported = true;
+    private long mCreateTime = System.currentTimeMillis();
 
     /**
      * Used to assosciate a given set of state changes sent from MSG_RESIZED
@@ -1714,6 +1715,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 : DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
     }
 
+    long getCreateTime() {
+        return mCreateTime;
+    }
+
     /**
      * Returns true if, at any point, the application token associated with this window has actually
      * displayed any windows. This is most useful with the "starting up" window to determine if any
@@ -1893,6 +1898,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean isSecureLocked() {
+        if (mWmService.getDisableSecureWindows()) {
+            return false;
+        }
+
         if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
             return true;
         }

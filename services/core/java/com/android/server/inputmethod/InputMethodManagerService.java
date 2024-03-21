@@ -479,7 +479,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private int getSequenceNumberLocked() {
-        return mBindingController.getSequenceNumber();
+        final UserData monitor = UserData.getOrCreate(mCurrentUserId);
+        return monitor.mSequence.getSequenceNumber();
     }
 
     /**
@@ -488,7 +489,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private void advanceSequenceNumberLocked() {
-        mBindingController.advanceSequenceNumber();
+        final UserData monitor = UserData.getOrCreate(mCurrentUserId);
+        monitor.mSequence.advanceSequenceNumber();
     }
 
     @GuardedBy("ImfLock.class")
@@ -1246,7 +1248,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mService.publishLocalService();
             IInputMethodManager.Stub service;
             if (Flags.useZeroJankProxy()) {
-                service = new ZeroJankProxy(mService.mHandler::post, mService);
+                service =
+                        new ZeroJankProxy(
+                                mService.mHandler::post,
+                                mService,
+                                () -> {
+                                    synchronized (ImfLock.class) {
+                                        return mService.isInputShown();
+                                    }
+                                });
             } else {
                 service = mService;
             }
@@ -1369,6 +1379,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // InputMethodSettingsRepository should be initialized before buildInputMethodListLocked
         InputMethodSettingsRepository.initialize(mHandler, mContext);
         AdditionalSubtypeMapRepository.initialize(mHandler, mContext);
+        UserData.initialize(mHandler);
 
         mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
 
@@ -5859,6 +5870,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 p.println("    curSession=" + c.mCurSession);
             };
             mClientController.forAllClients(clientControllerDump);
+            p.println("  mCurrentUserId=" + mCurrentUserId);
             p.println("  mCurMethodId=" + getSelectedMethodIdLocked());
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());
@@ -5884,8 +5896,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     ? Arrays.toString(mStylusIds.toArray()) : ""));
             p.println("  mSwitchingController:");
             mSwitchingController.dump(p);
-            p.println("  mSettings:");
-            settings.dump(p, "    ");
 
             p.println("  mStartInputHistory:");
             mStartInputHistory.dump(pw, "    ");

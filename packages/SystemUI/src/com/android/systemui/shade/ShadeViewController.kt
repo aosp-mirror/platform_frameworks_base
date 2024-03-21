@@ -17,7 +17,6 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import com.android.systemui.power.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
@@ -26,16 +25,13 @@ import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController
 import java.util.function.Consumer
 
 /**
- * Controller for the top level shade view
+ * Controller for the top level shade view.
  *
  * @see NotificationPanelViewController
  */
 interface ShadeViewController {
-    /** Returns whether the shade is tracking touches for expand/collapse of the shade or QS. */
-    val isTracking: Boolean
-
     /** Returns whether the shade's top level view is enabled. */
-    val isViewEnabled: Boolean
+    @Deprecated("No longer supported. Do not add new calls to this.") val isViewEnabled: Boolean
 
     /** Returns whether status bar icons should be hidden when the shade is expanded. */
     fun shouldHideStatusBarIconsWhenExpanded(): Boolean
@@ -48,10 +44,8 @@ interface ShadeViewController {
     fun disableHeader(state1: Int, state2: Int, animated: Boolean)
 
     /** If the latency tracker is enabled, begins tracking expand latency. */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun startExpandLatencyTracking()
-
-    /** Returns the StatusBarState. */
-    val barState: Int
 
     /** Sets the alpha value of the shade to a value between 0 and 255. */
     fun setAlpha(alpha: Int, animate: Boolean)
@@ -64,22 +58,17 @@ interface ShadeViewController {
     fun setAlphaChangeAnimationEndAction(r: Runnable)
 
     /** Sets Qs ScrimEnabled and updates QS state. */
+    @Deprecated("Does nothing when scene container is enabled.")
     fun setQsScrimEnabled(qsScrimEnabled: Boolean)
 
     /** Sets the top spacing for the ambient indicator. */
     fun setAmbientIndicationTop(ambientIndicationTop: Int, ambientTextVisible: Boolean)
 
     /** Updates notification panel-specific flags on [SysUiState]. */
-    fun updateSystemUiStateFlags()
+    @Deprecated("Does nothing when scene container is enabled.") fun updateSystemUiStateFlags()
 
     /** Ensures that the touchable region is updated. */
     fun updateTouchableRegion()
-
-    /** Adds a global layout listener. */
-    fun addOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener)
-
-    /** Removes a global layout listener. */
-    fun removeOnGlobalLayoutListener(listener: ViewTreeObserver.OnGlobalLayoutListener)
 
     /**
      * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
@@ -105,27 +94,18 @@ interface ShadeViewController {
      * notification shade. After that, since the launcher window is set to slippery, input
      * frameworks take care of routing the events to the notification shade.
      */
-    fun startInputFocusTransfer()
+    @Deprecated("No longer supported. Do not add new calls to this.") fun startInputFocusTransfer()
 
     /** Triggered when the input focus transfer was cancelled. */
-    fun cancelInputFocusTransfer()
+    @Deprecated("No longer supported. Do not add new calls to this.") fun cancelInputFocusTransfer()
 
     /**
      * Triggered when the input focus transfer has finished successfully.
      *
      * @param velocity unit is in px / millis
      */
+    @Deprecated("No longer supported. Do not add new calls to this.")
     fun finishInputFocusTransfer(velocity: Float)
-
-    /**
-     * Performs haptic feedback from a view with a haptic feedback constant.
-     *
-     * The implementation of this method should use the [android.view.View.performHapticFeedback]
-     * method with the provided constant.
-     *
-     * @param[constant] One of [android.view.HapticFeedbackConstants]
-     */
-    fun performHapticFeedback(constant: Int)
 
     /** Returns the ShadeHeadsUpTracker. */
     val shadeHeadsUpTracker: ShadeHeadsUpTracker

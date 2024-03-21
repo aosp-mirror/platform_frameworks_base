@@ -1315,8 +1315,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 boolean isActiveAshaHearingAid = mIsActiveDeviceHearingAid;
                 boolean isActiveLeAudioHearingAid = mIsActiveDeviceLeAudio
                         && isConnectedHapClientDevice();
-                if ((isActiveAshaHearingAid || isActiveLeAudioHearingAid)
-                        && stringRes == R.string.bluetooth_active_no_battery_level) {
+                if (isActiveAshaHearingAid || isActiveLeAudioHearingAid) {
                     final Set<CachedBluetoothDevice> memberDevices = getMemberDevice();
                     final CachedBluetoothDevice subDevice = getSubDevice();
                     if (memberDevices.stream().anyMatch(m -> m.isConnected())) {

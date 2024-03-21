@@ -12,4 +12,7 @@ flag {
   namespace: "accessibility"
   description: "Always draw fullscreen orange border in fullscreen magnification"
   bug: "291891390"
+  metadata {
+        purpose: PURPOSE_BUGFIX
+  }
 }

@@ -83,6 +83,7 @@ constructor(
                 }
             }
 
+            sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             supportedActions = setOf(QSTileState.UserAction.CLICK)
         }

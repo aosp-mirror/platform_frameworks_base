@@ -181,6 +181,11 @@ private constructor(
         turbulenceNoiseShader.setColor(newColor)
     }
 
+    /** Updates the noise color that's screen blended on top. */
+    fun updateScreenColor(newColor: Int) {
+        turbulenceNoiseShader.setScreenColor(newColor)
+    }
+
     /**
      * Retrieves the noise offset x, y, z values. This is useful for replaying the animation
      * smoothly from the last animation, by passing in the last values to the next animation.
@@ -322,7 +327,10 @@ private constructor(
     private fun draw() {
         paintCallback?.onDraw(paint!!)
         renderEffectCallback?.onDraw(
-            RenderEffect.createRuntimeShaderEffect(turbulenceNoiseShader, "in_src")
+            RenderEffect.createRuntimeShaderEffect(
+                turbulenceNoiseShader,
+                TurbulenceNoiseShader.BACKGROUND_UNIFORM
+            )
         )
     }
 

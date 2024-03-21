@@ -88,7 +88,7 @@ import androidx.annotation.Nullable;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.extensions.WindowExtensionsImpl;
+import androidx.window.extensions.WindowExtensions;
 import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.core.util.function.Predicate;
@@ -410,7 +410,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Registers the split organizer callback to notify about changes to active splits.
      *
      * @deprecated Use {@link #setSplitInfoCallback(Consumer)} starting with
-     * {@link WindowExtensionsImpl#getVendorApiLevel()} 2.
+     * {@link WindowExtensions#getVendorApiLevel()} 2.
      */
     @Deprecated
     @Override
@@ -423,7 +423,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * Registers the split organizer callback to notify about changes to active splits.
      *
-     * @since {@link WindowExtensionsImpl#getVendorApiLevel()} 2
+     * @since {@link WindowExtensions#getVendorApiLevel()} 2
      */
     @Override
     public void setSplitInfoCallback(Consumer<List<SplitInfo>> callback) {
@@ -844,6 +844,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         // Checks if container should be updated before apply new parentInfo.
         final boolean shouldUpdateContainer = taskContainer.shouldUpdateContainer(parentInfo);
         taskContainer.updateTaskFragmentParentInfo(parentInfo);
+        taskContainer.updateDivider(wct);
 
         // If the last direct activity of the host task is dismissed and the overlay container is
         // the only taskFragment, the overlay container should also be dismissed.
@@ -1224,7 +1225,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         if (shouldContainerBeExpanded(container)) {
             // Make sure that the existing container is expanded.
-            mPresenter.expandTaskFragment(wct, container.getTaskFragmentToken());
+            mPresenter.expandTaskFragment(wct, container);
         } else {
             // Put activity into a new expanded container.
             final TaskFragmentContainer newContainer = newContainer(activity, getTaskId(activity));
@@ -1928,7 +1929,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
         if (shouldContainerBeExpanded(container)) {
             if (container.getInfo() != null) {
-                mPresenter.expandTaskFragment(wct, container.getTaskFragmentToken());
+                mPresenter.expandTaskFragment(wct, container);
             }
             // If the info is not available yet the task fragment will be expanded when it's ready
             return;

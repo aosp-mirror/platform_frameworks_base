@@ -137,7 +137,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
+import com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerInternal;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -419,7 +419,6 @@ public class ComputerEngine implements Computer {
     private final PackageDexOptimizer mPackageDexOptimizer;
     private final DexManager mDexManager;
     private final CompilerStats mCompilerStats;
-    private final BackgroundDexOptService mBackgroundDexOptService;
     private final PackageManagerInternal.ExternalSourcesPolicy mExternalSourcesPolicy;
     private final CrossProfileIntentResolverEngine mCrossProfileIntentResolverEngine;
 
@@ -472,7 +471,6 @@ public class ComputerEngine implements Computer {
         mPackageDexOptimizer = args.service.mPackageDexOptimizer;
         mDexManager = args.service.getDexManager();
         mCompilerStats = args.service.mCompilerStats;
-        mBackgroundDexOptService = args.service.mBackgroundDexOptService;
         mExternalSourcesPolicy = args.service.mExternalSourcesPolicy;
         mCrossProfileIntentResolverEngine = new CrossProfileIntentResolverEngine(
                 mUserManager, mDomainVerificationManager, mDefaultAppProvider, mContext);
@@ -3093,40 +3091,7 @@ public class ComputerEngine implements Computer {
                 }
                 ipw.println("Dexopt state:");
                 ipw.increaseIndent();
-                if (DexOptHelper.useArtService()) {
-                    DexOptHelper.dumpDexoptState(ipw, packageName);
-                } else {
-                    Collection<? extends PackageStateInternal> pkgSettings;
-                    if (setting != null) {
-                        pkgSettings = Collections.singletonList(setting);
-                    } else {
-                        pkgSettings = mSettings.getPackages().values();
-                    }
-
-                    for (PackageStateInternal pkgSetting : pkgSettings) {
-                        final AndroidPackage pkg = pkgSetting.getPkg();
-                        if (pkg == null || pkg.isApex()) {
-                            // Skip APEX which is not dex-optimized
-                            continue;
-                        }
-                        final String pkgName = pkg.getPackageName();
-                        ipw.println("[" + pkgName + "]");
-                        ipw.increaseIndent();
-
-                        // TODO(b/251903639): Call into ART Service.
-                        try {
-                            mPackageDexOptimizer.dumpDexoptState(ipw, pkg, pkgSetting,
-                                    mDexManager.getPackageUseInfoOrDefault(pkgName));
-                        } catch (LegacyDexoptDisabledException e) {
-                            throw new RuntimeException(e);
-                        }
-                        ipw.decreaseIndent();
-                    }
-                    ipw.println("BgDexopt state:");
-                    ipw.increaseIndent();
-                    mBackgroundDexOptService.dump(ipw);
-                    ipw.decreaseIndent();
-                }
+                DexOptHelper.dumpDexoptState(ipw, packageName);
                 ipw.decreaseIndent();
                 break;
             }
@@ -4389,9 +4354,8 @@ public class ComputerEngine implements Computer {
         if (Process.isSdkSandboxUid(uid)) {
             uid = getBaseSdkSandboxUid();
         }
-        if (Process.isIsolatedUid(uid)
-                && mPermissionManager.getHotwordDetectionServiceProvider() != null
-                && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (isKnownIsolatedComputeApp(uid, callingUserId)) {
             try {
                 uid = getIsolatedOwner(uid);
             } catch (IllegalStateException e) {
@@ -4399,7 +4363,6 @@ public class ComputerEngine implements Computer {
                 Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
             }
         }
-        final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
         if (obj instanceof SharedUserSetting) {
@@ -4435,9 +4398,7 @@ public class ComputerEngine implements Computer {
             if (Process.isSdkSandboxUid(uid)) {
                 uid = getBaseSdkSandboxUid();
             }
-            if (Process.isIsolatedUid(uid)
-                    && mPermissionManager.getHotwordDetectionServiceProvider() != null
-                    && uid == mPermissionManager.getHotwordDetectionServiceProvider().getUid()) {
+            if (isKnownIsolatedComputeApp(uid, callingUserId)) {
                 try {
                     uid = getIsolatedOwner(uid);
                 } catch (IllegalStateException e) {
@@ -5836,6 +5797,43 @@ public class ComputerEngine implements Computer {
 
     private int getBaseSdkSandboxUid() {
         return getPackage(mService.getSdkSandboxPackageName()).getUid();
+    }
+
+
+    private boolean isKnownIsolatedComputeApp(int uid, int callingUserId) {
+        if (!Process.isIsolatedUid(uid)) {
+            return false;
+        }
+        final boolean isHotword =
+                mPermissionManager.getHotwordDetectionServiceProvider() != null
+                        && uid
+                        == mPermissionManager.getHotwordDetectionServiceProvider().getUid();
+        if (isHotword) {
+            return true;
+        }
+        OnDeviceIntelligenceManagerInternal onDeviceIntelligenceManagerInternal =
+                mInjector.getLocalService(OnDeviceIntelligenceManagerInternal.class);
+        if (onDeviceIntelligenceManagerInternal == null) {
+            return false;
+        }
+
+        String onDeviceIntelligencePackage =
+                onDeviceIntelligenceManagerInternal.getRemoteServicePackageName();
+        if (onDeviceIntelligencePackage == null) {
+            return false;
+        }
+
+        try {
+            if (getIsolatedOwner(uid) == getPackageUid(onDeviceIntelligencePackage, 0,
+                    callingUserId)) {
+                return true;
+            }
+        } catch (IllegalStateException e) {
+            // If the owner uid doesn't exist, just use the current uid
+            Slog.wtf(TAG, "Expected isolated uid " + uid + " to have an owner", e);
+        }
+
+        return false;
     }
 
     @Nullable

@@ -23,16 +23,21 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import com.android.settingslib.applications.InterestingConfigChanges
+import com.android.systemui.Dumpable
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.QSContainerImpl
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.util.kotlin.sample
+import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.resume
@@ -107,9 +112,15 @@ interface QSSceneAdapter {
         }
 
         /** State for appearing QQS from Lockscreen or Gone */
-        data class Unsquishing(override val squishiness: Float) : State {
+        data class UnsquishingQQS(override val squishiness: Float) : State {
             override val isVisible = true
             override val expansion = 0f
+        }
+
+        /** State for appearing QS from Lockscreen or Gone, used in Split shade */
+        data class UnsquishingQS(override val squishiness: Float) : State {
+            override val isVisible = true
+            override val expansion = 1f
         }
 
         companion object {
@@ -129,22 +140,28 @@ class QSSceneAdapterImpl
 constructor(
     private val qsSceneComponentFactory: QSSceneComponent.Factory,
     private val qsImplProvider: Provider<QSImpl>,
+    shadeInteractor: ShadeInteractor,
+    dumpManager: DumpManager,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application applicationScope: CoroutineScope,
     private val configurationInteractor: ConfigurationInteractor,
     private val asyncLayoutInflaterFactory: (Context) -> AsyncLayoutInflater,
-) : QSContainerController, QSSceneAdapter {
+) : QSContainerController, QSSceneAdapter, Dumpable {
 
     @Inject
     constructor(
         qsSceneComponentFactory: QSSceneComponent.Factory,
         qsImplProvider: Provider<QSImpl>,
+        shadeInteractor: ShadeInteractor,
+        dumpManager: DumpManager,
         @Main dispatcher: CoroutineDispatcher,
         @Application scope: CoroutineScope,
         configurationInteractor: ConfigurationInteractor,
     ) : this(
         qsSceneComponentFactory,
         qsImplProvider,
+        shadeInteractor,
+        dumpManager,
         dispatcher,
         scope,
         configurationInteractor,
@@ -182,6 +199,7 @@ constructor(
         )
 
     init {
+        dumpManager.registerDumpable(this)
         applicationScope.launch {
             launch {
                 state.sample(_isCustomizing, ::Pair).collect { (state, customizing) ->
@@ -208,6 +226,11 @@ constructor(
             launch {
                 combine(bottomNavBarSize, qsImpl.filterNotNull(), ::Pair).collect {
                     it.second.applyBottomNavBarToCustomizerPadding(it.first)
+                }
+            }
+            launch {
+                shadeInteractor.shadeMode.collect {
+                    qsImpl.value?.setInSplitShade(it == ShadeMode.Split)
                 }
             }
         }
@@ -256,9 +279,17 @@ constructor(
 
     private fun QSImpl.applyState(state: QSSceneAdapter.State) {
         setQsVisible(state.isVisible)
-        setExpanded(state.isVisible)
+        setExpanded(state.isVisible && state.expansion > 0f)
         setListening(state.isVisible)
         setQsExpansion(state.expansion, 1f, 0f, state.squishiness)
-        setTransitionToFullShadeProgress(false, 1f, state.squishiness)
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.apply {
+            println("Last state: ${state.value}")
+            println("Customizing: ${isCustomizing.value}")
+            println("QQS height: $qqsHeight")
+            println("QS height: $qsHeight")
+        }
     }
 }

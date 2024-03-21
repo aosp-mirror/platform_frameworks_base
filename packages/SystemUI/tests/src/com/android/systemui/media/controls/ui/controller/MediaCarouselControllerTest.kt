@@ -41,7 +41,6 @@ import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.shared.model.MediaData
-import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.controls.ui.view.MediaScrollView
@@ -111,7 +110,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var logger: MediaUiEventLogger
     @Mock lateinit var debugLogger: MediaCarouselControllerLogger
     @Mock lateinit var mediaViewController: MediaViewController
-    @Mock lateinit var smartspaceMediaData: SmartspaceMediaData
     @Mock lateinit var mediaCarousel: MediaScrollView
     @Mock lateinit var pageIndicator: PageIndicator
     @Mock lateinit var mediaFlags: MediaFlags
@@ -165,7 +163,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(mediaHostStatesManager).addCallback(capture(hostStateCallback))
         whenever(mediaControlPanelFactory.get()).thenReturn(panel)
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
-        whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         MediaPlayerData.clear()
         verify(globalSettings)

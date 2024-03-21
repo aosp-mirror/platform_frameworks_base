@@ -31,6 +31,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.windowRootViewVisibilityInteractor
@@ -52,6 +53,7 @@ val Kosmos.shadeControllerSceneImpl by
             notificationStackScrollLayout = mock<NotificationStackScrollLayout>(),
             deviceEntryInteractor = deviceEntryInteractor,
             touchLog = mock<LogBuffer>(),
+            vibratorHelper = mock<VibratorHelper>(),
             commandQueue = mock<CommandQueue>(),
             statusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>(),
             notificationShadeWindowController = mock<NotificationShadeWindowController>(),

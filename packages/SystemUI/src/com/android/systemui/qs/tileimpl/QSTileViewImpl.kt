@@ -37,7 +37,6 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -185,6 +184,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
     private val colorEvaluator = ArgbEvaluator.getInstance()
+    val hasLongPressEffect: Boolean
+        get() = longPressEffect != null
 
     init {
         val typedValue = TypedValue()
@@ -611,10 +612,9 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
         // Long-press effects
         if (quickSettingsVisualHapticsLongpress()){
-            if (state.handlesLongClick) {
-                // initialize the long-press effect and set it as the touch listener
+            if (state.handlesLongClick && maybeCreateAndInitializeLongPressEffect()) {
+                // set the valid long-press effect as the touch listener
                 showRippleEffect = false
-                initializeLongPressEffect()
                 setOnTouchListener(longPressEffect)
                 QSLongPressEffectViewBinder.bind(this, longPressEffect)
             } else {
@@ -751,7 +751,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     override fun onActivityLaunchAnimationEnd() = resetLongPressEffectProperties()
 
     fun updateLongPressEffectProperties(effectProgress: Float) {
-        if (!isLongClickable) return
+        if (!isLongClickable || longPressEffect == null) return
         setAllColors(
             colorEvaluator.evaluate(
                 effectProgress,
@@ -836,13 +836,25 @@ open class QSTileViewImpl @JvmOverloads constructor(
         icon.setTint(icon.mIcon as ImageView, lastIconTint)
     }
 
-    private fun initializeLongPressEffect() {
+    private fun maybeCreateAndInitializeLongPressEffect(): Boolean {
+        // Don't setup the effect if the long-press duration is invalid
+        val effectDuration = longPressEffectDuration
+        if (effectDuration <= 0) {
+            longPressEffect = null
+            return false
+        }
+
         initializeLongPressProperties()
-        longPressEffect =
-            QSLongPressEffect(
-                vibratorHelper,
-                ViewConfiguration.getLongPressTimeout() - ViewConfiguration.getTapTimeout(),
-            )
+        if (longPressEffect == null) {
+            longPressEffect =
+                QSLongPressEffect(
+                    vibratorHelper,
+                    effectDuration,
+                )
+        } else {
+            longPressEffect?.resetWithDuration(effectDuration)
+        }
+        return true
     }
 
     private fun initializeLongPressProperties() {

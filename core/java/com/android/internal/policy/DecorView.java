@@ -137,7 +137,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private static final int SCRIM_LIGHT = 0xe6ffffff; // 90% white
 
-    private static final int SCRIM_ALPHA = 0xcc0000; // 80% alpha
+    private static final int SCRIM_ALPHA = 0xcc000000; // 80% alpha
 
     public static final ColorViewAttributes STATUS_BAR_COLOR_VIEW_ATTRIBUTES =
             new ColorViewAttributes(FLAG_TRANSLUCENT_STATUS,

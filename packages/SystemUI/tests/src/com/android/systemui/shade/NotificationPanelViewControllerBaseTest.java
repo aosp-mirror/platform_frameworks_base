@@ -62,7 +62,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
@@ -299,7 +298,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected RecordingController mRecordingController;
     @Mock protected LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock protected DumpManager mDumpManager;
-    @Mock protected InteractionJankMonitor mInteractionJankMonitor;
     @Mock protected NotificationsQSContainerController mNotificationsQSContainerController;
     @Mock protected QsFrameTranslateController mQsFrameTranslateController;
     @Mock protected StatusBarWindowStateController mStatusBarWindowStateController;
@@ -441,7 +439,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(
                 mUiEventLogger,
-                mInteractionJankMonitor,
+                mKosmos.getInteractionJankMonitor(),
                 mJavaAdapter,
                 () -> mShadeInteractor,
                 () -> mKosmos.getDeviceUnlockedInteractor(),
@@ -459,7 +457,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mDozeParameters,
                 mScreenOffAnimationController,
                 mKeyguardLogger,
-                mInteractionJankMonitor,
+                mKosmos.getInteractionJankMonitor(),
                 mKeyguardInteractor,
                 mDumpManager,
                 mPowerInteractor));
@@ -611,7 +609,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         new StatusBarStateControllerImpl(
                                 new UiEventLoggerFake(),
-                                mInteractionJankMonitor,
+                                mKosmos.getInteractionJankMonitor(),
                                 mJavaAdapter,
                                 () -> mShadeInteractor,
                                 () -> mKosmos.getDeviceUnlockedInteractor(),
@@ -651,10 +649,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(mKeyguardBottomArea);
         when(mNotificationRemoteInputManager.isRemoteInputActive())
                 .thenReturn(false);
-        when(mInteractionJankMonitor.begin(any(), anyInt()))
-                .thenReturn(true);
-        when(mInteractionJankMonitor.end(anyInt()))
-                .thenReturn(true);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -820,7 +814,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mInteractionJankMonitor,
+                mKosmos.getInteractionJankMonitor(),
                 mShadeLog,
                 mDumpManager,
                 mDeviceEntryFaceAuthInteractor,

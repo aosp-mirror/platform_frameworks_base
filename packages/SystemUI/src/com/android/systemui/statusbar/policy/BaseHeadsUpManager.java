@@ -39,6 +39,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -162,11 +163,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     @Override
     public void showNotification(@NonNull NotificationEntry entry) {
-        HeadsUpEntry headsUpEntry = createHeadsUpEntry();
-
-        // Attach NotificationEntry for AvalancheController to log key and
-        // record mPostTime for AvalancheController sorting
-        headsUpEntry.setEntry(entry);
+        HeadsUpEntry headsUpEntry = createHeadsUpEntry(entry);
 
         Runnable runnable = () -> {
             // TODO(b/315362456) log outside runnable too
@@ -375,7 +372,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     /**
-     * Remove a notification and reset the entry.
+     * Remove a notification from the alerting entries.
      * @param key key of notification to remove
      */
     protected final void removeEntry(@NonNull String key) {
@@ -395,7 +392,11 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             mHeadsUpEntryMap.remove(key);
             onEntryRemoved(headsUpEntry);
             entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-            headsUpEntry.reset();
+            if (NotificationsHeadsUpRefactor.isEnabled()) {
+                headsUpEntry.cancelAutoRemovalCallbacks("removeEntry");
+            } else {
+                headsUpEntry.reset();
+            }
         };
         mAvalancheController.delete(headsUpEntry, runnable, "removeEntry");
     }
@@ -657,8 +658,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     }
 
     @NonNull
-    protected HeadsUpEntry createHeadsUpEntry() {
-        return new HeadsUpEntry();
+    protected HeadsUpEntry createHeadsUpEntry(NotificationEntry entry) {
+        return new HeadsUpEntry(entry);
     }
 
     /**
@@ -694,11 +695,23 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
 
         @Nullable private Runnable mCancelRemoveRunnable;
 
-        public void setEntry(@NonNull final NotificationEntry entry) {
-            setEntry(entry, () -> removeEntry(entry.getKey()));
+        public HeadsUpEntry() {
+            NotificationsHeadsUpRefactor.assertInLegacyMode();
         }
 
-        public void setEntry(@NonNull final NotificationEntry entry,
+        public HeadsUpEntry(NotificationEntry entry) {
+            // Attach NotificationEntry for AvalancheController to log key and
+            // record mPostTime for AvalancheController sorting
+            setEntry(entry, createRemoveRunnable(entry));
+        }
+
+        /** Attach a NotificationEntry. */
+        public void setEntry(@NonNull final NotificationEntry entry) {
+            NotificationsHeadsUpRefactor.assertInLegacyMode();
+            setEntry(entry, createRemoveRunnable(entry));
+        }
+
+        private void setEntry(@NonNull final NotificationEntry entry,
                 @Nullable Runnable removeRunnable) {
             mEntry = entry;
             mRemoveRunnable = removeRunnable;
@@ -776,7 +789,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             return mEarliestRemovalTime < mSystemClock.elapsedRealtime();
         }
 
-        public int compareTo(@NonNull HeadsUpEntry headsUpEntry) {
+        public int compareNonTimeFields(HeadsUpEntry headsUpEntry) {
             boolean isPinned = mEntry.isRowPinned();
             boolean otherPinned = headsUpEntry.mEntry.isRowPinned();
             if (isPinned && !otherPinned) {
@@ -806,7 +819,14 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             } else if (!mRemoteInputActive && headsUpEntry.mRemoteInputActive) {
                 return 1;
             }
+            return 0;
+        }
 
+        public int compareTo(@NonNull HeadsUpEntry headsUpEntry) {
+            int nonTimeCompareResult = compareNonTimeFields(headsUpEntry);
+            if (nonTimeCompareResult != 0) {
+                return nonTimeCompareResult;
+            }
             if (mPostTime > headsUpEntry.mPostTime) {
                 return -1;
             } else if (mPostTime == headsUpEntry.mPostTime) {
@@ -840,6 +860,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
 
         public void reset() {
+            NotificationsHeadsUpRefactor.assertInLegacyMode();
             cancelAutoRemovalCallbacks("reset()");
             mEntry = null;
             mRemoveRunnable = null;
@@ -912,6 +933,11 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             }
         }
 
+        /** Creates a runnable to remove this notification from the alerting entries. */
+        protected Runnable createRemoveRunnable(NotificationEntry entry) {
+            return () -> removeEntry(entry.getKey());
+        }
+
         /**
          * Calculate what the post time of a notification is at some current time.
          * @return the post time
@@ -929,10 +955,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             int requestedTimeOutMs;
             if (isStickyForSomeTime()) {
                 requestedTimeOutMs = mStickyForSomeTimeAutoDismissTime;
-            } else if (mAvalancheController.shortenDuration(this)) {
-                requestedTimeOutMs = 1000;
             } else {
-                requestedTimeOutMs = mAutoDismissTime;
+                requestedTimeOutMs = mAvalancheController.getDurationMs(this, mAutoDismissTime);
             }
             final long duration = getRecommendedHeadsUpTimeoutMs(requestedTimeOutMs);
             return mPostTime + duration;

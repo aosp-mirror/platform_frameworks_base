@@ -355,8 +355,11 @@ java_defaults {
             "packages/modules/Media/apex/aidl/stable",
             "hardware/interfaces/biometrics/common/aidl",
             "hardware/interfaces/biometrics/fingerprint/aidl",
+            "hardware/interfaces/common/aidl",
+            "hardware/interfaces/common/fmq/aidl",
             "hardware/interfaces/graphics/common/aidl",
             "hardware/interfaces/keymaster/aidl",
+            "hardware/interfaces/power/aidl",
             "system/hardware/interfaces/media/aidl",
         ],
     },
@@ -386,7 +389,6 @@ java_defaults {
         // TODO(b/120066492): remove gps_debug and protolog.conf.json when the build
         // system propagates "required" properly.
         "gps_debug.conf",
-        "protolog.conf.json.gz",
         "core.protolog.pb",
         "framework-res",
         // any install dependencies should go into framework-minus-apex-install-dependencies

@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.annotation.FloatRange
-import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
@@ -48,21 +47,8 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
     override val transitions: SharedFlow<TransitionStep> = _transitions
 
     init {
-        _transitions.tryEmit(
-            TransitionStep(
-                transitionState = TransitionState.STARTED,
-                from = KeyguardState.OFF,
-                to = KeyguardState.LOCKSCREEN,
-            )
-        )
-
-        _transitions.tryEmit(
-            TransitionStep(
-                transitionState = TransitionState.FINISHED,
-                from = KeyguardState.OFF,
-                to = KeyguardState.LOCKSCREEN,
-            )
-        )
+        // Seed the fake repository with the same initial steps the actual repository uses.
+        KeyguardTransitionRepositoryImpl.initialTransitionSteps.forEach { _transitions.tryEmit(it) }
     }
 
     /**
@@ -207,16 +193,15 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
     suspend fun sendTransitionSteps(
         steps: List<TransitionStep>,
         testScope: TestScope,
-        validateStep: Boolean = true
+        validateSteps: Boolean = true
     ) {
         steps.forEach {
-            sendTransitionStep(step = it, validateStep = validateStep)
+            sendTransitionStep(step = it, validateStep = validateSteps)
             testScope.testScheduler.runCurrent()
         }
     }
 
     override fun startTransition(info: TransitionInfo): UUID? {
-        Log.i("TEST", "Start transition: ", Exception())
         return if (info.animator == null) UUID.randomUUID() else null
     }
 

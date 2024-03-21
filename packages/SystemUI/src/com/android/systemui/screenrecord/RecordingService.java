@@ -82,7 +82,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     private final RecordingController mController;
     protected final KeyguardDismissUtil mKeyguardDismissUtil;
     private final Handler mMainHandler;
-    private ScreenRecordingAudioSource mAudioSource;
+    private ScreenRecordingAudioSource mAudioSource = ScreenRecordingAudioSource.NONE;
     private boolean mShowTaps;
     private boolean mOriginalShowTaps;
     private ScreenMediaRecorder mRecorder;

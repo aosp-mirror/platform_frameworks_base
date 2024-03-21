@@ -189,6 +189,13 @@ public class BrightnessClamperController {
         mModifiers.forEach(BrightnessStateModifier::stop);
     }
 
+    /**
+     * Notifies modifiers that ambient lux has changed.
+     * @param ambientLux current lux, debounced
+     */
+    public void onAmbientLuxChange(float ambientLux) {
+        mModifiers.forEach(modifier -> modifier.onAmbientLuxChange(ambientLux));
+    }
 
     // Called in DisplayControllerHandler
     private void recalculateBrightnessCap() {
