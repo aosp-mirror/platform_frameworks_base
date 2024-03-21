@@ -143,4 +143,24 @@ public class GrammaticalInflectionManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Peeks the current grammatical gender of privileged application from the specific user's
+     * encrypted file.
+     *
+     * @return the value of system grammatical gender.
+     * @hide
+     * @see Configuration#getGrammaticalGender
+     */
+    @RequiresPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
+    @FlaggedApi(Flags.FLAG_SYSTEM_TERMS_OF_ADDRESS_ENABLED)
+    @Configuration.GrammaticalGender
+    public int peekSystemGrammaticalGenderByUserId(int userId) {
+        try {
+            return mService.peekSystemGrammaticalGenderByUserId(mContext.getAttributionSource(),
+                    userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
