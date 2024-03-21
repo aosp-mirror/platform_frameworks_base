@@ -723,7 +723,8 @@ public final class ApduServiceInfo implements Parcelable {
      * delivered to {@link HostApduService#processPollingFrames(List)}. Adding a key with this
      * multiple times will cause the value to be overwritten each time.
      * @param pollingLoopFilter the polling loop filter to add, must be a valid hexadecimal string
-     * @param autoTransact whether Observe Mode should be disabled when this filter matches or not
+     * @param autoTransact when true, disable observe mode when this filter matches, when false,
+     *                     matching does not change the observe mode state
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopFilter(@NonNull String pollingLoopFilter,
@@ -748,7 +749,8 @@ public final class ApduServiceInfo implements Parcelable {
      * multiple times will cause the value to be overwritten each time.
      * @param pollingLoopPatternFilter the polling loop pattern filter to add, must be a valid
      *                                regex to match a hexadecimal string
-     * @param autoTransact whether Observe Mode should be disabled when this filter matches or not
+     * @param autoTransact when true, disable observe mode when this filter matches, when false,
+     *                     matching does not change the observe mode state
      */
     @FlaggedApi(Flags.FLAG_NFC_READ_POLLING_LOOP)
     public void addPollingLoopPatternFilter(@NonNull String pollingLoopPatternFilter,
