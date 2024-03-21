@@ -382,6 +382,16 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @MultiUserUnawareField
     Future<?> mImeDrawsImeNavBarResLazyInitFuture;
 
+    private final ImeTracing.ServiceDumper mDumper = new ImeTracing.ServiceDumper() {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void dumpToProto(ProtoOutputStream proto, @Nullable byte[] icProto) {
+            dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
+        }
+    };
+
     static class SessionState {
         final ClientState mClient;
         final IInputMethodInvoker mMethod;
@@ -3099,7 +3109,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
         int uid = Binder.getCallingUid();
         ImeTracing.getInstance().triggerManagerServiceDump(
-                "InputMethodManagerService#showSoftInput");
+                "InputMethodManagerService#showSoftInput", mDumper);
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "showSoftInput", statsToken)) {
                 ImeTracker.forLogging().onFailed(
@@ -3198,7 +3208,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.startStylusHandwriting");
         try {
             ImeTracing.getInstance().triggerManagerServiceDump(
-                    "InputMethodManagerService#startStylusHandwriting");
+                    "InputMethodManagerService#startStylusHandwriting", mDumper);
             int uid = Binder.getCallingUid();
             synchronized (ImfLock.class) {
                 if (!acceptingDelegation) {
@@ -3426,7 +3436,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         int uid = Binder.getCallingUid();
         ImeTracing.getInstance().triggerManagerServiceDump(
-                "InputMethodManagerService#hideSoftInput");
+                "InputMethodManagerService#hideSoftInput", mDumper);
         synchronized (ImfLock.class) {
             if (!canInteractWithImeLocked(uid, client, "hideSoftInput", statsToken)) {
                 if (isInputShownLocked()) {
@@ -3564,7 +3574,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                     "IMMS.startInputOrWindowGainedFocus");
             ImeTracing.getInstance().triggerManagerServiceDump(
-                    "InputMethodManagerService#startInputOrWindowGainedFocus");
+                    "InputMethodManagerService#startInputOrWindowGainedFocus", mDumper);
             final InputBindResult result;
             synchronized (ImfLock.class) {
                 // If the system is not yet ready, we shouldn't be running third party code.
