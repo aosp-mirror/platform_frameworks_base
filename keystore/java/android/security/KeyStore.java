@@ -17,7 +17,6 @@
 package android.security;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import android.os.StrictMode;
 
 /**
@@ -29,10 +28,6 @@ import android.os.StrictMode;
  * @hide
  */
 public class KeyStore {
-
-    // ResponseCodes - see system/security/keystore/include/keystore/keystore.h
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int NO_ERROR = 1;
 
     // Used for UID field to indicate the calling UID.
     public static final int UID_SELF = -1;
@@ -48,8 +43,8 @@ public class KeyStore {
      * Add an authentication record to the keystore authorization table.
      *
      * @param authToken The packed bytes of a hw_auth_token_t to be provided to keymaster.
-     * @return {@code KeyStore.NO_ERROR} on success, otherwise an error value corresponding to
-     * a {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
+     * @return 0 on success, otherwise an error value corresponding to a
+     * {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
      */
     public int addAuthToken(byte[] authToken) {
         StrictMode.noteDiskWrite();
