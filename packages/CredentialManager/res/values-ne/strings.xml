@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"हामी पासवर्डरहित भविष्यतर्फ बढ्दै गर्दा पासकीका साथसाथै पासवर्ड पनि उपलब्ध हुने छ।"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"तपाईं आफ्ना <xliff:g id="CREATETYPES">%1$s</xliff:g> कहाँ सेभ गर्न चाहनुहुन्छ भन्ने कुरा छनौट गर्नुहोस्"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"कुनै पासवर्ड म्यानेजरमा आफ्नो जानकारी सेभ गरी अर्को पटक अझ छिटो साइन इन गर्नुहोस्"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"<xliff:g id="APPNAME">%1$s</xliff:g> मा साइन इन गर्न पासकी बनाउने हो?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"<xliff:g id="APPNAME">%1$s</xliff:g> मा साइन इन गर्न पासवर्ड सेभ गर्ने हो?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"<xliff:g id="APPNAME">%1$s</xliff:g> मा साइन गर्न प्रयोग गरिनु पर्ने जानकारी सेभ गर्ने हो?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"पासकी"</string>
     <string name="password" msgid="6738570945182936667">"पासवर्ड"</string>
     <string name="passkeys" msgid="5733880786866559847">"पासकीहरू"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"हटाउनुहोस्"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"आफूले सेभ गरेको पासकी प्रयोग गरी <xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्ने हो?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न सेभ गरिएको पासवर्ड प्रयोग गर्ने हो?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्नका लागि तपाईंका क्रिडेन्सियलहरू प्रयोग गर्ने हो?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> का साइन इनसम्बन्धी विकल्पहरू अनलक गर्ने हो?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा साइन इन गर्न सेभ गरिएको पासकी छनौट गर्नुहोस्"</string>

@@ -39,9 +39,12 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Il futuro sarà senza password, ma per ora saranno ancora disponibili insieme alle passkey."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Scegli dove salvare le <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Seleziona un gestore delle password per salvare i tuoi dati e accedere più velocemente la prossima volta"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Creare passkey per accedere all\'app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Salvare password per accedere all\'app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vuoi salvare i dati di accesso di <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for choose_create_option_passkey_title (8762295821604276511) -->
+    <skip />
+    <!-- no translation found for choose_create_option_password_title (4481366993598649224) -->
+    <skip />
+    <!-- no translation found for choose_create_option_sign_in_title (7092914088455358079) -->
+    <skip />
     <string name="passkey" msgid="632353688396759522">"passkey"</string>
     <string name="password" msgid="6738570945182936667">"password"</string>
     <string name="passkeys" msgid="5733880786866559847">"passkey"</string>
@@ -70,6 +73,8 @@
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Chiudi"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vuoi usare la passkey salvata per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Vuoi usare la password salvata per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for get_dialog_title_single_tap_for (2057945648748859483) -->
+    <skip />
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Vuoi usare il tuo accesso per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Vuoi sbloccare le opzioni di accesso per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Scegli una passkey salvata per <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
