@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.component.bottombar.ui.viewmodel
 
+import android.app.ActivityManager
 import android.content.Intent
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -23,6 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.capture
@@ -48,6 +50,8 @@ class BottomBarViewModelTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
     @Captor private lateinit var intentCaptor: ArgumentCaptor<Intent>
+
+    @Captor private lateinit var activityStartedCaptor: ArgumentCaptor<ActivityStarter.Callback>
 
     private val kosmos = testKosmos()
 
@@ -80,10 +84,13 @@ class BottomBarViewModelTest : SysuiTestCase() {
 
                 runCurrent()
 
+                verify(activityStarter).startActivity(capture(intentCaptor), eq(true),
+                        capture(activityStartedCaptor))
+                assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_SOUND_SETTINGS)
+
+                activityStartedCaptor.value.onActivityStarted(ActivityManager.START_SUCCESS)
                 val volumePanelState by collectLastValue(volumePanelViewModel.volumePanelState)
                 assertThat(volumePanelState!!.isVisible).isFalse()
-                verify(activityStarter).startActivity(capture(intentCaptor), eq(true))
-                assertThat(intentCaptor.value.action).isEqualTo(Settings.ACTION_SOUND_SETTINGS)
             }
         }
     }
