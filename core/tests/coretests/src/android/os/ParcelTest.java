@@ -347,4 +347,30 @@ public class ParcelTest {
         p.recycle();
         Binder.setIsDirectlyHandlingTransactionOverride(false);
     }
+
+    @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    public void testHasBinders_AfterWritingBinderToParcel() {
+        Binder binder = new Binder();
+        Parcel pA = Parcel.obtain();
+        int iA = pA.dataPosition();
+        pA.writeInt(13);
+        assertFalse(pA.hasBinders());
+        pA.writeStrongBinder(binder);
+        assertTrue(pA.hasBinders());
+    }
+
+
+    @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
+    public void testHasBindersInRange_AfterWritingBinderToParcel() {
+        Binder binder = new Binder();
+        Parcel pA = Parcel.obtain();
+        pA.writeInt(13);
+
+        int binderStartPos = pA.dataPosition();
+        pA.writeStrongBinder(binder);
+        int binderEndPos = pA.dataPosition();
+        assertTrue(pA.hasBinders(binderStartPos, binderEndPos - binderStartPos));
+    }
 }

@@ -28,11 +28,6 @@ import java.util.Collection;
  */
 public interface CompanionDeviceManagerServiceInternal {
     /**
-     * @see CompanionDeviceManagerService#removeInactiveSelfManagedAssociations
-     */
-    void removeInactiveSelfManagedAssociations();
-
-    /**
      * Registers a callback from an InCallService / ConnectionService to CDM to process sync
      * requests and perform call control actions.
      */

@@ -58,6 +58,7 @@ public class FooterView extends StackScrollerDecorView {
 
     private FooterViewButton mClearAllButton;
     private FooterViewButton mManageOrHistoryButton;
+    private boolean mShouldBeHidden;
     private boolean mShowHistory;
     // String cache, for performance reasons.
     // Reading them from a Resources object can be quite slow sometimes.
@@ -108,6 +109,20 @@ public class FooterView extends StackScrollerDecorView {
     public void setClearAllButtonVisible(boolean visible, boolean animate,
             Consumer<Boolean> onAnimationEnded) {
         setSecondaryVisible(visible, animate, onAnimationEnded);
+    }
+
+    /** See {@link this#setShouldBeHidden} below. */
+    public boolean shouldBeHidden() {
+        return mShouldBeHidden;
+    }
+
+    /**
+     * Whether this view's visibility should be set to INVISIBLE. Note that this is different from
+     * the {@link StackScrollerDecorView#setVisible} method, which in turn handles visibility
+     * transitions between VISIBLE and GONE.
+     */
+    public void setShouldBeHidden(boolean hide) {
+        mShouldBeHidden = hide;
     }
 
     @Override

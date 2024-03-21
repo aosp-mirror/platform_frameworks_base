@@ -203,7 +203,7 @@ internal class ElementNode(
         measurable: Measurable,
         constraints: Constraints,
     ): MeasureResult {
-        val overscrollScene = layoutImpl.state.currentOverscrollSpec?.scene
+        val overscrollScene = layoutImpl.state.currentTransition?.currentOverscrollSpec?.scene
         if (overscrollScene != null && overscrollScene != scene.key) {
             // There is an overscroll in progress on another scene
             // By measuring composable elements, Compose can cache relevant information.
@@ -269,13 +269,12 @@ private fun shouldDrawElement(
         transition == null ||
             transition.fromScene !in element.sceneStates ||
             transition.toScene !in element.sceneStates ||
-            layoutImpl.state.currentOverscrollSpec?.scene == scene.key
+            transition.currentOverscrollSpec?.scene == scene.key
     ) {
         return true
     }
 
-    val sharedTransformation =
-        sharedElementTransformation(layoutImpl.state, transition, element.key)
+    val sharedTransformation = sharedElementTransformation(transition, element.key)
     if (sharedTransformation?.enabled == false) {
         return true
     }
@@ -305,23 +304,21 @@ internal fun shouldDrawOrComposeSharedElement(
             fromSceneZIndex = layoutImpl.scenes.getValue(fromScene).zIndex,
             toSceneZIndex = layoutImpl.scenes.getValue(toScene).zIndex,
         ) == scene
-    return chosenByPicker || layoutImpl.state.currentOverscrollSpec?.scene == scene
+    return chosenByPicker || transition.currentOverscrollSpec?.scene == scene
 }
 
 private fun isSharedElementEnabled(
-    layoutState: BaseSceneTransitionLayoutState,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): Boolean {
-    return sharedElementTransformation(layoutState, transition, element)?.enabled ?: true
+    return sharedElementTransformation(transition, element)?.enabled ?: true
 }
 
 internal fun sharedElementTransformation(
-    layoutState: BaseSceneTransitionLayoutState,
     transition: TransitionState.Transition,
     element: ElementKey,
 ): SharedElementTransformation? {
-    val transformationSpec = layoutState.transformationSpec
+    val transformationSpec = transition.transformationSpec
     val sharedInFromScene = transformationSpec.transformations(element, transition.fromScene).shared
     val sharedInToScene = transformationSpec.transformations(element, transition.toScene).shared
 
@@ -360,11 +357,11 @@ private fun isElementOpaque(
     }
 
     val isSharedElement = fromState != null && toState != null
-    if (isSharedElement && isSharedElementEnabled(layoutImpl.state, transition, element.key)) {
+    if (isSharedElement && isSharedElementEnabled(transition, element.key)) {
         return true
     }
 
-    return layoutImpl.state.transformationSpec.transformations(element.key, scene.key).alpha == null
+    return transition.transformationSpec.transformations(element.key, scene.key).alpha == null
 }
 
 /**
@@ -559,7 +556,7 @@ private inline fun <T> computeValue(
     }
 
     if (transition is TransitionState.HasOverscrollProperties) {
-        val overscroll = layoutImpl.state.currentOverscrollSpec
+        val overscroll = transition.currentOverscrollSpec
         if (overscroll?.scene == scene.key) {
             val elementSpec = overscroll.transformationSpec.transformations(element.key, scene.key)
             val propertySpec = transformation(elementSpec) ?: return currentValue()
@@ -597,7 +594,7 @@ private inline fun <T> computeValue(
     // TODO(b/290184746): Support non linear shared paths as well as a way to make sure that shared
     // elements follow the finger direction.
     val isSharedElement = fromState != null && toState != null
-    if (isSharedElement && isSharedElementEnabled(layoutImpl.state, transition, element.key)) {
+    if (isSharedElement && isSharedElementEnabled(transition, element.key)) {
         val start = sceneValue(fromState!!)
         val end = sceneValue(toState!!)
 
@@ -607,7 +604,7 @@ private inline fun <T> computeValue(
     }
 
     val transformation =
-        transformation(layoutImpl.state.transformationSpec.transformations(element.key, scene.key))
+        transformation(transition.transformationSpec.transformations(element.key, scene.key))
         // If there is no transformation explicitly associated to this element value, let's use
         // the value given by the system (like the current position and size given by the layout
         // pass).

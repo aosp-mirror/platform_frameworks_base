@@ -594,15 +594,16 @@ public class StackScrollAlgorithm {
         );
         if (view instanceof FooterView) {
             if (FooterViewRefactor.isEnabled()) {
-                final float footerEnd = algorithmState.mCurrentExpandedYPosition
-                        + view.getIntrinsicHeight();
-                final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
-                // TODO(b/293167744): May be able to keep only noSpaceForFooter here if we add an
-                //  emission when clearAllNotifications is called, and then use that in the footer
-                //  visibility flow.
-                ((FooterView.FooterViewState) viewState).hideContent =
-                        noSpaceForFooter || (ambientState.isClearAllInProgress()
-                                && !hasNonClearableNotifs(algorithmState));
+                if (((FooterView) view).shouldBeHidden()) {
+                    viewState.hidden = true;
+                } else {
+                    final float footerEnd = algorithmState.mCurrentExpandedYPosition
+                            + view.getIntrinsicHeight();
+                    final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
+                    ((FooterView.FooterViewState) viewState).hideContent =
+                            noSpaceForFooter || (ambientState.isClearAllInProgress()
+                                    && !hasNonClearableNotifs(algorithmState));
+                }
 
             } else {
                 final boolean shadeClosed = !ambientState.isShadeExpanded();

@@ -10,6 +10,7 @@ flag {
 flag {
     namespace: "haptics"
     name: "haptics_customization_enabled"
+    is_exported: true
     description: "Enables the haptics customization feature"
     bug: "241918098"
 }

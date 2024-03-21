@@ -2,6 +2,7 @@ package: "com.android.graphics.hwui.flags"
 
 flag {
   name: "clip_shader"
+  is_exported: true
   namespace: "core_graphics"
   description: "API for canvas shader clipping operations"
   bug: "280116960"
@@ -9,6 +10,7 @@ flag {
 
 flag {
   name: "matrix_44"
+  is_exported: true
   namespace: "core_graphics"
   description: "API for 4x4 matrix and related canvas functions"
   bug: "280116960"
@@ -16,6 +18,7 @@ flag {
 
 flag {
   name: "limited_hdr"
+  is_exported: true
   namespace: "core_graphics"
   description: "API to enable apps to restrict the amount of HDR headroom that is used"
   bug: "234181960"
@@ -44,6 +47,7 @@ flag {
 
 flag {
   name: "gainmap_animations"
+  is_exported: true
   namespace: "core_graphics"
   description: "APIs to help enable animations involving gainmaps"
   bug: "296482289"
@@ -51,6 +55,7 @@ flag {
 
 flag {
   name: "gainmap_constructor_with_metadata"
+  is_exported: true
   namespace: "core_graphics"
   description: "APIs to create a new gainmap with a bitmap for metadata."
   bug: "304478551"
@@ -65,6 +70,7 @@ flag {
 
 flag {
   name: "requested_formats_v"
+  is_exported: true
   namespace: "core_graphics"
   description: "Enable r_8, r_16_uint, rg_1616_uint, and rgba_10101010 in the SDK"
   bug: "292545615"

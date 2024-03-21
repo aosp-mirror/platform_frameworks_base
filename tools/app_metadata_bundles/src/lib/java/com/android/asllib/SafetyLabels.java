@@ -19,13 +19,15 @@ package com.android.asllib;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.List;
+
 /** Safety Label representation containing zero or more {@link DataCategory} for data shared */
-public class SafetyLabels {
+public class SafetyLabels implements AslMarshallable {
 
     private final Long mVersion;
     private final DataLabels mDataLabels;
 
-    private SafetyLabels(Long version, DataLabels dataLabels) {
+    public SafetyLabels(Long version, DataLabels dataLabels) {
         this.mVersion = version;
         this.mDataLabels = dataLabels;
     }
@@ -40,26 +42,12 @@ public class SafetyLabels {
         return mVersion;
     }
 
-    /** Creates a {@link SafetyLabels} from the human-readable DOM element. */
-    public static SafetyLabels createFromHrElement(Element safetyLabelsEle) {
-        Long version;
-        try {
-            version = Long.parseLong(safetyLabelsEle.getAttribute(XmlUtils.HR_ATTR_VERSION));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Malformed or missing required version in safety labels.");
-        }
-        Element dataLabelsEle =
-                XmlUtils.getSingleElement(safetyLabelsEle, XmlUtils.HR_TAG_DATA_LABELS);
-        DataLabels dataLabels = DataLabels.createFromHrElement(dataLabelsEle);
-        return new SafetyLabels(version, dataLabels);
-    }
-
     /** Creates an on-device DOM element from the {@link SafetyLabels}. */
-    public Element toOdDomElement(Document doc) {
+    @Override
+    public List<Element> toOdDomElements(Document doc) {
         Element safetyLabelsEle =
                 XmlUtils.createPbundleEleWithName(doc, XmlUtils.OD_NAME_SAFETY_LABELS);
-        safetyLabelsEle.appendChild(mDataLabels.toOdDomElement(doc));
-        return safetyLabelsEle;
+        XmlUtils.appendChildren(safetyLabelsEle, mDataLabels.toOdDomElements(doc));
+        return List.of(safetyLabelsEle);
     }
 }

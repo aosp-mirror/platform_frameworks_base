@@ -24,6 +24,7 @@ flag {
 
 flag {
     name: "support_communal_profile"
+    is_exported: true
     namespace: "multiuser"
     description: "Framework support for communal profile."
     bug: "285426179"
@@ -31,6 +32,7 @@ flag {
 
 flag {
     name: "support_communal_profile_nextgen"
+    is_exported: true
     namespace: "multiuser"
     description: "Further framework support for communal profile, beyond the basics, for later releases."
     bug: "285426179"
@@ -59,6 +61,7 @@ flag {
 
 flag {
     name: "enable_biometrics_to_unlock_private_space"
+    is_exported: true
     namespace: "profile_experiences"
     description: "Add support to unlock the private space using biometrics"
     bug: "312184187"
@@ -102,6 +105,7 @@ flag {
 
 flag {
     name: "enable_system_user_only_for_services_and_providers"
+    is_exported: true
     namespace: "multiuser"
     description: "Enable systemUserOnly manifest attribute for services and providers."
     bug: "302354856"
@@ -118,6 +122,7 @@ flag {
 
 flag {
     name: "enable_permission_to_access_hidden_profiles"
+    is_exported: true
     namespace: "profile_experiences"
     description: "Add permission to access API hidden users data via system APIs"
     bug: "321988638"

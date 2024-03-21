@@ -153,7 +153,7 @@ public abstract class ProviderSession<T, R>
         mUserId = userId;
         mComponentName = componentName;
         mRemoteCredentialService = remoteCredentialService;
-        mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
+        mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName, userId);
         mProviderSessionMetric = new ProviderSessionMetric(
                 ((RequestSession) mCallbacks).mRequestSessionMetric.getSessionIdTrackTwo());
     }

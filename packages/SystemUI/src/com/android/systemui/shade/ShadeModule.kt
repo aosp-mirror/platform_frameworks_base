@@ -36,6 +36,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
 import com.android.systemui.shade.domain.interactor.ShadeInteractorSceneContainerImpl
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractorImpl
 import dagger.Binds
 import dagger.Module

@@ -27,12 +27,11 @@ import android.content.pm.ShortcutManager
 import android.content.pm.launcherApps
 import android.graphics.Color
 import android.os.Binder
-import android.os.Handler
+import android.os.fakeExecutorHandler
 import android.os.userManager
 import android.provider.Settings
 import android.service.notification.NotificationListenerService.Ranking
 import android.testing.AndroidTestingRunner
-import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.util.ArraySet
 import android.view.View
@@ -45,6 +44,7 @@ import com.android.internal.logging.metricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.statusbar.statusBarService
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
@@ -71,9 +71,7 @@ import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.statusbar.policy.deviceProvisionedController
 import com.android.systemui.statusbar.policy.headsUpManager
 import com.android.systemui.testKosmos
-import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.kotlin.JavaAdapter
-import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.wmshell.BubblesManager
 import java.util.Optional
 import junit.framework.Assert
@@ -106,9 +104,8 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val javaAdapter = JavaAdapter(testScope.backgroundScope)
-    private val executor = FakeExecutor(FakeSystemClock())
-    private lateinit var testableLooper: TestableLooper
-    private lateinit var handler: Handler
+    private val executor = kosmos.fakeExecutor
+    private val handler = kosmos.fakeExecutorHandler
     private lateinit var helper: NotificationTestHelper
     private lateinit var gutsManager: NotificationGutsManager
     private lateinit var windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor
@@ -148,10 +145,8 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         val sceneContainerFlags = kosmos.fakeSceneContainerFlags
         sceneContainerFlags.enabled = true
-        testableLooper = TestableLooper.get(this)
         allowTestableLooperAsMainThread()
-        handler = Handler.createAsync(testableLooper.getLooper())
-        helper = NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
+        helper = NotificationTestHelper(mContext, mDependency)
         Mockito.`when`(accessibilityManager.isTouchExplorationEnabled).thenReturn(false)
         windowRootViewVisibilityInteractor =
             WindowRootViewVisibilityInteractor(
@@ -227,7 +222,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
         Mockito.`when`(row.guts).thenReturn(guts)
         Assert.assertTrue(gutsManager.openGutsInternal(row, 0, 0, menuItem))
         assertEquals(View.INVISIBLE.toLong(), guts.visibility.toLong())
-        testableLooper.processAllMessages()
+        executor.runAllReady()
         verify(guts)
             .openControls(
                 ArgumentMatchers.anyInt(),
@@ -247,7 +242,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
                 ArgumentMatchers.anyBoolean()
             )
         verify(row, Mockito.times(1)).setGutsView(ArgumentMatchers.any())
-        testableLooper.processAllMessages()
+        executor.runAllReady()
         verify(headsUpManager).setGutsShown(realRow.entry, false)
     }
 
@@ -343,7 +338,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
         Mockito.`when`(entry.row).thenReturn(row)
         Mockito.`when`(entry.getGuts()).thenReturn(guts)
         Assert.assertTrue(gutsManager.openGutsInternal(row, 0, 0, menuItem))
-        testableLooper.processAllMessages()
+        executor.runAllReady()
         verify(guts)
             .openControls(
                 ArgumentMatchers.anyInt(),
@@ -356,7 +351,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
         verify(row).setGutsView(ArgumentMatchers.any())
         row.onDensityOrFontScaleChanged()
         gutsManager.onDensityOrFontScaleChanged(entry)
-        testableLooper.processAllMessages()
+        executor.runAllReady()
         gutsManager.closeAndSaveGuts(false, false, false, 0, 0, false)
         verify(guts)
             .closeControls(

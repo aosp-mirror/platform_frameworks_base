@@ -138,8 +138,9 @@ private fun CoroutineScope.animate(
     // that will actually animate it.
     layoutState.startTransition(transition, transitionKey)
 
-    // The transformation now contains the spec that we should use to instantiate the Animatable.
-    val animationSpec = layoutState.transformationSpec.progressSpec
+    // The transition now contains the transformation spec that we should use to instantiate the
+    // Animatable.
+    val animationSpec = transition.transformationSpec.progressSpec
     val visibilityThreshold =
         (animationSpec as? SpringSpec)?.visibilityThreshold ?: ProgressVisibilityThreshold
     val animatable =

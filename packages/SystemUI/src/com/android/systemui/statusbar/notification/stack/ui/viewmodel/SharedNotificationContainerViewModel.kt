@@ -382,10 +382,11 @@ constructor(
                     emit(true)
                     // Now await the signal that SHADE state has been reached or the GONE transition
                     // was reversed. Until SHADE state has been replaced and merged with GONE, it is
-                    // the only source of when it is considered safe to reset alpha to 1f for HUNs
+                    // the only source of when it is considered safe to reset alpha to 1f for HUNs.
                     combine(
                             keyguardInteractor.statusBarState,
-                            keyguardTransitionInteractor.transitionValue(GONE),
+                            // Emit -1f on start to make sure the flow runs
+                            keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(-1f) }
                         ) { statusBarState, goneValue ->
                             statusBarState == SHADE || goneValue == 0f
                         }

@@ -163,6 +163,16 @@ public interface BluetoothCallback {
     default void onAclConnectionStateChanged(
             @NonNull CachedBluetoothDevice cachedDevice, int state) {}
 
+    /**
+     * Called when the Auto-on state is changed for any user. Listens to intent
+     * {@link android.bluetooth.BluetoothAdapter#ACTION_AUTO_ON_STATE_CHANGED }
+     *
+     * @param state        the Auto-on state, the possible values are:
+     *                     {@link android.bluetooth.BluetoothAdapter#AUTO_ON_STATE_ENABLED},
+     *                     {@link android.bluetooth.BluetoothAdapter#AUTO_ON_STATE_DISABLED}
+     */
+    default void onAutoOnStateChanged(int state) {}
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "STATE_" }, value = {
             STATE_DISCONNECTED,

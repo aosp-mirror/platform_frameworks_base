@@ -70,26 +70,26 @@ internal class RestrictedSwitchPreferenceModel(
             is BlockedByAdmin -> {
                 Box(
                     Modifier
-                            .clickable(
-                                role = Role.Switch,
-                                onClick = { restrictedMode.sendShowAdminSupportDetailsIntent() },
-                            )
-                            .semantics {
-                                this.toggleableState = ToggleableState(checked())
-                            },
+                        .clickable(
+                            role = Role.Switch,
+                            onClick = { restrictedMode.sendShowAdminSupportDetailsIntent() },
+                        )
+                        .semantics {
+                            this.toggleableState = ToggleableState(checked())
+                        },
                 ) { content() }
             }
 
             is BlockedByEcm -> {
                 Box(
                     Modifier
-                            .clickable(
-                                role = Role.Switch,
-                                onClick = { restrictedMode.showRestrictedSettingsDetails() },
-                            )
-                            .semantics {
-                                this.toggleableState = ToggleableState(checked())
-                            },
+                        .clickable(
+                            role = Role.Switch,
+                            onClick = { restrictedMode.showRestrictedSettingsDetails() },
+                        )
+                        .semantics {
+                            this.toggleableState = ToggleableState(checked())
+                        },
                 ) { content() }
             }
 
@@ -113,7 +113,7 @@ internal class RestrictedSwitchPreferenceModel(
             content: @Composable (SwitchPreferenceModel) -> Unit,
         ) {
             val context = LocalContext.current
-            val restrictedSwitchPreferenceModel = remember(restrictedMode) {
+            val restrictedSwitchPreferenceModel = remember(restrictedMode, model.title) {
                 RestrictedSwitchPreferenceModel(context, model, restrictedMode)
             }
             restrictedSwitchPreferenceModel.RestrictionWrapper {

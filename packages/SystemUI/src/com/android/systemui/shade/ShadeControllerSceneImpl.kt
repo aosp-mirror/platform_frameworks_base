@@ -248,7 +248,7 @@ constructor(
     }
 
     override fun onStatusBarTouch(event: MotionEvent) {
-        // The only call to this doesn't happen with migrateClocksToBlueprint() enabled
+        // The only call to this doesn't happen with MigrateClocksToBlueprint.isEnabled enabled
         throw UnsupportedOperationException()
     }
 

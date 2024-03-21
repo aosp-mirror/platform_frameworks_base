@@ -2656,6 +2656,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mBackgroundLaunchBroadcasts;
     }
 
+    private String getWearRemoteIntentAction() {
+        return mContext.getResources().getString(
+                    com.android.internal.R.string.config_wearRemoteIntentAction);
+    }
+
     /**
      * Ensures that the given package name has an explicit set of allowed associations.
      * If it does not, give it an empty set.
@@ -9973,7 +9978,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "getHistoricalProcessStartReasons");
             if (uid != INVALID_UID) {
                 mProcessList.getAppStartInfoTracker().getStartInfo(
-                        packageName, userId, callingPid, maxNum, results);
+                        packageName, uid, callingPid, maxNum, results);
             }
         } else {
             // If no package name is given, use the caller's uid as the filter uid.
@@ -15211,6 +15216,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.i(TAG, "Broadcast action " + action + " forcing include-background");
                 }
                 intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            }
+
+            // TODO: b/329211459 - Remove this after background remote intent is fixed.
+            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                    && getWearRemoteIntentAction().equals(action)) {
+                final int callerProcState = callerApp != null
+                        ? callerApp.getCurProcState()
+                        : ActivityManager.PROCESS_STATE_NONEXISTENT;
+                if (ActivityManager.RunningAppProcessInfo.procStateToImportance(callerProcState)
+                        > ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    return ActivityManager.START_CANCELED;
+                }
             }
 
             switch (action) {

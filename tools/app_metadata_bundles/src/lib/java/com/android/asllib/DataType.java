@@ -16,17 +16,18 @@
 
 package com.android.asllib;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Data usage type representation. Types are specific to a {@link DataCategory} and contains
  * metadata related to the data usage purpose.
  */
-public class DataType {
+public class DataType implements AslMarshallable {
+
     public enum Purpose {
         PURPOSE_APP_FUNCTIONALITY(1),
         PURPOSE_ANALYTICS(2),
@@ -78,20 +79,28 @@ public class DataType {
         }
     }
 
+    private final String mDataTypeName;
+
     private final Set<Purpose> mPurposeSet;
     private final Boolean mIsCollectionOptional;
     private final Boolean mIsSharingOptional;
     private final Boolean mEphemeral;
 
-    private DataType(
+    public DataType(
+            String dataTypeName,
             Set<Purpose> purposeSet,
             Boolean isCollectionOptional,
             Boolean isSharingOptional,
             Boolean ephemeral) {
+        this.mDataTypeName = dataTypeName;
         this.mPurposeSet = purposeSet;
         this.mIsCollectionOptional = isCollectionOptional;
         this.mIsSharingOptional = isSharingOptional;
         this.mEphemeral = ephemeral;
+    }
+
+    public String getDataTypeName() {
+        return mDataTypeName;
     }
 
     /**
@@ -126,20 +135,42 @@ public class DataType {
         return mEphemeral;
     }
 
-    /** Creates a {@link DataType} from the human-readable DOM element. */
-    public static DataType createFromHrElement(Element hrDataTypeEle) {
-        Set<Purpose> purposeSet =
-                Arrays.stream(hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_PURPOSES).split("\\|"))
-                        .map(Purpose::forString)
-                        .collect(Collectors.toUnmodifiableSet());
-        Boolean isCollectionOptional =
-                XmlUtils.fromString(
-                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL));
-        Boolean isSharingOptional =
-                XmlUtils.fromString(
-                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL));
-        Boolean ephemeral =
-                XmlUtils.fromString(hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_EPHEMERAL));
-        return new DataType(purposeSet, isCollectionOptional, isSharingOptional, ephemeral);
+    @Override
+    public List<Element> toOdDomElements(Document doc) {
+        Element dataTypeEle = XmlUtils.createPbundleEleWithName(doc, this.getDataTypeName());
+        if (!this.getPurposeSet().isEmpty()) {
+            Element purposesEle = doc.createElement(XmlUtils.OD_TAG_INT_ARRAY);
+            purposesEle.setAttribute(XmlUtils.OD_ATTR_NAME, XmlUtils.OD_NAME_PURPOSES);
+            purposesEle.setAttribute(
+                    XmlUtils.OD_ATTR_NUM, String.valueOf(this.getPurposeSet().size()));
+            for (DataType.Purpose purpose : this.getPurposeSet()) {
+                Element purposeEle = doc.createElement(XmlUtils.OD_TAG_ITEM);
+                purposeEle.setAttribute(XmlUtils.OD_ATTR_VALUE, String.valueOf(purpose.getValue()));
+                purposesEle.appendChild(purposeEle);
+            }
+            dataTypeEle.appendChild(purposesEle);
+        }
+
+        maybeAddBoolToOdElement(
+                doc,
+                dataTypeEle,
+                this.getIsCollectionOptional(),
+                XmlUtils.OD_NAME_IS_COLLECTION_OPTIONAL);
+        maybeAddBoolToOdElement(
+                doc,
+                dataTypeEle,
+                this.getIsSharingOptional(),
+                XmlUtils.OD_NAME_IS_SHARING_OPTIONAL);
+        maybeAddBoolToOdElement(doc, dataTypeEle, this.getEphemeral(), XmlUtils.OD_NAME_EPHEMERAL);
+        return List.of(dataTypeEle);
+    }
+
+    private static void maybeAddBoolToOdElement(
+            Document doc, Element parentEle, Boolean b, String odName) {
+        if (b == null) {
+            return;
+        }
+        Element ele = XmlUtils.createOdBooleanEle(doc, odName, b);
+        parentEle.appendChild(ele);
     }
 }

@@ -36,11 +36,10 @@ constructor(
     }
 
     fun onSettingsClicked() {
-        volumePanelViewModel.dismissPanel()
         activityStarter.startActivity(
             Intent(Settings.ACTION_SOUND_SETTINGS)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
             true,
-        )
+        ) { volumePanelViewModel.dismissPanel() }
     }
 }

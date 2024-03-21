@@ -32,12 +32,12 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.composable.blueprint.BlueprintAlignmentLines
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
@@ -69,7 +69,7 @@ constructor(
 ) {
     @Composable
     fun SceneScope.LockIcon(modifier: Modifier = Modifier) {
-        if (!keyguardBottomAreaRefactor() && !DeviceEntryUdfpsRefactor.isEnabled) {
+        if (!KeyguardBottomAreaRefactor.isEnabled && !DeviceEntryUdfpsRefactor.isEnabled) {
             return
         }
 
@@ -96,7 +96,7 @@ constructor(
                             )
                         }
                     } else {
-                        // keyguardBottomAreaRefactor()
+                        // KeyguardBottomAreaRefactor.isEnabled
                         LockIconView(context, null).apply {
                             id = R.id.lock_icon_view
                             lockIconViewController.get().setLockIconView(this)

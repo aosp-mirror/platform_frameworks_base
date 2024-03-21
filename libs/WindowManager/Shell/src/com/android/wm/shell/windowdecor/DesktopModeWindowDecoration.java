@@ -451,7 +451,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * until a resize event calls showResizeVeil below.
      */
     void createResizeVeil() {
-        mResizeVeil = new ResizeVeil(mContext, mAppIconDrawable, mTaskInfo,
+        mResizeVeil = new ResizeVeil(mContext, mAppIconDrawable, mTaskInfo, mTaskSurface,
                 mSurfaceControlBuilderSupplier, mDisplay, mSurfaceControlTransactionSupplier);
     }
 

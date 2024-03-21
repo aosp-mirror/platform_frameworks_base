@@ -64,6 +64,8 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private TvPipBackgroundView mPipBackgroundView;
 
     private boolean mIsReloading;
+    private static final int PIP_MENU_FORCE_CLOSE_DELAY_MS = 10_000;
+    private final Runnable mClosePipMenuRunnable = this::closeMenu;
 
     @TvPipMenuMode
     private int mCurrentMenuMode = MODE_NO_MENU;
@@ -280,6 +282,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: closeMenu()", TAG);
         requestMenuMode(MODE_NO_MENU);
+        mMainHandler.removeCallbacks(mClosePipMenuRunnable);
     }
 
     @Override
@@ -488,13 +491,17 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     private void requestMenuMode(@TvPipMenuMode int menuMode) {
         if (isMenuOpen() == isMenuOpen(menuMode)) {
+            if (mMainHandler.hasCallbacks(mClosePipMenuRunnable)) {
+                mMainHandler.removeCallbacks(mClosePipMenuRunnable);
+                mMainHandler.postDelayed(mClosePipMenuRunnable, PIP_MENU_FORCE_CLOSE_DELAY_MS);
+            }
             // No need to request a focus change. We can directly switch to the new mode.
             switchToMenuMode(menuMode);
         } else {
             if (isMenuOpen(menuMode)) {
+                mMainHandler.postDelayed(mClosePipMenuRunnable, PIP_MENU_FORCE_CLOSE_DELAY_MS);
                 mMenuModeOnFocus = menuMode;
             }
-
             // Send a request to gain window focus if the menu is open, or lose window focus
             // otherwise. Once the focus change happens, we will request the new mode in the
             // callback {@link #onPipWindowFocusChanged}.
@@ -583,6 +590,14 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         requestMenuMode(isInMoveMode() ? mPrevMenuMode : MODE_NO_MENU);
     }
 
+    @Override
+    public void onUserInteracting() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: onUserInteracting - mCurrentMenuMode=%s", TAG, getMenuModeString());
+        mMainHandler.removeCallbacks(mClosePipMenuRunnable);
+        mMainHandler.postDelayed(mClosePipMenuRunnable, PIP_MENU_FORCE_CLOSE_DELAY_MS);
+
+    }
     @Override
     public void onPipMovement(int keycode) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,

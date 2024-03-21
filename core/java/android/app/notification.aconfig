@@ -2,6 +2,7 @@ package: "android.app"
 
 flag {
   name: "modes_api"
+  is_exported: true
   namespace: "systemui"
   description: "This flag controls new and updated DND apis"
   bug: "300477976"
@@ -16,6 +17,7 @@ flag {
 
 flag {
   name: "api_tvextender"
+  is_exported: true
   namespace: "systemui"
   description: "Guards new android.app.Notification.TvExtender api"
   bug: "308164892"
@@ -24,6 +26,7 @@ flag {
 
 flag {
   name: "lifetime_extension_refactor"
+  is_exported: true
   namespace: "systemui"
   description: "Enables moving notification lifetime extension management from SystemUI to "
       "Notification Manager Service"
@@ -46,6 +49,7 @@ flag {
 
 flag {
   name: "category_voicemail"
+  is_exported: true
   namespace: "wear_sysui"
   description: "Adds a new voicemail category for notifications"
   bug: "322806700"
@@ -53,6 +57,7 @@ flag {
 
 flag {
   name: "notification_channel_vibration_effect_api"
+  is_exported: true
   namespace: "systemui"
   description: "This flag enables the API to allow setting VibrationEffect for NotificationChannels"
   bug: "241732519"

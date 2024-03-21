@@ -66,9 +66,7 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
             mInflateOrigin = new Throwable("inflate requested here");
         }
         mListener = listener;
-        AsyncLayoutInflater inflater = com.android.systemui.Flags.notificationRowUserContext()
-                ? new AsyncLayoutInflater(context, makeRowInflater(entry))
-                : new AsyncLayoutInflater(context);
+        AsyncLayoutInflater inflater = new AsyncLayoutInflater(context, makeRowInflater(entry));
         mEntry = entry;
         entry.setInflationTask(this);
 

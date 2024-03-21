@@ -26,9 +26,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
@@ -105,7 +105,7 @@ constructor(
 
                         var transition =
                             if (
-                                !keyguardBottomAreaRefactor() &&
+                                !KeyguardBottomAreaRefactor.isEnabled &&
                                     prevBluePrint != null &&
                                     prevBluePrint != blueprint
                             ) {

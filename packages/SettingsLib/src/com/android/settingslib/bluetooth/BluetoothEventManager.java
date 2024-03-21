@@ -133,6 +133,8 @@ public class BluetoothEventManager {
         addHandler(BluetoothDevice.ACTION_ACL_CONNECTED, new AclStateChangedHandler());
         addHandler(BluetoothDevice.ACTION_ACL_DISCONNECTED, new AclStateChangedHandler());
 
+        addHandler(BluetoothAdapter.ACTION_AUTO_ON_STATE_CHANGED, new AutoOnStateChangedHandler());
+
         registerAdapterIntentReceiver();
     }
 
@@ -550,6 +552,23 @@ public class BluetoothEventManager {
                 return;
             }
             dispatchAudioModeChanged();
+        }
+    }
+
+    private class AutoOnStateChangedHandler implements Handler {
+
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "AutoOnStateChangedHandler() action is null");
+                return;
+            }
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_AUTO_ON_STATE,
+                    BluetoothAdapter.ERROR);
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onAutoOnStateChanged(state);
+            }
         }
     }
 }

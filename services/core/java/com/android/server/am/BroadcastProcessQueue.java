@@ -277,6 +277,10 @@ class BroadcastProcessQueue {
         mOutgoingBroadcasts.clear();
     }
 
+    public void clearOutgoingBroadcasts() {
+        mOutgoingBroadcasts.clear();
+    }
+
     /**
      * Enqueue the given broadcast to be dispatched to this process at some
      * future point in time. The target receiver is indicated by the given index

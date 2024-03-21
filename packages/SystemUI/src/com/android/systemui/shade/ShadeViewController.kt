@@ -71,14 +71,6 @@ interface ShadeViewController {
     fun updateTouchableRegion()
 
     /**
-     * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
-     * screen off animation controller in order to animate in AOD without "actually" fully switching
-     * to the KEYGUARD state, which is a heavy transition that causes jank as 10+ files react to the
-     * change.
-     */
-    fun showAodUi()
-
-    /**
      * Sends an external (e.g. Status Bar) touch event to the Shade touch handler.
      *
      * This is different from [startInputFocusTransfer] as it doesn't rely on setting the launcher

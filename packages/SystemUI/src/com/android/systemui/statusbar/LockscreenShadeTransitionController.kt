@@ -15,13 +15,13 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Flags.nsslFalsingFix
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.biometrics.UdfpsKeyguardViewControllerLegacy
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -33,7 +33,7 @@ import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeLockscreenInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -69,7 +69,7 @@ constructor(
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val scrimTransitionController: LockscreenShadeScrimTransitionController,
     private val keyguardTransitionControllerFactory:
-    LockscreenShadeKeyguardTransitionController.Factory,
+        LockscreenShadeKeyguardTransitionController.Factory,
     private val depthController: NotificationShadeDepthController,
     private val context: Context,
     private val splitShadeOverScrollerFactory: SplitShadeLockScreenOverScroller.Factory,
@@ -292,8 +292,7 @@ constructor(
     /** @return true if the interaction is accepted, false if it should be cancelled */
     internal fun canDragDown(): Boolean {
         return (statusBarStateController.state == StatusBarState.KEYGUARD ||
-            nsslController.isInLockedDownShade()) &&
-                (isQsFullyCollapsed || useSplitShade)
+            nsslController.isInLockedDownShade()) && (isQsFullyCollapsed || useSplitShade)
     }
 
     /** Called by the touch helper when when a gesture has completed all the way and released. */
@@ -885,7 +884,7 @@ class DragDownHelper(
                     isDraggingDown = false
                     isTrackpadReverseScroll = false
                     shadeRepository.setLegacyLockscreenShadeTracking(false)
-                    if (nsslFalsingFix() || migrateClocksToBlueprint()) {
+                    if (nsslFalsingFix() || MigrateClocksToBlueprint.isEnabled) {
                         return true
                     }
                 } else {

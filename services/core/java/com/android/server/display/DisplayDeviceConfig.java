@@ -894,6 +894,7 @@ public class DisplayDeviceConfig {
     @Nullable
     private HdrBrightnessData mHdrBrightnessData;
 
+    // Null if low brightness mode is disabled - in config or by flag.
     @Nullable
     public LowBrightnessData mLowBrightnessData;
 
@@ -1063,6 +1064,9 @@ public class DisplayDeviceConfig {
      * @return The brightness mapping nits array.
      */
     public float[] getNits() {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mNits;
+        }
         return mNits;
     }
 
@@ -1071,7 +1075,11 @@ public class DisplayDeviceConfig {
      *
      * @return The backlight mapping value array.
      */
+    @VisibleForTesting
     public float[] getBacklight() {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mBacklight;
+        }
         return mBacklight;
     }
 
@@ -1083,7 +1091,24 @@ public class DisplayDeviceConfig {
      * @return backlight value on the HAL scale of 0-1
      */
     public float getBacklightFromBrightness(float brightness) {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mBrightnessToBacklight.interpolate(brightness);
+        }
         return mBrightnessToBacklightSpline.interpolate(brightness);
+    }
+
+    private float getBrightnessFromBacklight(float brightness) {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mBacklightToBrightness.interpolate(brightness);
+        }
+        return mBacklightToBrightnessSpline.interpolate(brightness);
+    }
+
+    private Spline getBacklightToBrightnessSpline() {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mBacklightToBrightness;
+        }
+        return mBacklightToBrightnessSpline;
     }
 
     /**
@@ -1093,11 +1118,33 @@ public class DisplayDeviceConfig {
      * exits.
      */
     public float getNitsFromBacklight(float backlight) {
+        if (mLowBrightnessData != null) {
+            if (mLowBrightnessData.mBacklightToNits == null) {
+                return INVALID_NITS;
+            }
+            backlight = Math.max(backlight, mBacklightMinimum);
+            return mLowBrightnessData.mBacklightToNits.interpolate(backlight);
+        }
+
         if (mBacklightToNitsSpline == null) {
             return INVALID_NITS;
         }
         backlight = Math.max(backlight, mBacklightMinimum);
         return mBacklightToNitsSpline.interpolate(backlight);
+    }
+
+    private float getBacklightFromNits(float nits) {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mNitsToBacklight.interpolate(nits);
+        }
+        return mNitsToBacklightSpline.interpolate(nits);
+    }
+
+    private Spline getNitsToBacklightSpline() {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mNitsToBacklight;
+        }
+        return mNitsToBacklightSpline;
     }
 
     /**
@@ -1126,13 +1173,13 @@ public class DisplayDeviceConfig {
 
         float ratio = Math.min(mSdrToHdrRatioSpline.interpolate(nits), maxDesiredHdrSdrRatio);
         float hdrNits = nits * ratio;
-        if (mNitsToBacklightSpline == null) {
+        if (getNitsToBacklightSpline() == null) {
             return PowerManager.BRIGHTNESS_INVALID;
         }
 
-        float hdrBacklight = mNitsToBacklightSpline.interpolate(hdrNits);
+        float hdrBacklight = getBacklightFromNits(hdrNits);
         hdrBacklight = Math.max(mBacklightMinimum, Math.min(mBacklightMaximum, hdrBacklight));
-        float hdrBrightness = mBacklightToBrightnessSpline.interpolate(hdrBacklight);
+        float hdrBrightness = getBrightnessFromBacklight(hdrBacklight);
 
         if (DEBUG) {
             Slog.d(TAG, "getHdrBrightnessFromSdr: sdr brightness " + brightness
@@ -1154,6 +1201,9 @@ public class DisplayDeviceConfig {
      * @return brightness array
      */
     public float[] getBrightness() {
+        if (mLowBrightnessData != null) {
+            return mLowBrightnessData.mBrightness;
+        }
         return mBrightness;
     }
 
@@ -1987,7 +2037,8 @@ public class DisplayDeviceConfig {
                 + "mHdrBrightnessData= " + mHdrBrightnessData + "\n"
                 + "mBrightnessCapForWearBedtimeMode= " + mBrightnessCapForWearBedtimeMode
                 + "\n"
-                + (mLowBrightnessData != null ? mLowBrightnessData.toString() : "")
+                + "mLowBrightnessData:" + (mLowBrightnessData != null
+                ? mLowBrightnessData.toString() : "null")
                 + "}";
     }
 
@@ -2588,9 +2639,9 @@ public class DisplayDeviceConfig {
                     // A negative value means that there's no threshold
                     mLowDisplayBrightnessThresholds[i] = thresholdNits;
                 } else {
-                    float thresholdBacklight = mNitsToBacklightSpline.interpolate(thresholdNits);
+                    float thresholdBacklight = getBacklightFromNits(thresholdNits);
                     mLowDisplayBrightnessThresholds[i] =
-                            mBacklightToBrightnessSpline.interpolate(thresholdBacklight);
+                            getBrightnessFromBacklight(thresholdBacklight);
                 }
 
                 mLowAmbientBrightnessThresholds[i] = lowerThresholdDisplayBrightnessPoints
@@ -2639,9 +2690,9 @@ public class DisplayDeviceConfig {
                     // A negative value means that there's no threshold
                     mHighDisplayBrightnessThresholds[i] = thresholdNits;
                 } else {
-                    float thresholdBacklight = mNitsToBacklightSpline.interpolate(thresholdNits);
+                    float thresholdBacklight = getBacklightFromNits(thresholdNits);
                     mHighDisplayBrightnessThresholds[i] =
-                            mBacklightToBrightnessSpline.interpolate(thresholdBacklight);
+                            getBrightnessFromBacklight(thresholdBacklight);
                 }
 
                 mHighAmbientBrightnessThresholds[i] = higherThresholdDisplayBrightnessPoints
@@ -2658,7 +2709,7 @@ public class DisplayDeviceConfig {
         loadAutoBrightnessBrighteningLightDebounceIdle(autoBrightness);
         loadAutoBrightnessDarkeningLightDebounceIdle(autoBrightness);
         mDisplayBrightnessMapping = new DisplayBrightnessMappingConfig(mContext, mFlags,
-                autoBrightness, mBacklightToBrightnessSpline);
+                autoBrightness, getBacklightToBrightnessSpline());
         loadEnableAutoBrightness(autoBrightness);
     }
 
@@ -2832,17 +2883,10 @@ public class DisplayDeviceConfig {
     // These splines are used to convert from the system brightness value to the HAL backlight
     // value
     private void createBacklightConversionSplines() {
-        if (mLowBrightnessData != null) {
-            mBrightnessToBacklightSpline = mLowBrightnessData.mBrightnessToBacklight;
-            mBacklightToBrightnessSpline = mLowBrightnessData.mBacklightToBrightness;
-            mBacklightToNitsSpline = mLowBrightnessData.mBacklightToNits;
-            mNitsToBacklightSpline = mLowBrightnessData.mNitsToBacklight;
 
-            mNits = mLowBrightnessData.mNits;
-            mBrightness = mLowBrightnessData.mBrightness;
-            mBacklight = mLowBrightnessData.mBacklight;
-            return;
-        }
+
+        // Create original brightness splines - not using low brightness mode arrays - this is
+        // so that we can continue to log the original brightness splines.
 
         mBrightness = new float[mBacklight.length];
         for (int i = 0; i < mBrightness.length; i++) {
@@ -2884,7 +2928,7 @@ public class DisplayDeviceConfig {
                         + mBacklightMaximum);
             }
             mHbmData.transitionPoint =
-                    mBacklightToBrightnessSpline.interpolate(transitionPointBacklightScale);
+                    getBrightnessFromBacklight(transitionPointBacklightScale);
             final HbmTiming hbmTiming = hbm.getTiming_all();
             mHbmData.timeWindowMillis = hbmTiming.getTimeWindowSecs_all().longValue() * 1000;
             mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;
@@ -2953,7 +2997,7 @@ public class DisplayDeviceConfig {
                         continue;
                     }
                     luxToTransitionPointMap.put(lux,
-                            mBacklightToBrightnessSpline.interpolate(maxBrightness));
+                            getBrightnessFromBacklight(maxBrightness));
                 }
                 if (!luxToTransitionPointMap.isEmpty()) {
                     mLuxThrottlingData.put(mappedType, luxToTransitionPointMap);
@@ -3048,7 +3092,7 @@ public class DisplayDeviceConfig {
 
     private void loadAutoBrightnessConfigsFromConfigXml() {
         mDisplayBrightnessMapping = new DisplayBrightnessMappingConfig(mContext, mFlags,
-                /* autoBrightnessConfig= */ null, mBacklightToBrightnessSpline);
+                /* autoBrightnessConfig= */ null, getBacklightToBrightnessSpline());
     }
 
     private void loadBrightnessChangeThresholdsFromXml() {

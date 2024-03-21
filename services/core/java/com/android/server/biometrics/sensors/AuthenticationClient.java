@@ -256,10 +256,10 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
             // For BP, BiometricService will add the authToken to Keystore.
             if (!isBiometricPrompt() && mIsStrongBiometric) {
                 final int result = KeyStore.getInstance().addAuthToken(byteToken);
-                if (result != KeyStore.NO_ERROR) {
+                if (result != 0) {
                     Slog.d(TAG, "Error adding auth token : " + result);
                 } else {
-                    Slog.d(TAG, "addAuthToken: " + result);
+                    Slog.d(TAG, "addAuthToken succeeded");
                 }
             } else {
                 Slog.d(TAG, "Skipping addAuthToken");

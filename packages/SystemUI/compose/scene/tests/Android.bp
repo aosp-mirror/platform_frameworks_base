@@ -26,7 +26,6 @@ android_test {
     name: "PlatformComposeSceneTransitionLayoutTests",
     manifest: "AndroidManifest.xml",
     test_suites: ["device-tests"],
-    sdk_version: "current",
     certificate: "platform",
 
     srcs: [

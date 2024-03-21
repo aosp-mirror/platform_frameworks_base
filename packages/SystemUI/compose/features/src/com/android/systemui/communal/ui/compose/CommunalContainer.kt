@@ -71,6 +71,7 @@ fun CommunalContainer(
             currentScene,
             onChangeScene = { viewModel.onSceneChanged(it) },
             transitions = sceneTransitions,
+            enableInterruptions = false,
         )
     val touchesAllowed by viewModel.touchesAllowed.collectAsState(initial = false)
 

@@ -145,7 +145,8 @@ public class AssociationRequestsProcessor {
 
     /**
      * Handle incoming {@link AssociationRequest}s, sent via
-     * {@link android.companion.ICompanionDeviceManager#associate(AssociationRequest, IAssociationRequestCallback, String, int)}
+     * {@link android.companion.ICompanionDeviceManager#associate(AssociationRequest,
+     * IAssociationRequestCallback, String, int)}
      */
     public void processNewAssociationRequest(@NonNull AssociationRequest request,
             @NonNull String packageName, @UserIdInt int userId,
@@ -212,7 +213,8 @@ public class AssociationRequestsProcessor {
         // 2b.4. Send the PendingIntent back to the app.
         try {
             callback.onAssociationPending(pendingIntent);
-        } catch (RemoteException ignore) { }
+        } catch (RemoteException ignore) {
+        }
     }
 
     /**
@@ -252,7 +254,8 @@ public class AssociationRequestsProcessor {
             // forward it back to the application via the callback.
             try {
                 callback.onFailure(e.getMessage());
-            } catch (RemoteException ignore) { }
+            } catch (RemoteException ignore) {
+            }
             return;
         }
 
@@ -322,7 +325,8 @@ public class AssociationRequestsProcessor {
      * Enable system data sync.
      */
     public void enableSystemDataSync(int associationId, int flags) {
-        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
+                associationId);
         AssociationInfo updated = (new AssociationInfo.Builder(association))
                 .setSystemDataSyncFlags(association.getSystemDataSyncFlags() | flags).build();
         mAssociationStore.updateAssociation(updated);
@@ -332,10 +336,21 @@ public class AssociationRequestsProcessor {
      * Disable system data sync.
      */
     public void disableSystemDataSync(int associationId, int flags) {
-        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
+                associationId);
         AssociationInfo updated = (new AssociationInfo.Builder(association))
                 .setSystemDataSyncFlags(association.getSystemDataSyncFlags() & (~flags)).build();
         mAssociationStore.updateAssociation(updated);
+    }
+
+    /**
+     * Set association tag.
+     */
+    public void setAssociationTag(int associationId, String tag) {
+        AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
+                associationId);
+        association = (new AssociationInfo.Builder(association)).setTag(tag).build();
+        mAssociationStore.updateAssociation(association);
     }
 
     private void sendCallbackAndFinish(@Nullable AssociationInfo association,
@@ -396,14 +411,14 @@ public class AssociationRequestsProcessor {
         // If the application already has a pending association request, that PendingIntent
         // will be cancelled except application wants to cancel the request by the system.
         return Binder.withCleanCallingIdentity(() ->
-            PendingIntent.getActivityAsUser(
-                    mContext, /*requestCode */ packageUid, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
-                    ActivityOptions.makeBasic()
-                            .setPendingIntentCreatorBackgroundActivityStartMode(
-                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
-                            .toBundle(),
-                    UserHandle.CURRENT)
+                PendingIntent.getActivityAsUser(
+                        mContext, /*requestCode */ packageUid, intent,
+                        FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                        ActivityOptions.makeBasic()
+                                .setPendingIntentCreatorBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle(),
+                        UserHandle.CURRENT)
         );
     }
 

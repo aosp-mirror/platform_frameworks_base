@@ -503,6 +503,8 @@ class CreateFlowUtils {
                         it.hasHint("androidx.credentials.provider.createEntry.SLICE_HINT_AUTO_" +
                             "SELECT_ALLOWED")
                     }?.text == "true",
+                    // TODO(b/326243754) : Handle this when the create flow is added; for now the
+                    // create flow does not support biometric values
                 )
                 )
             }

@@ -595,7 +595,7 @@ class ElementTest {
         }
 
         assertThat(state.currentTransition).isNull()
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
 
         // Swipe by half of verticalSwipeDistance.
         rule.onRoot().performTouchInput {
@@ -643,7 +643,7 @@ class ElementTest {
 
         // Scroll 150% (Scene B overscroll by 50%)
         assertThat(transition.progress).isEqualTo(1.5f)
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 0.5f)
         // animatedFloat cannot overflow (canOverflow = false)
         assertThat(animatedFloat).isEqualTo(100f)
@@ -655,7 +655,7 @@ class ElementTest {
 
         // Scroll 250% (Scene B overscroll by 150%)
         assertThat(transition.progress).isEqualTo(2.5f)
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 1.5f)
         assertThat(animatedFloat).isEqualTo(100f)
     }
@@ -707,7 +707,7 @@ class ElementTest {
         }
 
         assertThat(state.currentTransition).isNull()
-        assertThat(state.currentOverscrollSpec).isNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
         val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
 
@@ -720,7 +720,7 @@ class ElementTest {
         }
 
         val transition = state.currentTransition
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         assertThat(transition).isNotNull()
         assertThat(transition!!.progress).isEqualTo(-0.5f)
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 0.5f)
@@ -732,7 +732,7 @@ class ElementTest {
 
         // Scroll 150% (Scene B overscroll by 50%)
         assertThat(transition.progress).isEqualTo(-1.5f)
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 1.5f)
     }
 
@@ -771,7 +771,7 @@ class ElementTest {
 
         // Scroll 150% (100% scroll + 50% overscroll)
         assertThat(transition!!.progress).isEqualTo(1.5f)
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * 0.5f)
         assertThat(animatedFloat).isEqualTo(100f)
 
@@ -782,7 +782,7 @@ class ElementTest {
 
         // Scroll 250% (100% scroll + 150% overscroll)
         assertThat(transition.progress).isEqualTo(2.5f)
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * 1.5f)
         assertThat(animatedFloat).isEqualTo(100f)
     }
@@ -828,7 +828,7 @@ class ElementTest {
 
         // Scroll 150% (100% scroll + 50% overscroll)
         assertThat(transition.progress).isEqualTo(1.5f)
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * (transition.progress - 1f))
         assertThat(animatedFloat).isEqualTo(100f)
 
@@ -840,7 +840,7 @@ class ElementTest {
         rule.waitUntil(timeoutMillis = 10_000) { transition.progress < 1f }
 
         assertThat(transition.progress).isLessThan(1f)
-        assertThat(state.currentOverscrollSpec).isNotNull()
+        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
         assertThat(transition.bouncingScene).isEqualTo(transition.toScene)
         assertThat(animatedFloat).isEqualTo(100f)
     }

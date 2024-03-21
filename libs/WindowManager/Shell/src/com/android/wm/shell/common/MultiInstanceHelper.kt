@@ -21,11 +21,9 @@ import android.content.Context
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.os.UserHandle
-import android.view.WindowManager
 import android.view.WindowManager.PROPERTY_SUPPORTS_MULTI_INSTANCE_SYSTEM_UI
 import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.R
-import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL
 import com.android.wm.shell.util.KtProtoLog
 import java.util.Arrays
@@ -37,7 +35,8 @@ class MultiInstanceHelper @JvmOverloads constructor(
     private val context: Context,
     private val packageManager: PackageManager,
     private val staticAppsSupportingMultiInstance: Array<String> = context.resources
-            .getStringArray(R.array.config_appsSupportMultiInstancesSplit)) {
+            .getStringArray(R.array.config_appsSupportMultiInstancesSplit),
+    private val supportsMultiInstanceProperty: Boolean) {
 
     /**
      * Returns whether a specific component desires to be launched in multiple instances.
@@ -57,6 +56,11 @@ class MultiInstanceHelper @JvmOverloads constructor(
                     packageName)
                 return true
             }
+        }
+
+        if (!supportsMultiInstanceProperty) {
+            // If not checking the multi-instance properties, then return early
+            return false;
         }
 
         // Check the activity property first

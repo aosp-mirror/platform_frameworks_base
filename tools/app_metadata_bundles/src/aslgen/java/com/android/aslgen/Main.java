@@ -18,6 +18,7 @@ package com.android.aslgen;
 
 import com.android.asllib.AndroidSafetyLabel;
 import com.android.asllib.AndroidSafetyLabel.Format;
+import com.android.asllib.util.MalformedXmlException;
 
 import org.xml.sax.SAXException;
 
@@ -32,7 +33,11 @@ public class Main {
 
     /** Takes the options to make file conversion. */
     public static void main(String[] args)
-            throws IOException, ParserConfigurationException, SAXException, TransformerException {
+            throws IOException,
+                    ParserConfigurationException,
+                    SAXException,
+                    TransformerException,
+                    MalformedXmlException {
 
         String inFile = null;
         String outFile = null;

@@ -18,6 +18,7 @@ package com.android.server.companion.association;
 
 import static com.android.server.companion.utils.MetricUtils.logCreateAssociation;
 import static com.android.server.companion.utils.MetricUtils.logRemoveAssociation;
+import static com.android.server.companion.utils.PermissionsUtils.checkCallerCanManageAssociationsForPackage;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -26,6 +27,7 @@ import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.companion.IOnAssociationsChangedListener;
+import android.content.Context;
 import android.content.pm.UserInfo;
 import android.net.MacAddress;
 import android.os.Binder;
@@ -57,21 +59,22 @@ import java.util.concurrent.Executors;
 @SuppressLint("LongLogTag")
 public class AssociationStore {
 
-    @IntDef(prefix = { "CHANGE_TYPE_" }, value = {
+    @IntDef(prefix = {"CHANGE_TYPE_"}, value = {
             CHANGE_TYPE_ADDED,
             CHANGE_TYPE_REMOVED,
             CHANGE_TYPE_UPDATED_ADDRESS_CHANGED,
             CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ChangeType {}
+    public @interface ChangeType {
+    }
 
     public static final int CHANGE_TYPE_ADDED = 0;
     public static final int CHANGE_TYPE_REMOVED = 1;
     public static final int CHANGE_TYPE_UPDATED_ADDRESS_CHANGED = 2;
     public static final int CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED = 3;
 
-    /**  Listener for any changes to associations. */
+    /** Listener for any changes to associations. */
     public interface OnChangeListener {
         /**
          * Called when there are association changes.
@@ -100,25 +103,30 @@ public class AssociationStore {
         /**
          * Called when an association is added.
          */
-        default void onAssociationAdded(AssociationInfo association) {}
+        default void onAssociationAdded(AssociationInfo association) {
+        }
 
         /**
          * Called when an association is removed.
          */
-        default void onAssociationRemoved(AssociationInfo association) {}
+        default void onAssociationRemoved(AssociationInfo association) {
+        }
 
         /**
          * Called when an association is updated.
          */
-        default void onAssociationUpdated(AssociationInfo association, boolean addressChanged) {}
+        default void onAssociationUpdated(AssociationInfo association, boolean addressChanged) {
+        }
     }
 
     private static final String TAG = "CDM_AssociationStore";
 
-    private final Object mLock = new Object();
-
+    private final Context mContext;
+    private final UserManager mUserManager;
+    private final AssociationDiskStore mDiskStore;
     private final ExecutorService mExecutor;
 
+    private final Object mLock = new Object();
     @GuardedBy("mLock")
     private boolean mPersisted = false;
     @GuardedBy("mLock")
@@ -132,10 +140,9 @@ public class AssociationStore {
     private final RemoteCallbackList<IOnAssociationsChangedListener> mRemoteListeners =
             new RemoteCallbackList<>();
 
-    private final UserManager mUserManager;
-    private final AssociationDiskStore mDiskStore;
-
-    public AssociationStore(UserManager userManager, AssociationDiskStore diskStore) {
+    public AssociationStore(Context context, UserManager userManager,
+            AssociationDiskStore diskStore) {
+        mContext = context;
         mUserManager = userManager;
         mDiskStore = diskStore;
         mExecutor = Executors.newSingleThreadExecutor();
@@ -202,7 +209,7 @@ public class AssociationStore {
 
         synchronized (mLock) {
             if (mIdToAssociationMap.containsKey(id)) {
-                Slog.e(TAG, "Association with id=[" + id + "] already exists.");
+                Slog.e(TAG, "Association id=[" + id + "] already exists.");
                 return;
             }
 
@@ -446,6 +453,26 @@ public class AssociationStore {
                     a -> packageName.equals(a.getPackageName()) && a.getUserId() == userId
                             && a.isPending());
         }
+    }
+
+    /**
+     * Get association by id with caller checks.
+     */
+    @NonNull
+    public AssociationInfo getAssociationWithCallerChecks(int associationId) {
+        AssociationInfo association = getAssociationById(associationId);
+        if (association == null) {
+            throw new IllegalArgumentException(
+                    "getAssociationWithCallerChecks() Association id=[" + associationId
+                            + "] doesn't exist.");
+        }
+        if (checkCallerCanManageAssociationsForPackage(mContext, association.getUserId(),
+                association.getPackageName())) {
+            return association;
+        }
+
+        throw new IllegalArgumentException(
+                "The caller can't interact with the association id=[" + associationId + "].");
     }
 
     /**

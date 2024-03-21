@@ -19,6 +19,7 @@ flag {
 
 flag {
   name: "dynamic_policy"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable dynamic policy API"
   bug: "298401780"
@@ -26,6 +27,7 @@ flag {
 
 flag {
   name: "cross_device_clipboard"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable cross-device clipboard API"
   bug: "306622082"
@@ -40,6 +42,7 @@ flag {
 
 flag {
   name: "vdm_custom_ime"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable custom IME API"
   bug: "287269288"
@@ -47,6 +50,7 @@ flag {
 
 flag {
   name: "vdm_custom_home"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable custom home API"
   bug: "297168328"
@@ -54,6 +58,7 @@ flag {
 
 flag {
   name: "vdm_public_apis"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable public VDM API for device capabilities"
   bug: "297253526"
@@ -61,6 +66,7 @@ flag {
 
 flag {
   name: "virtual_camera"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable Virtual Camera"
   bug: "270352264"
@@ -82,6 +88,7 @@ flag {
 
 flag {
   name: "persistent_device_id_api"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable persistent device ID notification API"
   bug: "295258915"
@@ -96,6 +103,7 @@ flag {
 
 flag {
   name: "interactive_screen_mirror"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable interactive screen mirroring using Virtual Devices"
   bug: "292212199"
@@ -103,6 +111,7 @@ flag {
 
 flag {
   name: "virtual_stylus"
+  is_exported: true
   namespace: "virtual_devices"
   description: "Enable virtual stylus input"
   bug: "304829446"

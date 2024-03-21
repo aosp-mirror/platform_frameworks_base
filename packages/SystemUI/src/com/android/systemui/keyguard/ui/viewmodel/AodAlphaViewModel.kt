@@ -18,8 +18,8 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
@@ -60,7 +60,7 @@ constructor(
                 emit(goneToAodAlpha)
             } else if (step.from == GONE && step.to == DOZING) {
                 emit(goneToDozingAlpha)
-            } else if (!migrateClocksToBlueprint()) {
+            } else if (!MigrateClocksToBlueprint.isEnabled) {
                 emit(keyguardAlpha)
             }
         }

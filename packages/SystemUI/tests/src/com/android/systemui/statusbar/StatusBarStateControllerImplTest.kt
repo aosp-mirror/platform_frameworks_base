@@ -23,7 +23,6 @@ import android.platform.test.annotations.DisableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
-import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
@@ -39,6 +38,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsIntera
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -49,6 +49,7 @@ import com.android.systemui.keyguard.domain.interactor.fromGoneTransitionInterac
 import com.android.systemui.keyguard.domain.interactor.fromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.fromPrimaryBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
@@ -80,9 +81,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyFloat
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -101,7 +100,6 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     private lateinit var fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor
     private lateinit var fromPrimaryBouncerTransitionInteractor:
         FromPrimaryBouncerTransitionInteractor
-    private val interactionJankMonitor = mock<InteractionJankMonitor>()
     private val mockDarkAnimator = mock<ObjectAnimator>()
     private val deviceEntryUdfpsInteractor = mock<DeviceEntryUdfpsInteractor>()
     private val largeScreenHeaderHelper = mock<LargeScreenHeaderHelper>()
@@ -112,15 +110,13 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(interactionJankMonitor.begin(any(), anyInt())).thenReturn(true)
-        whenever(interactionJankMonitor.end(anyInt())).thenReturn(true)
 
         uiEventLogger = UiEventLoggerFake()
         underTest =
             object :
                 StatusBarStateControllerImpl(
                     uiEventLogger,
-                    interactionJankMonitor,
+                    kosmos.interactionJankMonitor,
                     JavaAdapter(testScope.backgroundScope),
                     { shadeInteractor },
                     { kosmos.deviceUnlockedInteractor },

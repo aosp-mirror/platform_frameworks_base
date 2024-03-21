@@ -16,13 +16,12 @@
   -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@drawable/desktop_mode_resize_veil_background">
+              android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/veil_application_icon"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
+        android:layout_width="@dimen/desktop_mode_resize_veil_icon_size"
+        android:layout_height="@dimen/desktop_mode_resize_veil_icon_size"
         android:layout_gravity="center"
         android:contentDescription="@string/app_icon_text" />
 </FrameLayout>
