@@ -238,6 +238,13 @@ flag {
 }
 
 flag {
+   name: "qs_new_tiles_future"
+   namespace: "systemui"
+   description: "Use the new tiles in the Quick Settings that are still under development. This flag will not be used to gate release but to prevent tiles under development from reaching teamfood."
+   bug: "311147395"
+}
+
+flag {
     name: "coroutine_tracing"
     namespace: "systemui"
     description: "Adds thread-local data to System UI's global coroutine scopes to "
