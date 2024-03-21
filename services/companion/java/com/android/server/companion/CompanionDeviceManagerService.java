@@ -429,10 +429,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             mCallingPackage = callingPackage;
             request.setCallingPackage(callingPackage);
 
-            if (mayAssociateWithoutPrompt(callingPackage, userId)) {
-                Slog.i(LOG_TAG, "setSkipPrompt(true)");
-                request.setSkipPrompt(true);
-            }
+            request.setSkipPrompt(mayAssociateWithoutPrompt(callingPackage, userId));
+
             callback.asBinder().linkToDeath(CompanionDeviceManagerService.this /* recipient */, 0);
 
             AndroidFuture<String> fetchProfileDescription =
