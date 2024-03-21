@@ -64,8 +64,10 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -2373,9 +2375,7 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(transitA.isCollecting());
 
         // finish collecting A
-        transitA.start();
-        transitA.setAllReady();
-        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        tryFinishTransitionSyncSet(transitA);
         waitUntilHandlersIdle();
 
         assertTrue(transitA.isPlaying());
@@ -2481,6 +2481,36 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDeferredMoveTaskToBack() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity.getTask();
+        registerTestTransitionPlayer();
+        final TransitionController controller = mWm.mRoot.mTransitionController;
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+        final Transition transition = createTestTransition(TRANSIT_CHANGE, controller);
+        controller.moveToCollecting(transition);
+        task.moveTaskToBack(task);
+        // Actual action will be deferred by current transition.
+        verify(task, never()).moveToBack(any(), any());
+
+        tryFinishTransitionSyncSet(transition);
+        waitUntilHandlersIdle();
+        // Continue to move task to back after the transition is done.
+        verify(task).moveToBack(any(), any());
+        final Transition moveBackTransition = controller.getCollectingTransition();
+        assertNotNull(moveBackTransition);
+        moveBackTransition.abort();
+
+        // The move-to-back can be collected in to a collecting OPEN transition.
+        clearInvocations(task);
+        final Transition transition2 = createTestTransition(TRANSIT_OPEN, controller);
+        controller.moveToCollecting(transition2);
+        task.moveTaskToBack(task);
+        verify(task).moveToBack(any(), any());
+    }
+
+    @Test
     public void testNoSyncFlagIfOneTrack() {
         final TransitionController controller = mAtm.getTransitionController();
         final TestTransitionPlayer player = registerTestTransitionPlayer();
@@ -2497,17 +2527,11 @@ public class TransitionTests extends WindowTestsBase {
         controller.startCollectOrQueue(transitC, (deferred) -> {});
 
         // Verify that, as-long as there is <= 1 track, we won't get a SYNC flag
-        transitA.start();
-        transitA.setAllReady();
-        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        tryFinishTransitionSyncSet(transitA);
         assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
-        transitB.start();
-        transitB.setAllReady();
-        mSyncEngine.tryFinishForTest(transitB.getSyncId());
+        tryFinishTransitionSyncSet(transitB);
         assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
-        transitC.start();
-        transitC.setAllReady();
-        mSyncEngine.tryFinishForTest(transitC.getSyncId());
+        tryFinishTransitionSyncSet(transitC);
         assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
     }
 
@@ -2614,6 +2638,12 @@ public class TransitionTests extends WindowTestsBase {
         condition1.meetAlternate("reason1");
         assertTrue(transit.mReadyTracker.isReady());
         assertEquals("reason1", condition1.mAlternate);
+    }
+
+    private void tryFinishTransitionSyncSet(Transition transition) {
+        transition.setAllReady();
+        transition.start();
+        mSyncEngine.tryFinishForTest(transition.getSyncId());
     }
 
     private static void makeTaskOrganized(Task... tasks) {
