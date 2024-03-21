@@ -46,6 +46,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 
+/**
+ * Provides information about physical keyboard states. [CommandLineKeyboardRepository] can be
+ * useful command line-driven implementation during development.
+ */
 interface KeyboardRepository {
     /** Emits true if any physical keyboard is connected to the device, false otherwise. */
     val isAnyKeyboardConnected: Flow<Boolean>
