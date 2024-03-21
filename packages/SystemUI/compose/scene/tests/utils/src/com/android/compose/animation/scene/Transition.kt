@@ -29,6 +29,7 @@ fun transition(
     isUpOrLeft: Boolean = false,
     bouncingScene: SceneKey? = null,
     orientation: Orientation = Orientation.Horizontal,
+    onFinish: ((TransitionState.Transition) -> Job)? = null,
 ): TransitionState.Transition {
     return object : TransitionState.Transition(from, to), TransitionState.HasOverscrollProperties {
         override val currentScene: SceneKey = from
@@ -46,7 +47,13 @@ fun transition(
             }
 
         override fun finish(): Job {
-            error("finish() is not supported in test transitions")
+            val onFinish =
+                onFinish
+                    ?: error(
+                        "onFinish() must be provided if finish() is called on test transitions"
+                    )
+
+            return onFinish(this)
         }
     }
 }
