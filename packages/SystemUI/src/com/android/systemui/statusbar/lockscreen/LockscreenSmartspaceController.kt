@@ -36,6 +36,7 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
@@ -45,6 +46,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
@@ -95,6 +97,7 @@ constructor(
         private val deviceProvisionedController: DeviceProvisionedController,
         private val bypassController: KeyguardBypassController,
         private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        private val wakefulnessLifecycle: WakefulnessLifecycle,
         private val dumpManager: DumpManager,
         private val execution: Execution,
         @Main private val uiExecutor: Executor,
@@ -123,7 +126,7 @@ constructor(
     private val recentSmartspaceData: Deque<List<SmartspaceTarget>> = LinkedList()
 
     // Smartspace can be used on multiple displays, such as when the user casts their screen
-    private var smartspaceViews = mutableSetOf<SmartspaceView>()
+    @VisibleForTesting var smartspaceViews = mutableSetOf<SmartspaceView>()
     private var regionSamplers =
             mutableMapOf<SmartspaceView, RegionSampler>()
 
@@ -269,6 +272,18 @@ constructor(
         object : KeyguardBypassController.OnBypassStateChangedListener {
             override fun onBypassStateChanged(isEnabled: Boolean) {
                 updateBypassEnabled()
+            }
+        }
+
+    // TODO(b/331451011): Refactor to viewmodel and use interactor pattern.
+    private val wakefulnessLifecycleObserver =
+        object : WakefulnessLifecycle.Observer {
+            override fun onStartedWakingUp() {
+                smartspaceViews.forEach { it.setScreenOn(true) }
+            }
+
+            override fun onFinishedGoingToSleep() {
+                smartspaceViews.forEach { it.setScreenOn(false) }
             }
         }
 
@@ -451,6 +466,7 @@ constructor(
         configurationController.addCallback(configChangeListener)
         statusBarStateController.addCallback(statusBarStateListener)
         bypassController.registerOnBypassStateChangedListener(bypassStateChangedListener)
+        wakefulnessLifecycle.addObserver(wakefulnessLifecycleObserver)
 
         datePlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
         weatherPlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
@@ -493,6 +509,7 @@ constructor(
         configurationController.removeCallback(configChangeListener)
         statusBarStateController.removeCallback(statusBarStateListener)
         bypassController.unregisterOnBypassStateChangedListener(bypassStateChangedListener)
+        wakefulnessLifecycle.removeObserver(wakefulnessLifecycleObserver)
         session = null
 
         datePlugin?.registerSmartspaceEventNotifier(null)
