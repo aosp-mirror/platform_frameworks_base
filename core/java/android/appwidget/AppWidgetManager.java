@@ -1384,7 +1384,8 @@ public class AppWidgetManager {
      *
      * @return {@code TRUE} if the launcher supports this feature. Note the API will return without
      *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
-     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature.
+     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature or if
+     *    calling app belongs to a user-profile with items restricted on home screen.
      *
      * @see android.content.pm.ShortcutManager#isRequestPinShortcutSupported()
      * @see android.content.pm.ShortcutManager#requestPinShortcut(ShortcutInfo, IntentSender)

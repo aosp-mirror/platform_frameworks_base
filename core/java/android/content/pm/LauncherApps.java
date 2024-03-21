@@ -1097,7 +1097,8 @@ public class LauncherApps {
      * @param packageName The specific package to query. If null, it checks all installed packages
      *            in the profile.
      * @param user The UserHandle of the profile.
-     * @return List of config activities. Can be an empty list but will not be null.
+     * @return List of config activities. Can be an empty list but will not be null. Empty list will
+     * be returned for user-profiles that have items restricted on home screen.
      *
      * @see Intent#ACTION_CREATE_SHORTCUT
      * @see #getShortcutConfigActivityIntent(LauncherActivityInfo)
@@ -1488,6 +1489,9 @@ public class LauncherApps {
      * <p>The calling launcher application must be allowed to access the shortcut information,
      * as defined in {@link #hasShortcutHostPermission()}.
      *
+     * <p>For user-profiles with items restricted on home screen, caller must have the required
+     * permission.
+     *
      * @param packageName The target package name.
      * @param shortcutIds The IDs of the shortcut to be pinned.
      * @param user The UserHandle of the profile.
@@ -1496,6 +1500,7 @@ public class LauncherApps {
      *
      * @see ShortcutManager
      */
+    @RequiresPermission(conditional = true, value = android.Manifest.permission.ACCESS_SHORTCUTS)
     public void pinShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
             @NonNull UserHandle user) {
         logErrorForInvalidProfileAccess(user);
@@ -2297,6 +2302,9 @@ public class LauncherApps {
      * Callers need to either declare &lt;queries&gt; element with the specific package name in the
      * app's manifest, have the android.permission.QUERY_ALL_PACKAGES, or be the session owner to
      * watch for these events.
+     *
+     * <p> Session callbacks are not sent for user-profiles that have items restricted on home
+     * screen.
      *
      * @param callback The callback to register.
      * @param executor {@link Executor} to handle the callbacks, cannot be null.
