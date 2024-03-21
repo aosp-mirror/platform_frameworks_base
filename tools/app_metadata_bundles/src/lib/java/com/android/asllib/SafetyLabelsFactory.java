@@ -16,6 +16,8 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.MalformedXmlException;
+
 import org.w3c.dom.Element;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public class SafetyLabelsFactory implements AslMarshallableFactory<SafetyLabels>
 
     /** Creates a {@link SafetyLabels} from the human-readable DOM element. */
     @Override
-    public SafetyLabels createFromHrElements(List<Element> elements) {
+    public SafetyLabels createFromHrElements(List<Element> elements) throws MalformedXmlException {
         Element safetyLabelsEle = XmlUtils.getSingleElement(elements);
         Long version;
         try {

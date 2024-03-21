@@ -35,10 +35,10 @@ public class DataTypeFactory implements AslMarshallableFactory<DataType> {
                         .collect(Collectors.toUnmodifiableSet());
         Boolean isCollectionOptional =
                 XmlUtils.fromString(
-                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL));
+                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL));
         Boolean isSharingOptional =
                 XmlUtils.fromString(
-                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_COLLECTION_OPTIONAL));
+                        hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_IS_SHARING_OPTIONAL));
         Boolean ephemeral =
                 XmlUtils.fromString(hrDataTypeEle.getAttribute(XmlUtils.HR_ATTR_EPHEMERAL));
         return new DataType(

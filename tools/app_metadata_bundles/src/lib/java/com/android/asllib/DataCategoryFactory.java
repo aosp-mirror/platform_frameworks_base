@@ -16,6 +16,8 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.MalformedXmlException;
+
 import org.w3c.dom.Element;
 
 import java.util.HashMap;
@@ -24,12 +26,16 @@ import java.util.Map;
 
 public class DataCategoryFactory implements AslMarshallableFactory<DataCategory> {
     @Override
-    public DataCategory createFromHrElements(List<Element> elements) {
+    public DataCategory createFromHrElements(List<Element> elements) throws MalformedXmlException {
         String categoryName = null;
         Map<String, DataType> dataTypeMap = new HashMap<String, DataType>();
         for (Element ele : elements) {
             categoryName = ele.getAttribute(XmlUtils.HR_ATTR_DATA_CATEGORY);
             String dataTypeName = ele.getAttribute(XmlUtils.HR_ATTR_DATA_TYPE);
+            if (!DataTypeConstants.getValidDataTypes().contains(dataTypeName)) {
+                throw new MalformedXmlException(
+                        String.format("Unrecognized data type name: %s", dataTypeName));
+            }
             dataTypeMap.put(dataTypeName, new DataTypeFactory().createFromHrElements(List.of(ele)));
         }
 

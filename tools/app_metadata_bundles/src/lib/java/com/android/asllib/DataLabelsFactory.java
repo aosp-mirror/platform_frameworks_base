@@ -16,6 +16,8 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.MalformedXmlException;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -29,7 +31,7 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
 
     /** Creates a {@link DataLabels} from the human-readable DOM element. */
     @Override
-    public DataLabels createFromHrElements(List<Element> elements) {
+    public DataLabels createFromHrElements(List<Element> elements) throws MalformedXmlException {
         Element ele = XmlUtils.getSingleElement(elements);
         Map<String, DataCategory> dataAccessed =
                 getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_ACCESSED);
@@ -37,13 +39,54 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
                 getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_COLLECTED);
         Map<String, DataCategory> dataShared =
                 getDataCategoriesWithTag(ele, XmlUtils.HR_TAG_DATA_SHARED);
+
+        // Validate booleans such as isCollectionOptional, isSharingOptional.
+        for (DataCategory dataCategory : dataAccessed.values()) {
+            for (DataType dataType : dataCategory.getDataTypes().values()) {
+                if (dataType.getIsSharingOptional() != null) {
+                    throw new MalformedXmlException(
+                            String.format(
+                                    "isSharingOptional was unexpectedly defined on a DataType"
+                                            + " belonging to data accessed: %s",
+                                    dataType.getDataTypeName()));
+                }
+                if (dataType.getIsCollectionOptional() != null) {
+                    throw new MalformedXmlException(
+                            String.format(
+                                    "isCollectionOptional was unexpectedly defined on a DataType"
+                                            + " belonging to data accessed: %s",
+                                    dataType.getDataTypeName()));
+                }
+            }
+        }
+        for (DataCategory dataCategory : dataCollected.values()) {
+            for (DataType dataType : dataCategory.getDataTypes().values()) {
+                if (dataType.getIsSharingOptional() != null) {
+                    throw new MalformedXmlException(
+                            String.format(
+                                    "isSharingOptional was unexpectedly defined on a DataType"
+                                            + " belonging to data collected: %s",
+                                    dataType.getDataTypeName()));
+                }
+            }
+        }
+        for (DataCategory dataCategory : dataShared.values()) {
+            for (DataType dataType : dataCategory.getDataTypes().values()) {
+                if (dataType.getIsCollectionOptional() != null) {
+                    throw new MalformedXmlException(
+                            String.format(
+                                    "isCollectionOptional was unexpectedly defined on a DataType"
+                                            + " belonging to data shared: %s",
+                                    dataType.getDataTypeName()));
+                }
+            }
+        }
+
         return new DataLabels(dataAccessed, dataCollected, dataShared);
     }
 
     private static Map<String, DataCategory> getDataCategoriesWithTag(
-            Element dataLabelsEle, String dataCategoryUsageTypeTag) {
-        Map<String, Map<String, DataType>> dataTypeMap =
-                new HashMap<String, Map<String, DataType>>();
+            Element dataLabelsEle, String dataCategoryUsageTypeTag) throws MalformedXmlException {
         NodeList dataUsedNodeList = dataLabelsEle.getElementsByTagName(dataCategoryUsageTypeTag);
         Map<String, DataCategory> dataCategoryMap = new HashMap<String, DataCategory>();
 
@@ -51,6 +94,10 @@ public class DataLabelsFactory implements AslMarshallableFactory<DataLabels> {
         for (int i = 0; i < dataUsedNodeList.getLength(); i++) {
             Element dataUsedEle = (Element) dataUsedNodeList.item(i);
             String dataCategoryName = dataUsedEle.getAttribute(XmlUtils.HR_ATTR_DATA_CATEGORY);
+            if (!DataCategoryConstants.getValidDataCategories().contains(dataCategoryName)) {
+                throw new MalformedXmlException(
+                        String.format("Unrecognized category name: %s", dataCategoryName));
+            }
             dataCategoryNames.add(dataCategoryName);
         }
         for (String dataCategoryName : dataCategoryNames) {
