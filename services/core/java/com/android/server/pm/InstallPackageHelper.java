@@ -112,7 +112,6 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderType;
-import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -2556,9 +2555,7 @@ final class InstallPackageHelper {
                                         & PackageManager.INSTALL_IGNORE_DEXOPT_PROFILE)
                                 != 0;
                         /*@DexoptFlags*/ int extraFlags =
-                                ignoreDexoptProfile && Flags.useArtServiceV2()
-                                ? ArtFlags.FLAG_IGNORE_PROFILE
-                                : 0;
+                                ignoreDexoptProfile ? ArtFlags.FLAG_IGNORE_PROFILE : 0;
                         DexoptParams params = dexoptOptions.convertToDexoptParams(extraFlags);
                         DexoptResult dexOptResult = DexOptHelper.getArtManagerLocal().dexoptPackage(
                                 snapshot, packageName, params);
