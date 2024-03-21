@@ -27,6 +27,7 @@ import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.hardware.usb.flags.Flags;
+import android.icu.text.NumberFormat;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.NetworkCapabilities;
@@ -67,7 +68,6 @@ import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.settingslib.utils.BuildCompatUtils;
 
-import java.text.NumberFormat;
 import java.time.Duration;
 import java.util.List;
 
