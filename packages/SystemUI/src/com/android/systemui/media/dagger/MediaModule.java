@@ -21,6 +21,7 @@ import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.media.controls.domain.MediaDomainModule;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.controller.MediaHostStatesManager;
 import com.android.systemui.media.controls.ui.view.MediaHost;
@@ -59,8 +60,9 @@ public interface MediaModule {
     @Named(QS_PANEL)
     static MediaHost providesQSMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** */
@@ -69,8 +71,9 @@ public interface MediaModule {
     @Named(QUICK_QS_PANEL)
     static MediaHost providesQuickQSMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** */
@@ -79,8 +82,9 @@ public interface MediaModule {
     @Named(KEYGUARD)
     static MediaHost providesKeyguardMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** */
@@ -89,8 +93,9 @@ public interface MediaModule {
     @Named(DREAM)
     static MediaHost providesDreamMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** */
@@ -99,8 +104,9 @@ public interface MediaModule {
     @Named(COMMUNAL_HUB)
     static MediaHost providesCommunalMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
-            MediaHostStatesManager statesManager) {
-        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+            MediaHostStatesManager statesManager, MediaCarouselController carouselController) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager,
+                carouselController);
     }
 
     /** Provides a logging buffer related to the media tap-to-transfer chip on the sender device. */

@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.database.ContentObserver
+import android.os.UserHandle
 import android.provider.Settings
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.util.Log
@@ -44,6 +45,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -76,6 +78,8 @@ import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.Locale
@@ -83,10 +87,16 @@ import java.util.TreeMap
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
@@ -108,6 +118,7 @@ constructor(
     private val systemClock: SystemClock,
     @Main executor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
@@ -118,6 +129,7 @@ constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val globalSettings: GlobalSettings,
+    private val secureSettings: SecureSettings,
 ) : Dumpable {
     /** The current width of the carousel */
     var currentCarouselWidth: Int = 0
@@ -190,6 +202,8 @@ constructor(
                 MediaPlayerData.players().forEach { it.updateAnimatorDurationScale() }
             }
         }
+
+    private var allowMediaPlayerOnLockScreen = false
 
     /** Whether the media card currently has the "expanded" layout */
     @VisibleForTesting
@@ -532,8 +546,9 @@ constructor(
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         mediaCarousel.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // A backup to show media carousel (if available) once the keyguard is gone.
                 listenForAnyStateToGoneKeyguardTransition(this)
+                listenForAnyStateToLockscreenTransition(this)
+                listenForLockscreenSettingChanges(this)
             }
         }
 
@@ -587,7 +602,49 @@ constructor(
         return scope.launch {
             keyguardTransitionInteractor.anyStateToGoneTransition
                 .filter { it.transitionState == TransitionState.FINISHED }
-                .collect { showMediaCarousel() }
+                .collect {
+                    showMediaCarousel()
+                    updateHostVisibility()
+                }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor.anyStateToLockscreenTransition
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect {
+                    if (!allowMediaPlayerOnLockScreen) {
+                        updateHostVisibility()
+                    }
+                }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun listenForLockscreenSettingChanges(scope: CoroutineScope): Job {
+        return scope.launch {
+            secureSettings
+                .observerFlow(UserHandle.USER_ALL, Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN)
+                // query to get initial value
+                .onStart { emit(Unit) }
+                .map { getMediaLockScreenSetting() }
+                .distinctUntilChanged()
+                .collectLatest {
+                    allowMediaPlayerOnLockScreen = it
+                    updateHostVisibility()
+                }
+        }
+    }
+
+    private suspend fun getMediaLockScreenSetting(): Boolean {
+        return withContext(backgroundDispatcher) {
+            secureSettings.getBoolForUser(
+                Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN,
+                true,
+                UserHandle.USER_CURRENT
+            )
         }
     }
 
@@ -598,6 +655,13 @@ constructor(
         widthInSceneContainerPx = width
         heightInSceneContainerPx = height
         updatePlayers(recreateMedia = true)
+    }
+
+    /** Return true if the carousel should be hidden because lockscreen is currently visible */
+    fun isLockedAndHidden(): Boolean {
+        val keyguardState = keyguardTransitionInteractor.getFinishedState()
+        return !allowMediaPlayerOnLockScreen &&
+            KeyguardState.lockscreenVisibleInState(keyguardState)
     }
 
     private fun reorderAllPlayers(
