@@ -502,6 +502,10 @@ public abstract class MediaRoute2ProviderService extends Service {
             return;
         }
 
+        if (mProviderInfo == null) {
+            return;
+        }
+
         try {
             mRemoteCallback.notifyProviderUpdated(mProviderInfo);
         } catch (RemoteException ex) {

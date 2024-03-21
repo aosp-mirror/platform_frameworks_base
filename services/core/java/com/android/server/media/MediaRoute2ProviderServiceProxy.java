@@ -662,7 +662,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
 
         @Override
-        public void notifyProviderUpdated(MediaRoute2ProviderInfo providerInfo) {
+        public void notifyProviderUpdated(@NonNull MediaRoute2ProviderInfo providerInfo) {
+            Objects.requireNonNull(providerInfo, "providerInfo must not be null");
+
             for (MediaRoute2Info route : providerInfo.getRoutes()) {
                 if (route.isSystemRoute()) {
                     throw new SecurityException(
