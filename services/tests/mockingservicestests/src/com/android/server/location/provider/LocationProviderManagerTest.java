@@ -16,6 +16,9 @@
 
 package com.android.server.location.provider;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.LOCATION_BYPASS;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
@@ -1167,6 +1170,63 @@ public class LocationProviderManagerTest {
         assertThat(mProvider.getRequest().isActive()).isTrue();
         assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
         assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isFalse();
+    }
+
+    @Test
+    public void testProviderRequest_IgnoreLocationSettings_LocationBypass() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LOCATION_BYPASS);
+
+        doReturn(PackageManager.PERMISSION_GRANTED)
+                .when(mContext)
+                .checkPermission(LOCATION_BYPASS, IDENTITY.getPid(), IDENTITY.getUid());
+        mInjector.getLocationPermissionsHelper()
+                .revokePermission(IDENTITY.getPackageName(), ACCESS_FINE_LOCATION);
+        mInjector.getLocationPermissionsHelper()
+                .revokePermission(IDENTITY.getPackageName(), ACCESS_COARSE_LOCATION);
+        mInjector
+                .getSettingsHelper()
+                .setIgnoreSettingsAllowlist(
+                        new PackageTagsList.Builder().add(IDENTITY.getPackageName()).build());
+
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request =
+                new LocationRequest.Builder(1)
+                        .setLocationSettingsIgnored(true)
+                        .setWorkSource(WORK_SOURCE)
+                        .build();
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+
+        assertThat(mProvider.getRequest().isActive()).isFalse();
+    }
+
+    @Test
+    public void testProviderRequest_IgnoreLocationSettings_LocationBypass_EmergencyCall() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LOCATION_BYPASS);
+
+        doReturn(PackageManager.PERMISSION_GRANTED)
+                .when(mContext)
+                .checkPermission(LOCATION_BYPASS, IDENTITY.getPid(), IDENTITY.getUid());
+        mInjector.getLocationPermissionsHelper()
+                .revokePermission(IDENTITY.getPackageName(), ACCESS_FINE_LOCATION);
+        mInjector.getLocationPermissionsHelper()
+                .revokePermission(IDENTITY.getPackageName(), ACCESS_COARSE_LOCATION);
+        mInjector.getEmergencyHelper().setInEmergency(true);
+        mInjector
+                .getSettingsHelper()
+                .setIgnoreSettingsAllowlist(
+                        new PackageTagsList.Builder().add(IDENTITY.getPackageName()).build());
+
+        ILocationListener listener = createMockLocationListener();
+        LocationRequest request =
+                new LocationRequest.Builder(1)
+                        .setLocationSettingsIgnored(true)
+                        .setWorkSource(WORK_SOURCE)
+                        .build();
+        mManager.registerLocationRequest(request, IDENTITY, PERMISSION_FINE, listener);
+
+        assertThat(mProvider.getRequest().isActive()).isTrue();
+        assertThat(mProvider.getRequest().getIntervalMillis()).isEqualTo(1);
+        assertThat(mProvider.getRequest().isLocationSettingsIgnored()).isTrue();
     }
 
     @Test
