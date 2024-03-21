@@ -1678,7 +1678,7 @@ final class AccessibilityController {
                 mA11yWindowsPopulator.populateVisibleWindowsOnScreenLocked(
                         mDisplayId, visibleWindows);
 
-                if (!com.android.server.accessibility.Flags.computeWindowChangesOnA11y()) {
+                if (!com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()) {
                     windows = buildWindowInfoListLocked(visibleWindows, screenSize);
                 }
 
@@ -1687,7 +1687,7 @@ final class AccessibilityController {
                 topFocusedWindowToken = topFocusedWindowState.mClient.asBinder();
             }
 
-            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11y()) {
+            if (com.android.server.accessibility.Flags.computeWindowChangesOnA11yV2()) {
                 mCallback.onAccessibilityWindowsChanged(forceSend, topFocusedDisplayId,
                         topFocusedWindowToken, screenSize, visibleWindows);
             } else {
@@ -1702,7 +1702,7 @@ final class AccessibilityController {
             mInitialized = true;
         }
 
-        // Here are old code paths, called when computeWindowChangesOnA11y flag is disabled.
+        // Here are old code paths, called when computeWindowChangesOnA11yV2 flag is disabled.
         // LINT.IfChange
 
         /**
