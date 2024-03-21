@@ -21,19 +21,28 @@ import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.RequestProcessor
 import com.android.systemui.screenshot.ScreenshotPolicy
 import com.android.systemui.screenshot.ScreenshotRequestProcessor
+import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
+import com.android.systemui.screenshot.data.repository.ProfileTypeRepositoryImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
 
 @Module
-object ScreenshotPolicyModule {
+interface ScreenshotPolicyModule {
 
-    @Provides
+    @Binds
     @SysUISingleton
-    fun bindScreenshotRequestProcessor(
-        imageCapture: ImageCapture,
-        policyProvider: Provider<ScreenshotPolicy>,
-    ): ScreenshotRequestProcessor {
-        return RequestProcessor(imageCapture, policyProvider.get())
+    fun bindProfileTypeRepository(impl: ProfileTypeRepositoryImpl): ProfileTypeRepository
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        fun bindScreenshotRequestProcessor(
+            imageCapture: ImageCapture,
+            policyProvider: Provider<ScreenshotPolicy>,
+        ): ScreenshotRequestProcessor {
+            return RequestProcessor(imageCapture, policyProvider.get())
+        }
     }
 }
