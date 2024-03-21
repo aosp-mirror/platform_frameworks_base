@@ -31,7 +31,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageResolver;
 import com.android.internal.widget.LocalImageResolver;
 import com.android.internal.widget.MessagingMessage;
-import com.android.systemui.Flags;
 
 import java.util.HashSet;
 import java.util.List;
@@ -67,11 +66,7 @@ public class NotificationInlineImageResolver implements ImageResolver {
      * @param imageCache The implementation of internal cache.
      */
     public NotificationInlineImageResolver(Context context, ImageCache imageCache) {
-        if (Flags.notificationRowUserContext()) {
-            mContext = context;
-        } else {
-            mContext = context.getApplicationContext();
-        }
+        mContext = context;
         mImageCache = imageCache;
 
         if (mImageCache != null) {
