@@ -143,7 +143,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         whenever(
                 mBluetoothTileDialogDelegateDelegateFactory.create(
                     any(),
-                    any(),
                     anyInt(),
                     ArgumentMatchers.anyBoolean(),
                     any(),
@@ -152,6 +151,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             )
             .thenReturn(bluetoothTileDialogDelegate)
         whenever(bluetoothTileDialogDelegate.createDialog()).thenReturn(sysuiDialog)
+        whenever(sysuiDialog.context).thenReturn(mContext)
         whenever(bluetoothTileDialogDelegate.bluetoothStateToggle)
             .thenReturn(getMutableStateFlow(false))
         whenever(bluetoothTileDialogDelegate.deviceItemClick)
@@ -164,7 +164,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Test
     fun testShowDialog_noAnimation() {
         testScope.runTest {
-            bluetoothTileDialogViewModel.showDialog(context, null)
+            bluetoothTileDialogViewModel.showDialog(null)
 
             verify(mDialogTransitionAnimator, never()).showFromView(any(), any(), any(), any())
         }
@@ -173,7 +173,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Test
     fun testShowDialog_animated() {
         testScope.runTest {
-            bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
+            bluetoothTileDialogViewModel.showDialog(LinearLayout(mContext))
 
             verify(mDialogTransitionAnimator).showFromView(any(), any(), nullable(), anyBoolean())
         }
@@ -183,7 +183,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     fun testShowDialog_animated_callInBackgroundThread() {
         testScope.runTest {
             backgroundExecutor.execute {
-                bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
+                bluetoothTileDialogViewModel.showDialog(LinearLayout(mContext))
 
                 verify(mDialogTransitionAnimator)
                     .showFromView(any(), any(), nullable(), anyBoolean())
@@ -194,7 +194,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Test
     fun testShowDialog_fetchDeviceItem() {
         testScope.runTest {
-            bluetoothTileDialogViewModel.showDialog(context, null)
+            bluetoothTileDialogViewModel.showDialog(null)
 
             verify(deviceItemInteractor).deviceItemUpdate
         }
@@ -203,7 +203,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Test
     fun testShowDialog_withBluetoothStateValue() {
         testScope.runTest {
-            bluetoothTileDialogViewModel.showDialog(context, null)
+            bluetoothTileDialogViewModel.showDialog(null)
 
             verify(bluetoothStateInteractor).bluetoothStateUpdate
         }
@@ -213,7 +213,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     fun testStartSettingsActivity_activityLaunched_dialogDismissed() {
         testScope.runTest {
             whenever(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
-            bluetoothTileDialogViewModel.showDialog(context, null)
+            bluetoothTileDialogViewModel.showDialog(null)
 
             val clickedView = View(context)
             bluetoothTileDialogViewModel.onPairNewDeviceClicked(clickedView)
