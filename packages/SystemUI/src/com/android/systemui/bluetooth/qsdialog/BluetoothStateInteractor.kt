@@ -25,12 +25,17 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** Holds business logic for the Bluetooth Dialog's bluetooth and device connection state */
 @SysUISingleton
@@ -40,9 +45,10 @@ constructor(
     private val localBluetoothManager: LocalBluetoothManager?,
     private val logger: BluetoothTileDialogLogger,
     @Application private val coroutineScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
 
-    internal val bluetoothStateUpdate: StateFlow<Boolean?> =
+    internal val bluetoothStateUpdate: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val listener =
                     object : BluetoothCallback {
@@ -64,16 +70,22 @@ constructor(
                 localBluetoothManager?.eventManager?.registerCallback(listener)
                 awaitClose { localBluetoothManager?.eventManager?.unregisterCallback(listener) }
             }
+            .onStart { emit(isBluetoothEnabled()) }
+            .flowOn(backgroundDispatcher)
             .stateIn(
                 coroutineScope,
                 SharingStarted.WhileSubscribed(replayExpirationMillis = 0),
-                initialValue = null
+                initialValue = false
             )
 
-    internal var isBluetoothEnabled: Boolean
-        get() = localBluetoothManager?.bluetoothAdapter?.isEnabled == true
-        set(value) {
-            if (isBluetoothEnabled != value) {
+    suspend fun isBluetoothEnabled(): Boolean =
+        withContext(backgroundDispatcher) {
+            localBluetoothManager?.bluetoothAdapter?.isEnabled == true
+        }
+
+    suspend fun setBluetoothEnabled(value: Boolean) {
+        withContext(backgroundDispatcher) {
+            if (isBluetoothEnabled() != value) {
                 localBluetoothManager?.bluetoothAdapter?.apply {
                     if (value) enable() else disable()
                     logger.logBluetoothState(
@@ -83,6 +95,7 @@ constructor(
                 }
             }
         }
+    }
 
     companion object {
         private const val TAG = "BtStateInteractor"

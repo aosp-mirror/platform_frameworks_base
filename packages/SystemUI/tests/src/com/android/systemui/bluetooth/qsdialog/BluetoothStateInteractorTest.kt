@@ -23,6 +23,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothAdapter
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -41,7 +42,8 @@ import org.mockito.junit.MockitoRule
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class BluetoothStateInteractorTest : SysuiTestCase() {
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
-    private val testScope = TestScope()
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     private lateinit var bluetoothStateInteractor: BluetoothStateInteractor
 
@@ -52,7 +54,12 @@ class BluetoothStateInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         bluetoothStateInteractor =
-            BluetoothStateInteractor(localBluetoothManager, logger, testScope.backgroundScope)
+            BluetoothStateInteractor(
+                localBluetoothManager,
+                logger,
+                testScope.backgroundScope,
+                testDispatcher
+            )
         `when`(localBluetoothManager.bluetoothAdapter).thenReturn(bluetoothAdapter)
     }
 
@@ -61,7 +68,7 @@ class BluetoothStateInteractorTest : SysuiTestCase() {
         testScope.runTest {
             `when`(bluetoothAdapter.isEnabled).thenReturn(true)
 
-            assertThat(bluetoothStateInteractor.isBluetoothEnabled).isTrue()
+            assertThat(bluetoothStateInteractor.isBluetoothEnabled()).isTrue()
         }
     }
 
@@ -70,7 +77,7 @@ class BluetoothStateInteractorTest : SysuiTestCase() {
         testScope.runTest {
             `when`(bluetoothAdapter.isEnabled).thenReturn(false)
 
-            assertThat(bluetoothStateInteractor.isBluetoothEnabled).isFalse()
+            assertThat(bluetoothStateInteractor.isBluetoothEnabled()).isFalse()
         }
     }
 
@@ -79,7 +86,7 @@ class BluetoothStateInteractorTest : SysuiTestCase() {
         testScope.runTest {
             `when`(bluetoothAdapter.isEnabled).thenReturn(false)
 
-            bluetoothStateInteractor.isBluetoothEnabled = true
+            bluetoothStateInteractor.setBluetoothEnabled(true)
             verify(bluetoothAdapter).enable()
             verify(logger)
                 .logBluetoothState(BluetoothStateStage.BLUETOOTH_STATE_VALUE_SET, true.toString())
@@ -91,7 +98,7 @@ class BluetoothStateInteractorTest : SysuiTestCase() {
         testScope.runTest {
             `when`(bluetoothAdapter.isEnabled).thenReturn(false)
 
-            bluetoothStateInteractor.isBluetoothEnabled = false
+            bluetoothStateInteractor.setBluetoothEnabled(false)
             verify(bluetoothAdapter, never()).enable()
         }
     }

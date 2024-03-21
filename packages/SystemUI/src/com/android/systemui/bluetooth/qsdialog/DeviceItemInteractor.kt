@@ -113,6 +113,7 @@ constructor(
     private var deviceItemFactoryList: List<DeviceItemFactory> =
         listOf(
             ActiveMediaDeviceItemFactory(),
+            AudioSharingMediaDeviceItemFactory(localBluetoothManager),
             AvailableMediaDeviceItemFactory(),
             ConnectedDeviceItemFactory(),
             SavedDeviceItemFactory()
@@ -121,6 +122,7 @@ constructor(
     private var displayPriority: List<DeviceItemType> =
         listOf(
             DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
+            DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
             DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
             DeviceItemType.SAVED_BLUETOOTH_DEVICE,
@@ -176,6 +178,9 @@ constructor(
                     DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE -> {
                         disconnect()
                         uiEventLogger.log(BluetoothTileDialogUiEvent.ACTIVE_DEVICE_DISCONNECT)
+                    }
+                    DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE -> {
+                        uiEventLogger.log(BluetoothTileDialogUiEvent.AUDIO_SHARING_DEVICE_CLICKED)
                     }
                     DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
                         setActive()

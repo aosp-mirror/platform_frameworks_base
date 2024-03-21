@@ -110,7 +110,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             BluetoothTileDialogDelegate(
                 uiProperties,
                 CONTENT_HEIGHT,
-                ENABLED,
                 bluetoothTileDialogCallback,
                 {},
                 dispatcher,
@@ -211,7 +210,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             BluetoothTileDialogDelegate(
                     uiProperties,
                     CONTENT_HEIGHT,
-                    ENABLED,
                     bluetoothTileDialogCallback,
                     {},
                     dispatcher,
@@ -267,7 +265,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 BluetoothTileDialogDelegate(
                         BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
                         cachedHeight,
-                        ENABLED,
                         bluetoothTileDialogCallback,
                         {},
                         dispatcher,
@@ -291,7 +288,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 BluetoothTileDialogDelegate(
                         BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
                         MATCH_PARENT,
-                        ENABLED,
                         bluetoothTileDialogCallback,
                         {},
                         dispatcher,
@@ -315,7 +311,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 BluetoothTileDialogDelegate(
                         BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
                         MATCH_PARENT,
-                        ENABLED,
                         bluetoothTileDialogCallback,
                         {},
                         dispatcher,

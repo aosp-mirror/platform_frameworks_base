@@ -52,7 +52,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
@@ -74,7 +73,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var bluetoothStateInteractor: BluetoothStateInteractor
 
-    @Mock private lateinit var bluetoothAutoOnInteractor: BluetoothAutoOnInteractor
+    @Mock private lateinit var audioSharingInteractor: AudioSharingInteractor
 
     @Mock private lateinit var deviceItemInteractor: DeviceItemInteractor
 
@@ -91,6 +90,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Mock private lateinit var bluetoothAdapter: BluetoothAdapter
 
     @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
+
+    @Mock private lateinit var bluetoothTileDialogLogger: BluetoothTileDialogLogger
 
     @Mock
     private lateinit var mBluetoothTileDialogDelegateDelegateFactory:
@@ -115,7 +116,12 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         bluetoothTileDialogViewModel =
             BluetoothTileDialogViewModel(
                 deviceItemInteractor,
-                bluetoothStateInteractor,
+                BluetoothStateInteractor(
+                    localBluetoothManager,
+                    bluetoothTileDialogLogger,
+                    testScope.backgroundScope,
+                    dispatcher
+                ),
                 // TODO(b/316822488): Create FakeBluetoothAutoOnInteractor.
                 BluetoothAutoOnInteractor(
                     BluetoothAutoOnRepository(
@@ -125,6 +131,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                         dispatcher
                     )
                 ),
+                audioSharingInteractor,
                 mDialogTransitionAnimator,
                 activityStarter,
                 uiEventLogger,
@@ -135,20 +142,9 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                 mBluetoothTileDialogDelegateDelegateFactory
             )
         whenever(deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
-        whenever(bluetoothStateInteractor.bluetoothStateUpdate)
-            .thenReturn(MutableStateFlow(null).asStateFlow())
         whenever(deviceItemInteractor.deviceItemUpdateRequest)
             .thenReturn(MutableStateFlow(Unit).asStateFlow())
-        whenever(bluetoothStateInteractor.isBluetoothEnabled).thenReturn(true)
-        whenever(
-                mBluetoothTileDialogDelegateDelegateFactory.create(
-                    any(),
-                    anyInt(),
-                    ArgumentMatchers.anyBoolean(),
-                    any(),
-                    any()
-                )
-            )
+        whenever(mBluetoothTileDialogDelegateDelegateFactory.create(any(), anyInt(), any(), any()))
             .thenReturn(bluetoothTileDialogDelegate)
         whenever(bluetoothTileDialogDelegate.createDialog()).thenReturn(sysuiDialog)
         whenever(sysuiDialog.context).thenReturn(mContext)
@@ -159,6 +155,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         whenever(bluetoothTileDialogDelegate.contentHeight).thenReturn(getMutableStateFlow(0))
         whenever(bluetoothTileDialogDelegate.bluetoothAutoOnToggle)
             .thenReturn(getMutableStateFlow(false))
+        whenever(audioSharingInteractor.audioSharingButtonStateUpdate)
+            .thenReturn(getMutableStateFlow(AudioSharingButtonState.Gone))
     }
 
     @Test
@@ -197,15 +195,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             bluetoothTileDialogViewModel.showDialog(null)
 
             verify(deviceItemInteractor).deviceItemUpdate
-        }
-    }
-
-    @Test
-    fun testShowDialog_withBluetoothStateValue() {
-        testScope.runTest {
-            bluetoothTileDialogViewModel.showDialog(null)
-
-            verify(bluetoothStateInteractor).bluetoothStateUpdate
         }
     }
 

@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.Switch
@@ -59,7 +60,6 @@ class BluetoothTileDialogDelegate
 internal constructor(
     @Assisted private val initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
     @Assisted private val cachedContentHeight: Int,
-    @Assisted private val bluetoothToggleInitialValue: Boolean,
     @Assisted private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
     @Assisted private val dismissListener: Runnable,
     @Main private val mainDispatcher: CoroutineDispatcher,
@@ -69,8 +69,7 @@ internal constructor(
     private val systemuiDialogFactory: SystemUIDialog.Factory,
 ) : SystemUIDialog.Delegate {
 
-    private val mutableBluetoothStateToggle: MutableStateFlow<Boolean> =
-        MutableStateFlow(bluetoothToggleInitialValue)
+    private val mutableBluetoothStateToggle: MutableStateFlow<Boolean?> = MutableStateFlow(null)
     internal val bluetoothStateToggle
         get() = mutableBluetoothStateToggle.asStateFlow()
 
@@ -99,7 +98,6 @@ internal constructor(
         fun create(
             initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
             cachedContentHeight: Int,
-            bluetoothEnabled: Boolean,
             dialogCallback: BluetoothTileDialogCallback,
             dimissListener: Runnable
         ): BluetoothTileDialogDelegate
@@ -129,6 +127,9 @@ internal constructor(
         }
         getPairNewDeviceButton(dialog).setOnClickListener {
             bluetoothTileDialogCallback.onPairNewDeviceClicked(it)
+        }
+        getAudioSharingButtonView(dialog).setOnClickListener {
+            bluetoothTileDialogCallback.onAudioSharingButtonClicked(it)
         }
         getScrollViewContent(dialog).apply {
             minimumHeight =
@@ -211,9 +212,19 @@ internal constructor(
         getAutoOnToggleInfoTextView(dialog).text = dialog.context.getString(infoResId)
     }
 
+    internal fun onAudioSharingButtonUpdated(
+        dialog: SystemUIDialog,
+        visibility: Int,
+        label: String?
+    ) {
+        getAudioSharingButtonView(dialog).apply {
+            this.visibility = visibility
+            label?.let { text = it }
+        }
+    }
+
     private fun setupToggle(dialog: SystemUIDialog) {
         val toggleView = getToggleView(dialog)
-        toggleView.isChecked = bluetoothToggleInitialValue
         toggleView.setOnCheckedChangeListener { view, isChecked ->
             mutableBluetoothStateToggle.value = isChecked
             view.apply {
@@ -257,6 +268,10 @@ internal constructor(
 
     private fun getAutoOnToggle(dialog: SystemUIDialog): Switch {
         return dialog.requireViewById(R.id.bluetooth_auto_on_toggle)
+    }
+
+    private fun getAudioSharingButtonView(dialog: SystemUIDialog): Button {
+        return dialog.requireViewById(R.id.audio_sharing_button)
     }
 
     private fun getAutoOnToggleView(dialog: SystemUIDialog): View {
@@ -412,6 +427,8 @@ internal constructor(
         const val ACTION_PREVIOUSLY_CONNECTED_DEVICE =
             "com.android.settings.PREVIOUSLY_CONNECTED_DEVICE"
         const val ACTION_PAIR_NEW_DEVICE = "android.settings.BLUETOOTH_PAIRING_SETTINGS"
+        const val ACTION_AUDIO_SHARING =
+            "com.google.android.settings.BLUETOOTH_AUDIO_SHARING_SETTINGS"
         const val DISABLED_ALPHA = 0.3f
         const val ENABLED_ALPHA = 1f
         const val PROGRESS_BAR_ANIMATION_DURATION_MS = 1500L
