@@ -506,6 +506,9 @@
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
 
+    <!-- The size of the icon shown in the resize veil. -->
+    <dimen name="desktop_mode_resize_veil_icon_size">96dp</dimen>
+
     <dimen name="freeform_resize_handle">15dp</dimen>
 
     <dimen name="freeform_resize_corner">44dp</dimen>
