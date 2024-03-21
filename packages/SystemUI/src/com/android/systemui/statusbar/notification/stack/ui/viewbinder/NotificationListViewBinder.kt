@@ -193,13 +193,14 @@ constructor(
                 },
             )
         launch {
-            viewModel.shouldShowFooterView.collect { animatedVisibility ->
+            viewModel.shouldIncludeFooterView.collect { animatedVisibility ->
                 footerView.setVisible(
                     /* visible = */ animatedVisibility.value,
                     /* animate = */ animatedVisibility.isAnimating,
                 )
             }
         }
+        launch { viewModel.shouldHideFooterView.collect { footerView.setShouldBeHidden(it) } }
         disposableHandle.awaitCancellationThenDispose()
     }
 

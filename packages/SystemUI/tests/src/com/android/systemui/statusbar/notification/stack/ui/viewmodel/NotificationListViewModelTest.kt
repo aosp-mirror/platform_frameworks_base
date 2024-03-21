@@ -130,35 +130,35 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_trueWhenNoNotifs() =
+    fun testShouldIncludeEmptyShadeView_trueWhenNoNotifs() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             runCurrent()
 
             // THEN empty shade is visible
-            assertThat(shouldShow).isTrue()
+            assertThat(shouldInclude).isTrue()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_falseWhenNotifs() =
+    fun testShouldIncludeEmptyShadeView_falseWhenNotifs() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
             runCurrent()
 
             // THEN empty shade is not visible
-            assertThat(shouldShow).isFalse()
+            assertThat(shouldInclude).isFalse()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_falseWhenQsExpandedDefault() =
+    fun testShouldIncludeEmptyShadeView_falseWhenQsExpandedDefault() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -167,13 +167,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN empty shade is not visible
-            assertThat(shouldShow).isFalse()
+            assertThat(shouldInclude).isFalse()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_trueWhenQsExpandedInSplitShade() =
+    fun testShouldIncludeEmptyShadeView_trueWhenQsExpandedInSplitShade() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -185,13 +185,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN empty shade is visible
-            assertThat(shouldShow).isTrue()
+            assertThat(shouldInclude).isTrue()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_trueWhenLockedShade() =
+    fun testShouldIncludeEmptyShadeView_trueWhenLockedShade() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -200,13 +200,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN empty shade is visible
-            assertThat(shouldShow).isTrue()
+            assertThat(shouldInclude).isTrue()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_falseWhenKeyguard() =
+    fun testShouldIncludeEmptyShadeView_falseWhenKeyguard() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -215,13 +215,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN empty shade is not visible
-            assertThat(shouldShow).isFalse()
+            assertThat(shouldInclude).isFalse()
         }
 
     @Test
-    fun testShouldShowEmptyShadeView_falseWhenStartingToSleep() =
+    fun testShouldIncludeEmptyShadeView_falseWhenStartingToSleep() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
+            val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
@@ -232,7 +232,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN empty shade is not visible
-            assertThat(shouldShow).isFalse()
+            assertThat(shouldInclude).isFalse()
         }
 
     @Test
@@ -282,9 +282,9 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldShowFooterView_trueWhenShade() =
+    fun testShouldIncludeFooterView_trueWhenShade() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -294,13 +294,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is visible
-            assertThat(shouldShow?.value).isTrue()
+            assertThat(shouldInclude?.value).isTrue()
         }
 
     @Test
-    fun testShouldShowFooterView_trueWhenLockedShade() =
+    fun testShouldIncludeFooterView_trueWhenLockedShade() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -310,13 +310,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is visible
-            assertThat(shouldShow?.value).isTrue()
+            assertThat(shouldInclude?.value).isTrue()
         }
 
     @Test
-    fun testShouldShowFooterView_falseWhenKeyguard() =
+    fun testShouldIncludeFooterView_falseWhenKeyguard() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -325,13 +325,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is not visible
-            assertThat(shouldShow?.value).isFalse()
+            assertThat(shouldInclude?.value).isFalse()
         }
 
     @Test
-    fun testShouldShowFooterView_falseWhenUserNotSetUp() =
+    fun testShouldIncludeFooterView_falseWhenUserNotSetUp() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -343,13 +343,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is not visible
-            assertThat(shouldShow?.value).isFalse()
+            assertThat(shouldInclude?.value).isFalse()
         }
 
     @Test
-    fun testShouldShowFooterView_falseWhenStartingToSleep() =
+    fun testShouldIncludeFooterView_falseWhenStartingToSleep() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -361,13 +361,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is not visible
-            assertThat(shouldShow?.value).isFalse()
+            assertThat(shouldInclude?.value).isFalse()
         }
 
     @Test
-    fun testShouldShowFooterView_falseWhenQsExpandedDefault() =
+    fun testShouldIncludeFooterView_falseWhenQsExpandedDefault() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -380,13 +380,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is not visible
-            assertThat(shouldShow?.value).isFalse()
+            assertThat(shouldInclude?.value).isFalse()
         }
 
     @Test
-    fun testShouldShowFooterView_trueWhenQsExpandedSplitShade() =
+    fun testShouldIncludeFooterView_trueWhenQsExpandedSplitShade() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -401,13 +401,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is visible
-            assertThat(shouldShow?.value).isTrue()
+            assertThat(shouldInclude?.value).isTrue()
         }
 
     @Test
-    fun testShouldShowFooterView_falseWhenRemoteInputActive() =
+    fun testShouldIncludeFooterView_falseWhenRemoteInputActive() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -419,29 +419,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer is not visible
-            assertThat(shouldShow?.value).isFalse()
+            assertThat(shouldInclude?.value).isFalse()
         }
 
     @Test
-    fun testShouldShowFooterView_falseWhenShadeIsClosed() =
+    fun testShouldIncludeFooterView_animatesWhenShade() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
-
-            // WHEN has notifs
-            activeNotificationListRepository.setActiveNotifs(count = 2)
-            // AND shade is closed
-            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            fakeShadeRepository.setLegacyShadeExpansion(0f)
-            runCurrent()
-
-            // THEN footer is not visible
-            assertThat(shouldShow?.value).isFalse()
-        }
-
-    @Test
-    fun testShouldShowFooterView_animatesWhenShade() =
-        testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -451,13 +435,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer visibility animates
-            assertThat(shouldShow?.isAnimating).isTrue()
+            assertThat(shouldInclude?.isAnimating).isTrue()
         }
 
     @Test
-    fun testShouldShowFooterView_notAnimatingOnKeyguard() =
+    fun testShouldIncludeFooterView_notAnimatingOnKeyguard() =
         testScope.runTest {
-            val shouldShow by collectLastValue(underTest.shouldShowFooterView)
+            val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
             // WHEN has notifs
             activeNotificationListRepository.setActiveNotifs(count = 2)
@@ -467,7 +451,35 @@ class NotificationListViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN footer visibility does not animate
-            assertThat(shouldShow?.isAnimating).isFalse()
+            assertThat(shouldInclude?.isAnimating).isFalse()
+        }
+
+    @Test
+    fun testShouldHideFooterView_trueWhenShadeIsClosed() =
+        testScope.runTest {
+            val shouldHide by collectLastValue(underTest.shouldHideFooterView)
+
+            // WHEN shade is closed
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            fakeShadeRepository.setLegacyShadeExpansion(0f)
+            runCurrent()
+
+            // THEN footer is hidden
+            assertThat(shouldHide).isTrue()
+        }
+
+    @Test
+    fun testShouldHideFooterView_falseWhenShadeIsOpen() =
+        testScope.runTest {
+            val shouldHide by collectLastValue(underTest.shouldHideFooterView)
+
+            // WHEN shade is open
+            fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            fakeShadeRepository.setLegacyShadeExpansion(1f)
+            runCurrent()
+
+            // THEN footer is hidden
+            assertThat(shouldHide).isFalse()
         }
 
     @Test
