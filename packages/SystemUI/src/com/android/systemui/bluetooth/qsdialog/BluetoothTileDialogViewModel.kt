@@ -61,6 +61,7 @@ internal class BluetoothTileDialogViewModel
 @Inject
 constructor(
     private val deviceItemInteractor: DeviceItemInteractor,
+    private val deviceItemActionInteractor: DeviceItemActionInteractor,
     private val bluetoothStateInteractor: BluetoothStateInteractor,
     private val bluetoothAutoOnInteractor: BluetoothAutoOnInteractor,
     private val audioSharingInteractor: AudioSharingInteractor,
@@ -193,7 +194,7 @@ constructor(
 
                 // deviceItemClick is emitted when user clicked on a device item.
                 dialogDelegate.deviceItemClick
-                    .onEach { deviceItemInteractor.updateDeviceItemOnClick(it) }
+                    .onEach { deviceItemActionInteractor.onClick(it, dialog) }
                     .launchIn(this)
 
                 // contentHeight is emitted when the dialog is dismissed.

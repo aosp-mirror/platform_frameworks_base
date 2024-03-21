@@ -21,6 +21,7 @@ import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
 import android.content.Context;
 import android.os.Handler;
 
+import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogModule;
 import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -60,6 +61,7 @@ import javax.inject.Named;
  */
 @Module(subcomponents = {QSFragmentComponent.class, QSSceneComponent.class},
         includes = {
+                BluetoothTileDialogModule.class,
                 MediaModule.class,
                 PanelsModule.class,
                 QSExternalModule.class,

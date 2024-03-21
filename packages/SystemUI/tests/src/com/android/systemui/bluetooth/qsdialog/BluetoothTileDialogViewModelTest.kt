@@ -77,6 +77,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var deviceItemInteractor: DeviceItemInteractor
 
+    @Mock private lateinit var deviceItemActionInteractor: DeviceItemActionInteractor
+
     @Mock private lateinit var activityStarter: ActivityStarter
 
     @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
@@ -116,6 +118,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         bluetoothTileDialogViewModel =
             BluetoothTileDialogViewModel(
                 deviceItemInteractor,
+                deviceItemActionInteractor,
                 BluetoothStateInteractor(
                     localBluetoothManager,
                     bluetoothTileDialogLogger,
