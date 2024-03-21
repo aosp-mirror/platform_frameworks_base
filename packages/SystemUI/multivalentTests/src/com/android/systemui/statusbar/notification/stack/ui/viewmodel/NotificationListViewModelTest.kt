@@ -85,7 +85,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun testIsImportantForAccessibility_falseWhenNoNotifs() =
+    fun isImportantForAccessibility_falseWhenNoNotifs() =
         testScope.runTest {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
@@ -100,7 +100,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testIsImportantForAccessibility_trueWhenNotifs() =
+    fun isImportantForAccessibility_trueWhenNotifs() =
         testScope.runTest {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
@@ -115,7 +115,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testIsImportantForAccessibility_trueWhenNotKeyguard() =
+    fun isImportantForAccessibility_trueWhenNotKeyguard() =
         testScope.runTest {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
@@ -130,7 +130,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeEmptyShadeView_trueWhenNoNotifs() =
+    fun shouldIncludeEmptyShadeView_trueWhenNoNotifs() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
@@ -143,7 +143,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeEmptyShadeView_falseWhenNotifs() =
+    fun shouldIncludeEmptyShadeView_falseWhenNotifs() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
@@ -156,7 +156,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeEmptyShadeView_falseWhenQsExpandedDefault() =
+    fun shouldIncludeEmptyShadeView_falseWhenQsExpandedDefault() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
@@ -171,7 +171,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeEmptyShadeView_trueWhenQsExpandedInSplitShade() =
+    fun shouldIncludeEmptyShadeView_trueWhenQsExpandedInSplitShade() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
@@ -189,7 +189,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeEmptyShadeView_trueWhenLockedShade() =
+    fun shouldIncludeEmptyShadeView_trueWhenLockedShade() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
@@ -204,7 +204,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeEmptyShadeView_falseWhenKeyguard() =
+    fun shouldIncludeEmptyShadeView_falseWhenKeyguard() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
@@ -219,7 +219,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeEmptyShadeView_falseWhenStartingToSleep() =
+    fun shouldIncludeEmptyShadeView_falseWhenStartingToSleep() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldShowEmptyShadeView)
 
@@ -236,7 +236,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testAreNotificationsHiddenInShade_true() =
+    fun areNotificationsHiddenInShade_true() =
         testScope.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
@@ -248,7 +248,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testAreNotificationsHiddenInShade_false() =
+    fun areNotificationsHiddenInShade_false() =
         testScope.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
@@ -260,7 +260,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testHasFilteredOutSeenNotifications_true() =
+    fun hasFilteredOutSeenNotifications_true() =
         testScope.runTest {
             val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
 
@@ -271,7 +271,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testHasFilteredOutSeenNotifications_false() =
+    fun hasFilteredOutSeenNotifications_false() =
         testScope.runTest {
             val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
 
@@ -282,7 +282,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_trueWhenShade() =
+    fun shouldIncludeFooterView_trueWhenShade() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -298,7 +298,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_trueWhenLockedShade() =
+    fun shouldIncludeFooterView_trueWhenLockedShade() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -314,7 +314,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_falseWhenKeyguard() =
+    fun shouldIncludeFooterView_falseWhenKeyguard() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -329,7 +329,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_falseWhenUserNotSetUp() =
+    fun shouldIncludeFooterView_falseWhenUserNotSetUp() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -347,7 +347,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_falseWhenStartingToSleep() =
+    fun shouldIncludeFooterView_falseWhenStartingToSleep() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -365,7 +365,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_falseWhenQsExpandedDefault() =
+    fun shouldIncludeFooterView_falseWhenQsExpandedDefault() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -384,7 +384,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_trueWhenQsExpandedSplitShade() =
+    fun shouldIncludeFooterView_trueWhenQsExpandedSplitShade() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -405,7 +405,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_falseWhenRemoteInputActive() =
+    fun shouldIncludeFooterView_falseWhenRemoteInputActive() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -423,7 +423,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_animatesWhenShade() =
+    fun shouldIncludeFooterView_animatesWhenShade() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -439,7 +439,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldIncludeFooterView_notAnimatingOnKeyguard() =
+    fun shouldIncludeFooterView_notAnimatingOnKeyguard() =
         testScope.runTest {
             val shouldInclude by collectLastValue(underTest.shouldIncludeFooterView)
 
@@ -455,7 +455,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldHideFooterView_trueWhenShadeIsClosed() =
+    fun shouldHideFooterView_trueWhenShadeIsClosed() =
         testScope.runTest {
             val shouldHide by collectLastValue(underTest.shouldHideFooterView)
 
@@ -469,7 +469,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun testShouldHideFooterView_falseWhenShadeIsOpen() =
+    fun shouldHideFooterView_falseWhenShadeIsOpen() =
         testScope.runTest {
             val shouldHide by collectLastValue(underTest.shouldHideFooterView)
 
@@ -484,7 +484,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun testPinnedHeadsUpRows_filtersForPinnedItems() =
+    fun pinnedHeadsUpRows_filtersForPinnedItems() =
         testScope.runTest {
             val pinnedHeadsUpRows by collectLastValue(underTest.pinnedHeadsUpRows)
 
@@ -527,7 +527,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun testHasPinnedHeadsUpRows_true() =
+    fun hasPinnedHeadsUpRows_true() =
         testScope.runTest {
             val hasPinnedHeadsUpRow by collectLastValue(underTest.hasPinnedHeadsUpRow)
 
@@ -542,7 +542,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun testHasPinnedHeadsUpRows_false() =
+    fun hasPinnedHeadsUpRows_false() =
         testScope.runTest {
             val hasPinnedHeadsUpRow by collectLastValue(underTest.hasPinnedHeadsUpRow)
 
@@ -557,7 +557,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun testTopHeadsUpRow_emptyList_null() =
+    fun topHeadsUpRow_emptyList_null() =
         testScope.runTest {
             val topHeadsUpRow by collectLastValue(underTest.topHeadsUpRow)
 
@@ -569,7 +569,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun testHeadsUpAnimationsEnabled_true() =
+    fun headsUpAnimationsEnabled_true() =
         testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
@@ -582,7 +582,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun testHeadsUpAnimationsEnabled_keyguardShowing_false() =
+    fun headsUpAnimationsEnabled_keyguardShowing_false() =
         testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
 
