@@ -895,7 +895,13 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             for (int i = 0; i < mFaceSensors.size(); i++) {
                 final Sensor sensor = mFaceSensors.valueAt(i);
                 final int sensorId = mFaceSensors.keyAt(i);
-                PerformanceTracker.getInstanceForSensorId(sensorId).incrementHALDeathCount();
+                final PerformanceTracker performanceTracker = PerformanceTracker.getInstanceForSensorId(
+                        sensorId);
+                if (performanceTracker != null) {
+                    performanceTracker.incrementHALDeathCount();
+                } else {
+                    Slog.w(getTag(), "Performance tracker is null. Not counting HAL death.");
+                }
                 sensor.onBinderDied();
             }
         });
