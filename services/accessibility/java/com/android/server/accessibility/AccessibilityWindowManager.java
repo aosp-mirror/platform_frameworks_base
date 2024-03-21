@@ -79,6 +79,8 @@ public class AccessibilityWindowManager {
 
     private static int sNextWindowId;
 
+    private final Region mTmpRegion = new Region();
+
     private final Object mLock;
     private final Handler mHandler;
     private final WindowManagerInternal mWindowManagerInternal;
@@ -613,7 +615,7 @@ public class AccessibilityWindowManager {
             }
 
             // If the window is completely covered by other windows - ignore.
-            if (unaccountedSpace.quickReject(regionInScreen)) {
+            if (!mTmpRegion.op(unaccountedSpace, regionInScreen, Region.Op.INTERSECT)) {
                 return false;
             }
 

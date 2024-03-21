@@ -665,8 +665,8 @@ public class SplitPresenterTest {
 
         assertEquals(RESULT_EXPANDED, mPresenter.expandSplitContainerIfNeeded(mTransaction,
                 splitContainer, mActivity, secondaryActivity, null /* secondaryIntent */));
-        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf.getTaskFragmentToken());
-        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf.getTaskFragmentToken());
+        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf);
+        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf);
 
         splitContainer.updateCurrentSplitAttributes(SPLIT_ATTRIBUTES);
         clearInvocations(mPresenter);
@@ -675,8 +675,8 @@ public class SplitPresenterTest {
                 splitContainer, mActivity, null /* secondaryActivity */,
                 new Intent(ApplicationProvider.getApplicationContext(),
                         MinimumDimensionActivity.class)));
-        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf.getTaskFragmentToken());
-        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf.getTaskFragmentToken());
+        verify(mPresenter).expandTaskFragment(mTransaction, primaryTf);
+        verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf);
     }
 
     @Test

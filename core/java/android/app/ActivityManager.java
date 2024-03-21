@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.media.audio.Flags.FLAG_FOREGROUND_AUDIO_CONTROL;
 
 import android.Manifest;
 import android.annotation.ColorInt;
@@ -948,8 +947,6 @@ public class ActivityManager {
      * @hide
      * Process can access volume APIs and can request audio focus with GAIN.
      */
-    @FlaggedApi(FLAG_FOREGROUND_AUDIO_CONTROL)
-    @SystemApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL = 1 << 6;
 
     /**

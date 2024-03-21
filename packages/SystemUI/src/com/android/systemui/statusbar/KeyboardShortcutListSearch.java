@@ -631,32 +631,39 @@ public final class KeyboardShortcutListSearch {
         //    Enter Split screen with current app to RHS: Meta + Ctrl + Right arrow
         //    Enter Split screen with current app to LHS: Meta + Ctrl + Left arrow
         //    Switch from Split screen to full screen: Meta + Ctrl + Up arrow
-        String[] shortcutLabels = {
-                context.getString(R.string.system_multitasking_rhs),
-                context.getString(R.string.system_multitasking_lhs),
-                context.getString(R.string.system_multitasking_full_screen),
-        };
-        int[] keyCodes = {
-                KeyEvent.KEYCODE_DPAD_RIGHT,
-                KeyEvent.KEYCODE_DPAD_LEFT,
-                KeyEvent.KEYCODE_DPAD_UP,
-        };
-
-        for (int i = 0; i < shortcutLabels.length; i++) {
-            List<ShortcutKeyGroup> shortcutKeyGroups = Arrays.asList(new ShortcutKeyGroup(
-                    new KeyboardShortcutInfo(
-                            shortcutLabels[i],
-                            keyCodes[i],
-                            KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON),
-                    null));
-            ShortcutMultiMappingInfo shortcutMultiMappingInfo =
-                    new ShortcutMultiMappingInfo(
-                            shortcutLabels[i],
-                            null,
-                            shortcutKeyGroups);
-            systemMultitaskingGroup.addItem(shortcutMultiMappingInfo);
-        }
+        //    Change split screen focus to RHS: Meta + Alt + Right arrow
+        //    Change split screen focus to LHS: Meta + Alt + Left arrow
+        systemMultitaskingGroup.addItem(
+                getMultitaskingShortcut(context.getString(R.string.system_multitasking_rhs),
+                        KeyEvent.KEYCODE_DPAD_RIGHT,
+                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON));
+        systemMultitaskingGroup.addItem(
+                getMultitaskingShortcut(context.getString(R.string.system_multitasking_lhs),
+                        KeyEvent.KEYCODE_DPAD_LEFT,
+                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON));
+        systemMultitaskingGroup.addItem(
+                getMultitaskingShortcut(context.getString(R.string.system_multitasking_full_screen),
+                        KeyEvent.KEYCODE_DPAD_UP,
+                        KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON));
+        systemMultitaskingGroup.addItem(
+                getMultitaskingShortcut(
+                        context.getString(R.string.system_multitasking_splitscreen_focus_rhs),
+                        KeyEvent.KEYCODE_DPAD_RIGHT,
+                        KeyEvent.META_META_ON | KeyEvent.META_ALT_ON));
+        systemMultitaskingGroup.addItem(
+                getMultitaskingShortcut(
+                        context.getString(R.string.system_multitasking_splitscreen_focus_lhs),
+                        KeyEvent.KEYCODE_DPAD_LEFT,
+                        KeyEvent.META_META_ON | KeyEvent.META_ALT_ON));
         return systemMultitaskingGroup;
+    }
+
+    private static ShortcutMultiMappingInfo getMultitaskingShortcut(String shortcutLabel,
+            int keycode, int modifiers) {
+        List<ShortcutKeyGroup> shortcutKeyGroups = Arrays.asList(
+                new ShortcutKeyGroup(new KeyboardShortcutInfo(shortcutLabel, keycode, modifiers),
+                        null));
+        return new ShortcutMultiMappingInfo(shortcutLabel, null, shortcutKeyGroups);
     }
 
     private static KeyboardShortcutMultiMappingGroup getMultiMappingInputShortcuts(

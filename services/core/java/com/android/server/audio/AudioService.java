@@ -73,6 +73,7 @@ import android.app.role.RoleManager;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -6853,15 +6854,6 @@ public class AudioService extends IAudioService.Stub
                         ringerMode = RINGER_MODE_SILENT;
                     }
                 }
-            } else if (mIsSingleVolume && (direction == AudioManager.ADJUST_TOGGLE_MUTE
-                    || direction == AudioManager.ADJUST_MUTE)) {
-                if (mHasVibrator) {
-                    ringerMode = RINGER_MODE_VIBRATE;
-                } else {
-                    ringerMode = RINGER_MODE_SILENT;
-                }
-                // Setting the ringer mode will toggle mute
-                result &= ~FLAG_ADJUST_VOLUME;
             }
             break;
         case RINGER_MODE_VIBRATE:
@@ -6870,11 +6862,8 @@ public class AudioService extends IAudioService.Stub
                         "but no vibrator is present");
                 break;
             }
-            if ((direction == AudioManager.ADJUST_LOWER)) {
-                // This is the case we were muted with the volume turned up
-                if (mIsSingleVolume && oldIndex >= 2 * step && isMuted) {
-                    ringerMode = RINGER_MODE_NORMAL;
-                } else if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+            if (direction == AudioManager.ADJUST_LOWER) {
+                if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                     if (mVolumePolicy.volumeDownToEnterSilent) {
                         final long diff = SystemClock.uptimeMillis()
                                 - mLoweredFromNormalToVibrateTime;
@@ -6894,10 +6883,7 @@ public class AudioService extends IAudioService.Stub
             result &= ~FLAG_ADJUST_VOLUME;
             break;
         case RINGER_MODE_SILENT:
-            if (mIsSingleVolume && direction == AudioManager.ADJUST_LOWER && oldIndex >= 2 * step && isMuted) {
-                // This is the case we were muted with the volume turned up
-                ringerMode = RINGER_MODE_NORMAL;
-            } else if (direction == AudioManager.ADJUST_RAISE
+            if (direction == AudioManager.ADJUST_RAISE
                     || direction == AudioManager.ADJUST_TOGGLE_MUTE
                     || direction == AudioManager.ADJUST_UNMUTE) {
                 if (!mVolumePolicy.volumeUpToExitSilent) {
@@ -12207,7 +12193,9 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
             boolean hasFocusListener, boolean isFocusPolicy, boolean isTestFocusPolicy,
-            boolean isVolumeController, IMediaProjection projection) {
+            boolean isVolumeController, IMediaProjection projection,
+            AttributionSource attributionSource) {
+        Objects.requireNonNull(attributionSource);
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
         if (!isPolicyRegisterAllowed(policyConfig,
@@ -12228,7 +12216,8 @@ public class AudioService extends IAudioService.Stub
             }
             try {
                 AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener,
-                        isFocusPolicy, isTestFocusPolicy, isVolumeController, projection);
+                        isFocusPolicy, isTestFocusPolicy, isVolumeController, projection,
+                        attributionSource);
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
 
                 // logging after registration so we have the registration id
@@ -13200,6 +13189,7 @@ public class AudioService extends IAudioService.Stub
     public class AudioPolicyProxy extends AudioPolicyConfig implements IBinder.DeathRecipient {
         private static final String TAG = "AudioPolicyProxy";
         final IAudioPolicyCallback mPolicyCallback;
+        final AttributionSource mAttributionSource;
         final boolean mHasFocusListener;
         final boolean mIsVolumeController;
         final HashMap<Integer, AudioDeviceArray> mUidDeviceAffinities =
@@ -13239,10 +13229,12 @@ public class AudioService extends IAudioService.Stub
 
         AudioPolicyProxy(AudioPolicyConfig config, IAudioPolicyCallback token,
                 boolean hasFocusListener, boolean isFocusPolicy, boolean isTestFocusPolicy,
-                boolean isVolumeController, IMediaProjection projection) {
+                boolean isVolumeController, IMediaProjection projection,
+                AttributionSource attributionSource) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
             mPolicyCallback = token;
+            mAttributionSource = attributionSource;
             mHasFocusListener = hasFocusListener;
             mIsVolumeController = isVolumeController;
             mProjection = projection;
@@ -13370,6 +13362,7 @@ public class AudioService extends IAudioService.Stub
                 if (android.media.audiopolicy.Flags.audioMixOwnership()) {
                     for (AudioMix mix : mixes) {
                         setMixRegistration(mix);
+                        mix.setVirtualDeviceId(mAttributionSource.getDeviceId());
                     }
 
                     int result = mAudioSystem.registerPolicyMixes(mixes, true);
@@ -13393,6 +13386,9 @@ public class AudioService extends IAudioService.Stub
         @AudioSystem.AudioSystemError int connectMixes() {
             final long identity = Binder.clearCallingIdentity();
             try {
+                for (AudioMix mix : mMixes) {
+                    mix.setVirtualDeviceId(mAttributionSource.getDeviceId());
+                }
                 return mAudioSystem.registerPolicyMixes(mMixes, true);
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -13406,6 +13402,9 @@ public class AudioService extends IAudioService.Stub
             Objects.requireNonNull(mixesToUpdate);
             Objects.requireNonNull(updatedMixingRules);
 
+            for (AudioMix mix : mixesToUpdate) {
+                mix.setVirtualDeviceId(mAttributionSource.getDeviceId());
+            }
             if (mixesToUpdate.length != updatedMixingRules.length) {
                 Log.e(TAG, "Provided list of audio mixes to update and corresponding mixing rules "
                         + "have mismatching length (mixesToUpdate.length = " + mixesToUpdate.length

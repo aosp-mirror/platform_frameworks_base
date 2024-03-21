@@ -16,6 +16,7 @@
 
 package android.nfc.cardemulation;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -148,7 +149,8 @@ public final class PollingFrame implements Parcelable{
     private final int mType;
     private final byte[] mData;
     private final int mGain;
-    private final int mTimestamp;
+    @DurationMillisLong
+    private final long mTimestamp;
     private final boolean mTriggeredAutoTransact;
 
     public static final @NonNull Parcelable.Creator<PollingFrame> CREATOR =
@@ -180,16 +182,18 @@ public final class PollingFrame implements Parcelable{
      * @param type the type of the frame
      * @param data a byte array of the data contained in the frame
      * @param gain the vendor-specific gain of the field
-     * @param timestamp the timestamp in millisecones
+     * @param timestampMillis the timestamp in millisecones
      * @param triggeredAutoTransact whether or not this frame triggered the device to start a
      * transaction automatically
+     *
+     * @hide
      */
     public PollingFrame(@PollingFrameType int type, @Nullable byte[] data,
-            int gain, int timestamp, boolean triggeredAutoTransact) {
+            int gain, @DurationMillisLong long timestampMillis, boolean triggeredAutoTransact) {
         mType = type;
         mData = data == null ? new byte[0] : data;
         mGain = gain;
-        mTimestamp = timestamp;
+        mTimestamp = timestampMillis;
         mTriggeredAutoTransact = triggeredAutoTransact;
     }
 
@@ -230,7 +234,7 @@ public final class PollingFrame implements Parcelable{
      * frames relative to each other.
      * @return the timestamp in milliseconds
      */
-    public int getTimestamp() {
+    public @DurationMillisLong long getTimestamp() {
         return mTimestamp;
     }
 
@@ -264,7 +268,7 @@ public final class PollingFrame implements Parcelable{
             frame.putInt(KEY_POLLING_LOOP_GAIN, (byte) getVendorSpecificGain());
         }
         frame.putByteArray(KEY_POLLING_LOOP_DATA, getData());
-        frame.putInt(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
+        frame.putLong(KEY_POLLING_LOOP_TIMESTAMP, getTimestamp());
         frame.putBoolean(KEY_POLLING_LOOP_TRIGGERED_AUTOTRANSACT, getTriggeredAutoTransact());
         return frame;
     }
@@ -273,7 +277,7 @@ public final class PollingFrame implements Parcelable{
     public String toString() {
         return "PollingFrame { Type: " + (char) getType()
                 + ", gain: " + getVendorSpecificGain()
-                + ", timestamp: " + Integer.toUnsignedString(getTimestamp())
+                + ", timestamp: " + Long.toUnsignedString(getTimestamp())
                 + ", data: [" + HexFormat.ofDelimiter(" ").formatHex(getData()) + "] }";
     }
 }

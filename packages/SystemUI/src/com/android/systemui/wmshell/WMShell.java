@@ -363,8 +363,8 @@ public final class WMShell implements
                 }, mSysUiMainExecutor);
         mCommandQueue.addCallback(new CommandQueue.Callbacks() {
             @Override
-            public void enterDesktop(int displayId) {
-                desktopMode.enterDesktop(displayId);
+            public void moveFocusedTaskToDesktop(int displayId) {
+                desktopMode.moveFocusedTaskToDesktop(displayId);
             }
             @Override
             public void moveFocusedTaskToFullscreen(int displayId) {

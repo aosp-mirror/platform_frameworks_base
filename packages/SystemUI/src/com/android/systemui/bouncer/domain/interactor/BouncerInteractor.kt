@@ -16,13 +16,8 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
-import android.content.Context
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Password
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pattern
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Pin
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel.Sim
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.classifier.FalsingClassifier
@@ -31,7 +26,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -41,7 +35,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 /** Encapsulates business logic and application state accessing use-cases. */
 @SysUISingleton
@@ -49,16 +42,14 @@ class BouncerInteractor
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    @Application private val applicationContext: Context,
     private val repository: BouncerRepository,
     private val authenticationInteractor: AuthenticationInteractor,
     private val deviceEntryFaceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
-    private val simBouncerInteractor: SimBouncerInteractor,
 ) {
-    /** The user-facing message to show in the bouncer when lockout is not active. */
-    val message: StateFlow<String?> = repository.message
+    private val _onIncorrectBouncerInput = MutableSharedFlow<Unit>()
+    val onIncorrectBouncerInput: SharedFlow<Unit> = _onIncorrectBouncerInput
 
     /** Whether the auto confirm feature is enabled for the currently-selected user. */
     val isAutoConfirmEnabled: StateFlow<Boolean> = authenticationInteractor.isAutoConfirmEnabled
@@ -119,25 +110,6 @@ constructor(
         )
     }
 
-    fun setMessage(message: String?) {
-        repository.message.value = message
-    }
-
-    /**
-     * Resets the user-facing message back to the default according to the current authentication
-     * method.
-     */
-    fun resetMessage() {
-        applicationScope.launch {
-            setMessage(promptMessage(authenticationInteractor.getAuthenticationMethod()))
-        }
-    }
-
-    /** Removes the user-facing message. */
-    fun clearMessage() {
-        setMessage(null)
-    }
-
     /**
      * Attempts to authenticate based on the given user input.
      *
@@ -176,50 +148,17 @@ constructor(
                 .async { authenticationInteractor.authenticate(input, tryAutoConfirm) }
                 .await()
 
-        if (authenticationInteractor.lockoutEndTimestamp != null) {
-            clearMessage()
-        } else if (
+        if (
             authResult == AuthenticationResult.FAILED ||
                 (authResult == AuthenticationResult.SKIPPED && !tryAutoConfirm)
         ) {
-            showWrongInputMessage()
+            _onIncorrectBouncerInput.emit(Unit)
         }
         return authResult
-    }
-
-    /**
-     * Shows the a message notifying the user that their credentials input is wrong.
-     *
-     * Callers should use this instead of [authenticate] when they know ahead of time that an auth
-     * attempt will fail but aren't interested in the other side effects like triggering lockout.
-     * For example, if the user entered a pattern that's too short, the system can show the error
-     * message without having the attempt trigger lockout.
-     */
-    private suspend fun showWrongInputMessage() {
-        setMessage(wrongInputMessage(authenticationInteractor.getAuthenticationMethod()))
     }
 
     /** Notifies that the input method editor (software keyboard) has been hidden by the user. */
     suspend fun onImeHiddenByUser() {
         _onImeHiddenByUser.emit(Unit)
-    }
-
-    private fun promptMessage(authMethod: AuthenticationMethodModel): String {
-        return when (authMethod) {
-            is Sim -> simBouncerInteractor.getDefaultMessage()
-            is Pin -> applicationContext.getString(R.string.keyguard_enter_your_pin)
-            is Password -> applicationContext.getString(R.string.keyguard_enter_your_password)
-            is Pattern -> applicationContext.getString(R.string.keyguard_enter_your_pattern)
-            else -> ""
-        }
-    }
-
-    private fun wrongInputMessage(authMethod: AuthenticationMethodModel): String {
-        return when (authMethod) {
-            is Pin -> applicationContext.getString(R.string.kg_wrong_pin)
-            is Password -> applicationContext.getString(R.string.kg_wrong_password)
-            is Pattern -> applicationContext.getString(R.string.kg_wrong_pattern)
-            else -> ""
-        }
     }
 }

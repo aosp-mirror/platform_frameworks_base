@@ -25,7 +25,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
-import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
@@ -1835,7 +1835,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         final TaskFragment tf = createTaskFragment(task);
         final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE).build();
+                OP_TYPE_CREATE_OR_MOVE_TASK_FRAGMENT_DECOR_SURFACE).build();
         mTransaction.addTaskFragmentOperation(tf.getFragmentToken(), operation);
 
         assertApplyTransactionAllowed(mTransaction);

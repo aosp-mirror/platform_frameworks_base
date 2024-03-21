@@ -63,6 +63,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true).asStateFlow(),
+            onIntentionalUserInput = {},
         )
     }
 
@@ -79,12 +80,10 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     fun onShown() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
             lockDeviceAndOpenPatternBouncer()
 
-            assertThat(message?.text).isEqualTo(ENTER_YOUR_PATTERN)
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(currentScene).isEqualTo(Scenes.Bouncer)
@@ -95,14 +94,12 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     fun onDragStart() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
             lockDeviceAndOpenPatternBouncer()
 
             underTest.onDragStart()
 
-            assertThat(message?.text).isEmpty()
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
             assertThat(currentScene).isEqualTo(Scenes.Bouncer)
@@ -148,7 +145,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     fun onDragEnd_whenWrong() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
             lockDeviceAndOpenPatternBouncer()
@@ -159,7 +155,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(message?.text).isEqualTo(WRONG_PATTERN)
             assertThat(currentScene).isEqualTo(Scenes.Bouncer)
         }
 
@@ -302,7 +297,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onDragEnd_whenPatternTooShort() =
         testScope.runTest {
-            val message by collectLastValue(bouncerViewModel.message)
             val dialogViewModel by collectLastValue(bouncerViewModel.dialogViewModel)
             lockDeviceAndOpenPatternBouncer()
 
@@ -325,7 +319,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
                 underTest.onDragEnd()
 
-                assertWithMessage("Attempt #$attempt").that(message?.text).isEqualTo(WRONG_PATTERN)
                 assertWithMessage("Attempt #$attempt").that(dialogViewModel).isNull()
             }
         }
@@ -334,7 +327,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     fun onDragEnd_correctAfterWrong() =
         testScope.runTest {
             val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
-            val message by collectLastValue(bouncerViewModel.message)
             val selectedDots by collectLastValue(underTest.selectedDots)
             val currentDot by collectLastValue(underTest.currentDot)
             lockDeviceAndOpenPatternBouncer()
@@ -344,7 +336,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             underTest.onDragEnd()
             assertThat(selectedDots).isEmpty()
             assertThat(currentDot).isNull()
-            assertThat(message?.text).isEqualTo(WRONG_PATTERN)
             assertThat(authResult).isFalse()
 
             // Enter the correct pattern:
@@ -370,10 +361,8 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)
-        val bouncerShown = currentScene != Scenes.Bouncer && toScene == Scenes.Bouncer
         val bouncerHidden = currentScene == Scenes.Bouncer && toScene != Scenes.Bouncer
         sceneInteractor.changeScene(toScene, "reason")
-        if (bouncerShown) underTest.onShown()
         if (bouncerHidden) underTest.onHidden()
         runCurrent()
 

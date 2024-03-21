@@ -46,6 +46,7 @@ android_robolectric_test {
     exclude_srcs: ["src/com/android/wm/shell/bubbles/BubbleStackViewTest.kt"],
     static_libs: [
         "junit",
+        "androidx.core_core-animation-testing",
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",
@@ -64,6 +65,7 @@ android_test {
     static_libs: [
         "WindowManager-Shell",
         "junit",
+        "androidx.core_core-animation-testing",
         "androidx.test.runner",
         "androidx.test.rules",
         "androidx.test.ext.junit",

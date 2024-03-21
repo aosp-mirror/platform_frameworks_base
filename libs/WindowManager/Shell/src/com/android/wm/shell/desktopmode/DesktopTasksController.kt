@@ -263,7 +263,7 @@ class DesktopTasksController(
     }
 
     /** Enter desktop by using the focused task in given `displayId` */
-    fun enterDesktop(displayId: Int) {
+    fun moveFocusedTaskToDesktop(displayId: Int) {
         val allFocusedTasks =
             shellTaskOrganizer.getRunningTasks(displayId).filter { taskInfo ->
                 taskInfo.isFocused &&
@@ -1212,9 +1212,9 @@ class DesktopTasksController(
             }
         }
 
-        override fun enterDesktop(displayId: Int) {
+        override fun moveFocusedTaskToDesktop(displayId: Int) {
             mainExecutor.execute {
-                this@DesktopTasksController.enterDesktop(displayId)
+                this@DesktopTasksController.moveFocusedTaskToDesktop(displayId)
             }
         }
 

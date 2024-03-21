@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade;
 
-import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -48,6 +47,7 @@ import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -320,7 +320,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     mTouchActive = true;
                     mTouchCancelled = false;
                     mDownEvent = ev;
-                    if (migrateClocksToBlueprint()) {
+                    if (MigrateClocksToBlueprint.isEnabled()) {
                         mService.userActivity();
                     }
                 } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
@@ -475,7 +475,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                         && !bouncerShowing
                         && !mStatusBarStateController.isDozing()) {
                     if (mDragDownHelper.isDragDownEnabled()) {
-                        if (migrateClocksToBlueprint()) {
+                        if (MigrateClocksToBlueprint.isEnabled()) {
                             // When on lockscreen, if the touch originates at the top of the screen
                             // go directly to QS and not the shade
                             if (mStatusBarStateController.getState() == KEYGUARD
@@ -488,7 +488,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
                         // This handles drag down over lockscreen
                         boolean result = mDragDownHelper.onInterceptTouchEvent(ev);
-                        if (migrateClocksToBlueprint()) {
+                        if (MigrateClocksToBlueprint.isEnabled()) {
                             if (result) {
                                 mLastInterceptWasDragDownHelper = true;
                                 if (ev.getAction() == MotionEvent.ACTION_DOWN) {
@@ -511,7 +511,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                             return true;
                         }
                     }
-                } else if (migrateClocksToBlueprint()) {
+                } else if (MigrateClocksToBlueprint.isEnabled()) {
                     // This final check handles swipes on HUNs and when Pulsing
                     if (!bouncerShowing && didNotificationPanelInterceptEvent(ev)) {
                         mShadeLogger.d("NSWVC: intercepted for HUN/PULSING");
@@ -526,7 +526,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 MotionEvent cancellation = MotionEvent.obtain(ev);
                 cancellation.setAction(MotionEvent.ACTION_CANCEL);
                 mStackScrollLayout.onInterceptTouchEvent(cancellation);
-                if (!migrateClocksToBlueprint()) {
+                if (!MigrateClocksToBlueprint.isEnabled()) {
                     mNotificationPanelViewController.handleExternalInterceptTouch(cancellation);
                 }
                 cancellation.recycle();
@@ -541,7 +541,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 if (mStatusBarKeyguardViewManager.onTouch(ev)) {
                     return true;
                 }
-                if (migrateClocksToBlueprint()) {
+                if (MigrateClocksToBlueprint.isEnabled()) {
                     if (mLastInterceptWasDragDownHelper && (mDragDownHelper.isDraggingDown())) {
                         // we still want to finish our drag down gesture when locking the screen
                         handled |= mDragDownHelper.onTouchEvent(ev) || handled;
@@ -631,7 +631,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     private boolean didNotificationPanelInterceptEvent(MotionEvent ev) {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled()) {
             // Since NotificationStackScrollLayout is now a sibling of notification_panel, we need
             // to also ask NotificationPanelViewController directly, in order to process swipe up
             // events originating from notifications

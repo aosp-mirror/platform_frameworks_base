@@ -24,10 +24,8 @@ import com.android.systemui.plugins.clocks.ClockController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 /** View model for the small clock view, large clock view. */
 class KeyguardPreviewClockViewModel
@@ -45,15 +43,7 @@ constructor(
     val isSmallClockVisible: Flow<Boolean> =
         interactor.selectedClockSize.map { it == SettingsClockSize.SMALL }
 
-    var lastClockPair: Pair<ClockController, ClockController>? = null
+    val previewClock: Flow<ClockController> = interactor.previewClock
 
-    val previewClockPair: StateFlow<Pair<ClockController, ClockController>> =
-        interactor.previewClockPair
-
-    val selectedClockSize: StateFlow<SettingsClockSize?> =
-        interactor.selectedClockSize.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = null
-        )
+    val selectedClockSize: StateFlow<SettingsClockSize?> = interactor.selectedClockSize
 }

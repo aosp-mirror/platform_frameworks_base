@@ -17,6 +17,7 @@
 package com.android.systemui.recordissue
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -74,7 +75,6 @@ constructor(
 
     @SuppressLint("UseSwitchCompatOrMaterialCode") private lateinit var screenRecordSwitch: Switch
     private lateinit var issueTypeButton: Button
-    private var hasSelectedIssueType: Boolean = false
 
     @MainThread
     override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
@@ -86,15 +86,13 @@ constructor(
             setPositiveButton(
                 R.string.qs_record_issue_start,
                 { _, _ ->
-                    if (hasSelectedIssueType) {
-                        onStarted.accept(
-                            IssueRecordingConfig(
-                                screenRecordSwitch.isChecked,
-                                true /* TODO: Base this on issueType selected */
-                            )
+                    onStarted.accept(
+                        IssueRecordingConfig(
+                            screenRecordSwitch.isChecked,
+                            true /* TODO: Base this on issueType selected */
                         )
-                        dismiss()
-                    }
+                    )
+                    dismiss()
                 },
                 false
             )
@@ -115,8 +113,12 @@ constructor(
                     bgExecutor.execute { onScreenRecordSwitchClicked() }
                 }
             }
+            val startButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             issueTypeButton = requireViewById(R.id.issue_type_button)
-            issueTypeButton.setOnClickListener { onIssueTypeClicked(context) }
+            issueTypeButton.setOnClickListener {
+                onIssueTypeClicked(context) { startButton.isEnabled = true }
+            }
+            startButton.isEnabled = false
         }
     }
 
@@ -159,7 +161,7 @@ constructor(
     }
 
     @MainThread
-    private fun onIssueTypeClicked(context: Context) {
+    private fun onIssueTypeClicked(context: Context, onIssueTypeSelected: Runnable) {
         val selectedCategory = issueTypeButton.text.toString()
         val popupMenu = PopupMenu(context, issueTypeButton)
 
@@ -174,11 +176,11 @@ constructor(
         popupMenu.apply {
             setOnMenuItemClickListener {
                 issueTypeButton.text = it.title
+                onIssueTypeSelected.run()
                 true
             }
             setForceShowIcon(true)
             show()
         }
-        hasSelectedIssueType = true
     }
 }

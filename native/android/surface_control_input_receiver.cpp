@@ -45,6 +45,8 @@ public:
             mClientToken(clientToken),
             mInputTransferToken(inputTransferToken) {}
 
+    // The InputConsumer does not keep the InputReceiver alive so the receiver is cleared once the
+    // owner releases it.
     ~InputReceiver() {
         remove();
     }
@@ -190,7 +192,9 @@ const AInputTransferToken* AInputReceiver_getInputTransferToken(AInputReceiver* 
 
 void AInputReceiver_release(AInputReceiver* aInputReceiver) {
     InputReceiver* inputReceiver = AInputReceiver_to_InputReceiver(aInputReceiver);
-    inputReceiver->remove();
+    if (inputReceiver != nullptr) {
+        inputReceiver->remove();
+    }
     delete inputReceiver;
 }
 

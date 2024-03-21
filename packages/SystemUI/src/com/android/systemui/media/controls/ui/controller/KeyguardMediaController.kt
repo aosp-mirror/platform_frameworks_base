@@ -27,10 +27,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
@@ -185,7 +185,7 @@ constructor(
         refreshMediaPosition(reason = "onMediaHostVisibilityChanged")
 
         if (visible) {
-            if (migrateClocksToBlueprint() && useSplitShade) {
+            if (MigrateClocksToBlueprint.isEnabled && useSplitShade) {
                 return
             }
             mediaHost.hostView.layoutParams.apply {

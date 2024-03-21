@@ -932,6 +932,9 @@
     <uses-permission
         android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
 
+    <!-- Permission required for Cts test - CtsSettingsTestCases -->
+    <uses-permission android:name="android.permission.PREPARE_FACTORY_RESET" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

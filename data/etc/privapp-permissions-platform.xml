@@ -588,6 +588,8 @@ applications that come with the platform
         <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
         <!-- Permission required for CTS test - PackageManagerShellCommandInstallTest -->
         <permission name="android.permission.EMERGENCY_INSTALL_PACKAGES" />
+        <!-- Permission required for Cts test - CtsSettingsTestCases -->
+        <permission name="android.permission.PREPARE_FACTORY_RESET" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

@@ -1,0 +1,12 @@
+aconfig_declarations {
+    name: "power_hint_flags",
+    package: "com.android.server.power.hint",
+    srcs: [
+        "flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "power_hint_flags_lib",
+    aconfig_declarations: "power_hint_flags",
+}

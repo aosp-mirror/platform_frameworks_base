@@ -41,7 +41,6 @@ import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.PhoneMediaDevice
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDeviceData
@@ -98,7 +97,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var muteAwaitManager: MediaMuteAwaitConnectionManager
     private lateinit var fakeFgExecutor: FakeExecutor
     private lateinit var fakeBgExecutor: FakeExecutor
-    @Mock private lateinit var dumpster: DumpManager
     @Mock private lateinit var listener: MediaDeviceManager.Listener
     @Mock private lateinit var device: MediaDevice
     @Mock private lateinit var icon: Drawable
@@ -133,7 +131,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
                 { localBluetoothManager },
                 fakeFgExecutor,
                 fakeBgExecutor,
-                dumpster,
             )
         manager.addListener(listener)
 

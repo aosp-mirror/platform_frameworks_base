@@ -57,7 +57,9 @@ class IntraBlueprintTransition(
         when (config.type) {
             Type.NoTransition -> {}
             Type.DefaultClockStepping ->
-                addTransition(clockViewModel.clock?.let { DefaultClockSteppingTransition(it) })
+                addTransition(
+                    clockViewModel.currentClock.value?.let { DefaultClockSteppingTransition(it) }
+                )
             else -> addTransition(ClockSizeTransition(config, clockViewModel, smartspaceViewModel))
         }
     }

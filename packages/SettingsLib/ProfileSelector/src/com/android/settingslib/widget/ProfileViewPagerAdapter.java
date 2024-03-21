@@ -18,7 +18,6 @@ package com.android.settingslib.widget;
 
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
-import com.android.settingslib.widget.profileselector.R;
 
 /**
  * ViewPager Adapter to handle between TabLayout and ViewPager2
@@ -34,11 +33,11 @@ public class ProfileViewPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public Fragment createFragment(int position) {
-        return mParentFragments.createFragment(position);
+        return mParentFragments.createFragment(mParentFragments.getUserIdForPosition(position));
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return mParentFragments.getTabCount();
     }
 }

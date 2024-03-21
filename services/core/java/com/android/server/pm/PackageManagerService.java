@@ -18,6 +18,7 @@ package com.android.server.pm;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
 import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
 import static android.content.pm.PackageManager.APP_METADATA_SOURCE_UNKNOWN;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
@@ -3181,27 +3182,53 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     callingMethod);
         }
 
-        final int packageUid = snapshot.getPackageUid(suspender.packageName, 0, targetUserId);
-        final boolean allowedPackageUid = packageUid == callingUid;
-        // TODO(b/139383163): remove special casing for shell and enforce INTERACT_ACROSS_USERS_FULL
-        final boolean allowedShell = callingUid == SHELL_UID
-                && UserHandle.isSameApp(packageUid, callingUid);
+        if (crossUserSuspensionEnabled()) {
+            final int suspendingPackageUid =
+                    snapshot.getPackageUid(suspender.packageName, 0, suspender.userId);
+            if (suspendingPackageUid != callingUid) {
+                throw new SecurityException("Suspender package %s doesn't match calling uid %d"
+                                .formatted(suspender.packageName, callingUid));
+            }
+            if (targetUserId != suspender.userId) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingMethod);
+            }
+        } else {
+            // Here only SHELL can suspend across users
+            final int packageUid =
+                    snapshot.getPackageUid(suspender.packageName, 0, targetUserId);
+            final boolean allowedPackageUid = packageUid == callingUid;
+            final boolean allowedShell = callingUid == SHELL_UID
+                    && UserHandle.isSameApp(packageUid, callingUid);
 
-        if (!allowedShell && !allowedPackageUid) {
-            throw new SecurityException("Suspending package " + suspender.packageName
-                    + " in user " + targetUserId + " does not belong to calling uid " + callingUid);
+            if (!allowedShell && !allowedPackageUid) {
+                throw new SecurityException("Suspending package " + suspender.packageName
+                        + " in user " + targetUserId + " does not belong to calling uid "
+                        + callingUid);
+            }
         }
     }
 
+    /**
+     * @param inAllUsers Whether to unsuspend packages suspended by the given package in other
+     *                   users. This flag is only used when cross-user suspension is enabled.
+     */
     void unsuspendForSuspendingPackage(@NonNull Computer computer, String suspendingPackage,
-            @UserIdInt int suspendingUserId) {
+            @UserIdInt int suspendingUserId, boolean inAllUsers) {
         // TODO: This can be replaced by a special parameter to iterate all packages, rather than
         //  this weird pre-collect of all packages.
         final String[] allPackages = computer.getPackageStates().keySet().toArray(new String[0]);
         final Predicate<UserPackage> suspenderPredicate =
                 UserPackage.of(suspendingUserId, suspendingPackage)::equals;
-        mSuspendPackageHelper.removeSuspensionsBySuspendingPackage(computer,
-                allPackages, suspenderPredicate, suspendingUserId);
+        if (!crossUserSuspensionEnabled() || !inAllUsers) {
+            mSuspendPackageHelper.removeSuspensionsBySuspendingPackage(computer,
+                    allPackages, suspenderPredicate, suspendingUserId);
+        } else {
+            for (int targetUserId: mUserManager.getUserIds()) {
+                mSuspendPackageHelper.removeSuspensionsBySuspendingPackage(
+                        computer, allPackages, suspenderPredicate, targetUserId);
+            }
+        }
     }
 
     void removeAllDistractingPackageRestrictions(@NonNull Computer snapshot, int userId) {
@@ -4053,7 +4080,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // This app should not generally be allowed to get disabled by the UI, but
                 // if it ever does, we don't want to end up with some of the user's apps
                 // permanently suspended.
-                unsuspendForSuspendingPackage(computer, packageName, userId);
+                unsuspendForSuspendingPackage(computer, packageName, userId, true /* inAllUsers */);
                 removeAllDistractingPackageRestrictions(computer, userId);
             }
             success = true;
@@ -4339,6 +4366,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         mInstantAppRegistry.onUserRemoved(userId);
         mPackageMonitorCallbackHelper.onUserRemoved(userId);
+        if (crossUserSuspensionEnabled()) {
+            cleanUpCrossUserSuspension(userId);
+        }
+    }
+
+    private void cleanUpCrossUserSuspension(int removedUser) {
+        final Computer computer = snapshotComputer();
+        var allPackages = computer.getAllAvailablePackageNames();
+        for (int targetUserId : mUserManager.getUserIds()) {
+            if (targetUserId == removedUser) continue;
+            mSuspendPackageHelper.removeSuspensionsBySuspendingPackage(computer, allPackages,
+                    userPackage -> userPackage.userId == removedUser, targetUserId);
+        }
     }
 
     /**
@@ -4745,7 +4785,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         if (checkPermission(Manifest.permission.SUSPEND_APPS, packageName, userId)
                                 == PERMISSION_GRANTED) {
                             final Computer snapshot = snapshotComputer();
-                            unsuspendForSuspendingPackage(snapshot, packageName, userId);
+                            unsuspendForSuspendingPackage(
+                                    snapshot, packageName, userId, true /* inAllUsers */);
                             removeAllDistractingPackageRestrictions(snapshot, userId);
                             synchronized (mLock) {
                                 flushPackageRestrictionsAsUserInternalLocked(userId);
@@ -6239,7 +6280,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final boolean quarantined = ((flags & PackageManager.FLAG_SUSPEND_QUARANTINED) != 0)
                     && Flags.quarantinedEnabled();
             final Computer snapshot = snapshotComputer();
-            final UserPackage suspender = UserPackage.of(targetUserId, suspendingPackage);
+            final UserPackage suspender = crossUserSuspensionEnabled()
+                    ? UserPackage.of(suspendingUserId, suspendingPackage)
+                    : UserPackage.of(targetUserId, suspendingPackage);
             enforceCanSetPackagesSuspendedAsUser(snapshot, quarantined, suspender, callingUid,
                     targetUserId, "setPackagesSuspendedAsUser");
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
@@ -6707,7 +6750,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String[] setPackagesSuspendedByAdmin(
                 @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended) {
-            final int suspendingUserId = userId;
+            // Suspension by admin isn't attributed to admin package but to the platform,
+            // Using USER_SYSTEM for consistency with other internal suspenders, like shell or root.
+            final int suspendingUserId =
+                    crossUserSuspensionEnabled() ? UserHandle.USER_SYSTEM : userId;
             final UserPackage suspender = UserPackage.of(
                     suspendingUserId, PackageManagerService.PLATFORM_PACKAGE_NAME);
             return mSuspendPackageHelper.setPackagesSuspended(snapshotComputer(), packageNames,

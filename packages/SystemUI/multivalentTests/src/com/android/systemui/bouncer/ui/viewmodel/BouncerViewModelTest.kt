@@ -37,7 +37,6 @@ import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -142,54 +141,6 @@ class BouncerViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun message() =
-        testScope.runTest {
-            val message by collectLastValue(underTest.message)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(message?.isUpdateAnimated).isTrue()
-
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                bouncerInteractor.authenticate(WRONG_PIN)
-            }
-            assertThat(message?.isUpdateAnimated).isFalse()
-
-            val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
-            advanceTimeBy(lockoutEndMs - testScope.currentTime)
-            assertThat(message?.isUpdateAnimated).isTrue()
-        }
-
-    @Test
-    fun lockoutMessage() =
-        testScope.runTest {
-            val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
-            val message by collectLastValue(underTest.message)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(kosmos.fakeAuthenticationRepository.lockoutEndTimestamp).isNull()
-            assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
-
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) { times ->
-                bouncerInteractor.authenticate(WRONG_PIN)
-                if (times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
-                    assertThat(message?.text).isEqualTo(bouncerInteractor.message.value)
-                    assertThat(message?.isUpdateAnimated).isTrue()
-                }
-            }
-            val lockoutSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS
-            assertTryAgainMessage(message?.text, lockoutSeconds)
-            assertThat(message?.isUpdateAnimated).isFalse()
-
-            repeat(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS) { time ->
-                advanceTimeBy(1.seconds)
-                val remainingSeconds = lockoutSeconds - time - 1
-                if (remainingSeconds > 0) {
-                    assertTryAgainMessage(message?.text, remainingSeconds)
-                }
-            }
-            assertThat(message?.text).isEmpty()
-            assertThat(message?.isUpdateAnimated).isTrue()
-        }
-
-    @Test
     fun isInputEnabled() =
         testScope.runTest {
             val isInputEnabled by
@@ -209,25 +160,6 @@ class BouncerViewModelTest : SysuiTestCase() {
             val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
             advanceTimeBy(lockoutEndMs - testScope.currentTime)
             assertThat(isInputEnabled).isTrue()
-        }
-
-    @Test
-    fun dialogViewModel() =
-        testScope.runTest {
-            val authMethodViewModel by collectLastValue(underTest.authMethodViewModel)
-            val dialogViewModel by collectLastValue(underTest.dialogViewModel)
-            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
-            assertThat(authMethodViewModel?.lockoutMessageId).isNotNull()
-
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
-                assertThat(dialogViewModel).isNull()
-                bouncerInteractor.authenticate(WRONG_PIN)
-            }
-            assertThat(dialogViewModel).isNotNull()
-            assertThat(dialogViewModel?.text).isNotEmpty()
-
-            dialogViewModel?.onDismiss?.invoke()
-            assertThat(dialogViewModel).isNull()
         }
 
     @Test
@@ -263,13 +195,6 @@ class BouncerViewModelTest : SysuiTestCase() {
 
     private fun authMethodsToTest(): List<AuthenticationMethodModel> {
         return listOf(None, Pin, Password, Pattern, Sim)
-    }
-
-    private fun assertTryAgainMessage(
-        message: String?,
-        time: Int,
-    ) {
-        assertThat(message).isEqualTo("Try again in $time seconds.")
     }
 
     companion object {

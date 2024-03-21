@@ -44,6 +44,7 @@ import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
+import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
@@ -8496,8 +8497,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *            hierarchy
      * @param refocus when propagate is true, specifies whether to request the
      *            root view place new focus
+     * @hide
      */
-    void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
+    public void clearFocusInternal(View focused, boolean propagate, boolean refocus) {
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
             clearParentsWantFocus();
@@ -8668,11 +8670,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusLost();
         } else if (hasWindowFocus()) {
             notifyFocusChangeToImeFocusController(true /* hasFocus */);
-
-            if (mIsHandwritingDelegate) {
-                ViewRootImpl viewRoot = getViewRootImpl();
-                if (viewRoot != null) {
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null) {
+                if (mIsHandwritingDelegate) {
                     viewRoot.getHandwritingInitiator().onDelegateViewFocused(this);
+                } else if (initiationWithoutInputConnection() && onCheckIsTextEditor()) {
+                    viewRoot.getHandwritingInitiator().onEditorFocused(this);
                 }
             }
         }
@@ -12695,7 +12698,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (getSystemGestureExclusionRects().isEmpty()
                 && collectPreferKeepClearRects().isEmpty()
                 && collectUnrestrictedPreferKeepClearRects().isEmpty()
-                && (info.mHandwritingArea == null || !shouldInitiateHandwriting())) {
+                && (info.mHandwritingArea == null || !shouldTrackHandwritingArea())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
                 info.mPositionUpdateListener = null;
@@ -13062,7 +13065,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     void updateHandwritingArea() {
         // If autoHandwritingArea is not enabled, do nothing.
-        if (!shouldInitiateHandwriting()) return;
+        if (!shouldTrackHandwritingArea()) return;
         final AttachInfo ai = mAttachInfo;
         if (ai != null) {
             ai.mViewRootImpl.getHandwritingInitiator().updateHandwritingAreasForView(this);
@@ -13077,6 +13080,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     boolean shouldInitiateHandwriting() {
         return isAutoHandwritingEnabled() || getHandwritingDelegatorCallback() != null;
+    }
+
+    /**
+     * Returns whether the handwriting initiator should track the handwriting area for this view,
+     * either to initiate handwriting mode, or to prepare handwriting delegation, or to show the
+     * handwriting unsupported message.
+     * @hide
+     */
+    public boolean shouldTrackHandwritingArea() {
+        return shouldInitiateHandwriting();
     }
 
     /**
@@ -16691,6 +16704,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusLost();
         } else if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             notifyFocusChangeToImeFocusController(true /* hasFocus */);
+            ViewRootImpl viewRoot = getViewRootImpl();
+            if (viewRoot != null && initiationWithoutInputConnection() && onCheckIsTextEditor()) {
+                viewRoot.getHandwritingInitiator().onEditorFocused(this);
+            }
         }
 
         refreshDrawableState();

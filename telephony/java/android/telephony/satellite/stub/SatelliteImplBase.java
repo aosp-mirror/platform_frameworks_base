@@ -194,17 +194,6 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                IIntegerConsumer resultCallback, IBooleanConsumer callback)
-                throws RemoteException {
-            executeMethodAsync(
-                    () -> SatelliteImplBase.this
-                            .requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                                    resultCallback, callback),
-                    "requestIsCommunicationAllowedForCurrentLocation");
-        }
-
-        @Override
         public void requestTimeForNextSatelliteVisibility(IIntegerConsumer resultCallback,
                 IIntegerConsumer callback) throws RemoteException {
             executeMethodAsync(
@@ -634,30 +623,6 @@ public class SatelliteImplBase extends SatelliteService {
      */
     public void requestSatelliteModemState(@NonNull IIntegerConsumer resultCallback,
             @NonNull IIntegerConsumer callback) {
-        // stub implementation
-    }
-
-    /**
-     * Request to get whether satellite communication is allowed for the current location.
-     *
-     * @param resultCallback The callback to receive the error code result of the operation.
-     *                       This must only be sent when the result is not
-     *                       SatelliteResult#SATELLITE_RESULT_SUCCESS.
-     * @param callback If the result is SatelliteResult#SATELLITE_RESULT_SUCCESS, the callback to
-     *                 receive whether satellite communication is allowed for the current location.
-     *
-     * Valid result codes returned:
-     *   SatelliteResult:SATELLITE_RESULT_SUCCESS
-     *   SatelliteResult:SATELLITE_RESULT_SERVICE_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_MODEM_ERROR
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_MODEM_STATE
-     *   SatelliteResult:SATELLITE_RESULT_INVALID_ARGUMENTS
-     *   SatelliteResult:SATELLITE_RESULT_RADIO_NOT_AVAILABLE
-     *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
-     *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
-     */
-    public void requestIsSatelliteCommunicationAllowedForCurrentLocation(
-            @NonNull IIntegerConsumer resultCallback, @NonNull IBooleanConsumer callback) {
         // stub implementation
     }
 

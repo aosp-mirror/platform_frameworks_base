@@ -107,7 +107,7 @@ public class JetpackTaskFragmentOrganizerTest {
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(mTransaction, info);
 
-        mOrganizer.expandTaskFragment(mTransaction, container.getTaskFragmentToken());
+        mOrganizer.expandTaskFragment(mTransaction, container);
 
         verify(mTransaction).setWindowingMode(container.getInfo().getToken(),
                 WINDOWING_MODE_UNDEFINED);

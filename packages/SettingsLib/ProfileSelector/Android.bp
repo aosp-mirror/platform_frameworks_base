@@ -20,6 +20,7 @@ android_library {
     static_libs: [
         "com.google.android.material_material",
         "SettingsLibSettingsTheme",
+        "android.os.flags-aconfig-java-export",
     ],
 
     sdk_version: "system_current",

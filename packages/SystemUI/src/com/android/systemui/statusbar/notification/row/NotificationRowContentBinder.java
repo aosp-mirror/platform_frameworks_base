@@ -128,9 +128,9 @@ public interface NotificationRowContentBinder {
     class BindParams {
 
         /**
-         * Bind a low priority version of the content views.
+         * Bind a minimized version of the content views.
          */
-        public boolean isLowPriority;
+        public boolean isMinimized;
 
         /**
          * Use increased height when binding contracted view.

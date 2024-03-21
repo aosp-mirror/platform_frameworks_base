@@ -242,6 +242,7 @@ java_library_static {
         "apache-commons-math",
         "backstage_power_flags_lib",
         "notification_flags_lib",
+        "power_hint_flags_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
         "com_android_server_accessibility_flags_lib",

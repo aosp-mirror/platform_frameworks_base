@@ -450,6 +450,11 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<VcnManager>() {
             @Override
             public VcnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                if (!ctx.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)) {
+                    return null;
+                }
+
                 IBinder b = ServiceManager.getService(Context.VCN_MANAGEMENT_SERVICE);
                 IVcnManagementService service = IVcnManagementService.Stub.asInterface(b);
                 return new VcnManager(ctx, service);
@@ -1736,6 +1741,13 @@ public final class SystemServiceRegistry {
         return fetcher;
     }
 
+    private static boolean hasSystemFeatureOpportunistic(@NonNull ContextImpl ctx,
+            @NonNull String featureName) {
+        PackageManager manager = ctx.getPackageManager();
+        if (manager == null) return true;
+        return manager.hasSystemFeature(featureName);
+    }
+
     /**
      * Gets a system service from a given context.
      * @hide
@@ -1758,12 +1770,18 @@ public final class SystemServiceRegistry {
                 case Context.VIRTUALIZATION_SERVICE:
                 case Context.VIRTUAL_DEVICE_SERVICE:
                     return null;
-                case Context.SEARCH_SERVICE:
-                    // Wear device does not support SEARCH_SERVICE so we do not print WTF here
-                    PackageManager manager = ctx.getPackageManager();
-                    if (manager != null && manager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+                case Context.VCN_MANAGEMENT_SERVICE:
+                    if (!hasSystemFeatureOpportunistic(ctx,
+                            PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)) {
                         return null;
                     }
+                    break;
+                case Context.SEARCH_SERVICE:
+                    // Wear device does not support SEARCH_SERVICE so we do not print WTF here
+                    if (hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_WATCH)) {
+                        return null;
+                    }
+                    break;
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);
             return null;

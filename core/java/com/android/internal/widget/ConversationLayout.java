@@ -162,6 +162,8 @@ public class ConversationLayout extends FrameLayout
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
     private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
     private boolean mPrecomputedTextEnabled = false;
+    @Nullable
+    private ConversationHeaderData mConversationHeaderData;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -651,6 +653,7 @@ public class ConversationLayout extends FrameLayout
 
     private void setConversationAvatarAndNameFromData(
             ConversationHeaderData conversationHeaderData) {
+        mConversationHeaderData = conversationHeaderData;
         final OneToOneConversationAvatarData oneToOneConversationDrawable;
         final GroupConversationAvatarData groupConversationAvatarData;
         final ConversationAvatarData conversationAvatar =
@@ -804,7 +807,10 @@ public class ConversationLayout extends FrameLayout
         bottomBackground.setLayoutParams(layoutParams);
     }
 
-    private void bindFacePileWithDrawable(ImageView bottomBackground, ImageView bottomView,
+    /**
+     * Binds group avatar drawables to face pile.
+     */
+    public void bindFacePileWithDrawable(ImageView bottomBackground, ImageView bottomView,
             ImageView topView, GroupConversationAvatarData groupConversationAvatarData) {
         applyNotificationBackgroundColor(bottomBackground);
         bottomView.setImageDrawable(groupConversationAvatarData.mLastIcon);
@@ -1571,6 +1577,11 @@ public class ConversationLayout extends FrameLayout
     @Nullable
     public Icon getConversationIcon() {
         return mConversationIcon;
+    }
+
+    @Nullable
+    public ConversationHeaderData getConversationHeaderData() {
+        return mConversationHeaderData;
     }
 
     private static class TouchDelegateComposite extends TouchDelegate {

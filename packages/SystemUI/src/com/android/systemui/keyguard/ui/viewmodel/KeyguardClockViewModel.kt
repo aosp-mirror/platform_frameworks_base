@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
-import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -53,8 +52,6 @@ constructor(
     var burnInLayer: Layer? = null
     val useLargeClock: Boolean
         get() = clockSize.value == LARGE
-
-    var clock: ClockController? by keyguardClockInteractor::clock
 
     val clockSize =
         combine(keyguardClockInteractor.selectedClockSize, keyguardClockInteractor.clockSize) {

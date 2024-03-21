@@ -165,7 +165,8 @@ public class WindowTokenClient extends Binder {
             Log.d(TAG, "Configuration not dispatch to IME because configuration is up"
                     + " to date. Current config=" + context.getResources().getConfiguration()
                     + ", reported config=" + currentConfig
-                    + ", updated config=" + newConfig);
+                    + ", updated config=" + newConfig
+                    + ", updated display ID=" + newDisplayId);
         }
         // Update display first. In case callers want to obtain display information(
         // ex: DisplayMetrics) in #onConfigurationChanged callback.
@@ -190,13 +191,18 @@ public class WindowTokenClient extends Binder {
             if (mShouldDumpConfigForIme) {
                 if (!shouldReportConfigChange) {
                     Log.d(TAG, "Only apply configuration update to Resources because "
-                            + "shouldReportConfigChange is false.\n" + Debug.getCallers(5));
+                            + "shouldReportConfigChange is false. "
+                            + "context=" + context
+                            + ", config=" + context.getResources().getConfiguration()
+                            + ", display ID=" + context.getDisplayId() + "\n"
+                            + Debug.getCallers(5));
                 } else if (diff == 0) {
                     Log.d(TAG, "Configuration not dispatch to IME because configuration has no "
                             + " public difference with updated config. "
                             + " Current config=" + context.getResources().getConfiguration()
                             + ", reported config=" + currentConfig
-                            + ", updated config=" + newConfig);
+                            + ", updated config=" + newConfig
+                            + ", display ID=" + context.getDisplayId());
                 }
             }
         }

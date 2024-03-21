@@ -2604,6 +2604,19 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.notifyStylusGestureStarted(deviceId, eventTime);
     }
 
+    // Native callback.
+    @SuppressWarnings("unused")
+    private int getPackageUid(String pkg) {
+        if (TextUtils.isEmpty(pkg)) {
+            return Process.INVALID_UID;
+        }
+        try {
+            return mContext.getPackageManager().getPackageUid(pkg, 0 /*flags*/);
+        } catch (PackageManager.NameNotFoundException e) {
+            return Process.INVALID_UID;
+        }
+    }
+
     /**
      * Flatten a map into a string list, with value positioned directly next to the
      * key.

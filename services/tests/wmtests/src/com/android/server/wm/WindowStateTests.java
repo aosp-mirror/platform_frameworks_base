@@ -804,7 +804,8 @@ public class WindowStateTests extends WindowTestsBase {
                     anyBoolean() /* reportDraw */, any() /* mergedConfig */,
                     any() /* insetsState */, anyBoolean() /* forceLayout */,
                     anyBoolean() /* alwaysConsumeSystemBars */, anyInt() /* displayId */,
-                    anyInt() /* seqId */, anyBoolean() /* dragResizing */);
+                    anyInt() /* seqId */, anyBoolean() /* dragResizing */,
+                    any() /* activityWindowInfo */);
         } catch (RemoteException ignored) {
         }
         win.reportResized();

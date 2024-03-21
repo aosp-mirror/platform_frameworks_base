@@ -17,6 +17,8 @@
 package com.android.server.power.hint;
 
 
+import static com.android.server.power.hint.HintManagerService.CLEAN_UP_UID_DELAY_MILLIS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -45,6 +47,9 @@ import android.os.IBinder;
 import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.Log;
 
 import com.android.server.FgThread;
@@ -54,11 +59,13 @@ import com.android.server.power.hint.HintManagerService.Injector;
 import com.android.server.power.hint.HintManagerService.NativeWrapper;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -71,7 +78,7 @@ import java.util.concurrent.locks.LockSupport;
  * Tests for {@link com.android.server.power.hint.HintManagerService}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:HintManagerServiceTest
+ * atest FrameworksServicesTests:HintManagerServiceTest
  */
 public class HintManagerServiceTest {
     private static final String TAG = "HintManagerServiceTest";
@@ -110,9 +117,15 @@ public class HintManagerServiceTest {
         makeWorkDuration(2L, 13L, 2L, 8L, 0L),
     };
 
-    @Mock private Context mContext;
-    @Mock private HintManagerService.NativeWrapper mNativeWrapperMock;
-    @Mock private ActivityManagerInternal mAmInternalMock;
+    @Mock
+    private Context mContext;
+    @Mock
+    private HintManagerService.NativeWrapper mNativeWrapperMock;
+    @Mock
+    private ActivityManagerInternal mAmInternalMock;
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private HintManagerService mService;
 
@@ -122,12 +135,11 @@ public class HintManagerServiceTest {
         when(mNativeWrapperMock.halGetHintSessionPreferredRate())
                 .thenReturn(DEFAULT_HINT_PREFERRED_RATE);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_A),
-              eq(DEFAULT_TARGET_DURATION))).thenReturn(1L);
+                eq(DEFAULT_TARGET_DURATION))).thenReturn(1L);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_B),
-              eq(DEFAULT_TARGET_DURATION))).thenReturn(2L);
+                eq(DEFAULT_TARGET_DURATION))).thenReturn(2L);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_C),
-              eq(0L))).thenReturn(1L);
-        when(mAmInternalMock.getIsolatedProcesses(anyInt())).thenReturn(null);
+                eq(0L))).thenReturn(1L);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmInternalMock);
     }
@@ -434,6 +446,163 @@ public class HintManagerServiceTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_POWERHINT_THREAD_CLEANUP)
+    public void testCleanupDeadThreads() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+        CountDownLatch stopLatch1 = new CountDownLatch(1);
+        int threadCount = 3;
+        int[] tids1 = createThreads(threadCount, stopLatch1);
+        long sessionPtr1 = 111;
+        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(tids1),
+                eq(DEFAULT_TARGET_DURATION))).thenReturn(sessionPtr1);
+        AppHintSession session1 = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSession(token, tids1, DEFAULT_TARGET_DURATION);
+        assertNotNull(session1);
+
+        // for test only to avoid conflicting with any real thread that exists on device
+        int isoProc1 = -100;
+        int isoProc2 = 9999;
+        when(mAmInternalMock.getIsolatedProcesses(eq(UID))).thenReturn(List.of(0));
+
+        CountDownLatch stopLatch2 = new CountDownLatch(1);
+        int[] tids2 = createThreads(threadCount, stopLatch2);
+        int[] tids2WithIsolated = Arrays.copyOf(tids2, tids2.length + 2);
+        int[] expectedTids2 = Arrays.copyOf(tids2, tids2.length + 1);
+        expectedTids2[tids2.length] = isoProc1;
+        tids2WithIsolated[threadCount] = isoProc1;
+        tids2WithIsolated[threadCount + 1] = isoProc2;
+        long sessionPtr2 = 222;
+        when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(tids2WithIsolated),
+                eq(DEFAULT_TARGET_DURATION))).thenReturn(sessionPtr2);
+        AppHintSession session2 = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSession(token, tids2WithIsolated, DEFAULT_TARGET_DURATION);
+        assertNotNull(session2);
+
+        // trigger clean up through UID state change by making the process background
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+                CLEAN_UP_UID_DELAY_MILLIS));
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr2), any());
+        // the new TIDs pending list should be updated
+        assertArrayEquals(session2.getTidsInternal(), expectedTids2);
+        reset(mNativeWrapperMock);
+
+        // this should resume and update the threads so those never-existed invalid isolated
+        // processes should be cleaned up
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        // wait for the async uid state change to trigger resume and setThreads
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+        verify(mNativeWrapperMock, times(1)).halSetThreads(eq(sessionPtr2), eq(expectedTids2));
+        reset(mNativeWrapperMock);
+
+        // let all session 1 threads to exit and the cleanup should force pause the session
+        stopLatch1.countDown();
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+                CLEAN_UP_UID_DELAY_MILLIS));
+        verify(mNativeWrapperMock, times(1)).halPauseHintSession(eq(sessionPtr1));
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr2), any());
+        // all hints will have no effect as the session is force paused while proc in foreground
+        verifyAllHintsEnabled(session1, false);
+        verifyAllHintsEnabled(session2, true);
+        reset(mNativeWrapperMock);
+
+        // in foreground, set new tids for session 1 then it should be resumed and all hints allowed
+        stopLatch1 = new CountDownLatch(1);
+        tids1 = createThreads(threadCount, stopLatch1);
+        session1.setThreads(tids1);
+        verify(mNativeWrapperMock, times(1)).halSetThreads(eq(sessionPtr1), eq(tids1));
+        verify(mNativeWrapperMock, times(1)).halResumeHintSession(eq(sessionPtr1));
+        verifyAllHintsEnabled(session1, true);
+        reset(mNativeWrapperMock);
+
+        // let all session 1 and 2 non isolated threads to exit
+        stopLatch1.countDown();
+        stopLatch2.countDown();
+        expectedTids2 = new int[]{isoProc1};
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+                CLEAN_UP_UID_DELAY_MILLIS));
+        verify(mNativeWrapperMock, times(1)).halPauseHintSession(eq(sessionPtr1));
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
+        verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr2), any());
+        // in background, set threads for session 1 then it should not be force paused next time
+        session1.setThreads(SESSION_TIDS_A);
+        // the new TIDs pending list should be updated
+        assertArrayEquals(session1.getTidsInternal(), SESSION_TIDS_A);
+        assertArrayEquals(session2.getTidsInternal(), expectedTids2);
+        verifyAllHintsEnabled(session1, false);
+        verifyAllHintsEnabled(session2, false);
+        reset(mNativeWrapperMock);
+
+        service.mUidObserver.onUidStateChanged(UID,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+                CLEAN_UP_UID_DELAY_MILLIS));
+        verify(mNativeWrapperMock, times(1)).halSetThreads(eq(sessionPtr1),
+                eq(SESSION_TIDS_A));
+        verify(mNativeWrapperMock, times(1)).halSetThreads(eq(sessionPtr2),
+                eq(expectedTids2));
+        verifyAllHintsEnabled(session1, true);
+        verifyAllHintsEnabled(session2, true);
+    }
+
+    private void verifyAllHintsEnabled(AppHintSession session, boolean verifyEnabled) {
+        session.reportActualWorkDuration2(new WorkDuration[]{makeWorkDuration(1, 3, 2, 1, 1000)});
+        session.reportActualWorkDuration(new long[]{1}, new long[]{2});
+        session.updateTargetWorkDuration(3);
+        session.setMode(0, true);
+        session.sendHint(1);
+        if (verifyEnabled) {
+            verify(mNativeWrapperMock, times(1)).halReportActualWorkDuration(
+                    eq(session.mHalSessionPtr), any());
+            verify(mNativeWrapperMock, times(1)).halSetMode(eq(session.mHalSessionPtr), anyInt(),
+                    anyBoolean());
+            verify(mNativeWrapperMock, times(1)).halUpdateTargetWorkDuration(
+                    eq(session.mHalSessionPtr), anyLong());
+            verify(mNativeWrapperMock, times(1)).halSendHint(eq(session.mHalSessionPtr), anyInt());
+        } else {
+            verify(mNativeWrapperMock, never()).halReportActualWorkDuration(
+                    eq(session.mHalSessionPtr), any());
+            verify(mNativeWrapperMock, never()).halSetMode(eq(session.mHalSessionPtr), anyInt(),
+                    anyBoolean());
+            verify(mNativeWrapperMock, never()).halUpdateTargetWorkDuration(
+                    eq(session.mHalSessionPtr), anyLong());
+            verify(mNativeWrapperMock, never()).halSendHint(eq(session.mHalSessionPtr), anyInt());
+        }
+    }
+
+    private int[] createThreads(int threadCount, CountDownLatch stopLatch)
+            throws InterruptedException {
+        int[] tids = new int[threadCount];
+        AtomicInteger k = new AtomicInteger(0);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        for (int j = 0; j < threadCount; j++) {
+            Thread thread = new Thread(() -> {
+                try {
+                    tids[k.getAndIncrement()] = android.os.Process.myTid();
+                    latch.countDown();
+                    stopLatch.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            thread.start();
+        }
+        latch.await();
+        return tids;
+    }
+
+    @Test
     public void testSetMode() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
@@ -457,7 +626,8 @@ public class HintManagerServiceTest {
         // Set session to background, then the duration would not be updated.
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
-        FgThread.getHandler().runWithScissors(() -> { }, 500);
+        FgThread.getHandler().runWithScissors(() -> {
+        }, 500);
         assertFalse(service.mUidObserver.isUidForeground(a.mUid));
         a.setMode(0, true);
         verify(mNativeWrapperMock, never()).halSetMode(anyLong(), anyInt(), anyBoolean());
@@ -519,7 +689,10 @@ public class HintManagerServiceTest {
                     LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
                     service.mUidObserver.onUidStateChanged(UID,
                             ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
-                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+                    // let the cleanup work proceed
+                    LockSupport.parkNanos(
+                            TimeUnit.MILLISECONDS.toNanos(500) + TimeUnit.MILLISECONDS.toNanos(
+                                    CLEAN_UP_UID_DELAY_MILLIS));
                 }
                 Log.d(TAG, "notifier thread min " + min + " max " + max + " avg " + sum / count);
                 service.mUidObserver.onUidGone(UID, true);

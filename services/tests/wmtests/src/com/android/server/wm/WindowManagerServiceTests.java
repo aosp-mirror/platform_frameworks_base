@@ -90,6 +90,7 @@ import android.util.ArraySet;
 import android.util.MergedConfiguration;
 import android.view.ContentRecordingSession;
 import android.view.IWindow;
+import android.view.IWindowSession;
 import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -99,6 +100,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
@@ -1214,6 +1216,35 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         // No exception even if the window doesn't exist
         mWm.reportKeepClearAreasChanged(session, window, new ArrayList<>(), new ArrayList<>());
+    }
+
+    @Test
+    public void testRelayout_appWindowSendActivityWindowInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
+
+        // Skip unnecessary operations of relayout.
+        spyOn(mWm.mWindowPlacerLocked);
+        doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
+
+        final Task task = createTask(mDisplayContent);
+        final WindowState win = createAppWindow(task, ACTIVITY_TYPE_STANDARD, "appWindow");
+        mWm.mWindowMap.put(win.mClient.asBinder(), win);
+
+        final int w = 100;
+        final int h = 200;
+        final ClientWindowFrames outFrames = new ClientWindowFrames();
+        final MergedConfiguration outConfig = new MergedConfiguration();
+        final SurfaceControl outSurfaceControl = new SurfaceControl();
+        final InsetsState outInsetsState = new InsetsState();
+        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
+        final Bundle outBundle = new Bundle();
+
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+
+        final ActivityWindowInfo activityWindowInfo = outBundle.getParcelable(
+                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
+        assertEquals(win.mActivityRecord.getActivityWindowInfo(), activityWindowInfo);
     }
 
     class TestResultReceiver implements IResultReceiver {

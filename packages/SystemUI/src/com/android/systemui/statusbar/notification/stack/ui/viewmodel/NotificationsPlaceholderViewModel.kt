@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.notification.stack.shared.model.StackBound
 import com.android.systemui.statusbar.notification.stack.shared.model.StackRounding
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -73,7 +72,7 @@ constructor(
     }
 
     /** Corner rounding of the stack */
-    val stackRounding: StateFlow<StackRounding> = interactor.stackRounding
+    val stackRounding: Flow<StackRounding> = interactor.stackRounding
 
     /**
      * The height in px of the contents of notification stack. Depending on the number of

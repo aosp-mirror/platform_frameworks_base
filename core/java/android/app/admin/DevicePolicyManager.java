@@ -6545,8 +6545,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Flag for {@link #wipeData(int)}: also erase the device's external
-     * storage (such as SD cards).
+     * Flag for {@link #wipeData(int)}: also erase the device's adopted external storage (such as
+     * adopted SD cards).
+     * @see <a href="{@docRoot}about/versions/marshmallow/android-6.0.html#adoptable-storage">
+     *     Adoptable Storage Devices</a>
      */
     public static final int WIPE_EXTERNAL_STORAGE = 0x0001;
 

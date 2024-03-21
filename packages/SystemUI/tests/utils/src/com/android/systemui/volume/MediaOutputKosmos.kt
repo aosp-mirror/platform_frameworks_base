@@ -18,7 +18,6 @@ package com.android.systemui.volume
 
 import android.content.packageManager
 import android.content.pm.ApplicationInfo
-import android.media.session.MediaController
 import android.os.Handler
 import android.testing.TestableLooper
 import com.android.systemui.kosmos.Kosmos
@@ -32,10 +31,9 @@ import com.android.systemui.volume.data.repository.FakeLocalMediaRepository
 import com.android.systemui.volume.data.repository.FakeMediaControllerRepository
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.FakeLocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
+import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputActionsInteractor
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
-
-var Kosmos.mediaController: MediaController by Kosmos.Fixture { mock {} }
 
 val Kosmos.localMediaRepository by Kosmos.Fixture { FakeLocalMediaRepository() }
 val Kosmos.localMediaRepositoryFactory: LocalMediaRepositoryFactory by
@@ -55,6 +53,14 @@ val Kosmos.mediaOutputInteractor by
                 whenever(getApplicationInfo(any(), any<Int>())).thenReturn(appInfo)
             },
             testScope.backgroundScope,
+            testScope.testScheduler,
+            mediaControllerRepository,
+        )
+    }
+
+val Kosmos.mediaDeviceSessionInteractor by
+    Kosmos.Fixture {
+        MediaDeviceSessionInteractor(
             testScope.testScheduler,
             Handler(TestableLooper.get(testCase).looper),
             mediaControllerRepository,

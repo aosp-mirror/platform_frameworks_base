@@ -5405,7 +5405,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     /**
      * @param topHeadsUpRow the first headsUp row in z-order.
      */
-    public void setTopHeadsUpRow(ExpandableNotificationRow topHeadsUpRow) {
+    public void setTopHeadsUpRow(@Nullable ExpandableNotificationRow topHeadsUpRow) {
         mTopHeadsUpRow = topHeadsUpRow;
     }
 

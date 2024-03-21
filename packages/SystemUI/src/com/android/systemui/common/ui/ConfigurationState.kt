@@ -54,6 +54,18 @@ constructor(
     }
 
     /**
+     * Returns a [Flow] that emits a dimension pixel size that is kept in sync with the device
+     * configuration.
+     *
+     * @see android.content.res.Resources.getDimensionPixelSize
+     */
+    fun getDimensionPixelOffset(@DimenRes id: Int): Flow<Int> {
+        return configurationController.onDensityOrFontScaleChanged.emitOnStart().map {
+            context.resources.getDimensionPixelOffset(id)
+        }
+    }
+
+    /**
      * Returns a [Flow] that emits a color that is kept in sync with the device theme.
      *
      * @see Utils.getColorAttrDefaultColor

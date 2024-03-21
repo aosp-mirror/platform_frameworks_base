@@ -30,6 +30,7 @@ import android.view.IScrollCaptureResponseListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.ImeTracker;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 
 import com.android.internal.os.IResultReceiver;
@@ -61,7 +62,8 @@ oneway interface IWindow {
     void resized(in ClientWindowFrames frames, boolean reportDraw,
             in MergedConfiguration newMergedConfiguration, in InsetsState insetsState,
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-            int syncSeqId, boolean dragResizing);
+            int syncSeqId, boolean dragResizing,
+            in @nullable ActivityWindowInfo activityWindowInfo);
 
     /**
      * Called when this window retrieved control over a specified set of insets sources.

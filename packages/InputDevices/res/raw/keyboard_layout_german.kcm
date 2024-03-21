@@ -101,6 +101,7 @@ key 0 {
 key SLASH {
     label:                              '\u00df'
     base:                               '\u00df'
+    capslock:                           '\u1e9e'
     shift:                              '?'
     ralt:                               '\\'
 }

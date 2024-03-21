@@ -39,7 +39,7 @@ class DataSaverDialogDelegate(
         return sysuiDialogFactory.create(this, context)
     }
 
-    override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+    override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
         with(dialog) {
             setTitle(R.string.data_saver_enable_title)
             setMessage(R.string.data_saver_description)

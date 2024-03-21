@@ -22,7 +22,12 @@ import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FIN
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_NO_UID_REPORTED__OEM_UI_USAGE_STATUS__OEM_UI_USAGE_STATUS_SPECIFIED_BUT_NOT_FOUND;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_NO_UID_REPORTED__OEM_UI_USAGE_STATUS__OEM_UI_USAGE_STATUS_SPECIFIED_BUT_NOT_ENABLED;
 
+import android.credentials.selection.IntentCreationResult;
 
+/**
+ * Result of attempting to use the config_oemCredentialManagerDialogComponent as the Credential
+ * Manager UI.
+ */
 public enum OemUiUsageStatus {
     UNKNOWN(CREDENTIAL_MANAGER_FINAL_NO_UID_REPORTED__OEM_UI_USAGE_STATUS__OEM_UI_USAGE_STATUS_UNKNOWN),
     SUCCESS(CREDENTIAL_MANAGER_FINAL_NO_UID_REPORTED__OEM_UI_USAGE_STATUS__OEM_UI_USAGE_STATUS_SUCCESS),
@@ -38,5 +43,22 @@ public enum OemUiUsageStatus {
 
     public int getLoggingInt() {
         return mLoggingInt;
+    }
+
+    /** Factory method. */
+    public static OemUiUsageStatus createFrom(IntentCreationResult.OemUiUsageStatus from) {
+        switch (from) {
+            case UNKNOWN:
+                return OemUiUsageStatus.UNKNOWN;
+            case SUCCESS:
+                return OemUiUsageStatus.SUCCESS;
+            case OEM_UI_CONFIG_NOT_SPECIFIED:
+                return OemUiUsageStatus.FAILURE_NOT_SPECIFIED;
+            case OEM_UI_CONFIG_SPECIFIED_BUT_NOT_FOUND:
+                return OemUiUsageStatus.FAILURE_SPECIFIED_BUT_NOT_FOUND;
+            case OEM_UI_CONFIG_SPECIFIED_FOUND_BUT_NOT_ENABLED:
+                return OemUiUsageStatus.FAILURE_SPECIFIED_BUT_NOT_ENABLED;
+        }
+        return OemUiUsageStatus.UNKNOWN;
     }
 }

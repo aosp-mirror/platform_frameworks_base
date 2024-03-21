@@ -72,10 +72,7 @@ fun PinPad(
     verticalSpacing: Dp,
     modifier: Modifier = Modifier,
 ) {
-    DisposableEffect(Unit) {
-        viewModel.onShown()
-        onDispose { viewModel.onHidden() }
-    }
+    DisposableEffect(Unit) { onDispose { viewModel.onHidden() } }
 
     val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
     val backspaceButtonAppearance by viewModel.backspaceButtonAppearance.collectAsState()

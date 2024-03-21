@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.IActivityManager
+import android.content.pm.PackageManager
 import android.media.projection.MediaProjectionManager
 import android.os.Handler
 import android.platform.test.annotations.DisableFlags
@@ -44,6 +45,7 @@ class SensitiveNotificationProtectionControllerFlagDisabledTest : SysuiTestCase(
     @Mock private lateinit var handler: Handler
     @Mock private lateinit var activityManager: IActivityManager
     @Mock private lateinit var mediaProjectionManager: MediaProjectionManager
+    @Mock private lateinit var packageManager: PackageManager
     private lateinit var controller: SensitiveNotificationProtectionControllerImpl
 
     @Before
@@ -56,6 +58,7 @@ class SensitiveNotificationProtectionControllerFlagDisabledTest : SysuiTestCase(
                 FakeGlobalSettings(),
                 mediaProjectionManager,
                 activityManager,
+                packageManager,
                 handler,
                 FakeExecutor(FakeSystemClock()),
                 logger

@@ -36,7 +36,6 @@ import static com.android.server.am.ProcessList.SERVICE_ADJ;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -185,8 +184,8 @@ public final class ServiceBindingOomAdjPolicyTest {
         doReturn(false).when(mAms.mAtmInternal).hasSystemAlertWindowPermission(anyInt(), anyInt(),
                 any());
         doReturn(true).when(mAms.mOomAdjuster.mCachedAppOptimizer).useFreezer();
-        doNothing().when(mAms.mOomAdjuster.mCachedAppOptimizer).freezeAppAsyncInternalLSP(
-                any(), anyLong(), anyBoolean(), anyBoolean());
+        doNothing().when(mAms.mOomAdjuster.mCachedAppOptimizer).freezeAppAsyncAtEarliestLSP(
+                any());
         doReturn(false).when(mAms.mAppProfiler).updateLowMemStateLSP(anyInt(), anyInt(),
                 anyInt(), anyLong());
 
@@ -503,7 +502,7 @@ public final class ServiceBindingOomAdjPolicyTest {
         if (clientApp.isFreezable()) {
             verify(mAms.mOomAdjuster.mCachedAppOptimizer,
                     times(Flags.serviceBindingOomAdjPolicy() ? 1 : 0))
-                    .freezeAppAsyncInternalLSP(eq(clientApp), eq(0L), anyBoolean(), anyBoolean());
+                    .freezeAppAsyncAtEarliestLSP(eq(clientApp));
             clearInvocations(mAms.mOomAdjuster.mCachedAppOptimizer);
         }
 

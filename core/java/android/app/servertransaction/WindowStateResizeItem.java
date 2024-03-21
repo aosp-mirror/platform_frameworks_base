@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
 import android.content.Context;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -32,6 +33,7 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.IWindow;
 import android.view.InsetsState;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 
 import java.util.Objects;
@@ -55,6 +57,14 @@ public class WindowStateResizeItem extends ClientTransactionItem {
     private int mSyncSeqId;
     private boolean mDragResizing;
 
+    /** {@code null} if this is not an Activity window. */
+    @Nullable
+    private IBinder mActivityToken;
+
+    /** {@code null} if this is not an Activity window. */
+    @Nullable
+    private ActivityWindowInfo mActivityWindowInfo;
+
     @Override
     public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
@@ -65,7 +75,8 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         }
         try {
             mWindow.resized(mFrames, mReportDraw, mConfiguration, mInsetsState, mForceLayout,
-                    mAlwaysConsumeSystemBars, mDisplayId, mSyncSeqId, mDragResizing);
+                    mAlwaysConsumeSystemBars, mDisplayId, mSyncSeqId, mDragResizing,
+                    mActivityWindowInfo);
         } catch (RemoteException e) {
             // Should be a local call.
             // An exception could happen if the process is restarted. It is safe to ignore since
@@ -78,6 +89,7 @@ public class WindowStateResizeItem extends ClientTransactionItem {
     @Nullable
     @Override
     public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
+        // TODO(b/260873529): dispatch for mActivityToken as well.
         // WindowStateResizeItem may update the global config with #mConfiguration.
         return ActivityThread.currentApplication();
     }
@@ -91,7 +103,8 @@ public class WindowStateResizeItem extends ClientTransactionItem {
             @NonNull ClientWindowFrames frames, boolean reportDraw,
             @NonNull MergedConfiguration configuration, @NonNull InsetsState insetsState,
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-            boolean dragResizing) {
+            boolean dragResizing, @Nullable IBinder activityToken,
+            @Nullable ActivityWindowInfo activityWindowInfo) {
         WindowStateResizeItem instance =
                 ObjectPool.obtain(WindowStateResizeItem.class);
         if (instance == null) {
@@ -107,6 +120,10 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         instance.mDisplayId = displayId;
         instance.mSyncSeqId = syncSeqId;
         instance.mDragResizing = dragResizing;
+        instance.mActivityToken = activityToken;
+        instance.mActivityWindowInfo = activityWindowInfo != null
+                ? new ActivityWindowInfo(activityWindowInfo)
+                : null;
 
         return instance;
     }
@@ -123,6 +140,8 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         mDisplayId = INVALID_DISPLAY;
         mSyncSeqId = -1;
         mDragResizing = false;
+        mActivityToken = null;
+        mActivityWindowInfo = null;
         ObjectPool.recycle(this);
     }
 
@@ -141,6 +160,8 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         dest.writeInt(mDisplayId);
         dest.writeInt(mSyncSeqId);
         dest.writeBoolean(mDragResizing);
+        dest.writeStrongBinder(mActivityToken);
+        dest.writeTypedObject(mActivityWindowInfo, flags);
     }
 
     /** Reads from Parcel. */
@@ -155,6 +176,8 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         mDisplayId = in.readInt();
         mSyncSeqId = in.readInt();
         mDragResizing = in.readBoolean();
+        mActivityToken = in.readStrongBinder();
+        mActivityWindowInfo = in.readTypedObject(ActivityWindowInfo.CREATOR);
     }
 
     public static final @NonNull Creator<WindowStateResizeItem> CREATOR = new Creator<>() {
@@ -185,7 +208,9 @@ public class WindowStateResizeItem extends ClientTransactionItem {
                 && mAlwaysConsumeSystemBars == other.mAlwaysConsumeSystemBars
                 && mDisplayId == other.mDisplayId
                 && mSyncSeqId == other.mSyncSeqId
-                && mDragResizing == other.mDragResizing;
+                && mDragResizing == other.mDragResizing
+                && Objects.equals(mActivityToken, other.mActivityToken)
+                && Objects.equals(mActivityWindowInfo, other.mActivityWindowInfo);
     }
 
     @Override
@@ -201,6 +226,8 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         result = 31 * result + mDisplayId;
         result = 31 * result + mSyncSeqId;
         result = 31 * result + (mDragResizing ? 1 : 0);
+        result = 31 * result + Objects.hashCode(mActivityToken);
+        result = 31 * result + Objects.hashCode(mActivityWindowInfo);
         return result;
     }
 
@@ -209,6 +236,8 @@ public class WindowStateResizeItem extends ClientTransactionItem {
         return "WindowStateResizeItem{window=" + mWindow
                 + ", reportDrawn=" + mReportDraw
                 + ", configuration=" + mConfiguration
+                + ", activityToken=" + mActivityToken
+                + ", activityWindowInfo=" + mActivityWindowInfo
                 + "}";
     }
 

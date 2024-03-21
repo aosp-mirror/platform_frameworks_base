@@ -91,11 +91,46 @@ constructor(
         }
     }
 
+    val transitions = repository.transitions
+
+    /**
+     * A pair of the most recent STARTED step, and the transition step immediately preceding it. The
+     * transition framework enforces that the previous step is either a CANCELED or FINISHED step,
+     * and that the previous step was *to* the state the STARTED step is *from*.
+     *
+     * This flow can be used to access the previous step to determine whether it was CANCELED or
+     * FINISHED. In the case of a CANCELED step, we can also figure out which state we were coming
+     * from when we were canceled.
+     */
+    val startedStepWithPrecedingStep =
+        transitions
+            .pairwise()
+            .filter { it.newValue.transitionState == TransitionState.STARTED }
+            .shareIn(scope, SharingStarted.Eagerly)
+
     init {
+        // Collect non-canceled steps and emit transition values.
         scope.launch(mainDispatcher) {
-            repository.transitions.collect { step ->
-                getTransitionValueFlow(step.from).emit(1f - step.value)
-                getTransitionValueFlow(step.to).emit(step.value)
+            repository.transitions
+                .filter { it.transitionState != TransitionState.CANCELED }
+                .collect { step ->
+                    getTransitionValueFlow(step.from).emit(1f - step.value)
+                    getTransitionValueFlow(step.to).emit(step.value)
+                }
+        }
+
+        // If a transition from state A -> B is canceled in favor of a transition from B -> C, we
+        // need to ensure we emit transitionValue(A) = 0f, since no further steps will be emitted
+        // where the from or to states are A. This would leave transitionValue(A) stuck at an
+        // arbitrary non-zero value.
+        scope.launch(mainDispatcher) {
+            startedStepWithPrecedingStep.collect { (prevStep, startedStep) ->
+                if (
+                    prevStep.transitionState == TransitionState.CANCELED &&
+                        startedStep.to != prevStep.from
+                ) {
+                    getTransitionValueFlow(prevStep.from).emit(0f)
+                }
             }
         }
     }
@@ -202,8 +237,6 @@ constructor(
     val dozingToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(DOZING, LOCKSCREEN)
 
-    val transitions = repository.transitions
-
     /** Receive all [TransitionStep] matching a filter of [from]->[to] */
     fun transition(from: KeyguardState, to: KeyguardState): Flow<TransitionStep> {
         return repository.transition(from, to)
@@ -248,21 +281,6 @@ constructor(
         keyguardRepository.isAodAvailable
             .map { aodAvailable -> if (aodAvailable) AOD else DOZING }
             .stateIn(scope, SharingStarted.Eagerly, DOZING)
-
-    /**
-     * A pair of the most recent STARTED step, and the transition step immediately preceding it. The
-     * transition framework enforces that the previous step is either a CANCELED or FINISHED step,
-     * and that the previous step was *to* the state the STARTED step is *from*.
-     *
-     * This flow can be used to access the previous step to determine whether it was CANCELED or
-     * FINISHED. In the case of a CANCELED step, we can also figure out which state we were coming
-     * from when we were canceled.
-     */
-    val startedStepWithPrecedingStep =
-        transitions
-            .pairwise()
-            .filter { it.newValue.transitionState == TransitionState.STARTED }
-            .stateIn(scope, SharingStarted.Eagerly, null)
 
     /**
      * The last [KeyguardState] to which we [TransitionState.FINISHED] a transition.

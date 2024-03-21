@@ -148,14 +148,18 @@ public abstract class OnDeviceIntelligenceService extends Service {
 
                 @Override
                 public void requestFeatureDownload(int callerUid, Feature feature,
-                        ICancellationSignal cancellationSignal,
+                        AndroidFuture cancellationSignalFuture,
                         IDownloadCallback downloadCallback) {
                     Objects.requireNonNull(feature);
                     Objects.requireNonNull(downloadCallback);
-
+                    ICancellationSignal transport = null;
+                    if (cancellationSignalFuture != null) {
+                        transport = CancellationSignal.createTransport();
+                        cancellationSignalFuture.complete(transport);
+                    }
                     OnDeviceIntelligenceService.this.onDownloadFeature(callerUid,
                             feature,
-                            CancellationSignal.fromTransport(cancellationSignal),
+                            CancellationSignal.fromTransport(transport),
                             wrapDownloadCallback(downloadCallback));
                 }
 

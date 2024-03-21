@@ -86,6 +86,7 @@ public class PackageInstallerActivity extends Activity {
     static final String EXTRA_APP_SNIPPET = "EXTRA_APP_SNIPPET";
     static final String EXTRA_ORIGINATING_UID_FROM_SESSION_INFO =
         "EXTRA_ORIGINATING_UID_FROM_SESSION_INFO";
+    static final String EXTRA_IS_TRUSTED_SOURCE = "EXTRA_IS_TRUSTED_SOURCE";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
 
@@ -302,21 +303,6 @@ public class PackageInstallerActivity extends Activity {
             Log.i(TAG, "Multiple packages found for source uid " + sourceUid);
         }
         return packagesForUid[0];
-    }
-
-    private boolean isInstallRequestFromUnknownSource(Intent intent) {
-        if (mCallingPackage != null && intent.getBooleanExtra(
-                Intent.EXTRA_NOT_UNKNOWN_SOURCE, false)) {
-            if (mSourceInfo != null && mSourceInfo.isPrivilegedApp()) {
-                // Privileged apps can bypass unknown sources check if they want.
-                return false;
-            }
-        }
-        if (mSourceInfo != null && checkPermission(Manifest.permission.INSTALL_PACKAGES,
-                -1 /* pid */, mSourceInfo.uid) == PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
-        return true;
     }
 
     private void initiateInstall() {
@@ -557,7 +543,7 @@ public class PackageInstallerActivity extends Activity {
      * Check if it is allowed to install the package and initiate install if allowed.
      */
     private void checkIfAllowedAndInitiateInstall() {
-        if (mAllowUnknownSources || !isInstallRequestFromUnknownSource(getIntent())) {
+        if (mAllowUnknownSources || getIntent().getBooleanExtra(EXTRA_IS_TRUSTED_SOURCE, false)) {
             if (mLocalLOGV) Log.i(TAG, "install allowed");
             initiateInstall();
         } else {

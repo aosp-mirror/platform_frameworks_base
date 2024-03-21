@@ -36,6 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.any
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -44,8 +45,8 @@ class DialogTransitionAnimatorTest : SysuiTestCase() {
     private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     private val attachedViews = mutableSetOf<View>()
 
-    val interactionJankMonitor = Kosmos().interactionJankMonitor
-    @get:Rule val rule = MockitoJUnit.rule()
+    private val interactionJankMonitor = Kosmos().interactionJankMonitor
+    @get:Rule val rule: MockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {

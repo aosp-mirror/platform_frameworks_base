@@ -23,6 +23,7 @@ import static android.companion.virtual.VirtualDeviceParams.ACTIVITY_POLICY_DEFA
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CLIPBOARD;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
@@ -82,6 +83,8 @@ import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualStylusMotionEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.hardware.input.VirtualTouchscreenConfig;
+import android.media.AudioManager;
+import android.media.audiopolicy.AudioMix;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.LocaleList;
@@ -1060,6 +1063,37 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             throw new UnsupportedOperationException("Virtual camera controller is not available");
         }
         return mVirtualCameraController.getCameraId(cameraConfig);
+    }
+
+    @Override
+    public boolean hasCustomAudioInputSupport() throws RemoteException {
+        if (!Flags.vdmPublicApis()) {
+            return false;
+        }
+
+        if (!android.media.audiopolicy.Flags.audioMixTestApi()) {
+            return false;
+        }
+        if (!android.media.audiopolicy.Flags.recordAudioDeviceAwarePermission()) {
+            return false;
+        }
+
+        if (getDevicePolicy(POLICY_TYPE_AUDIO) == VirtualDeviceParams.DEVICE_POLICY_DEFAULT) {
+            return false;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            AudioManager audioManager = mContext.getSystemService(AudioManager.class);
+            for (AudioMix mix : audioManager.getRegisteredPolicyMixes()) {
+                if (mix.matchesVirtualDeviceId(getDeviceId())
+                        && mix.getMixType() == AudioMix.MIX_TYPE_RECORDERS) {
+                    return true;
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return false;
     }
 
     @Override

@@ -895,7 +895,7 @@ public abstract class PackageManager {
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
-            MATCH_CLONE_PROFILE,
+            MATCH_CLONE_PROFILE_LONG,
             MATCH_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1235,10 +1235,11 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
+     * @deprecated Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 

@@ -25,8 +25,8 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.VISIBILITY_MODE_IGNORE
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -48,14 +48,14 @@ constructor(
     private val vibratorHelper: VibratorHelper,
 ) : BaseShortcutSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (keyguardBottomAreaRefactor()) {
+        if (KeyguardBottomAreaRefactor.isEnabled) {
             addLeftShortcut(constraintLayout)
             addRightShortcut(constraintLayout)
         }
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (keyguardBottomAreaRefactor()) {
+        if (KeyguardBottomAreaRefactor.isEnabled) {
             leftShortcutHandle =
                 KeyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.start_button),

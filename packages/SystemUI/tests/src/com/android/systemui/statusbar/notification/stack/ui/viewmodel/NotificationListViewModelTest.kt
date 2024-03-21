@@ -35,9 +35,13 @@ import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.statusbar.data.repository.fakeRemoteInputRepository
+import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
+import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
+import com.android.systemui.statusbar.notification.stack.data.repository.setNotifications
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.fakeConfigurationController
@@ -70,6 +74,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
     private val fakeRemoteInputRepository = kosmos.fakeRemoteInputRepository
     private val fakeShadeRepository = kosmos.fakeShadeRepository
     private val fakeUserSetupRepository = kosmos.fakeUserSetupRepository
+    private val headsUpRepository = kosmos.headsUpNotificationRepository
     private val zenModeRepository = kosmos.zenModeRepository
 
     val underTest = kosmos.notificationListViewModel
@@ -463,5 +468,121 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
             // THEN footer visibility does not animate
             assertThat(shouldShow?.isAnimating).isFalse()
+        }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    fun testPinnedHeadsUpRows_filtersForPinnedItems() =
+        testScope.runTest {
+            val pinnedHeadsUpRows by collectLastValue(underTest.pinnedHeadsUpRows)
+
+            // WHEN there are no pinned rows
+            val rows =
+                arrayListOf(
+                    fakeHeadsUpRowRepository(key = "0"),
+                    fakeHeadsUpRowRepository(key = "1"),
+                    fakeHeadsUpRowRepository(key = "2"),
+                )
+            headsUpRepository.setNotifications(
+                rows,
+            )
+            runCurrent()
+
+            // THEN the list is empty
+            assertThat(pinnedHeadsUpRows).isEmpty()
+
+            // WHEN a row gets pinned
+            rows[0].isPinned.value = true
+            runCurrent()
+
+            // THEN it's added to the list
+            assertThat(pinnedHeadsUpRows).containsExactly(rows[0])
+
+            // WHEN more rows are pinned
+            rows[1].isPinned.value = true
+            runCurrent()
+
+            // THEN they are all in the list
+            assertThat(pinnedHeadsUpRows).containsExactly(rows[0], rows[1])
+
+            // WHEN a row gets unpinned
+            rows[0].isPinned.value = false
+            runCurrent()
+
+            // THEN it's removed from the list
+            assertThat(pinnedHeadsUpRows).containsExactly(rows[1])
+        }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    fun testHasPinnedHeadsUpRows_true() =
+        testScope.runTest {
+            val hasPinnedHeadsUpRow by collectLastValue(underTest.hasPinnedHeadsUpRow)
+
+            headsUpRepository.setNotifications(
+                fakeHeadsUpRowRepository(key = "0", isPinned = true),
+                fakeHeadsUpRowRepository(key = "1")
+            )
+            runCurrent()
+
+            assertThat(hasPinnedHeadsUpRow).isTrue()
+        }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    fun testHasPinnedHeadsUpRows_false() =
+        testScope.runTest {
+            val hasPinnedHeadsUpRow by collectLastValue(underTest.hasPinnedHeadsUpRow)
+
+            headsUpRepository.setNotifications(
+                fakeHeadsUpRowRepository(key = "0"),
+                fakeHeadsUpRowRepository(key = "1"),
+            )
+            runCurrent()
+
+            assertThat(hasPinnedHeadsUpRow).isFalse()
+        }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    fun testTopHeadsUpRow_emptyList_null() =
+        testScope.runTest {
+            val topHeadsUpRow by collectLastValue(underTest.topHeadsUpRow)
+
+            headsUpRepository.setNotifications(emptyList())
+            runCurrent()
+
+            assertThat(topHeadsUpRow).isNull()
+        }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    fun testHeadsUpAnimationsEnabled_true() =
+        testScope.runTest {
+            val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
+
+            fakeShadeRepository.setQsExpansion(0.0f)
+            fakeKeyguardRepository.setKeyguardShowing(false)
+            runCurrent()
+
+            assertThat(animationsEnabled).isTrue()
+        }
+
+    @Test
+    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
+    fun testHeadsUpAnimationsEnabled_keyguardShowing_false() =
+        testScope.runTest {
+            val animationsEnabled by collectLastValue(underTest.headsUpAnimationsEnabled)
+
+            fakeShadeRepository.setQsExpansion(0.0f)
+            fakeKeyguardRepository.setKeyguardShowing(true)
+            runCurrent()
+
+            assertThat(animationsEnabled).isFalse()
+        }
+
+    private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean = false) =
+        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
+            this.isPinned.value = isPinned
         }
 }

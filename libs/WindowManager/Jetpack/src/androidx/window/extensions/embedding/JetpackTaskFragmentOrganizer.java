@@ -168,11 +168,14 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
      * @param fragmentToken token of an existing TaskFragment.
      */
     void expandTaskFragment(@NonNull WindowContainerTransaction wct,
-            @NonNull IBinder fragmentToken) {
+            @NonNull TaskFragmentContainer container) {
+        final IBinder fragmentToken = container.getTaskFragmentToken();
         resizeTaskFragment(wct, fragmentToken, new Rect());
         clearAdjacentTaskFragments(wct, fragmentToken);
         updateWindowingMode(wct, fragmentToken, WINDOWING_MODE_UNDEFINED);
         updateAnimationParams(wct, fragmentToken, TaskFragmentAnimationParams.DEFAULT);
+
+        container.getTaskContainer().updateDivider(wct);
     }
 
     /**

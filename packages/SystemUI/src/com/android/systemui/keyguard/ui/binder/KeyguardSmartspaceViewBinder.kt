@@ -21,7 +21,7 @@ import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
@@ -41,9 +41,9 @@ object KeyguardSmartspaceViewBinder {
         blueprintInteractor: KeyguardBlueprintInteractor,
     ) {
         keyguardRootView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     clockViewModel.hasCustomWeatherDataDisplay.collect { hasCustomWeatherDataDisplay
                         ->
                         updateDateWeatherToBurnInLayer(
@@ -62,7 +62,7 @@ object KeyguardSmartspaceViewBinder {
                 }
 
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     smartspaceViewModel.bcSmartspaceVisibility.collect {
                         updateBCSmartspaceInBurnInLayer(keyguardRootView, clockViewModel)
                         blueprintInteractor.refreshBlueprint(

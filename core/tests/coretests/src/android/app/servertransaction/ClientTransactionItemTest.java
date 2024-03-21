@@ -88,6 +88,7 @@ public class ClientTransactionItemTest {
     private InsetsState mInsetsState;
     private ClientWindowFrames mFrames;
     private MergedConfiguration mMergedConfiguration;
+    private ActivityWindowInfo mActivityWindowInfo;
 
     @Before
     public void setup() {
@@ -99,6 +100,7 @@ public class ClientTransactionItemTest {
         mInsetsState = new InsetsState();
         mFrames = new ClientWindowFrames();
         mMergedConfiguration = new MergedConfiguration(mGlobalConfig, mConfiguration);
+        mActivityWindowInfo = new ActivityWindowInfo();
 
         doReturn(mActivity).when(mHandler).getActivity(mActivityToken);
         doReturn(mActivitiesToBeDestroyed).when(mHandler).getActivitiesToBeDestroyed();
@@ -107,7 +109,7 @@ public class ClientTransactionItemTest {
     @Test
     public void testActivityConfigurationChangeItem_getContextToUpdate() {
         final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem
-                .obtain(mActivityToken, mConfiguration, new ActivityWindowInfo());
+                .obtain(mActivityToken, mConfiguration, mActivityWindowInfo);
         final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(mActivity, context);
@@ -118,7 +120,7 @@ public class ClientTransactionItemTest {
         final ActivityRelaunchItem item = ActivityRelaunchItem
                 .obtain(mActivityToken, null /* pendingResults */, null  /* pendingNewIntents */,
                         0 /* configChange */, mMergedConfiguration, false /* preserveWindow */,
-                        new ActivityWindowInfo());
+                        mActivityWindowInfo);
         final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(mActivity, context);
@@ -177,7 +179,7 @@ public class ClientTransactionItemTest {
     @Test
     public void testMoveToDisplayItem_getContextToUpdate() {
         final MoveToDisplayItem item = MoveToDisplayItem
-                .obtain(mActivityToken, DEFAULT_DISPLAY, mConfiguration, new ActivityWindowInfo());
+                .obtain(mActivityToken, DEFAULT_DISPLAY, mConfiguration, mActivityWindowInfo);
         final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(mActivity, context);
@@ -218,13 +220,13 @@ public class ClientTransactionItemTest {
         final WindowStateResizeItem item = WindowStateResizeItem.obtain(mWindow, mFrames,
                 true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */);
+                true /* dragResizing */, mActivityToken, mActivityWindowInfo);
         item.execute(mHandler, mPendingActions);
 
         verify(mWindow).resized(mFrames,
                 true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */);
+                true /* dragResizing */, mActivityWindowInfo);
     }
 
     @Test
@@ -232,7 +234,7 @@ public class ClientTransactionItemTest {
         final WindowStateResizeItem item = WindowStateResizeItem.obtain(mWindow, mFrames,
                 true /* reportDraw */, mMergedConfiguration, mInsetsState, true /* forceLayout */,
                 true /* alwaysConsumeSystemBars */, 123 /* displayId */, 321 /* syncSeqId */,
-                true /* dragResizing */);
+                true /* dragResizing */, mActivityToken, mActivityWindowInfo);
         final Context context = item.getContextToUpdate(mHandler);
 
         assertEquals(ActivityThread.currentApplication(), context);

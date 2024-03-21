@@ -863,7 +863,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         boolean isAppearing = row.isDrawingAppearAnimation() && !row.isInShelf();
         iconState.hidden = isAppearing
                 || (view instanceof ExpandableNotificationRow
-                && ((ExpandableNotificationRow) view).isLowPriority()
+                && ((ExpandableNotificationRow) view).isMinimized()
                 && mShelfIcons.areIconsOverflowing())
                 || (transitionAmount == 0.0f && !iconState.isAnimating(icon))
                 || row.isAboveShelf()

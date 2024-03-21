@@ -638,7 +638,7 @@ public class WindowlessWindowManager implements IWindowSession {
                 mTmpConfig.setConfiguration(mConfiguration, mConfiguration);
                 s.mClient.resized(mTmpFrames, false /* reportDraw */, mTmpConfig, state,
                         false /* forceLayout */, false /* alwaysConsumeSystemBars */, s.mDisplayId,
-                        Integer.MAX_VALUE, false /* dragResizing */);
+                        Integer.MAX_VALUE, false /* dragResizing */, null /* activityWindowInfo */);
             } catch (RemoteException e) {
                 // Too bad
             }
