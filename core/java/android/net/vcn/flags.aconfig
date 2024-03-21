@@ -21,3 +21,17 @@ flag{
     description: "Feature flag for enabling network metric monitor"
     bug: "282996138"
 }
+
+flag{
+    name: "validate_network_on_ipsec_loss"
+    namespace: "vcn"
+    description: "Trigger network validation when IPsec packet loss exceeds the threshold"
+    bug: "329139898"
+}
+
+flag{
+    name: "evaluate_ipsec_loss_on_lp_nc_change"
+    namespace: "vcn"
+    description: "Re-evaluate IPsec packet loss on LinkProperties or NetworkCapabilities change"
+    bug: "323238888"
+}
