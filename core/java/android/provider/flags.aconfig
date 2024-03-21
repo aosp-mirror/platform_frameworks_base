@@ -1,6 +1,13 @@
 package: "android.provider"
 
 flag {
+    name: "a11y_standalone_fab_enabled"
+    namespace: "accessibility"
+    description: "Separating a11y software shortcut and floating a11y button"
+    bug: "297544054"
+}
+
+flag {
     name: "system_settings_default"
     is_exported: true
     namespace: "package_manager_service"
