@@ -47,8 +47,8 @@ interface INfcAdapter
     INfcAdapterExtras getNfcAdapterExtrasInterface(in String pkg);
     INfcDta getNfcDtaInterface(in String pkg);
     int getState();
-    boolean disable(boolean saveState);
-    boolean enable();
+    boolean disable(boolean saveState, in String pkg);
+    boolean enable(in String pkg);
     void pausePolling(int timeoutInMs);
     void resumePolling();
 
