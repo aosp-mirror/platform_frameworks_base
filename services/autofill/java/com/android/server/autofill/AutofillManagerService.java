@@ -79,6 +79,7 @@ import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManager;
 import android.view.autofill.IAutoFillManagerClient;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AbstractRemoteService;
@@ -159,6 +160,7 @@ public final class AutofillManagerService
     final FrameworkResourcesServiceNameResolver mFieldClassificationResolver;
 
     private final AutoFillUI mUi;
+    final ComponentName mCredentialAutofillService;
 
     private final LocalLog mRequestsHistory = new LocalLog(20);
     private final LocalLog mUiLatencyHistory = new LocalLog(20);
@@ -288,6 +290,16 @@ public final class AutofillManagerService
                         mAugmentedAutofillResolver.isTemporary(userId));
             }
         }
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null
+                && !credentialManagerAutofillCompName.isEmpty()) {
+            mCredentialAutofillService = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        } else {
+            mCredentialAutofillService = null;
+            Slog.w(TAG, "Invalid CredentialAutofillService");
+        }
     }
 
     @Override // from AbstractMasterSystemService
@@ -416,7 +428,6 @@ public final class AutofillManagerService
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-
         return managerService;
     }
 

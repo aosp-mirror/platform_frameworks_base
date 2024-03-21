@@ -242,10 +242,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private static final int DEFAULT__FILL_REQUEST_ID_SNAPSHOT = -2;
     private static final int DEFAULT__FIELD_CLASSIFICATION_REQUEST_ID_SNAPSHOT = -2;
 
-    private static final ComponentName CREDMAN_SERVICE_COMPONENT_NAME =
-            new ComponentName("com.android.credentialmanager",
-                    "com.android.credentialmanager.autofill.CredentialAutofillService");
-
     static final String SESSION_ID_KEY = "autofill_session_id";
     static final String REQUEST_ID_KEY = "autofill_request_id";
 
@@ -521,6 +517,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final PccAssistDataReceiverImpl mPccAssistReceiver = new PccAssistDataReceiverImpl();
 
     private final ClassificationState mClassificationState = new ClassificationState();
+
+    @Nullable
+    private final ComponentName mCredentialAutofillService;
 
     // TODO(b/216576510): Share one BroadcastReceiver between all Sessions instead of creating a
     // new one per Session.
@@ -1471,23 +1470,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mUi = ui;
         mHandler = handler;
 
+        mCredentialAutofillService = getCredentialAutofillService(context);
+
         ComponentName primaryServiceComponentName, secondaryServiceComponentName;
         if (isPrimaryCredential) {
-            primaryServiceComponentName = CREDMAN_SERVICE_COMPONENT_NAME;
+            primaryServiceComponentName = mCredentialAutofillService;
             secondaryServiceComponentName = serviceComponentName;
         } else {
             primaryServiceComponentName = serviceComponentName;
-            secondaryServiceComponentName = CREDMAN_SERVICE_COMPONENT_NAME;
+            secondaryServiceComponentName = mCredentialAutofillService;
         }
         Slog.v(TAG, "Primary service component name: " + primaryServiceComponentName
                 + ", secondary service component name: " + secondaryServiceComponentName);
 
         mRemoteFillService = primaryServiceComponentName == null ? null
                 : new RemoteFillService(context, primaryServiceComponentName, userId, this,
-                        bindInstantServiceAllowed);
+                        bindInstantServiceAllowed, mCredentialAutofillService);
         mSecondaryProviderHandler = secondaryServiceComponentName == null ? null
                 : new SecondaryProviderHandler(context, userId, bindInstantServiceAllowed,
-                this::onSecondaryFillResponse, secondaryServiceComponentName);
+                this::onSecondaryFillResponse, secondaryServiceComponentName,
+                        mCredentialAutofillService);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;
@@ -1544,6 +1546,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FLAGS, flags));
         mLogViewEntered = false;
+    }
+
+    private ComponentName getCredentialAutofillService(Context context) {
+        ComponentName componentName = null;
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null
+                && !credentialManagerAutofillCompName.isEmpty()) {
+            componentName = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        }
+        if (componentName == null) {
+            Slog.w(TAG, "Invalid CredentialAutofillService");
+        }
+        return componentName;
     }
 
     /**

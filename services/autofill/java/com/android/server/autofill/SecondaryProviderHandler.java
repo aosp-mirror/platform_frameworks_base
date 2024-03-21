@@ -59,9 +59,10 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
 
     SecondaryProviderHandler(
             @NonNull Context context, int userId, boolean bindInstantServiceAllowed,
-            SecondaryProviderCallback callback, ComponentName componentName) {
+            SecondaryProviderCallback callback, ComponentName componentName,
+            @Nullable ComponentName credentialAutofillService) {
         mRemoteFillService = new RemoteFillService(context, componentName, userId, this,
-                bindInstantServiceAllowed);
+                bindInstantServiceAllowed, credentialAutofillService);
         mCallback = callback;
         Slog.v(TAG, "Creating a secondary provider handler with component name, " + componentName);
     }

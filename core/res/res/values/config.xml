@@ -4795,6 +4795,18 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
+    
+    <!-- The component name, flattened to a string, for the system's credential manager
+      autofill service. This service allows interceding autofill requests and routing
+      them to credential manager.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, autofill will still
+     work with the user configured autofill service
+
+     See android.credentials.CredentialManager
+    -->
+    <string name="config_defaultCredentialManagerAutofillService" translatable="false"></string>
 
     <!-- The component name(s), flattened to a string, for the system's credential manager
       provider services. These services allow retrieving and storing credentials.

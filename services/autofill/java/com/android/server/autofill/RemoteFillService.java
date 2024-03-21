@@ -62,10 +62,6 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     private static final long TIMEOUT_IDLE_BIND_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
 
-    private static final ComponentName CREDMAN_SERVICE_COMPONENT_NAME =
-            new ComponentName("com.android.credentialmanager",
-                    "com.android.credentialmanager.autofill.CredentialAutofillService");
-
     private final FillServiceCallbacks mCallbacks;
     private final Object mLock = new Object();
     private CompletableFuture<FillResponse> mPendingFillRequest;
@@ -102,14 +98,15 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     }
 
     RemoteFillService(Context context, ComponentName componentName, int userId,
-            FillServiceCallbacks callbacks, boolean bindInstantServiceAllowed) {
+            FillServiceCallbacks callbacks, boolean bindInstantServiceAllowed,
+            @Nullable ComponentName credentialAutofillService) {
         super(context, new Intent(AutofillService.SERVICE_INTERFACE).setComponent(componentName),
                 Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
                         | (bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0),
                 userId, IAutoFillService.Stub::asInterface);
         mCallbacks = callbacks;
         mComponentName = componentName;
-        mIsCredentialAutofillService = mComponentName.equals(CREDMAN_SERVICE_COMPONENT_NAME);
+        mIsCredentialAutofillService = mComponentName.equals(credentialAutofillService);
     }
 
     @Override // from ServiceConnector.Impl
