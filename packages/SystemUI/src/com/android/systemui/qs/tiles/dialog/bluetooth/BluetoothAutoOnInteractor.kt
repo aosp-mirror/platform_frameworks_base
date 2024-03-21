@@ -19,8 +19,6 @@ package com.android.systemui.qs.tiles.dialog.bluetooth
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 
 /** Interactor class responsible for interacting with the Bluetooth Auto-On feature. */
 @SysUISingleton
@@ -30,14 +28,10 @@ constructor(
     private val bluetoothAutoOnRepository: BluetoothAutoOnRepository,
 ) {
 
-    val isEnabled = bluetoothAutoOnRepository.isAutoOn.map { it == ENABLED }.distinctUntilChanged()
+    val isEnabled = bluetoothAutoOnRepository.isAutoOn
 
-    /**
-     * Checks if the auto on value is present in the repository.
-     *
-     * @return `true` if a value is present (i.e, the feature is enabled by the Bluetooth server).
-     */
-    suspend fun isValuePresent(): Boolean = bluetoothAutoOnRepository.isValuePresent()
+    /** Checks if the auto on feature is supported. */
+    suspend fun isAutoOnSupported(): Boolean = bluetoothAutoOnRepository.isAutoOnSupported()
 
     /**
      * Sets enabled or disabled based on the provided value.
@@ -45,17 +39,14 @@ constructor(
      * @param value `true` to enable the feature, `false` to disable it.
      */
     suspend fun setEnabled(value: Boolean) {
-        if (!isValuePresent()) {
+        if (!isAutoOnSupported()) {
             Log.e(TAG, "Trying to set toggle value while feature not available.")
         } else {
-            val newValue = if (value) ENABLED else DISABLED
-            bluetoothAutoOnRepository.setAutoOn(newValue)
+            bluetoothAutoOnRepository.setAutoOn(value)
         }
     }
 
     companion object {
         private const val TAG = "BluetoothAutoOnInteractor"
-        const val DISABLED = 0
-        const val ENABLED = 1
     }
 }
