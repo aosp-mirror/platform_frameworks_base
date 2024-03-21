@@ -16,7 +16,14 @@
 
 package android.view;
 
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_DEFAULT_NORMAL_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -124,6 +131,7 @@ public class ViewFrameRateTest {
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void noVelocityUsesCategorySmall() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -141,12 +149,14 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a normal category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_NORMAL,
-                    mViewRoot.getPreferredFrameRateCategory());
+            int expected = toolkitFrameRateBySizeReadOnly()
+                    ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void noVelocityUsesCategoryNarrowWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -164,12 +174,14 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a normal category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_NORMAL,
-                    mViewRoot.getPreferredFrameRateCategory());
+            int expected = toolkitFrameRateBySizeReadOnly()
+                    ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void noVelocityUsesCategoryNarrowHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -187,12 +199,14 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a normal category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_NORMAL,
-                    mViewRoot.getPreferredFrameRateCategory());
+            int expected = toolkitFrameRateBySizeReadOnly()
+                    ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void noVelocityUsesCategoryLargeWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -210,12 +224,14 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a high category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_HIGH,
-                    mViewRoot.getPreferredFrameRateCategory());
+            int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
         });
     }
 
     @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
     public void noVelocityUsesCategoryLargeHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -233,7 +249,20 @@ public class ViewFrameRateTest {
         // Now that it is small, any invalidation should have a high category
         mActivityRule.runOnUiThread(() -> {
             mMovingView.invalidate();
-            assertEquals(Surface.FRAME_RATE_CATEGORY_HIGH,
+            int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
+        });
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_DEFAULT_NORMAL_READ_ONLY})
+    public void defaultNormal() throws Throwable {
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.invalidate();
+            assertEquals(FRAME_RATE_CATEGORY_NORMAL,
                     mViewRoot.getPreferredFrameRateCategory());
         });
     }
