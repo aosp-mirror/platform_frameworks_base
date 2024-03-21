@@ -35,7 +35,6 @@ import android.apex.ApexInfo;
 import android.app.AppOpsManager;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderType;
-import android.content.pm.Flags;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -931,7 +930,7 @@ final class InstallRequest {
         // Only report external profile warnings when installing from adb. The goal is to warn app
         // developers if they have provided bad external profiles, so it's not beneficial to report
         // those warnings in the normal app install workflow.
-        if (isInstallFromAdb() && Flags.useArtServiceV2()) {
+        if (isInstallFromAdb()) {
             var externalProfileErrors = new LinkedHashSet<String>();
             for (PackageDexoptResult packageResult : dexoptResult.getPackageDexoptResults()) {
                 for (DexContainerFileDexoptResult fileResult :
