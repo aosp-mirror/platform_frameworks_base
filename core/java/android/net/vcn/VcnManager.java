@@ -20,10 +20,12 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Binder;
@@ -69,8 +71,13 @@ import java.util.concurrent.Executor;
  * tasks. In Safe Mode, the system will allow underlying cellular networks to be used as default.
  * Additionally, during Safe Mode, the VCN will continue to retry the connections, and will
  * automatically exit Safe Mode if all active tunnels connect successfully.
+ *
+ * <p>Apps targeting Android 15 or newer should check the existence of {@link
+ * PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} before querying the service. If the feature is
+ * absent, {@link Context#getSystemService} may return null.
  */
 @SystemService(Context.VCN_MANAGEMENT_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
 public class VcnManager {
     @NonNull private static final String TAG = VcnManager.class.getSimpleName();
 
