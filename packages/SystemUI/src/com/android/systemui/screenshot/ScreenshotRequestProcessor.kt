@@ -17,13 +17,14 @@
 package com.android.systemui.screenshot
 
 /** Processes a screenshot request sent from [ScreenshotHelper]. */
-interface ScreenshotRequestProcessor {
+fun interface ScreenshotRequestProcessor {
     /**
      * Inspects the incoming ScreenshotData, potentially modifying it based upon policy.
      *
-     * @param screenshot the screenshot to process
+     * @param original the screenshot to process
+     * @return a potentially modified screenshot data
      */
-    suspend fun process(screenshot: ScreenshotData): ScreenshotData
+    suspend fun process(original: ScreenshotData): ScreenshotData
 }
 
 /** Exception thrown by [RequestProcessor] if something goes wrong. */

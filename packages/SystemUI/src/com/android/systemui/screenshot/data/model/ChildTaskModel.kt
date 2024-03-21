@@ -16,14 +16,20 @@
 
 package com.android.systemui.screenshot.data.model
 
-import android.app.ActivityTaskManager.RootTaskInfo
+import android.content.ComponentName
+import android.graphics.Rect
 
-/** Information about the tasks on a display. */
-data class DisplayContentModel(
-    /** The id of the display. */
-    val displayId: Int,
-    /** Information about the current System UI state which can affect capture. */
-    val systemUiState: SystemUiState,
-    /** A list of root tasks on the display, ordered from top to bottom along the z-axis */
-    val rootTasks: List<RootTaskInfo>,
-)
+/** A child task within a RootTaskInfo */
+data class ChildTaskModel(
+    /** The task identifier */
+    val id: Int,
+    /** The task name */
+    val name: String,
+    /** The location and size of the task */
+    val bounds: Rect,
+    /** The user which created the task. */
+    val userId: Int,
+) {
+    val componentName: ComponentName?
+        get() = ComponentName.unflattenFromString(name)
+}
