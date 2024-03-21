@@ -172,6 +172,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             // Add new entry and begin managing it
             mHeadsUpEntryMap.put(entry.getKey(), headsUpEntry);
             onEntryAdded(headsUpEntry);
+            // TODO(b/328390331) move accessibility events to the view layer
             entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
             entry.setIsHeadsUpEntry(true);
 
@@ -232,7 +233,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             // with the groupmanager
             return;
         }
-
+        // TODO(b/328390331) move accessibility events to the view layer
         headsUpEntry.mEntry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
 
         if (shouldHeadsUpAgain) {
@@ -332,15 +333,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         if (!isPinned) {
             headsUpEntry.mWasUnpinned = true;
         }
-        if (headsUpEntry.isPinned() != isPinned) {
-            headsUpEntry.setPinned(isPinned);
+        if (headsUpEntry.isRowPinned() != isPinned) {
+            headsUpEntry.setRowPinned(isPinned);
             updatePinnedMode();
             if (isPinned && entry.getSbn() != null) {
                mUiEventLogger.logWithInstanceId(
                         NotificationPeekEvent.NOTIFICATION_PEEK, entry.getSbn().getUid(),
                         entry.getSbn().getPackageName(), entry.getSbn().getInstanceId());
             }
-            // TODO(b/325936094) convert these listeners to collecting a flow
+        // TODO(b/325936094) use the isPinned Flow instead
             for (OnHeadsUpChangedListener listener : mListeners) {
                 if (isPinned) {
                     listener.onHeadsUpPinned(entry);
@@ -359,7 +360,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      * Manager-specific logic that should occur when an entry is added.
      * @param headsUpEntry entry added
      */
-    void onEntryAdded(HeadsUpEntry headsUpEntry) {
+    protected void onEntryAdded(HeadsUpEntry headsUpEntry) {
         NotificationEntry entry = headsUpEntry.mEntry;
         entry.setHeadsUp(true);
 
@@ -391,6 +392,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             entry.demoteStickyHun();
             mHeadsUpEntryMap.remove(key);
             onEntryRemoved(headsUpEntry);
+            // TODO(b/328390331) move accessibility events to the view layer
             entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
             if (NotificationsHeadsUpRefactor.isEnabled()) {
                 headsUpEntry.cancelAutoRemovalCallbacks("removeEntry");
@@ -416,7 +418,16 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         }
     }
 
-    private void updatePinnedMode() {
+    /**
+     * Manager-specific logic, that should occur, when the entry is updated, and its posted time has
+     * changed.
+     *
+     * @param headsUpEntry entry updated
+     */
+    protected void onEntryUpdated(HeadsUpEntry headsUpEntry) {
+    }
+
+    protected void updatePinnedMode() {
         boolean hasPinnedNotification = hasPinnedNotificationInternal();
         if (hasPinnedNotification == mHasPinnedNotification) {
             return;
@@ -471,7 +482,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     @Nullable
     protected HeadsUpEntry getHeadsUpEntry(@NonNull String key) {
         // TODO(b/315362456) See if callers need to check AvalancheController
-        return (HeadsUpEntry) mHeadsUpEntryMap.get(key);
+        return mHeadsUpEntryMap.get(key);
     }
 
     /**
@@ -491,7 +502,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         HeadsUpEntry topEntry = null;
         for (HeadsUpEntry entry: mHeadsUpEntryMap.values()) {
             if (topEntry == null || entry.compareTo(topEntry) < 0) {
-                topEntry = (HeadsUpEntry) entry;
+                topEntry = entry;
             }
         }
         return topEntry;
@@ -720,11 +731,11 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
             updateEntry(true /* updatePostTime */, "setEntry");
         }
 
-        public boolean isPinned() {
+        protected boolean isRowPinned() {
             return mEntry != null && mEntry.isRowPinned();
         }
 
-        public void setPinned(boolean pinned) {
+        protected void setRowPinned(boolean pinned) {
             if (mEntry != null) mEntry.setRowPinned(pinned);
         }
 
@@ -764,6 +775,9 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                 return timeLeft;
             };
             scheduleAutoRemovalCallback(finishTimeCalculator, "updateEntry (not sticky)");
+
+            // Notify the manager, that the posted time has changed.
+            onEntryUpdated(this);
         }
 
         /**

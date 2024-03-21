@@ -51,6 +51,8 @@ import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
+import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -175,10 +177,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
             transitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
             assertThat(isVisible).isFalse()
 
-            kosmos.headsUpNotificationRepository.hasPinnedHeadsUp.value = true
+            kosmos.headsUpNotificationRepository.activeHeadsUpRows.value =
+                buildNotificationRows(isPinned = true)
             assertThat(isVisible).isTrue()
 
-            kosmos.headsUpNotificationRepository.hasPinnedHeadsUp.value = false
+            kosmos.headsUpNotificationRepository.activeHeadsUpRows.value =
+                buildNotificationRows(isPinned = false)
             assertThat(isVisible).isFalse()
         }
 
@@ -1070,4 +1074,17 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
         return transitionStateFlow
     }
+
+    private fun buildNotificationRows(isPinned: Boolean = false): Set<HeadsUpRowRepository> =
+        setOf(
+            fakeHeadsUpRowRepository(key = "0", isPinned = isPinned),
+            fakeHeadsUpRowRepository(key = "1", isPinned = isPinned),
+            fakeHeadsUpRowRepository(key = "2", isPinned = isPinned),
+            fakeHeadsUpRowRepository(key = "3", isPinned = isPinned),
+        )
+
+    private fun fakeHeadsUpRowRepository(key: String, isPinned: Boolean) =
+        FakeHeadsUpRowRepository(key = key, elementKey = Any()).apply {
+            this.isPinned.value = isPinned
+        }
 }
