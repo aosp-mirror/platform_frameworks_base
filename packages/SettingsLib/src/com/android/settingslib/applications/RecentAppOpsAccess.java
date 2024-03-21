@@ -23,6 +23,7 @@ import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserProperties;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -132,8 +133,9 @@ public class RecentAppOpsAccess {
             int uid = ops.getUid();
             UserHandle user = UserHandle.getUserHandleForUid(uid);
 
-            // Don't show apps belonging to background users except managed users.
-            if (!profiles.contains(user)) {
+            // Don't show apps belonging to background users except for profiles that shouldn't
+            // be shown in quiet mode.
+            if (!profiles.contains(user) || isHideInQuietEnabledForProfile(um, user)) {
                 continue;
             }
 
@@ -190,6 +192,16 @@ public class RecentAppOpsAccess {
             }
         }));
         return accesses;
+    }
+
+    private boolean isHideInQuietEnabledForProfile(UserManager userManager, UserHandle userHandle) {
+        if (android.multiuser.Flags.enablePrivateSpaceFeatures()
+                && android.multiuser.Flags.handleInterleavedSettingsForPrivateSpace()) {
+            return userManager.isQuietModeEnabled(userHandle)
+                    && userManager.getUserProperties(userHandle).getShowInQuietMode()
+                            == UserProperties.SHOW_IN_QUIET_MODE_HIDDEN;
+        }
+        return false;
     }
 
     /**
