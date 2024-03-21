@@ -796,7 +796,7 @@ public class Activity extends ContextThemeWrapper
     private static final String SAVED_DIALOGS_TAG = "android:savedDialogs";
     private static final String SAVED_DIALOG_KEY_PREFIX = "android:dialog_";
     private static final String SAVED_DIALOG_ARGS_KEY_PREFIX = "android:dialog_args_";
-    private static final String HAS_CURENT_PERMISSIONS_REQUEST_KEY =
+    private static final String HAS_CURRENT_PERMISSIONS_REQUEST_KEY =
             "android:hasCurrentPermissionsRequest";
 
     private static final String REQUEST_PERMISSIONS_WHO_PREFIX = "@android:requestPermissions:";
@@ -9318,14 +9318,14 @@ public class Activity extends ContextThemeWrapper
 
     private void storeHasCurrentPermissionRequest(Bundle bundle) {
         if (bundle != null && mHasCurrentPermissionsRequest) {
-            bundle.putBoolean(HAS_CURENT_PERMISSIONS_REQUEST_KEY, true);
+            bundle.putBoolean(HAS_CURRENT_PERMISSIONS_REQUEST_KEY, true);
         }
     }
 
     private void restoreHasCurrentPermissionRequest(Bundle bundle) {
         if (bundle != null) {
             mHasCurrentPermissionsRequest = bundle.getBoolean(
-                    HAS_CURENT_PERMISSIONS_REQUEST_KEY, false);
+                    HAS_CURRENT_PERMISSIONS_REQUEST_KEY, false);
         }
     }
 
