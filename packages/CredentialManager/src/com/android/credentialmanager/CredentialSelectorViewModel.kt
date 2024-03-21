@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.app.Activity
+import android.hardware.biometrics.BiometricPrompt
 import android.os.IBinder
 import android.text.TextUtils
 import android.util.Log
@@ -28,6 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.common.BiometricResult
+import com.android.credentialmanager.common.BiometricState
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
@@ -54,6 +57,7 @@ data class UiState(
     val isAutoSelectFlow: Boolean = false,
     val cancelRequestState: CancelUiRequestState?,
     val isInitialRender: Boolean,
+    val biometricState: BiometricState = BiometricState()
 )
 
 data class CancelUiRequestState(
@@ -113,12 +117,21 @@ class CredentialSelectorViewModel(
         launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
     ) {
         val entry = uiState.selectedEntry
+        val biometricState = uiState.biometricState
         val pendingIntent = entry?.pendingIntent
         if (pendingIntent != null) {
             Log.d(Constants.LOG_TAG, "Launching provider activity")
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val entryIntent = entry.fillInIntent
             entryIntent?.putExtra(Constants.IS_AUTO_SELECTED_KEY, uiState.isAutoSelectFlow)
+            if (biometricState.biometricResult != null) {
+                if (uiState.isAutoSelectFlow) {
+                    Log.w(Constants.LOG_TAG, "Unexpected biometric result exists when " +
+                            "autoSelect is preferred.")
+                }
+                entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_TYPE,
+                    biometricState.biometricResult.biometricAuthenticationResult.authenticationType)
+            }
             val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent)
                 .setFillInIntent(entryIntent).build()
             try {
@@ -200,13 +213,20 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     /*****                      Get Flow Callbacks                        *****/
     /**************************************************************************/
-    fun getFlowOnEntrySelected(entry: EntryInfo) {
+    fun getFlowOnEntrySelected(
+        entry: EntryInfo,
+        authResult: BiometricPrompt.AuthenticationResult? = null
+    ) {
         Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
             ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
         uiState = if (entry.pendingIntent != null) {
             uiState.copy(
                 selectedEntry = entry,
                 providerActivityState = ProviderActivityState.READY_TO_LAUNCH,
+                biometricState = if (authResult == null) uiState.biometricState else uiState
+                    .biometricState.copy(biometricResult = BiometricResult(
+                            biometricAuthenticationResult = authResult)
+                )
             )
         } else {
             credManRepo.onOptionSelected(entry.providerId, entry.entryKey, entry.entrySubkey)
@@ -346,5 +366,10 @@ class CredentialSelectorViewModel(
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {
         this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.packageName)
+    }
+
+    companion object {
+        // TODO(b/326243754) : Replace/remove once all failure flows added in
+        const val TEMPORARY_FAILURE_CODE = Integer.MIN_VALUE
     }
 }

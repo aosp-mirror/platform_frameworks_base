@@ -19,6 +19,7 @@ package com.android.credentialmanager.model.get
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import com.android.credentialmanager.model.BiometricRequestInfo
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.model.EntryInfo
 import java.time.Instant
@@ -49,6 +50,7 @@ class CredentialEntryInfo(
                               // "For <value-of-entryGroupId>" on the more-option screen.
     val isDefaultIconPreferredAsSingleProvider: Boolean,
     val affiliatedDomain: String?,
+    val biometricRequest: BiometricRequestInfo? = null,
 ) : EntryInfo(
     providerId,
     entryKey,
