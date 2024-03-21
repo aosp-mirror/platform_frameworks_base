@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar.policy
 
+import android.os.UserManager
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
@@ -47,6 +48,7 @@ import com.android.systemui.qs.tiles.impl.work.domain.interactor.WorkModeTileUse
 import com.android.systemui.qs.tiles.impl.work.domain.model.WorkModeTileModel
 import com.android.systemui.qs.tiles.impl.work.ui.WorkModeTileMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
+import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.res.R
@@ -120,6 +122,13 @@ interface PolicyModule {
                         labelRes = R.string.quick_settings_location_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                policy =
+                    QSTilePolicy.Restricted(
+                        listOf(
+                            UserManager.DISALLOW_SHARE_LOCATION,
+                            UserManager.DISALLOW_CONFIG_LOCATION
+                        )
+                    )
             )
 
         /** Inject LocationTile into tileViewModelMap in QSModule */
