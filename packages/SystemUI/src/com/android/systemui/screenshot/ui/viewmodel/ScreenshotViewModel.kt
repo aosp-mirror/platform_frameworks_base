@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.StateFlow
 class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager) {
     private val _preview = MutableStateFlow<Bitmap?>(null)
     val preview: StateFlow<Bitmap?> = _preview
+    private val _previewAction = MutableStateFlow<Runnable?>(null)
+    val previewAction: StateFlow<Runnable?> = _previewAction
     private val _actions = MutableStateFlow(emptyList<ActionButtonViewModel>())
     val actions: StateFlow<List<ActionButtonViewModel>> = _actions
     val showDismissButton: Boolean
@@ -33,7 +35,19 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         _preview.value = bitmap
     }
 
-    fun setActions(actions: List<ActionButtonViewModel>) {
-        _actions.value = actions
+    fun setPreviewAction(runnable: Runnable) {
+        _previewAction.value = runnable
+    }
+
+    fun addActions(actions: List<ActionButtonViewModel>) {
+        val actionList = _actions.value.toMutableList()
+        actionList.addAll(actions)
+        _actions.value = actionList
+    }
+
+    fun reset() {
+        _preview.value = null
+        _previewAction.value = null
+        _actions.value = listOf()
     }
 }

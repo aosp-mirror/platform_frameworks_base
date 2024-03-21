@@ -26,34 +26,45 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 /**
- * Provides static actions for screenshots. This class can be overridden by a vendor-specific SysUI
+ * Provides actions for screenshots. This class can be overridden by a vendor-specific SysUI
  * implementation.
  */
 interface ScreenshotActionsProvider {
     data class ScreenshotAction(
-        val icon: Drawable?,
-        val text: String?,
-        val overrideTransition: Boolean,
+        val icon: Drawable? = null,
+        val text: String? = null,
+        val description: String,
+        val overrideTransition: Boolean = false,
         val retrieveIntent: (Uri) -> Intent
     )
 
-    fun getPreviewAction(context: Context, uri: Uri, user: UserHandle): Intent
-    fun getActions(context: Context, user: UserHandle): List<ScreenshotAction>
-}
-
-class DefaultScreenshotActionsProvider @Inject constructor() : ScreenshotActionsProvider {
-    override fun getPreviewAction(context: Context, uri: Uri, user: UserHandle): Intent {
-        return ActionIntentCreator.createEdit(uri, context)
+    interface ScreenshotActionsCallback {
+        fun setPreviewAction(overrideTransition: Boolean = false, retrieveIntent: (Uri) -> Intent)
+        fun addAction(action: ScreenshotAction) = addActions(listOf(action))
+        fun addActions(actions: List<ScreenshotAction>)
     }
 
-    override fun getActions(
-        context: Context,
-        user: UserHandle
-    ): List<ScreenshotActionsProvider.ScreenshotAction> {
+    interface Factory {
+        fun create(
+            context: Context,
+            user: UserHandle?,
+            callback: ScreenshotActionsCallback
+        ): ScreenshotActionsProvider
+    }
+}
+
+class DefaultScreenshotActionsProvider(
+    private val context: Context,
+    private val user: UserHandle?,
+    private val callback: ScreenshotActionsProvider.ScreenshotActionsCallback
+) : ScreenshotActionsProvider {
+    init {
+        callback.setPreviewAction(true) { ActionIntentCreator.createEdit(it, context) }
         val editAction =
             ScreenshotActionsProvider.ScreenshotAction(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_edit),
                 context.resources.getString(R.string.screenshot_edit_label),
+                context.resources.getString(R.string.screenshot_edit_description),
                 true
             ) { uri ->
                 ActionIntentCreator.createEdit(uri, context)
@@ -62,10 +73,21 @@ class DefaultScreenshotActionsProvider @Inject constructor() : ScreenshotActions
             ScreenshotActionsProvider.ScreenshotAction(
                 AppCompatResources.getDrawable(context, R.drawable.ic_screenshot_share),
                 context.resources.getString(R.string.screenshot_share_label),
+                context.resources.getString(R.string.screenshot_share_description),
                 false
             ) { uri ->
                 ActionIntentCreator.createShare(uri)
             }
-        return listOf(editAction, shareAction)
+        callback.addActions(listOf(editAction, shareAction))
+    }
+
+    class Factory @Inject constructor() : ScreenshotActionsProvider.Factory {
+        override fun create(
+            context: Context,
+            user: UserHandle?,
+            callback: ScreenshotActionsProvider.ScreenshotActionsCallback
+        ): ScreenshotActionsProvider {
+            return DefaultScreenshotActionsProvider(context, user, callback)
+        }
     }
 }
