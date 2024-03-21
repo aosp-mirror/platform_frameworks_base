@@ -1271,7 +1271,7 @@
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Mobilen uppdateras …"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Surfplattan uppdateras …"</string>
     <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"Enheten uppdateras …"</string>
-    <string name="android_start_title" product="default" msgid="4036708252778757652">"Mobilen startar …"</string>
+    <string name="android_start_title" product="default" msgid="4036708252778757652">"Telefonen startar …"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android startar …"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Surfplattan startar …"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Enheten startar …"</string>

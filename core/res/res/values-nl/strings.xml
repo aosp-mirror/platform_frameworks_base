@@ -255,7 +255,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Uitzetten"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Aan/uit"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Opnieuw opstarten"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Herstarten"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Noodgeval"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Bugrapport"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Sessie beëindigen"</string>
@@ -1922,7 +1922,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Doordeweekse avond"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
-    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Afspraken"</string>
+    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Afspraak"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Slapen"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Beheerd door <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aan"</string>
