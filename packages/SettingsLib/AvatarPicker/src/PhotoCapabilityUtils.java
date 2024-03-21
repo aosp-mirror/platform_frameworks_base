@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.users;
+package com.android.settingslib.avatarpicker;
 
 import android.app.KeyguardManager;
 import android.content.Context;
