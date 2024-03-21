@@ -542,7 +542,8 @@ final class DeletePackageHelper {
         final Computer snapshot = mPm.snapshotComputer();
         for (final int affectedUserId : outInfo.mRemovedUsers) {
             if (hadSuspendAppsPermission.get(affectedUserId)) {
-                mPm.unsuspendForSuspendingPackage(snapshot, packageName, affectedUserId);
+                mPm.unsuspendForSuspendingPackage(snapshot, packageName,
+                        affectedUserId /*suspendingUserId*/, true /*inAllUsers*/);
                 mPm.removeAllDistractingPackageRestrictions(snapshot, affectedUserId);
             }
         }

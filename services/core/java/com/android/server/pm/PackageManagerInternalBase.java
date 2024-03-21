@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
@@ -45,6 +46,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -687,14 +689,17 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Override
     @Deprecated
     public final void unsuspendAdminSuspendedPackages(int affectedUser) {
-        final int suspendingUserId = affectedUser;
-        mService.unsuspendForSuspendingPackage(snapshot(), PLATFORM_PACKAGE_NAME, suspendingUserId);
+        final int suspendingUserId =
+                crossUserSuspensionEnabled() ? UserHandle.USER_SYSTEM : affectedUser;
+        mService.unsuspendForSuspendingPackage(
+                snapshot(), PLATFORM_PACKAGE_NAME, suspendingUserId, /* inAllUsers= */ false);
     }
 
     @Override
     @Deprecated
     public final boolean isAdminSuspendingAnyPackages(int userId) {
-        final int suspendingUserId = userId;
+        final int suspendingUserId =
+                crossUserSuspensionEnabled() ? UserHandle.USER_SYSTEM : userId;
         return snapshot().isSuspendingAnyPackages(PLATFORM_PACKAGE_NAME, suspendingUserId, userId);
     }
 
