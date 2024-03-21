@@ -84,6 +84,8 @@ public class PackageInstallerActivity extends Activity {
     static final String EXTRA_ORIGINAL_SOURCE_INFO = "EXTRA_ORIGINAL_SOURCE_INFO";
     static final String EXTRA_STAGED_SESSION_ID = "EXTRA_STAGED_SESSION_ID";
     static final String EXTRA_APP_SNIPPET = "EXTRA_APP_SNIPPET";
+    static final String EXTRA_ORIGINATING_UID_FROM_SESSION_INFO =
+        "EXTRA_ORIGINATING_UID_FROM_SESSION_INFO";
     static final String EXTRA_IS_TRUSTED_SOURCE = "EXTRA_IS_TRUSTED_SOURCE";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
@@ -97,6 +99,10 @@ public class PackageInstallerActivity extends Activity {
      * The package name corresponding to #mOriginatingUid
      */
     private String mOriginatingPackage;
+    /**
+     * The package name corresponding to the app updater in the update-ownership confirmation dialog
+     */
+    private String mOriginatingPackageFromSessionInfo;
     private int mActivityResultCode = Activity.RESULT_CANCELED;
     private int mPendingUserActionReason = -1;
 
@@ -149,7 +155,8 @@ public class PackageInstallerActivity extends Activity {
             viewToEnable = mDialog.requireViewById(R.id.install_confirm_question_update);
 
             final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
-            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mOriginatingPackage);
+            final CharSequence requestedUpdateOwnerLabel =
+                getApplicationLabel(mOriginatingPackageFromSessionInfo);
             if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
                     && mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
                 String updateOwnerString =
@@ -363,9 +370,15 @@ public class PackageInstallerActivity extends Activity {
         mCallingPackage = intent.getStringExtra(EXTRA_CALLING_PACKAGE);
         mCallingAttributionTag = intent.getStringExtra(EXTRA_CALLING_ATTRIBUTION_TAG);
         mSourceInfo = intent.getParcelableExtra(EXTRA_ORIGINAL_SOURCE_INFO);
-        mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID, Process.INVALID_UID);
+        mOriginatingUid = intent.getIntExtra(Intent.EXTRA_ORIGINATING_UID,
+                Process.INVALID_UID);
         mOriginatingPackage = (mOriginatingUid != Process.INVALID_UID)
                 ? getPackageNameForUid(mOriginatingUid) : null;
+        int originatingUidFromSessionInfo =
+            intent.getIntExtra(EXTRA_ORIGINATING_UID_FROM_SESSION_INFO, Process.INVALID_UID);
+        mOriginatingPackageFromSessionInfo = (originatingUidFromSessionInfo != Process.INVALID_UID)
+            ? getPackageNameForUid(originatingUidFromSessionInfo) : mCallingPackage;
+
 
         final Object packageSource;
         if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(action)) {
