@@ -211,6 +211,30 @@ public class PackageManagerBackupAgentTest {
         assertThat(mNewState.length()).isEqualTo(0);
     }
 
+    @Test
+    public void onRestore_legacyBackupWithMissingSignature_restoresBackup() throws Exception {
+        PackageInfo pkgWithoutSigs = createPackage("pkg.no.sigs", 1);
+        pkgWithoutSigs.signingInfo =
+                new SigningInfo(new SigningDetails(new Signature[0], 1, null, null));
+        when(mPackageManager.getPackageInfoAsUser(
+                        eq(pkgWithoutSigs.packageName), anyInt(), anyInt()))
+                .thenReturn(pkgWithoutSigs);
+        ImmutableList<PackageInfo> packages =
+                ImmutableList.<PackageInfo>builder().addAll(mPackages).add(pkgWithoutSigs).build();
+        mPackageManagerBackupAgent =
+                new PackageManagerBackupAgent(mPackageManager, packages, USER_ID);
+        // A legacy backup is one without an ancestral record version. Ancestral record versions
+        // are always written however, so we'll need to delete it from the backup data before
+        // restoring.
+        runBackupAgentOnBackup();
+        deleteKeyFromBackupData(mBackupData, PackageManagerBackupAgent.ANCESTRAL_RECORD_KEY);
+
+        runBackupAgentOnRestore(); // should not fail or timeout
+
+        assertThat(mPackageManagerBackupAgent.getRestoredPackages())
+                .containsExactly(EXISTING_PACKAGE_NAME);
+    }
+
     private void runBackupAgentOnBackup() throws Exception {
         try (ParcelFileDescriptor oldStateDescriptor = openForReading(mOldState);
                 ParcelFileDescriptor backupDataDescriptor = openForWriting(mBackupData);
