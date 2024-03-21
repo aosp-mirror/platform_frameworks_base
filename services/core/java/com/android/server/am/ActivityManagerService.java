@@ -9973,7 +9973,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         "getHistoricalProcessStartReasons");
             if (uid != INVALID_UID) {
                 mProcessList.getAppStartInfoTracker().getStartInfo(
-                        packageName, userId, callingPid, maxNum, results);
+                        packageName, uid, callingPid, maxNum, results);
             }
         } else {
             // If no package name is given, use the caller's uid as the filter uid.
