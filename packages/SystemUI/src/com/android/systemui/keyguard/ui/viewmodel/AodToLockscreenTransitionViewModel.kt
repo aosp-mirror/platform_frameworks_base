@@ -30,8 +30,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down AOD->LOCKSCREEN transition into discrete steps for corresponding views to consume.
@@ -52,6 +50,8 @@ constructor(
             from = KeyguardState.AOD,
             to = KeyguardState.LOCKSCREEN,
         )
+
+    private var isShadeExpanded = false
 
     /**
      * Begin the transition from wherever the y-translation value is currently. This helps ensure a
@@ -77,22 +77,21 @@ constructor(
     }
 
     val notificationAlpha: Flow<Float> =
-        combine(
-            shadeInteractor.shadeExpansion.map { it > 0f },
-            shadeInteractor.qsExpansion.map { it > 0f },
-            transitionAnimation.sharedFlow(
-                duration = 500.milliseconds,
-                onStep = { it },
-                onCancel = { 1f },
-            ),
-        ) { isShadeExpanded, isQsExpanded, alpha ->
-            if (isShadeExpanded || isQsExpanded) {
-                // One example of this happening is dragging a notification while pulsing on AOD
-                1f
-            } else {
-                alpha
-            }
-        }
+        transitionAnimation.sharedFlow(
+            duration = 500.milliseconds,
+            onStart = {
+                isShadeExpanded =
+                    shadeInteractor.shadeExpansion.value > 0f ||
+                        shadeInteractor.qsExpansion.value > 0f
+            },
+            onStep = {
+                if (isShadeExpanded) {
+                    1f
+                } else {
+                    it
+                }
+            },
+        )
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
