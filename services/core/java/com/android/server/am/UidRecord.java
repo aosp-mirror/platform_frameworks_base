@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.Manifest;
+import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
@@ -65,8 +66,19 @@ public final class UidRecord {
     @CompositeRWLock({"mService", "mProcLock"})
     private long mLastBackgroundTime;
 
+    /**
+     * Last time the UID became idle. This is set to 0, once the UID becomes active.
+     */
+    @ElapsedRealtimeLong
     @CompositeRWLock({"mService", "mProcLock"})
-    private long mLastIdleTime;
+    private long mLastIdleTimeIfStillIdle;
+
+    /**
+     * Last time the UID became idle. Unlike {@link #mLastIdleTimeIfStillIdle}, we never clear it.
+     */
+    @ElapsedRealtimeLong
+    @CompositeRWLock({"mService", "mProcLock"})
+    private long mRealLastIdleTime;
 
     @CompositeRWLock({"mService", "mProcLock"})
     private boolean mEphemeral;
@@ -257,14 +269,28 @@ public final class UidRecord {
         mLastBackgroundTime = lastBackgroundTime;
     }
 
+    /**
+     * Last time the UID became idle. This is set to 0, once the UID becomes active.
+     */
     @GuardedBy(anyOf = {"mService", "mProcLock"})
-    long getLastIdleTime() {
-        return mLastIdleTime;
+    long getLastIdleTimeIfStillIdle() {
+        return mLastIdleTimeIfStillIdle;
+    }
+
+    /**
+     * Last time the UID became idle. Unlike {@link #getLastIdleTimeIfStillIdle}, we never clear it.
+     */
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    long getRealLastIdleTime() {
+        return mRealLastIdleTime;
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    void setLastIdleTime(long lastActiveTime) {
-        mLastIdleTime = lastActiveTime;
+    void setLastIdleTime(@ElapsedRealtimeLong long lastIdleTime) {
+        mLastIdleTimeIfStillIdle = lastIdleTime;
+        if (lastIdleTime > 0) {
+            mRealLastIdleTime = lastIdleTime;
+        }
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

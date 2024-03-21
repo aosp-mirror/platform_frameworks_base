@@ -3759,7 +3759,7 @@ public class OomAdjuster {
         for (int i = N - 1; i >= 0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             final long bgTime = uidRec.getLastBackgroundTime();
-            final long idleTime = uidRec.getLastIdleTime();
+            final long idleTime = uidRec.getLastIdleTimeIfStillIdle();
             if (bgTime > 0 && (!uidRec.isIdle() || idleTime == 0)) {
                 if (bgTime <= maxBgTime) {
                     EventLogTags.writeAmUidIdle(uidRec.getUid());
