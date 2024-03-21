@@ -5301,6 +5301,13 @@
     <!-- Zen mode - Condition summary when a rule is deactivated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
     <string name="zen_mode_implicit_deactivated">Off</string>
 
+    <!-- [CHAR LIMIT=40] General divider text when concatenating multiple items in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_divider_text">,\u0020</string>
+    <!-- [CHAR LIMIT=40] General template for a symbolic start - end range in a text summary, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
+    <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
+
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by"><xliff:g id="third_party">%1$s</xliff:g> is muting some sounds</string>
 

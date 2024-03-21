@@ -2609,6 +2609,10 @@
   <java-symbol type="string" name="zen_mode_implicit_trigger_description" />
   <java-symbol type="string" name="zen_mode_implicit_activated" />
   <java-symbol type="string" name="zen_mode_implicit_deactivated" />
+  <java-symbol type="string" name="zen_mode_trigger_summary_divider_text" />
+  <java-symbol type="string" name="zen_mode_trigger_summary_range_symbol_combination" />
+  <java-symbol type="string" name="zen_mode_trigger_event_calendar_any" />
+
   <java-symbol type="string" name="display_rotation_camera_compat_toast_after_rotation" />
   <java-symbol type="string" name="display_rotation_camera_compat_toast_in_multi_window" />
   <java-symbol type="array" name="config_system_condition_providers" />

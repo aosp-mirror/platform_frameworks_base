@@ -5693,8 +5693,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mLocaleChangeReceiver.onReceive(mContext,
                 new Intent(Intent.ACTION_LOCALE_CHANGED));
 
-        verify(mZenModeHelper, times(1)).updateDefaultZenRules(
-                anyInt());
+        verify(mZenModeHelper).updateZenRulesOnLocaleChange();
     }
 
     private void simulateNotificationTimeoutBroadcast(String notificationKey) {

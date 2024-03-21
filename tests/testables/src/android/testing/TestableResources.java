@@ -26,6 +26,8 @@ import android.util.SparseArray;
 
 import org.mockito.invocation.InvocationOnMock;
 
+import java.util.Arrays;
+
 /**
  * Provides a version of Resources that defaults to all existing resources, but can have ids
  * changed to return specific values.
@@ -103,6 +105,15 @@ public class TestableResources {
                     if (index >= 0) {
                         Object value = mOverrides.valueAt(index);
                         if (value == null) throw new Resources.NotFoundException();
+                        // Support for Resources.getString(resId, Object... formatArgs)
+                        if (value instanceof String
+                                && invocationOnMock.getMethod().getName().equals("getString")
+                                && invocationOnMock.getArguments().length > 1) {
+                            value = String.format(mResources.getConfiguration().getLocales().get(0),
+                                    (String) value,
+                                    Arrays.copyOfRange(invocationOnMock.getArguments(), 1,
+                                            invocationOnMock.getArguments().length));
+                        }
                         return value;
                     }
                 } catch (Resources.NotFoundException e) {
