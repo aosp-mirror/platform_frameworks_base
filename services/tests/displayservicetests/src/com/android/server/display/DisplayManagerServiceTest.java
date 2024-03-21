@@ -2408,6 +2408,7 @@ public class DisplayManagerServiceTest {
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -2440,6 +2441,7 @@ public class DisplayManagerServiceTest {
                 .when(() -> SystemProperties.getBoolean(ENABLE_ON_CONNECT, false));
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -2487,6 +2489,7 @@ public class DisplayManagerServiceTest {
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
@@ -2652,6 +2655,7 @@ public class DisplayManagerServiceTest {
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         DisplayManagerInternal localService = displayManager.new LocalService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
@@ -2699,6 +2703,7 @@ public class DisplayManagerServiceTest {
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(true);
         manageDisplaysPermission(/* granted= */ true);
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
