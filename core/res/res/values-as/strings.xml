@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ম’বাইল নেটৱৰ্কৰ লগত সংযোগ কৰিব পৰা নাই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পচন্দৰ নেটৱৰ্ক সলনি কৰি চেষ্টা কৰি চাওক। সলনি কৰিবলৈ টিপক।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ৱাই-ফাইৰ জৰিয়তে জৰুৰীকালীন কল কৰিব নোৱাৰি"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতৰ্কবাণীসমূহ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফৰৱাৰ্ডিং"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"জৰুৰীকালীন ক\'লবেক ম\'ড"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"মচক"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ইনপুট পদ্ধতি"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"পাঠ বিষয়ক কাৰ্য"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"উভতি যাওক"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ইনপুটৰ পদ্ধতি সলনি কৰক"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ষ্ট’ৰেজৰ খালী ঠাই শেষ হৈ আছে"</string>
@@ -1922,7 +1927,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ডাউনটাইম"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"কাৰ্য-দিনৰ নিশা"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহ অন্ত"</string>
-    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"কার্যক্ৰম"</string>
+    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"অনুষ্ঠান"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"নিদ্ৰাৰত"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ পৰিচালনা কৰা"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"অন আছে"</string>
@@ -1972,7 +1977,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"ভাষা যোগ কৰক"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"অঞ্চলৰ অগ্ৰাধিকাৰ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ভাষাৰ নাম লিখক"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"প্ৰস্তাৱিত"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"পৰামৰ্শিত"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"পৰামৰ্শিত"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"পৰামৰ্শিত ভাষাসমূহ"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"চুপাৰিছ কৰা অঞ্চলসমূহ"</string>

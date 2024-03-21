@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ບໍ່ສາມາດຕິດຕໍ່ເຄືອຂ່າຍມືຖືໄດ້"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ໃຫ້ລອງປ່ຽນເຄືອຂ່າຍທີ່ຕ້ອງການ. ແຕະເພື່ອປ່ຽນ."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ບໍ່ສາມາດໃຊ້ການໂທສຸກເສີນໄດ້"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ບໍ່ສາມາດໂທສຸກເສີນຜ່ານ Wi‑Fi ໄດ້"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ການເຕືອນ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ການໂອນສາຍ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ໂໝດໂທກັບສຸກເສີນ"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"ລຶບ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ການເຮັດວຽກຂອງຂໍ້ຄວາມ"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ກັບຄືນ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ສະຫຼັບວິທີການປ້ອນຂໍ້ມູນ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນກຳລັງຈະເຕັມ"</string>
@@ -1900,7 +1905,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ຕົກລົງ"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກທາງພາບຈຳນວນໜຶ່ງ, ຄຸນສົມບັດບາງຢ່າງ ແລະ ການເຊື່ອມຕໍ່ເຄືອຂ່າຍບາງອັນ."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ຕົວປະຢັດແບັດເຕີຣີຈະເປີດໃຊ້ຮູບແບບສີສັນມືດ ແລະ ຈຳກັດ ຫຼື ປິດການເຄື່ອນໄຫວໃນພື້ນຫຼັງ, ເອັບເຟັກທາງພາບຈຳນວນໜຶ່ງ, ຄຸນສົມບັດບາງຢ່າງ ແລະ ການເຊື່ອມຕໍ່ເຄືອຂ່າຍບາງອັນ."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດອິນເຕີເນັດຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ເພື່ອຊ່ວຍຫຼຸດຜ່ອນການນຳໃຊ້ຂໍ້ມູນ, ຕົວປະຢັດຂໍ້ມູນຈະປ້ອງກັນບໍ່ໃຫ້ບາງແອັບສົ່ງ ຫຼື ຮັບຂໍ້ມູນໃນພື້ນຫຼັງ. ແອັບໃດໜຶ່ງທີ່ທ່ານກຳລັງໃຊ້ຢູ່ຈະສາມາດເຂົ້າເຖິງຂໍ້ມູນໄດ້ ແຕ່ອາດເຂົ້າເຖິງໄດ້ຖີ່ໜ້ອຍລົງ. ນີ້ອາດໝາຍຄວາມວ່າ ຮູບພາບຕ່າງໆອາດບໍ່ສະແດງຈົນກວ່າທ່ານຈະແຕະໃສ່ກ່ອນ."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ເປີດຕົວປະຢັດອິນເຕີເນັດບໍ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ເປີດໃຊ້"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ໄລຍະເວລາ 1 ນາທີ (ຈົນຮອດ {formattedTime})}other{ໄລຍະເວລາ # ນາທີ (ຈົນຮອດ {formattedTime})}}"</string>

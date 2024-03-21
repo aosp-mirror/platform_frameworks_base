@@ -86,7 +86,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Brak zasięgu sieci komórkowej"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Spróbuj zmienić preferowaną sieć. Kliknij, by zmienić."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Połączenia alarmowe są niedostępne"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nie można nawiązywać połączeń alarmowych przez Wi‑Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Połączenia alarmowe wymagają sieci komórkowej"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Przekierowanie połączeń"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Tryb alarmowego połączenia zwrotnego"</string>
@@ -1185,6 +1185,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Usuń"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Sposób wprowadzania tekstu"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Działania na tekście"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"To pole nie obsługuje pisma odręcznego"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Pola haseł nie obsługują pisma odręcznego"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Wstecz"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Przełącz metodę wprowadzania"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Kończy się miejsce"</string>

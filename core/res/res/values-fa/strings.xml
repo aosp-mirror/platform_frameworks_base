@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"شبکه تلفن همراه دردسترس نیست"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"تغییر شبکه ترجیحی را امتحان کنید. برای تغییر، ضربه بزنید."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"تماس اضطراری امکان‌پذیر نیست"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏تماس اضطراری ازطریق Wi‑Fi امکان‌پذیر نیست"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"هشدارها"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"بازارسال تماس"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"حالت پاسخ تماس اضطراری"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"حذف"</string>
     <string name="inputMethod" msgid="1784759500516314751">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"کنش‌های متنی"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"برگشت"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"تغییر روش ورودی"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"فضای ذخیره‌سازی درحال پر شدن است"</string>

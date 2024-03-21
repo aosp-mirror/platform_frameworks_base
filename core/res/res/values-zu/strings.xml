@@ -84,7 +84,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ayikwazi ukufinyelela kunethiwekhi yeselula"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Zama ukushintsha inethiwekhi encanyelwayo. Thepha ukuze ushintshe."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ukushaya okuphuthumayo akutholakali"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ayikwazi ukwenza amakholi aphuthumayo nge-Wi-Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Amakholi aphuthumayo adinga inethiwekhi yeselula"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Izexwayiso"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Ukudlulisa ikholi"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Imodi yokushayela yesimo esiphuthumayo"</string>
@@ -1183,6 +1183,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Susa"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Indlela yokufakwayo"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Izenzo zombhalo"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"Ukubhala ngesandla akusekelwa kule nkambu"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"Ukubhala ngesandla akusekelwa kuzinkambu zephasiwedi"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Emuva"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Shintsha indlela yokufaka"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Isikhala sokulondoloza siyaphela"</string>

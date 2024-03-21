@@ -84,7 +84,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"无法连接到移动网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"请尝试更改首选网络。点按即可更改。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"无法使用紧急呼救服务"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"无法通过 WLAN 拨打紧急呼救电话"</string>
+    <!-- no translation found for EmergencyCallWarningSummary (9102799172089265268) -->
+    <skip />
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"提醒"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"来电转接"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"紧急回拨模式"</string>
@@ -260,7 +261,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"错误报告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"结束会话"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"屏幕截图"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Bug 报告"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"错误报告"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"互动式报告"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，输入与相应问题相关的更多详细信息，以及截取屏幕截图。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
@@ -1183,6 +1184,10 @@
     <string name="deleteText" msgid="4200807474529938112">"删除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"输入法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"文字操作"</string>
+    <!-- no translation found for error_handwriting_unsupported (7809438534946014050) -->
+    <skip />
+    <!-- no translation found for error_handwriting_unsupported_password (5095401146106891087) -->
+    <skip />
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"返回"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"切换输入法"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"存储空间不足"</string>
