@@ -49,7 +49,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
@@ -158,17 +157,14 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(AsyncHybridViewInflation.FLAG_NAME)
-    fun changeIsChildInGroup_asyncHybirdFlagEnabled_needReInflation() {
+    fun becomeChildInGroup_asyncHybirdFlagEnabled_needReInflation() {
         // Given: an Entry that is not child in group
         // AsyncHybridViewInflation flag is enabled
-        val spySbn = spy(entry.sbn)
-        entry.sbn = spySbn
-        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(false)
         val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(oldAdjustment.isChildInGroup).isFalse()
 
         // When: the Entry becomes a group child
-        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(true)
+        entry.markAsGroupChild()
         val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(newAdjustment.isChildInGroup).isTrue()
         assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
@@ -179,17 +175,14 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(AsyncHybridViewInflation.FLAG_NAME)
-    fun changeIsChildInGroup_asyncHybirdFlagDisabled_noNeedForReInflation() {
+    fun becomeChildInGroup_asyncHybirdFlagDisabled_noNeedForReInflation() {
         // Given: an Entry that is not child in group
         // AsyncHybridViewInflation flag is disabled
-        val spySbn = spy(entry.sbn)
-        entry.sbn = spySbn
-        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(false)
         val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(oldAdjustment.isChildInGroup).isFalse()
 
         // When: the Entry becomes a group child
-        whenever(spySbn.isAppOrSystemGroupChild).thenReturn(true)
+        entry.markAsGroupChild()
         val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(newAdjustment.isChildInGroup).isTrue()
         assertThat(newAdjustment).isNotEqualTo(oldAdjustment)
@@ -202,14 +195,11 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
     @EnableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     fun changeIsGroupSummary_needReInflation() {
         // Given: an Entry that is not a group summary
-        val spySbn = spy(entry.sbn)
-        entry.sbn = spySbn
-        whenever(spySbn.isAppOrSystemGroupSummary).thenReturn(false)
         val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(oldAdjustment.isGroupSummary).isFalse()
 
         // When: the Entry becomes a group summary
-        whenever(spySbn.isAppOrSystemGroupSummary).thenReturn(true)
+        entry.markAsGroupSummary()
         val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
         assertThat(newAdjustment.isGroupSummary).isTrue()
         assertThat(newAdjustment).isNotEqualTo(oldAdjustment)

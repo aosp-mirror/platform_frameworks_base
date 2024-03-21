@@ -171,6 +171,9 @@ public final class NotificationEntry extends ListEntry {
     private boolean mIsMarkedForUserTriggeredMovement;
     private boolean mIsHeadsUpEntry;
 
+    private boolean mHasEverBeenGroupSummary;
+    private boolean mHasEverBeenGroupChild;
+
     public boolean mRemoteEditImeAnimatingAway;
     public boolean mRemoteEditImeVisible;
     private boolean mExpandAnimationRunning;
@@ -215,6 +218,26 @@ public final class NotificationEntry extends ListEntry {
      */
     public void demoteStickyHun() {
         mIsDemoted = true;
+    }
+
+    /** called when entry is currently a summary of a group */
+    public void markAsGroupSummary() {
+        mHasEverBeenGroupSummary = true;
+    }
+
+    /** whether this entry has ever been marked as a summary */
+    public boolean hasEverBeenGroupSummary() {
+        return mHasEverBeenGroupSummary;
+    }
+
+    /** called when entry is currently a child in a group */
+    public void markAsGroupChild() {
+        mHasEverBeenGroupChild = true;
+    }
+
+    /** whether this entry has ever been marked as a child */
+    public boolean hasEverBeenGroupChild() {
+        return mHasEverBeenGroupChild;
     }
 
     /**
