@@ -19,7 +19,7 @@ package com.android.server.companion.presence;
 import static android.companion.DevicePresenceEvent.EVENT_BT_CONNECTED;
 import static android.companion.DevicePresenceEvent.EVENT_BT_DISCONNECTED;
 
-import static com.android.server.companion.presence.CompanionDevicePresenceMonitor.DEBUG;
+import static com.android.server.companion.presence.DevicePresenceProcessor.DEBUG;
 import static com.android.server.companion.utils.Utils.btDeviceToString;
 
 import android.annotation.NonNull;
