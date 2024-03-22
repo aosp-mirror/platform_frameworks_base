@@ -300,18 +300,4 @@ public class ObservableUuidStore {
             return readObservableUuidsFromCache(userId);
         }
     }
-
-    /**
-     * Check if a UUID is being observed by the package.
-     */
-    public boolean isUuidBeingObserved(ParcelUuid uuid, int userId, String packageName) {
-        final List<ObservableUuid> uuidsBeingObserved = getObservableUuidsForPackage(userId,
-                packageName);
-        for (ObservableUuid observableUuid : uuidsBeingObserved) {
-            if (observableUuid.getUuid().equals(uuid)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
