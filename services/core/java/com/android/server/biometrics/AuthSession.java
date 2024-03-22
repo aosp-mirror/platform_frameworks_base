@@ -56,7 +56,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.security.KeyStore;
+import android.security.KeyStoreAuthorization;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -111,7 +111,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @NonNull private final BiometricContext mBiometricContext;
     private final IStatusBarService mStatusBarService;
     @VisibleForTesting final IBiometricSysuiReceiver mSysuiReceiver;
-    private final KeyStore mKeyStore;
+    private final KeyStoreAuthorization mKeyStoreAuthorization;
     private final Random mRandom;
     private final ClientDeathReceiver mClientDeathReceiver;
     final PreAuthInfo mPreAuthInfo;
@@ -158,7 +158,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull BiometricContext biometricContext,
             @NonNull IStatusBarService statusBarService,
             @NonNull IBiometricSysuiReceiver sysuiReceiver,
-            @NonNull KeyStore keystore,
+            @NonNull KeyStoreAuthorization keyStoreAuthorization,
             @NonNull Random random,
             @NonNull ClientDeathReceiver clientDeathReceiver,
             @NonNull PreAuthInfo preAuthInfo,
@@ -172,8 +172,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull PromptInfo promptInfo,
             boolean debugEnabled,
             @NonNull List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties) {
-        this(context, biometricContext, statusBarService, sysuiReceiver, keystore, random,
-                clientDeathReceiver, preAuthInfo, token, requestId, operationId, userId,
+        this(context, biometricContext, statusBarService, sysuiReceiver, keyStoreAuthorization,
+                random, clientDeathReceiver, preAuthInfo, token, requestId, operationId, userId,
                 sensorReceiver, clientReceiver, opPackageName, promptInfo, debugEnabled,
                 fingerprintSensorProperties, BiometricFrameworkStatsLogger.getInstance());
     }
@@ -183,7 +183,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
             @NonNull BiometricContext biometricContext,
             @NonNull IStatusBarService statusBarService,
             @NonNull IBiometricSysuiReceiver sysuiReceiver,
-            @NonNull KeyStore keystore,
+            @NonNull KeyStoreAuthorization keyStoreAuthorization,
             @NonNull Random random,
             @NonNull ClientDeathReceiver clientDeathReceiver,
             @NonNull PreAuthInfo preAuthInfo,
@@ -203,7 +203,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mBiometricContext = biometricContext;
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
-        mKeyStore = keystore;
+        mKeyStoreAuthorization = keyStoreAuthorization;
         mRandom = random;
         mClientDeathReceiver = clientDeathReceiver;
         mPreAuthInfo = preAuthInfo;
@@ -814,14 +814,14 @@ public final class AuthSession implements IBinder.DeathRecipient {
             switch (reason) {
                 case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
                     if (credentialAttestation != null) {
-                        mKeyStore.addAuthToken(credentialAttestation);
+                        mKeyStoreAuthorization.addAuthToken(credentialAttestation);
                     } else {
                         Slog.e(TAG, "credentialAttestation is null");
                     }
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
                     if (mTokenEscrow != null) {
-                        final int result = mKeyStore.addAuthToken(mTokenEscrow);
+                        final int result = mKeyStoreAuthorization.addAuthToken(mTokenEscrow);
                         Slog.d(TAG, "addAuthToken: " + result);
                     } else {
                         Slog.e(TAG, "mTokenEscrow is null");

@@ -55,6 +55,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -63,8 +64,7 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.security.Authorization;
-import android.security.authorization.IKeystoreAuthorization;
+import android.security.KeyStoreAuthorization;
 import android.service.trust.TrustAgentService;
 import android.testing.TestableContext;
 import android.view.IWindowManager;
@@ -96,7 +96,6 @@ public class TrustManagerServiceTest {
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
             .spyStatic(ActivityManager.class)
-            .spyStatic(Authorization.class)
             .mockStatic(ServiceManager.class)
             .mockStatic(WindowManagerGlobal.class)
             .build();
@@ -126,14 +125,13 @@ public class TrustManagerServiceTest {
     private @Mock DevicePolicyManager mDevicePolicyManager;
     private @Mock FaceManager mFaceManager;
     private @Mock FingerprintManager mFingerprintManager;
-    private @Mock IKeystoreAuthorization mKeystoreAuthorization;
+    private @Mock KeyStoreAuthorization mKeyStoreAuthorization;
     private @Mock LockPatternUtils mLockPatternUtils;
     private @Mock PackageManager mPackageManager;
     private @Mock UserManager mUserManager;
     private @Mock IWindowManager mWindowManager;
 
     private HandlerThread mHandlerThread;
-    private TrustManagerService.Injector mInjector;
     private TrustManagerService mService;
     private ITrustManager mTrustManager;
 
@@ -144,8 +142,6 @@ public class TrustManagerServiceTest {
 
         when(mFaceManager.getSensorProperties()).thenReturn(List.of());
         when(mFingerprintManager.getSensorProperties()).thenReturn(List.of());
-
-        doReturn(mKeystoreAuthorization).when(() -> Authorization.getService());
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mLockPatternUtils.isSecure(TEST_USER_ID)).thenReturn(true);
@@ -193,8 +189,7 @@ public class TrustManagerServiceTest {
 
         mHandlerThread = new HandlerThread("handler");
         mHandlerThread.start();
-        mInjector = new TrustManagerService.Injector(mLockPatternUtils, mHandlerThread.getLooper());
-        mService = new TrustManagerService(mMockContext, mInjector);
+        mService = new TrustManagerService(mMockContext, new MockInjector(mMockContext));
 
         // Get the ITrustManager from the new TrustManagerService.
         mService.onStart();
@@ -202,6 +197,27 @@ public class TrustManagerServiceTest {
         verify(() -> ServiceManager.addService(eq(Context.TRUST_SERVICE),
                     binderArgumentCaptor.capture(), anyBoolean(), anyInt()));
         mTrustManager = ITrustManager.Stub.asInterface(binderArgumentCaptor.getValue());
+    }
+
+    private class MockInjector extends TrustManagerService.Injector {
+        MockInjector(Context context) {
+            super(context);
+        }
+
+        @Override
+        LockPatternUtils getLockPatternUtils() {
+            return mLockPatternUtils;
+        }
+
+        @Override
+        KeyStoreAuthorization getKeyStoreAuthorization() {
+            return mKeyStoreAuthorization;
+        }
+
+        @Override
+        Looper getLooper() {
+            return mHandlerThread.getLooper();
+        }
     }
 
     @After
@@ -371,14 +387,14 @@ public class TrustManagerServiceTest {
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(false);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization).onDeviceUnlocked(PARENT_USER_ID, null);
-        verify(mKeystoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(PARENT_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization)
+        verify(mKeyStoreAuthorization)
                 .onDeviceLocked(eq(PARENT_USER_ID), eq(PARENT_BIOMETRIC_SIDS), eq(false));
-        verify(mKeystoreAuthorization)
+        verify(mKeyStoreAuthorization)
                 .onDeviceLocked(eq(PROFILE_USER_ID), eq(PARENT_BIOMETRIC_SIDS), eq(false));
     }
 
@@ -392,10 +408,10 @@ public class TrustManagerServiceTest {
         setupMocksForProfile(/* unifiedChallenge= */ false);
 
         mTrustManager.setDeviceLockedForUser(PROFILE_USER_ID, false);
-        verify(mKeystoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(PROFILE_USER_ID, null);
 
         mTrustManager.setDeviceLockedForUser(PROFILE_USER_ID, true);
-        verify(mKeystoreAuthorization)
+        verify(mKeyStoreAuthorization)
                 .onDeviceLocked(eq(PROFILE_USER_ID), eq(PROFILE_BIOMETRIC_SIDS), eq(false));
     }
 
@@ -572,11 +588,11 @@ public class TrustManagerServiceTest {
     private void verifyWeakUnlockValue(boolean expectedWeakUnlockEnabled) throws Exception {
         when(mWindowManager.isKeyguardLocked()).thenReturn(false);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization).onDeviceUnlocked(TEST_USER_ID, null);
+        verify(mKeyStoreAuthorization).onDeviceUnlocked(TEST_USER_ID, null);
 
         when(mWindowManager.isKeyguardLocked()).thenReturn(true);
         mTrustManager.reportKeyguardShowingChanged();
-        verify(mKeystoreAuthorization).onDeviceLocked(eq(TEST_USER_ID), any(),
+        verify(mKeyStoreAuthorization).onDeviceLocked(eq(TEST_USER_ID), any(),
                 eq(expectedWeakUnlockEnabled));
     }
 
