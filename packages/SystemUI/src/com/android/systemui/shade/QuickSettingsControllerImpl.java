@@ -976,13 +976,20 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         }
     }
 
-    void updateQsState() {
-        boolean qsFullScreen = getExpanded() && !mSplitShadeEnabled;
+    private void setQsFullScreen(boolean qsFullScreen) {
         mShadeRepository.setLegacyQsFullscreen(qsFullScreen);
         mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
         if (!SceneContainerFlag.isEnabled()) {
             mNotificationStackScrollLayoutController.setScrollingEnabled(
                     mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));
+        }
+    }
+
+    void updateQsState() {
+        if (!FooterViewRefactor.isEnabled()) {
+            // Update full screen state; note that this will be true if the QS panel is only
+            // partially expanded, and that is fixed with the footer view refactor.
+            setQsFullScreen(/* qsFullScreen = */ getExpanded() && !mSplitShadeEnabled);
         }
 
         if (mQsStateUpdateListener != null) {
@@ -1046,6 +1053,11 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
         // Update the light bar
         mLightBarController.setQsExpanded(mFullyExpanded);
+
+        if (FooterViewRefactor.isEnabled()) {
+            // Update full screen state
+            setQsFullScreen(/* qsFullScreen = */ mFullyExpanded && !mSplitShadeEnabled);
+        }
     }
 
     float getLockscreenShadeDragProgress() {
