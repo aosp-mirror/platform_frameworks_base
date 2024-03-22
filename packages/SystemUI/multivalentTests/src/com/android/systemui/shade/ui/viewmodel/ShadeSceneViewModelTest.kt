@@ -110,6 +110,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
                 context = context,
+                shadeInteractor = kosmos.shadeInteractor,
                 mobileIconsInteractor = mobileIconsInteractor,
                 mobileIconsViewModel = mobileIconsViewModel,
                 privacyChipInteractor = kosmos.privacyChipInteractor,
@@ -280,17 +281,17 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
     @Test
     fun upTransitionSceneKey_customizing_noTransition() =
-            testScope.runTest {
-                val destinationScenes by collectLastValue(underTest.destinationScenes)
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
 
-                qsSceneAdapter.setCustomizing(true)
-                assertThat(
-                        destinationScenes!!
-                                .keys
-                                .filterIsInstance<Swipe>()
-                                .filter { it.direction == SwipeDirection.Up }
-                ).isEmpty()
-            }
+            qsSceneAdapter.setCustomizing(true)
+            assertThat(
+                    destinationScenes!!.keys.filterIsInstance<Swipe>().filter {
+                        it.direction == SwipeDirection.Up
+                    }
+                )
+                .isEmpty()
+        }
 
     @Test
     fun shadeMode() =

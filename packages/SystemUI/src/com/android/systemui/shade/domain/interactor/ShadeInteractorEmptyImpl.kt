@@ -29,6 +29,7 @@ class ShadeInteractorEmptyImpl @Inject constructor() : ShadeInteractor {
     private val inactiveFlowBoolean = MutableStateFlow(false)
     private val inactiveFlowFloat = MutableStateFlow(0f)
     override val isShadeEnabled: StateFlow<Boolean> = inactiveFlowBoolean
+    override val isQsEnabled: StateFlow<Boolean> = inactiveFlowBoolean
     override val shadeExpansion: StateFlow<Float> = inactiveFlowFloat
     override val qsExpansion: StateFlow<Float> = inactiveFlowFloat
     override val isQsExpanded: StateFlow<Boolean> = inactiveFlowBoolean
