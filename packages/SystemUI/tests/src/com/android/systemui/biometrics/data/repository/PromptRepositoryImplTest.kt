@@ -163,6 +163,8 @@ class PromptRepositoryImplTest : SysuiTestCase() {
     @Test
     fun showBpWithoutIconForCredential_withDescription() =
         testScope.runTest {
+            mSetFlagsRule.enableFlags(Flags.FLAG_CONSTRAINT_BP)
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             for (case in
                 listOf(
                     PromptKind.Biometric(),

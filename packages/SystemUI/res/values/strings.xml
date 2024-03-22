@@ -410,6 +410,8 @@
     <string name="biometric_dialog_authenticated">Authenticated</string>
     <!-- Talkback string when a canceling authentication [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_cancel_authentication">Cancel Authentication</string>
+    <!-- Content description for the more options button on biometric prompt content view. [CHAR LIMIT=60] -->
+    <string name="biometric_dialog_content_view_more_options_button">More Options</string>
 
     <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pin) [CHAR LIMIT=30] -->
     <string name="biometric_dialog_use_pin">Use PIN</string>

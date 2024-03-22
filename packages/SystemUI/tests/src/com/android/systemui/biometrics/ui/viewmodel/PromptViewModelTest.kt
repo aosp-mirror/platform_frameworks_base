@@ -25,6 +25,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT
 import android.hardware.biometrics.PromptContentItemBulletedText
 import android.hardware.biometrics.PromptContentView
+import android.hardware.biometrics.PromptContentViewWithMoreOptionsButton
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import android.hardware.face.FaceSensorPropertiesInternal
@@ -122,6 +123,8 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     private lateinit var viewModel: PromptViewModel
     private lateinit var iconViewModel: PromptIconViewModel
     private lateinit var promptContentView: PromptContentView
+    private lateinit var promptContentViewWithMoreOptionsButton:
+        PromptContentViewWithMoreOptionsButton
 
     @Before
     fun setup() {
@@ -161,6 +164,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             PromptVerticalListContentView.Builder()
                 .addListItem(PromptContentItemBulletedText("content item 1"))
                 .addListItem(PromptContentItemBulletedText("content item 2"), 1)
+                .build()
+
+        promptContentViewWithMoreOptionsButton =
+            PromptContentViewWithMoreOptionsButton.Builder()
+                .setDescription("test")
+                .setMoreOptionsButtonListener(fakeExecutor, { _, _ -> })
                 .build()
 
         viewModel =
@@ -1254,7 +1263,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun descriptionOverriddenByContentView() =
+    fun descriptionOverriddenByVerticalListContentView() =
         runGenericTest(contentView = promptContentView, description = "test description") {
             mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
             mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
@@ -1263,6 +1272,21 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
             assertThat(description).isEqualTo("")
             assertThat(contentView).isEqualTo(promptContentView)
+        }
+
+    @Test
+    fun descriptionOverriddenByContentViewWithMoreOptionsButton() =
+        runGenericTest(
+            contentView = promptContentViewWithMoreOptionsButton,
+            description = "test description"
+        ) {
+            mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+            mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+            val contentView by collectLastValue(viewModel.contentView)
+            val description by collectLastValue(viewModel.description)
+
+            assertThat(description).isEqualTo("")
+            assertThat(contentView).isEqualTo(promptContentViewWithMoreOptionsButton)
         }
 
     @Test
