@@ -49,6 +49,7 @@ import android.os.Looper;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.IdleScreenRefreshRateConfig;
 import android.view.SurfaceControl.RefreshRateRange;
 import android.view.SurfaceControl.RefreshRateRanges;
 
@@ -830,18 +831,20 @@ public class LocalDisplayAdapterTest {
                 .get()
                 .getModeId();
 
+        IdleScreenRefreshRateConfig
+                idleScreenRefreshRateConfig = new SurfaceControl.IdleScreenRefreshRateConfig(500);
         displayDevice.setDesiredDisplayModeSpecsLocked(
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
         verify(mSurfaceControlProxy).setDesiredDisplayModeSpecs(display.token,
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* baseModeId */ 0,
                         /* allowGroupSwitching */ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
 
         // Change the display
@@ -862,12 +865,13 @@ public class LocalDisplayAdapterTest {
 
         baseModeId = displayDevice.getDisplayDeviceInfoLocked().supportedModes[0].getModeId();
 
+        idleScreenRefreshRateConfig = new SurfaceControl.IdleScreenRefreshRateConfig(600);
         // The traversal request will call setDesiredDisplayModeSpecsLocked on the display device
         displayDevice.setDesiredDisplayModeSpecsLocked(
                 new DisplayModeDirector.DesiredDisplayModeSpecs(
                         /*baseModeId*/ baseModeId,
                         /*allowGroupSwitching*/ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
 
         waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
@@ -877,7 +881,7 @@ public class LocalDisplayAdapterTest {
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* baseModeId */ 2,
                         /* allowGroupSwitching */ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES, idleScreenRefreshRateConfig
                 ));
     }
 
@@ -1319,7 +1323,8 @@ public class LocalDisplayAdapterTest {
                 new SurfaceControl.DesiredDisplayModeSpecs(
                         /* defaultMode */ 0,
                         /* allowGroupSwitching */ false,
-                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES
+                        REFRESH_RATE_RANGES, REFRESH_RATE_RANGES,
+                        new IdleScreenRefreshRateConfig(100)
                 );
 
         private FakeDisplay(int port) {

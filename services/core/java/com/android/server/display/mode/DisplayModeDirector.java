@@ -64,6 +64,8 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
+import android.view.SurfaceControl.IdleScreenRefreshRateConfig;
 import android.view.SurfaceControl.RefreshRateRange;
 import android.view.SurfaceControl.RefreshRateRanges;
 
@@ -74,6 +76,7 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.display.DisplayDeviceConfig;
+import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.utils.AmbientFilter;
@@ -184,6 +187,8 @@ public class DisplayModeDirector {
 
     private final boolean mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled;
 
+    private final DisplayManagerFlags mDisplayManagerFlags;
+
     private final boolean mDvrrSupported;
 
 
@@ -206,7 +211,7 @@ public class DisplayModeDirector {
             .isDisplaysRefreshRatesSynchronizationEnabled();
         mIsBackUpSmoothDisplayAndForcePeakRefreshRateEnabled = displayManagerFlags
                 .isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled();
-
+        mDisplayManagerFlags = displayManagerFlags;
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
@@ -374,7 +379,7 @@ public class DisplayModeDirector {
                 final RefreshRateRanges ranges = new RefreshRateRanges(range, range);
                 return new DesiredDisplayModeSpecs(defaultMode.getModeId(),
                         /*allowGroupSwitching */ false,
-                        ranges, ranges);
+                        ranges, ranges, mBrightnessObserver.getIdleScreenRefreshRateConfig());
             }
 
             boolean modeSwitchingDisabled =
@@ -422,7 +427,8 @@ public class DisplayModeDirector {
                                     appRequestSummary.maxPhysicalRefreshRate),
                             new RefreshRateRange(
                                     appRequestSummary.minRenderFrameRate,
-                                    appRequestSummary.maxRenderFrameRate)));
+                                    appRequestSummary.maxRenderFrameRate)),
+                    mBrightnessObserver.getIdleScreenRefreshRateConfig());
         }
     }
 
@@ -764,6 +770,16 @@ public class DisplayModeDirector {
         public boolean allowGroupSwitching;
 
         /**
+         * Represents the idle time of the screen after which the associated display's refresh rate
+         * is to be reduced to preserve power
+         * Defaults to null, meaning that the device is not configured to have a timeout based on
+         * the surrounding conditions
+         * -1 means that the current conditions require no timeout
+         */
+        @Nullable
+        public IdleScreenRefreshRateConfig mIdleScreenRefreshRateConfig;
+
+        /**
          * The primary refresh rate ranges.
          */
         public final RefreshRateRanges primary;
@@ -783,11 +799,13 @@ public class DisplayModeDirector {
         public DesiredDisplayModeSpecs(int baseModeId,
                 boolean allowGroupSwitching,
                 @NonNull RefreshRateRanges primary,
-                @NonNull RefreshRateRanges appRequest) {
+                @NonNull RefreshRateRanges appRequest,
+                @Nullable SurfaceControl.IdleScreenRefreshRateConfig idleScreenRefreshRateConfig) {
             this.baseModeId = baseModeId;
             this.allowGroupSwitching = allowGroupSwitching;
             this.primary = primary;
             this.appRequest = appRequest;
+            this.mIdleScreenRefreshRateConfig = idleScreenRefreshRateConfig;
         }
 
         /**
@@ -797,9 +815,10 @@ public class DisplayModeDirector {
         public String toString() {
             return String.format("baseModeId=%d allowGroupSwitching=%b"
                             + " primary=%s"
-                            + " appRequest=%s",
+                            + " appRequest=%s"
+                            + " idleScreenRefreshRateConfig=%s",
                     baseModeId, allowGroupSwitching, primary.toString(),
-                    appRequest.toString());
+                    appRequest.toString(), String.valueOf(mIdleScreenRefreshRateConfig));
         }
 
         /**
@@ -830,12 +849,18 @@ public class DisplayModeDirector {
                     desiredDisplayModeSpecs.appRequest)) {
                 return false;
             }
+
+            if (!Objects.equals(mIdleScreenRefreshRateConfig,
+                    desiredDisplayModeSpecs.mIdleScreenRefreshRateConfig)) {
+                return false;
+            }
             return true;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(baseModeId, allowGroupSwitching, primary, appRequest);
+            return Objects.hash(baseModeId, allowGroupSwitching, primary, appRequest,
+                    mIdleScreenRefreshRateConfig);
         }
 
         /**
@@ -853,6 +878,14 @@ public class DisplayModeDirector {
             appRequest.physical.max = other.appRequest.physical.max;
             appRequest.render.min = other.appRequest.render.min;
             appRequest.render.max = other.appRequest.render.max;
+
+            if (other.mIdleScreenRefreshRateConfig == null) {
+                mIdleScreenRefreshRateConfig = null;
+            } else {
+                mIdleScreenRefreshRateConfig =
+                        new IdleScreenRefreshRateConfig(
+                                other.mIdleScreenRefreshRateConfig.timeoutMillis);
+            }
         }
     }
 
@@ -1543,11 +1576,19 @@ public class DisplayModeDirector {
         private float mAmbientLux = -1.0f;
         private AmbientFilter mAmbientFilter;
 
+        /**
+         * The current timeout configuration. This value is used by surface flinger to track the
+         * time after which an idle screen's refresh rate is to be reduced.
+         */
+        @Nullable
+        private SurfaceControl.IdleScreenRefreshRateConfig mIdleScreenRefreshRateConfig;
+
         private float mBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
         private final Context mContext;
         private final Injector mInjector;
         private final Handler mHandler;
+
 
         private final boolean mVsyncLowLightBlockingVoteEnabled;
 
@@ -1641,6 +1682,11 @@ public class DisplayModeDirector {
         @VisibleForTesting
         int getRefreshRateInLowZone() {
             return mRefreshRateInLowZone;
+        }
+
+        @VisibleForTesting
+        IdleScreenRefreshRateConfig getIdleScreenRefreshRateConfig() {
+            return mIdleScreenRefreshRateConfig;
         }
 
         private void loadLowBrightnessThresholds(@Nullable DisplayDeviceConfig displayDeviceConfig,
@@ -2381,6 +2427,10 @@ public class DisplayModeDirector {
                     // is interrupted by a new sensor event.
                     mHandler.postDelayed(mInjectSensorEventRunnable, INJECT_EVENTS_INTERVAL_MS);
                 }
+
+                if (mDisplayManagerFlags.isIdleScreenRefreshRateTimeoutEnabled()) {
+                    updateIdleScreenRefreshRate(mAmbientLux);
+                }
             }
 
             @Override
@@ -2439,6 +2489,40 @@ public class DisplayModeDirector {
                     }
                 }
             };
+        }
+
+        private void updateIdleScreenRefreshRate(float ambientLux) {
+            List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
+                    idleScreenRefreshRateTimeoutLuxThresholdPoints;
+            synchronized (mLock) {
+                if (mDefaultDisplayDeviceConfig == null || mDefaultDisplayDeviceConfig
+                        .getIdleScreenRefreshRateTimeoutLuxThresholdPoint().isEmpty()) {
+                    // Setting this to null will let surface flinger know that the idle timer is not
+                    // configured in the display configs
+                    mIdleScreenRefreshRateConfig = null;
+                    return;
+                }
+
+                idleScreenRefreshRateTimeoutLuxThresholdPoints =
+                        mDefaultDisplayDeviceConfig
+                                .getIdleScreenRefreshRateTimeoutLuxThresholdPoint();
+            }
+            int newTimeout = -1;
+            for (IdleScreenRefreshRateTimeoutLuxThresholdPoint point :
+                    idleScreenRefreshRateTimeoutLuxThresholdPoints) {
+                int newLux = point.getLux().intValue();
+                if (newLux <= ambientLux) {
+                    newTimeout = point.getTimeout().intValue();
+                }
+            }
+            if (mIdleScreenRefreshRateConfig == null
+                    || newTimeout != mIdleScreenRefreshRateConfig.timeoutMillis) {
+                mIdleScreenRefreshRateConfig =
+                        new IdleScreenRefreshRateConfig(newTimeout);
+                synchronized (mLock) {
+                    notifyDesiredDisplayModeSpecsChangedLocked();
+                }
+            }
         }
     }
 

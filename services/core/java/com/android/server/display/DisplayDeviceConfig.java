@@ -3471,6 +3471,12 @@ public class DisplayDeviceConfig {
                     throw new RuntimeException("Lux values should be in ascending order in the"
                             + " idle screen refresh rate timeout config");
                 }
+
+                int timeout = point.getTimeout().intValue();
+                if (timeout < 0) {
+                    throw new RuntimeException("The timeout value cannot be negative in"
+                            + " idle screen refresh rate timeout config");
+                }
                 previousLux = newLux;
             }
         }
