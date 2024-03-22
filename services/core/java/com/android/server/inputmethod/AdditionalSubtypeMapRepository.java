@@ -19,13 +19,11 @@ package com.android.server.inputmethod;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.Handler;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 
@@ -69,7 +67,7 @@ final class AdditionalSubtypeMapRepository {
         AdditionalSubtypeUtils.save(map, inputMethodMap, userId);
     }
 
-    static void initialize(@NonNull Handler handler, @NonNull Context context) {
+    static void initialize(@NonNull Handler handler) {
         final UserManagerInternal userManagerInternal =
                 LocalServices.getService(UserManagerInternal.class);
         handler.post(() -> {
@@ -81,16 +79,8 @@ final class AdditionalSubtypeMapRepository {
                             handler.post(() -> {
                                 synchronized (ImfLock.class) {
                                     if (!sPerUserMap.contains(userId)) {
-                                        final AdditionalSubtypeMap additionalSubtypeMap =
-                                                AdditionalSubtypeUtils.load(userId);
-                                        sPerUserMap.put(userId, additionalSubtypeMap);
-                                        final InputMethodSettings settings =
-                                                InputMethodManagerService
-                                                        .queryInputMethodServicesInternal(context,
-                                                                userId,
-                                                                additionalSubtypeMap,
-                                                                DirectBootAwareness.AUTO);
-                                        InputMethodSettingsRepository.put(userId, settings);
+                                        sPerUserMap.put(userId,
+                                                AdditionalSubtypeUtils.load(userId));
                                     }
                                 }
                             });
