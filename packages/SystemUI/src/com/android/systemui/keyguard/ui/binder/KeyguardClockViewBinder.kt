@@ -28,7 +28,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.keyguard.KeyguardClockSwitch.SMALL
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
@@ -59,7 +59,7 @@ object KeyguardClockViewBinder {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     viewModel.currentClock.collect { currentClock ->
                         cleanupClockViews(currentClock, keyguardRootView, viewModel.burnInLayer)
                         addClockViews(currentClock, keyguardRootView)
@@ -68,14 +68,14 @@ object KeyguardClockViewBinder {
                     }
                 }
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     viewModel.clockSize.collect {
                         updateBurnInLayer(keyguardRootView, viewModel)
                         blueprintInteractor.refreshBlueprint(Type.ClockSize)
                     }
                 }
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     viewModel.clockShouldBeCentered.collect { clockShouldBeCentered ->
                         viewModel.currentClock.value?.let {
                             // Weather clock also has hasCustomPositionUpdatedAnimation as true
@@ -92,7 +92,7 @@ object KeyguardClockViewBinder {
                     }
                 }
                 launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     viewModel.isAodIconsVisible.collect { isAodIconsVisible ->
                         viewModel.currentClock.value?.let {
                             // Weather clock also has hasCustomPositionUpdatedAnimation as true

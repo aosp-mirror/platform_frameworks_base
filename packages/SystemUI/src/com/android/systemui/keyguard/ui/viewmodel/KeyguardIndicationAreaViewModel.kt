@@ -16,10 +16,10 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -52,7 +52,7 @@ constructor(
 
     /** An observable for whether the indication area should be padded. */
     val isIndicationAreaPadded: Flow<Boolean> =
-        if (keyguardBottomAreaRefactor()) {
+        if (KeyguardBottomAreaRefactor.isEnabled) {
             combine(shortcutsCombinedViewModel.startButton, shortcutsCombinedViewModel.endButton) {
                     startButtonModel,
                     endButtonModel ->
@@ -79,7 +79,7 @@ constructor(
 
     /** An observable for the x-offset by which the indication area should be translated. */
     val indicationAreaTranslationX: Flow<Float> =
-        if (migrateClocksToBlueprint() || keyguardBottomAreaRefactor()) {
+        if (MigrateClocksToBlueprint.isEnabled || KeyguardBottomAreaRefactor.isEnabled) {
             burnIn.map { it.translationX.toFloat() }
         } else {
             bottomAreaInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()
@@ -87,7 +87,7 @@ constructor(
 
     /** Returns an observable for the y-offset by which the indication area should be translated. */
     fun indicationAreaTranslationY(defaultBurnInOffset: Int): Flow<Float> {
-        return if (migrateClocksToBlueprint()) {
+        return if (MigrateClocksToBlueprint.isEnabled) {
             burnIn.map { it.translationY.toFloat() }
         } else {
             keyguardInteractor.dozeAmount

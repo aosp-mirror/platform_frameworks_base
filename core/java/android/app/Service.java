@@ -1135,6 +1135,9 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
         } catch (RemoteException ex) {
         }
         onTimeout(startId);
+        if (Flags.introduceNewServiceOntimeoutCallback()) {
+            onTimeout(startId, ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE);
+        }
     }
 
     /**
@@ -1145,6 +1148,12 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
      * doesn't finish even after it's timed out,
      * the app will be declared an ANR after a short grace period of several seconds.
+     *
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * {@link #onTimeout(int, int)} will also be called when a foreground service of type
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE} times out.
+     * Developers do not need to implement both of the callbacks on
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and onwards.
      *
      * <p>Note, even though
      * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}

@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,6 +33,7 @@ import androidx.core.view.contains
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.customization.R as customizationR
+import com.android.systemui.customization.R
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.largeClockElementKey
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.smallClockElementKey
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
@@ -58,19 +60,21 @@ constructor(
         if (currentClock?.smallClock?.view == null) {
             return
         }
-
         val context = LocalContext.current
         MovableElement(key = smallClockElementKey, modifier = modifier) {
             content {
                 AndroidView(
                     factory = { context ->
                         FrameLayout(context).apply {
-                            addClockView(checkNotNull(currentClock).smallClock.view)
+                            ensureClockViewExists(checkNotNull(currentClock).smallClock.view)
                         }
                     },
-                    update = { it.addClockView(checkNotNull(currentClock).smallClock.view) },
+                    update = {
+                        it.ensureClockViewExists(checkNotNull(currentClock).smallClock.view)
+                    },
                     modifier =
-                        Modifier.padding(
+                        Modifier.height(dimensionResource(R.dimen.small_clock_height))
+                            .padding(
                                 horizontal =
                                     dimensionResource(customizationR.dimen.clock_padding_start)
                             )
@@ -91,23 +95,24 @@ constructor(
         if (currentClock?.largeClock?.view == null) {
             return
         }
-
         MovableElement(key = largeClockElementKey, modifier = modifier) {
             content {
                 AndroidView(
                     factory = { context ->
                         FrameLayout(context).apply {
-                            addClockView(checkNotNull(currentClock).largeClock.view)
+                            ensureClockViewExists(checkNotNull(currentClock).largeClock.view)
                         }
                     },
-                    update = { it.addClockView(checkNotNull(currentClock).largeClock.view) },
+                    update = {
+                        it.ensureClockViewExists(checkNotNull(currentClock).largeClock.view)
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }
         }
     }
 
-    private fun FrameLayout.addClockView(clockView: View) {
+    private fun FrameLayout.ensureClockViewExists(clockView: View) {
         if (contains(clockView)) {
             return
         }

@@ -92,6 +92,7 @@ constructor(
             currentScene = currentScene,
             onChangeScene = {},
             transitions = ClockTransition.defaultClockTransitions,
+            enableInterruptions = false,
         ) {
             scene(ClockScenes.splitShadeLargeClockScene) {
                 Row(

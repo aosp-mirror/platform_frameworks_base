@@ -56,7 +56,7 @@ constructor(
     val isAvailable: StateFlow<Boolean> =
         availabilityCriteria.isAvailable().stateIn(scope, SharingStarted.Eagerly, true)
 
-    val spatialAudioButtonByEnabled: StateFlow<List<SpatialAudioButtonViewModel>> =
+    val spatialAudioButtons: StateFlow<List<SpatialAudioButtonViewModel>> =
         combine(interactor.isEnabled, interactor.isAvailable) { currentIsEnabled, isAvailable ->
                 SpatialAudioEnabledModel.values
                     .filter {

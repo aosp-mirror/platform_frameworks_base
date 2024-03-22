@@ -40,6 +40,7 @@ import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.findAutoSelectEntry
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.createflow.isFlowAutoSelectable
+import com.android.credentialmanager.getflow.findBiometricFlowEntry
 
 /**
  * Client for interacting with Credential Manager. Also holds data inputs from it.
@@ -148,10 +149,17 @@ class CredentialManagerRepo(
                 )
             }
             RequestInfo.TYPE_GET -> {
-                val getCredentialInitialUiState = getCredentialInitialUiState(originName,
+                var getCredentialInitialUiState = getCredentialInitialUiState(originName,
                         isReqForAllOptions)!!
                 val autoSelectEntry =
                     findAutoSelectEntry(getCredentialInitialUiState.providerDisplayInfo)
+                val biometricEntry = findBiometricFlowEntry(
+                    getCredentialInitialUiState.providerDisplayInfo,
+                    autoSelectEntry != null)
+                if (biometricEntry != null) {
+                    getCredentialInitialUiState = getCredentialInitialUiState.copy(
+                        activeEntry = biometricEntry)
+                }
                 UiState(
                     createCredentialUiState = null,
                     getCredentialUiState = getCredentialInitialUiState,

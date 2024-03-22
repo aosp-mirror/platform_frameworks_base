@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.shade
+package com.android.systemui.shade.domain.interactor
 
 /** Allows the lockscreen to control the shade. */
 interface ShadeLockscreenInteractor {
@@ -73,4 +73,12 @@ interface ShadeLockscreenInteractor {
      * @param alpha value between 0 and 1. -1 if the value is to be reset.
      */
     @Deprecated("TODO(b/325072511) delete this") fun setKeyguardStatusBarAlpha(alpha: Float)
+
+    /**
+     * Reconfigures the shade to show the AOD UI (clock, smartspace, etc). This is called by the
+     * screen off animation controller in order to animate in AOD without "actually" fully switching
+     * to the KEYGUARD state, which is a heavy transition that causes jank as 10+ files react to the
+     * change.
+     */
+    fun showAodUi()
 }

@@ -102,6 +102,7 @@ import android.view.WindowInsets;
 import android.view.WindowLayout;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.ScreenCapture;
 
@@ -459,7 +460,8 @@ public abstract class WallpaperService extends Service {
             public void resized(ClientWindowFrames frames, boolean reportDraw,
                     MergedConfiguration mergedConfiguration, InsetsState insetsState,
                     boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
-                    int syncSeqId, boolean dragResizing) {
+                    int syncSeqId, boolean dragResizing,
+                    @Nullable ActivityWindowInfo activityWindowInfo) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);

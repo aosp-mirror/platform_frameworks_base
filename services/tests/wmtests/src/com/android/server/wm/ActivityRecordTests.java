@@ -3346,7 +3346,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         } else {
             verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
                     insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
-                    anyBoolean());
+                    anyBoolean(), any());
         }
         assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
     }

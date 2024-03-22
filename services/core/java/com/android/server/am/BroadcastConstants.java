@@ -281,7 +281,7 @@ public class BroadcastConstants {
      * For {@link BroadcastQueueModernImpl}: Maximum number of outgoing broadcasts from a
      * freezable process that will be allowed before killing the process.
      */
-    public long MAX_FROZEN_OUTGOING_BROADCASTS = DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS;
+    public int MAX_FROZEN_OUTGOING_BROADCASTS = DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS;
     private static final String KEY_MAX_FROZEN_OUTGOING_BROADCASTS =
             "max_frozen_outgoing_broadcasts";
     private static final int DEFAULT_MAX_FROZEN_OUTGOING_BROADCASTS = 32;

@@ -18,10 +18,8 @@
 
 package com.android.compose.animation.scene
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -145,16 +143,6 @@ internal class DraggableHandlerImpl(
         }
 
         val transitionState = layoutImpl.state.transitionState
-        if (transitionState is TransitionState.Transition) {
-            // TODO(b/290184746): Better handle interruptions here if state != idle.
-            Log.w(
-                TAG,
-                "start from TransitionState.Transition is not fully supported: from" +
-                    " ${transitionState.fromScene} to ${transitionState.toScene} " +
-                    "(progress ${transitionState.progress})"
-            )
-        }
-
         val fromScene = layoutImpl.scene(transitionState.currentScene)
         val swipes = computeSwipes(fromScene, startedPosition, pointersDown)
         val result =
@@ -269,19 +257,6 @@ private class DragControllerImpl(
     fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
         if (isDrivingTransition || force) {
             layoutState.startTransition(newTransition, newTransition.key)
-
-            // Initialize SwipeTransition.transformationSpec and .swipeSpec. Note that this must be
-            // called right after layoutState.startTransition() is called, because it computes the
-            // current layoutState.transformationSpec().
-            val transformationSpec = layoutState.transformationSpec
-            newTransition.transformationSpec = transformationSpec
-            newTransition.swipeSpec =
-                transformationSpec.swipeSpec ?: layoutState.transitions.defaultSwipeSpec
-        } else {
-            // We were not driving the transition and we don't force the update, so the specs won't
-            // be used and it doesn't matter which ones we set here.
-            newTransition.transformationSpec = TransformationSpec.Empty
-            newTransition.swipeSpec = SceneTransitions.DefaultSwipeSpec
         }
 
         swipeTransition = newTransition
@@ -616,18 +591,6 @@ private class SwipeTransition(
     override val isUserInputOngoing: Boolean
         get() = offsetAnimation == null
 
-    /**
-     * The [TransformationSpecImpl] associated to this transition.
-     *
-     * Note: This is lateinit because this [SwipeTransition] is needed by
-     * [BaseSceneTransitionLayoutState] to compute the [TransitionSpec], and it will be set right
-     * after [BaseSceneTransitionLayoutState.startTransition] is called with this transition.
-     */
-    lateinit var transformationSpec: TransformationSpecImpl
-
-    /** The spec to use when animating this transition to either [fromScene] or [toScene]. */
-    lateinit var swipeSpec: SpringSpec<Float>
-
     override val overscrollScope: OverscrollScope =
         object : OverscrollScope {
             override val absoluteDistance: Float
@@ -701,6 +664,9 @@ private class SwipeTransition(
                 coroutineScope
                     .launch {
                         try {
+                            val swipeSpec =
+                                transformationSpec.swipeSpec
+                                    ?: layoutState.transitions.defaultSwipeSpec
                             animatable.animateTo(
                                 targetValue = targetOffset,
                                 animationSpec = swipeSpec,

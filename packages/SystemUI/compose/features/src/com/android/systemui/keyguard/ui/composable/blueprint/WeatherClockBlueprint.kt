@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -33,11 +35,14 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
+import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.Flags
+import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor.Companion.WEATHER_CLOCK_BLUEPRINT_ID
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
+import com.android.systemui.keyguard.ui.composable.modifier.onTopPlacementChanged
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
@@ -47,8 +52,8 @@ import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.WeatherClockSection
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import dagger.Binds
@@ -71,6 +76,7 @@ constructor(
     private val settingsMenuSection: SettingsMenuSection,
     private val clockInteractor: KeyguardClockInteractor,
     private val mediaCarouselSection: MediaCarouselSection,
+    private val clockViewModel: KeyguardClockViewModel,
 ) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = WEATHER_CLOCK_BLUEPRINT_ID
@@ -79,7 +85,7 @@ constructor(
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val burnIn = rememberBurnIn(clockInteractor)
         val resources = LocalContext.current.resources
-
+        val currentClockState = clockViewModel.currentClock.collectAsState()
         LockscreenLongPress(
             viewModel = viewModel.longPress,
             modifier = modifier,
@@ -91,7 +97,34 @@ constructor(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
-                        // TODO: Add weather clock for small and large clock
+                        val currentClock = currentClockState.value
+                        val clockSize by clockViewModel.clockSize.collectAsState()
+                        with(weatherClockSection) {
+                            if (currentClock == null) {
+                                return@with
+                            }
+
+                            if (clockSize == LARGE) {
+                                Time(
+                                    clock = currentClock,
+                                    modifier =
+                                        Modifier.padding(
+                                            start =
+                                                dimensionResource(
+                                                    customizationR.dimen.clock_padding_start
+                                                )
+                                        )
+                                )
+                            } else {
+                                SmallClock(
+                                    burnInParams = burnIn.parameters,
+                                    modifier =
+                                        Modifier.align(Alignment.Start)
+                                            .onTopPlacementChanged(burnIn.onSmallClockTopChanged),
+                                    clock = currentClock
+                                )
+                            }
+                        }
                         with(smartSpaceSection) {
                             SmartSpace(
                                 burnInParams = burnIn.parameters,
@@ -118,6 +151,12 @@ constructor(
                                     modifier = Modifier.fillMaxWidth().weight(weight = 1f)
                                 )
                             }
+                        }
+                        with(weatherClockSection) {
+                            if (currentClock == null || clockSize != LARGE) {
+                                return@with
+                            }
+                            LargeClockSectionBelowSmartspace(clock = currentClock)
                         }
 
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
@@ -234,6 +273,7 @@ constructor(
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val weatherClockSection: WeatherClockSection,
     private val mediaCarouselSection: MediaCarouselSection,
+    private val clockViewModel: KeyguardClockViewModel,
 ) : ComposableLockscreenSceneBlueprint {
     override val id: String = SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
 
@@ -242,7 +282,7 @@ constructor(
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val burnIn = rememberBurnIn(clockInteractor)
         val resources = LocalContext.current.resources
-
+        val currentClockState = clockViewModel.currentClock.collectAsState()
         LockscreenLongPress(
             viewModel = viewModel.longPress,
             modifier = modifier,
@@ -257,11 +297,42 @@ constructor(
                         Row(
                             modifier = Modifier.fillMaxSize(),
                         ) {
-                            // TODO: Add weather clock for small and large clock
                             Column(
                                 modifier = Modifier.fillMaxHeight().weight(weight = 1f),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
+                                val currentClock = currentClockState.value
+                                val clockSize by clockViewModel.clockSize.collectAsState()
+                                with(weatherClockSection) {
+                                    if (currentClock == null) {
+                                        return@with
+                                    }
+
+                                    if (clockSize == LARGE) {
+                                        Time(
+                                            clock = currentClock,
+                                            modifier =
+                                                Modifier.align(Alignment.Start)
+                                                    .padding(
+                                                        start =
+                                                            dimensionResource(
+                                                                customizationR.dimen
+                                                                    .clock_padding_start
+                                                            )
+                                                    )
+                                        )
+                                    } else {
+                                        SmallClock(
+                                            burnInParams = burnIn.parameters,
+                                            modifier =
+                                                Modifier.align(Alignment.Start)
+                                                    .onTopPlacementChanged(
+                                                        burnIn.onSmallClockTopChanged
+                                                    ),
+                                            clock = currentClock,
+                                        )
+                                    }
+                                }
                                 with(smartSpaceSection) {
                                     SmartSpace(
                                         burnInParams = burnIn.parameters,
@@ -284,6 +355,14 @@ constructor(
                                 }
 
                                 with(mediaCarouselSection) { MediaCarousel() }
+
+                                with(weatherClockSection) {
+                                    if (currentClock == null || clockSize != LARGE) {
+                                        return@with
+                                    }
+
+                                    LargeClockSectionBelowSmartspace(currentClock)
+                                }
                             }
                             with(notificationSection) {
                                 val splitShadeTopMargin: Dp =

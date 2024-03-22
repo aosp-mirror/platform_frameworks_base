@@ -2,6 +2,7 @@ package: "android.view.flags"
 
 flag {
     name: "view_velocity_api"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for view content velocity api"
     bug: "293513816"
@@ -16,6 +17,7 @@ flag {
 
 flag {
     name: "toolkit_set_frame_rate_read_only"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for toolkit to set frame rate"
     bug: "293512962"
@@ -24,6 +26,7 @@ flag {
 
 flag {
     name: "expected_presentation_time_api"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for using expected presentation time of the Choreographer"
     bug: "278730197"
@@ -31,6 +34,7 @@ flag {
 
 flag {
     name: "expected_presentation_time_read_only"
+    is_exported: true
     namespace: "toolkit"
     description: "Feature flag for using expected presentation time of the Choreographer"
     bug: "278730197"

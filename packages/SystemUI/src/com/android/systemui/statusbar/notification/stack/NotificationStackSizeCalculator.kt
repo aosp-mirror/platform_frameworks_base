@@ -20,6 +20,7 @@ import android.content.res.Resources
 import android.util.Log
 import android.view.View.GONE
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Flags.notificationMinimalismPrototype
 import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -65,6 +66,11 @@ constructor(
      * shown.
      */
     private var maxKeyguardNotifications by notNull<Int>()
+
+    /**
+     * Whether [maxKeyguardNotifications] will have 1 added to it when media is shown in the stack.
+     */
+    private var maxNotificationsExcludesMedia = false
 
     /** Minimum space between two notifications, see [calculateGapAndDividerHeight]. */
     private var dividerHeight by notNull<Float>()
@@ -168,7 +174,11 @@ constructor(
         log { "\n" }
 
         val stackHeightSequence = computeHeightPerNotificationLimit(stack, shelfHeight)
+
+        // TODO: Avoid making this split shade assumption by simply checking the stack for media
         val isMediaShowing = mediaDataManager.hasActiveMediaOrRecommendation()
+        val isMediaShowingInStack = isMediaShowing && !splitShadeStateController
+                .shouldUseSplitNotificationShade(resources)
 
         log { "\tGet maxNotifWithoutSavingSpace ---" }
         val maxNotifWithoutSavingSpace =
@@ -181,12 +191,11 @@ constructor(
             }
 
         // How many notifications we can show at heightWithoutLockscreenConstraints
-        var minCountAtHeightWithoutConstraints =
-            if (isMediaShowing && !splitShadeStateController
-                    .shouldUseSplitNotificationShade(resources)) 2 else 1
+        val minCountAtHeightWithoutConstraints = if (isMediaShowingInStack) 2 else 1
         log {
             "\t---maxNotifWithoutSavingSpace=$maxNotifWithoutSavingSpace " +
                 "isMediaShowing=$isMediaShowing" +
+                "isMediaShowingInStack=$isMediaShowingInStack" +
                 "minCountAtHeightWithoutConstraints=$minCountAtHeightWithoutConstraints"
         }
         log { "\n" }
@@ -223,7 +232,9 @@ constructor(
         }
 
         if (onLockscreen()) {
-            maxNotifications = min(maxKeyguardNotifications, maxNotifications)
+            val increaseMaxForMedia = maxNotificationsExcludesMedia && isMediaShowingInStack
+            val lockscreenMax = maxKeyguardNotifications.safeIncrementIf(increaseMaxForMedia)
+            maxNotifications = min(lockscreenMax, maxNotifications)
         }
 
         // Could be < 0 if the space available is less than the shelf size. Returns 0 in this case.
@@ -276,7 +287,7 @@ constructor(
             height = notifsHeight + shelfHeightWithSpaceBefore
             log {
                 "--- computeHeight(maxNotifs=$maxNotifs, shelfHeight=$shelfHeight)" +
-                    " -> ${height}=($notifsHeight+$shelfHeightWithSpaceBefore)" +
+                    " -> $height=($notifsHeight+$shelfHeightWithSpaceBefore)" +
                     " | saveSpaceOnLockscreen=$saveSpaceOnLockscreen"
             }
         }
@@ -367,8 +378,9 @@ constructor(
     }
 
     fun updateResources() {
-        maxKeyguardNotifications =
-            infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
+        maxKeyguardNotifications = if (notificationMinimalismPrototype()) 1
+            else infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
+        maxNotificationsExcludesMedia = notificationMinimalismPrototype()
 
         dividerHeight =
             max(1f, resources.getDimensionPixelSize(R.dimen.notification_divider_height).toFloat())
@@ -484,6 +496,13 @@ constructor(
             Int.MAX_VALUE
         } else {
             v
+        }
+
+    private fun Int.safeIncrementIf(condition: Boolean): Int =
+        if (condition && this != Int.MAX_VALUE) {
+            this + 1
+        } else {
+            this
         }
 
     /** Returns the last index where [predicate] returns true, or -1 if it was always false. */

@@ -193,7 +193,8 @@ public class PrepareGetRequestSession extends GetRequestSession {
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
                                     Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
                             /*isShowAllOptionsRequested=*/ false),
-                    providerDataList);
+                    providerDataList,
+                    mRequestSessionMetric);
         } else {
             return null;
         }

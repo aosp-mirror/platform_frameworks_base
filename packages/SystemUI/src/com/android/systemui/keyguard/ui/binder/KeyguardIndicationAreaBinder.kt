@@ -22,8 +22,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
@@ -69,7 +69,10 @@ object KeyguardIndicationAreaBinder {
                     launch {
                         // Do not independently apply alpha, as [KeyguardRootViewModel] should work
                         // for this and all its children
-                        if (!(migrateClocksToBlueprint() || keyguardBottomAreaRefactor())) {
+                        if (
+                            !(MigrateClocksToBlueprint.isEnabled ||
+                                KeyguardBottomAreaRefactor.isEnabled)
+                        ) {
                             viewModel.alpha.collect { alpha -> view.alpha = alpha }
                         }
                     }

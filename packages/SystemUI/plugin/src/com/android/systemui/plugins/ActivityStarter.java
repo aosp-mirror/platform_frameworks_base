@@ -17,6 +17,7 @@ package com.android.systemui.plugins;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.View;
 
@@ -65,6 +66,17 @@ public interface ActivityStarter {
     void startPendingIntentMaybeDismissingKeyguard(PendingIntent intent,
             @Nullable Runnable intentSentUiThreadCallback,
             @Nullable ActivityTransitionAnimator.Controller animationController);
+
+    /**
+     * Similar to {@link #startPendingIntentMaybeDismissingKeyguard(PendingIntent, Runnable,
+     * ActivityTransitionAnimator.Controller)}, but also specifies a fill-in intent and extra
+     * options that could be used to populate the pending intent and launch the activity.
+     */
+    void startPendingIntentMaybeDismissingKeyguard(PendingIntent intent,
+            @Nullable Runnable intentSentUiThreadCallback,
+            @Nullable ActivityTransitionAnimator.Controller animationController,
+            @Nullable Intent fillInIntent,
+            @Nullable Bundle extraOptions);
 
     /**
      * The intent flag can be specified in startActivity().

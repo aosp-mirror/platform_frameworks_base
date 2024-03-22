@@ -269,6 +269,7 @@ public class SecureSettings {
         Settings.Secure.CAMERA_EXTENSIONS_FALLBACK,
         Settings.Secure.VISUAL_QUERY_ACCESSIBILITY_DETECTION_ENABLED,
         Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
-        Settings.Secure.AUDIO_DEVICE_INVENTORY
+        Settings.Secure.AUDIO_DEVICE_INVENTORY,
+        Settings.Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS
     };
 }

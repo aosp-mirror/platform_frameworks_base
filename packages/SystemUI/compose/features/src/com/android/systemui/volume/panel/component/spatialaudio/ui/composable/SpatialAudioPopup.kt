@@ -65,7 +65,7 @@ constructor(
             return
         }
 
-        val enabledModelStates by viewModel.spatialAudioButtonByEnabled.collectAsState()
+        val enabledModelStates by viewModel.spatialAudioButtons.collectAsState()
         if (enabledModelStates.isEmpty()) {
             return
         }

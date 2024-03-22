@@ -262,7 +262,6 @@ public abstract class VisualQueryDetectionService extends Service
     public void onStopDetection() {
     }
 
-    // TODO(b/324341724): Properly deprecate this API.
     /**
      * Informs the system that the attention is gained for the interaction intention
      * {@link VisualQueryAttentionResult#INTERACTION_INTENTION_AUDIO_VISUAL} with
@@ -343,7 +342,6 @@ public abstract class VisualQueryDetectionService extends Service
         }
     }
 
-    // TODO(b/324341724): Properly deprecate this API.
     /**
      * Informs the {@link VisualQueryDetector} with the text content being captured about the
      * query from the audio source. {@code partialQuery} is provided to the

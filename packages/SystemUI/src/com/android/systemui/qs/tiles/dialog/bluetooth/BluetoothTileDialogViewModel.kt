@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -29,7 +28,6 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
-import com.android.settingslib.flags.Flags.bluetoothQsTileDialogAutoOnToggle
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -78,19 +76,19 @@ constructor(
     /**
      * Shows the dialog.
      *
-     * @param context The context in which the dialog is displayed.
      * @param view The view from which the dialog is shown.
      */
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun showDialog(context: Context, view: View?) {
+    fun showDialog(view: View?) {
         cancelJob()
 
         job =
             coroutineScope.launch(mainDispatcher) {
                 var updateDeviceItemJob: Job?
                 var updateDialogUiJob: Job? = null
-                val dialogDelegate = createBluetoothTileDialog(context)
+                val dialogDelegate = createBluetoothTileDialog()
                 val dialog = dialogDelegate.createDialog()
+                val context = dialog.context
 
                 view?.let {
                     dialogTransitionAnimator.showFromView(
@@ -213,7 +211,7 @@ constructor(
             }
     }
 
-    private suspend fun createBluetoothTileDialog(context: Context): BluetoothTileDialogDelegate {
+    private suspend fun createBluetoothTileDialog(): BluetoothTileDialogDelegate {
         val cachedContentHeight =
             withContext(backgroundDispatcher) {
                 sharedPreferences.getInt(
@@ -223,7 +221,6 @@ constructor(
             }
 
         return bluetoothDialogDelegateFactory.create(
-            context,
             UiProperties.build(
                 bluetoothStateInteractor.isBluetoothEnabled,
                 isAutoOnToggleFeatureAvailable()
@@ -277,7 +274,7 @@ constructor(
 
     @VisibleForTesting
     internal suspend fun isAutoOnToggleFeatureAvailable() =
-        bluetoothQsTileDialogAutoOnToggle() && bluetoothAutoOnInteractor.isValuePresent()
+        bluetoothAutoOnInteractor.isAutoOnSupported()
 
     companion object {
         private const val INTERACTION_JANK_TAG = "bluetooth_tile_dialog"

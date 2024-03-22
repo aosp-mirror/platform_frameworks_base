@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.draganddrop;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
 import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
@@ -301,6 +302,8 @@ public class DragAndDropPolicy {
                 position);
         final ActivityOptions baseActivityOpts = ActivityOptions.makeBasic();
         baseActivityOpts.setDisallowEnterPictureInPictureWhileLaunching(true);
+        baseActivityOpts.setPendingIntentBackgroundActivityStartMode(
+                MODE_BACKGROUND_ACTIVITY_START_DENIED);
         // TODO(b/255649902): Rework this so that SplitScreenController can always use the options
         // instead of a fillInIntent since it's assuming that the PendingIntent is mutable
         baseActivityOpts.setPendingIntentLaunchFlags(FLAG_ACTIVITY_NEW_TASK

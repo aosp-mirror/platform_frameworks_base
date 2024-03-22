@@ -114,7 +114,9 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import static com.android.input.flags.Flags.enablePointerChoreographer;
+import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
+import static com.android.window.flags.Flags.setScPropertiesInClient;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -233,6 +235,7 @@ import android.view.contentcapture.ContentCaptureSession;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
+import android.window.ActivityWindowInfo;
 import android.window.BackEvent;
 import android.window.ClientWindowFrames;
 import android.window.CompatOnBackInvokedCallback;
@@ -435,13 +438,27 @@ public final class ViewRootImpl implements ViewParent,
      * Callback for notifying activities.
      */
     public interface ActivityConfigCallback {
-
         /**
          * Notifies about override config change and/or move to different display.
          * @param overrideConfig New override config to apply to activity.
          * @param newDisplayId New display id, {@link Display#INVALID_DISPLAY} if not changed.
          */
-        void onConfigurationChanged(Configuration overrideConfig, int newDisplayId);
+        default void onConfigurationChanged(@NonNull Configuration overrideConfig,
+                int newDisplayId) {
+            // Must override one of the #onConfigurationChanged.
+            throw new IllegalStateException("Not implemented");
+        }
+
+        /**
+         * Notifies about override config change and/or move to different display.
+         * @param overrideConfig New override config to apply to activity.
+         * @param newDisplayId New display id, {@link Display#INVALID_DISPLAY} if not changed.
+         * @param activityWindowInfo New ActivityWindowInfo to apply to activity.
+         */
+        default void onConfigurationChanged(@NonNull Configuration overrideConfig,
+                int newDisplayId, @Nullable ActivityWindowInfo activityWindowInfo) {
+            onConfigurationChanged(overrideConfig, newDisplayId);
+        }
 
         /**
          * Notify the corresponding activity about the request to show or hide a camera compat
@@ -467,7 +484,7 @@ public final class ViewRootImpl implements ViewParent,
      * In that case we receive a call back from {@link ActivityThread} and this flag is used to
      * preserve the initial value.
      *
-     * @see #performConfigurationChange(MergedConfiguration, boolean, int)
+     * @see #performConfigurationChange
      */
     private boolean mForceNextConfigUpdate;
 
@@ -813,6 +830,13 @@ public final class ViewRootImpl implements ViewParent,
     private final MergedConfiguration mLastReportedMergedConfiguration = new MergedConfiguration();
     /** Configurations waiting to be applied. */
     private final MergedConfiguration mPendingMergedConfiguration = new MergedConfiguration();
+
+    /** Non-{@code null} if {@link #mActivityConfigCallback} is not {@code null}. */
+    @Nullable
+    private ActivityWindowInfo mPendingActivityWindowInfo;
+    /** Non-{@code null} if {@link #mActivityConfigCallback} is not {@code null}. */
+    @Nullable
+    private ActivityWindowInfo mLastReportedActivityWindowInfo;
 
     boolean mScrollMayChange;
     @SoftInputModeFlags
@@ -1260,8 +1284,18 @@ public final class ViewRootImpl implements ViewParent,
      * Add activity config callback to be notified about override config changes and camera
      * compat control state updates.
      */
-    public void setActivityConfigCallback(ActivityConfigCallback callback) {
+    public void setActivityConfigCallback(@Nullable ActivityConfigCallback callback) {
         mActivityConfigCallback = callback;
+        if (!activityWindowInfoFlag()) {
+            return;
+        }
+        if (callback == null) {
+            mPendingActivityWindowInfo = null;
+            mLastReportedActivityWindowInfo = null;
+        } else {
+            mPendingActivityWindowInfo = new ActivityWindowInfo();
+            mLastReportedActivityWindowInfo = new ActivityWindowInfo();
+        }
     }
 
     public void setOnContentApplyWindowInsetsListener(OnContentApplyWindowInsetsListener listener) {
@@ -2096,7 +2130,8 @@ public final class ViewRootImpl implements ViewParent,
     /** Handles messages {@link #MSG_RESIZED} and {@link #MSG_RESIZED_REPORT}. */
     private void handleResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing) {
+            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing,
+            @Nullable ActivityWindowInfo activityWindowInfo) {
         if (!mAdded) {
             return;
         }
@@ -2114,7 +2149,14 @@ public final class ViewRootImpl implements ViewParent,
         mInsetsController.onStateChanged(insetsState);
         final float compatScale = frames.compatScale;
         final boolean frameChanged = !mWinFrame.equals(frame);
-        final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
+        final boolean shouldReportActivityWindowInfoChanged =
+                // Can be null if callbacks is not set
+                mLastReportedActivityWindowInfo != null
+                        // Can be null if not activity window
+                        && activityWindowInfo != null
+                        && !mLastReportedActivityWindowInfo.equals(activityWindowInfo);
+        final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration)
+                || shouldReportActivityWindowInfoChanged;
         final boolean attachedFrameChanged =
                 !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
@@ -2133,7 +2175,8 @@ public final class ViewRootImpl implements ViewParent,
         if (configChanged) {
             // If configuration changed - notify about that and, maybe, about move to display.
             performConfigurationChange(mergedConfiguration, false /* force */,
-                    displayChanged ? displayId : INVALID_DISPLAY /* same display */);
+                    displayChanged ? displayId : INVALID_DISPLAY /* same display */,
+                    activityWindowInfo);
         } else if (displayChanged) {
             // Moved to display without config change - report last applied one.
             onMovedToDisplay(displayId, mLastConfigurationFromResources);
@@ -3522,6 +3565,16 @@ public final class ViewRootImpl implements ViewParent,
                         mTransaction.setDefaultFrameRateCompatibility(mSurfaceControl,
                             Surface.FRAME_RATE_COMPATIBILITY_NO_VOTE).apply();
                     }
+
+                    if (setScPropertiesInClient()) {
+                        if (surfaceControlChanged || windowAttributesChanged) {
+                            boolean colorSpaceAgnostic = (lp.privateFlags
+                                    & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC)
+                                    != 0;
+                            mTransaction.setColorSpaceAgnostic(mSurfaceControl, colorSpaceAgnostic)
+                                    .apply();
+                        }
+                    }
                 }
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
@@ -3532,12 +3585,18 @@ public final class ViewRootImpl implements ViewParent,
                 // WindowManagerService has reported back a frame from a configuration not yet
                 // handled by the client. In this case, we need to accept the configuration so we
                 // do not lay out and draw with the wrong configuration.
-                if (mRelayoutRequested
-                        && !mPendingMergedConfiguration.equals(mLastReportedMergedConfiguration)) {
+                boolean shouldPerformConfigurationUpdate =
+                        !mPendingMergedConfiguration.equals(mLastReportedMergedConfiguration)
+                                || !Objects.equals(mPendingActivityWindowInfo,
+                                mLastReportedActivityWindowInfo);
+                if (mRelayoutRequested && shouldPerformConfigurationUpdate) {
                     if (DEBUG_CONFIGURATION) Log.v(mTag, "Visible with new config: "
                             + mPendingMergedConfiguration.getMergedConfiguration());
                     performConfigurationChange(new MergedConfiguration(mPendingMergedConfiguration),
-                            !mFirst, INVALID_DISPLAY /* same display */);
+                            !mFirst, INVALID_DISPLAY /* same display */,
+                            mPendingActivityWindowInfo != null
+                                    ? new ActivityWindowInfo(mPendingActivityWindowInfo)
+                                    : null);
                     updatedConfiguration = true;
                 }
                 final boolean updateSurfaceNeeded = mUpdateSurfaceNeeded;
@@ -6063,9 +6122,11 @@ public final class ViewRootImpl implements ViewParent,
      * @param force Flag indicating if we should force apply the config.
      * @param newDisplayId Id of new display if moved, {@link Display#INVALID_DISPLAY} if not
      *                     changed.
+     * @param activityWindowInfo New activity window info. {@code null} if it is non-app window, or
+     *                           this is not a Configuration change to the activity window (global).
      */
-    private void performConfigurationChange(MergedConfiguration mergedConfiguration, boolean force,
-            int newDisplayId) {
+    private void performConfigurationChange(@NonNull MergedConfiguration mergedConfiguration,
+            boolean force, int newDisplayId, @Nullable ActivityWindowInfo activityWindowInfo) {
         if (mergedConfiguration == null) {
             throw new IllegalArgumentException("No merged config provided.");
         }
@@ -6105,6 +6166,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mLastReportedMergedConfiguration.setConfiguration(globalConfig, overrideConfig);
+        if (mLastReportedActivityWindowInfo != null && activityWindowInfo != null) {
+            mLastReportedActivityWindowInfo.set(activityWindowInfo);
+        }
 
         mForceNextConfigUpdate = force;
         if (mActivityConfigCallback != null) {
@@ -6112,7 +6176,8 @@ public final class ViewRootImpl implements ViewParent,
             // This basically initiates a round trip to ActivityThread and back, which will ensure
             // that corresponding activity and resources are updated before updating inner state of
             // ViewRootImpl. Eventually it will call #updateConfiguration().
-            mActivityConfigCallback.onConfigurationChanged(overrideConfig, newDisplayId);
+            mActivityConfigCallback.onConfigurationChanged(overrideConfig, newDisplayId,
+                    activityWindowInfo);
         } else {
             // There is no activity callback - update the configuration right away.
             updateConfiguration(newDisplayId);
@@ -6354,13 +6419,15 @@ public final class ViewRootImpl implements ViewParent,
                     final boolean reportDraw = msg.what == MSG_RESIZED_REPORT;
                     final MergedConfiguration mergedConfiguration = (MergedConfiguration) args.arg2;
                     final InsetsState insetsState = (InsetsState) args.arg3;
+                    final ActivityWindowInfo activityWindowInfo = (ActivityWindowInfo) args.arg4;
                     final boolean forceLayout = args.argi1 != 0;
                     final boolean alwaysConsumeSystemBars = args.argi2 != 0;
                     final int displayId = args.argi3;
                     final int syncSeqId = args.argi4;
                     final boolean dragResizing = args.argi5 != 0;
                     handleResized(frames, reportDraw, mergedConfiguration, insetsState, forceLayout,
-                            alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
+                            alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing,
+                            activityWindowInfo);
                     args.recycle();
                     break;
                 }
@@ -6504,7 +6571,8 @@ public final class ViewRootImpl implements ViewParent,
                             mLastReportedMergedConfiguration.getOverrideConfiguration());
 
                     performConfigurationChange(new MergedConfiguration(mPendingMergedConfiguration),
-                            false /* force */, INVALID_DISPLAY /* same display */);
+                            false /* force */, INVALID_DISPLAY /* same display */,
+                            mLastReportedActivityWindowInfo);
                 } break;
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST: {
                     setAccessibilityFocus(null, null);
@@ -8938,6 +9006,14 @@ public final class ViewRootImpl implements ViewParent,
             if (maybeSyncSeqId > 0) {
                 mSyncSeqId = maybeSyncSeqId;
             }
+            if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
+                final ActivityWindowInfo outInfo = mRelayoutBundle.getParcelable(
+                        IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                        ActivityWindowInfo.class);
+                if (outInfo != null) {
+                    mPendingActivityWindowInfo.set(outInfo);
+                }
+            }
             mWinFrameInScreen.set(mTmpFrames.frame);
             if (mTranslator != null) {
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
@@ -9358,6 +9434,10 @@ public final class ViewRootImpl implements ViewParent,
                 + mLastReportedMergedConfiguration);
         writer.println(innerPrefix + "mLastConfigurationFromResources="
                 + mLastConfigurationFromResources);
+        if (mLastReportedActivityWindowInfo != null) {
+            writer.println(innerPrefix + "mLastReportedActivityWindowInfo="
+                    + mLastReportedActivityWindowInfo);
+        }
         writer.println(innerPrefix + "mIsAmbientMode="  + mIsAmbientMode);
         writer.println(innerPrefix + "mUnbufferedInputSource="
                 + Integer.toHexString(mUnbufferedInputSource));
@@ -9571,12 +9651,14 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private void dispatchResized(ClientWindowFrames frames, boolean reportDraw,
             MergedConfiguration mergedConfiguration, InsetsState insetsState, boolean forceLayout,
-            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing) {
+            boolean alwaysConsumeSystemBars, int displayId, int syncSeqId, boolean dragResizing,
+            @Nullable ActivityWindowInfo activityWindowInfo) {
         Message msg = mHandler.obtainMessage(reportDraw ? MSG_RESIZED_REPORT : MSG_RESIZED);
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = frames;
         args.arg2 = mergedConfiguration;
         args.arg3 = insetsState;
+        args.arg4 = activityWindowInfo;
         args.argi1 = forceLayout ? 1 : 0;
         args.argi2 = alwaysConsumeSystemBars ? 1 : 0;
         args.argi3 = displayId;
@@ -11029,7 +11111,7 @@ public final class ViewRootImpl implements ViewParent,
         public void resized(ClientWindowFrames frames, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, InsetsState insetsState,
                 boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId, int syncSeqId,
-                boolean dragResizing) {
+                boolean dragResizing, @Nullable ActivityWindowInfo activityWindowInfo) {
             final boolean isFromResizeItem = mIsFromResizeItem;
             mIsFromResizeItem = false;
             // Although this is a AIDL method, it will only be triggered in local process through
@@ -11048,7 +11130,8 @@ public final class ViewRootImpl implements ViewParent,
             if (isFromResizeItem && viewAncestor.mHandler.getLooper()
                     == ActivityThread.currentActivityThread().getLooper()) {
                 viewAncestor.handleResized(frames, reportDraw, mergedConfiguration, insetsState,
-                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
+                        forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing,
+                        activityWindowInfo);
                 return;
             }
             // The the parameters from WindowStateResizeItem are already copied.
@@ -11060,7 +11143,8 @@ public final class ViewRootImpl implements ViewParent,
                 mergedConfiguration = new MergedConfiguration(mergedConfiguration);
             }
             viewAncestor.dispatchResized(frames, reportDraw, mergedConfiguration, insetsState,
-                    forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing);
+                    forceLayout, alwaysConsumeSystemBars, displayId, syncSeqId, dragResizing,
+                    activityWindowInfo);
         }
 
         @Override
@@ -12716,7 +12800,10 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean shouldEnableDvrr() {
-        return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
+        // uncomment this when we are ready for enabling dVRR
+        // return sToolkitSetFrameRateReadOnlyFlagValue && mIsFrameRatePowerSavingsBalanced;
+        return false;
+
     }
 
     private void checkIdleness() {

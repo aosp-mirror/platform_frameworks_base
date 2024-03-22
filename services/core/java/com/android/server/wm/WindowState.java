@@ -240,6 +240,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.ImeTracker;
+import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.OnBackInvokedCallbackInfo;
 
@@ -3696,19 +3697,32 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         markRedrawForSyncReported();
 
+        // App window resize may trigger Activity#onConfigurationChanged, so we need to update
+        // ActivityWindowInfo as well.
+        final IBinder activityToken;
+        final ActivityWindowInfo activityWindowInfo;
+        if (Flags.activityWindowInfoFlag() && mActivityRecord != null) {
+            activityToken = mActivityRecord.token;
+            activityWindowInfo = mActivityRecord.getActivityWindowInfo();
+        } else {
+            activityToken = null;
+            activityWindowInfo = null;
+        }
+
         if (Flags.bundleClientTransactionFlag()) {
             getProcess().scheduleClientTransactionItem(
                     WindowStateResizeItem.obtain(mClient, mClientWindowFrames, reportDraw,
                             mLastReportedConfiguration, getCompatInsetsState(), forceRelayout,
                             alwaysConsumeSystemBars, displayId,
-                            syncWithBuffers ? mSyncSeqId : -1, isDragResizing));
+                            syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
+                            activityToken, activityWindowInfo));
             onResizePostDispatched(drawPending, prevRotation, displayId);
         } else {
             // TODO(b/301870955): cleanup after launch
             try {
                 mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
                         getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
-                        syncWithBuffers ? mSyncSeqId : -1, isDragResizing);
+                        syncWithBuffers ? mSyncSeqId : -1, isDragResizing, activityWindowInfo);
                 onResizePostDispatched(drawPending, prevRotation, displayId);
             } catch (RemoteException e) {
                 // Cancel orientation change of this window to avoid blocking unfreeze display.

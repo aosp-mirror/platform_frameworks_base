@@ -213,7 +213,7 @@
     <dimen name="bubble_swap_animation_offset">15dp</dimen>
     <!-- How far offscreen the bubble stack rests. There's some padding around the bubble so
          add 3dp to the desired overhang. -->
-    <dimen name="bubble_stack_offscreen">3dp</dimen>
+    <dimen name="bubble_stack_offscreen">2.5dp</dimen>
     <!-- How far down the screen the stack starts. -->
     <dimen name="bubble_stack_starting_offset_y">120dp</dimen>
     <!-- Space between the pointer triangle and the bubble expanded view -->
@@ -505,6 +505,9 @@
 
     <!-- The radius of the caption menu shadow. -->
     <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
+
+    <!-- The size of the icon shown in the resize veil. -->
+    <dimen name="desktop_mode_resize_veil_icon_size">96dp</dimen>
 
     <dimen name="freeform_resize_handle">15dp</dimen>
 

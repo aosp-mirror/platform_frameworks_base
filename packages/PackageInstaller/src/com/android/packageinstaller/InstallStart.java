@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
@@ -38,7 +39,6 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.android.packageinstaller.v2.ui.InstallLaunch;
 import java.util.Arrays;
@@ -51,6 +51,7 @@ public class InstallStart extends Activity {
     private static final String TAG = InstallStart.class.getSimpleName();
 
     private PackageManager mPackageManager;
+    private PackageInstaller mPackageInstaller;
     private UserManager mUserManager;
     private boolean mAbortInstall = false;
     private boolean mShouldFinish = true;
@@ -66,7 +67,7 @@ public class InstallStart extends Activity {
             Log.i(TAG, "Using Pia V2");
 
             Intent piaV2 = new Intent(getIntent());
-            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getCallingPackage());
+            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getLaunchedFromPackage());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
             piaV2.setClass(this, InstallLaunch.class);
             piaV2.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
@@ -75,6 +76,7 @@ public class InstallStart extends Activity {
             return;
         }
         mPackageManager = getPackageManager();
+        mPackageInstaller = mPackageManager.getPackageInstaller();
         mUserManager = getSystemService(UserManager.class);
 
         Intent intent = getIntent();
@@ -94,12 +96,11 @@ public class InstallStart extends Activity {
         // If the activity was started via a PackageInstaller session, we retrieve the calling
         // package from that session
         final int sessionId = (isSessionInstall
-                ? intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -1)
-                : -1);
+                ? intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, SessionInfo.INVALID_ID)
+                : SessionInfo.INVALID_ID);
         int originatingUidFromSession = callingUid;
-        if (callingPackage == null && sessionId != -1) {
-            PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
-            PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
+        if (callingPackage == null && sessionId != SessionInfo.INVALID_ID) {
+            PackageInstaller.SessionInfo sessionInfo = mPackageInstaller.getSessionInfo(sessionId);
             if (sessionInfo != null) {
                 callingPackage = sessionInfo.getInstallerPackageName();
                 callingAttributionTag = sessionInfo.getInstallerAttributionTag();
@@ -188,6 +189,7 @@ public class InstallStart extends Activity {
         nextActivity.putExtra(Intent.EXTRA_ORIGINATING_UID, originatingUid);
         nextActivity.putExtra(PackageInstallerActivity.EXTRA_ORIGINATING_UID_FROM_SESSION_INFO,
             originatingUidFromSession);
+        nextActivity.putExtra(PackageInstallerActivity.EXTRA_IS_TRUSTED_SOURCE, isTrustedSource);
 
         if (isSessionInstall) {
             nextActivity.setClass(this, PackageInstallerActivity.class);
@@ -257,7 +259,7 @@ public class InstallStart extends Activity {
     private ApplicationInfo getSourceInfo(@Nullable String callingPackage) {
         if (callingPackage != null) {
             try {
-                return getPackageManager().getApplicationInfo(callingPackage, 0);
+                return mPackageManager.getApplicationInfo(callingPackage, 0);
             } catch (PackageManager.NameNotFoundException ex) {
                 // ignore
             }
@@ -265,8 +267,6 @@ public class InstallStart extends Activity {
         return null;
     }
 
-
-    @NonNull
     private boolean canPackageQuery(int callingUid, Uri packageUri) {
         ProviderInfo info = mPackageManager.resolveContentProvider(packageUri.getAuthority(),
                 PackageManager.ComponentInfoFlags.of(0));
@@ -295,8 +295,7 @@ public class InstallStart extends Activity {
         if (originatingUid == Process.ROOT_UID) {
             return true;
         }
-        PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
-        PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
+        PackageInstaller.SessionInfo sessionInfo = mPackageInstaller.getSessionInfo(sessionId);
         if (sessionInfo == null) {
             return false;
         }

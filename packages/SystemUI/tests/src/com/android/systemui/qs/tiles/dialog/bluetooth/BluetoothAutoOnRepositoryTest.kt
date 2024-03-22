@@ -16,18 +16,14 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
-import android.content.pm.UserInfo
-import android.os.UserHandle
+import android.bluetooth.BluetoothAdapter
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.settingslib.bluetooth.BluetoothEventManager
+import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothAutoOnInteractor.Companion.DISABLED
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothAutoOnInteractor.Companion.ENABLED
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothAutoOnRepository.Companion.SETTING_NAME
-import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothAutoOnRepository.Companion.UNSET
-import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -37,6 +33,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -46,83 +43,57 @@ class BluetoothAutoOnRepositoryTest : SysuiTestCase() {
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private var secureSettings: FakeSettings = FakeSettings()
-    private val userRepository: FakeUserRepository = FakeUserRepository()
+    @Mock private lateinit var bluetoothAdapter: BluetoothAdapter
+    @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
+    @Mock private lateinit var eventManager: BluetoothEventManager
 
     private lateinit var bluetoothAutoOnRepository: BluetoothAutoOnRepository
 
     @Before
     fun setUp() {
+        whenever(localBluetoothManager.eventManager).thenReturn(eventManager)
         bluetoothAutoOnRepository =
             BluetoothAutoOnRepository(
-                secureSettings,
-                userRepository,
+                localBluetoothManager,
+                bluetoothAdapter,
                 testScope.backgroundScope,
-                testDispatcher
+                testDispatcher,
             )
-
-        userRepository.setUserInfos(listOf(SECONDARY_USER, SYSTEM_USER))
     }
 
     @Test
-    fun testGetValue_valueUnset() {
+    fun testIsAutoOn_returnFalse() {
         testScope.runTest {
-            userRepository.setSelectedUserInfo(SYSTEM_USER)
+            whenever(bluetoothAdapter.isAutoOnEnabled).thenReturn(false)
             val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
 
             runCurrent()
 
-            assertThat(actualValue).isEqualTo(UNSET)
-            assertThat(bluetoothAutoOnRepository.isValuePresent()).isFalse()
+            assertThat(actualValue).isEqualTo(false)
         }
     }
 
     @Test
-    fun testGetValue_valueFalse() {
+    fun testIsAutoOn_returnTrue() {
         testScope.runTest {
-            userRepository.setSelectedUserInfo(SYSTEM_USER)
+            whenever(bluetoothAdapter.isAutoOnEnabled).thenReturn(true)
             val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
 
-            secureSettings.putIntForUser(SETTING_NAME, DISABLED, UserHandle.USER_SYSTEM)
             runCurrent()
 
-            assertThat(actualValue).isEqualTo(DISABLED)
+            assertThat(actualValue).isEqualTo(true)
         }
     }
 
     @Test
-    fun testGetValue_valueTrue() {
+    fun testIsAutoOnSupported_returnTrue() {
         testScope.runTest {
-            userRepository.setSelectedUserInfo(SYSTEM_USER)
-            val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
+            whenever(bluetoothAdapter.isAutoOnSupported).thenReturn(true)
+            val actualValue = bluetoothAutoOnRepository.isAutoOnSupported()
 
-            secureSettings.putIntForUser(SETTING_NAME, ENABLED, UserHandle.USER_SYSTEM)
             runCurrent()
 
-            assertThat(actualValue).isEqualTo(ENABLED)
+            assertThat(actualValue).isEqualTo(true)
         }
-    }
-
-    @Test
-    fun testGetValue_valueTrue_secondaryUser_returnTrue() {
-        testScope.runTest {
-            userRepository.setSelectedUserInfo(SECONDARY_USER)
-            val actualValue by collectLastValue(bluetoothAutoOnRepository.isAutoOn)
-
-            secureSettings.putIntForUser(SETTING_NAME, DISABLED, SYSTEM_USER_ID)
-            secureSettings.putIntForUser(SETTING_NAME, ENABLED, SECONDARY_USER_ID)
-            runCurrent()
-
-            assertThat(actualValue).isEqualTo(ENABLED)
-        }
-    }
-
-    companion object {
-        private const val SYSTEM_USER_ID = 0
-        private const val SECONDARY_USER_ID = 1
-        private val SYSTEM_USER =
-            UserInfo(/* id= */ SYSTEM_USER_ID, /* name= */ "system user", /* flags= */ 0)
-        private val SECONDARY_USER =
-            UserInfo(/* id= */ SECONDARY_USER_ID, /* name= */ "secondary user", /* flags= */ 0)
     }
 }

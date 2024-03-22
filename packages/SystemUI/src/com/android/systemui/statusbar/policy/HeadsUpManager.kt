@@ -196,6 +196,7 @@ interface OnHeadsUpPhoneListenerChange {
      * Called when a heads up notification is 'going away' or no longer 'going away'. See
      * [HeadsUpManager.setHeadsUpGoingAway].
      */
+    // TODO(b/325936094) delete this callback, and listen to the flow instead
     fun onHeadsUpGoingAwayStateChanged(headsUpGoingAway: Boolean)
 }
 

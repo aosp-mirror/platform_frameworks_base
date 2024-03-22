@@ -69,7 +69,7 @@ class NotificationTemplateViewWrapperTest : SysuiTestCase() {
             TestUiOffloadThread(looper.looper)
         )
 
-        helper = NotificationTestHelper(mContext, mDependency, looper)
+        helper = NotificationTestHelper(mContext, mDependency)
         row = helper.createRow()
         // Some code in the view iterates through parents so we need some extra containers around
         // it.

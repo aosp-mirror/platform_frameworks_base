@@ -109,7 +109,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
 
         mBluetoothTileDialogDelegate =
             BluetoothTileDialogDelegate(
-                mContext,
                 uiProperties,
                 CONTENT_HEIGHT,
                 ENABLED,
@@ -119,14 +118,12 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 fakeSystemClock,
                 uiEventLogger,
                 logger,
-                sysuiDialogFactory,
-                LayoutInflater.from(mContext)
+                sysuiDialogFactory
             )
 
         whenever(
                 sysuiDialogFactory.create(
-                    any(SystemUIDialog.Delegate::class.java),
-                    any(Context::class.java)
+                    any(SystemUIDialog.Delegate::class.java)
                 )
             )
             .thenAnswer {
@@ -216,7 +213,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
         val viewHolder =
             BluetoothTileDialogDelegate(
-                    mContext,
                     uiProperties,
                     CONTENT_HEIGHT,
                     ENABLED,
@@ -227,7 +223,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                     uiEventLogger,
                     logger,
                     sysuiDialogFactory,
-                    LayoutInflater.from(mContext)
                 )
                 .Adapter(bluetoothTileDialogCallback)
                 .DeviceItemViewHolder(view)
@@ -273,7 +268,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
             val cachedHeight = Int.MAX_VALUE
             val dialog =
                 BluetoothTileDialogDelegate(
-                        mContext,
                         BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
                         cachedHeight,
                         ENABLED,
@@ -284,7 +278,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                         uiEventLogger,
                         logger,
                         sysuiDialogFactory,
-                        LayoutInflater.from(mContext)
                     )
                     .createDialog()
             dialog.show()
@@ -298,7 +291,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
         testScope.runTest {
             val dialog =
                 BluetoothTileDialogDelegate(
-                        mContext,
                         BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
                         MATCH_PARENT,
                         ENABLED,
@@ -309,7 +301,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                         uiEventLogger,
                         logger,
                         sysuiDialogFactory,
-                        LayoutInflater.from(mContext)
                     )
                     .createDialog()
             dialog.show()
@@ -323,7 +314,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
         testScope.runTest {
             val dialog =
                 BluetoothTileDialogDelegate(
-                        mContext,
                         BluetoothTileDialogViewModel.UiProperties.build(ENABLED, ENABLED),
                         MATCH_PARENT,
                         ENABLED,
@@ -334,7 +324,6 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                         uiEventLogger,
                         logger,
                         sysuiDialogFactory,
-                        LayoutInflater.from(mContext)
                     )
                     .createDialog()
             dialog.show()

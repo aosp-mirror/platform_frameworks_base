@@ -75,6 +75,7 @@ android_test {
         "compatibility-device-util-axt",
         "flag-junit",
         "am_flags_lib",
+        "device_policy_aconfig_flags_lib",
     ],
 
     libs: [

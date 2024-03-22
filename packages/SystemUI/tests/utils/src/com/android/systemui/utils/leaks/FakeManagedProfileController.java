@@ -19,24 +19,65 @@ import android.testing.LeakCheck;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileController.Callback;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FakeManagedProfileController extends BaseLeakChecker<Callback> implements
         ManagedProfileController {
+
+    private List<Callback> mCallbackList = new ArrayList<>();
+    private boolean mIsEnabled = false;
+    private boolean mHasActiveProfile = false;
+
     public FakeManagedProfileController(LeakCheck test) {
         super(test, "profile");
     }
 
     @Override
+    public void addCallback(Callback cb) {
+        mCallbackList.add(cb);
+        cb.onManagedProfileChanged();
+    }
+
+    @Override
+    public void removeCallback(Callback cb) {
+        mCallbackList.remove(cb);
+    }
+
+    @Override
     public void setWorkModeEnabled(boolean enabled) {
+        if (mIsEnabled != enabled) {
+            mIsEnabled = enabled;
+            for (Callback cb: mCallbackList) {
+                cb.onManagedProfileChanged();
+            }
+        }
 
     }
 
     @Override
     public boolean hasActiveProfile() {
-        return false;
+        return mHasActiveProfile;
+    }
+
+    /**
+     * Triggers onManagedProfileChanged on callbacks when value flips.
+     */
+    public void setHasActiveProfile(boolean hasActiveProfile) {
+        if (mHasActiveProfile != hasActiveProfile) {
+            mHasActiveProfile = hasActiveProfile;
+            for (Callback cb: mCallbackList) {
+                cb.onManagedProfileChanged();
+                if (!hasActiveProfile) {
+                    cb.onManagedProfileRemoved();
+                }
+            }
+        }
+
     }
 
     @Override
     public boolean isWorkModeEnabled() {
-        return false;
+        return mIsEnabled;
     }
 }

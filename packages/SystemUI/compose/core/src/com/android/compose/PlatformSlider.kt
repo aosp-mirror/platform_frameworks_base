@@ -18,6 +18,7 @@
 
 package com.android.compose
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
@@ -266,8 +267,17 @@ private fun TrackBackground(
             label = "PlatformSliderCornersAnimation",
         )
 
-    val trackColor = colors.getTrackColor(enabled)
-    val indicatorColor = colors.getIndicatorColor(enabled)
+    val trackColor by
+        animateColorAsState(
+            colors.getTrackColor(enabled),
+            label = "PlatformSliderTrackColorAnimation",
+        )
+
+    val indicatorColor by
+        animateColorAsState(
+            colors.getIndicatorColor(enabled),
+            label = "PlatformSliderIndicatorColorAnimation",
+        )
     Canvas(modifier.fillMaxSize()) {
         val trackCornerRadius = CornerRadius(size.height / 2, size.height / 2)
         val trackPath = Path()

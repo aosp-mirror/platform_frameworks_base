@@ -16,9 +16,14 @@
 
 package com.android.asllib;
 
+import com.android.asllib.util.MalformedXmlException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class XmlUtils {
     public static final String HR_TAG_APP_METADATA_BUNDLES = "app-metadata-bundles";
@@ -58,7 +63,8 @@ public class XmlUtils {
     public static final String FALSE_STR = "false";
 
     /** Gets the single top-level {@link Element} having the {@param tagName}. */
-    public static Element getSingleElement(Document doc, String tagName) {
+    public static Element getSingleElement(Document doc, String tagName)
+            throws MalformedXmlException {
         var elements = doc.getElementsByTagName(tagName);
         return getSingleElement(elements, tagName);
     }
@@ -66,22 +72,55 @@ public class XmlUtils {
     /**
      * Gets the single {@link Element} within {@param parentEle} and having the {@param tagName}.
      */
-    public static Element getSingleElement(Element parentEle, String tagName) {
+    public static Element getSingleChildElement(Element parentEle, String tagName)
+            throws MalformedXmlException {
         var elements = parentEle.getElementsByTagName(tagName);
         return getSingleElement(elements, tagName);
     }
 
-    /** Gets the single {@link Element} from {@param elements} and having the {@param tagName}. */
-    public static Element getSingleElement(NodeList elements, String tagName) {
+    /** Gets the single {@link Element} from {@param elements} */
+    public static Element getSingleElement(NodeList elements, String tagName)
+            throws MalformedXmlException {
         if (elements.getLength() != 1) {
-            throw new IllegalArgumentException(
-                    String.format("Expected 1 %s but got %s.", tagName, elements.getLength()));
+            throw new MalformedXmlException(
+                    String.format(
+                            "Expected 1 element \"%s\" in NodeList but got %s.",
+                            tagName, elements.getLength()));
         }
         var elementAsNode = elements.item(0);
         if (!(elementAsNode instanceof Element)) {
-            throw new IllegalStateException(String.format("%s was not an element.", tagName));
+            throw new MalformedXmlException(
+                    String.format("%s was not a valid XML element.", tagName));
         }
         return ((Element) elementAsNode);
+    }
+
+    /** Gets the single {@link Element} within {@param elements}. */
+    public static Element getSingleElement(List<Element> elements) {
+        if (elements.size() != 1) {
+            throw new IllegalStateException(
+                    String.format("Expected 1 element in list but got %s.", elements.size()));
+        }
+        return elements.get(0);
+    }
+
+    /** Converts {@param nodeList} into List of {@link Element}. */
+    public static List<Element> asElementList(NodeList nodeList) {
+        List<Element> elementList = new ArrayList<Element>();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            var elementAsNode = nodeList.item(0);
+            if (elementAsNode instanceof Element) {
+                elementList.add(((Element) elementAsNode));
+            }
+        }
+        return elementList;
+    }
+
+    /** Appends {@param children} to the {@param ele}. */
+    public static void appendChildren(Element ele, List<Element> children) {
+        for (Element c : children) {
+            ele.appendChild(c);
+        }
     }
 
     /** Gets the Boolean from the String value. */

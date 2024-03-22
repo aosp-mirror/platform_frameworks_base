@@ -19,6 +19,7 @@
 package com.android.systemui.kosmos
 
 import android.content.applicationContext
+import android.os.fakeExecutorHandler
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.bouncerRepository
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
@@ -27,6 +28,7 @@ import com.android.systemui.common.ui.data.repository.fakeConfigurationRepositor
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -65,6 +67,8 @@ class KosmosJavaAdapter(
     val testScope by lazy { kosmos.testScope }
     val fakeFeatureFlags by lazy { kosmos.fakeFeatureFlagsClassic }
     val fakeSceneContainerFlags by lazy { kosmos.fakeSceneContainerFlags }
+    val fakeExecutor by lazy { kosmos.fakeExecutor }
+    val fakeExecutorHandler by lazy { kosmos.fakeExecutorHandler }
     val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     val configurationInteractor by lazy { kosmos.configurationInteractor }
     val bouncerRepository by lazy { kosmos.bouncerRepository }

@@ -39,7 +39,7 @@ constructor(
     /** The position of the keyguard clock. */
     private val _clockPosition = MutableStateFlow(Position(0, 0))
     /** See [ClockSection] */
-    @Deprecated("with migrateClocksToBlueprint()")
+    @Deprecated("with MigrateClocksToBlueprint.isEnabled")
     val clockPosition: Flow<Position> = _clockPosition.asStateFlow()
 
     fun setClockPosition(x: Int, y: Int) {

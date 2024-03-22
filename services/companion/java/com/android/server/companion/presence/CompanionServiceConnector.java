@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.companion;
+package com.android.server.companion.presence;
 
 import static android.content.Context.BIND_ALMOST_PERCEPTIBLE;
 import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
@@ -33,36 +33,42 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.ServiceThread;
+import com.android.server.companion.CompanionDeviceManagerService;
 
 /**
  * Manages a connection (binding) to an instance of {@link CompanionDeviceService} running in the
  * application process.
  */
 @SuppressLint("LongLogTag")
-class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDeviceService> {
+public class CompanionServiceConnector extends ServiceConnector.Impl<ICompanionDeviceService> {
+
+    /** Listener for changes to the state of the {@link CompanionServiceConnector}  */
+    public interface Listener {
+        /**
+         * Called when service binding is died.
+         */
+        void onBindingDied(@UserIdInt int userId, @NonNull String packageName,
+                @NonNull CompanionServiceConnector serviceConnector);
+    }
+
     private static final String TAG = "CDM_CompanionServiceConnector";
-    private static final boolean DEBUG = false;
 
     /* Unbinding before executing the callbacks can cause problems. Wait 5-seconds before unbind. */
     private static final long UNBIND_POST_DELAY_MS = 5_000;
-
-    /** Listener for changes to the state of the {@link CompanionDeviceServiceConnector}  */
-    interface Listener {
-        void onBindingDied(@UserIdInt int userId, @NonNull String packageName,
-                @NonNull CompanionDeviceServiceConnector serviceConnector);
-    }
-
-    private final @UserIdInt int mUserId;
-    private final @NonNull ComponentName mComponentName;
+    @UserIdInt
+    private final int mUserId;
+    @NonNull
+    private final ComponentName mComponentName;
+    private final boolean mIsPrimary;
     // IMPORTANT: this can (and will!) be null (at the moment, CompanionApplicationController only
     // installs a listener to the primary ServiceConnector), hence we should always null-check the
     // reference before calling on it.
-    private @Nullable Listener mListener;
-    private boolean mIsPrimary;
+    @Nullable
+    private Listener mListener;
 
     /**
      * Create a CompanionDeviceServiceConnector instance.
@@ -79,16 +85,16 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
      * IMPORTANCE_FOREGROUND_SERVICE = 125. In order to kill the one time permission session, the
      * service importance level should be higher than 125.
      */
-    static CompanionDeviceServiceConnector newInstance(@NonNull Context context,
+    static CompanionServiceConnector newInstance(@NonNull Context context,
             @UserIdInt int userId, @NonNull ComponentName componentName, boolean isSelfManaged,
             boolean isPrimary) {
         final int bindingFlags = isSelfManaged ? BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
                 : BIND_ALMOST_PERCEPTIBLE;
-        return new CompanionDeviceServiceConnector(
+        return new CompanionServiceConnector(
                 context, userId, componentName, bindingFlags, isPrimary);
     }
 
-    private CompanionDeviceServiceConnector(@NonNull Context context, @UserIdInt int userId,
+    private CompanionServiceConnector(@NonNull Context context, @UserIdInt int userId,
             @NonNull ComponentName componentName, int bindingFlags, boolean isPrimary) {
         super(context, buildIntent(componentName), bindingFlags, userId, null);
         mUserId = userId;
@@ -133,6 +139,7 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         return mIsPrimary;
     }
 
+    @NonNull
     ComponentName getComponentName() {
         return mComponentName;
     }
@@ -140,17 +147,15 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
     @Override
     protected void onServiceConnectionStatusChanged(
             @NonNull ICompanionDeviceService service, boolean isConnected) {
-        if (DEBUG) {
-            Log.d(TAG, "onServiceConnection_StatusChanged() " + mComponentName.toShortString()
-                    + " connected=" + isConnected);
-        }
+        Slog.d(TAG, "onServiceConnectionStatusChanged() " + mComponentName.toShortString()
+                + " connected=" + isConnected);
     }
 
     @Override
     public void binderDied() {
         super.binderDied();
 
-        if (DEBUG) Log.d(TAG, "binderDied() " + mComponentName.toShortString());
+        Slog.d(TAG, "binderDied() " + mComponentName.toShortString());
 
         // Handle primary process being killed
         if (mListener != null) {
@@ -172,7 +177,8 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
      * within system_server and thus tends to get heavily congested)
      */
     @Override
-    protected @NonNull Handler getJobHandler() {
+    @NonNull
+    protected Handler getJobHandler() {
         return getServiceThread().getThreadHandler();
     }
 
@@ -182,12 +188,14 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         return -1;
     }
 
-    private static @NonNull Intent buildIntent(@NonNull ComponentName componentName) {
+    @NonNull
+    private static Intent buildIntent(@NonNull ComponentName componentName) {
         return new Intent(CompanionDeviceService.SERVICE_INTERFACE)
                 .setComponent(componentName);
     }
 
-    private static @NonNull ServiceThread getServiceThread() {
+    @NonNull
+    private static ServiceThread getServiceThread() {
         if (sServiceThread == null) {
             synchronized (CompanionDeviceManagerService.class) {
                 if (sServiceThread == null) {
@@ -206,5 +214,6 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
      * <p>
      *  Do NOT reference directly, use {@link #getServiceThread()} method instead.
      */
-    private static volatile @Nullable ServiceThread sServiceThread;
+    @Nullable
+    private static volatile ServiceThread sServiceThread;
 }

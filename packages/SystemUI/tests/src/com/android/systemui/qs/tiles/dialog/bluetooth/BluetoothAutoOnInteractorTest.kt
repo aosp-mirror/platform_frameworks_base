@@ -16,22 +16,25 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
-import android.content.pm.UserInfo
+import android.bluetooth.BluetoothAdapter
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.util.settings.FakeSettings
-import com.google.common.truth.Truth
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import kotlin.test.Test
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -41,8 +44,17 @@ class BluetoothAutoOnInteractorTest : SysuiTestCase() {
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private var secureSettings: FakeSettings = FakeSettings()
-    private val userRepository: FakeUserRepository = FakeUserRepository()
+    private val bluetoothAdapter =
+        mock<BluetoothAdapter> {
+            var autoOn = false
+            whenever(isAutoOnEnabled).thenAnswer { autoOn }
+
+            whenever(setAutoOnEnabled(anyBoolean())).thenAnswer { invocation ->
+                autoOn = invocation.getArgument(0) as Boolean
+                autoOn
+            }
+        }
+    @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
     private lateinit var bluetoothAutoOnInteractor: BluetoothAutoOnInteractor
 
     @Before
@@ -50,49 +62,35 @@ class BluetoothAutoOnInteractorTest : SysuiTestCase() {
         bluetoothAutoOnInteractor =
             BluetoothAutoOnInteractor(
                 BluetoothAutoOnRepository(
-                    secureSettings,
-                    userRepository,
+                    localBluetoothManager,
+                    bluetoothAdapter,
                     testScope.backgroundScope,
-                    testDispatcher
+                    testDispatcher,
                 )
             )
     }
 
     @Test
-    fun testSet_bluetoothAutoOnUnset_doNothing() {
+    fun testSetEnabled_bluetoothAutoOnUnsupported_doNothing() {
         testScope.runTest {
+            whenever(bluetoothAdapter.isAutoOnSupported).thenReturn(false)
+
             bluetoothAutoOnInteractor.setEnabled(true)
-
-            val actualValue by collectLastValue(bluetoothAutoOnInteractor.isEnabled)
-
             runCurrent()
 
-            Truth.assertThat(actualValue).isEqualTo(false)
+            assertFalse(bluetoothAdapter.isAutoOnEnabled)
         }
     }
 
     @Test
-    fun testSet_bluetoothAutoOnSet_setNewValue() {
+    fun testSetEnabled_bluetoothAutoOnSupported_setNewValue() {
         testScope.runTest {
-            userRepository.setUserInfos(listOf(SYSTEM_USER))
-            secureSettings.putIntForUser(
-                BluetoothAutoOnRepository.SETTING_NAME,
-                BluetoothAutoOnInteractor.DISABLED,
-                SYSTEM_USER_ID
-            )
+            whenever(bluetoothAdapter.isAutoOnSupported).thenReturn(true)
+
             bluetoothAutoOnInteractor.setEnabled(true)
-
-            val actualValue by collectLastValue(bluetoothAutoOnInteractor.isEnabled)
-
             runCurrent()
 
-            Truth.assertThat(actualValue).isEqualTo(true)
+            assertTrue(bluetoothAdapter.isAutoOnEnabled)
         }
-    }
-
-    companion object {
-        private const val SYSTEM_USER_ID = 0
-        private val SYSTEM_USER =
-            UserInfo(/* id= */ SYSTEM_USER_ID, /* name= */ "system user", /* flags= */ 0)
     }
 }

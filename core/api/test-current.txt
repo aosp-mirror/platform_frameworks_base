@@ -1721,6 +1721,15 @@ package android.hardware.display {
 
 }
 
+package android.hardware.fingerprint {
+
+  @Deprecated public class FingerprintManager {
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public android.hardware.biometrics.BiometricTestSession createTestSession(int);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.TEST_BIOMETRIC) public java.util.List<android.hardware.biometrics.SensorProperties> getSensorProperties();
+  }
+
+}
+
 package android.hardware.hdmi {
 
   public final class HdmiControlServiceWrapper {

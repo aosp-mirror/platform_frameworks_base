@@ -32,7 +32,6 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.keyguard.ClockEventController
 import com.android.systemui.customization.R as customizationR
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
@@ -44,12 +43,10 @@ import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.util.Utils
 import kotlin.reflect.KSuspendFunction1
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /** Binder for the small clock view, large clock view. */
 object KeyguardPreviewClockViewBinder {
-
     @JvmStatic
     fun bind(
         largeClockHostView: View,
@@ -72,52 +69,38 @@ object KeyguardPreviewClockViewBinder {
     @JvmStatic
     fun bind(
         context: Context,
-        displayId: Int,
         rootView: ConstraintLayout,
         viewModel: KeyguardPreviewClockViewModel,
-        clockEventController: ClockEventController,
         updateClockAppearance: KSuspendFunction1<ClockController, Unit>,
     ) {
-        // TODO(b/327668072): When this function is called multiple times, the clock view can be
-        //                    gone due to a race condition on removeView and addView.
         rootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    combine(viewModel.selectedClockSize, viewModel.previewClockPair) { _, clock ->
-                            clock
+                    var lastClock: ClockController? = null
+                    viewModel.previewClock.collect { currentClock ->
+                        lastClock?.let { clock ->
+                            (clock.largeClock.layout.views + clock.smallClock.layout.views)
+                                .forEach { rootView.removeView(it) }
                         }
-                        .collect { previewClockPair ->
-                            viewModel.lastClockPair?.let { clockPair ->
-                                (clockPair.first.largeClock.layout.views +
-                                        clockPair.first.smallClock.layout.views)
-                                    .forEach { rootView.removeView(it) }
-                                (clockPair.second.largeClock.layout.views +
-                                        clockPair.second.smallClock.layout.views)
-                                    .forEach { rootView.removeView(it) }
-                            }
-                            viewModel.lastClockPair = previewClockPair
-                            val clockPreview =
-                                if (displayId == 0) previewClockPair.first
-                                else previewClockPair.second
-                            clockEventController.clock = clockPreview
-                            updateClockAppearance(clockPreview)
+                        lastClock = currentClock
+                        updateClockAppearance(currentClock)
 
-                            if (viewModel.shouldHighlightSelectedAffordance) {
-                                (clockPreview.largeClock.layout.views +
-                                        clockPreview.smallClock.layout.views)
-                                    .forEach { it.alpha = KeyguardPreviewRenderer.DIM_ALPHA }
-                            }
-                            clockPreview.largeClock.layout.views.forEach {
-                                (it.parent as? ViewGroup)?.removeView(it)
-                                rootView.addView(it)
-                            }
-
-                            clockPreview.smallClock.layout.views.forEach {
-                                (it.parent as? ViewGroup)?.removeView(it)
-                                rootView.addView(it)
-                            }
-                            applyPreviewConstraints(context, rootView, viewModel)
+                        if (viewModel.shouldHighlightSelectedAffordance) {
+                            (currentClock.largeClock.layout.views +
+                                    currentClock.smallClock.layout.views)
+                                .forEach { it.alpha = KeyguardPreviewRenderer.DIM_ALPHA }
                         }
+                        currentClock.largeClock.layout.views.forEach {
+                            (it.parent as? ViewGroup)?.removeView(it)
+                            rootView.addView(it)
+                        }
+
+                        currentClock.smallClock.layout.views.forEach {
+                            (it.parent as? ViewGroup)?.removeView(it)
+                            rootView.addView(it)
+                        }
+                        applyPreviewConstraints(context, rootView, currentClock, viewModel)
+                    }
                 }
             }
         }
@@ -170,15 +153,13 @@ object KeyguardPreviewClockViewBinder {
     private fun applyPreviewConstraints(
         context: Context,
         rootView: ConstraintLayout,
+        previewClock: ClockController,
         viewModel: KeyguardPreviewClockViewModel
     ) {
         val cs = ConstraintSet().apply { clone(rootView) }
-        val clockPair = viewModel.previewClockPair.value
         applyClockDefaultConstraints(context, cs)
-        clockPair.first.largeClock.layout.applyPreviewConstraints(cs)
-        clockPair.first.smallClock.layout.applyPreviewConstraints(cs)
-        clockPair.second.largeClock.layout.applyPreviewConstraints(cs)
-        clockPair.second.smallClock.layout.applyPreviewConstraints(cs)
+        previewClock.largeClock.layout.applyPreviewConstraints(cs)
+        previewClock.smallClock.layout.applyPreviewConstraints(cs)
 
         // When selectedClockSize is the initial value, make both clocks invisible to avoid
         // flickering
@@ -194,12 +175,9 @@ object KeyguardPreviewClockViewBinder {
                 SettingsClockSize.SMALL -> VISIBLE
                 null -> INVISIBLE
             }
-
         cs.apply {
-            setVisibility(clockPair.first.largeClock.layout.views, largeClockVisibility)
-            setVisibility(clockPair.first.smallClock.layout.views, smallClockVisibility)
-            setVisibility(clockPair.second.largeClock.layout.views, largeClockVisibility)
-            setVisibility(clockPair.second.smallClock.layout.views, smallClockVisibility)
+            setVisibility(previewClock.largeClock.layout.views, largeClockVisibility)
+            setVisibility(previewClock.smallClock.layout.views, smallClockVisibility)
         }
         cs.applyTo(rootView)
     }

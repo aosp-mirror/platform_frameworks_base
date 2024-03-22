@@ -33,8 +33,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
@@ -251,6 +253,31 @@ final class AutofillManagerServiceImpl
     @Override // from PerUserSystemService
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
+        final List<ResolveInfo> resolveInfos =
+                getContext().getPackageManager().queryIntentServicesAsUser(
+                    new Intent(AutofillService.SERVICE_INTERFACE),
+                    // The MATCH_INSTANT flag is added because curret autofill CTS module is
+                    // defined in one apk, which makes the test autofill service installed in a
+                    // instant app when the CTS tests are running in instant app mode.
+                    // TODO: Remove MATCH_INSTANT flag after completing refactoring the CTS module
+                    //       to make the test autofill service a separate apk.
+                    PackageManager.GET_META_DATA | PackageManager.MATCH_INSTANT,
+                    mUserId);
+        boolean serviceHasAutofillIntentFilter = false;
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            if (serviceInfo.getComponentName().equals(serviceComponent)) {
+                serviceHasAutofillIntentFilter = true;
+                break;
+            }
+        }
+        if (!serviceHasAutofillIntentFilter) {
+            Slog.w(TAG,
+                    "Autofill service from '" + serviceComponent.getPackageName() + "' does"
+                            + "not have intent filter " + AutofillService.SERVICE_INTERFACE);
+            throw new SecurityException("Service does not declare intent filter "
+                            + AutofillService.SERVICE_INTERFACE);
+        }
         mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
         return mInfo.getServiceInfo();
     }

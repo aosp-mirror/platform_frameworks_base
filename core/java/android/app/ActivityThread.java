@@ -712,16 +712,22 @@ public final class ActivityThread extends ClientTransactionHandler
             stopped = false;
             hideForNow = false;
             activityConfigCallback = new ViewRootImpl.ActivityConfigCallback() {
+
                 @Override
-                public void onConfigurationChanged(Configuration overrideConfig,
-                        int newDisplayId) {
+                public void onConfigurationChanged(@NonNull Configuration overrideConfig,
+                        int newDisplayId, @Nullable ActivityWindowInfo activityWindowInfo) {
                     if (activity == null) {
                         throw new IllegalStateException(
                                 "Received config update for non-existing activity");
                     }
+                    if (activityWindowInfoFlag() && activityWindowInfo == null) {
+                        Log.w(TAG, "Received empty ActivityWindowInfo update for r=" + activity);
+                        activityWindowInfo = mActivityWindowInfo;
+                    }
                     activity.mMainThread.handleActivityConfigurationChanged(
                             ActivityClientRecord.this, overrideConfig, newDisplayId,
-                            mActivityWindowInfo, false /* alwaysReportChange */);
+                            activityWindowInfo,
+                            false /* alwaysReportChange */);
                 }
 
                 @Override

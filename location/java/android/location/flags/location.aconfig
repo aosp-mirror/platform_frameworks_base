@@ -8,7 +8,15 @@ flag {
 }
 
 flag {
+    name: "enable_location_bypass"
+    namespace: "location"
+    description: "Enable location bypass feature"
+    bug: "301150056"
+}
+
+flag {
     name: "location_bypass"
+    is_exported: true
     namespace: "location"
     description: "Enable location bypass appops behavior"
     bug: "329151785"

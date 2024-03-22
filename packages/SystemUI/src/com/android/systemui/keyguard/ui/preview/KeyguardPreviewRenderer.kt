@@ -50,8 +50,6 @@ import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
-import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -61,6 +59,8 @@ import com.android.systemui.communal.ui.viewmodel.CommunalTutorialIndicatorViewM
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -186,7 +186,7 @@ constructor(
         coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job())
         disposables += DisposableHandle { coroutineScope.cancel() }
 
-        if (keyguardBottomAreaRefactor()) {
+        if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
                     bundle.getString(
@@ -204,7 +204,7 @@ constructor(
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         }
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             clockViewModel.shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance
         }
         runBlocking(mainDispatcher) {
@@ -231,7 +231,7 @@ constructor(
 
             setupKeyguardRootView(previewContext, rootView)
 
-            if (!keyguardBottomAreaRefactor()) {
+            if (!KeyguardBottomAreaRefactor.isEnabled) {
                 setUpBottomArea(rootView)
             }
 
@@ -275,7 +275,7 @@ constructor(
     }
 
     fun onSlotSelected(slotId: String) {
-        if (keyguardBottomAreaRefactor()) {
+        if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.onPreviewSlotSelected(slotId = slotId)
         } else {
             bottomAreaViewModel.onPreviewSlotSelected(slotId = slotId)
@@ -286,7 +286,7 @@ constructor(
         isDestroyed = true
         lockscreenSmartspaceController.disconnect()
         disposables.dispose()
-        if (keyguardBottomAreaRefactor()) {
+        if (KeyguardBottomAreaRefactor.isEnabled) {
             shortcutsBindings.forEach { it.destroy() }
         }
     }
@@ -372,7 +372,7 @@ constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
         val keyguardRootView = KeyguardRootView(previewContext, null)
-        if (!keyguardBottomAreaRefactor()) {
+        if (!KeyguardBottomAreaRefactor.isEnabled) {
             disposables +=
                 KeyguardRootViewBinder.bind(
                     keyguardRootView,
@@ -397,21 +397,22 @@ constructor(
             ),
         )
 
-        setUpUdfps(previewContext, if (migrateClocksToBlueprint()) keyguardRootView else rootView)
+        setUpUdfps(
+            previewContext,
+            if (MigrateClocksToBlueprint.isEnabled) keyguardRootView else rootView
+        )
 
-        if (keyguardBottomAreaRefactor()) {
+        if (KeyguardBottomAreaRefactor.isEnabled) {
             setupShortcuts(keyguardRootView)
         }
 
         if (!shouldHideClock) {
             setUpClock(previewContext, rootView)
-            if (migrateClocksToBlueprint()) {
+            if (MigrateClocksToBlueprint.isEnabled) {
                 KeyguardPreviewClockViewBinder.bind(
                     context,
-                    displayId,
                     keyguardRootView,
                     clockViewModel,
-                    clockController,
                     ::updateClockAppearance
                 )
             } else {
@@ -482,7 +483,7 @@ constructor(
                 ) as View
 
         // Place the UDFPS view in the proper sensor location
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             finger.id = R.id.lock_icon_view
             parentView.addView(finger)
             val cs = ConstraintSet()
@@ -509,7 +510,7 @@ constructor(
 
     private fun setUpClock(previewContext: Context, parentView: ViewGroup) {
         val resources = parentView.resources
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             largeClockHostView = FrameLayout(previewContext)
             largeClockHostView.layoutParams =
                 FrameLayout.LayoutParams(
@@ -547,7 +548,7 @@ constructor(
         }
 
         // TODO (b/283465254): Move the listeners to KeyguardClockRepository
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             val clockChangeListener =
                 object : ClockRegistry.ClockChangeListener {
                     override fun onCurrentClockChanged() {
@@ -581,7 +582,7 @@ constructor(
         )
         disposables += DisposableHandle { broadcastDispatcher.unregisterReceiver(receiver) }
 
-        if (!migrateClocksToBlueprint()) {
+        if (!MigrateClocksToBlueprint.isEnabled) {
             val layoutChangeListener =
                 View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
                     if (clockController.clock !is DefaultClockController) {
@@ -629,7 +630,7 @@ constructor(
         }
     }
     private fun onClockChanged() {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             return
         }
         coroutineScope.launch {
@@ -676,7 +677,7 @@ constructor(
     }
 
     private fun updateLargeClock(clock: ClockController) {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             return
         }
         clock.largeClock.events.onTargetRegionChanged(
@@ -690,7 +691,7 @@ constructor(
     }
 
     private fun updateSmallClock(clock: ClockController) {
-        if (migrateClocksToBlueprint()) {
+        if (MigrateClocksToBlueprint.isEnabled) {
             return
         }
         clock.smallClock.events.onTargetRegionChanged(

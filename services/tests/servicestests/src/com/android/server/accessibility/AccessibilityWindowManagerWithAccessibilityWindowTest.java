@@ -470,6 +470,27 @@ public class AccessibilityWindowManagerWithAccessibilityWindowTest {
     }
 
     @Test
+    public void onWindowsChanged_shouldNotReportfullyOccludedWindow() {
+        final AccessibilityWindow frontWindow = mWindows.get(Display.DEFAULT_DISPLAY).get(0);
+        setRegionForMockAccessibilityWindow(frontWindow, new Region(100, 100, 300, 300));
+        final int frontWindowId = mA11yWindowManager.findWindowIdLocked(
+                USER_SYSTEM_ID, frontWindow.getWindowInfo().token);
+
+        // index 1 is focused. Let's use the next one for this test.
+        final AccessibilityWindow occludedWindow = mWindows.get(Display.DEFAULT_DISPLAY).get(2);
+        setRegionForMockAccessibilityWindow(occludedWindow, new Region(150, 150, 250, 250));
+        final int occludedWindowId = mA11yWindowManager.findWindowIdLocked(
+                USER_SYSTEM_ID, occludedWindow.getWindowInfo().token);
+
+        onAccessibilityWindowsChanged(Display.DEFAULT_DISPLAY, SEND_ON_WINDOW_CHANGES);
+
+        final List<AccessibilityWindowInfo> a11yWindows =
+                mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY);
+        assertThat(a11yWindows, hasItem(windowId(frontWindowId)));
+        assertThat(a11yWindows, not(hasItem(windowId(occludedWindowId))));
+    }
+
+    @Test
     public void onWindowsChangedAndForceSend_shouldUpdateWindows() {
         assertNotEquals("new title",
                 toString(mA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY)

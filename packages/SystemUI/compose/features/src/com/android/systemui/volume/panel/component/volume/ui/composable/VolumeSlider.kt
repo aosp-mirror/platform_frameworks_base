@@ -17,17 +17,19 @@
 package com.android.systemui.volume.panel.component.volume.ui.composable
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,16 +54,15 @@ fun VolumeSlider(
     modifier: Modifier = Modifier,
     sliderColors: PlatformSliderColors,
 ) {
-    val value by
-        animateFloatAsState(targetValue = state.value, label = "VolumeSliderValueAnimation")
+    val value by valueState(state)
     PlatformSlider(
         modifier =
             modifier.clearAndSetSemantics {
                 if (!state.isEnabled) disabled()
                 contentDescription = state.label
 
-                // provide a not animated value to the a11y because it fails to announce the settled
-                // value when it changes rapidly.
+                // provide a not animated value to the a11y because it fails to announce the
+                // settled value when it changes rapidly.
                 progressBarRangeInfo = ProgressBarRangeInfo(state.value, state.valueRange)
                 setProgress { targetValue ->
                     val targetDirection =
@@ -99,29 +100,27 @@ fun VolumeSlider(
         },
         colors = sliderColors,
         label = {
-            Column(modifier = Modifier) {
-                Text(
-                    modifier = Modifier.basicMarquee(),
-                    text = state.label,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = LocalContentColor.current,
-                    maxLines = 1,
-                )
-
-                if (!state.isEnabled) {
-                    state.disabledMessage?.let { message ->
-                        Text(
-                            modifier = Modifier.basicMarquee(),
-                            text = message,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = LocalContentColor.current,
-                            maxLines = 1,
-                        )
-                    }
-                }
-            }
+            VolumeSliderContent(
+                modifier = Modifier,
+                label = state.label,
+                isEnabled = state.isEnabled,
+                disabledMessage = state.disabledMessage,
+            )
         }
     )
+}
+
+@Composable
+private fun valueState(state: SliderState): State<Float> {
+    var prevState by remember { mutableStateOf(state) }
+    // Don't animate slider value when receive the first value and when changing isEnabled state
+    val shouldSkipAnimation =
+        prevState is SliderState.Empty || prevState.isEnabled != state.isEnabled
+    val value =
+        if (shouldSkipAnimation) mutableFloatStateOf(state.value)
+        else animateFloatAsState(targetValue = state.value, label = "VolumeSliderValueAnimation")
+    prevState = state
+    return value
 }
 
 @Composable
