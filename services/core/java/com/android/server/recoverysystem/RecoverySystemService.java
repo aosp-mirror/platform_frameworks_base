@@ -30,6 +30,7 @@ import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_
 import static com.android.internal.widget.LockSettingsInternal.ARM_REBOOT_ERROR_NO_PROVIDER;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.apex.CompressedApexInfo;
 import android.apex.CompressedApexInfoList;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.boot.IBootControl;
+import android.hardware.security.secretkeeper.ISecretkeeper;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Binder;
@@ -552,6 +554,28 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         } catch (android.security.KeyStoreException e) {
             Log.wtf(TAG, "Failed to delete all keys from keystore.", e);
         }
+
+        try {
+            ISecretkeeper secretKeeper = getSecretKeeper();
+            if (secretKeeper != null) {
+                Slogf.i(TAG, "ISecretkeeper.deleteAll();");
+                secretKeeper.deleteAll();
+            }
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failed to delete all secrets from secretkeeper.", e);
+        }
+    }
+
+    private static @Nullable ISecretkeeper getSecretKeeper() {
+        ISecretkeeper result = null;
+        try {
+            result = ISecretkeeper.Stub.asInterface(
+                ServiceManager.waitForDeclaredService(ISecretkeeper.DESCRIPTOR + "/default"));
+        } catch (SecurityException e) {
+            Slog.w(TAG, "Does not have permissions to get AIDL secretkeeper service");
+        }
+
+        return result;
     }
 
     private void enforcePermissionForResumeOnReboot() {

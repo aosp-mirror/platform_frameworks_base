@@ -169,7 +169,9 @@ java_library_static {
         "android.hardware.health-V3-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
+        "android.hardware.security.authgraph-V1-java",
         "android.hardware.security.rkp-V3-java",
+        "android.hardware.security.secretkeeper-V1-java",
         "android.hardware.tv.cec-V1.1-java",
         "android.hardware.tv.hdmi.cec-V1-java",
         "android.hardware.tv.hdmi.connection-V1-java",
