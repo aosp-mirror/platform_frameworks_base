@@ -74,8 +74,13 @@ constructor(
                     keyguardInteractor.isKeyguardShowing,
                     primaryBouncerInteractor.isShowing,
                     alternateBouncerInteractor.isVisible,
-                ) { occluded, showing, primaryBouncerShowing, alternateBouncerVisible ->
-                    occluded && showing && !primaryBouncerShowing && !alternateBouncerVisible
+                    keyguardInteractor.isDozing,
+                ) { occluded, showing, primaryBouncerShowing, alternateBouncerVisible, dozing ->
+                    occluded &&
+                        showing &&
+                        !primaryBouncerShowing &&
+                        !alternateBouncerVisible &&
+                        !dozing
                 }
                 .distinctUntilChanged()
         }
