@@ -228,6 +228,11 @@ public class ResourcesImpl {
         return mAssets;
     }
 
+    @UnsupportedAppUsage
+    public DisplayMetrics getMetrics() {
+        return mMetrics;
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     DisplayMetrics getDisplayMetrics() {
         if (DEBUG_CONFIG) Slog.v(TAG, "Returning DisplayMetrics: " + mMetrics.widthPixels
@@ -235,7 +240,8 @@ public class ResourcesImpl {
         return mMetrics;
     }
 
-    Configuration getConfiguration() {
+    @UnsupportedAppUsage
+    public Configuration getConfiguration() {
         return mConfiguration;
     }
 
