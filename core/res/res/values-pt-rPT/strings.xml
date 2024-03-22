@@ -1901,7 +1901,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"A Poupança de bateria ativa o tema escuro e limita ou desativa a atividade em segundo plano, alguns efeitos visuais, determinadas funcionalidades e algumas ligações de rede."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Uma determinada app que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas apps enviem ou recebam dados em segundo plano. Qualquer app que esteja a usar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nelas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durante um minuto (até à[s] {formattedTime})}many{Durante # minutos (até à[s] {formattedTime})}other{Durante # minutos (até à[s] {formattedTime})}}"</string>
@@ -1972,7 +1972,7 @@
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Adicionar utilizador supervisionado"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"Preferência de região"</string>
-    <string name="search_language_hint" msgid="7004225294308793583">"Intr. nome do idioma"</string>
+    <string name="search_language_hint" msgid="7004225294308793583">"Introduza o idioma"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugeridos"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Sugeridas"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Idiomas sugeridos"</string>
