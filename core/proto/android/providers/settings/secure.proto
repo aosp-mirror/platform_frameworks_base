@@ -249,6 +249,11 @@ message SecureSettingsProto {
     }
     optional DateTime date_time = 90;
 
+    message Display {
+        optional SettingProto screen_resolution_mode = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Display display = 100;
+
     message Doze {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -727,5 +732,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 100;
+    // Next tag = 101;
 }
