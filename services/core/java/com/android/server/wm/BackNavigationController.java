@@ -748,6 +748,10 @@ class BackNavigationController {
         if (!isMonitoringTransition() || targets.isEmpty()) {
             return;
         }
+        if (mAnimationHandler.hasTargetDetached()) {
+            mNavigationMonitor.cancelBackNavigating("targetDetached");
+            return;
+        }
         for (int i = targets.size() - 1; i >= 0; --i) {
             final WindowContainer wc = targets.get(i).mContainer;
             if (wc.asActivityRecord() == null && wc.asTask() == null
@@ -1120,6 +1124,21 @@ class BackNavigationController {
             return containTarget(closeApps, false /* open */)
                     && (containTarget(openApps, true /* open */)
                     || containTarget(openApps, false /* open */));
+        }
+
+        /**
+         * Check if any animation target is detached, possibly due to app crash.
+         */
+        boolean hasTargetDetached() {
+            if (!mComposed) {
+                return false;
+            }
+            for (int i = mOpenAnimAdaptor.mAdaptors.length - 1; i >= 0; --i) {
+                if (!mOpenAnimAdaptor.mAdaptors[i].mTarget.isAttached()) {
+                    return true;
+                }
+            }
+            return !mCloseAdaptor.mTarget.isAttached();
         }
 
         @Override
@@ -1659,6 +1678,10 @@ class BackNavigationController {
     }
 
     private static void restoreLaunchBehind(@NonNull ActivityRecord activity) {
+        if (!activity.isAttached()) {
+            // The activity was detached from hierarchy.
+            return;
+        }
         activity.mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
 
         // Restore the launch-behind state.
