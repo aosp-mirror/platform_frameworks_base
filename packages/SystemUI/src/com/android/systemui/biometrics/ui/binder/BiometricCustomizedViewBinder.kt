@@ -39,23 +39,20 @@ import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.ui.BiometricPromptLayout
-import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlin.math.ceil
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Sub-binder for [BiometricPromptLayout.customized_view_container]. */
 object BiometricCustomizedViewBinder {
     fun bind(
         customizedViewContainer: LinearLayout,
-        viewModel: PromptViewModel,
+        contentView: PromptContentView?,
         legacyCallback: Spaghetti.Callback
     ) {
         customizedViewContainer.repeatWhenAttached { containerView ->
             lifecycleScope.launch {
-                val contentView: PromptContentView? = viewModel.contentView.first()
                 if (contentView == null) {
                     containerView.visibility = View.GONE
                     return@launch

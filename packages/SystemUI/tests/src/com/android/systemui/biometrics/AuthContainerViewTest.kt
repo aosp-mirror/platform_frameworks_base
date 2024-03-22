@@ -418,9 +418,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowCredentialUI_withDescription() {
-        val container = initializeFingerprintContainer(
-                authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        )
+        val container =
+                initializeFingerprintContainer(
+                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                )
         waitForIdleSync()
 
         assertThat(container.hasCredentialView()).isTrue()
@@ -447,6 +448,25 @@ open class AuthContainerViewTest : SysuiTestCase() {
         // TODO(b/302735104): Check the reason why hasConstraintBiometricPrompt() is still true
         // assertThat(container.hasConstraintBiometricPrompt()).isFalse()
         assertThat(container.hasCredentialView()).isTrue()
+    }
+
+    @Test
+    fun testShowCredentialUI_withContentViewWithMoreOptionsButton() {
+        mSetFlagsRule.enableFlags(FLAG_CONSTRAINT_BP)
+        mSetFlagsRule.enableFlags(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        val contentView =
+                PromptContentViewWithMoreOptionsButton.Builder()
+                        .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
+                        .build()
+        val container =
+                initializeFingerprintContainer(
+                        authenticators = BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+                        contentViewWithMoreOptionsButton = contentView
+                )
+        waitForIdleSync()
+
+        assertThat(container.hasCredentialView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
     }
 
     @Test

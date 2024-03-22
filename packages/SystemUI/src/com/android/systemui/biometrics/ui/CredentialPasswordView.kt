@@ -10,10 +10,11 @@ import android.view.WindowInsets
 import android.view.accessibility.AccessibilityManager
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.ui.binder.CredentialViewBinder
+import com.android.systemui.biometrics.ui.binder.Spaghetti
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
+import com.android.systemui.res.R
 
 /** PIN or password credential view for BiometricPrompt. */
 class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
@@ -31,8 +32,16 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
         host: CredentialView.Host,
         panelViewController: AuthPanelController,
         animatePanel: Boolean,
+        legacyCallback: Spaghetti.Callback,
     ) {
-        CredentialViewBinder.bind(this, host, viewModel, panelViewController, animatePanel)
+        CredentialViewBinder.bind(
+            this,
+            host,
+            viewModel,
+            panelViewController,
+            animatePanel,
+            legacyCallback
+        )
     }
 
     override fun onFinishInflate() {

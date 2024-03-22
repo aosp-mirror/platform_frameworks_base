@@ -171,7 +171,7 @@ object BiometricViewBinder {
             if (Flags.customBiometricPrompt() && constraintBp()) {
                 BiometricCustomizedViewBinder.bind(
                     customizedViewContainer,
-                    viewModel,
+                    viewModel.contentView.first(),
                     legacyCallback
                 )
             }
