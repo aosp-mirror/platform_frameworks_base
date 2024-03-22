@@ -119,6 +119,14 @@ final class InputMethodBindingController {
     }
 
     /**
+     * Interface used to abstract {@code InputMethodBindingController} instantiation.
+     */
+    interface Creator {
+
+        InputMethodBindingController create();
+    }
+
+    /**
      * Time that we last initiated a bind to the input method, to determine
      * if we should try to disconnect and reconnect to it.
      */
