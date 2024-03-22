@@ -107,6 +107,7 @@ import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
+import android.util.SizeF;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -163,6 +164,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
+import java.util.stream.Collectors;
 
 class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBackupProvider,
         OnCrossProfileWidgetProvidersChangeListener {
@@ -175,6 +177,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static final int KEYGUARD_HOST_ID = 0x4b455947;
 
     private static final String STATE_FILENAME = "appwidgets.xml";
+
+    private static final String KEY_SIZES = "sizes";
+    private static final String SIZE_SEPARATOR = ",";
 
     private static final int MIN_UPDATE_PERIOD = DEBUG ? 0 : 30 * 60 * 1000; // 30 minutes
 
@@ -2710,6 +2715,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             out.attributeIntHex(null, "max_height", (maxHeight > 0) ? maxHeight : 0);
             out.attributeIntHex(null, "host_category", widget.options.getInt(
                     AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY));
+            List<SizeF> sizes = widget.options.getParcelableArrayList(
+                    AppWidgetManager.OPTION_APPWIDGET_SIZES, SizeF.class);
+            if (sizes != null) {
+                String sizeStr = sizes.stream().map(SizeF::toString)
+                        .collect(Collectors.joining(SIZE_SEPARATOR));
+                out.attribute(null, KEY_SIZES, sizeStr);
+            }
             if (saveRestoreCompleted) {
                 boolean restoreCompleted = widget.options.getBoolean(
                         AppWidgetManager.OPTION_APPWIDGET_RESTORE_COMPLETED);
@@ -2740,6 +2752,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         int maxHeight = parser.getAttributeIntHex(null, "max_height", -1);
         if (maxHeight != -1) {
             options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight);
+        }
+        String sizesStr = parser.getAttributeValue(null, KEY_SIZES);
+        if (sizesStr != null) {
+            try {
+                ArrayList<SizeF> sizes = Arrays.stream(sizesStr.split(SIZE_SEPARATOR))
+                        .map(SizeF::parseSizeF)
+                        .collect(Collectors.toCollection(ArrayList::new));
+                options.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES, sizes);
+            } catch (NumberFormatException e) {
+                Slog.e(TAG, "Error parsing widget sizes", e);
+            }
         }
         int category = parser.getAttributeIntHex(null, "host_category",
                 AppWidgetProviderInfo.WIDGET_CATEGORY_UNKNOWN);
