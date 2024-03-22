@@ -846,17 +846,6 @@ package android.app.prediction {
 
 }
 
-package android.app.tare {
-
-  public class EconomyManager {
-    method public int getEnabledMode();
-    field public static final int ENABLED_MODE_OFF = 0; // 0x0
-    field public static final int ENABLED_MODE_SHADOW = 2; // 0x2
-    field public static final String KEY_ENABLE_TARE_MODE = "enable_tare_mode";
-  }
-
-}
-
 package android.app.usage {
 
   public class StorageStatsManager {

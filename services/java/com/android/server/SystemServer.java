@@ -324,8 +324,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.job.JobSchedulerService";
     private static final String LOCK_SETTINGS_SERVICE_CLASS =
             "com.android.server.locksettings.LockSettingsService$Lifecycle";
-    private static final String RESOURCE_ECONOMY_SERVICE_CLASS =
-            "com.android.server.tare.InternalResourceService";
     private static final String STORAGE_MANAGER_SERVICE_CLASS =
             "com.android.server.StorageManagerService$Lifecycle";
     private static final String STORAGE_STATS_SERVICE_CLASS =
@@ -1638,11 +1636,6 @@ public final class SystemServer implements Dumpable {
                 ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
                 t.traceEnd();
             }
-
-            // TODO(aml-jobscheduler): Think about how to do it properly.
-            t.traceBegin("StartResourceEconomy");
-            mSystemServiceManager.startService(RESOURCE_ECONOMY_SERVICE_CLASS);
-            t.traceEnd();
 
             // TODO(aml-jobscheduler): Think about how to do it properly.
             t.traceBegin("StartAlarmManagerService");

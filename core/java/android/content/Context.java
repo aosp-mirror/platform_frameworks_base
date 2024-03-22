@@ -5914,15 +5914,6 @@ public abstract class Context {
     public static final String JOB_SCHEDULER_SERVICE = "jobscheduler";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.app.tare.EconomyManager} instance for understanding economic standing.
-     * @see #getSystemService(String)
-     * @hide
-     * @see android.app.tare.EconomyManager
-     */
-    public static final String RESOURCE_ECONOMY_SERVICE = "tare";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.service.persistentdata.PersistentDataBlockManager} instance
      * for interacting with a storage device that lives across factory resets.

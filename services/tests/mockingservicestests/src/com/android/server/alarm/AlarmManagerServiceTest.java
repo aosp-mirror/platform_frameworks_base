@@ -69,7 +69,6 @@ import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REFRESH_
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_ALARMS;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_LISTENER_ALARMS_ON_CACHED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
-import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TARE_AFFORDABILITY_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TEMPORARY_QUOTA_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_QUOTA;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_WINDOW;
@@ -126,7 +125,6 @@ import android.app.IAlarmListener;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
-import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.ContentResolver;
@@ -177,8 +175,6 @@ import com.android.server.SystemService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.tare.AlarmManagerEconomicPolicy;
-import com.android.server.tare.EconomyManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
 import libcore.util.EmptyArray;
@@ -256,8 +252,6 @@ public final class AlarmManagerServiceTest {
     private AlarmManagerService.ClockReceiver mClockReceiver;
     @Mock
     private PowerManager.WakeLock mWakeLock;
-    @Mock
-    private EconomyManagerInternal mEconomyManagerInternal;
     @Mock
     DeviceConfig.Properties mDeviceConfigProperties;
     HashSet<String> mDeviceConfigKeys = new HashSet<>();
@@ -440,8 +434,6 @@ public final class AlarmManagerServiceTest {
         doReturn(mIActivityManager).when(ActivityManager::getService);
         doReturn(mDeviceIdleInternal).when(
                 () -> LocalServices.getService(DeviceIdleInternal.class));
-        doReturn(mEconomyManagerInternal).when(
-                () -> LocalServices.getService(EconomyManagerInternal.class));
         doReturn(mPermissionManagerInternal).when(
                 () -> LocalServices.getService(PermissionManagerServiceInternal.class));
         doReturn(mActivityManagerInternal).when(
@@ -532,7 +524,6 @@ public final class AlarmManagerServiceTest {
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         verify(mBatteryManager).isCharging();
-        setTareEnabled(EconomyManager.ENABLED_MODE_OFF);
         mAppStandbyWindow = mService.mConstants.APP_STANDBY_WINDOW;
         mAllowWhileIdleWindow = mService.mConstants.ALLOW_WHILE_IDLE_WINDOW;
 
@@ -700,12 +691,6 @@ public final class AlarmManagerServiceTest {
         mDeviceConfigKeys.add(key);
         doReturn(val).when(mDeviceConfigProperties).getString(eq(key), anyString());
         mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
-    }
-
-    private void setTareEnabled(int enabledMode) {
-        when(mEconomyManagerInternal.getEnabledMode(eq(AlarmManagerEconomicPolicy.POLICY_ALARM)))
-                .thenReturn(enabledMode);
-        mService.mConstants.onTareEnabledModeChanged(enabledMode);
     }
 
     /**
@@ -2083,44 +2068,6 @@ public final class AlarmManagerServiceTest {
     }
 
     @Test
-    public void tareThrottling() {
-        setTareEnabled(EconomyManager.ENABLED_MODE_ON);
-        final ArgumentCaptor<EconomyManagerInternal.AffordabilityChangeListener> listenerCaptor =
-                ArgumentCaptor.forClass(EconomyManagerInternal.AffordabilityChangeListener.class);
-        final ArgumentCaptor<EconomyManagerInternal.ActionBill> billCaptor =
-                ArgumentCaptor.forClass(EconomyManagerInternal.ActionBill.class);
-
-        when(mEconomyManagerInternal
-                .canPayFor(eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), billCaptor.capture()))
-                .thenReturn(false);
-
-        final PendingIntent alarmPi = getNewMockPendingIntent();
-        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 15, alarmPi);
-        assertEquals(mNowElapsedTest + INDEFINITE_DELAY, mTestTimer.getElapsed());
-
-        final EconomyManagerInternal.ActionBill bill = billCaptor.getValue();
-        verify(mEconomyManagerInternal).registerAffordabilityChangeListener(
-                eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE),
-                listenerCaptor.capture(), eq(bill));
-        final EconomyManagerInternal.AffordabilityChangeListener listener =
-                listenerCaptor.getValue();
-
-        when(mEconomyManagerInternal
-                .canPayFor(eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), eq(bill)))
-                .thenReturn(true);
-        listener.onAffordabilityChanged(TEST_CALLING_USER, TEST_CALLING_PACKAGE, bill, true);
-        assertAndHandleMessageSync(TARE_AFFORDABILITY_CHANGED);
-        assertEquals(mNowElapsedTest + 15, mTestTimer.getElapsed());
-
-        when(mEconomyManagerInternal
-                .canPayFor(eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), eq(bill)))
-                .thenReturn(false);
-        listener.onAffordabilityChanged(TEST_CALLING_USER, TEST_CALLING_PACKAGE, bill, false);
-        assertAndHandleMessageSync(TARE_AFFORDABILITY_CHANGED);
-        assertEquals(mNowElapsedTest + INDEFINITE_DELAY, mTestTimer.getElapsed());
-    }
-
-    @Test
     public void dispatchOrder() throws Exception {
         setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 0);
 
@@ -3393,32 +3340,6 @@ public final class AlarmManagerServiceTest {
         assertEquals(5, wakeupAlarmsPerUidCaptor.getValue()[uid1Idx]);
         assertEquals(4, alarmsPerUidCaptor.getValue()[uid2Idx]);
         assertEquals(2, wakeupAlarmsPerUidCaptor.getValue()[uid2Idx]);
-    }
-
-    @Test
-    public void tareEventPushed_on() throws Exception {
-        setTareEnabled(EconomyManager.ENABLED_MODE_ON);
-        runTareEventPushed();
-    }
-
-    @Test
-    public void tareEventPushed_shadow() throws Exception {
-        setTareEnabled(EconomyManager.ENABLED_MODE_SHADOW);
-        runTareEventPushed();
-    }
-
-    private void runTareEventPushed() throws Exception {
-        for (int i = 0; i < 10; i++) {
-            final int type = (i % 2 == 1) ? ELAPSED_REALTIME : ELAPSED_REALTIME_WAKEUP;
-            setTestAlarm(type, mNowElapsedTest + i, getNewMockPendingIntent());
-        }
-
-        final ArrayList<Alarm> alarms = mService.mAlarmStore.remove((alarm) -> {
-            return alarm.creatorUid == TEST_CALLING_UID;
-        });
-        mService.deliverAlarmsLocked(alarms, mNowElapsedTest);
-        verify(mEconomyManagerInternal, times(10)).noteInstantaneousEvent(
-                eq(TEST_CALLING_USER), eq(TEST_CALLING_PACKAGE), anyInt(), any());
     }
 
     @Test

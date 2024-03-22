@@ -33,6 +33,7 @@ import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.sSystemClock;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -400,8 +401,6 @@ public class QuotaControllerTest {
                 /* state */ true, /* allowlisted */false);
         js.setBackgroundNotRestrictedConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), true, false);
-        js.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
-        js.setExpeditedJobTareApproved(sElapsedRealtimeClock.millis(), true);
         js.setFlexibilityConstraintSatisfied(sElapsedRealtimeClock.millis(), true);
         return js;
     }

@@ -85,7 +85,6 @@ import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.ConnectivityController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.QuotaController;
-import com.android.server.job.controllers.TareController;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
 
@@ -617,12 +616,8 @@ public class JobSchedulerServiceTest {
 
         QuotaController quotaController = mService.getQuotaController();
         spyOn(quotaController);
-        TareController tareController = mService.getTareController();
-        spyOn(tareController);
         doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                 .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
-        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
-                .when(tareController).getMaxJobExecutionTimeMsLocked(any());
 
         grantRunUserInitiatedJobsPermission(true);
         assertEquals(mService.mConstants.RUNTIME_UI_LIMIT_MS,
@@ -655,12 +650,8 @@ public class JobSchedulerServiceTest {
 
         QuotaController quotaController = mService.getQuotaController();
         spyOn(quotaController);
-        TareController tareController = mService.getTareController();
-        spyOn(tareController);
         doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                 .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
-        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
-                .when(tareController).getMaxJobExecutionTimeMsLocked(any());
 
         mService.mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC = false;
         mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = 2;
@@ -784,12 +775,8 @@ public class JobSchedulerServiceTest {
 
         QuotaController quotaController = mService.getQuotaController();
         spyOn(quotaController);
-        TareController tareController = mService.getTareController();
-        spyOn(tareController);
         doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                 .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
-        doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
-                .when(tareController).getMaxJobExecutionTimeMsLocked(any());
 
         mService.mConstants.ENABLE_EXECUTION_SAFEGUARDS_UDC = true;
         mService.mConstants.EXECUTION_SAFEGUARDS_UDC_TIMEOUT_UIJ_COUNT = 2;
