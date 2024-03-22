@@ -28,6 +28,7 @@ import com.android.systemui.shade.ShadeHeaderController
 import com.android.systemui.shade.TouchLogger.Companion.logTouchesTo
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.transition.ScrimShadeTransitionController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -47,12 +48,14 @@ constructor(
     private val controller: SplitShadeStateController,
     private val shadeController: ShadeController,
     private val shadeHeaderController: ShadeHeaderController,
+    private val scrimShadeTransitionController: ScrimShadeTransitionController,
 ) : CoreStartable {
 
     override fun start() {
         hydrateShadeMode()
         logTouchesTo(touchLog)
         initHeaderController()
+        scrimShadeTransitionController.init()
     }
 
     private fun initHeaderController() {

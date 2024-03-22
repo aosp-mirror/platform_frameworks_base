@@ -69,7 +69,6 @@ import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -134,7 +133,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     @Mock protected ViewGroup mQsHeader;
     @Mock protected ViewParent mPanelViewParent;
     @Mock protected QsFrameTranslateController mQsFrameTranslateController;
-    @Mock protected ShadeTransitionController mShadeTransitionController;
     @Mock protected PulseExpansionHandler mPulseExpansionHandler;
     @Mock protected NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -305,10 +303,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mPanelViewControllerLazy,
                 mPanelView,
                 mQsFrameTranslateController,
-                mShadeTransitionController,
                 mPulseExpansionHandler,
                 mNotificationRemoteInputManager,
-                mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
                 mLightBarController,
                 mNotificationStackScrollLayoutController,
@@ -318,7 +314,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mStatusBarTouchableRegionManager,
                 mKeyguardStateController,
                 mKeyguardBypassController,
-                mKeyguardUpdateMonitor,
                 mScrimController,
                 mMediaDataManager,
                 mMediaHierarchyManager,
