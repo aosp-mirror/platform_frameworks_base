@@ -15,6 +15,7 @@
  */
 package com.android.systemui.biometrics
 
+import android.app.ActivityTaskManager
 import android.app.admin.DevicePolicyManager
 import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricAuthenticator
@@ -44,9 +45,12 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
+import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
@@ -120,10 +124,12 @@ open class AuthContainerViewTest : SysuiTestCase() {
     lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock
     private lateinit var packageManager: PackageManager
+    @Mock private lateinit var activityTaskManager: ActivityTaskManager
 
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
+    private val biometricStatusRepository = FakeBiometricStatusRepository()
     private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val displayStateRepository = FakeDisplayStateRepository()
     private val credentialInteractor = FakeCredentialInteractor()
@@ -143,6 +149,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private lateinit var displayRepository: FakeDisplayRepository
     private lateinit var displayStateInteractor: DisplayStateInteractor
     private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
+    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
 
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
     private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
@@ -168,6 +175,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
                         selectedUserInteractor,
                         testScope.backgroundScope,
                 )
+        biometricStatusInteractor =
+                BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository)
         // Set up default logo icon
         whenever(packageManager.getApplicationIcon(OP_PACKAGE_NAME)).thenReturn(defaultLogoIcon)
         context.setMockPackageManager(packageManager)
@@ -645,6 +654,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             promptSelectorInteractor,
             context,
             udfpsOverlayInteractor,
+            biometricStatusInteractor,
             udfpsUtils
         ),
         { credentialViewModel },
