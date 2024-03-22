@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -71,6 +72,7 @@ constructor(
         listenForDreamingToAodOrDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
         listenForDreamingToGlanceableHub()
+        listenForDreamingToPrimaryBouncer()
     }
 
     private fun listenForDreamingToGlanceableHub() {
@@ -81,6 +83,21 @@ constructor(
                 fromState = KeyguardState.DREAMING,
                 toState = KeyguardState.GLANCEABLE_HUB,
             )
+        }
+    }
+
+    private fun listenForDreamingToPrimaryBouncer() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.DREAMING
+                    ) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
         }
     }
 

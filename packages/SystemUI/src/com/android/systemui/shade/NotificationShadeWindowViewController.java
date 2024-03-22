@@ -382,12 +382,15 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     float x = ev.getRawX();
                     float y = ev.getRawY();
                     if (mStatusBarViewController.touchIsWithinView(x, y)) {
-                        if (mStatusBarWindowStateController.windowIsShowing()) {
-                            mIsTrackingBarGesture = true;
-                            return logDownDispatch(ev, "sending touch to status bar",
-                                    mStatusBarViewController.sendTouchToView(ev));
-                        } else {
-                            return logDownDispatch(ev, "hidden or hiding", true);
+                        if (!(MigrateClocksToBlueprint.isEnabled()
+                                && mPrimaryBouncerInteractor.isBouncerShowing())) {
+                            if (mStatusBarWindowStateController.windowIsShowing()) {
+                                mIsTrackingBarGesture = true;
+                                return logDownDispatch(ev, "sending touch to status bar",
+                                        mStatusBarViewController.sendTouchToView(ev));
+                            } else {
+                                return logDownDispatch(ev, "hidden or hiding", true);
+                            }
                         }
                     }
                 } else if (mIsTrackingBarGesture) {
