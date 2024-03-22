@@ -241,7 +241,7 @@ public final class PackageUtils {
             final int mode = context.getSystemService(AppOpsManager.class).noteOpNoThrow(
                     AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS, uid,
                     packageName, /* attributionTag= */ null, /* message= */ null);
-            return mode == AppOpsManager.MODE_ALLOWED;
+            return mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_DEFAULT;
         }
     }
 }
