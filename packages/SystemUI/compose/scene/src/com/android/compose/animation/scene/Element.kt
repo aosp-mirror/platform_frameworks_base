@@ -388,6 +388,7 @@ private fun elementAlpha(
             transformation = { it.alpha },
             idleValue = 1f,
             currentValue = { 1f },
+            isSpecified = { true },
             ::lerp,
         )
         .fastCoerceIn(0f, 1f)
@@ -425,6 +426,7 @@ private fun ApproachMeasureScope.measure(
             transformation = { it.size },
             idleValue = lookaheadSize,
             currentValue = { measurable.measure(constraints).also { maybePlaceable = it }.size() },
+            isSpecified = { it != Element.SizeUnspecified },
             ::lerp,
         )
 
@@ -450,6 +452,7 @@ private fun getDrawScale(
         transformation = { it.drawScale },
         idleValue = Scale.Default,
         currentValue = { Scale.Default },
+        isSpecified = { true },
         ::lerp,
     )
 }
@@ -490,6 +493,7 @@ private fun ApproachMeasureScope.place(
                 transformation = { it.offset },
                 idleValue = targetOffsetInScene,
                 currentValue = { currentOffset },
+                isSpecified = { it != Offset.Unspecified },
                 ::lerp,
             )
 
@@ -536,6 +540,7 @@ private inline fun <T> computeValue(
     transformation: (ElementTransformations) -> PropertyTransformation<T>?,
     idleValue: T,
     currentValue: () -> T,
+    isSpecified: (T) -> Boolean,
     lerp: (T, T, Float) -> T,
 ): T {
     val transition =
@@ -599,6 +604,11 @@ private inline fun <T> computeValue(
     if (isSharedElement && isSharedElementEnabled(layoutImpl.state, transition, element.key)) {
         val start = sceneValue(fromState!!)
         val end = sceneValue(toState!!)
+
+        // TODO(b/316901148): Remove checks to isSpecified() once the lookahead pass runs for all
+        // nodes before the intermediate layout pass.
+        if (!isSpecified(start)) return end
+        if (!isSpecified(end)) return start
 
         // Make sure we don't read progress if values are the same and we don't need to interpolate,
         // so we don't invalidate the phase where this is read.
