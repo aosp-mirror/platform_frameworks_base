@@ -257,7 +257,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Emparejando dispositivo…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"No se ha podido emparejar el dispositivo. El código QR no era correcto o el dispositivo no estaba conectado a la misma red."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Dirección IP y puerto"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanea el código QR"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanear código QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Empareja un dispositivo mediante Wi‑Fi escaneando un código QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conéctate a una red Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depuración, desarrollo"</string>
@@ -619,8 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"No se ha podido crear el usuario"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"No se ha podido crear un nuevo invitado"</string>
     <string name="user_nickname" msgid="262624187455825083">"Apodo"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"Cualquier persona que use este dispositivo podrá ver el nombre y la imagen que elijas."</string>
     <string name="user_add_user" msgid="7876449291500212468">"Añadir usuario"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Añadir invitado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Quitar invitado"</string>

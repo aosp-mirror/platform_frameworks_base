@@ -619,8 +619,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰিব পৰা নগ’ল"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"নতুন অতিথি সৃষ্টি কৰিব পৰা নগ’ল"</string>
     <string name="user_nickname" msgid="262624187455825083">"উপনাম"</string>
-    <!-- no translation found for edit_user_info_message (6677556031419002895) -->
-    <skip />
+    <string name="edit_user_info_message" msgid="6677556031419002895">"এই ডিভাইচটো ব্যৱহাৰ কৰা যিকোনো লোকে আপুনি বাছনি কৰা নাম আৰু চিত্ৰখন দেখা পাব।"</string>
     <string name="user_add_user" msgid="7876449291500212468">"ব্যৱহাৰকাৰী যোগ দিয়ক"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"অতিথি যোগ দিয়ক"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"অতিথি আঁতৰাওক"</string>
