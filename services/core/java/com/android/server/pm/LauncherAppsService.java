@@ -104,6 +104,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -215,7 +216,9 @@ public class LauncherAppsService extends SystemService {
     static class LauncherAppsImpl extends ILauncherApps.Stub {
         private static final boolean DEBUG = false;
         private static final String TAG = "LauncherAppsService";
-
+        private static final String NAMESPACE_MULTIUSER = "multiuser";
+        private static final String FLAG_NON_SYSTEM_ACCESS_TO_HIDDEN_PROFILES =
+                "allow_3p_launchers_access_via_launcher_apps_apis";
         private final Context mContext;
         private final UserManager mUm;
         private final RoleManager mRoleManager;
@@ -563,6 +566,10 @@ public class LauncherAppsService extends SystemService {
                     return true;
                 }
 
+                if (isAccessToHiddenProfilesForNonSystemAppsForbidden()) {
+                    return false;
+                }
+
                 if (!mRoleManager
                         .getRoleHoldersAsUser(
                                 RoleManager.ROLE_HOME, UserHandle.getUserHandleForUid(callingUid))
@@ -570,7 +577,6 @@ public class LauncherAppsService extends SystemService {
                     return false;
                 }
 
-                // TODO(b/321988638): add option to disable with a flag
                 return mContext.checkPermission(
                                 android.Manifest.permission.ACCESS_HIDDEN_PROFILES,
                                 callingPid,
@@ -579,6 +585,13 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 injectRestoreCallingIdentity(ident);
             }
+        }
+
+        private boolean isAccessToHiddenProfilesForNonSystemAppsForbidden() {
+            return !DeviceConfig.getBoolean(
+                    NAMESPACE_MULTIUSER,
+                    FLAG_NON_SYSTEM_ACCESS_TO_HIDDEN_PROFILES,
+                    /* defaultValue= */ true);
         }
 
         private boolean areHiddenApisChecksEnabled() {
