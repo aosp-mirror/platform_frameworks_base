@@ -47,7 +47,7 @@ constructor(
         val bound = gameView.getVisibleBounds()
         return uiDevice.swipe(
             bound.centerX(),
-            bound.top,
+            0,
             bound.centerX(),
             bound.centerY(),
             SWIPE_STEPS
