@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.deviceentry.ui.viewmodel.AlternateBouncerUdfpsAccessibilityOverlayViewModel
 import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
-import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import dagger.Lazy
 import javax.inject.Inject
@@ -30,11 +30,11 @@ class AlternateBouncerDependencies
 @Inject
 constructor(
     val viewModel: AlternateBouncerViewModel,
-    val falsingManager: FalsingManager,
     val swipeUpAnywhereGestureHandler: SwipeUpAnywhereGestureHandler,
     val tapGestureDetector: TapGestureDetector,
     val udfpsIconViewModel: AlternateBouncerUdfpsIconViewModel,
     val udfpsAccessibilityOverlayViewModel:
         Lazy<AlternateBouncerUdfpsAccessibilityOverlayViewModel>,
     val messageAreaViewModel: AlternateBouncerMessageAreaViewModel,
+    val powerInteractor: PowerInteractor,
 )

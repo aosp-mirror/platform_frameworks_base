@@ -45,9 +45,14 @@ object AlternateBouncerUdfpsViewBinder {
 
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.accessibilityDelegateHint.collect { hint ->
-                    view.accessibilityHintType = hint
+                view.alpha = 0f
+                launch {
+                    viewModel.accessibilityDelegateHint.collect { hint ->
+                        view.accessibilityHintType = hint
+                    }
                 }
+
+                launch { viewModel.alpha.collect { view.alpha = it } }
             }
         }
 
